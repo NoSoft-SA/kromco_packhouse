@@ -1,0 +1,177 @@
+--- 
+- !ActiveRecord,2010/FunctionalArea 
+  attributes: 
+    functional_area_name: rmt_processing
+    disabled: 
+    display_name: rmt_processing
+    class_name: 
+    is_non_web_program: 
+    id: "33"
+- - !ActiveRecord,2010/Program 
+    attributes: 
+      is_leaf: f
+      functional_area_name: rmt_processing
+      functional_area_id: "33"
+      url_component: 
+      technology: 
+      description: 
+      disabled: f
+      display_name: pre sorting
+      program_name: presort_staging_run
+      func_area_url_component: 
+      class_name: 
+      is_non_web_program: 
+      id: "339"
+  - - !ActiveRecord,2010/ProgramFunction 
+      attributes: 
+        name: new_presort_run
+        position: 
+        functional_area_name: rmt_processing
+        description: 
+        disabled: f
+        program_name: presort_staging_run
+        display_name: new presort run
+        program_id: "339"
+        created_on: 2013-08-27 12:16:08
+        func_area_url_component: 
+        prog_url_component: 
+        url_param: 
+        class_name: 
+        is_non_web_program: 
+        id: "1147"
+    - !ActiveRecord,2010/ProgramFunction 
+      attributes: 
+        name: editing_presort_runs
+        position: 
+        functional_area_name: rmt_processing
+        description: 
+        disabled: f
+        program_name: presort_staging_run
+        display_name: editing presort  runs
+        program_id: "339"
+        created_on: 2013-08-29 13:53:56
+        func_area_url_component: 
+        prog_url_component: 
+        url_param: 
+        class_name: 
+        is_non_web_program: 
+        id: "1148"
+    - !ActiveRecord,2010/ProgramFunction 
+      attributes: 
+        name: active_presort_runs
+        position: 
+        functional_area_name: rmt_processing
+        description: 
+        disabled: f
+        program_name: presort_staging_run
+        display_name: active presort runs
+        program_id: "339"
+        created_on: 2013-09-04 07:58:06
+        func_area_url_component: 
+        prog_url_component: 
+        url_param: 
+        class_name: 
+        is_non_web_program: 
+        id: "1149"
+    - !ActiveRecord,2010/ProgramFunction 
+      attributes: 
+        name: staged_presort_run
+        position: 
+        functional_area_name: rmt_processing
+        description: 
+        disabled: f
+        program_name: presort_staging_run
+        display_name: staged presort run
+        program_id: "339"
+        created_on: 2013-09-04 07:59:03
+        func_area_url_component: 
+        prog_url_component: 
+        url_param: 
+        class_name: 
+        is_non_web_program: 
+        id: "1150"
+    - !ActiveRecord,2010/ProgramFunction 
+      attributes: 
+        name: find_presort_runs
+        position: 
+        functional_area_name: rmt_processing
+        description: 
+        disabled: f
+        program_name: presort_staging_run
+        display_name: find presort runs
+        program_id: "339"
+        created_on: 2013-09-04 08:00:13
+        func_area_url_component: 
+        prog_url_component: 
+        url_param: 
+        class_name: 
+        is_non_web_program: 
+        id: "1151"
+    - !ActiveRecord,2010/ProgramFunction 
+      attributes: 
+        name: active_run
+        position: 
+        functional_area_name: rmt_processing
+        description: 
+        disabled: f
+        program_name: presort_staging_run
+        display_name: active run
+        program_id: "339"
+        created_on: 2013-09-05 08:07:55
+        func_area_url_component: 
+        prog_url_component: 
+        url_param: 
+        class_name: 
+        is_non_web_program: 
+        id: "1152"
+    - !ActiveRecord,2010/ProgramFunction 
+      attributes: 
+        name: pre_sorted_bins_tipped_mes_vs_maf
+        position: 
+        functional_area_name: rmt_processing
+        description: 
+        disabled: f
+        program_name: presort_staging_run
+        display_name: bins_tipped_mes_maf_comparer
+        program_id: "339"
+        created_on: 2014-01-29 11:07:23
+        func_area_url_component: tools
+        prog_url_component: mes_maf_comparer
+        url_param: 
+        class_name: 
+        is_non_web_program: 
+        id: "1154"
+    - !ActiveRecord,2010/ProgramFunction 
+      attributes: 
+        name: pre_sorted_bins_created_mes_vs_maf
+        position: 
+        functional_area_name: rmt_processing
+        description: 
+        disabled: f
+        program_name: presort_staging_run
+        display_name: bins_created_mes_maf_comparer
+        program_id: "339"
+        created_on: 2014-01-29 10:51:49
+        func_area_url_component: tools
+        prog_url_component: mes_maf_comparer
+        url_param: 
+        class_name: 
+        is_non_web_program: 
+        id: "1153"
+    - !ActiveRecord,2010/ProgramFunction 
+      attributes: 
+        name: manual_integration
+        position: 
+        functional_area_name: rmt_processing
+        description: 
+        disabled: f
+        program_name: presort_staging_run
+        display_name: 
+        program_id: "339"
+        created_on: 2014-02-11 11:13:49
+        func_area_url_component: services
+        prog_url_component: pre_sorting
+        url_param: 
+        class_name: 
+        is_non_web_program: 
+        id: "1155"

@@ -1,0 +1,439 @@
+<% @tree_node_content_header = "parameter fields" if(!@tree_node_content_header)%>
+ <% @hide_content_pane = false %>
+ <% @is_menu_loaded_view = true %>
+
+<script type="text/javascript">
+  function is_checkbox_clicked(c_box,c_box_name) {
+    var is_c_box_clicked = document.getElementById(c_box.id + "_is_clicked");
+    is_c_box_clicked.value = "true";
+
+    var c_box_img = document.getElementById(c_box_name + "_img");
+    c_box_img.style.visibility = "visible";
+  }
+
+  function remove_cbox_image(cbox_image,cbox_id,cbox_name) {
+      cbox_image.style.visibility = "hidden";
+      var is_c_box_clicked = document.getElementById(cbox_id + "_is_clicked");
+      is_c_box_clicked.value = "false";
+      alert("field: " + cbox_name + ", has been removed from the query");
+  }
+</script>
+
+<div>
+    <% form_for :parameter_field, :url=>{:action=>'send_parameter_fields'} do |f|  %>
+<%= f.hidden_field("select_column_name", {:value=>@select_column_name}) if(@select_column_name)%>
+<%= f.hidden_field("looked_up_field", {:value=>@looked_up_field}) if(@looked_up_field)%>
+<%= f.hidden_field("submit_to", {:value=>@submit_to}) if(@submit_to)%>
+<%= f.hidden_field("submit_search_action", {:value=>@submit_search_action}) if(@submit_search_action)%>
+<%= f.hidden_field(:hash_check, :value => dm_session[:parameter_query].hash.to_s ) %>
+        <table cellspacing="1" border="0">
+            <% if dm_session[:parameter_fields] != nil %>
+            <% tester=0%>
+            <% dm_session[:parameter_fields].each do |parameter| %>
+                <% if parameter[:field_type]=="DropDownField"%>
+                    <% tester += 1%>
+                <% end %>
+            <% end %>
+            <% if tester > 0 %>
+                <tr>
+                  <td class="search_heading_td"> Field Name </td>
+                  <td class="search_heading_td"> Value </td>
+                  <td class="search_heading_td"> OR Values </td>
+                  <td class="search_heading_td"> Operator </td>
+                </tr>
+               <% end %>
+                <% dm_session[:parameter_fields].each do |parameter| %>
+                    <tr>
+                        <td> <%= parameter[:caption] %> </td>
+                        <% if parameter[:field_type]=="DropDownField" %>
+                            <%
+                               sorted = false
+                               sorted = parameter[:options][:sorted] if(parameter[:options])
+
+                                if parameter[:list].length > 0 && parameter[:list][0].class == Array
+                                  parameter[:list].unshift(['', nil])
+                                else
+                                  parameter[:list].unshift('')
+                                end
+                                myStr = "<table border=\"0\" cellspacing=\"0\" cellpadding=\"0\"><tr><td class=\"ds_label\"> current OR values</td></tr>"
+                                myStr << "<tr><td><textarea id=\"or_values\" name=\"or_values\" rows=\"3\" disabled=\"true\" style=\"font-weight:bold; border-color:white; width:260px;\"></textarea></td></tr>"
+                                myStr << "<tr><td><SELECT id=\"#{parameter[:field_name]}\" name=\"#{parameter[:field_name]}\">"
+                                for item in parameter[:list]
+                                    myStr << "<OPTION VALUE=\"#{item}\">"
+                                    myStr << "#{item}"
+                                    myStr << "</OPTION>"
+                                end
+                                myStr << "</SELECT></td></tr><br />"
+                                myStr << "<tr><td><a href=\"#\" onclick=\"JavaScript:ds_add_value();\" class=\"ds_link\">Add Value</a></td></tr>"
+                                myStr << "<tr><td><a href=\"#\" onclick=\"ds_remove_value();\" class=\"ds_link\">Remove Value</a></td></tr>"
+                                myStr << "<tr><td><a href=\"#\" onclick=\"ds_hide();\" class=\"ds_link\">Hide</a><br /></td></tr></table>"
+
+
+                                signList = ["=", "!=", "<>", "<", ">", "<=", ">=", "like", "text", "IS NULL", "IS NOT NULL"]
+                                field_id = "id_observed_" + parameter[:field_name].to_s
+                                field_name = parameter[:field_name].to_s + "-sign"
+                                observed_field = "parameter_field_" + field_name.to_s
+
+                                hiddendm_session = "hidden=" + parameter[:field_name]
+                                dm_session[hiddendm_session] = parameter[:list]
+                             %>
+                            <% if dm_session[:parameter_fields_values] != nil %>
+                                <% dropdown_name = parameter[:field_name]
+                                   field_value = ""
+                                   for field in dm_session[:parameter_fields_values]
+                                     if field[:field_name] == parameter[:field_name]
+                                       field_value = field[:field_value].to_s
+                                     end
+                                   end
+                                %>
+                                <% sign_value = "=" %>
+                                <% if dm_session[:operator_signs] != nil %>
+                                    <% if dm_session[:operator_signs].has_key?(parameter[:field_name])%>
+                                        <% sign_value = dm_session[:operator_signs][parameter[:field_name]]%>
+                                    <% end %>
+                                <% end %>
+                                <% if dm_session[:search_engine_or_values] != nil && dm_session[:search_engine_or_values].has_key?(dropdown_name) %>
+                                    <%if(parameter[:static_value])%>
+                                      <td id="<%=field_id%>"> <%= f.text_field(parameter[:field_name],:value=>parameter[:static_value],:readonly=>"readonly") %> </td> <td> <input type="hidden" class="hidden_parameter_field" name="hidden-<%=parameter[:field_name]%>" id="hidden-<%=parameter[:field_name]%>"/> <%= image_tag "collapsed.png", :id=>"img-#{parameter[:field_name]}", :onClick=>"ds_show(this,'#{myStr}');" %> </td> <td><%= f.select(field_name, signList, :selected=>"=") %> <%= image_tag 'spinner.gif', :id=>"img_#{parameter[:field_name]}", :style=>"display:none;" %></td>
+                                    <%else%>
+                                      <% if sign_value.strip == "text" || sign_value.strip == "like" %>
+                                          <td id="<%=field_id%>"> <%= f.text_field(parameter[:field_name], :value=>field_value) %></td> <td> <input type="hidden" class="hidden_parameter_field" name="hidden-<%=parameter[:field_name]%>" id="hidden-<%=parameter[:field_name]%>" value="<%=dm_session[:search_engine_or_values][dropdown_name]%>"/> <%= image_tag "collapsed.png", :id=>"img-#{parameter[:field_name]}", :onClick=>"ds_show(this,'#{myStr}');" %> </td> <td><%= f.select(field_name, signList, :selected=>"=") %> <%= image_tag 'spinner.gif', :id=>"img_#{parameter[:field_name]}", :style=>"display:none;" %></td>
+                                      <% else %>
+                                          <td id="<%=field_id%>"> <%= f.select(parameter[:field_name], parameter[:list], :selected=>field_value,:sorted=>sorted) %></td> <td> <input type="hidden" class="hidden_parameter_field" name="hidden-<%=parameter[:field_name]%>" id="hidden-<%=parameter[:field_name]%>" value="<%=dm_session[:search_engine_or_values][dropdown_name]%>"/> <%= image_tag "collapsed.png", :id=>"img-#{parameter[:field_name]}", :onClick=>"ds_show(this,'#{myStr}');" %> </td> <td><%= f.select(field_name, signList, :selected=>"=") %> <%= image_tag 'spinner.gif', :id=>"img_#{parameter[:field_name]}", :style=>"display:none;" %></td>
+                                      <% end %>
+                                      <%= observe_field "parameter_field_" + parameter[:field_name] +"-sign",
+                                          :update=>field_id,
+                                          :before=>"Element.show('img_#{parameter[:field_name]}')",
+                                          :complete=>"Element.hide('img_#{parameter[:field_name]}')",
+                                          :url=>{:action=>"operator_sign_changed"},
+                                          :with=>"'#{field_name}='+value"
+                                      %>
+                                    <% end %>
+                                <% else %>
+                                   <%if(parameter[:static_value])%>
+                                      <td id="<%=field_id%>"> <%= f.text_field(parameter[:field_name],:value=>parameter[:static_value],:readonly=>"readonly") %> </td> <td> <input type="hidden" class="hidden_parameter_field" name="hidden-<%=parameter[:field_name]%>" id="hidden-<%=parameter[:field_name]%>"/> <%= image_tag "collapsed.png", :id=>"img-#{parameter[:field_name]}", :onClick=>"ds_show(this,'#{myStr}');" %> </td> <td><%= f.select(field_name, signList, :selected=>"=") %> <%= image_tag 'spinner.gif', :id=>"img_#{parameter[:field_name]}", :style=>"display:none;" %></td>
+                                   <%else%>
+                                      <% if sign_value.strip == "text" || sign_value.strip == "like" %>
+                                          <td id="<%=field_id%>"> <%= f.text_field(parameter[:field_name], :value=>field_value) %></td> <td> <input type="hidden" class="hidden_parameter_field" name="hidden-<%=parameter[:field_name]%>" id="hidden-<%=parameter[:field_name]%>"/> <%= image_tag "collapsed.png", :id=>"img-#{parameter[:field_name]}", :onClick=>"ds_show(this,'#{myStr}');" %> </td> <td><%= f.select(field_name, signList, :selected=>"=") %> <%= image_tag 'spinner.gif', :id=>"img_#{parameter[:field_name]}", :style=>"display:none;" %></td>
+                                      <% else %>
+                                          <td id="<%=field_id%>"> <%= f.select(parameter[:field_name], parameter[:list], :selected=>field_value,:sorted=>sorted) %></td> <td> <input type="hidden" class="hidden_parameter_field" name="hidden-<%=parameter[:field_name]%>" id="hidden-<%=parameter[:field_name]%>"/> <%= image_tag "collapsed.png", :id=>"img-#{parameter[:field_name]}", :onClick=>"ds_show(this,'#{myStr}');" %> </td> <td><%= f.select(field_name, signList, :selected=>"=") %> <%= image_tag 'spinner.gif', :id=>"img_#{parameter[:field_name]}", :style=>"display:none;" %></td>
+                                      <% end %>
+                                      <%= observe_field "parameter_field_" + parameter[:field_name] +"-sign",
+                                          :update=>field_id,
+                                          :before=>"Element.show('img_#{parameter[:field_name]}')",
+                                          :complete=>"Element.hide('img_#{parameter[:field_name]}')",
+                                          :url=>{:action=>"operator_sign_changed"},
+                                          :with=>"'#{field_name}='+value"
+                                      %>
+                                   <% end %>
+                                <% end %>
+                            <% else %>
+                                <%if(parameter[:static_value])%>
+                                  <td id="<%=field_id%>"> <%= f.text_field(parameter[:field_name],:value=>parameter[:static_value],:readonly=>"readonly") %> </td> <td> <input type="hidden" class="hidden_parameter_field" name="hidden-<%=parameter[:field_name]%>" id="hidden-<%=parameter[:field_name]%>"/> <%= image_tag "collapsed.png", :id=>"img-#{parameter[:field_name]}", :onClick=>"ds_show(this,'#{myStr}');" %> </td> <td><%= f.select(field_name, signList, :selected=>"=") %> <%= image_tag 'spinner.gif', :id=>"img_#{parameter[:field_name]}", :style=>"display:none;" %></td>
+                                <%else%>
+                                  <td id="<%=field_id%>"> <%= f.select(parameter[:field_name], parameter[:list],:sorted=>sorted) %></td> <td> <input type="hidden" class="hidden_parameter_field" name="hidden-<%=parameter[:field_name]%>" id="hidden-<%=parameter[:field_name]%>"/> <%= image_tag "collapsed.png", :id=>"img-#{parameter[:field_name]}", :onClick=>"ds_show(this,'#{myStr}');" %> </td> <td><%= f.select(field_name, signList, :selected=>"=") %> <%= image_tag 'spinner.gif', :id=>"img_#{parameter[:field_name]}", :style=>"display:none;" %></td>
+                                  <%= observe_field "parameter_field_" + parameter[:field_name] +"-sign",
+                                      :update=>field_id,
+                                      :before=>"Element.show('img_#{parameter[:field_name]}')",
+                                      :complete=>"Element.hide('img_#{parameter[:field_name]}')",
+                                      :url=>{:action=>"operator_sign_changed"},
+                                      :with=>"'#{field_name}='+value"
+                                  %>
+                                <% end %>
+                            <% end %>
+
+                        <% elsif parameter[:field_type]=="TextField" %>
+                            <%
+                                signList = ["=", "!=", "<>", "<", ">", "<=", ">=", "like", "text", "IS NULL", "IS NOT NULL"]
+                                field_id = "id_observerd_" + parameter[:field_name].to_s
+                                field_name = parameter[:field_name].to_s + "-sign"
+                                observed_field = "parameter_field_" + field_name.to_s
+                            %>
+                            <% if dm_session[:parameter_fields_values] != nil %>
+                                <% text_field_name = parameter[:field_name]
+                                   field_value = ""
+                                   for field in dm_session[:parameter_fields_values]
+                                     if field[:field_name] == parameter[:field_name]
+                                       field_value = field[:field_value].to_s
+                                     end
+                                   end
+                                %>
+                                <% sign_value = "=" %>
+                                <% if dm_session[:operator_signs] != nil %>
+                                    <% if dm_session[:operator_signs].has_key?(parameter[:field_name])%>
+                                        <% sign_value = dm_session[:operator_signs][parameter[:field_name]]%>
+                                    <% end %>
+                                <% end %>
+                                <%if(parameter[:static_value])%>
+                                  <td id="<%=field_id%>"> <%= f.text_field(parameter[:field_name],:value=>parameter[:static_value],:readonly=>"readonly") %> </td> <td> <input type="hidden" class="hidden_parameter_field" name="hidden-<%=parameter[:field_name]%>" id="hidden-<%=parameter[:field_name]%>"/></td><td> <%= f.select(field_name, signList, :selected=>"=") %> <%= image_tag 'spinner.gif', :id=>"img_#{parameter[:field_name]}", :style=>"display:none;" %> </td>
+                                <%else%>
+                                  <td id="<%=field_id%>"> <%= f.text_field(parameter[:field_name], :value=>field_value) %> </td> <td> <input type="hidden" class="hidden_parameter_field" name="hidden-<%=parameter[:field_name]%>" id="hidden-<%=parameter[:field_name]%>"/></td><td> <%= f.select(field_name, signList, :selected=>"=") %> <%= image_tag 'spinner.gif', :id=>"img_#{parameter[:field_name]}", :style=>"display:none;" %> </td>
+                                <% end %>
+                            <% else %>
+                                <%if(parameter[:static_value])%>
+                                  <td id="<%=field_id%>"> <%= f.text_field(parameter[:field_name],:value=>parameter[:static_value],:readonly=>"readonly") %> </td> <td> <input type="hidden" class="hidden_parameter_field" name="hidden-<%=parameter[:field_name]%>" id="hidden-<%=parameter[:field_name]%>"/></td><td> <%= f.select(field_name, signList, :selected=>"=") %> <%= image_tag 'spinner.gif', :id=>"img_#{parameter[:field_name]}", :style=>"display:none;" %> </td>
+                                <%else%>
+                                  <td id="<%=field_id%>"> <%= f.text_field(parameter[:field_name]) %> </td> <td> <input type="hidden" class="hidden_parameter_field" name="hidden-<%=parameter[:field_name]%>" id="hidden-<%=parameter[:field_name]%>"/></td><td> <%= f.select(field_name, signList, :selected=>"=") %> <%= image_tag 'spinner.gif', :id=>"img_#{parameter[:field_name]}", :style=>"display:none;" %> </td>
+                                <%end%>
+                            <% end %>
+                            <% elsif parameter[:field_type]=="LookUpField" %>
+                            <%
+                                signList = ["=", "!=", "<>", "<", ">", "<=", ">=", "like", "text", "IS NULL", "IS NOT NULL"]
+                                field_id = "id_observerd_" + parameter[:field_name].to_s
+                                field_name = parameter[:field_name].to_s + "-sign"
+                                observed_field = "parameter_field_" + field_name.to_s
+                            %>
+                            <% if dm_session[:parameter_fields_values] != nil %>
+                                <% text_field_name = parameter[:field_name]
+                                   field_value = ""
+                                   for field in dm_session[:parameter_fields_values]
+                                     if field[:field_name] == parameter[:field_name]
+                                       field_value = field[:field_value].to_s
+                                     end
+                                   end
+                                %>
+                                <% sign_value = "=" %>
+                                <% if dm_session[:operator_signs] != nil %>
+                                    <% if dm_session[:operator_signs].has_key?(parameter[:field_name])%>
+                                        <% sign_value = dm_session[:operator_signs][parameter[:field_name]]%>
+                                    <% end %>
+                                <% end %>
+                                <%if(parameter[:static_value])%>
+                                  <td id="<%=field_id%>"> <%= f.text_field(parameter[:field_name],:value=>parameter[:static_value],:readonly=>"readonly") %> </td> <td> <input type="hidden" class="hidden_parameter_field" name="hidden-<%=parameter[:field_name]%>" id="hidden-<%=parameter[:field_name]%>"/></td><td> <%= f.select(field_name, signList, :selected=>"=") %> <%=ApplicationHelper::TextField.build_look_up_link(self,{:lookup_search_file=>parameter[:lookup_search_file],:send_fields=>parameter[:send_fields],:submit_to=>parameter[:submit_to],:select_column_name=>parameter[:select_column_name],:field_name=>"parameter_field_" + parameter[:field_name],:lookup_search_uri=>parameter[:lookup_search_uri]})%>  <%= image_tag 'spinner.gif', :id=>"img_#{parameter[:field_name]}", :style=>"display:none;" %> </td>
+                                <%else%>
+                                  <td id="<%=field_id%>"> <%= f.text_field(parameter[:field_name], :value=>field_value) %> </td> <td> <input type="hidden" class="hidden_parameter_field" name="hidden-<%=parameter[:field_name]%>" id="hidden-<%=parameter[:field_name]%>"/></td><td> <%= f.select(field_name, signList, :selected=>"=") %> <%=ApplicationHelper::TextField.build_look_up_link(self,{:lookup_search_file=>parameter[:lookup_search_file],:send_fields=>parameter[:send_fields],:submit_to=>parameter[:submit_to],:select_column_name=>parameter[:select_column_name],:field_name=>"parameter_field_" + parameter[:field_name],:lookup_search_uri=>parameter[:lookup_search_uri]})%>  <%= image_tag 'spinner.gif', :id=>"img_#{parameter[:field_name]}", :style=>"display:none;" %> </td>
+                                <% end %>
+                            <% else %>
+                                <%if(parameter[:static_value])%>
+                                  <td id="<%=field_id%>"> <%= f.text_field(parameter[:field_name],:value=>parameter[:static_value],:readonly=>"readonly") %> </td> <td> <input type="hidden" class="hidden_parameter_field" name="hidden-<%=parameter[:field_name]%>" id="hidden-<%=parameter[:field_name]%>"/></td><td> <%= f.select(field_name, signList, :selected=>"=") %> <%=ApplicationHelper::TextField.build_look_up_link(self,{:lookup_search_file=>parameter[:lookup_search_file],:send_fields=>parameter[:send_fields],:submit_to=>parameter[:submit_to],:select_column_name=>parameter[:select_column_name],:field_name=>"parameter_field_" + parameter[:field_name],:lookup_search_uri=>parameter[:lookup_search_uri]})%>   <%= image_tag 'spinner.gif', :id=>"img_#{parameter[:field_name]}", :style=>"display:none;" %> </td>
+                                <%else%>
+                                  <td id="<%=field_id%>"> <%= f.text_field(parameter[:field_name]) %> </td> <td> <input type="hidden" class="hidden_parameter_field" name="hidden-<%=parameter[:field_name]%>" id="hidden-<%=parameter[:field_name]%>"/></td><td> <%= f.select(field_name, signList, :selected=>"=") %>  <%=ApplicationHelper::TextField.build_look_up_link(self,{:lookup_search_file=>parameter[:lookup_search_file],:select_column_name=>parameter[:select_column_name],:send_fields=>parameter[:send_fields],:submit_to=>parameter[:submit_to],:field_name=>"parameter_field_" + parameter[:field_name],:lookup_search_uri=>parameter[:lookup_search_uri]})%>  <%= image_tag 'spinner.gif', :id=>"img_#{parameter[:field_name]}", :style=>"display:none;" %> </td>
+                                <%end%>
+                            <% end %>
+
+                        <% elsif parameter[:field_type]=="DateField" %>
+                            <%
+                                date_field_name = parameter[:field_name].to_s + "-sign"
+                               updated_field_id = "id_observed_" + parameter[:field_name].to_s
+                               dateSignList = ["=", "!=", "<>", "<", ">", "<=", ">=", "IS NULL", "IS NOT NULL"]
+                            %>
+                            <td id="<%=updated_field_id%>"> <%= f.date_select(parameter[:field_name], :start_year=>1995) %> </td> <td> </td> <td><%= f.select(date_field_name, dateSignList) %> <%= image_tag 'spinner.gif', :id=>"img_#{parameter[:field_name]}", :style=>"display:none;" %> </td>
+                            <% dm_session[date_field_name] = "DateField"%>
+                            <%= observe_field "parameter_field_" + parameter[:field_name] +"-sign",
+                                :update=>updated_field_id,
+                                :before=>"Element.show('img_#{parameter[:field_name]}')",
+                                :complete=>"Element.hide('img_#{parameter[:field_name]}')",
+                                :url=>{:action=>"datetime_operator_sign_changed"},
+                                :with=>"'#{date_field_name}='+value"
+                            %>
+                        <% elsif parameter[:field_type]=="DateTimeField" %>
+                            <%
+                               date_field_name = parameter[:field_name].to_s + "-sign"
+                               updated_field_id = "id_observed_" + parameter[:field_name].to_s
+                               dateSignList = ["=", "!=", "<>", "<", ">", "<=", ">=", "IS NULL", "IS NOT NULL"]
+                            %>
+                            <td id="<%=updated_field_id%>"> <%= f.datetime_select(parameter[:field_name], :start_year=>1995) %> </td> <td> </td> <td><%= f.select(date_field_name, dateSignList) %> <%= image_tag 'spinner.gif', :id=>"img_#{parameter[:field_name]}", :style=>"display:none;" %> </td>
+                            <% dm_session[date_field_name] = "DateTimeField"%>
+                            <%= observe_field "parameter_field_" + parameter[:field_name] +"-sign",
+                                :update=>updated_field_id,
+                                :before=>"Element.show('img_#{parameter[:field_name]}')",
+                                :complete=>"Element.hide('img_#{parameter[:field_name]}')",
+                                :url=>{:action=>"datetime_operator_sign_changed"},
+                                :with=>"'#{date_field_name}='+value"
+                            %>
+
+                        <% elsif parameter[:field_type]== "PopupDateRangeSelector" %>
+                            <%
+                               field_name_from = parameter[:field_name].to_s + "_datefrom"
+                               field_name_to = parameter[:field_name].to_s + "_dateto"
+                            %>
+                            <% if dm_session[:parameter_fields_values] != nil %>
+                                <% text_field_name = parameter[:field_name]
+                                   field_value = ""
+                                   for field in dm_session[:parameter_fields_values]
+                                     if field[:field_name] == parameter[:field_name]
+                                       field_value = field[:field_value].to_s
+                                     end
+                                   end
+                                   from_value = ""
+                                   to_value = ""
+                                   if field_value != ""
+                                      from_value = field_value.split("|")[0]
+                                      to_value = field_value.split("|")[1]
+                                   end
+                                %>
+                                <td> <label class="date_range_from">from:</label> <input type="text" id="<%=field_name_from%>_txt" name="<%=field_name_from%>" size="20" value="<%=from_value%>" class="datepicker_from" /><br />
+                                     <label class="date_range_to">to:</label> <input type="text" id="<%=field_name_to%>_txt" name="<%=field_name_to%>" size="20" value="<%=to_value%>" class="datepicker_to" />
+                                </td>
+                            <% else %>
+                                <td> <label class="date_range_from">from:</label> <input type="text" id="<%=field_name_from%>_txt" name="<%=field_name_from%>" size="20" class="datepicker_from" /><br />
+                                     <label class="date_range_to">to:</label> <input type="text" id="<%=field_name_to%>_txt" name="<%=field_name_to%>" size="20" class="datepicker_to" />
+                                </td>
+                            <% end %>
+
+                        <% elsif parameter[:field_type]=="CheckBox" %>
+                          <td>
+                            <% if dm_session[:parameter_fields_values] != nil %>
+                                <% text_field_name = parameter[:field_name]
+                                   field_value = ""
+                                   for field in dm_session[:parameter_fields_values]
+                                     if field[:field_name] == parameter[:field_name]
+                                       field_value = field[:field_value].to_s
+                                     end
+                                   end
+                                   checked_test = nil
+                                   if field_value == "1"
+                                     checked_test = true
+                                   else
+                                     checked_test = false
+                                   end
+                                %>
+                                <%  if(parameter[:static_value]) %>
+                                  <%= f.hidden_field(parameter[:field_name]+ "_is_clicked", :value=>"true") %>
+                                  <%  if(parameter[:static_value] == '1' || parameter[:static_value] == 1 || parameter[:static_value] == 'checked' || parameter[:static_value] == 'true' || parameter[:static_value] == true) %>
+                                      <input  type="checkbox" checked="checked" disabled="disabled"/><%= f.hidden_field(parameter[:field_name],:value=>1) %>
+                                  <%  elsif(parameter[:static_value] == '0' || parameter[:static_value] == 0 || parameter[:static_value] == 'unchecked' || parameter[:static_value] == 'false' || parameter[:static_value] == false) %>
+                                      <input  type="checkbox" disabled="disabled"/><%= f.hidden_field(parameter[:field_name],:value=>0) %>
+                                  <%  end %>
+                                <%else%>
+                                  <%
+                                    if(dm_session[:"#{parameter[:field_name]}_is_clicked"])
+                                      is_clicked = "true"
+                                    else
+                                      is_clicked = "false"
+                                    end
+                                  %>
+                                  <%= f.check_box(parameter[:field_name], :checked=>checked_test , :onclick=>"is_checkbox_clicked(this, '#{parameter[:field_name]}');")%> <%= f.hidden_field(parameter[:field_name]+ "_is_clicked", :value=>is_clicked) %>
+                                  <%
+                                     if(is_clicked == "true")
+                                       visibility = "visible"
+                                     else
+                                       visibility = "hidden"
+                                     end
+                                    %>
+                                  <img id="<%=parameter[:field_name]%>_img" onclick="remove_cbox_image(this, 'parameter_field_<%=parameter[:field_name]%>','<%=parameter[:field_name]%>')" src="/images/disable_checkbox.png" title="exclude from query" style="visibility: <%= visibility %>"/>
+                                <% end %>
+                            <% else %>
+                                <%  if(parameter[:static_value]) %>
+                                  <%= f.hidden_field(parameter[:field_name]+ "_is_clicked", :value=>"true") %>
+                                  <%  if(parameter[:static_value] == '1' || parameter[:static_value] == 1 || parameter[:static_value] == 'checked' || parameter[:static_value] == 'true' || parameter[:static_value] == true) %>
+                                      <input  type="checkbox" checked="checked" disabled="disabled"/><%= f.hidden_field(parameter[:field_name],:value=>1) %>
+                                  <%  elsif(parameter[:static_value] == '0' || parameter[:static_value] == 0 || parameter[:static_value] == 'unchecked' || parameter[:static_value] == 'false' || parameter[:static_value] == false) %>
+                                      <input  type="checkbox" disabled="disabled"/><%= f.hidden_field(parameter[:field_name],:value=>0) %>
+                                  <%  end %>
+                                <%else%>
+                                  <%
+                                    if(dm_session[:"#{parameter[:field_name]}_is_clicked"])
+                                      is_clicked = "true"
+                                    else
+                                      is_clicked = "false"
+                                    end
+                                  %>
+                                  <%= f.check_box(parameter[:field_name], :onclick=>"is_checkbox_clicked(this, '#{parameter[:field_name]}');")%> <%= f.hidden_field(parameter[:field_name]+ "_is_clicked", :value=>is_clicked) %>
+                                  <%
+                                     if(is_clicked == "true")
+                                       visibility = "visible"
+                                     else
+                                       visibility = "hidden"
+                                     end
+                                    %>
+                                  <img id="<%=parameter[:field_name]%>_img" onclick="remove_cbox_image(this, 'parameter_field_<%=parameter[:field_name]%>','<%=parameter[:field_name]%>')" title="exclude from query" src="/images/disable_checkbox.png" style="visibility: <%= visibility %>"/>
+                                <%end%>
+                            <% end %>
+                         </td>
+                        <% end %>
+                    </tr>
+                <% end %>
+                <tr>
+
+                </tr>
+                <tr>
+                  <td><font color='blue'><b>limit</b></font></td>
+                      <% if dm_session[:search_engine_limit].to_s != "" %>
+                         <td> <%= f.text_field("search_engine_limit", :size=>15, :value=>dm_session[:search_engine_limit].to_s)%> </td><td></td><td></td>
+                      <% else %>
+                         <td> <%= f.text_field("search_engine_limit", :size=>15, :value=>"1000")%> </td><td></td><td></td>
+                      <% end %>
+                </tr>
+                <% if dm_session[:show_summary_icon] != nil && dm_session[:show_summary_icon] == false%>
+                        <% dm_session[:show_summary_icon] = nil if dm_session[:show_summary_icon] != nil%>
+                <% else %>
+                <tr>
+                    <td><font color='green'><b onclick="dmCalcFunc.showBox();">Calculations/ Functions</b></font> </td>
+                    <%
+                        function_list = ["SUM", "COUNT", "AVG", "MIN", "MAX"]
+
+                        stat = dm_session[:parameter_query].to_s
+                        column_array = nil
+                        numeric_cols = nil
+                        if stat.upcase.index(" JOIN") == nil
+                            table_name = FieldParser.get_table_name(stat)
+                            puts "TAFURA : " + table_name
+
+                            column_array = FieldExtractor.get_table_columns(table_name)
+                            column_array.unshift("");
+                            column_array.sort!
+
+                            numeric_cols = FieldExtractor.get_numeric_columns(table_name)
+                            numeric_cols.sort
+                        else
+                            column_array = FieldExtractor.get_join_query_columns(stat)
+                            column_array.sort!
+                            column_array.unshift("");
+                            numeric_cols = column_array
+                        end
+                        dm_session[:column_array] = column_array
+                        dm_session[:numeric_cols] = numeric_cols
+                        numeric_cols_string = numeric_cols.reject {|a| a == ''}.join(',')
+
+                        cols_dropdown_string = column_array.reject {|a| a == ''}.join(',')
+                    %>
+                    <% g_by_columns  = dm_session[:search_engine_group_by_columns].to_s
+                       o_by_columns  = dm_session[:search_engine_order_by_columns].to_s
+                       applied_funcs = dm_session[:functions].nil? ? '' : dm_session[:functions]
+                    %>
+
+                        <td> <%= image_tag "popup_date_selector.png", :id=>"img-calculations", :onClick=>"dmCalcFunc.showBox();" %> <input type="hidden" id="group_by_hidden_field" name="group_by_hidden_field" value="<%=g_by_columns%>" /> <input type="hidden" id="apply_functions_hidden_field" name="apply_functions_hidden_field" value="<%=applied_funcs%>" /> <input type="hidden" id="apply_group_by_hidden_field" name="apply_group_by_hidden_field" /> <input type="hidden" id="numeric_cols_hidden_field" name="numeric_cols_hidden_field" value="<%=numeric_cols_string%>" /> <input type="hidden" id="columns_dropdown_hidden_field" name="columns_dropdown_hidden_field" value="<%=cols_dropdown_string%>" /> <input type="hidden" id="order_by_hidden_field" name="order_by_hidden_field" value="<%=o_by_columns%>" /> </td>
+                    <% dm_session[:show_summary_icon] = nil if dm_session[:show_summary_icon] != nil%>
+
+                    <% puts "G BY COLUMNS : " + dm_session[:search_engine_group_by_columns].to_s %>
+                </tr>
+                <% end %>
+                <tr>
+                  <td><label for="parameter_field_excel_only"><img src='/images/excel.png' style='border:0;'/>&nbsp;export to excel only</label></td>
+                    <td><%= f.check_box("excel_only")%> <%= f.hidden_field(:user_defined_report_name, {:value=>@user_defined_report_name})%></td>
+                </tr>
+                <tr>
+                  <td><font color='green'><b>Clear Search Form</b></font></td>
+                    <td> <%= link_to image_tag('/images/delete.png', :border =>0) ,{:action  =>  :clear_search_form ,:id => dm_session[:redirect_method] }%></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td> <button><img src='/images/exec2.png'/>execute query</button></td>
+                </tr>
+            <% end %>
+        </table>
+
+        <%= render :partial => 'reports/reports/calculations_dialog', :locals => {:function_list => function_list,
+                                                                  :numeric_cols  => numeric_cols,
+                                                                  :column_array  => column_array } %>
+
+    <% end %>
+</div>
+
+<div id="conClass" class="ds_box" style="display:none; overflow:auto;">
+
+</div>
+
+<div id="calculations" class="ds_calculation ui-widget ui-widget-content" style="display:none; overflow:auto;">
+
+</div>
+ <script>
+
+     if(window.parent.document.getElementById('tree_container_cell')!= null)
+      window.parent.document.getElementById('tree_container_cell').parentNode.removeChild(window.parent.document.getElementById('tree_container_cell')) ;
+   //window.parent.document.getElementById('tree_container_cell').style.visibility = "hidden";
+   //window.parent.document.getElementById('tree_content_frame_cell').style.width = "100%";
+
+
+ </script>

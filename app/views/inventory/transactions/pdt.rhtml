@@ -1,0 +1,32 @@
+<%= stylesheet_link_tag "pdt" %>
+
+   <div id='pdt-container'>
+      <label style='padding-left: 8px;'>SLMS</label>
+      <div id='header'>
+       <div style='border: grey thin solid;'>
+        <table id='header-table'>
+          <tr>
+            <td class='header-table-select'>
+               <%= select(nil, nil,['1st level']) %>
+            </td>
+            <td  class='header-table-select'>
+               <%= select(nil, nil,['2st level']) %>
+            </td>
+            <td class='header-table-select'>
+               <%= select(nil, nil,['3st level']) %>
+            </td>
+            <td  class='actions-drop-down' style='padding-left: 5px;width: 50px;'>
+               <div style='border-left: black thin solid;padding-left: 6px;height: 25px;padding-top: 5px;'><%= select(nil, nil,['Refresh','Cancel','Undo','Logon/off']) %></div>
+            </td>
+          </tr>
+        </table>
+       </div> 
+      </div>
+      
+
+<!--####################################################################-->  
+    <iframe  name = "contentFrame" id = "contentFrame" style='width: 345px;height: 325px;' src ="http://luxolo:3000/inventory/transactions/build_pdt" topmargin="0" bottommargin="0" leftmargin="0" rightmargin="0" frameborder="0" Scrolling = "Auto">      
+     
+    </frame>
+<!--####################################################################-->  
+   </div>

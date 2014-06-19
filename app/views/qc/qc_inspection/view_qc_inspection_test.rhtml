@@ -1,0 +1,27 @@
+<table>
+  <tr>
+    <td>Inspection Test Number:</td>
+    <td class="heading_field"><%= @qc_inspection_test.inspection_test_number %></td>
+  </tr>
+  <%= display_inspection_business_info @qc_inspection_test.qc_inspection %>
+</table>
+
+<p>
+  <% if @qc_inspection_test.status == QcInspectionTest::STATUS_COMPLETED %>
+    This test is <em>complete</em>, the test <em><%= @qc_inspection_test.passed ? 'passed' : 'failed' %></em>.
+  <% else %>
+    This test is <em>incomplete</em>.
+  <% end %>
+</p>
+
+<% if @qc_inspection_test.cull_test %>
+  <h3 class="qc_heading">CULL Analysis</h3>
+  <%= render :partial => 'cull_result_view', :collection => @qc_results,
+                                        :locals     => {:max_cols => @qc_inspection_test.max_columns_for_measurements,
+                                                        :measurement_rules => @qc_inspection_test.measurement_rules } %>
+<% else %>
+  <h3 class="qc_heading">Test Samples</h3>
+    <%= render :partial => 'result_view', :collection => @qc_results,
+                                     :locals     => {:max_cols => @qc_inspection_test.max_columns_for_measurements,
+                                                     :measurement_rules => @qc_inspection_test.measurement_rules } %>
+<% end %>

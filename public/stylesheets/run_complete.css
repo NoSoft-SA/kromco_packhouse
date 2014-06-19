@@ -1,0 +1,152 @@
+.main_heading{
+    border-right: gray thin solid;
+    border-top: gray thin solid;
+    border-left: gray thin solid;
+    border-bottom: gray thin solid;
+    background-color:transparent;
+    color: green;
+    font-weight: normal;
+    font-size: 13pt;
+    font-family: Arial;
+    padding:0;
+    padding-left:2;
+}
+
+.second_heading{
+    border-right: gray thin solid;
+    border-top: gray thin solid;
+    border-left: gray thin solid;
+    border-bottom: gray thin solid;
+    background-color: whitesmoke;
+    color: black;
+    font-weight: bold;
+    font-size: 10pt;
+    font-family: Arial;
+    padding:0;
+    padding-left:2;
+}
+
+.object_heading{
+    border-right: gray thin solid;
+    border-top: gray thin solid;
+    border-left: gray thin solid;
+    border-bottom: gray thin solid;
+    background-color: whitesmoke;
+    color: black;
+    font-weight: bold;
+    font-size: 10pt;
+    font-family: Arial;
+    padding:0;
+    padding-left:2;
+}
+
+.hidden{
+    visibility: hidden;
+
+}
+
+.visible{
+    visibility: visible;
+
+}
+
+.na_cell{
+    border-right: gray thin solid;
+    border-top: gray thin solid;
+    border-left: gray thin solid;
+    border-bottom: gray thin solid;
+    background-color: lightgray;
+    color: lightgray;
+    font-weight: normal;
+    font-size: 9pt;
+    font-family: Arial;
+    padding:0;
+    padding-left:2;
+    margin-top:0;
+  
+}
+
+.todo_cell{
+    border-right: gray thin dotted;
+    border-top: gray thin dotted;
+    border-left: gray thin dotted;
+    border-bottom: gray thin dotted;
+    background-color: white;
+    color: red;
+    font-weight: normal;
+    font-size: 9pt;
+    font-family: Arial;
+    padding:0;
+    padding-left:2;
+}
+
+.generic_action{
+    border-right: gray thin solid;
+    border-top: gray thin solid;
+    border-left: gray thin solid;
+    border-bottom: gray thin solid;
+    background-color: whitesmoke;
+    color:black;
+    font-weight: normal;
+    font-size: 9pt;
+    font-family: Arial;
+    padding:0;
+    padding-left:2;
+    padding-top:2;
+}
+
+.active_cell{
+    border-right: gray thin solid;
+    border-top: gray thin solid;
+    border-left: gray thin solid;
+    border-bottom: gray thin solid;
+    background-color: white;
+    color: green;
+    font-weight: normal;
+    font-size: 9pt;
+    font-family: Arial;
+    padding:0;
+    padding-left:2;
+}
+
+
+
+.completed_cell{
+    border-right: gray thin solid;
+    border-top: gray thin solid;
+    border-left: gray thin solid;
+    border-bottom: gray thin solid;
+    background-color: lightgreen;
+    color: black;
+    font-weight: normal;
+    font-size: 8pt;
+    font-family: Arial;
+    padding:0;
+    padding-left:2;
+}
+
+.completed_cell{
+    border-right: gray thin solid;
+    border-top: gray thin solid;
+    border-left: gray thin solid;
+    border-bottom: gray thin solid;
+    background-color: lightgreen;
+    color: black;
+    font-weight: normal;
+    font-size: 8pt;
+    font-family: Arial;
+    padding:0;
+    padding-left:2;
+}
+
+.action{
+   
+    background-color: white;
+    color: blue;
+    font-weight: normal;
+    font-size: 9pt;
+    font-family: Arial;
+    visibility: visible;
+   
+}
+

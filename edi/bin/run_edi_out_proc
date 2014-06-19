@@ -1,0 +1,54 @@
+#!/usr/bin/env ruby
+# EDI Out-Process starter
+#
+# Arguments:
+# +out_path+::  Where EDI out-flow files should be written.
+# +interval+::  No of seconds between each check for EdiOutProposal records.
+#               Can be omitted. Defaults to 5.
+# +mode+::      Must be "normal" or "retry".
+#               Can be omitted. Defaults to "Normal".
+#
+# Creates an OutProcess instance with the arguments.
+# Calls OutProcess#run method which checks EdiOutProposal records every +interval+ seconds and ceates EDI files in +out_path+.
+# If the +mode+ parameter is "retry", only EdiOutProposal records that failed before are processed.
+
+begin
+  require 'rubygems' unless ENV['RUBYOPT']
+  require 'pathname'
+  require 'nokogiri'
+
+  # Place the lib dir on the load path so the edi engine files can be loaded relative to it.
+  $LOAD_PATH.unshift File.expand_path(File.join(File.dirname(__FILE__), '../lib'))
+
+  # Change to the root of the rails app and work relative to that
+  Dir.chdir(Pathname(File.join(File.dirname(__FILE__), '../..')).cleanpath)
+
+  require 'edi/edi_errors'
+  require 'edi/edi_helper'
+  require 'edi/edi_setup'
+  require 'edi/edi_field_formatter'
+  require 'edi/raw_fixed_len_record'
+  require 'out_process'
+
+  # Could read config for dir as a default..( EdiHelper could read config when loaded )
+
+  dir_path  = ARGV[0]
+  interval  = ARGV[1] || 5
+  mode      = ARGV[2] || 'normal'
+  join_path = ARGV[3] || dir_path
+
+  raise EdiProcessError, "Missing argument. Mode must be supplied as a parameter." if mode.nil?
+  raise EdiProcessError, "Missing argument. Output path must be supplied as a parameter." if dir_path.nil?
+
+  out_process = OutProcess.new(interval.to_i, mode, dir_path, join_path)
+
+rescue Exception => error
+  puts "Error: " << error
+  puts error.backtrace
+  puts "Failed to start EDI Out Process."
+  exit 1
+end
+
+# Do the work. This process runs continuously.
+out_process.run
+

@@ -1,0 +1,63 @@
+td.td1{   background: lightgray;
+ font-size: small;
+ 
+}
+td.td1:hover {
+background : gray;
+font-size: small;
+color: blue;
+border-right: blue;
+}
+td.td1_output{background : silver;
+}
+
+
+
+td.td2:hover{
+background: silver;
+font-size: small;
+
+}
+td.td2_output:hover{
+
+background: lightgray;
+font-size: small;
+}
+td.td2_output{
+
+background: whitesmoke;
+font-size: small;
+}
+td.td2_input{
+background: whitesmoke;
+font-size: small;
+}
+td.td2_input:hover{
+
+background:lightgray;
+font-size: small;
+}
+td.td1_output:hover
+{
+ font-size: small;
+ background: gray;
+}
+td.td1_output{
+ font-size: small;
+ background: lightgray;
+}
+tr:hover 
+{
+color: blue;
+background: gray;
+}
+
+table{border: 1px dotted blue;
+}
+tr{border: 1px dotted blue;}
+td{border: 1px dotted blue;}
+td.multiple_outputs{background: lightblue;}
+td.multiple_input{background: whitesmoke; }
+td.multiple_input_precise{background: gray;}
+span.out_of_sync {background-color: aqua;}
+table.table_error_info{font-size: small;}

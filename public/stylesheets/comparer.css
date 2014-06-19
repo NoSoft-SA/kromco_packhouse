@@ -1,0 +1,160 @@
+/*Styles for view date*/
+#view-date {
+    color: red;
+    font: bold 15px sans-serif;
+}
+
+/*Styles for headers*/
+
+div.c1 {
+    background-color: green;
+
+}
+
+div.c2 {
+    background-color: blue;
+
+}
+
+div.c3 {
+    background-color: yellow;
+
+}
+
+div.c4 {
+    background-color: purple;;
+
+}
+
+div.c5 {
+    background-color: black;
+
+}
+
+div.c6 {
+    background-color: pink;
+
+}
+
+div.headers {
+    font: bold smaller arial;
+    border-top: thin solid grey;
+    width: 150px;
+    border-left: thin solid grey;
+    border-bottom: thin solid grey;
+    width: 150px;
+}
+
+div.parent_containers {
+
+    background-color: grey;
+
+}
+
+div.new_rec {
+
+    background-color: red;
+
+}
+
+div.rec_header {
+
+    font-family: "Times New Roman", Times, serif;
+    font-style: normal;
+    font-size: 20px;
+    font-weight: 800;
+
+}
+
+div.td {
+    border-right: 1px solid color;
+}
+
+div.td2 {
+    border-left: 1px solid color;
+}
+
+div.table {
+
+}
+
+div.top_table {
+    width: 1000px;
+    border-right: solid 1px #000000;
+    border-left: solid 1px #000000;
+    border-top: solid 1px #000000;
+}
+
+div.bottom_table {
+    width: 1000px;
+    border-right: solid 1px #000000;
+    border-left: solid 1px #000000;
+    border-bottom: solid 1px #000000;
+}
+
+div.submit {
+    width: 50px;
+    height: 50px;
+
+}
+
+div.tds {
+
+}
+
+div.children_containers {
+
+    background-color: #E8E8E8;
+
+}
+
+div.checkboxes {
+    float: right;
+    width: 10px;
+
+}
+
+div.field {
+    float: left;
+    width: 200px;
+
+}
+
+div.value {
+    float: centre;
+    width: 100px;
+    text-align: right;
+}
+
+div.box {
+    width: 500px;
+    background-color: #ff0000;
+
+}
+
+div.left {
+    float: left;
+    width: 250px;
+    font-size: 10px;
+    font-family: Verdana, Arial, Helvetica, sans-serif, monospace;
+
+}
+
+div.right {
+    float: right;
+    width: 50px;
+
+}
+
+div.middle {
+    float: left;
+    padding: 0px 0px 1px 0px;
+    margin: 0px;
+    font-size: 10px;
+    font-family: Verdana, Arial, Helvetica, sans-serif, monospace;
+
+}
+
+div.floatstop {
+    clear: both;
+}

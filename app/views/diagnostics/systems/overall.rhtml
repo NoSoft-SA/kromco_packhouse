@@ -1,0 +1,116 @@
+<!--between <%=@today%> and <%=@tomorrow%>-->
+
+<%= stylesheet_link_tag "diagnostics"%>
+
+<% @content_header_caption = "'system overview'" %>
+
+<!--DAILY ACTIVITY-->
+<div id="view-date">
+  (<%=@view_date%>)
+</div>
+<div class="headers">
+   daily activity
+</div>
+
+<div class="table_containers" style="width: 400px;">
+  <table class="contents" style="width: 400px;"> 
+   <tr>
+     <td>total cartons printed</td><td><%=@total_cartons_printed%></td>
+   </tr>
+   <tr>
+     <td>total cartons packed</td><td><%=@total_cartons_packed%></td>
+   </tr>
+   <tr>
+     <td>total pallets palletized</td><td><%=@total_pallets_palletized%></td>
+   </tr>
+   <tr>
+     <td>total bins tipped</td><td><%=@total_bins_tipped%></td>
+   </tr>
+   <tr>
+     <td>total rebins printed</td><td><%=@total_rebins_printed%></td>
+   </tr>
+   <tr>
+      <td>total number of scans</td><td><%=@total_number_of_scans%></td>
+   </tr>
+  </table>
+</div>
+
+  <br>
+
+<!--PRODUCTIVITY-->
+<div class="headers">
+   productivity
+</div>
+
+<div class="table_containers">
+  <table class="contents"> 
+   <tr>
+     <td><%=@scan_per_hour%></td><td>scans per hour</td><td><%=@scans_per_minute%> scans per minute</td>
+   </tr>
+  </table>
+</div>  
+
+    <br>
+ 
+<!--ERROR ACTIVITY-->
+<div class="headers">
+   error activity
+</div>
+
+<div class="table_containers">
+  <table class="contents" style="text-align: center;"> 
+   <tr>
+     <td >&nbsp;&nbsp;&nbsp;<%=@server_errors%>  server errors</td>
+   </tr>
+   <tr>
+     <td ><%=@error_percentage%>% of scans produced an error OR every <%=@error_frequency%>th scan</td>
+   </tr>
+  </table>
+</div>  
+   
+   <br>
+   
+<!--ERROR ACTIVITY-->
+<div class="headers">
+   reworks activity
+</div>
+
+<div class="table_containers">
+  <table class="contents"> 
+   <tr>
+     <td >cartons scrapped</td><td><%=@cartons_scraped%></td><td><%=@cartons_scraped_percentage%>% of total packed</td>
+   </tr>
+   <tr>
+     <td >cartons repacked</td><td><%=@cartons_repacked%></td><td><%=@cartons_repacked_percentage%>% of total packed</td>
+   </tr>
+   <tr>
+     <td >cartons reclassified</td><td><%=@cartons_reclassified%></td><td><%=@cartons_reclassified_percentage%>% of total packed</td>
+   </tr>
+   <tr>
+     <td >pallets scrapped</td><td><%=@pallets_scrapped%></td><td><%=@pallets_scrapped_percentage%>% of total palletized</td>
+   </tr>
+   <tr>
+     <td >pallets reclassified</td><td><%=@pallets_reclassified%></td><td><%=@pallets_reclassified_percentage%>% of total palletized</td>
+   </tr>
+   <tr>
+     <td >pallets repacked</td><td><%=@pallets_repacked%></td><td><%=@pallets_repacked_percentage%>% of total palletized</td>
+   </tr>
+   <tr>
+     <td >rebins scraped</td><td><%=@rebins_scraped%></td><td><%=@rebins_scraped_percentage%>% of total printed</td>
+   </tr>
+   <tr>
+     <td >rebins reclassified</td><td><%=@rebins_reclassified%></td><td><%=@rebins_reclassified_percentage%>% of total printed</td>
+   </tr>
+  </table>
+</div>  
+
+<!--SELECT A FIFFERENT DATE-->
+<div>
+<% form_tag :action => 'overall' do %>
+  <p><label for="view_different_date" style="font:  smaller verdana;">view different date</label>
+         <%= date_select("date", "view")%><br>
+         
+  </p>
+  <span style="padding-left : 230px;"><%= submit_tag "Go" %></span>
+<% end %>
+</div>

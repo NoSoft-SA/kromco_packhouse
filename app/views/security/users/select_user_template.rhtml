@@ -1,0 +1,22 @@
+<% @tree_node_content_header = 'select user' %>
+
+<% @hide_content_pane = false %>
+<% @is_menu_loaded_view = true %>
+
+<div>
+
+    <% form_tag :action => 'export_all_locally' do %>
+        <table border ="0">
+        
+            <tr>
+                <td><label for ="users" style = "font : smaller verdana;"> select user: </label></td>
+                <td><%= select_tag("users", options_for_select(@usernames)) %></td>
+            </tr>
+            
+            <tr>
+                <td></td>
+                <td> <%= submit_tag "export" %> </td>
+            </tr>
+        </table>
+     <% end %>
+ </div>

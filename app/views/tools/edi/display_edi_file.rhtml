@@ -1,0 +1,34 @@
+<% content_for :head_extras do -%>
+  <script type="text/javascript">
+    jQuery(function() {
+        jQuery("#edi_collapse").collapse();
+    });
+  </script>
+<% end -%>
+
+<% @header_content = '' -%>
+<h2>View EDI file: <%= @fname %></h2>
+
+<%= expand_and_collapse_all_collapses %>
+
+<div id="edi_collapse" class="collapse_set_no_pad">
+  <% @records.each_with_index do |record, index| -%>
+    <% height = record.data.length == 1 ? 40 : 100 %>
+    <h3><%= record.rec_type %></h3>
+    <% column_configs = []
+       record.colnames.each {|c| column_configs << {:field_type => 'text', :field_name => c} }
+       grid = get_data_grid(record.data, column_configs, nil, true, nil, :grid_id => "ediGrid#{record.rec_type}#{index}",
+                         :caption => record.rec_type, :height => height )
+       @header_content << grid.build_grid_data %>
+    <div>
+      <%= grid.render_html %>
+      <%= grid.render_grid %>
+    </div>
+  <% end -%>
+  
+<h3>File</h3>
+<div style="width:100%">
+  <pre>
+    <%= @content %>
+  </pre>
+</div>

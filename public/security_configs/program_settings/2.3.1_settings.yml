@@ -1,0 +1,51 @@
+--- 
+- !ActiveRecord,2010/FunctionalArea 
+  attributes: 
+    class_name: 
+    functional_area_name: "2.3"
+    id: "43"
+    is_non_web_program: t
+    disabled: f
+    display_name: RMT Bin Sales
+- - !ActiveRecord,2010/Program 
+    attributes: 
+      class_name: 
+      is_leaf: f
+      functional_area_name: "2.3"
+      technology: 
+      url_component: 
+      id: "313"
+      functional_area_id: "43"
+      is_non_web_program: t
+      disabled: f
+      description: 
+      display_name: bin_load_planning
+      program_name: 2.3.1
+  - - !ActiveRecord,2010/ProgramFunction 
+      attributes: 
+        class_name: 
+        name: 2.3.1.1
+        program_id: "313"
+        created_on: 2010-12-08 14:32:34
+        functional_area_name: "2.3"
+        id: "1027"
+        is_non_web_program: t
+        disabled: f
+        display_name: enter_tripsheet
+        description: 
+        url_param: 
+        program_name: 2.3.1
+    - !ActiveRecord,2010/ProgramFunction 
+      attributes: 
+        class_name: 
+        name: 2.3.1.2
+        program_id: "313"
+        created_on: 2010-12-08 14:33:24
+        functional_area_name: "2.3"
+        id: "1028"
+        is_non_web_program: t
+        disabled: f
+        display_name: complete_load
+        description: 
+        url_param: 
+        program_name: 2.3.1

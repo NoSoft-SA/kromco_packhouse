@@ -1,0 +1,38 @@
+
+<html>
+    <body>
+          <pre>
+         <table border = 1   width= 1000>
+           <tr><td><%="#{@file1} "%></td><td><%="#{@file2}"%></td></tr>
+           <tr>
+             <td valign = "top">
+                 <%@diffs_file1.each do |diff|%>
+                 <%diff.each do |dif|%>
+                   <%if dif =~ /\bdef/ %>
+                        <b><%=dif%></b><br><br>
+                            <%else%>
+                            <%=dif%><br>
+                            <%end%>
+                  <%end%>
+                    <%end%>
+                </td>
+                <td valign = "top">
+                   <%@diffs_file2.each do |diff2|%>
+                    <%diff2.each do |dif2|%>
+                     <%if dif2 =~ /\bdef/ %>
+                     <b><%=dif2%></b><br><br>
+                           <%else%>
+                            <%=dif2%><br>
+                            <%end%>
+                      <%end%>    
+                   <%end%>
+                </td>
+            </tr>
+            </table>
+             </pre>
+
+
+
+
+    </body>
+    </html>

@@ -1,0 +1,59 @@
+<%= stylesheet_link_tag "pdt" %>
+
+<script language="JavaScript">
+
+ function show_element(id)
+  		{
+    		elt = document.getElementById(id);
+    		elt.style.display = "inline";
+  
+  		}
+</script>
+
+<%= start_form_tag({:action=> "pdt_login"}, { :onSubmit => "show_element('ident_spinner');" }) %>
+   <div id='login'>
+   
+    <div style='border: grey thin solid;padding: 1px;'>
+     <div id='login-nessage'>
+      <% if @message %>
+        <%= @message %>
+      <% else %>
+       Please log in
+       <% end %>
+     </div>
+     
+     <div id='login-fields-group'>
+        <table id='login-fields-table'>
+          <tr>
+            <td>
+               User name :
+            </td>
+            
+            <td>
+               <%= text_field('user', 'user_name', "size" => 26) %>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              Password :
+            </td>
+            
+            <td>
+              <%= password_field('user', 'password', "size" => 26) %>
+            </td>
+          </tr>
+          <tr>
+            <td>
+            </td>
+            
+            <td>
+               <%= submit_tag("login")%>  <%= image_tag("spinner.gif", :align => 'absmiddle', :border=> 0, :id=>"ident_spinner", :style=>"display: none;" ) %>
+            </td>
+          </tr>
+        </table>
+     </div>
+    </div>
+    
+   </div>
+   
+  <%= end_form_tag %>

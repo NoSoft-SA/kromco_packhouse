@@ -1,0 +1,107 @@
+--- 
+- !ActiveRecord,2010/FunctionalArea 
+  attributes: 
+    class_name: 
+    functional_area_name: qc
+    id: "51"
+    is_non_web_program: f
+    disabled: f
+    display_name: QC
+- - !ActiveRecord,2010/Program 
+    attributes: 
+      class_name: 
+      is_leaf: f
+      functional_area_name: qc
+      technology: 
+      url_component: qc_inspection
+      id: "295"
+      functional_area_id: "51"
+      is_non_web_program: f
+      disabled: f
+      description: 
+      display_name: QTY Fruit Sample
+      program_name: qc_qty_fruit_sample
+  - - !ActiveRecord,2010/ProgramFunction 
+      attributes: 
+        class_name: 
+        name: list_tests
+        program_id: "295"
+        created_on: 2010-12-20 11:52:50
+        functional_area_name: qc
+        id: "950"
+        is_non_web_program: f
+        disabled: f
+        display_name: List Tests
+        description: 
+        url_param: QTYFS
+        program_name: qc_qty_fruit_sample
+    - !ActiveRecord,2010/ProgramFunction 
+      attributes: 
+        class_name: 
+        name: current_qc_tests
+        program_id: "295"
+        created_on: 2010-12-20 12:31:55
+        functional_area_name: qc
+        id: "951"
+        is_non_web_program: f
+        disabled: f
+        display_name: Refresh Tests list
+        description: 
+        url_param: QTYFS
+        program_name: qc_qty_fruit_sample
+    - !ActiveRecord,2010/ProgramFunction 
+      attributes: 
+        class_name: 
+        name: current_qc_inspection
+        program_id: "295"
+        created_on: 2010-12-08 10:30:32
+        functional_area_name: qc
+        id: "945"
+        is_non_web_program: f
+        disabled: f
+        display_name: Current Inspection
+        description: 
+        url_param: QTYFS
+        program_name: qc_qty_fruit_sample
+    - !ActiveRecord,2010/ProgramFunction 
+      attributes: 
+        class_name: 
+        name: current_qc_business_context_search
+        program_id: "295"
+        created_on: 2010-12-09 15:18:07
+        functional_area_name: qc
+        id: "946"
+        is_non_web_program: f
+        disabled: f
+        display_name: Refresh Deliveries list
+        description: 
+        url_param: QTYFS
+        program_name: qc_qty_fruit_sample
+    - !ActiveRecord,2010/ProgramFunction 
+      attributes: 
+        class_name: 
+        name: search_inspections
+        program_id: "295"
+        created_on: 2010-12-06 18:42:10
+        functional_area_name: qc
+        id: "944"
+        is_non_web_program: f
+        disabled: f
+        display_name: Inspections
+        description: 
+        url_param: QTYFS
+        program_name: qc_qty_fruit_sample
+    - !ActiveRecord,2010/ProgramFunction 
+      attributes: 
+        class_name: 
+        name: search_business_context
+        program_id: "295"
+        created_on: 2010-12-01 10:08:39
+        functional_area_name: qc
+        id: "942"
+        is_non_web_program: f
+        disabled: f
+        display_name: Deliveries list
+        description: 
+        url_param: QTYFS
+        program_name: qc_qty_fruit_sample

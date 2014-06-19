@@ -1,0 +1,104 @@
+ 
+ <h3 style = "border-right: none;
+                                border-top: none; 
+                                border-left: none; 
+                                border-bottom: none; 
+                                background-color: none;
+                                color: red;
+                                font-weight: bold;
+                                font-size: 10pt;
+                               font-family: Arial;">The following Exception was raised in the Kromco Mes Web System</h3>
+ <table>
+   <tr>
+     <td colspan = '2' style = "border: 2px solid red;
+                 padding: 1em;
+                 margin-bottom: 2em;
+                 background-color: yellow;
+                 font: bold smaller sans-serif;"><%= @error.description%><br></td><td></td>
+   </tr>
+   <tr><tr><tr></tr>
+   <tr>
+     <td colspan = '2' style = "  border-right: none;
+                                border-top: none; 
+                                border-left: none; 
+                                border-bottom: none; 
+                                background-color: whitesmoke;
+                                color: gray;
+                                font-weight: normal;
+                                font-size: 8pt;
+                               font-family: Arial;">STACK TRACE<BR><%= @error.html_stacktrace%></td><td></td>
+   </tr><tr/><tr/>
+   <tr style = "border-right: gray thin solid;
+                   border-top: gray thin solid; 
+                   border-left: gray thin solid; 
+                   border-bottom: gray thin solid; 
+                   background-color: whitesmoke;
+                   color: blue;
+                   font-weight: normal;
+                   font-size: 8pt;
+                   font-family: Arial;">
+      
+      <td >at time</td><td class = 'err_meta_val'><%= Time.now.to_s%></td>
+   </tr>
+   
+   <tr style = "border-right: gray thin solid;
+                   border-top: gray thin solid; 
+                   border-left: gray thin solid; 
+                   border-bottom: gray thin solid; 
+                   background-color: whitesmoke;
+                   color: blue;
+                   font-weight: normal;
+                   font-size: 8pt;
+                   font-family: Arial;">
+     <td class = 'err_meta_title'>error type</td><td class = 'err_meta_val'><%= @error.error_type%></td>
+   </tr>
+   
+   <tr style = "border-right: gray thin solid;
+                   border-top: gray thin solid; 
+                   border-left: gray thin solid; 
+                   border-bottom: gray thin solid; 
+                   background-color: whitesmoke;
+                   color: blue;
+                   font-weight: normal;
+                   font-size: 8pt;
+                   font-family: Arial;">
+     <td class = 'err_meta_title'>controller name</td><td class = 'err_meta_val'><%= @error.controller_name%></td>
+   </tr>
+   
+   <tr style = "border-right: gray thin solid;
+                   border-top: gray thin solid; 
+                   border-left: gray thin solid; 
+                   border-bottom: gray thin solid; 
+                   background-color: whitesmoke;
+                   color: blue;
+                   font-weight: normal;
+                   font-size: 8pt;
+                   font-family: Arial;">
+     <td class = 'err_meta_title'>action name</td><td class = 'err_meta_val'><%= @error.action_name%></td>
+   </tr>
+   
+   <tr style = "border-right: gray thin solid;
+                   border-top: gray thin solid; 
+                   border-left: gray thin solid; 
+                   border-bottom: gray thin solid; 
+                   background-color: whitesmoke;
+                   color: blue;
+                   font-weight: normal;
+                   font-size: 8pt;
+                   font-family: Arial;">
+     <td class = 'err_meta_title'>user_name</td><td class = 'err_meta_val'><%= @error.logged_on_user%></td></tr>
+   <tr style = "border-right: gray thin solid;
+                   border-top: gray thin solid; 
+                   border-left: gray thin solid; 
+                   border-bottom: gray thin solid; 
+                   background-color: whitesmoke;
+                   color: blue;
+                   font-weight: normal;
+                   font-size: 8pt;
+                   font-family: Arial;">
+     <td class = 'err_meta_title'>user_identity</td><td class = 'err_meta_val'><%= @error.person%></td>
+   </tr>
+ </table>
+
+ 
+  

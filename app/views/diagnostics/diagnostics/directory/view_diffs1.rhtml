@@ -1,0 +1,34 @@
+<html>
+    <body>
+          <pre>
+         <table border = 1   width= 1000>
+           <tr><td><%="#{@file1} "%></td><td><%="#{@file2}"%></td></tr>
+           <tr>
+             <td valign = "top">
+                 <% @lines1.each do |x|%>
+                     <% if @diff_lines1.include?(x)%>
+                     <font color = "red"><%= @lines1[x]%></font><br>
+                         <%else%>
+                            <%=@lines1[x] %><br>
+                        <%end%>
+                  <%end %>
+                </td>
+                <td valign = "top">
+                   <% @lines2.each do |y|%>
+                        <% if @diff_lines1.include?(y)%>
+                                <font color = "red"><%= @lines2[y]%></font><br>
+                             <%else%>
+                                 <%=@lines2[y] %><br>
+                         <%end%>
+                    <%end %>
+                </td>
+            </tr>
+            </table>
+             </pre>
+
+
+
+
+    </body>
+    </html>
+ 

@@ -1,0 +1,16 @@
+<% sample_size = qc_inspection_test.qc_inspection.population_size
+   summ_tot    = 0
+   summ_perc   = 0.0 %>
+   <% high_summary = qc_inspection_test.qc_results.first.cull_summary( sample_size ) %>
+ <table>
+   <tr><td>Description</td><td>Amount</td><td>Percentage</td></tr>
+   <% high_summary.keys.sort.each do |k| %>
+     <tr><td><%= k %></td><td><%= measure_formatted( high_summary[k][:amount] ) %></td><td><%= measure_formatted( high_summary[k][:percentage] ) %>%</td></tr>
+   <% end %>
+ </table>
+<a href='#' onclick="$('test_summary_measure_detail_<%= qc_inspection_test.id %>').toggle();return false;">Show/Hide detail</a>
+<div id="test_summary_measure_detail_<%= qc_inspection_test.id %>" style="display:none">
+  <%= render :partial => 'cull_result_view', :collection => qc_inspection_test.qc_results,
+                                        :locals     => {:max_cols => qc_inspection_test.max_columns_for_measurements,
+                                                        :measurement_rules => qc_inspection_test.measurement_rules } %>
+</div>

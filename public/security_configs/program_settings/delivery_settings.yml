@@ -1,0 +1,74 @@
+--- 
+- !ActiveRecord,2010/FunctionalArea 
+  attributes: 
+    class_name: 
+    functional_area_name: rmt_processing
+    id: "33"
+    disabled: 
+    is_non_web_program: 
+    display_name: rmt_processing
+- - !ActiveRecord,2010/Program 
+    attributes: 
+      class_name: 
+      is_leaf: f
+      functional_area_name: rmt_processing
+      technology: ""
+      id: "180"
+      disabled: f
+      description: ""
+      functional_area_id: "33"
+      is_non_web_program: f
+      display_name: ""
+      program_name: delivery
+  - - !ActiveRecord,2010/ProgramFunction 
+      attributes: 
+        created_on: 
+        class_name: 
+        name: new_delivery
+        program_id: "180"
+        functional_area_name: rmt_processing
+        id: "667"
+        disabled: f
+        description: ""
+        is_non_web_program: f
+        display_name: ""
+        program_name: delivery
+    - !ActiveRecord,2010/ProgramFunction 
+      attributes: 
+        created_on: 
+        class_name: 
+        name: search_deliveries_hierarchy
+        program_id: "180"
+        functional_area_name: rmt_processing
+        id: "668"
+        disabled: f
+        description: ""
+        is_non_web_program: f
+        display_name: find deliveries
+        program_name: delivery
+    - !ActiveRecord,2010/ProgramFunction 
+      attributes: 
+        created_on: 
+        class_name: 
+        name: list_deliveries
+        program_id: "180"
+        functional_area_name: rmt_processing
+        id: "669"
+        disabled: f
+        description: ""
+        is_non_web_program: f
+        display_name: ""
+        program_name: delivery
+    - !ActiveRecord,2010/ProgramFunction 
+      attributes: 
+        created_on: 
+        class_name: 
+        name: search_deliveries
+        program_id: "180"
+        functional_area_name: rmt_processing
+        id: "918"
+        disabled: f
+        description: 
+        is_non_web_program: f
+        display_name: find delivery note enties
+        program_name: delivery

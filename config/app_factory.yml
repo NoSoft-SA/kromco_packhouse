@@ -1,0 +1,68 @@
+
+datagrid:
+
+   grid_page_size: 500
+   grid_min_width: 780
+   grid_min_height: 350
+   grid_max_width: 920
+   grid_max_height: 410
+   max_column_width: 150
+
+diagnostics:
+  send_error_mail: false
+  enable_logging: kromco_mes_test
+  truncate_size: 2000
+
+data_miner:
+  excel_export_limit: 5000
+  grid_max_rows: 2000
+  query_def_location: reports
+  
+concurrency:
+  lock_requests: true
+  grid_max_rows: 2000
+
+PDT:
+  pdt_server_url: http://192.168.10.191:3000
+  pdt_simulator_server: http://192.168.10.179:8080
+
+reporting:
+  reports_location: reports
+  crystal_reports_server_ip: 192.168.10.191
+  crystal_reports_server_port: 8080
+  get_crystal_reports_server: /CrystalReportsServer/index.jsp?
+
+
+legacy_db:
+  legacy_db_conn_string: DBI:ADO:Provider=SQLOLEDB;Data Source=172.16.16.14;Initial Catalog=KromcoData;User Id=sa;Password = ''
+  odbc_legacy_db_conn_string: DBI:ODBC:kromco_sql
+  odbc_legacy_personnell_db_conn_string: DBI:ODBC:kromco_intrack
+  odbc_intrack_db_conn_string: DBI:ODBC:kromco_sql
+  legacy_personnell_db_conn_string: DBI:ADO:Provider=SQLOLEDB;Data Source=172.16.16.14;Initial Catalog=KromcoPMS;User Id=sa;Password = ''
+
+mes:
+  mes_conn_param:
+       adapter: postgresql
+       host: 192.168.10.179
+       database: kromco_mes_live
+       username: postgres
+       password: postgres
+       port: 5432
+  label_printing_server_port: 2080
+  label_printing_server_url: 192.168.10.179
+  bin_ticket_printing_ip: 192.168.10.198
+  mrl_printer_ip: 192.168.10.198
+  reworks_ip: 172.16.35.113
+  mesware_ip: 192.168.10.179
+
+
+
+
+
+
+
+
+
+
+
+

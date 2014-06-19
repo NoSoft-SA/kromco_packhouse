@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<!-- Generated using Flame-Ware Solutions XML-2-XSD v2.0 at http://www.flame-ware.com/Products/XML-2-XSD/ -->
+<xs:schema id="NewDataSet" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+  <xs:element name="MesSchema">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Namespace" type="xs:string" minOccurs="0" />
+        <xs:element name="nsURL" type="xs:string" minOccurs="0" />
+        <xs:element name="MesData" minOccurs="0" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Data" minOccurs="0" maxOccurs="unbounded">
+                <xs:complexType>
+                  <xs:attribute name="PID" type="xs:string" />
+                  <xs:attribute name="ID" type="xs:string" />
+                  <xs:attribute name="Date" type="xs:string" />
+                  <xs:attribute name="Time" type="xs:string" />
+                  <xs:attribute name="CID" type="xs:string" />
+                  <xs:attribute name="TransponderID" type="xs:string" />
+                  <xs:attribute name="Ambient" type="xs:string" />
+                  <xs:attribute name="Probe" type="xs:string" />
+                  <xs:attribute name="MeasureUnit" type="xs:string" />
+                  <xs:attribute name="BatteryStatus" type="xs:string" />
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+            <xs:attribute name="Name" type="xs:string" />
+            <xs:attribute name="Date" type="xs:string" />
+            <xs:attribute name="Time" type="xs:string" />
+            <xs:attribute name="File" type="xs:string" />
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="MesSchema" />
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

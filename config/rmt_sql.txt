@@ -1,0 +1,179 @@
+#================================================
+# Start of track_slms_indicators table
+#================================================
+
+CREATE TABLE "public"."track_slms_indicators" (
+  "id" SERIAL, 
+  "track_slms_indicator_code" VARCHAR, 
+  "date_from" TIMESTAMP(0) WITHOUT TIME ZONE, 
+  "date_to" TIMESTAMP(0) WITHOUT TIME ZONE, 
+  "track_indicator_type_id" INTEGER, 
+  "track_indicator_type_code" VARCHAR, 
+  "season_id" INTEGER, 
+  "season_code" VARCHAR, 
+  "variety_id" INTEGER, 
+  "variety_type" VARCHAR, 
+  "variety_code" VARCHAR, 
+  "commodity_code" VARCHAR, 
+  "marketing_variety_code" VARCHAR, 
+  "commodity_id" INTEGER, 
+  CONSTRAINT "track_slms_indicators_fk" FOREIGN KEY ("season_code", "season_id")
+    REFERENCES "public"."seasons"("season_code", "id")
+    ON DELETE NO ACTION
+    ON UPDATE RESTRICT
+    NOT DEFERRABLE, 
+  CONSTRAINT "track_slms_indicators_fk1" FOREIGN KEY ("track_indicator_type_code", "track_indicator_type_id")
+    REFERENCES "public"."track_indicator_types"("track_indicator_type_code", "id")
+    ON DELETE NO ACTION
+    ON UPDATE RESTRICT
+    NOT DEFERRABLE, 
+  CONSTRAINT "track_slms_indicators_fk2" FOREIGN KEY ("commodity_code", "commodity_id")
+    REFERENCES "public"."commodities"("commodity_code", "id")
+    ON DELETE NO ACTION
+    ON UPDATE RESTRICT
+    NOT DEFERRABLE
+) WITH OIDS;
+
+CREATE UNIQUE INDEX "track_slms_indicators_id_key" ON "public"."track_slms_indicators"
+  USING btree ("id");
+  
+#================================================
+# End of track_slms_indicators table
+#================================================
+ 
+#================================================
+# Start of track_slms_varieties table
+#================================================
+
+CREATE TABLE "public"."track_slms_varieties" (
+  "track_slms_indicator_id" INTEGER, 
+  "id" SERIAL, 
+  "marketing_variety_id" INTEGER, 
+  "rmt_variety_id" INTEGER, 
+  "season_id" INTEGER, 
+  "track_indicator_type_id" INTEGER
+) WITH OIDS;
+
+ALTER TABLE "public"."track_slms_varieties"
+  ALTER COLUMN "id" SET STATISTICS 0;
+
+#================================================
+# End of track_slms_varieties table
+#================================================
+  
+  
+#================================================
+# Start of track_indicator_types table
+#================================================
+
+CREATE TABLE "public"."track_indicator_types" (
+  "id" SERIAL, 
+  "description" VARCHAR, 
+  "track_indicator_type_code" VARCHAR, 
+  CONSTRAINT "track_indicator_type_pkey" PRIMARY KEY("id")
+) WITH OIDS;
+
+CREATE UNIQUE INDEX "track_indicator_type_track_indicator_type_code_key" ON "public"."track_indicator_types"
+  USING btree ("track_indicator_type_code");
+
+CREATE UNIQUE INDEX "track_indicator_types_id_track_indicator_type_code_key" ON "public"."track_indicator_types"
+  USING btree ("id", "track_indicator_type_code");
+
+CREATE UNIQUE INDEX "track_indicator_types_track_indicator_type_code_id_key" ON "public"."track_indicator_types"
+  USING btree ("track_indicator_type_code", "id");
+
+CREATE UNIQUE INDEX "track_slms_indicators_idx" ON "public"."track_indicator_types"
+  USING btree ("track_indicator_type_code", "id");
+
+#================================================
+# End of track_indicator_types table
+#================================================
+
+
+#================
+#forecast tables
+#=================
+
+#FORECAST_TYPES:
+
+CREATE TABLE "public"."forecast_types" (
+  "id" SERIAL, 
+  "forecast_type_code" VARCHAR, 
+  "description" VARCHAR,
+  "forecast_sequence_number" VARCHAR,
+  CONSTRAINT "forecast_types_pkey" PRIMARY KEY("id")
+) WITH OIDS;
+
+#FORECASTS:
+
+CREATE TABLE "public"."forecasts" (
+  "id" SERIAL, 
+  "season_code" VARCHAR, 
+  "forecast_code" VARCHAR NOT NULL, 
+  "forecast_status_code" VARCHAR, 
+  "created_on" TIMESTAMP(0) WITHOUT TIME ZONE, 
+  "forecast_description" VARCHAR, 
+  "delivery_date" TIMESTAMP WITHOUT TIME ZONE, 
+  "season_id" INTEGER, 
+  "farm_code" VARCHAR NOT NULL, 
+  "forecast_type_code" VARCHAR, 
+  "forecast_type_id" INTEGER, 
+  "farm_id" INTEGER, 
+  CONSTRAINT "forecasts_pkey" PRIMARY KEY("id")
+) WITH OIDS;
+
+CREATE UNIQUE INDEX "forecasts_idx" ON "public"."forecasts"
+  USING btree ("season_code", "farm_code", "forecast_code", "forecast_status_code");
+
+
+#FORECAST_VARIETIES
+
+CREATE TABLE "public"."forecast_varieties" (
+  "id" SERIAL, 
+  "rmt_variety_code" VARCHAR, 
+  "commodity_code" VARCHAR, 
+  "quantity_bins" INTEGER, 
+  "uom" VARCHAR, 
+  "forecast_id" INTEGER, 
+  "status_code" VARCHAR, 
+  CONSTRAINT "forecast_details_pkey" PRIMARY KEY("id")
+) WITH OIDS;
+
+#FORECAST VARIETY INDICATORS
+
+CREATE TABLE "public"."forecast_variety_indiators" (
+  "id" SERIAL, 
+  "forecast_variety_id" INTEGER, 
+  "quantity" INTEGER, 
+  "number_tickets_printed" INTEGER, 
+  "track_slms_indicator_code" VARCHAR, 
+  "track_slms_indicator_id" INTEGER, 
+  CONSTRAINT "forecast_variety_indiators_pkey" PRIMARY KEY("id")
+) WITH OIDS;
+
+#forecast_variety_indicators_track_slms_indicators"
+
+CREATE TABLE "public"."forecast_variety_indicators_track_slms_indicators" (
+  "id" SERIAL, 
+  "forecast_variety_indicator_id" INTEGER, 
+  "track_slms_indicator_id" INTEGER, 
+  CONSTRAINT "forecast_detail_track_indicators_pkey" PRIMARY KEY("id")
+) WITH OIDS;
+
+#FORECASTS_TRACK_SLMS_INDICATORS
+
+CREATE TABLE "public"."forecasts_track_slms_indicators" (
+  "id" SERIAL, 
+  "forecast_id" INTEGER, 
+  "track_slms_indicator_id" INTEGER, 
+  CONSTRAINT "forecasts_track_indicators_pkey" PRIMARY KEY("id")
+) WITH OIDS;
+
+
+
+
+
+
+
+
+

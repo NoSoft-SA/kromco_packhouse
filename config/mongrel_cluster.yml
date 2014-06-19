@@ -1,0 +1,8 @@
+--- 
+user: mongrel
+log_file: /home/Kromco_MES/log/mongrel.log
+port: "8000"
+environment: production
+group: mongrel
+pid_file: /home/Kromco_MES/tmp/pids/mongrel.pid
+servers: 8

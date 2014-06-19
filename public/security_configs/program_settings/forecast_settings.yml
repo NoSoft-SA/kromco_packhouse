@@ -1,0 +1,79 @@
+--- 
+- !ActiveRecord,2010/FunctionalArea 
+  attributes: 
+    class_name: 
+    functional_area_name: rmt_processing
+    id: "33"
+    disabled: 
+    is_non_web_program: 
+    display_name: rmt_processing
+- - !ActiveRecord,2010/Program 
+    attributes: 
+      class_name: 
+      is_leaf: f
+      url_component: 
+      functional_area_name: rmt_processing
+      technology: ""
+      id: "176"
+      disabled: f
+      description: ""
+      functional_area_id: "33"
+      is_non_web_program: f
+      display_name: forecasts
+      program_name: forecast
+  - - !ActiveRecord,2010/ProgramFunction 
+      attributes: 
+        created_on: 
+        class_name: 
+        name: new_forecast
+        program_id: "176"
+        functional_area_name: rmt_processing
+        id: "655"
+        disabled: f
+        description: ""
+        url_param: 
+        is_non_web_program: f
+        display_name: ""
+        program_name: forecast
+    - !ActiveRecord,2010/ProgramFunction 
+      attributes: 
+        created_on: 
+        class_name: 
+        name: list_forecasts
+        program_id: "176"
+        functional_area_name: rmt_processing
+        id: "656"
+        disabled: f
+        description: ""
+        url_param: 
+        is_non_web_program: f
+        display_name: ""
+        program_name: forecast
+    - !ActiveRecord,2010/ProgramFunction 
+      attributes: 
+        created_on: 
+        class_name: 
+        name: search_forecasts
+        program_id: "176"
+        functional_area_name: rmt_processing
+        id: "921"
+        disabled: f
+        description: 
+        url_param: 
+        is_non_web_program: f
+        display_name: 
+        program_name: forecast
+    - !ActiveRecord,2010/ProgramFunction 
+      attributes: 
+        created_on: 2010-12-06 11:29:59
+        class_name: 
+        name: active_forecast
+        program_id: "176"
+        functional_area_name: rmt_processing
+        id: "1013"
+        disabled: f
+        description: 
+        url_param: 
+        is_non_web_program: f
+        display_name: 
+        program_name: forecast

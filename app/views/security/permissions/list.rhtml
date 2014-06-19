@@ -1,0 +1,8 @@
+<% @page_title = "Permissions List" -%>
+
+ <% grid = get_permissions_grid(@permissions) %>
+ <% grid.caption    = 'list of all permissions' %>
+ <% @header_content = grid.build_grid_data %>
+
+ <%= grid.render_html %>
+ <%= grid.render_grid %>

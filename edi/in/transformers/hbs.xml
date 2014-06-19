@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<in-map name="hbs" identifier_size="2" root_identifier="BH">
+  <sequence>
+    <record name="csv_heading" identifier="BH" size="0" occurence="1">
+      <fields>
+        <field name="load_id" size="7" default="Load_ID" />
+        <field name="weight" size="6" default="weight" />
+        <field name="class" size="5" default="Class" />
+        <field name="fruit_type" size="10" default="Fruit_Type" />
+        <field name="bin_size" size="8" default="BIN_SIZE" />
+        <field name="bin_id" size="6" default="Bin_ID" />
+        <field name="exit_reference" size="14" default="Exit_Reference" />
+        <field name="exit_date" size="9" default="Exit_Date" />
+        <field name="hansaworld_customer_code" size="24" default="HansaWorld_Customer_code" />
+        <field name="tradingpartner" size="14" default="TradingPartner" />
+        <field name="lineofbusiness" size="14" default="LineOfBusiness" />
+        <field name="current_raw_material_type" size="25" default="Current_Raw_Material_Type" />
+        <field name="cultivar" size="8" default="Cultivar" />
+        <field name="qty" size="3" default="qty" />
+        <field name="season" size="6" default="Season" />
+        <field name="farm_id" size="7" default="Farm_ID" />
+        <field name="farmsubgroup" size="12" default="FarmSubGroup" />
+      </fields>
+    </record>
+    <record name="hansa_bin_sales" identifier="HBS" size="0" occurence="1..n">
+      <fields>
+        <field name="load_id" size="7" />
+        <field name="weight" size="6" />
+        <field name="class" size="5" />
+        <field name="fruit_type" size="10" />
+        <field name="bin_size" size="8" />
+        <field name="bin_id" size="6" />
+        <field name="exit_reference" size="14" />
+        <field name="exit_date" size="20" format="MMMDDYYYHMMAP" />
+        <field name="hansaworld_customer_code" size="24" />
+        <field name="tradingpartner" size="14" />
+        <field name="lineofbusiness" size="14" />
+        <field name="current_raw_material_type" size="25" />
+        <field name="cultivar" size="8" />
+        <field name="qty" size="3" />
+        <field name="season" size="6" />
+        <field name="farm_id" size="7" />
+        <field name="farmsubgroup" size="12" />
+      </fields>
+    </record>
+  </sequence>
+</in-map>

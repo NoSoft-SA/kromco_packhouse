@@ -1,0 +1,2 @@
+query: select cartons.id, cartons.carton_number, pallets.pallet_number from pallets inner join cartons ON pallets.id = cartons.pallet_id where ( pallets.pallet_number={pallets.pallet_number} and cartons.is_inspection_carton is true )
+main_table_name: cartons

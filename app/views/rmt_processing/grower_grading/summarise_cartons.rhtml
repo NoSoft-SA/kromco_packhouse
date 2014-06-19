@@ -1,0 +1,86 @@
+<% form_for :pool_graded_summary, :url => { :action => 'save_pool_graded_cartons', :id => @pool_graded_summary.id } do |f|%>
+
+  <p>Total carton count: <b><%= @summary.sum {|k,v|v[3]} %></b> mass:
+                         <b><%= @summary.sum {|k,v|v[4]} %></b></p>
+  <div id="pool_graded_cartons_outer">
+  <div id="pool_graded_cartons_inner">
+    <table id="pool_graded_cartons_rows" class="sortable">
+      <thead>
+      <tr>
+        <th class="number">Size</th>
+        <th class="number">Adjusted<br />Size</th>
+        <th>Class</th>
+        <th class="number">Adjusted<br />Class</th>
+        <th class="number">Schedule<br />Weight</th>
+        <th>FG code</th>
+        <th>Variety</th>
+        <th class="text">Grade</th>
+        <th class="text">Line<br />Type</th>
+        <th>Old<br />Pack Code</th>
+        <th class="number">Carton<br />count</th>
+        <th class="number">Qty Not<br />Inspected</th>
+        <th class="number">Qty<br />Inspected</th>
+        <th class="number">Qty<br />Failed</th>
+        <th>Organization</th>
+        <th>Inspection<br />Type</th>
+        <th>Target<br />Market</th>
+        <th>Inventory<br />Code</th>
+      </tr>
+      </thead>
+      <tbody>
+        <%= render :partial => 'carton', :collection => @pool_graded_cartons %>
+      </tbody>
+    </table>
+  </div>
+  </div>
+
+  <button>Save</button>
+
+  <table class="thinbordertable"><tr><th>Org</th><th>Grade</th><th>Not inspected</th>
+             <th>Passed</th><th>Failed</th><th>Tot ctns</th>
+             <th>Mass</th> </tr>
+  <% @summary.keys.sort.each do |key| -%>
+    <tr>
+      <td><%= key.split(', ')[0] %></td>
+      <td><%= key.split(', ')[1] %></td>
+      <td align="right"><%= @summary[key][0] %></td>
+      <td align="right"><%= @summary[key][1] %></td>
+      <td align="right"><%= @summary[key][2] %></td>
+      <td align="right"><%= @summary[key][3] %></td>
+      <td align="right"><%= @summary[key][4] %></td>
+    </tr>
+  <% end -%>
+</table>
+<% end %>
+
+<script type="text/javascript">
+
+  document.observe('dom:loaded', function() {
+    SortableTable.load();
+
+    function cartonGradingDone(event)	{
+      var elem = event.element();
+      var parent_id = elem.up('td').id;
+      if (parent_id === undefined) { return; }
+
+      var pattern       = /[^\d]+/;
+      var id = parent_id.gsub(pattern, '');
+      if (id !== undefined) {
+        $('carton_size_'+id).addClassName('pool_graded_cartons_modified');
+        $('carton_gsize_'+id).addClassName('pool_graded_cartons_modified');
+        $('carton_class_'+id).addClassName('pool_graded_cartons_modified');
+        $('carton_gclass_'+id).addClassName('pool_graded_cartons_modified');
+
+        $('carton_gsize_'+id).select('span')[0].update($('cartons['+id+'][graded_size]').value);
+        $('carton_gclass_'+id).select('span')[0].update($('cartons['+id+'][graded_class]').value);
+
+        $('cartons['+id+'][grading_applied]').setValue('true');
+      }
+    };
+
+    $$('#pool_graded_cartons_rows input[type=text]').invoke('observe', 'change', cartonGradingDone);
+    $$('#pool_graded_cartons_rows select').invoke('observe', 'change', cartonGradingDone);
+
+  });
+
+</script>

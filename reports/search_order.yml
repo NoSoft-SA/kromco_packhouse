@@ -1,0 +1,135 @@
+query: SELECT  distinct l.load_status,orders.not_all_pallets_is_stock ,users.user_name as marketer,orders.created_by ,parties_r.party_name as consignee_party_name,  parties_roles.party_name AS customer_party_name,  orders.is_export,  orders.order_date,  orders.promised_delivery_date,  orders.id,  order_types.order_type_code, orders.depot_id,  orders.required_quantity,  orders.customer_party_role_id,  orders.consignee_party_role_id,  orders.credit_exceed_amount,  orders.order_complete_timestamp,  orders.updated_at,  orders.created_at,  orders.order_number,  orders.order_number,  orders.order_description,  orders.agent_consignee_code,  orders.document_destination_type_code,  orders.order_credit_ratings,  depots.depot_code,  orders.edi_li_filename,  orders.line_of_business_code,  orders.order_status,  order_customer_details.discount_percentage,  order_customer_details.customer_contact_name,  order_customer_details.customer_credit_rating,  order_customer_details.customer_credit_rating_timestamp,  order_customer_details.customer_memo_pad,  order_customer_details.customer_order_number,lc.container_code,l.load_number,lv.booking_reference,trading_partners.remarks as consignee_party_desc  FROM   orders  INNER JOIN parties_roles parties_r ON (orders.consignee_party_role_id = parties_r.id)  INNER JOIN parties_roles ON (orders.customer_party_role_id = parties_roles.id)   INNER JOIN order_customer_details ON (orders.id = order_customer_details.order_id)   left join load_orders lo on (orders.id=lo.order_id)   left join loads l on  (lo.load_id=l.id)   left join load_containers lc on (lc.load_id =l.id)      left join load_voyages lv on (lv.load_id =l.id)          left join voyages v on (v.id =lv.voyage_id)   inner join load_details on (load_details.order_id= orders.id )   inner join pallets on (pallets.load_detail_id = load_details.id)   left join depots on orders.depot_id=depots.id left join users on orders.marketer_user_id=users.id inner join order_types on orders.order_type_id=order_types.id INNER JOIN trading_partners on trading_partners.parties_role_id = orders.consignee_party_role_id WHERE (orders.order_number={orders.order_number} AND orders.order_description={orders.order_description} AND order_types.order_type_code={order_types.order_type_code} AND orders.order_date={orders.order_date} AND orders.promised_delivery_date={orders.promised_delivery_date} AND parties_roles.party_name={parties_roles.party_name} AND orders.document_destination_type_code={orders.document_destination_type_code} AND orders.order_credit_ratings={orders.order_credit_ratings} AND depots.depot_code={depots.depot_code} AND orders.order_complete_timestamp={orders.order_complete_timestamp} AND orders.edi_li_filename={orders.edi_li_filename} AND depots.depot_code={depots.depot_code} AND orders.line_of_business_code={orders.line_of_business_code} AND orders.order_status={orders.order_status} AND parties_r.party_name={parties_r.party_name} and lc.container_code={lc.container_code} and l.load_number={l.load_number} and lo.dispatch_consignment_number={lo.dispatch_consignment_number} and v.voyage_code={v.voyage_code} and v.voyage_number={v.voyage_number} and v.vessel_code={v.vessel_code} and lv.booking_reference={lv.booking_reference} and order_customer_details.customer_order_number={order_customer_details.customer_order_number} and pallets.pallet_number={pallets.pallet_number} and users.user_name={users.user_name} and orders.created_by={orders.created_by}and order_customer_details.customer_contact_name={order_customer_details.customer_contact_name} and trading_partners.remarks={trading_partners.remarks} ) limit 1000
+main_table_name: orders
+default_report_index_group_name: System
+
+fields:
+  field1:
+   field_name: orders.order_number
+   caption: order number
+   field_type: text
+  field2:
+   field_name: orders.order_date
+   caption: order date
+   field_type: daterange
+  field3:
+   field_name: orders.promised_delivery_date
+   caption: promised delivery date
+   field_type: daterange
+  field4:
+   field_name: orders.order_complete_timestamp
+   caption: order complete timestamp
+   field_type: daterange
+  field5:
+   field_name: required_quantity
+   caption: required quantity
+   field_type: text
+  field10:
+   field_name: orders.is_export
+   caption: is export
+   field_type: checkbox
+  field11:
+   field_name: depots.depot_code
+   caption: depot
+   field_type: lookup
+   list: "select depot_code from depots order by depot_code asc"
+  field12:
+   field_name: parties_roles.party_name
+   caption: customer party name
+   field_type: lookup
+   list: "select distinct party_name from parties_roles where party_type_name = 'ORGANIZATION' AND role_name = 'CUSTOMER' order by party_name asc"
+  field13:
+   field_name: parties_r.party_name
+   caption: trading name
+   field_type: lookup
+   list: "select distinct party_name from parties_roles where party_type_name = 'ORGANIZATION' AND role_name = 'TRADING PARTNER' order by party_name asc"
+  field14:
+   field_name: pallets.pallet_number
+   caption: pallet number
+   field_type: text
+  field15:
+   field_name: users.user_name
+   caption: marketer
+   field_type: lookup
+   list: "select distinct user_name from users where department_name = 'Dispatch' or department_name = 'Marketing' or department_name='Planning' order by user_name asc"
+  field16:
+   field_name: orders.created_by
+   caption: user
+   field_type: lookup
+   list: "select distinct user_name from users where department_name = 'Dispatch' or department_name = 'Marketing' or department_name='Planning' order by user_name asc"
+  field17:
+   field_name: orders.order_description
+   caption: order description
+   field_type: text
+  field18:
+   field_name: order_types.order_type_code
+   caption: order type
+   field_type: text
+  field19:
+   field_name: orders.created_at
+   caption: created_at
+   field_type: daterange
+  field20:
+   field_name: orders.promised_delivery_date
+   caption: delivery date
+   field_type: daterange
+  field21:
+   field_name: orders.order_status
+   caption: order status
+   field_type: text
+  field22:
+   field_name: lc.container_code
+   caption: container code
+   field_type: text
+  field23:
+   field_name: l.load_number
+   caption: load number
+   field_type: text
+  field24:
+   field_name: lo.dispatch_consignment_number
+   caption: dispatch consignment number
+   field_type: text
+  field25:
+   field_name: v.voyage_code
+   caption: voyage code
+   field_type: text
+  field26:
+   field_name: order_customer_details.customer_order_number
+   caption: customer order number
+   field_type: text
+  field27:
+   field_name: v.vessel_code
+   caption: vessel code
+   field_type: text
+  field28:
+   field_name: lv.booking_reference
+   caption: booking reference
+   field_type: text
+  field29:
+   field_name: orders.document_destination_type_code
+   caption: document destination type code
+   field_type: text
+  field30:
+   field_name: orders.order_credit_ratings
+   caption: order credit ratings
+   field_type: text
+  field31:
+   field_name: orders.edi_li_filename
+   caption: edi li filename
+   field_type: text
+  field32:
+   field_name: v.voyage_number
+   caption: voyage number
+   field_type: text
+  field34:
+   field_name: orders.line_of_business_code
+   caption: line of business code
+   field_type: text
+  field35:
+   field_name: order_customer_details.customer_contact_name
+   caption: customer
+   field_type: text
+  field36:
+   field_name: trading_partners.remarks
+   caption: trading name_desc
+   field_type: lookup
+   list: "select distinct remarks from trading_partners order by remarks asc"

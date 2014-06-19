@@ -1,0 +1,32 @@
+<% key_id = carton.id; %>
+<% modified_class = carton.grading_applied ? 'pool_graded_cartons_modified' : '' %>
+<tr class="<%= cycle('rowodd','roweven') %> hover-row">
+  <td id="carton_size_<%=key_id%>" class="<%= modified_class %>">
+    <%= carton.actual_size_count_code %>
+    <%= hidden_field_tag "cartons[#{key_id}][grading_applied]", carton.grading_applied %>
+  </td>
+  <td id="carton_gsize_<%=key_id%>" class="<%= modified_class %>">
+    <span style="display:none"><%= carton.graded_size %></span>
+    <%= text_field_tag "cartons[#{key_id}][graded_size]", carton.graded_size, :size => 3 %>
+  </td>
+  <td id="carton_class_<%=key_id%>" class="<%= modified_class %>"><%= carton.product_class_code %></td>
+  <td id="carton_gclass_<%=key_id%>" class="<%= modified_class %>">
+    <span style="display:none"><%= carton.graded_class %></span>
+    <%= select_tag "cartons[#{key_id}][graded_class]", options_for_select([1,2,3,4], carton.graded_class) %>
+  </td>
+  <td align="right"><%= sprintf('%0.2f', carton.schedule_weight ) %></td>
+  <td><%= carton.fg_code_old %></td>
+  <td><%= carton.variety_short_long %></td>
+  <td><%= carton.grade_code %></td>
+  <td><%= carton.line_type %></td>
+  <td><%= carton.old_pack_code %></td>
+  <td align="right"><%= carton.cartons_quantity %></td>
+  <td align="right"><%= carton.qty_not_inspected %></td>
+  <td align="right"><%= carton.qty_inspected %></td>
+  <td align="right"><%= carton.qty_failed %></td>
+  <td><%= carton.organization_code %></td>
+  <td><%= carton.inspection_type_code %></td>
+  <td><%= carton.target_market_code %></td>
+  <td><%= carton.inventory_code %></td>
+</tr>
+

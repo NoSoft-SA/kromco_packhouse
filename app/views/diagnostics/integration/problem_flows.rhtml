@@ -1,0 +1,12 @@
+<%= stylesheet_link_tag "diagnostics"%>
+
+<% @content_header_caption = "'select flow type'" %>
+
+<div>
+ <% form_tag :action => 'list_problem_flows' do %>
+  <p><label for="flow_type" style="font:  smaller verdana;">select flow type</label>
+       <%= select_tag "flow_type", options_for_select(@flow_types, "all") %>
+  </p>
+  <span style="padding-left : 180px;"><%= submit_tag "Go" %></span>
+ <% end %>
+</div>

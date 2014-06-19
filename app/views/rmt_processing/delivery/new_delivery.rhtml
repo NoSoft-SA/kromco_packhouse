@@ -1,0 +1,155 @@
+
+<% @content_header_caption = "'create a new delivery note entry'" %>
+
+<% @hide_content_pane = false %>
+<% @is_menu_loaded_view = true %>
+
+<%= build_delivery_form(@delivery,"create_delivery","create_delivery",false,false,@is_edit,@is_create_retry)%>  <!-- ,is_edit = nil,is_create_retry = nil -->
+
+
+<!---Adding track indicators-->
+
+<table cellspacing="0" border="0"
+    <tbody>
+        <tr>
+            <td style="border-top:1px solid #000000; border-left:1px solid #000000; border-right:1px solid #000000" width="172px" height="17" align="left" colspan="2" bgcolor="#c0c0c0"> <b><font size="2" color="#000000">track slms indicators</font></b></td>
+            <td width="172px" align="left" class="add_slms"><%= link_to "Add track slms indicator", :action=>'add_delivery_indicator_for_captured_delivery'%> </td>
+            <td width="86"></td>
+            <td width="86"></td>
+            <td width="86"></td>
+            <td width="86"></td>
+            <td width="86"></td>
+            <td width="86"></td>
+        </tr>
+        <tr>
+            <td class="col_headers">type code </td>
+            <td class="col_headers">track_slms_indicator_code </td>
+            <td class="col_headers">season code </td>
+            <td class="col_headers">variety_type_code </td>
+            <td class="col_headers">variety_code </td>
+            <td class="col_headers">drench? </td>
+            <td class="col_headers">sample_bins? </td>
+            <td width="120px" style="border-top:1px dotted green; border-bottom: 1px dotted green; border-right: 1px dotted green"> </td>
+            <td width="120px" style="border-top:1px dotted green; border-bottom: 1px dotted green; border-right: 1px dotted green"> </td>
+            <td width="120px" style="border-top:1px dotted green; border-bottom: 1px dotted green; border-right: 1px dotted green"> </td>
+        </tr>
+        
+        
+        <% if session[:delivery_track_indicators] != nil %>
+            <% if session[:delivery_track_indicators].length()!= 0 %>
+                <% for indicator in session[:delivery_track_indicators] %>
+                    <tr>
+                        <% if indicator.track_indicator_type_code == 'LOB' %>
+                            <td class="delivery_new_track"> <%= indicator.track_indicator_type_code %> </td>
+                            <td class="delivery_new_track"> <%= indicator.track_slms_indicator_code %> </td>
+                            <td class="delivery_new_track"> <%= indicator.season_code %> </td>
+                            <td class="delivery_new_track"> rmt_variety </td>
+                            <td class="delivery_new_track"> <%= indicator.rmt_variety_code %> </td
+                            <% if indicator.track_variable_1 == true %>
+                                <td class="delivery_new_track">TRUE</td>
+                            <% else %>
+                                <td class="delivery_new_track">FALSE</td>
+                            <% end %>
+                            <% if indicator.track_variable_2 == true %>
+                                <td class="delivery_new_track">TRUE</td>
+                            <% else %>
+                                <td class="delivery_new_track">FALSE</td>
+                            <% end %>
+                            <td class="delivery_new_track" style="text-decoration:underline;"> <%= link_to 'edit', :action=>'edit_delivery_track_indicator', :id=> indicator %> </td>
+                            <td class="delivery_new_track" style="text-decoration:underline;">
+                              <% if(session[:delivery_track_indicators].index(indicator) > 0) %>
+                                <%= link_to 'remove', {:action=>'delete_delivery_track_indicator', :id=>indicator}, :confirm => 'Are you sure?', :method => :post %>
+                              <% end %>
+                            </td>
+                        <% else %>
+                            <td class="delivery_new_odd_track"> <%= indicator.track_indicator_type_code %> </td>
+                            <td class="delivery_new_odd_track"> <%= indicator.track_slms_indicator_code %> </td>
+                            <td class="delivery_new_odd_track"> <%= indicator.season_code %> </td>
+                            <td class="delivery_new_odd_track"> rmt_variety </td>
+                            <td class="delivery_new_odd_track"> <%= indicator.rmt_variety_code %> </td>
+                            <% if indicator.track_variable_1 == true %>
+                                <td class="delivery_new_odd_track">TRUE</td>
+                            <% else %>
+                                <td class="delivery_new_odd_track">FALSE</td>
+                            <% end %>
+                            <% if indicator.track_variable_2 == true %>
+                                <td class="delivery_new_odd_track">TRUE</td>
+                            <% else %>
+                                <td class="delivery_new_odd_track">FALSE</td>
+                            <% end %>
+                            <td class="delivery_new_odd_track" style="text-decoration:underline;"> <%= link_to 'edit', :action=>'edit_delivery_track_indicator', :id=> indicator %></td>
+                            <td class="delivery_new_odd_track" style="text-decoration:underline;">
+                              <% if(session[:delivery_track_indicators].index(indicator) > 0) %>
+                                <%= link_to 'remove', {:action=>'delete_delivery_track_indicator', :id=>indicator}, :confirm => 'Are you sure?', :method => :post %>
+                              <% end %>
+                            </td>
+                        <% end %>
+                    </tr>
+                <% end %>
+            <% end %>
+        <% end %>
+        
+    </tbody>
+</table>
+
+<br>
+
+<!--Delivery route steps-->
+
+<table cellspacing="0" border="0">
+    <tbody>
+        <tr>
+            <td style="border-top:1px solid #000000; border-left:1px solid #000000; border-right:1px solid #000000" width="240px" height="17" align="left" colspan="2" bgcolor="#c0c0c0"> <b><font size="2" color="#000000">delivery route steps</font></b></td>
+            <td width="130"></td>
+            <td width="130"></td>
+            <td width="130"></td>
+        </tr>
+        <tr>
+            <td class="col_headers">route step code </td>
+            <td class="col_headers">step description </td>
+            <td class="col_headers">date activated </td>
+            <td class="col_headers">date completed </td>
+        </tr>
+        
+        <% if session[:delivery_route_steps]!= nil %>
+            <% if session[:delivery_route_steps].length()!= 0 %>
+                <% for delivery_route_step in session[:delivery_route_steps] %>
+                    <% if delivery_route_step.date_completed%>
+                        <tr class="delivery_row">
+                            <td class="delivery_new_track"> <%= delivery_route_step.route_step_code%> </td>
+                            <td class="delivery_new_track"> <%= delivery_route_step.route_step.route_step_description %> </td>
+                            <% if delivery_route_step.date_activated == nil || delivery_route_step.date_activated == "" %>
+                                <td class="delivery_new_track"> - </td>
+                            <% else %>
+                                <td class="delivery_new_track"> <%= delivery_route_step.date_activated %> </td>
+                            <% end %>
+                            <% if delivery_route_step.date_completed == nil || delivery_route_step.date_completed == "" %>
+                                <td class="delivery_new_track"> - </td>
+                            <% else %>
+                                <td class="delivery_new_track"> <%= delivery_route_step.date_completed %> </td>
+                            <% end %>
+                        </tr>
+                     <% else %>
+                        <tr class="delivery_row">
+                            <td class="route_step_css"> <%= delivery_route_step.route_step_code%> </td>
+                            <td class="route_step_css"> <%= delivery_route_step.route_step.route_step_description %> </td>
+                            <% if delivery_route_step.date_activated == nil || delivery_route_step.date_activated == "" %>
+                                <td class="route_step_css"> - </td>
+                            <% else %>
+                                <td class="route_step_css"> <%= delivery_route_step.date_activated %> </td>
+                            <% end %>
+                            <% if delivery_route_step.date_completed == nil || delivery_route_step.date_completed == "" %>
+                                <td class="route_step_css"> - </td>
+                            <% else %>
+                                <td class="route_step_css"> <%= delivery_route_step.date_completed %> </td>
+                            <% end %>
+                        </tr>
+                     <% end %>
+                <% end %>
+            <% end %>
+        <% end %>
+        
+    </tbody>
+</table> 
+
+

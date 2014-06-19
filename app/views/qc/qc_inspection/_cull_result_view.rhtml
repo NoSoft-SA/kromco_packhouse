@@ -1,0 +1,21 @@
+  <table id="cull_results">
+    <% @qc_ann_total = Hash.new(0) %>
+    <% result_measurements = cull_result_view.cull_measurements
+       col_headers = result_measurements.shift %>
+    <tr><th>&nbsp;</th>
+      <% col_headers.each do |col_header| %>
+        <th><%= col_header.nil? ? '&nbsp;' : col_header %></th>
+      <% end %>
+    </tr>
+    <%= render :partial    => 'cull_result_measurement_view',
+               :collection => result_measurements,
+               :locals     => {:max_cols => max_cols,
+                               :col_headers => col_headers,
+                               :measurement_rules => measurement_rules } %>
+    <tr><td><strong>Total:</strong></td>
+      <% col_headers.each do |col_header| %>
+        <td align="right"><strong><%= @qc_ann_total[col_header] %></strong></td>
+      <% end %>
+    </tr>
+  </table>
+

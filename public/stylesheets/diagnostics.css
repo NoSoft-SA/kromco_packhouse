@@ -1,0 +1,28 @@
+/*Styles for view date*/
+#view-date {
+  color: red;
+  font: bold 15px sans-serif;
+}
+
+/*Styles for headers*/
+.headers {
+font: bold smaller arial;
+background: url('/images/tlo_podmenu.gif');
+border-top: thin solid grey;
+width: 150px;
+border-right: thin solid grey;
+width: 150px;
+border-left: thin solid grey;
+width: 150px;
+}
+
+div.table_containers {
+  border: thin solid grey;
+  width: 500px;
+}
+
+table.contents {
+  width: 500px;
+  
+}
+

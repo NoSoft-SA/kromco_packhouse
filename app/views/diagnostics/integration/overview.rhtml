@@ -1,0 +1,15 @@
+<%= stylesheet_link_tag "diagnostics"%>
+
+<% @content_header_caption = "'integration overview'" %>
+
+<label style="color: red;font: bold 15px sans-serif;">(<%= @today %>)</label>
+<div class="table_containers">
+  <table class="contents" > 
+   <tr>
+     <td>missing flows</td><td><%=@missing_flows%></td>
+   </tr>
+   <tr>
+     <td>problem flows</td><td><%=@error_flows%></td>
+   </tr>
+  </table>
+</div>

@@ -1,0 +1,41 @@
+query: select distinct forecasts.id,forecasts.forecast_code,forecasts.forecast_status_code, forecasts.season, forecasts.farm_code, forecasts.forecast_type_code,forecasts.created_on,forecasts.forecast_description,forecasts.delivery_date,forecasts.sequence_number,forecast_varieties.rmt_variety_code, forecast_varieties.commodity_code,forecast_variety_indicators.track_slms_indicator_code FROM forecasts LEFT JOIN forecast_varieties on forecasts.id = forecast_varieties.forecast_id LEFT JOIN forecast_variety_indicators on forecast_varieties.id = forecast_variety_indicators.forecast_variety_id WHERE( forecasts.forecast_code={forecasts.forecast_code} and forecasts.season={forecasts.season} and forecasts.farm_code={forecasts.farm_code} and forecasts.forecast_type_code={forecasts.forecast_type_code} and forecast_varieties.rmt_variety_code={forecast_varieties.rmt_variety_code} and forecast_varieties.commodity_code={forecast_varieties.commodity_code} and forecast_variety_indicators.track_slms_indicator_code={forecast_variety_indicators.track_slms_indicator_code} and forecasts.delivery_date={forecasts.delivery_date} and forecasts.created_on={forecasts.created_on}) order by forecasts.farm_code ASC
+main_table_name: forecasts
+default_report_index_group_name: System
+
+fields:
+  field1:
+   field_name: forecasts.forecast_code 
+   caption: forecast code
+   field_type: text
+  field2:
+   field_name: forecasts.season
+   caption: season
+   field_type: text
+  field3:
+   field_name: forecasts.farm_code
+   caption: farm code
+   field_type: text
+  field4:
+   field_name: forecasts.forecast_type_code
+   caption: forecast type code
+   field_type: text
+  field5:
+   field_name: forecast_varieties.rmt_variety_code
+   caption: rmt variety code
+   field_type: text
+  field6:
+   field_name: forecast_varieties.commodity_code
+   caption: commodity code
+   field_type: text
+  field7:
+   field_name: forecast_variety_indicators.track_slms_indicator_code
+   caption: track slms indicator code
+   field_type: text
+  field8:
+   field_name: forecasts.delivery_date
+   caption: from_delivery_date
+   field_type: daterange
+  field9:
+   field_name: forecasts.created_on
+   caption: from_created_on
+   field_type: daterange

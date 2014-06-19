@@ -1,0 +1,43 @@
+query: SELECT grower_commitments.id,grower_commitments.farm_code,grower_commitments.season,grower_commitments.commitment_document_delivered,grower_commitments.transaction_date, grower_commitments.grower_commitment_data_capture_date_time, grower_commitments.mrl_data_capture_date_time, grower_commitments.season, spray_program_results.commodity_code,spray_program_results.rmt_variety_code,spray_program_results.spray_result,spray_program_results.spray_result_comment,spray_program_results.spray_program_code,spray_program_results.cancelled_user_name,spray_program_results.cancelled_reason,spray_program_results.cancelled_date_time,spray_program_results.cancelled, mrl_results.sample_no,mrl_results.puc_code,mrl_results.orchard_code,mrl_results.created_on,mrl_results.mrl_label_text,mrl_results.mrl_result_type_code, mrl_results.mrl_result,mrl_results.cancelled_date_time,mrl_results.cancelled_reason,mrl_results.cancelled_user_name,mrl_results.cancelled FROM grower_commitments LEFT OUTER JOIN spray_program_results ON (grower_commitments.id = spray_program_results.grower_commitment_id) LEFT OUTER JOIN mrl_results ON (spray_program_results.id = mrl_results.spray_program_result_id) WHERE(farm_code={farm_code} and season={season} and commodity_code={commodity_code} and rmt_variety_code={rmt_variety_code} and spray_result={spray_result} and spray_program_code={spray_program_code} and mrl_result_type_code={mrl_result_type_code} and mrl_result={mrl_result})
+main_table_name: grower_commitments
+fields:
+ field1:
+  field_name:  farm_code
+  caption: farm_code
+  field_type: lookup
+  list: "select distinct farm_code from farms order by farm_code asc"
+ field2:
+  field_name:  season
+  caption: season
+  field_type: lookup
+  list: "select distinct season from seasons order by season desc"
+ field3:
+  field_name:  commodity_code
+  caption: commodity_code
+  field_type: lookup
+  list: "select distinct commodity_code from commodities order by commodity_code asc" 
+ field4:
+  field_name:  rmt_variety_code
+  caption: rmt_variety_code
+  field_type: lookup
+  list: "select distinct rmt_variety_code from rmt_varieties order by rmt_variety_code asc"
+ field5:
+  field_name:  spray_result
+  caption: spray_result
+  field_type: lookup
+  list: "select status_code from statuses where status_type_code = 'spray_result' order by status_code asc"
+ field6:
+  field_name:  spray_program_code
+  caption: spray_program_code
+  field_type: lookup
+  list: "select distinct spray_program_code from spray_programs order by spray_program_code asc"
+ field7:
+  field_name:  mrl_result_type_code
+  caption: mrl_result_type_code
+  field_type: lookup
+  list: "select distinct mrl_result_type_code from mrl_result_types order by mrl_result_type_code asc"
+ field8:
+  field_name:  mrl_result
+  caption: mrl_result
+  field_type: lookup
+  list: "select status_code from statuses where status_type_code = 'mrl_result' order by status_code asc"   

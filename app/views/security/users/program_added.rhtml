@@ -1,0 +1,14 @@
+
+<% @hide_content_pane = true %>
+<% @is_menu_loaded_view = false %>
+
+<% tree_additions = "" %>
+<% if @create_func_area == true %>
+<%   tree_additions = render_add_node_to_parent_js(@func_area_parent_id,@func_area_node_name,"func_area",@func_area_node_id,@tree_name)%>
+<% end%>
+
+<% tree_additions += render_add_node_to_parent_js(@parent_id,@node_name,@node_type,@node_id,@tree_name) %>
+<% tree_additions += render_add_node_to_parent_js(@parent_prog_id,@sec_group_name,"sec_group",@sec_group_id,@tree_name)%>
+
+<% @tree_actions = tree_additions %>
+

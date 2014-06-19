@@ -1,0 +1,306 @@
+<table style="float:left">
+  <tr>
+    <td>Inspection Test Number:</td>
+    <td class="heading_field"><%= @qc_inspection_test.inspection_test_number %></td>
+  </tr>
+  <%= display_inspection_business_info @qc_inspection_test.qc_inspection %>
+</table>
+
+  <div id="cull_add_form" style="<%= 'display:none' if @cull_measures.empty? %>">
+    <% form_remote_tag :url => {:action => 'add_cull_measure', :id => @qc_inspection_test.id },
+                                :before   => "Element.show('cull_add_form_spinner');",
+                                :complete => "Element.hide('cull_add_form_spinner');" do %>
+  <fieldset>
+    <legend>Choose cull measurements</legend>
+    <%= select_tag( 'cull_measure', options_for_select(@cull_measures) ) %>
+    <%= submit_tag 'add' %>
+    <%=image_tag 'spinner.gif', :id=>'cull_add_form_spinner', :style=>'display:none;'%>
+  </fieldset>
+  <% end %>
+  </div>
+
+  <h3 class="qc_heading">CULL Analysis</h3>
+
+  <% col_headings = @qc_results.first.cull_measurements.first.compact %>
+
+  <fieldset><legend>Fill in cull values:</legend>
+  <p>Quick way to capture cull measures: type the code and tick the class/classes (you can use the space bar). Hit Enter button to add one to the specified measure. Use Next button to clear and Cancel button to reduce the count for the selected code.</p>
+  <table id="cull_entries">
+    <tr>
+      <td>Description</td>
+      <td>Code</td>
+      <% col_headings.each do |col_heading| %>
+        <td><%= col_heading %></td>
+      <% end %>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <td id="cull_entry_desc" style="width:160px;">&nbsp;</td>
+      <td><%= text_field_tag :cull_entry_code, nil, :size => 5 %></td>
+      <% col_headings.each do |col_heading| %>
+        <td><%= check_box_tag "cull_entry_check_#{col_heading.downcase.tr(' _','')}" %></td>
+      <% end %>
+      <td><button id="cull_entry_button_enter">Enter</button>
+        <button id="cull_entry_button_next">Next</button>
+        <button id="cull_entry_button_cancel">Cancel</button></td>
+    </tr>
+  </table>
+
+  <p>Or: fill in actual values. Use the Enter key to move from one field to the next and to make changes.</p>
+  <table id="cull_typing_entries">
+    <tr>
+      <td>Description</td>
+      <td>Code</td>
+      <% col_headings.each do |col_heading| %>
+        <td>No of <%= col_heading %></td>
+      <% end %>
+    </tr>
+    <tr>
+      <td id="cull_typing_entry_desc" style="width:160px;">&nbsp;</td>
+      <td><%= text_field_tag :cull_typing_entry_code, nil, :size => 5 %></td>
+      <% col_headings.each do |col_heading| %>
+        <td><%= text_field_tag "cull_typing_entry_#{col_heading.downcase.tr(' _','')}", nil, :size => 5 %></td>
+      <% end %>
+    </tr>
+  </table>
+  <div id="cull_entry_show_feedback"></div>
+</fieldset>
+
+<% form_for :qc_inspection_test, :url => { :action => 'save_qc_inspection_test', :id => @qc_inspection_test.id } do |f|%>
+
+  <%= render :partial => 'test_form_completion', :locals => {:from_list     => @from_list,
+                                                             :auto_complete => @auto_complete,
+                                                             :f             => f} %>
+
+  <%= render :partial => 'cull_result', :collection => @qc_results,
+                                        :locals     => {:max_cols => @qc_inspection_test.max_columns_for_measurements,
+                                                        :measurement_rules => @qc_inspection_test.measurement_rules } %>
+
+  <button>Save</button>
+<% end %>
+
+<% ar = @qc_inspection_test.qc_inspection_type_test.qc_test.qc_measurement_types.map { |measurement_type| [measurement_type.qc_measurement_code, measurement_type.qc_measurement_description] } 
+  hs = Hash[*ar.flatten]
+  ch = col_headings.map {|m| m.downcase.tr(' _','') } %>
+
+<script type="text/javascript">
+
+// Module to handle events for capturing cull measurements.
+var cullEntry = (function() {
+
+  var measure_descs = <%= hs.to_json %>;
+  var col_headings  = <%= ch.to_json %>;
+  var pattern       = /\s|_/g;
+
+  // Attach the event listeners. "Public" method.
+	function init()
+	{
+    // Incremental actions (add/subtract 1 from the selected code/class combination).
+    $('cull_entry_code').observe('blur', findDescription);
+    $('cull_entry_code').observe('keyup', findDescription);
+    $('cull_entry_button_enter').observe('click', processEnter);
+    $('cull_entry_button_next').observe('click', processNext);
+    $('cull_entry_button_cancel').observe('click', processCancel);
+
+    // Replacement actions (replace code/class combinations with the values entered).
+    $('cull_typing_entry_code').observe('blur', findDescription);
+    $('cull_typing_entry_code').observe('keyup', findDescription);
+    $('cull_typing_entry_code').observe('keyup', checkEnter);
+    col_headings.each(function(col_heading) {
+        $('cull_typing_entry_'+col_heading).observe('keyup', checkEnter);
+    });
+    $$('.numberonly').invoke('observe', 'blur', numberOnly);
+
+	}
+	
+  // Display a message and highlight it.
+	function showFeedback(phrase, desc, measure, is_typing)
+  {
+    if(is_typing) {
+      $('cull_entry_show_feedback').update('<span id="cull_entry_show_feedback_text">Set '+
+          phrase+' ('+desc+') to '+measure+'.</span>');
+    }
+    else
+    {
+      $('cull_entry_show_feedback').update('<span id="cull_entry_show_feedback_text">'+
+          phrase+desc+' - total is '+measure.getValue()+'</span>');
+    }
+    $('cull_entry_show_feedback').highlight();
+    $('cull_entry_show_feedback_text').fade( {delay: 2});
+	}
+	
+  // Add one to the selected measure.
+	function processEnter(event)
+	{
+    var full_cde = $('cull_entry_code').getValue().toLowerCase();
+    var desc = measure_descs[full_cde];
+    var m_id, measure, val;
+    if (desc === undefined) {
+      alert('Cannot process a code that does not exist');
+      return;
+    }
+    cde = full_cde.replace(pattern, '');
+    col_headings.each(function(col_heading) {
+      if($('cull_entry_check_'+col_heading).checked) {
+        m_id = $('cull_entry_'+cde+col_heading);
+        if(m_id === null) { return; }
+        measure = m_id.select('input')[0];
+        val = measure.getValue();
+        if (val === '') {
+          measure.setValue('1');
+        }
+        else {
+          measure.setValue(parseInt(val, 10) + 1);
+        }
+        showFeedback('Added one to ', desc, measure);
+      }
+    });
+	}
+	
+  // Subtract one from the selected measure.
+	function processCancel(event)
+	{
+    var full_cde = $('cull_entry_code').getValue().toLowerCase();
+    var desc = measure_descs[full_cde];
+    if (desc === undefined) {
+      alert('Cannot process a code that does not exist');
+      return;
+    }
+    cde = full_cde.replace(pattern, '');
+    var m_id;
+    col_headings.each(function(col_heading) {
+      if($('cull_entry_check_'+col_heading).checked) {
+        m_id = 'cull_entry_'+cde+col_heading;
+        var measure = $(m_id).select('input')[0];
+        var val = measure.getValue();
+        if (val === '' || val == '0') {
+          measure.setValue('0');
+        }
+        else {
+            measure.setValue(parseInt(val, 10) - 1);
+        }
+        showFeedback('Subtracted one from ', desc, measure);
+      }
+    });
+	}
+
+  // Clear all the inputs.
+	function processNext(event)
+	{
+    $('cull_entry_desc').update('');
+    $('cull_entry_code').setValue('');
+    col_headings.each(function(col_heading) {
+        $('cull_entry_check_'+col_heading).checked = false;
+    });
+    $('cull_entry_code').focus();
+	}
+	
+  // Lookup the description given the code and display it.
+	function findDescription(event)
+	{
+    var elem = event.element();
+    var cde = elem.getValue();
+    if('' === cde) { return; }
+    var desc = measure_descs[cde];
+    var target = $(elem.id == 'cull_typing_entry_code' ? 'cull_typing_entry_desc' : 'cull_entry_desc');
+
+    if (desc === undefined) {
+      target.update('Unknown code');
+    }
+    else {
+      target.update( desc );
+    }
+	}
+
+  // Reset all typing fields back to blank and focus back on the first field.
+  function clearTypingFields() {
+    $('cull_typing_entry_desc').update('');
+    $('cull_typing_entry_code').setValue('');
+    col_headings.each(function(col_heading) {
+        $('cull_typing_entry_'+col_heading).setValue('');
+    });
+  }
+
+  // Process the typing-in fields and update the page with their values.
+  function processTyping() {
+    var full_cde = $('cull_typing_entry_code').getValue().toLowerCase();
+    var desc = measure_descs[full_cde];
+    var m_id, measure, val;
+    if (desc === undefined) {
+      alert('Cannot process a code that does not exist');
+      return;
+    }
+
+    cde = full_cde.replace(pattern, '');
+    var vals = [];
+    col_headings.each(function(col_heading) {
+      if($('cull_typing_entry_'+col_heading).getValue() !== '') {
+        m_id = $('cull_entry_'+cde+col_heading);
+        if(m_id === null) { return; }
+        measure = m_id.select('input')[0];
+        measure.setValue(parseInt($('cull_typing_entry_'+col_heading).getValue(), 10));
+        vals.push($('cull_typing_entry_'+col_heading).getValue());
+      }
+    });
+    showFeedback(full_cde, desc, vals.join(' and '), true);
+  }
+
+  // Advance to the next input field. If on the last field,
+  // add the values, clear the fields and cycle back to the first one.
+  function checkEnter(event)
+  {
+    var elem = event.element();
+    if(event.keyCode == Event.KEY_RETURN) {
+      if('cull_typing_entry_code' == elem.id) {
+        $('cull_typing_entry_'+col_headings[0]).focus();
+      }
+      else
+      {
+        for(var i=0, l=col_headings.size(); i < l; i++) {
+          if ('cull_typing_entry_'+col_headings[i] == elem.id) {
+            if(i == col_headings.size()-1) {
+              processTyping();
+              clearTypingFields();
+              $('cull_typing_entry_code').focus();
+            }
+            else
+            {
+              $('cull_typing_entry_'+col_headings[i+1]).focus();
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // For fields with class numberonly, remove any non-numeric input.
+  function numberOnly(event)
+  {
+    var elem = event.element();
+    if (elem.value === '') { return true; } // Blank is fine.
+    if (parseFloat(elem.value, 10) == elem.value) {
+      return true;
+    }
+    else
+    {
+      elem.value = parseFloat(elem.value, 10);
+      if (elem.value == 'NaN') { elem.value = ''; }
+      elem.highlight().shake();
+      return false;
+    }
+  }
+
+  // Public methods and properties:
+  return {
+    init: init
+  };
+
+}) ();
+// End of module.
+
+cullEntry.init();
+
+$('cull_entry_code').focus();
+
+</script>
+

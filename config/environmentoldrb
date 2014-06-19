@@ -1,0 +1,158 @@
+# Be sure to restart your web server when you modify this file.
+
+# Uncomment below to force Rails into production mode when 
+# you don't control web/app server and can't set it the proper way
+# ENV['RAILS_ENV'] ||= 'production'
+
+# Specifies gem version of Rails to use when vendor/rails is not present
+RAILS_GEM_VERSION = '1.2.3' unless defined? RAILS_GEM_VERSION
+
+# Bootstrap the Rails environment, frameworks, and default configuration
+require File.join(File.dirname(__FILE__), 'boot')
+
+
+Rails::Initializer.run do |config|
+  # Settings in config/environments/* take precedence those specified here
+  config.action_mailer.delivery_method       = :smtp
+  config.action_mailer.raise_delivery_errors = true
+  config.action_mailer.server_settings       = {
+      :address        => "relay.mweb.net",
+      :port           => "25",
+      :domain         => "Kromco",
+      :authentication => :login,
+      :user_name      => "hans.zietsman@jmt.co.za",
+      :password       => "devserv"
+  }
+
+  # Skip frameworks you're not going to use
+  # config.frameworks -= [ :action_web_service, :action_mailer ]
+
+  # Add additional load paths for your own custom dirs
+  # config.load_paths += %W( #{RAILS_ROOT}/extras )
+
+  # Force all environments to use the same logger level 
+  # (by default production uses :info, the others :debug)
+  # config.log_level = :debug
+
+  # Use the database for sessions instead of the file system
+  # (create the session table with 'rake create_sessions_table')
+  # config.action_controller.session_store = :active_record_store
+
+  # Enable page/fragment caching by setting a file-based store
+  # (remember to create the caching directory and make it readable to the application)
+  # config.action_controller.fragment_cache_store = :file_store, "#{RAILS_ROOT}/cache"
+
+  # Activate observers that should always be running
+  # config.active_record.observers = :cacher, :garbage_collector
+
+  # Make Active Record use UTC-base instead of local time
+  # config.active_record.default_timezone = :utc
+
+  # Use Active Record's schema dumper instead of SQL when creating the test database
+  # (enables use of different database adapters for development and test environments)
+  # config.active_record.schema_format = :ruby
+
+  # See Rails::Configuration for more options
+end
+
+# Add new inflection rules using the following format 
+# (all these examples are active by default):
+Inflector.inflections do |inflect|
+#   inflect.plural /^(ox)$/i, '\1en'
+#   inflect.singular /^(ox)en/i, '\1'
+  inflect.irregular 'golf_club', 'golf_clubs'
+#   inflect.uncountable %w( fish sheep )
+end
+
+
+YAML.add_domain_type("ActiveRecord,2010", "") do |type, val|
+  klass = type.split(':').last.constantize
+  YAML.object_maker(klass, val)
+end
+
+class ActiveRecord::Base
+  def to_yaml_type
+    "!ActiveRecord,2010/#{self.class}"
+  end
+end
+
+class ActiveRecord::Base
+  def to_yaml_properties
+    ['@attributes']
+  end
+end
+
+# Override truncate so that it works with Ruby 1.8.7 and Rails < 2.2
+# NB ********* REMOVE WHEN UPGRADING RAILS *************************
+module ActionView
+  module Helpers
+    module TextHelper
+      def truncate(text, length = 30, truncate_string = "...")
+        if text.nil? then
+          return
+        end
+        l = length - truncate_string.chars.to_a.size
+        (text.chars.to_a.size > length ? text.chars.to_a[0...l].join + truncate_string : text).to_s
+      end
+    end
+  end
+end
+
+
+module ActionView
+  module Helpers
+    module FormOptionsHelper
+      def select(object, method, choices, options = {}, html_options = {})
+        if !options[:sorted]
+          choices.sort! { |x, y|
+            if x.class.to_s == "Array" && y.class.to_s == "Array"
+              if x[0] && y[0]
+                if x[0] < y[0]
+                  -1
+                else
+                  1
+                end
+              else
+                0
+              end
+            elsif x.class.to_s == "String" && y.class.to_s == "String"
+              is_num = (x.to_i > 0 && y.to_i > 0)
+              if is_num
+                if x.to_i < y.to_i
+                  -1
+                else
+                  1
+                end
+              else
+                if x < y
+                  -1
+                else
+                  1
+                end
+              end
+            else
+              0
+            end }
+
+
+          #html_options[:value] = ["<empty>"]
+
+          empty = choices.find { |c| c == "" }
+          empty = choices.find { |c| c[0] == "" if c.class.to_s == "Array" } if !empty
+
+          if empty
+            new_empty = empty.clone
+            choices.delete(empty)
+            choices.unshift(new_empty)
+          end
+
+          end
+          InstanceTag.new(object, method, self, nil, options.delete(:object)).to_select_tag(choices, options, html_options)
+
+
+      end
+    end
+  end
+end
+
+# Include your application configuration below

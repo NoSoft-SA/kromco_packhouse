@@ -1,0 +1,38 @@
+.uneditable-label-field {
+     border-right: black thin solid;
+     border-top: black thin solid; 
+     border-left: black thin solid; 
+     border-bottom: black thin solid; 
+     background-color: lightgray;
+     color: black;
+     /*font-weight: bold;*/
+     font-size: 9pt;
+}
+.uneditable-bold-label-field {
+     border-right: black thin solid;
+     border-top: black thin solid; 
+     border-left: black thin solid; 
+     border-bottom: black thin solid; 
+     background-color: lightgray;
+     color: black;
+     font-weight: bold;
+     font-size: 9pt;
+}
+
+.forecast-header-table {
+ border-spacing: 0px;
+ border-collapse: collapse;
+}
+
+.track-slms-table-header {
+ background-color: lightgray;
+}
+
+#forecast-header-table-headings {
+  background-color: lightgray;
+}
+
+.forecast-header-table label {
+   padding-right: 0px;
+   padding-left: 2px;
+}

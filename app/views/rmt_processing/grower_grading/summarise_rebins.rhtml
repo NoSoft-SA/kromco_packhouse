@@ -1,0 +1,37 @@
+<% form_for :pool_graded_summary, :url => { :action => 'save_pool_graded_rebins', :id => @pool_graded_summary.id } do |f|%>
+
+  <table id="pool_graded_rebins_rows">
+    <tr>
+      <th>&nbsp;</th>
+      <th>Bin<br /> count</th>
+      <th>Class</th>
+      <th>Adjusted<br /> Class</th>
+      <th>Size</th>
+      <th>Adjusted<br /> Size</th>
+      <th>Weight</th>
+      <th>Adjusted<br /> Weight</th>
+    </tr>
+    <%= render :partial => 'rebin', :collection => @pool_graded_rebins %>
+    <tr>
+      <td>&nbsp;</td>
+      <td align="right"><strong><%= @pool_graded_rebins.sum{|p| p.rebins_quantity } %></strong></td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+      <td align="right"><strong><%= sprintf('%0.2f', @pool_graded_rebins.sum{|p| p.total_rebin_mass }) %></strong></td>
+      <td>&nbsp;</td>
+    </tr>
+  </table>
+
+  <button>Save</button>
+<% end %>
+
+<% if @refresh_main %>
+    <script>
+      document.observe('dom:loaded', function() {
+        window.opener.frames[1].location.href ='/rmt_processing/grower_grading/edit_pool_graded_summary/<%=@pool_graded_summary.id%>';
+      });
+    </script>
+<% end %>
+

@@ -1,0 +1,70 @@
+#!/usr/bin/env ruby
+# EDI Out-Flow file joiner
+#
+# Arguments:
+# +in_path+::    The directory to check for staged EDI out-flow files.
+# +out_path+::   Where EDI out-flow files should be written.
+# +flow_type+::  Which +flow_type+ to look for and join.
+#
+# Creates a flow joiner which is derived from EdiFileJoiner, named flow_type_joiner.rb. (e.g. pi_joiner.rb for class PiJoiner).
+# Calls the run method on the joiner which will check the +in_path+ and all its subdirectories,
+# take all output files found there (of the same flow_type), join them into one new file and move the new file to the
+# corresponding subdirectory of +out_path+.
+
+begin
+  require 'rubygems' unless ENV['RUBYOPT']
+  require 'pathname'
+  require 'nokogiri'
+
+  # Place the lib dir on the load path so the edi engine files can be loaded relative to it.
+  $LOAD_PATH.unshift File.expand_path(File.join(File.dirname(__FILE__), '../lib'))
+
+  # Change to the root of the rails app and work relative to that
+  Dir.chdir(Pathname.new(File.join(File.dirname(__FILE__), '../..')).cleanpath)
+
+  require 'find'
+  require 'tempfile'
+  require 'edi/edi_errors'
+  require 'edi/edi_helper'
+  require 'edi/edi_setup'
+  require 'edi/in/record_padder'
+  require 'edi/edi_field_formatter'
+  require 'edi/raw_fixed_len_record'
+  require 'edi_file_joiner'
+
+  in_dir    = ARGV[0] || '~/edi_out/tosend/staging' #'~/edi_test/edi_out/staging'
+  out_dir   = ARGV[1] || '~/edi_out/tosend'         #'~/edi_test/edi_out'
+  ft        = ARGV[2] || 'PI'
+  flow_type = ft.dup
+
+  raise EdiProcessError, "Missing argument. Input path must be supplied as a parameter." if in_dir.nil?
+  raise EdiProcessError, "Missing argument. Output path must be supplied as a parameter." if out_dir.nil?
+  raise EdiProcessError, "Missing argument. Flow Type must be supplied as a parameter." if flow_type.nil?
+
+  flow_type.downcase!
+
+  require "edi/out/joiners/#{flow_type}_joiner"
+
+  pre_processor_class_name = (flow_type[0,1].upcase + flow_type[1,flow_type.length] + "Joiner")
+  pre_processor = nil
+  if File.exist?("edi/out/joiners/#{flow_type}_joiner.rb")
+    file_joiner = eval(pre_processor_class_name + ".new( in_dir, out_dir, flow_type )")
+  else
+    raise EdiProcessError, "Cannot load \"edi/out/joiners/#{flow_type}_joiner.rb\"."
+  end
+
+rescue Exception => error
+  puts "Error: " << error
+  puts error.backtrace
+  puts "Failed to start EDI File Joiner."
+  exit 1
+end
+
+# Check if the joiner ran successfully and exit with an appropriate code.
+if file_joiner.run
+  exit 0
+else
+  puts "Failed to join all files. Check the log for exceptions."
+  exit 1
+end
+

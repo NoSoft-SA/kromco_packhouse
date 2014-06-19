@@ -1,0 +1,139 @@
+
+
+<% key_id = ps_bin.id; %>
+<% pool_graded_ps_bin_ids = Array.new %>
+<% ps_bin_weight_minus_ids=[] %>
+<% ps_bin_weight_plus_ids=[] %>
+<%classes = ProductClass.find_by_sql("select product_class_code from product_classes order by product_class_code ").map{|p|p.product_class_code}%>
+<%colours = Treatment.find_by_sql("select treatment_code from treatments where treatment_type_code = 'PRESORT' order by treatment_code ").map{|p|p.treatment_code}%>
+<%counts = Size.find_by_sql("select size_code from sizes where commodity_code = 'AP' order by size_code").map{|p|p.size_code}%>
+<% @pool_graded_ps_bin_ids.map { |p|
+  if p == @pool_graded_ps_bin_ids.last
+    pool_graded_ps_bin_ids << "ps_bins[#{p}][graded_weight]"
+    ps_bin_weight_minus_ids << "ps_bins[#{p}][weight_adjusted_minus]"
+    ps_bin_weight_plus_ids << "ps_bins[#{p}][weight_adjusted_plus]"
+  else
+    pool_graded_ps_bin_ids << "ps_bins[#{p}][graded_weight],"
+    ps_bin_weight_minus_ids << "ps_bins[#{p}][weight_adjusted_minus],"
+    ps_bin_weight_plus_ids << "ps_bins[#{p}][weight_adjusted_plus],"
+  end } %>
+
+<tr class="<%= cycle('rowodd','roweven') %> hover-row">
+  <td >
+    <% if ps_bin %><%= link_to 'delete', :action => 'delete_ps_bin', :id => ps_bin.id %>
+    <% else %><%= link_to 'Split', :action => 'split_ps_bin', :id => ps_bin.id %>
+    <% end %></td>
+  <td  ><%= ps_bin.maf_article %></td>
+  <td width="100px"><%= ps_bin.maf_class %></td>
+  <td class="red_label_field"><% if ps_bin.graded_class %><%= select_tag "ps_bins[#{key_id}][graded_class]", options_for_select(classes,ps_bin.graded_class) %><% else %><%= select_tag "ps_bins[#{key_id}][graded_class]", options_for_select(classes,ps_bin.maf_class) %><% end %></td>
+  <td><%= ps_bin.maf_colour %></td>
+  <td class="red_label_field"><% if ps_bin.graded_colour %><%= select_tag "ps_bins[#{key_id}][graded_colour]", options_for_select(colours,ps_bin.graded_colour) %><% else %><%= select_tag "ps_bins[#{key_id}][graded_colour]", options_for_select(colours,ps_bin.maf_colour)%><% end %></td>
+  <td><%= ps_bin.maf_article_count %></td>
+  <td><%= ps_bin.maf_count %></td>
+  <td class="red_label_field"><% if ps_bin.graded_count %><%= select_tag "ps_bins[#{key_id}][graded_count]", options_for_select(counts,ps_bin.graded_count) %><% else %><%= select_tag "ps_bins[#{key_id}][graded_count]", options_for_select(counts,ps_bin.maf_count)%><% end %></td>
+  <td><%= ps_bin.maf_weight %></td>
+  <td class="red_label_field" onchange="adjust_weights('ps_bins[total_graded_weight_hidden_field]','<%= pool_graded_ps_bin_ids%>','ps_bins[<%= key_id %>][graded_weight]',<%= ps_bin.maf_weight %>,'ps_bins[<%= key_id %>][weight_adjusted_plus]','ps_bins[<%= key_id %>][weight_adjusted_minus]','<%= ps_bin_weight_minus_ids%>','<%= ps_bin_weight_plus_ids%>')">
+    <% if ps_bin.graded_weight==0  ||   ps_bin.graded_weight== nil || ps_bin.graded_weight== sprintf('%0.2f',0.0 ).to_f%>
+      <%= text_field_tag "ps_bins[#{key_id}][graded_weight]", sprintf('%0.2f', ps_bin.maf_weight).to_f, :size => 6, :class => 'numeric' %>
+    <% else %>
+        <%= text_field_tag "ps_bins[#{key_id}][graded_weight]", sprintf('%0.2f', ps_bin.graded_weight).to_f, :size => 6, :class => 'numeric' %>
+   <% end %>
+  </td>
+  <td><%= text_field_tag "ps_bins[#{key_id}][weight_adjusted_plus]", sprintf('%0.2f', ps_bin.weight_adjusted_plus), :size => 6, :class => 'numeric', :disabled => true %></td>
+  <td><%= text_field_tag "ps_bins[#{key_id}][weight_adjusted_minus]", sprintf('%0.2f', ps_bin.weight_adjusted_minus), :size => 6, :class => 'numeric', :disabled => true %></td>
+  <%= hidden_field_tag "ps_bins[total_graded_weight_hidden_field]", sprintf('%0.2f', 0.0), :class => 'numeric'%>
+  <%= hidden_field_tag "pesage_maf_weight", sprintf('%0.2f',  ps_bin.pesage_maf_weight), :class => 'numeric'%>
+  <%= hidden_field_tag "rmt_bin_weight", sprintf('%0.2f',  ps_bin.rmt_bin_weight), :class => 'numeric'%>
+</tr>
+
+<script>
+
+    function adjust_weights(total_graded_weight_hidden_field,ps_bin_ids, graded_weight, maf_weight, weight_adjusted_plus, weight_adjusted_minus, ps_bin_weight_minus_ids, ps_bin_weight_plus_ids) {
+
+        var var_graded_weight = document.getElementById(graded_weight)
+        var var_weight_adjusted_plus = document.getElementById(weight_adjusted_plus)
+        var var_weight_adjusted_minus = document.getElementById(weight_adjusted_minus)
+        var weight_adjusted = var_graded_weight.value - maf_weight
+        if (weight_adjusted > 0) {
+            var_weight_adjusted_plus.value = weight_adjusted.toFixed(2)
+            calculate_total_graded_weight(total_graded_weight_hidden_field,ps_bin_ids, var_weight_adjusted_plus.value, var_graded_weight.value, maf_weight)
+            calculate_total_weight_adjusted_plus(var_weight_adjusted_plus.value, ps_bin_weight_plus_ids)
+            var_weight_adjusted_minus.value = 0.0.toFixed(2)
+            calculate_total_weight_adjusted_minus(var_weight_adjusted_minus.value, ps_bin_weight_minus_ids)
+
+        }
+        else {
+            weight_adjusted = Math.abs(weight_adjusted)
+            var_weight_adjusted_minus.value = weight_adjusted.toFixed(2)
+            calculate_total_graded_weight(total_graded_weight_hidden_field,ps_bin_ids, var_weight_adjusted_plus.value, var_graded_weight.value, maf_weight)
+            calculate_total_weight_adjusted_minus(var_weight_adjusted_minus.value, ps_bin_weight_minus_ids)
+            var_weight_adjusted_plus.value = 0.0.toFixed(2)
+            calculate_total_weight_adjusted_plus(var_weight_adjusted_plus.value, ps_bin_weight_plus_ids)
+        }
+
+    }
+
+    function calculate_total_graded_weight(total_graded_weight_hidden_field,ps_bin_ids, adjusted_weight, graded_weight, maf_weight) {
+        var str = ps_bin_ids;
+        var res = str.split(",");
+        var var_total_calculated_weight = document.getElementById("total_graded_weight")
+        var total_graded_weight_hidden_field = document.getElementById(total_graded_weight_hidden_field)
+        var total_weight = 0
+        for (var i = 0; i < res.length; i++) {
+            var var_g_weight = document.getElementById(res[i])
+            total_weight += Number(var_g_weight.value)
+        }
+        calculate_rounding_error(total_weight.toFixed(2))
+        var_total_calculated_weight.value = total_weight.toFixed(2)
+        total_graded_weight_hidden_field.value = total_weight.toFixed(2)
+    }
+
+    function calculate_rounding_error(total_weight){
+        var round_check=  document.getElementById("round_check")
+        var total_maf_weight = document.getElementById("total_maf_weight")
+        var rounding_error = Number(total_maf_weight.value) -  Number(total_weight)
+        calculate_waste(rounding_error.toFixed(2))
+        round_check.value =rounding_error.toFixed(2)
+    }
+
+    function calculate_waste(rounding_error){
+        var total_maf_weight = document.getElementById("total_maf_weight")
+        var pesage_maf_weight =  document.getElementById("pesage_maf_weight")
+        var rmt_bin_weight = document.getElementById("rmt_bin_weight")
+        var waste = document.getElementById("waste")
+
+        var maf_calculated_mass =Number(total_maf_weight.value)  + Number(pesage_maf_weight.value)  + Number(rounding_error)
+        var waste_weight = Number(rmt_bin_weight.value)  -  Number(maf_calculated_mass)
+        waste.value = waste_weight.toFixed(2)
+    }
+
+    function calculate_total_weight_adjusted_plus(weight_adjusted, ps_bin_ids) {
+        var total_adjusted_weight_plus = document.getElementById("total_adjusted_weight_plus")
+        var str = ps_bin_ids;
+        var res = str.split(",");
+        var total_weight_plus = 0
+        for (var i = 0; i < res.length; i++) {
+            var var_weight_plus = document.getElementById(res[i])
+            total_weight_plus += Number(var_weight_plus.value)
+        }
+        total_adjusted_weight_plus.value = total_weight_plus.toFixed(2)
+    }
+
+    function calculate_total_weight_adjusted_minus(weight_adjusted, ps_bin_ids) {
+        var total_adjusted_weight_minus = document.getElementById("total_adjusted_weight_minus")
+        var str = ps_bin_ids;
+        var res = str.split(",");
+        var total_weight_minus = 0
+        for (var i = 0; i < res.length; i++) {
+            var var_weight_minus = document.getElementById(res[i])
+            total_weight_minus += Number(var_weight_minus.value)
+        }
+        total_adjusted_weight_minus.value = total_weight_minus.toFixed(2)
+    }
+
+
+</script>
+
+
+
+

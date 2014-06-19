@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<in-map name="mffa" identifier_size="0" root_identifier="masterfile">
+  <record name="masterfile" identifier="masterfile" size="531" occurence="1..n">
+    <transformer>
+      <action type="ruby" name="apply_masterfile_rec"/>
+    </transformer>
+    <fields>
+      <field name="batch_no" size="5" />
+      <field name="from_type" size="1" />
+      <field name="update_flag" size="1" />
+      <field name="user_name" size="7" />
+      <field name="date_tran" size="8" />
+      <field name="time_tran" size="8" />
+      <field name="act_flag" size="1" required="false" />
+      <field name="orgzn" size="2" />
+      <field name="farm" size="7" />
+      <field name="long_desc" size="16" required="false" />
+      <field name="med" size="10" required="false" />
+      <field name="name" size="40" />
+      <field name="post1" size="40" required="false" />
+      <field name="post2" size="40" required="false" />
+      <field name="post3" size="40" required="false" />
+      <field name="str1" size="40" required="false" />
+      <field name="str2" size="40" required="false" />
+      <field name="str3" size="40" required="false" />
+      <field name="contact" size="30" required="false" />
+      <field name="orch_flg" size="1" />
+      <field name="phone" size="20" required="false" />
+      <field name="fax" size="20" required="false" />
+      <field name="furn" size="6" required="false" />
+      <field name="country" size="2" />
+      <field name="main_area" size="2" required="false" />
+      <field name="st_area" size="2" required="false" />
+      <field name="farm_area" size="2" />
+      <field name="pckd_farm" size="7" required="false" />
+      <field name="curr_marea" size="2" required="false" />
+      <field name="curr_sarea" size="2" required="false" />
+      <field name="depotcd1" size="7" required="false" />
+      <field name="depotcd2" size="7" required="false" />
+      <field name="fpnt" size="7" required="false" />
+      <field name="whitespace" size="68" required="false" />
+    </fields>
+  </record>
+</in-map>
+

@@ -1,0 +1,159 @@
+== Description
+
+The EDI engine processes in and out flows.
+
+In-flows are for EDI files received that are transformed and applied to the database.
+
+Out-flows are for transforming data into EDI files for transmission out.
+
+Some out-flows may have several EDI files accumulated into one. In this case, an EDI joiner
+is run to collect files of the same flow type that were written to a staging area and
+combine them into a single file.
+
+== Requirements
+
+Nokogiri gem: http://nokogiri.org
+
+== In-flow Usage
+
+On Windows:
+
+  edi/bin/run_edi_in_proc.bat
+
+On Linux:
+
+  edi/bin/run_edi_in_proc
+
+
+== Out-flow Usage
+
+On Windows:
+
+  edi/bin/run_edi_out_proc.bat
+
+On Linux:
+
+  edi/bin/run_edi_out_proc
+
+In-memory out-flow (returns EDI output as a string):
+
+  OutProcessInMemory.new.run
+
+== joiner Usage
+
+On Windows:
+
+  edi/bin/run_edi_file_joiner.bat
+
+On Linux:
+
+  edi/bin/run_edi_file_joiner
+
+
+== Configuration
+
+Database connection is set in RAILS_ROOT/config/database.yml
+
+There is an +edi+ entry which should point to the production entry.
+For testing it can be changed so that a different database is used:
+  production: &production
+    adapter: ...
+    
+  edi:
+    <<: *production
+
+All other configuration takes place in YAML files in the edi/config dir.
+
+== Configuration settings
+
+=== Set the network address
+
+Change the value of the +network_address+ section of edi/config/config.yml.
+This value must be quoted. It is the 'From Depot' network address used in 
+generating EDI out filenames and in the BH and BT (Batch Header and Batch Trailer)
+records of the out files.
+
+=== Set the log levels
+
+Change the values in +log_levels+ and  +console_log_levels+ section of edi/config/config.yml.
+Values can be 0, 1 or 2. 0 is most verbose and 2 is least verbose (logging of errors only).
+Log levels can be changed while a process is running and the new settings will take immediate effect.
+
+=== Set the accumulated outflow types
+
+Change the values in +edi_out_accumulated+ section of edi/config/config.yml.
+Any flow type with a value of true will be accumulated.
+Missing flow types or those with a value of false will create files normally.
+Accumulated files are written in a subdir named 'staging' for latter grouping together.
+
+=== Configure a new in-flow
+
+Add the fixed-length record sizes to:
+
+  edi/config/record_sizes.yaml
+
+Add the new flow type to the IN_FLOW_TYPES section of
+
+  edi/config/supported_doc_types.yaml
+
+If necessary, write a pre-processor for the flow type in
+
+  edi/in/pre_processors
+  # Naming convention (Flow type == 'FT'):
+  ft_pre.rb # File
+  FtPre     # Class
+
+Write the transformation schema for the flow type and place it in
+
+  edi/in/transformers
+  # Naming convention (Flow type == 'FT'):
+  ft.xml # File
+
+Write the transformer for the flow type and place it in
+
+  edi/in/transformers
+  # Naming convention (Flow type == 'FT'):
+  ft.rb # File
+  Ft    # Class
+
+See special instructions for Masterfiles[link:files/MASTERFILES.html].
+
+=== Configure a new out-flow
+
+If they don't already exist, add the fixed-length record sizes to:
+
+  edi/config/record_sizes.yaml
+
+Add the new flow type to the OUT_FLOW_TYPES section of
+
+  edi/config/supported_doc_types.yaml
+
+If it doesn't already exist, write the transformation schema for the flow type and place it in
+
+  edi/in/transformers
+  # Naming convention (Flow type == 'FT'):
+  ft.xml # File
+
+Write the transformer for the flow type and place it in
+
+  edi/out/transformers
+  # Naming convention (Flow type == 'FT'):
+  ft_out.rb # File
+  FtOut     # Class
+
+=== Configure a new EDI file joiner
+
+Write the joiner for the flow type and place it in
+
+  edi/out/joiners
+  # Naming convention (Flow type == 'FT'):
+  ft_joiner.rb # File
+  FtJoiner     # Class
+
+== To re-generate this RDoc:
+
+From this dir:
+  rdoc --main README --title 'EDI Engine' -U -d README MASTERFILES quick_schema_setup.rb bin/run_edi_in_proc bin/run_edi_out_proc bin/run_edi_file_joiner bin in out lib
+or:
+  yard doc bin in out lib --main README --title 'EDI Engine' -o ./yrd
+

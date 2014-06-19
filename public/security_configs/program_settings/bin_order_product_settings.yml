@@ -1,0 +1,25 @@
+--- 
+- !ActiveRecord,2010/FunctionalArea 
+  attributes: 
+    class_name: 
+    functional_area_name: rmt_processing
+    id: "21"
+    disabled: f
+    is_non_web_program: f
+    display_name: rmt_processing
+- - !ActiveRecord,2010/Program 
+    attributes: 
+      class_name: 
+      is_leaf: f
+      url_component: 
+      functional_area_name: rmt_processing
+      technology: 
+      id: "306"
+      disabled: f
+      description: 
+      functional_area_id: "21"
+      is_non_web_program: f
+      display_name: bin_order_product
+      program_name: bin_order_product
+  - []
+

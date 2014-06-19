@@ -1,0 +1,21 @@
+<% @content_header_caption = "'view complete pdt error details'"%>
+<%= view_pdt_errors_details_form(@pdt_error,'view_paging_handler_pdt_errors')%>
+
+<table style="width: 970px; height: 560px;border-collapse: collapse;">
+    <thead>
+        <tr style="text-align: center;height: 10px;font-weight: bold;font-size: 11px;">
+          <td style="border-left: gray solid thin;border-top: gray solid thin;border-right: gray solid thin;color: green;background: url('/images/tlo_podmenu.gif')">Input Screen</td>
+          <td></td>
+          <td style="border-left: gray solid thin;border-top: gray solid thin;border-right: gray solid thin;color: green;background: url('/images/tlo_podmenu.gif')">Stack Trace</td>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td id="left_screen_container" style="width: 300px;border: gray solid thin;"> <%= render :partial => '/diagnostics/pdt_log/pdt_view', :locals => {:screen_definition=>@input_screen,:menu_tree=>@input_menu_tree} %></td>
+
+            <td style="width: 50px;border: none;"></td>
+
+            <td id="right_screen_container" style="width: 300px;border: gray solid thin;"> <div style="height: 550px;width: 620px;overflow:scroll;" class="stack_trace_label"><%= @pdt_error.stack_trace.gsub!("\n" , "<br>")%> </div></td>
+        </tr>
+</tbody>
+</table>

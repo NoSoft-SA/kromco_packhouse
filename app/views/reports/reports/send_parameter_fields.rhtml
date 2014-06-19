@@ -1,0 +1,115 @@
+<table border = 0>
+  <tr>
+    <td class="yml">
+      <p style='border-bottom: 1px solid black;color:green;font-weight:bold;margin-bottom:0;'>
+        Summary details for '<%=dm_session[:report_name]%>' report
+      </p>
+      <br>
+      <table border="0">
+        <tr>
+          <td><%= link_to "re-launch search form <img src='/images/application_form.png' style='border:0;'/>",
+            :action=>'relaunch_search_form',
+            :controller=>'reports/reports' %>
+          </td>
+          <td style="padding-left:10px;">
+            <%= link_to "save report <img src='/images/save_as_template.png' style='border:0;valign:middle;'/>",
+              :action=>'save_as_view',
+              :controller=>'reports' %>
+            </td>
+        </tr>
+      </table>
+      <hr>
+      <b>QUERY PARAMETERS SPECIFIED</b><br>
+      <% if dm_session[:parameter_fields_values].nil? || dm_session[:parameter_fields_values].length == 0 %>
+          no query parameters specified.<br>
+        <% else %>
+          <% no_params = true %>
+          <% dm_session[:parameter_fields_values].each do |field| %>
+            <% hidden_field = "hidden-#{field[:field_name]}" %>
+            <% if params[hidden_field] %>
+              <% val = params[hidden_field] %>
+              <% if field[:field_value] != "" %>
+                <% no_params = false %>
+                <% if val != "" %>
+                  <%=field[:field_name]%> : <%=field[:field_value]%> <font color='blue'>OR</font> (<%=params[hidden_field]%>)<br>
+                <% else %>
+                  <%=field[:field_name]%> : <%=field[:field_value]%><br>
+                <% end %>
+              <% else %>
+                <% if val != "" %>
+                  <%= field[:field_name]%> : nil <font color='blue'>OR</font> (<%=params[hidden_field]%>)<br>
+                <% end %>
+              <% end %>
+            <% else %>
+              <% if field[:field_value] != "" %>
+                <% no_params = false %>
+                <%= field[:field_name]%> : <%= field[:field_value]%><br>
+              <% end %>
+            <% end %>
+          <% end %>
+          <% if no_params %>
+            no query parameters specified.<br>
+          <% end %>
+      <% end %>
+      <br>
+      <hr>
+      <b>FUNCTIONS SPECIFIED</b><br>
+      <% if dm_session[:functions] != nil && dm_session[:functions].strip != '' %>
+        <% if dm_session[:functions].index("|") != nil %>
+          <% dm_session[:functions].split("|").each do |func| %>
+            <%= func %><br>
+          <% end %>
+        <% else %>
+          <%= dm_session[:functions] %><br>
+        <% end %>
+      <% else %>
+        no function specified.<br>
+      <% end %>
+      <br>
+
+      <hr>
+      <b>GROUP BY COLUMNS SPECIFIED</b><br>
+      <% if dm_session[:group_by_columns].length != 0 %>
+        <% for col in dm_session[:group_by_columns] %>
+          <%= col %><br>
+        <% end %>
+      <% else %>
+        no group by columns specified.
+      <% end %>
+      <br><br>
+
+      <hr><b>ORDER BY COLUMNS SPECIFIED </b><br>
+      <% if dm_session[:order_by_columns].length != 0 %>
+        <% for col in dm_session[:order_by_columns] %>
+          <%= col %><br>
+        <% end %>
+      <% else %>
+        no order by columns specified.
+      <% end %> <br><br>
+
+      <hr><b>SQL CODE </b><br>
+      <a href="#" onclick="jQuery('#sql_code').toggle();return false" style="text-decoration: none; color: #333;">Show/Hide &#10162;</a>
+      <div id="sql_code" style="display : none;">
+        <tt><% if ENV['USE_CODERAY'] %>
+            <%= CodeRay.encode(Globals.cleanup_where(dm_session[:search_engine_query_definition]), :sql, :html, :css => :style).gsub("\n", "<br />") %>
+          <% else %>
+            <%= Globals.cleanup_where(dm_session[:search_engine_query_definition]) %></tt>
+          <% end %>
+        </tt>
+      </div>
+      <br>
+
+    </td>
+  </tr>
+</table>
+
+<% if dm_session[:redirect] == true || @excel_only %>
+  <script>
+    window.location.href = "<%=@url_base%>";
+  </script>
+<% else %>
+  <script>
+    window.open("<%=@url_base%>", "<%=@window_name%>","width=850,height=400,top=200,left=200,toolbar=1,menubar=1,status=1,scrollbars=1,resizable=1" );
+  </script>
+<% end %>
+

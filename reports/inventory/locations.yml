@@ -1,0 +1,24 @@
+query: SELECT * from locations WHERE (location_code={location_code} AND  location_type_code={location_type_code} and parent_location_code={parent_location_code} and location_barcode={location_barcode}) 
+main_table_name: locations
+fields:
+ field1:
+  field_name: location_code
+  caption: location_code
+  field_type: lookup
+  list: "select location_code from locations order by location_code asc"
+ field2:
+  field_name: location_type_code
+  caption: location_type_code
+  field_type: lookup
+  list: "select location_type_code from location_types order by location_type_code asc"
+ field3:
+  field_name: parent_location_code
+  caption: parent_location_code
+  field_type: lookup
+  list: "select distinct parent_location_code from locations order by parent_location_code asc"
+ field4:
+  field_name: location_barcode
+  caption: location_barcode
+  field_type: lookup
+  list: "select distinct location_barcode from locations order by location_barcode asc"  
+

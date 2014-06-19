@@ -1,0 +1,43 @@
+# Inflow types. Specify which type of transformer handles each type of inflow.
+IN_FLOW_TYPES:
+  PO: TextIn::TextTransformer
+  LI: TextIn::TextTransformer
+  PI: na
+  PS: TextIn::TextTransformer
+  PI: TextIn::TextTransformer
+  PF: TextIn::TextTransformer
+  MFAC: TextIn::TextTransformer
+  MFAF: TextIn::TextTransformer
+  MFFA: TextIn::TextTransformer
+  MFGM: TextIn::TextTransformer
+  MFGT: TextIn::TextTransformer
+  MFGU: TextIn::TextTransformer
+  CSM: XmlInTransformer
+  PDF417: TextIn::TextTransformer
+
+# Outflow types. A type can be handled by different transformers for different hub addresses (although this is not all that likely).
+# Example: If Flow AA is usually handled by AaOut, but when the hub address is 09E, it is handled by Aa09e:
+# AA:
+#   ALL: AaOut
+#   09E: Aa09e
+OUT_FLOW_TYPES:
+  PI:
+    ALL: PiOut
+  TI:
+    ALL: TiOut
+  PM:
+    ALL: PmOut
+  PS:
+    ALL: PsOut
+  PO:
+    ALL: PoOut
+  PF:
+    ALL: PfOut
+  HBS:
+    ALL: HbsOut
+  HCS:
+    ALL: HcsOut
+  HWE:
+    ALL: HweOut
+  PDF417:
+    ALL: Pdf417Out

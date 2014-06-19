@@ -1,0 +1,44 @@
+  <% @content_header_caption = "'Compare directories'"%>
+<html>
+
+
+
+
+
+
+
+<h1> Source=> <%= @name %><br/> Target=><%= @nam %></h1>
+
+
+<h2>Files in Source only</h2>
+      <ul>
+      <% for file in @file_list1 %>
+      <li>"<%= h(file) %></li>
+      <% end %>
+      </ul>
+        
+<h2>Newer files</h2>
+      <ul>
+      <% for file in @file_list2 %>
+      <li><%= h(file) %></li>
+
+      <% end %>
+         </ul>
+
+<h2>Older</h2>
+      <ul>
+      <% for file in @file_list3 %>
+      <li><%= h(file) %></li>
+      <% end %>
+       </ul>
+
+<h2>Files in Target Dir only</h2>
+      <ul>
+      <% for file in @file_list4 %>
+      <li><%= h(file) %></li>
+
+      <% end %>
+       </ul>
+
+
+   </html>

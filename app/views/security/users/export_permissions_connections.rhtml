@@ -1,0 +1,39 @@
+<% @tree_node_content_header = 'enter remote connection details' %>
+
+<% @hide_content_pane = false %>
+<% @is_menu_loaded_view = true %>
+
+<div>
+
+    <% form_tag :action => 'select_user' do %>
+        <table border ="0">
+        
+            <tr>
+                <td><label for ="host" style = "font : smaller verdana;"> Host: </label></td>
+                <td><%= text_field_tag("host", @host, :size=>40) %></td>
+            </tr>
+        
+            <tr>
+                <td><label for ="database" style = "font : smaller verdana;"> Database: </label></td>
+                <td><%= text_field_tag("database", @db, :size=>40) %></td>
+            </tr>
+            
+            <tr>
+                <td><label for ="username" style = "font : smaller verdana;"> Username: </label></td>
+                <td><%= text_field_tag("username", @uname, :size=>40) %></td>
+            </tr>
+            
+            <tr>
+                <td><label for ="password" style = "font : smaller verdana;"> Password: </label></td>
+                <td><%= password_field_tag("password", @pword, :size=>40) %></td>
+            </tr>
+            
+            <tr>
+                <td></td>
+                <td> <%= submit_tag "enter" %> </td>
+            </tr>
+        </table>
+        
+    <% end %>
+
+</div>

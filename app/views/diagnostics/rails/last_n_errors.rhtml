@@ -1,0 +1,12 @@
+
+<% @content_header_caption = "'enter number of errors to display'" %>
+
+<div>
+    <% form_tag  :action => 'list_last_n_errors' do %>
+        <p>
+            <label for ="error_limit" style = "font : smaller verdana;"> Enter error limit: </label>
+            <%= text_field_tag("error_limit", "", :size=>10) %>
+        </p>
+        <span style = "padding-left:110px;"><%= submit_tag "list errors" %> </span>
+    <% end %>
+</div>

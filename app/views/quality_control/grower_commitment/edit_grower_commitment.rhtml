@@ -1,0 +1,99 @@
+<%
+   field_config =
+           {:id_value      =>@grower_commitment_id_for_commitment,
+            :link_text     =>'new_commitment',
+            :host_and_port =>request.host_with_port.to_s,
+            :controller    => request.path_parameters['controller'].to_s,
+            :target_action =>'new_commitment',
+            :link_type=> 'child_form'}
+
+
+   popup_link = ApplicationHelper::LinkWindowField.new(nil, nil, 'none', 'none', 'none', field_config, true, nil, self)
+
+   @child_form_caption = ["commitment_form", "commitments " + popup_link.build_control]
+%>
+
+<div>
+
+  <table class='iframe_table'>
+    <tr class='iframe_table_rows'>
+      <td>certficate number</td>
+      <td>accreditation body</td>
+      <td>variable 1</td>
+      <td>variable 2</td>
+      <td>commitment type</td>
+      <td>online test done</td>
+      <td>certificate expiry date</td>
+      <td>edit</td>
+      <td>remove</td>
+    <tr>
+      <% if @commitment != nil %>
+
+          <% @commitment.each do |x| %>
+              <% if x.certificate_expiry_date < Time.now%>
+
+                <tr class='iframe_table_rows_td_orange'>
+
+                  <td class='iframe_table_rows_td_orange'> <%= x.certificate_number %></td>
+                  <td class='iframe_table_rows_td_orange'><%= x.accreditation_body %></td>
+                  <td class='iframe_table_rows_td_orange'><%= x.variable_1 %></td>
+                  <td class='iframe_table_rows_td_orange'><%= x.variable_2 %></td>
+                  <td class='iframe_table_rows_td_orange'><%= x.commitment_type_code %></td>
+                  <td class='iframe_table_rows_td_orange'><%= x.online_test_completed %></td>
+                  <td class='iframe_table_rows_td_orange'><%= x.certificate_expiry_date %></td>
+                  <td class='iframe_table_rows_td_orange'>
+                    <% field_config = {:id_value      =>x.id.to_s,
+                                       :host_and_port =>request.host_with_port.to_s,
+                                       :controller    =>request.path_parameters['controller'].to_s,
+                                       :target_action => 'edit_commitment',
+                                       :link_text     =>'edit'}
+
+
+                       popup_link = ApplicationHelper::LinkWindowField.new(nil, nil, 'none', 'none', 'none', field_config, true, nil, self)
+                    %>     <%= popup_link.build_control %>           </td>
+
+
+                  <% if x.commitment_type_code.to_s == "Sedex" or x.commitment_type_code.to_s == "Globalgap" %>
+                      <td class='iframe_table_rows_td_orange'></td>
+                  <% else %>
+                      <td class='iframe_table_rows_td_orange'>
+
+                        <%= link_to("remove", {:controller => request.path_parameters['controller'].to_s, :action => "delete_commitment", :id => x.id.to_s}, {:class=>"action_link"}) %>
+                  <% end %>
+                </tr>
+            <% else %>
+
+                <tr class='iframe_table_rows_td_pass'>
+
+                  <td class='iframe_table_rows_td_pass'> <%= x.certificate_number %></td>
+                  <td class='iframe_table_rows_td_pass'><%= x.accreditation_body %></td>
+                  <td class='iframe_table_rows_td_pass'><%= x.variable_1 %></td>
+                  <td class='iframe_table_rows_td_pass'><%= x.variable_2 %></td>
+                  <td class='iframe_table_rows_td_pass'><%= x.commitment_type_code %></td>
+                  <td class='iframe_table_rows_td_pass'><%= x.online_test_completed %></td>
+                  <td class='iframe_table_rows_td_pass'><%= x.certificate_expiry_date %></td>
+                  <td class='iframe_table_rows_td_pass'>
+                    <% field_config = {:id_value      =>x.id.to_s,
+                                       :host_and_port =>request.host_with_port.to_s,
+                                       :controller    =>request.path_parameters['controller'].to_s,
+                                       :target_action => 'edit_commitment',
+                                       :link_text     =>'edit'}
+
+
+                       popup_link = ApplicationHelper::LinkWindowField.new(nil, nil, 'none', 'none', 'none', field_config, true, nil, self)
+                    %>     <%= popup_link.build_control %>
+                  </td>
+
+                  <% if x.commitment_type_code.to_s == "Sedex" or x.commitment_type_code.to_s == "Globalgap" %>
+                      <td class='iframe_table_rows_td_pass'></td>
+                  <% else %>
+                      <td class='iframe_table_rows_td_pass'>
+                        <%= link_to("remove", {:controller => request.path_parameters['controller'].to_s, :action => "delete_commitment", :id => x.id.to_s}, {:class=>"action_link"}) %>
+                  <% end %>
+                </tr>
+            <% end %>
+        <% end %>
+    <% end %>
+  </table>
+
+</div>

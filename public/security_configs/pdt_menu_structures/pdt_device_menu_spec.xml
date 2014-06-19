@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SystemSchema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="d\:Pmm\Config\systemschema.xsd">
+<Namespace>
+xs
+</Namespace>
+<nsURL>
+http://www.w3.org/2001/XMLSchema
+</nsURL>
+<ConfigurationRecords Name="RFS-03" File="c:/jmt/mwserver/config/rf/mwrf_a.xml">
+<Mesware Status="true" Operation="remote" Config="mwpdt" License="KRM0053601414314161"/>
+<IPData Server="192.168.10.179" ListenPort="2000" ServerPort="2020" HTTPPort="2080"/>
+<WebData URL="192.168.10.9" HTTPSPort="9080" HTTPPort="8080" HTTPOOPort="2082"/>
+<Device Message="true" DeviceName="intermec" DeviceAddress="0" DevicePort="1" Enable="true" DriverName="ck3"/>
+<Buttons B2Enable="false" B3Enable="false" B1Label="Yes" B1Enable="false" B3Label="Cancel" B2Label="No"/>
+<InputFields Input3Enable="true" Input1Enable="true" Input2Enable="true" Input3Label="Scan 3" Input2Label="Scan 2" Input1Label="Scan 1"/>
+<Server Status="true" Name="SRV-01" IP="192.168.10.179" Item="1" ServerPort="2020"/>
+<Server Status="true" Name="SRV-02" IP="192.168.10.17" Item="2" ServerPort="2020"/>
+<Printer Status="true" Name="PRN-01" Port="8375" IP="192.168.10.177" Item="1"/>
+<Printer Status="true" Name="PRN-02" Port="8375" IP="192.168.10.178" Item="2"/>
+<Menu Name="SLMS" Item="0.0" NodeType="0"/>
+<Menu Name="Depot Receipts" Enable="true" Item="1.10" NodeType="1"/>
+<Menu Name="first_intake" Enable="true" Item="1.10.1" NodeType="1"/>
+<Menu Name="new_pallet" Enable="true" Item="1.10.1.1" NodeType="2"/>
+<Menu Name="get_pallet" Enable="true" Item="1.10.1.2" NodeType="2"/>
+<Menu Name="edit_pallet" Enable="true" Item="1.10.1.3" NodeType="2"/>
+<Menu Name="scan_pdf417" Enable="true" Item="1.10.2" NodeType="2"/>
+<Menu Name="depot_pallets" Enable="true" Item="1.10.3" NodeType="1"/>
+<Menu Name="receive_depot_pallets" Enable="true" Item="1.10.3.1" NodeType="2"/>
+<Menu Name="show_validated_pallets" Enable="true" Item="1.10.3.2" NodeType="2"/>
+<Menu Name="show_not_yet_validated_pallets" Enable="true" Item="1.10.3.3" NodeType="2"/>
+<Menu Name="print_depot_ctn_labels" Enable="true" Item="1.10.4" NodeType="2"/>
+<Menu Name="print depot ctn labels" Enable="true" Item="1.10.4.1" NodeType="2"/>
+<Menu Name="print depot ctn sequence" Enable="true" Item="1.10.4.2" NodeType="2"/>
+<Menu Name="Inter Warehouse" Enable="true" Item="1.2" NodeType="1"/>
+<Menu Name="load_vehicle" Enable="true" Item="1.2.1" NodeType="2"/>
+<Menu Name="scan_pallet" Enable="true" Item="1.2.1a" NodeType="2"/>
+<Menu Name="offload_vehicle" Enable="true" Item="1.2.2" NodeType="2"/>
+<Menu Name="validate_pallets" Enable="true" Item="1.2.2a" NodeType="2"/>
+<Menu Name="validate_pallet" Enable="true" Item="1.2.2b" NodeType="2"/>
+<Menu Name="print_tripsheet" Enable="true" Item="1.2.3" NodeType="2"/>
+<Menu Name="scan_pallet" Enable="true" Item="1.2.3a" NodeType="2"/>
+<Menu Name="reset_tripsheet" Enable="true" Item="1.2.4" NodeType="2"/>
+<Menu Name="put_away_pallet" Enable="true" Item="1.2.5" NodeType="2"/>
+<Menu Name="Temperatures" Enable="true" Item="1.3" NodeType="1"/>
+<Menu Name="recooling" Enable="true" Item="1.4" NodeType="1"/>
+<Menu Name="create_job" Enable="true" Item="1.4.1" NodeType="2"/>
+<Menu Name="assign_probe" Enable="true" Item="1.4.2" NodeType="2"/>
+<Menu Name="load_job" Enable="true" Item="1.4.3" NodeType="2"/>
+<Menu Name="complete_job" Enable="true" Item="1.4.4" NodeType="2"/>
+<Menu Name="set_pallet_recool_status" Enable="true" Item="1.4.5" NodeType="2"/>
+<Menu Name="remove_probe" Enable="true" Item="1.4.6" NodeType="1"/>
+<Menu Name="Putaway" Enable="true" Item="1.5" NodeType="1"/>
+<Menu Name="put_away_pallet" Enable="true" Item="1.5.1" NodeType="2"/>
+<Menu Name="scan_putaway_location" Enable="true" Item="1.5.2" NodeType="2"/>
+<Menu Name="Dispatch" Enable="true" Item="1.6" NodeType="1"/>
+<Menu Name="scan_pick_list" Enable="true" Item="1.6.1" NodeType="2"/>
+<Menu Name="scan_pick_list" Enable="true" Item="1.6.1.1" NodeType="2"/>
+<Menu Name="load_truck" Enable="true" Item="1.6.2" NodeType="2"/>
+<Menu Name="scan_pick_list" Enable="true" Item="1.6.2.1" NodeType="2"/>
+<Menu Name="show_loaded_pallets" Enable="true" Item="1.6.2.2" NodeType="2"/>
+<Menu Name="show_not_yet_loaded_pallets" Enable="true" Item="1.6.2.3" NodeType="2"/>
+<Menu Name="scan_pallet_to_load" Enable="true" Item="1.6.2.4" NodeType="2"/>
+<Menu Name="buildup" Enable="true" Item="1.7" NodeType="1"/>
+<Menu Name="buildup" Enable="true" Item="1.7.1" NodeType="1"/>
+<Menu Name="buildup_pallet" Enable="true" Item="1.7.1.1" NodeType="2"/>
+<Menu Name="move_labeled_cartons" Enable="true" Item="1.7.1.2" NodeType="2"/>
+<Menu Name="move_unlabeled_cartons" Enable="true" Item="1.7.1.3" NodeType="2"/>
+<Menu Name="show_moved_cartons" Enable="true" Item="1.7.1.4" NodeType="2"/>
+<Menu Name="show_not_yet_moved_cartons" Enable="true" Item="1.7.1.5" NodeType="2"/>
+<Menu Name="show_build_up_progress" Enable="true" Item="1.7.1.6" NodeType="2"/>
+<Menu Name="mark_pallet" Enable="true" Item="1.7.2" NodeType="2"/>
+<Menu Name="destroy_pallet" Enable="true" Item="1.7.3" NodeType="2"/>
+<Menu Name="create_pallet" Enable="true" Item="1.7.5" NodeType="2"/>
+<Menu Name="relabel_pallet" Enable="true" Item="1.7.6" NodeType="2"/>
+<Menu Name="Miscellaneous" Enable="true" Item="1.8" NodeType="1"/>
+<Menu Name="pallet_enquiry" Enable="true" Item="1.8.1" NodeType="2"/>
+<Menu Name="force_move" Enable="true" Item="1.8.2" NodeType="2"/>
+<Menu Name="set_location_status" Enable="true" Item="1.8.3" NodeType="2"/>
+<Menu Name="stock_take" Enable="true" Item="1.8.4" NodeType="1"/>
+<Menu Name="scan_location" Enable="true" Item="1.8.4.1" NodeType="2"/>
+<Menu Name="scan_pallet" Enable="true" Item="1.8.4.2" NodeType="2"/>
+<Menu Name="complete_stocktake" Enable="true" Item="1.8.4.3" NodeType="2"/>
+<Menu Name="show_original_pallets_in_location" Enable="true" Item="1.8.4.4" NodeType="2"/>
+<Menu Name="show_current_pallets_in_location" Enable="true" Item="1.8.4.5" NodeType="2"/>
+<Menu Name="show_scanned_correct_pallets" Enable="true" Item="1.8.4.6" NodeType="2"/>
+<Menu Name="show_missing_pallets" Enable="true" Item="1.8.4.7" NodeType="2"/>
+<Menu Name="cancel_stock_take" Enable="true" Item="1.8.4.8" NodeType="2"/>
+<Menu Name="packhouse" Enable="true" Item="1.8.5" NodeType="1"/>
+<Menu Name="match_labels" Enable="true" Item="1.8.5.1" NodeType="2"/>
+<Menu Name="print_pallet_label" Enable="true" Item="1.8.5.2" NodeType="2"/>
+<Menu Name="qc_in" Enable="true" Item="1.8.5.3" NodeType="2"/>
+<Menu Name="qc_out" Enable="true" Item="1.8.5.4" NodeType="2"/>
+<Menu Name="carton_pallet_number" Enable="true" Item="1.8.5.5" NodeType="2"/>
+<Menu Name="print_composite_pallet_label" Enable="true" Item="1.8.5.7" NodeType="2"/>
+<Menu Name="unit_temp_capture" Enable="true" Item="1.8.6" NodeType="2"/>
+<Menu Name="Rmt Receipts" Enable="true" Item="2.1" NodeType="1"/>
+<Menu Name="receive_bins" Enable="true" Item="2.1.1" NodeType="1"/>
+<Menu Name="enter_delivery_number" Enable="true" Item="2.1.1.1" NodeType="2"/>
+<Menu Name="scan_full_bins" Enable="true" Item="2.1.1.2" NodeType="2"/>
+<Menu Name="scan_half_bins" Enable="true" Item="2.1.1.3" NodeType="2"/>
+<Menu Name="complete_delivery" Enable="true" Item="2.1.1.4" NodeType="2"/>
+<Menu Name="view_full_bins_scanned" Enable="true" Item="2.1.1.5" NodeType="2"/>
+<Menu Name="view_half_bins_scanned" Enable="true" Item="2.1.1.6" NodeType="2"/>
+<Menu Name="view_sample_bins_scanned" Enable="true" Item="2.1.1.7" NodeType="2"/>
+<Menu Name="scan_intake_bins" Enable="true" Item="2.1.1.8" NodeType="2"/>
+<Menu Name="queries" Enable="true" Item="2.2" NodeType="1"/>
+<Menu Name="accept_bins" Enable="true" Item="2.2.1" NodeType="1"/>
+<Menu Name="scan_location" Enable="true" Item="2.2.1.1" NodeType="2"/>
+<Menu Name="scan_bin" Enable="true" Item="2.2.1.2" NodeType="2"/>
+<Menu Name="view_scanned_bins" Enable="true" Item="2.2.1.3" NodeType="2"/>
+<Menu Name="complete" Enable="true" Item="2.2.1.4" NodeType="2"/>
+<Menu Name="accept_tripsheet" Enable="true" Item="2.2.2" NodeType="1"/>
+<Menu Name="scan_tripsheet" Enable="true" Item="2.2.2.1" NodeType="2"/>
+<Menu Name="complete_prompt" Enable="true" Item="2.2.2.2" NodeType="2"/>
+<Menu Name="bin_enquiry" Enable="true" Item="2.2.3" NodeType="1"/>
+<Menu Name="bin_enquiry" Enable="true" Item="2.2.3.1" NodeType="2"/>
+<Menu Name="create_tripsheet" Enable="true" Item="2.2.4" NodeType="1"/>
+<Menu Name="create_tripsheet" Enable="true" Item="2.2.4.1" NodeType="2"/>
+<Menu Name="print_tripsheet" Enable="true" Item="2.2.4.2" NodeType="2"/>
+<Menu Name="remove_bin" Enable="true" Item="2.2.4.3" NodeType="2"/>
+<Menu Name="view_bins_on_tripsheet" Enable="true" Item="2.2.4.4" NodeType="2"/>
+<Menu Name="scan_bins_on_tripsheet" Enable="true" Item="2.2.4.5" NodeType="2"/>
+<Menu Name="RMT Bin Sales" Enable="true" Item="2.3" NodeType="1"/>
+<Menu Name="bin_load_planning" Enable="true" Item="2.3.1" NodeType="1"/>
+<Menu Name="enter_tripsheet" Enable="true" Item="2.3.1.1" NodeType="2"/>
+<Menu Name="complete_load" Enable="true" Item="2.3.1.2" NodeType="2"/>
+<Choice Name="None" Number="1" Enable="true" Item="0"/>
+<Choice Name="None" Number="1" Enable="true" Item="1"/>
+<Choice Name="None" Number="1" Enable="true" Item="2"/>
+</ConfigurationRecords>
+</SystemSchema>

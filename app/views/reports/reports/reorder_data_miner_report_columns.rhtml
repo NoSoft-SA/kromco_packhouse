@@ -1,0 +1,25 @@
+<% @content_header_caption = "'Re-order report columns'" %>
+
+<% if @columns.first == '*' %>
+  <p>Cannot re-order the columns of this report - &quot;*&quot; used as field selector.</p>
+<% else %>
+  <p>
+    Drag and drop column names up and down the list to re-order them.<br />
+    Once you have the sequence you want press the button below to save your changes.
+  </p>
+
+    <% form_tag "/reports/reports/apply_data_miner_column_order/#{@data_miner_report.id}" do -%>
+
+    <%= hidden_field_tag :re_ordered_list %>
+
+      <ol id="list_to_re_order">
+        <% @columns.each_with_index do |col, index| %>
+          <li data_field_id="col_<%= index %>" class="ui-state-default draggable">
+          <%= col %></li>
+        <% end -%>
+      </ol>
+
+    <%= submit_tag 'Re-order columns' %>
+  <% end %>
+
+<% end %>

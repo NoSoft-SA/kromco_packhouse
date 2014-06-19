@@ -1,0 +1,21 @@
+<table>
+  <tr>
+    <td>Test number:</td>
+    <td class="heading_field"><%= test_summary.inspection_test_number %></td>
+  </tr>
+  <tr>
+    <td>Test code:</td>
+    <td class="heading_field"><%= test_summary.qc_inspection_type_test.qc_test.qc_test_code %></td>
+  </tr>
+  <tr>
+    <td>Test description:</td>
+    <td class="heading_field"><%= test_summary.qc_inspection_type_test.qc_test.qc_test_description %></td>
+  </tr>
+</table>
+
+<% if test_summary.cull_test? %>
+  <%= render :partial => 'test_summary_cull', :locals => {:qc_inspection_test => test_summary } %>
+<% else %>
+  <%= render :partial => 'test_summary_non_cull', :locals => {:qc_inspection_test => test_summary } %>
+<% end %>
+<hr />

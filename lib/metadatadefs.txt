@@ -1,0 +1,22 @@
+CASE WHEN Type.typname IN ('int2', 'int4', 'int8') 
+             THEN 'int'
+             WHEN Type.typname IN ('float4', 'float8')
+             THEN 'float'
+             WHEN Type.typname IN ('numeric')
+             THEN 'numeric'
+             WHEN Type.typname IN ('char', 'bpchar') 
+             THEN 'char'
+             WHEN Type.typname IN ('timestamp') 
+             THEN 'date_time'
+             
+              WHEN 'bpchar' THEN a.atttypmod - 4
+	  WHEN 'varchar' THEN a.atttypmod - 4
+	  WHEN 'numeric' THEN (a.atttypmod - 4 ) / 65536
+	  WHEN 'decimal' THEN (a.atttypmod - 4 ) / 65536
+	  ELSE NULL
+	  
+	   WHEN 'bpchar' THEN a.atttypmod - 4
+	  WHEN 'varchar' THEN a.atttypmod - 4
+	  WHEN 'numeric' THEN (a.atttypmod - 4 ) / 65536
+	  WHEN 'decimal' THEN (a.atttypmod - 4 ) / 65536
+	  ELSE NULL

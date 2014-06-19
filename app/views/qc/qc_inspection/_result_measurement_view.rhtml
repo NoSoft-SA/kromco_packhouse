@@ -1,0 +1,11 @@
+<% key_sample = result_measurement_view.sample_no; key_id = result_measurement_view.id; %>
+<tr>
+  <td><%= result_measurement_view.qc_measurement_description %></td>
+  <td><%= measure_formatted( result_measurement_view.measurement ) %>
+    <%= result_measurement_view.test_uom %>
+  </td>
+
+  <%= build_up_annotation_fields(result_measurement_view, max_cols, measurement_rules, true) %>
+
+</tr>
+

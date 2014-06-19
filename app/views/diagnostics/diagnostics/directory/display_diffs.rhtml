@@ -1,0 +1,26 @@
+<html>
+    <body>
+          <pre>
+         <table border = 1   width= 1000>
+           <tr><td><%="#{@file1} "%></td><td><%="#{@file2}"%></td></tr>
+           <tr>
+             <td valign = "top">
+                 <% for file in @ary1 %>
+                  <%= h(file) %><br>
+              <% end %>
+                </td>
+                <td valign = "top">
+                   <% for ffile in @ary2 %>
+                  <%= h(ffile) %><br>
+              <% end %>
+                </td>
+            </tr>
+            </table>
+             </pre>
+
+
+
+
+    </body>
+    </html>
+

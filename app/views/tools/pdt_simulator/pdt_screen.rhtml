@@ -1,0 +1,112 @@
+ <%= stylesheet_link_tag "pdt" %>
+
+<script language="JavaScript">
+
+ function button_clicked(button)
+ {
+  	hidden_field = document.getElementById('clicked_button');
+  	hidden_field.value = button.id;
+  	// submit_tag @buttons[key][:label],:id => @buttons[key][:label],:onClick => "button_clicked(this);"
+  	//alert(hidden_field.value);
+  
+ }
+</script>
+
+<%= start_form_tag({:action => 'handle_pdt_simulator_requests',:controller=>'tools/pdt_simulator'}) %>
+ <div id='content'>
+ 
+ <% if session[:build_pdt_simulator_input] != nil%>
+ <%  @outputs = session[:build_pdt_simulator_input].outputs%>
+   <% @inputs = session[:build_pdt_simulator_input].inputs%>
+  <%  @buttons = session[:build_pdt_simulator_input].buttons%>
+  <% end %>
+      
+       <div id='output-fields-content'>
+        <table id='output-fields-table' >
+      <% if @outputs != nil %> 
+      <% count = 1 %>
+          <% keys = @outputs.keys.sort %>
+       <% 7.times do %>
+         <% if count < 8 %>
+              <% if keys[count-1] != nil%>
+          <tr>
+            <td class="output-fields"> 
+              <label id='<%= keys[count-1] %>' > <%= @outputs[keys[count-1]] %></label>
+            </td>
+          </tr>
+              <% else %>
+          <tr>
+            <td class="output-fields"> 
+              <label> </label>
+            </td>
+          </tr>
+              
+              <%end%>
+           <% end %>
+         <% count += 1 %>
+       <% end %>   
+      <% end %>
+        </table>    
+       </div>
+       
+             <div class='spacer'></div>
+             <div class='spacer'></div>
+             <div class='spacer'></div>
+             
+       <div id='input-fields-content'>
+        <table id='input-fields-table' border='1'>
+     <% if @inputs != nil %> 
+      <% count = 1 %>
+          <% keys = @inputs.keys.sort %>
+       <% for key in keys%>
+         <% if @inputs[key][:enabled] == 'true' && count < 4 %>
+          <tr>
+            <td> 
+              <label><%= @inputs[key][:label] %></label>
+            </td>
+            <td> 
+              <%= text_field('pdt_screen', @inputs[key][:label], "size" => 20) %>
+            </td>
+          </tr>
+         <% end %>
+         <% count += 1 %>
+       <% end %>   
+      <% end %>
+        </table>    
+       </div>
+                       
+                        <div class='spacer'></div>
+                        <div class='spacer'></div>
+                       
+       <div id='three-buttons'>
+         <table id='three-buttons-table'>
+          <tr>
+     <% if @buttons != nil %> 
+      <% count = 1 %>
+          <% keys = @buttons.keys.sort %>
+       <% for key in keys%>
+         <% if @buttons[key][:enabled] == 'true' && count < 4 %>
+            <td> 
+              <%= submit_tag @buttons[key][:label],:id => key,:onClick => "button_clicked(this);" %>
+            </td>
+          <% end %>
+         <% count += 1 %>
+       <% end %>   
+      <% end %>
+          </tr>
+         </table>
+       </div>
+       
+       <%= hidden_field('pdt_screen', 'clicked_button', {:id=> 'clicked_button', :value => 'hidden_field_value'}) %>
+       
+      </div>
+                     
+                      <div class='spacer'></div>
+                      <div class='spacer'></div>
+  
+
+         <%= submit_tag 'submit',:id => 'submit',:onClick => "button_clicked(this);" %>
+
+  
+      
+  <%= end_form_tag %>

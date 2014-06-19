@@ -1,0 +1,11 @@
+<% @content_header_caption = "'select user from list'" %>
+
+<div>
+    <% form_tag  :action => 'list_errors_by_user1' do %>
+        <p>
+            <label for ="username" style = "font : smaller verdana;"> select user: </label>
+            <%= select_tag("username", options_for_select(@list,"system" )) %>
+        </p>
+        <span style = "padding-left:85px;"><%= submit_tag "list errors" %> </span>
+    <% end %>
+</div>

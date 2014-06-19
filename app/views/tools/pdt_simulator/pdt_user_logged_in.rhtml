@@ -1,0 +1,10 @@
+<%= stylesheet_link_tag "pdt" %>
+
+   <div id='logged-in'>
+     <label style='font: lighter 15px/15px helvetica;'>logged in :</label>
+     <div style='padding-top: 3px;'>
+        <%= image_tag("user.png", :align => 'absmiddle', :border=> 0, :style=>"display: visible;" )%>
+        <label> <%= @user.user_name %> </label>
+        <label> | <%= @user.department_name %> </label>
+     </div>
+   </div>

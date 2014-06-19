@@ -1,0 +1,73 @@
+query: SELECT count(public.cartons.id) AS carton_count,public.cartons.carton_fruit_nett_mass AS carton_weight,public.item_pack_products.item_pack_product_code,public.item_pack_products.id FROM public.cartons INNER JOIN public.extended_fgs ON (public.cartons.extended_fg_code = public.extended_fgs.extended_fg_code) INNER JOIN public.fg_products ON (public.fg_products.fg_product_code = public.extended_fgs.fg_code) INNER JOIN public.item_pack_products ON (public.fg_products.item_pack_product_id = public.item_pack_products.id)   INNER JOIN public.pallets ON (public.cartons.pallet_id = public.pallets.id) INNER JOIN public.stock_items ON (public.pallets.pallet_number = public.stock_items.inventory_reference) WHERE( location_code not in ('Not_on_Stock','IN_TRANSIT') and (pallets.consignment_note_number is not null) and (pallets.load_detail_id is null) and (item_pack_products.commodity_code={item_pack_products.commodity_code}) AND (pallets.build_status={pallets.build_status}) and (item_pack_products.marketing_variety_code={item_pack_products.marketing_variety_code}) AND (cartons.target_market_code={cartons.target_market_code}) AND (item_pack_products.grade_code={item_pack_products.grade_code}) AND (cartons.inventory_code={cartons.inventory_code}) AND (cartons.puc={cartons.puc}) AND (cartons.iso_week_code={cartons.iso_week_code}) AND (cartons.season_code={cartons.season_code}) AND (cartons.inspection_type_code={cartons.inspection_type_code}) AND (cartons.pick_reference={cartons.pick_reference}) AND (pallets.pallet_format_product_code={pallets.pallet_format_product_code}) AND (cartons.pc_code={cartons.pc_code}) AND (extended_fgs.old_fg_code={extended_fgs.old_fg_code}) AND (item_pack_products.actual_count={item_pack_products.actual_count}) AND (item_pack_products.size_ref={item_pack_products.size_ref}) AND (extended_fgs.extended_fg_code={extended_fgs.extended_fg_code})) GROUP BY public.cartons.carton_fruit_nett_mass ,public.item_pack_products.item_pack_product_code,public.item_pack_products.id
+main_table_name: cartons
+default_report_index_group_name: System
+
+fields:
+  field1:
+   field_name: item_pack_products.commodity_code
+   caption: commodity_code
+   field_type: text
+  field2:
+   field_name: item_pack_products.marketing_variety_code
+   caption: marketing_variety_code
+   field_type: text
+  field3:
+   field_name: cartons.target_market_code
+   caption: target_market_code
+   field_type: text
+  field4:
+   field_name: cartons.inventory_code
+   caption: inventory_code
+   field_type: text
+  field5:
+   field_name: cartons.puc
+   caption: puc
+   field_type: text
+  field6:
+   field_name: cartons.iso_week_code
+   caption: iso_week_code
+   field_type: text
+  field7:
+   field_name: cartons.season_code
+   caption: season_code
+   field_type: text
+  field8:
+   field_name: cartons.inspection_type_code
+   caption: inspection_type_code
+   field_type: text
+  field9:
+   field_name: cartons.pick_reference
+   caption: pick_reference
+   field_type: text
+  field10:
+   field_name: pallets.pallet_format_product_code
+   caption: pallet_format_product_code
+   field_type: text
+  field11:
+   field_name: cartons.pc_code
+   caption: pc_code
+   field_type: text
+  field12:
+   field_name: extended_fgs.old_fg_code
+   caption: extended_fg_code
+   field_type: text
+  field13:
+   field_name: item_pack_products.size_ref
+   caption: size_ref
+   field_type: text
+  field14:
+   field_name: extended_fgs.extended_fg_code
+   caption: extended_fg_code
+   field_type: text
+  field15:
+   field_name: item_pack_products.grade_code
+   caption: grade_code
+   field_type: text
+  field16:
+   field_name: pallets.build_status
+   caption: build_status
+   field_type: text
+  field17:
+   field_name: item_pack_products.actual_count
+   caption: actual_count
+   field_type: text

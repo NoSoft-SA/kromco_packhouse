@@ -1,0 +1,134 @@
+<%= stylesheet_link_tag "diagnostics"%>
+ <script src = "/javascripts/context_menu.js"></script>
+<!--####################################################################-->
+ <% id = "-"%>
+   <% for delivery_drench_concentrate in @delivery_drench_concentrates %>
+<%if @stations_for_earlier_dates.include?(delivery_drench_concentrate.delivery_drench_station_id) == false %>
+<% if @last_change_time[0].last_change_time != nil %> <!--if there's no drench_concentrate_histories records-->
+   <%if DeliveryDrenchConcentrate.find_by_delivery_drench_station_id(delivery_drench_concentrate.delivery_drench_station_id).date_created.strftime("%Y-%m-%d %H:%M:%S") > @last_change_time[0].last_change_time %>
+     <% id += delivery_drench_concentrate.delivery_drench_station_id.to_s + "-"%>
+  <% end%>
+<% else %>
+   <% id += delivery_drench_concentrate.delivery_drench_station_id.to_s + "-"%>
+<% end %>
+ <% @stations_for_earlier_dates.push(delivery_drench_concentrate.delivery_drench_station_id)%>
+<% end %>
+   <% end %>
+
+   <!--####################################################################-->
+
+
+
+
+         <table style="margin-bottom: -3px;margin-left: -3px;">
+          <tr>
+           <td>
+            <div style="float: left;background-color: lime;text-align: left;width: 150px;border-top: 1px dotted black;border-left: 1px dotted black;border-right: 1px dotted black;">
+              Current setup  
+            </div>
+            </td>
+            <td>
+              <% if id != "-" %>
+                   <div style="padding-top: 5px;text-decoration: underline;"> <%= link_to("deliveries drenched", :action => 'view_deliveries_drenched', :id => id.chop!) %></div>
+               <% end %>
+                   </div>
+              </td>
+            </tr>
+           </table>
+ <!--=========== Building the drench_concentrate grid ==========-->
+           <%
+             column_configs = Array.new
+             column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'concentrate_code'}
+             column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'concentrate_description'}
+             column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'drench_status_code'}
+             column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'concentrate_quantity'}
+             column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'date_created'}
+              column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'uom'}
+
+           %>
+           <% grid = get_data_grid(@current_drench_concentrate,column_configs) %>
+           <% grid.caption    = '' %>
+           <% grid.height     = 120 %>
+           <% @header_content = grid.build_grid_data %>
+
+           <%= grid.render_html %>
+           <%= grid.render_grid %>
+
+   <!--===============================================================-->
+
+
+
+<%if @drench_concentrate_histories.length != 0%>
+ <% drench_history_groups = group_by_date_to_history(@drench_concentrate_histories)%>
+
+  <% for drench_history_group in drench_history_groups %>
+  <!--__________________________________________-->
+   <% prev_change = DrenchConcentrateHistory.find_by_sql("select max(date_to_history) as prev_change_time from drench_concentrate_histories where drench_station_code = '#{drench_history_group[0].drench_station_code}' and date_to_history < '#{drench_history_group[0].date_to_history}'")%>
+   <!--__________________________________________-->
+
+ <!--####################################################################-->
+<% delivery_drench_concentrates = get_delivery_drench_concentrates(drench_history_group)%>
+<% id = "-"%>
+<% for delivery_drench_concentrate in delivery_drench_concentrates %>
+ <%if @stations_for_earlier_dates.include?(delivery_drench_concentrate.delivery_drench_station_id) == false %>
+  <% if prev_change[0].prev_change_time == nil%>
+    <% id += delivery_drench_concentrate.delivery_drench_station_id.to_s + "-"%>
+  <%else%>
+   <% if delivery_drench_concentrate.date_created.strftime("%Y-%m-%d %H:%M:%S") > prev_change[0].prev_change_time %>
+      <% id += delivery_drench_concentrate.delivery_drench_station_id.to_s + "-"%>
+   <% end %>
+  <% end %>
+   
+  <% @stations_for_earlier_dates.push(delivery_drench_concentrate.delivery_drench_station_id)%>
+ <% end %>
+<% end %>
+ 
+<!--####################################################################-->
+          <table style="margin-bottom: -3px;margin-left: -3px;">
+           <tr>
+            <td>
+ 	       <% if (@increment%2) == 1%>
+	         <div style="float: left;background-color: lime;text-align: left;width: 150px;border-top: 1px dotted black;border-left: 1px dotted black;border-right: 1px dotted black;">
+	       <% else %>
+	         <div style="float: left;background-color: #FFFF00;text-align: left;width: 150px;border-top: 1px dotted black;border-left: 1px dotted black;border-right: 1px dotted black;">
+	       <% end %>
+	       <%= drench_history_group[0].date_to_history.strftime("%d-%m-%Y %H:%M:%S")  %>
+	         </div>
+             </td>
+             <td>
+	           <% if id != "-" %>    
+                    <div style="padding-top: 5px;text-decoration: underline;"> <%= link_to("deliveries drenched", :action => 'view_deliveries_drenched', :id => id.chop!) %></div>
+                <% end %>
+                    </div>
+              </td>
+             </tr>
+            </table>
+  <!--=========== Building the drench_concentrate grid ==========-->
+            <%
+              column_configs = Array.new
+              column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'concentrate_code'}
+              column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'concentrate_description'}
+              column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'drench_status_code'}
+              column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'concentrate_quantity'}
+              column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'date_created'}
+              column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'date_to_history'}
+               column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'uom'}
+            %>
+   
+           <% grid = get_data_grid(drench_history_group,column_configs) %>
+           <% grid.caption    = '' %>
+           <% grid.height     = 120 %>
+           <% @header_content = grid.build_grid_data %>
+
+           <%= grid.render_html %>
+           <%= grid.render_grid %>
+             
+<!--===============================================================-->	
+<!-- prev change date <%= prev_change[0].prev_change_time%> -->
+       <% @increment += 1 %>
+	 <br><br>
+
+  <% end %>
+  
+ <% end %>
+ 

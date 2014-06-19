@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<in-map name="pf" identifier_size="2" root_identifier="BH">
+    <sequence>
+        <record name="doc_header" identifier="BH" size="27" occurence="1">
+            <fields>
+                <field name="header" size="2" default="BH" />
+                <field name="network_address" size="3" format="ZEROES" />
+                <field name="batch_number" size="6" format="ZEROES" />
+                <field name="create_date" size="8" format="DATE"/>
+                <field name="create_time" size="8" format="HMS" />
+            </fields>
+        </record>
+        <record name="load_final" identifier="PF" size="36" occurence="1">
+            <fields>
+                <field name="record_type" size="2" default="PF" />
+                <field name="order_no" size="6" required="false" />
+                <field name="sender" size="7" default="KROMCO" />
+                <field name="transmit" size="1" default="Y"/>
+                <field name="account" size="6" />
+                <field name="load_no" size="6" />
+                <field name="carton_qty" size="8" format="ZEROES" />
+            </fields>
+        </record>
+        <record name="doc_trailer" identifier="BT" size="18" occurence="1">
+            <fields>
+              <field name="record_type" size="2" default="BT" />
+              <field name="network_address" size="3" format="ZEROES" />
+              <field name="batch_number" size="6" format="ZEROES" />
+              <field name="record_count" size="7" format="ZEROES" default="3" />
+            </fields>
+        </record>
+
+    </sequence>
+</in-map>

@@ -1,0 +1,69 @@
+ <!--script src = "/javascripts/cache/content_js.js"></script-->
+<% form_tag '/inventory/grouped_assets/submit_asset_item_transaction_history_search' do |f|%>
+
+      <tr>
+        <td style="border: thin black dotted;text-align: center;">Field Name</td>
+        <td style="border: thin black dotted;text-align: center;">Value</td>
+      </tr>
+      <tr>
+        <td>
+          <label> created on </label>
+        </td>
+        <td> <label class="date_range_from">from:</label> <input type="text" id="created_on_date_from_txt" name="created_on_date_from" size="20" value="" class="datepicker_from" /><br />
+          <label class="date_range_to">to:</label> <input type="text" id="created_on_date_to_txt" name="created_on_date_to" size="20" value="" class="datepicker_to" />
+        </td>
+
+      </tr>
+      <tr>
+        <td>
+          <label> transaction type code </label>
+        </td>
+        <td>
+          <!--<input type="text" id="transaction_type_code" name="transaction_type_code" size="30" value="<%= @transaction_type_code.to_s %>"/>-->
+          <%= select('transaction_type_code', 'transaction_type_code', @transaction_type_codes ,{:sorted => false}) %>
+        </td>
+      </tr>      <tr>
+        <td>
+          <label> transaction business name code </label>
+        </td>
+        <td>
+          <input type="text" id="transaction_business_name_code" name="transaction_business_name_code" size="30" value="<%= @transaction_business_name_code.to_s %>"/>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label> location code </label>
+        </td>
+        <td>
+          <%= select('location_code', 'location_code', @location_codes ,{:sorted => false}) %>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label> asset number </label>
+        </td>
+        <td>
+          <input type="text" id="asset_number" name="asset_number" size="30" value="<%= @asset_item.asset_number.to_s %>"/>
+        </td>
+      </tr>
+      <tr>
+        <td>
+        </td>
+        <td>
+          <input type="hidden" id="asset_item_id" name="asset_item_id" value="<%= @asset_item.id %>" />          
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label style="font-weight: bold;color: blue;"> limit </label>
+        </td>
+        <td>
+          <input type="text" id="limit" name="limit" size="30" value="1000"/>
+        </td>
+      </tr>
+      <tr>
+        <td></td>
+        <td> <button><img src='/images/exec2.png'/>execute query</button></td>
+      </tr>
+    </table>
+<% end %>

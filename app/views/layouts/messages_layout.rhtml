@@ -1,0 +1,31 @@
+<html>
+<head>
+    <title>Untitled Page</title>
+    <%= stylesheet_link_tag "scaffold", "depot", "admin" %>
+
+    <script src = "/javascripts/lib/prototype.js" type="text/javascript"></script>
+    <script>
+      
+      
+      
+      <%= @content_for_layout %>
+      running_img = document.createElement("img");
+      running_img.src = "/images/messages/process_running.gif";
+    </script>
+    <script>
+    
+    var loading_cell = document.createElement("td");
+    
+    loading_cell.innerHTML = "<img id = 'fetching_img'  src='/images/loading.gif' />";
+ 
+
+    </script>
+</head>
+<body >
+ 
+
+    
+    
+   
+</body>
+</html>

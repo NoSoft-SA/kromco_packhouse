@@ -1,0 +1,303 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" >
+<html>
+  <head>
+
+    <title>Admin</title>
+
+    <%= stylesheet_link_tag "scaffold", "depot", "admin", "menu", "main", "delivery", "3" %>
+
+    <script type="text/javascript">
+
+      var login_url = <%= login_url %>
+      var logout_url = <%= logout_url %>
+      //-----------------------
+      //Grid dimension settings
+      //-----------------------
+      var current_grid_height = <%= grid_min_height%>;
+      var current_grid_width = <%= grid_min_width%>;
+
+      grid_min_width = <%= grid_min_width%>;
+      grid_min_height = <%= grid_min_height%>;
+
+    </script>
+
+    <!-- menu script itself. you should not modify this file -->
+    <!-- files with geometry and styles structures -->
+
+  <% if ENV['RAILS_ENV'] == 'development' -%>
+  <script src="/javascripts/field_show_popup.js" type="text/javascript"></script>
+  <script src="/javascripts/lib/prototype.js" type="text/javascript"></script>
+  <script src="/javascripts/src/scriptaculous.js" type="text/javascript"></script>
+  <script src="/javascripts/src/effects.js" type="text/javascript"></script>
+  <script src="/javascripts/src/dragdrop.js" type="text/javascript"></script>
+
+  <script src="/javascripts/tabs.js" type="text/javascript"></script>
+  <script src="/javascripts/popupwindow.js" type="text/javascript"></script>
+  <!--script src="/javascripts/resizing.js" type="text/javascript"></script-->
+
+  <script src="/javascripts/session.js" type="text/javascript"></script>
+
+  <script src="/javascripts/progressbar.js" type="text/javascript"></script>
+
+  <script src="/javascripts/jquery.min.js" type="text/javascript"></script>
+  <script src="/javascripts/jquery-ui.min.js" type="text/javascript"></script>
+  <script src="/javascripts/jquery.fullscreen-min.js" type="text/javascript"></script>
+  <script src="/javascripts/search_form.js" type="text/javascript"></script>
+  <script src="/javascripts/home_layout.js" type="text/javascript"></script>
+    <% else %>
+      <script src = "/javascripts/home_all.js" type="text/javascript"></script>
+    <% end %>
+  <link href="/stylesheets/jskr1/jquery-ui.css" rel="stylesheet" type="text/css"/>
+
+    <script type="text/javascript">
+      <% if ENV['RAILS_ENV'] == 'development' -%>
+        noSession = true; // JS - TURN OFF SESSION EXPIRY
+      <% end -%>
+
+      <% if @new_session != nil && @new_session == true %>
+        start_new_session();
+      <% end%>
+  </script>
+
+  <script type="text/javascript" language="JavaScript">
+    <%= @menus_js %>
+  </script>
+
+  </head>
+  <body onload = "build_menus();add_sizing();" topmargin="0" leftmargin="0" bottommargin="0" rightmargin="0" bgcolor="#ffffff"style="overflow:hidden">
+     <div id="zoomgridclose" style="position:absolute;right:0px;top:0px;z-index:2001;visibility:hidden" ><img onclick="miniMize()" src="/images//messages/close_form.png"/></div>
+  <div id="zoomGrid_1" style="position:absolute;width: 100%; height: 100%; z-index:1300;background-color:black;background-repeat:repeat;visibility:hidden;" ></div>
+   <div id = "content_loading_gif" style = "visibility:hidden; position:absolute; top: 300;left:500;"><img src = "/images/content_loading.gif"></img></div>
+    <table  id = "home_header" border="0" cellpadding="0" cellspacing="0" width="100%">
+        <tbody>
+            <tr>
+
+                <td  align="center" valign="top" width="20%">
+                    <table  cellpadding="0" cellspacing="0"
+                        width="100%">
+                        <tbody >
+                            <tr >
+                                <td  width="100%" style="height: 40px">
+                                    <img src="/images/Logo.png"  vspace="0" /></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </td>
+                <td valign = "bottom" id = "msg_frame_container" style="width: 60%" >
+                     <iframe id = "messagesFrame"
+       		           height = "40px" frameborder = "0"
+       		           scrolling = "off" >
+                    </iframe>
+               </td>
+                <td  align="center" background="/images/tlo_gora_3.jpg" 
+                    valign="center" width = "20%">
+                    <br> 
+                    <div class="top-right-block">
+                   <!--button onclick="jQuery('#contentFrame').toggleFullScreen()">Go Fullscreen</button-->
+                      <%= image_tag('view_fullscreen.png', :onclick => "jQuery('#contentFrame').toggleFullScreen()", :title => 'Go Fullscreen', :style => "margin-right:20px;") %>
+
+                        <% if @new_session != nil && @new_session == true %>
+                            <% dept = "" %>
+                            <% if session[:user_id].department != nil%>
+                                <% if session[:user_id].department.department_name != nil%>
+                                    <%dept = "|" + session[:user_id].department.department_name %>
+                                <%end%>
+                            <%end%>
+	                   <%
+                            field_config =
+                                 {:id_value      =>nil,
+                                  :link_text     =>session[:user_id].user_name  + dept,
+                                  :host_and_port =>request.host_with_port.to_s,
+                                  :controller    => "security/users",
+                                  :target_action =>'change_password',
+                                  :link_type=> 'popup',
+                                  :extra_styling=>"color: white;font-size: 15;font-weight: bold;"}
+
+ 
+                            popup_link = ApplicationHelper::LinkWindowField.new(nil, nil, 'none', 'none', 'none', field_config, true, nil, self)
+                            the_link = popup_link.build_control
+                            %>
+                           <img src = "/images/user.png" />
+                            <%=the_link.to_s%>
+	                       &nbsp; &nbsp; &nbsp;<img onclick = "window.location.href = <%= logout_url_single_quote %>;" src = "/images/logout.png" />
+	                    <% end%>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <br id = "insert_point" >
+    <table  border="0" cellpadding="0"
+        cellspacing="0" width="100%" id="tableOuter" style=" position:absolute;top:8.2%;">
+        <tbody >   
+            <tr id = "outerTabsContainer" >              
+            </tr>
+        </tbody>
+    </table>    
+    <table border="0" cellpadding="0"
+        cellspacing="0" width="100%" id="innerTabstable" style="position:absolute;top:11.5%;">
+        <tbody valign = "top" >
+            <tr  id ="innerTabsContainer" >          
+            </tr>
+        </tbody>
+    </table>
+    <br>
+    <table  border="0" cellpadding="0" id = "l3menus_table"
+        cellspacing="0" width="100%" style="position:absolute;top:16%;height:430px;">
+        <tbody>     
+            <tr >
+     
+                <td id = "l3_menus_container_parent" valign = 'top' width="16%" style="height:368;border-right:thin solid #449A2F">
+                  <!-- scrollmenu -->
+                  <div id="l3_div_container" style="overflow-y:auto;">
+
+                        
+                    <ul id="l3_menus_container" style="list-style:none;padding:0px 5px;margin-top:0;">
+
+                    </ul>
+                  </div>
+               
+                </td>
+                <td style="width: 2%; height: 400px">
+         
+                    </td>
+
+
+
+
+
+
+                <script type="text/javascript">
+              jQuery(function() {
+              jQuery( ".MainContent" ).resizable({
+              animate: true, animateEasing: 'swing', animateDuration: 500
+              });
+              // This does not work in Firefox.
+              jQuery( "#l3_menus_container_parent" ).resizable({
+                handles: 'e'
+              });
+              });
+              </script>
+
+
+
+
+
+                <td  id = 'content_container' width = "100%" valign="top" halign = "left" style="height:480px;" class ="MainContent"   >
+
+                    <div id='content_header'   style="vertical-align: top;" >&nbsp; </div>
+             
+        				<% if flash[:notice] -%>
+        			
+        			
+          					<div> &nbsp </div><div id="notice"><%= flash[:notice] %></div>
+        				<% end  -%>
+	
+						        <%= @content_for_layout %>
+      			
+                </td>
+              
+                <td  style="height: 480px" >
+                    &nbsp;</td>
+            </tr>
+        </tbody>
+    </table>
+    <br>
+    <table  background="/images/tlo_dol_3.jpg"
+        border="0" cellpadding="0" cellspacing="0" width="100%" id="footer_table" style="position:absolute;top:95%;" >
+        <tbody >
+            <tr >
+                <td >
+                    &nbsp;</td>
+                <td  width="20">
+                    &nbsp;</td>
+                <td  valign="top" width="560"id="footer_td">
+                    <div class="footer" id="footer_menu's" >
+                       <img id = "img_menu_hider" src = "/images/home/hide.png" /><a href = "javascript:nothing();" onclick = "hide_l3_menus(this);">hide menus</a> &nbsp;&nbsp;
+                       <img id = "img_header_hider" src = "/images/home/hide.png" /><a href = "javascript:nothing();" onclick = "hide_home_header(this);">hide header</a>
+                    </div>
+                    
+                </td>
+                <td width="20">
+                </td>
+                <td style = "visibility:visible;" id = 'awgrid_img' align = 'middle' valign = "middle" ><img src = "/images/awgrid.png" onclick = 'show_grid_cell_info();' /></td>
+                <td style = "visibility:hidden;" id = 'info_img' align = 'middle' valign = "middle" ><img src = "/images/info.png" onclick = 'show_info();' /></td>
+                <td style = "visibility:hidden;" id = 'info_sticker_img' align = 'middle' valign = "middle" ><img src = "/images/home/info_sticker.png" /></td> 
+                <td style = "visibility:hidden;" id = 'info_sticker_info' align = "left" class = "info_sticker"></td>
+            </tr>
+        </tbody>
+    </table>
+    <table  border="0" cellpadding="0"
+        cellspacing="0" width="100%">
+        <tbody >
+            <tr >
+                <td  width="">
+                </td>
+                <td >
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    
+   <div id ="hidden_program_list_div" style = "z-index: 1200;border:1px black dotted; position: absolute; overflow:auto;height:0px;width:167px;right: 15px; top:11.5%;background-color: whitesmoke ;visibility:hidden;">
+  
+   </div>
+   <div id="hidden_program_list_button" style = "z-index: 1200; position: absolute;right: 15px; top: 8.0%;visibility:hidden;">
+   </div>
+   
+   <!-- This is the second level div's -->
+   <div id ="hidden_program_list_level2_div" style = "z-index: 1200;border:1px black dotted; position: absolute;right: 15px;overflow:auto;height:0px;width:168px; top: 14.5%;background-color: whitesmoke;visibility:hidden;">
+   </div>
+   <div id="hidden_program_list_level2_button" style = "z-index: 1200; position: absolute;right: 15px; top: 11.4%;visibility:hidden;">
+   </div>
+   <!-- This is the end  of the  second level div's -->
+
+   <!-- This is the third level div's -->
+
+     <div id ="hidden_program_list_level3_div" style = "z-index: 0;overflow: auto; width: 165px;border:black 1px solid;  height: 152px; position: absolute;top:71.5%;background-color:white ;visibility:hidden;">   
+    
+    </div>
+  
+   <div id="hidden_program_list_level3_button" style = "z-index: 0; position: absolute;right: 94%; top: 95.5%;background-color: gray;visibility:hidden;">
+  
+   </div>
+   <!-- This is the end  of the  third's level div's -->
+ 
+
+
+    <div id = "info_form" style = "z-index: 400; position: absolute;visibility:hidden;left: 211px; top: 100px;background-color: white;" >
+        <table style="border-right: gray thin solid; border-top: gray thin solid; border-left: gray thin solid; border-bottom: gray thin solid">
+        <tr>
+            <td colspan="2" style="width: 20px;" >
+                <img src="/images/info.png" /></td>
+            <td style="width: 173px; font-weight: bold; font-size: 11px; font-family: Arial; background-color: silver; border-right: blue thin solid; border-top: blue thin solid; border-left: blue thin solid; border-bottom: blue thin solid; background-color: whitesmoke;">
+                <img onclick = "close_info_form();" src= "/images/messages/close_form.png" style="left: 250px; position: relative; top: 0px" />Please note:
+                </td>
+            <td style="font-weight: bold; font-size: 10px; width: 100px; color: blue; font-family: Arial; padding-right: 0px; padding-left: 0px; margin-left: 0px; margin-right: 0px;" align="right">
+            </td>
+        </tr>
+        <tr>
+            <td id = "info_body" style="height: 140px; background-color: whitesmoke; border-right: red thin dotted; border-top: red thin dotted; font-size: 11px; border-left: red thin dotted; color: blue; border-bottom: red thin dotted; font-family: Arial;" colspan="4"></td>
+        </tr>
+    </table>
+    
+    </div>
+    <div id = "grid_form" style = "z-index: 400; position: absolute;visibility:hidden;left: 211px; top: 100px;background-color: white;" >
+        <table style="border-right: gray thin solid; border-top: gray thin solid; border-left: gray thin solid; border-bottom: gray thin solid">
+        <tr>
+            <td colspan="2" style="width: 20px;" >
+                <img src="/images/info.png" /></td>
+            <td style="width: 173px; font-weight: bold; font-size: 11px; font-family: Arial; background-color: silver; border-right: blue thin solid; border-top: blue thin solid; border-left: blue thin solid; border-bottom: blue thin solid; background-color: whitesmoke;">
+                <img onclick = "close_grid_form();" src= "/images/messages/close_form.png" style="left: 250px; position: relative; top: 0px" />Selected Grid Cell Text:
+                </td>
+            <td style="font-weight: bold; font-size: 10px; width: 100px; color: blue; font-family: Arial; padding-right: 0px; padding-left: 0px; margin-left: 0px; margin-right: 0px;"align="right">
+            </td>
+        </tr>
+        <tr>
+            <td id = "grid_cell_info_body" style="height: 140px; background-color: whitesmoke; border-right: red thin dotted; border-top: red thin dotted; font-size: 11px; border-left: red thin dotted; color: blue; border-bottom: red thin dotted; font-family: Arial;" colspan="4"></td>
+        </tr>
+    </table>
+    
+    </div>
+</body>
+</html>

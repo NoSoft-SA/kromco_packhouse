@@ -1,0 +1,7 @@
+query: select * from pdt_errors where (id={id} and user={user} and created_on={created_on} and error_description={error_description} and stack_trace={stack_trace} and ip={ip} and mode={mode} and input_xml={input_xml} and menu_item={menu_item} and error_type={error_type}  )
+main_table_name: pdt_errors
+fields:
+  field1:
+   field_name: created_on
+   caption: created_on
+   field_type: daterange

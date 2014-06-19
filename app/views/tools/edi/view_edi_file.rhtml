@@ -1,0 +1,7 @@
+<% form_tag '/tools/edi/display_edi_file', :multipart => true do -%>
+  <table>
+    <tr><td>EDI Flow:</td><td><%= select_tag :flow_type, options_for_select(@flow_types, @chosen_flow) %></td></tr>
+    <tr><td>Choose a file:</td><td><%= file_field_tag :edi_file %></td></tr>
+  </table>
+  <%= submit_tag 'Upload EDI file to view' %>
+<% end -%>

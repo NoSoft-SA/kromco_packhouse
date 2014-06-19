@@ -1,0 +1,27 @@
+<h1>Listing tests</h1>
+
+<table>
+  <tr>
+  <% for column in Test.content_columns %>
+    <th><%= column.human_name %></th>
+  <% end %>
+  </tr>
+  
+<% for test in @tests %>
+  <tr>
+  <% for column in Test.content_columns %>
+    <td><%=h test.send(column.name) %></td>
+  <% end %>
+    <td><%= link_to 'Show', :action => 'show', :id => test %></td>
+    <td><%= link_to 'Edit', :action => 'edit', :id => test %></td>
+    <td><%= link_to 'Destroy', { :action => 'destroy', :id => test }, :confirm => 'Are you sure?' %></td>
+  </tr>
+<% end %>
+</table>
+
+<%= link_to 'Previous page', { :page => @test_pages.current.previous } if @test_pages.current.previous %>
+<%= link_to 'Next page', { :page => @test_pages.current.next } if @test_pages.current.next %> 
+
+<br />
+
+<%= link_to 'New test', :action => 'new' %>

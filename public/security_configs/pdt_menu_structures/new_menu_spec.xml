@@ -1,0 +1,160 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SystemSchema xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:noNamespaceSchemaLocation='d\:Pmm\Config\systemschema.xsd'>
+   <Namespace>
+      xs
+   </Namespace>
+   <nsURL>
+      http://www.w3.org/2001/XMLSchema
+   </nsURL>
+   <BootRecords Name='RFS-01' File='rf/RFS-01.xml'>
+      <Mesware Status='true' Operation='remote' Config='mwpdt' License='KRM0053601414314161'/>
+      <IPData Server='192.168.10.179' ListenPort='2000' ServerPort='2020' HTTPPort='2080'/>
+      <Device Message='true' DeviceName='Symbol' DeviceAddress='0' DevicePort='1' Enable='true' DriverName='MC9090G'/>
+      <Buttons B2Enable='true' B3Enable='true' B1Label='Yes' B1Enable='true' B3Label='Cancel' B2Label='No'/>
+      <InputFields Input3Enable='true' Input1Enable='true' Input2Enable='true' Input3Label='Scan 3' Input2Label='Scan 2' Input1Label='Scan 1'/>
+      <Server Item='0' List='2'/>
+      <Server Status='true' Name='SRV-01' IP='192.168.10.179' Item='1' ServerPort='2020'/>
+      <Server Status='true' Name='SRV-02' IP='192.168.10.17' Item='2' ServerPort='2020'/>
+      <Printer Item='0' List='2'/>
+      <Printer Status='true' Name='PRN-01' Port='8375' IP='192.168.10.177' Item='1'/>
+      <Printer Status='true' Name='PRN-02' Port='8375' IP='192.168.10.178' Item='2'/>
+      <Choice Name='None' Number='1' Enable='true' Item='0'/>
+      <Choice Name='Goldens' Number='1' Enable='true' Item='1'/>
+      <Choice Name='Grannies' Number='1' Enable='true' Item='2'/>
+      <menus>
+         <menu node_type='.' display='Mesware' value='0.0'/>
+         <menu node_type='0' display='SLMS' value='1.0'>
+            <menu node_type='1' display='Depot Receipts' value='1.10'>
+               <menu node_type='1' display='first_intake' value='1.10.1'>
+                  <menu node_type='2' display='new_pallet' value='1.10.1.1'/>
+                  <menu node_type='2' display='get_pallet' value='1.10.1.2'/>
+                  <menu node_type='2' display='edit_pallet' value='1.10.1.3'/>
+               </menu>
+               <menu node_type='2' display='scan_pdf417' value='1.10.2'/>
+               <menu node_type='1' display='depot_pallets' value='1.10.3'>
+                  <menu node_type='2' display='receive_depot_pallets' value='1.10.3.1'/>
+                  <menu node_type='2' display='show_validated_pallets' value='1.10.3.2'/>
+                  <menu node_type='2' display='show_not_yet_validated_pallets' value='1.10.3.3'/>
+               </menu>
+               <menu node_type='2' display='print_depot_ctn_labels' value='1.10.4'>
+                  <menu node_type='2' display='print depot ctn labels' value='1.10.4.1'/>
+                  <menu node_type='2' display='print depot ctn sequence' value='1.10.4.2'/>
+               </menu>
+            </menu>
+            <menu node_type='1' display='Inter Warehouse' value='1.2'>
+               <menu node_type='2' display='load_vehicle' value='1.2.1'/>
+               <menu node_type='2' display='scan_pallet' value='1.2.1a'/>
+               <menu node_type='2' display='offload_vehicle' value='1.2.2'/>
+               <menu node_type='2' display='validate_pallets' value='1.2.2a'/>
+               <menu node_type='2' display='validate_pallet' value='1.2.2b'/>
+               <menu node_type='2' display='print_tripsheet' value='1.2.3'/>
+               <menu node_type='2' display='scan_pallet' value='1.2.3a'/>
+               <menu node_type='2' display='reset_tripsheet' value='1.2.4'/>
+               <menu node_type='2' display='put_away_pallet' value='1.2.5'/>
+            </menu>
+            <menu node_type='1' display='Temperatures' value='1.3'/>
+            <menu node_type='1' display='recooling' value='1.4'>
+               <menu node_type='2' display='create_job' value='1.4.1'/>
+               <menu node_type='2' display='assign_probe' value='1.4.2'/>
+               <menu node_type='2' display='load_job' value='1.4.3'/>
+               <menu node_type='2' display='complete_job' value='1.4.4'/>
+               <menu node_type='2' display='set_pallet_recool_status' value='1.4.5'/>
+               <menu node_type='1' display='remove_probe' value='1.4.6'/>
+            </menu>
+            <menu node_type='1' display='Putaway' value='1.5'>
+               <menu node_type='2' display='put_away_pallet' value='1.5.1'/>
+               <menu node_type='2' display='scan_putaway_location' value='1.5.2'/>
+            </menu>
+            <menu node_type='1' display='Dispatch' value='1.6'>
+               <menu node_type='2' display='scan_pick_list' value='1.6.1'>
+                  <menu node_type='2' display='scan_pick_list' value='1.6.1.1'/>
+               </menu>
+               <menu node_type='2' display='load_truck' value='1.6.2'>
+                  <menu node_type='2' display='scan_pick_list' value='1.6.2.1'/>
+                  <menu node_type='2' display='show_loaded_pallets' value='1.6.2.2'/>
+                  <menu node_type='2' display='show_not_yet_loaded_pallets' value='1.6.2.3'/>
+                  <menu node_type='2' display='scan_pallet_to_load' value='1.6.2.4'/>
+               </menu>
+            </menu>
+            <menu node_type='1' display='buildup' value='1.7'>
+               <menu node_type='1' display='buildup' value='1.7.1'>
+                  <menu node_type='2' display='buildup_pallet' value='1.7.1.1'/>
+                  <menu node_type='2' display='move_labeled_cartons' value='1.7.1.2'/>
+                  <menu node_type='2' display='move_unlabeled_cartons' value='1.7.1.3'/>
+                  <menu node_type='2' display='show_moved_cartons' value='1.7.1.4'/>
+                  <menu node_type='2' display='show_not_yet_moved_cartons' value='1.7.1.5'/>
+                  <menu node_type='2' display='show_build_up_progress' value='1.7.1.6'/>
+               </menu>
+               <menu node_type='2' display='mark_pallet' value='1.7.2'/>
+               <menu node_type='2' display='destroy_pallet' value='1.7.3'/>
+               <menu node_type='2' display='create_pallet' value='1.7.5'/>
+               <menu node_type='2' display='relabel_pallet' value='1.7.6'/>
+            </menu>
+            <menu node_type='1' display='Miscellaneous' value='1.8'>
+               <menu node_type='2' display='pallet_enquiry' value='1.8.1'/>
+               <menu node_type='2' display='force_move' value='1.8.2'/>
+               <menu node_type='2' display='set_location_status' value='1.8.3'/>
+               <menu node_type='1' display='stock_take' value='1.8.4'>
+                  <menu node_type='2' display='scan_location' value='1.8.4.1'/>
+                  <menu node_type='2' display='scan_pallet' value='1.8.4.2'/>
+                  <menu node_type='2' display='complete_stocktake' value='1.8.4.3'/>
+                  <menu node_type='2' display='show_original_pallets_in_location' value='1.8.4.4'/>
+                  <menu node_type='2' display='show_current_pallets_in_location' value='1.8.4.5'/>
+                  <menu node_type='2' display='show_scanned_correct_pallets' value='1.8.4.6'/>
+                  <menu node_type='2' display='show_missing_pallets' value='1.8.4.7'/>
+                  <menu node_type='2' display='cancel_stock_take' value='1.8.4.8'/>
+               </menu>
+               <menu node_type='1' display='packhouse' value='1.8.5'>
+                  <menu node_type='2' display='match_labels' value='1.8.5.1'/>
+                  <menu node_type='2' display='print_pallet_label' value='1.8.5.2'/>
+                  <menu node_type='2' display='qc_in' value='1.8.5.3'/>
+                  <menu node_type='2' display='qc_out' value='1.8.5.4'/>
+                  <menu node_type='2' display='carton_pallet_number' value='1.8.5.5'/>
+                  <menu node_type='2' display='print_composite_pallet_label' value='1.8.5.7'/>
+               </menu>
+               <menu node_type='2' display='unit_temp_capture' value='1.8.6'/>
+            </menu>
+            <menu node_type='1' display='Rmt Receipts' value='2.1'>
+               <menu node_type='1' display='receive_bins' value='2.1.1'>
+                  <menu node_type='2' display='enter_delivery_number' value='2.1.1.1'/>
+                  <menu node_type='2' display='scan_full_bins' value='2.1.1.2'/>
+                  <menu node_type='2' display='scan_half_bins' value='2.1.1.3'/>
+                  <menu node_type='2' display='complete_delivery' value='2.1.1.4'/>
+                  <menu node_type='2' display='view_full_bins_scanned' value='2.1.1.5'/>
+                  <menu node_type='2' display='view_half_bins_scanned' value='2.1.1.6'/>
+                  <menu node_type='2' display='view_sample_bins_scanned' value='2.1.1.7'/>
+                  <menu node_type='2' display='scan_intake_bins' value='2.1.1.8'/>
+               </menu>
+            </menu>
+            <menu node_type='1' display='queries' value='2.2'>
+               <menu node_type='1' display='accept_bins' value='2.2.1'>
+                  <menu node_type='2' display='scan_location' value='2.2.1.1'/>
+                  <menu node_type='2' display='scan_bin' value='2.2.1.2'/>
+                  <menu node_type='2' display='view_scanned_bins' value='2.2.1.3'/>
+                  <menu node_type='2' display='complete' value='2.2.1.4'/>
+               </menu>
+               <menu node_type='1' display='accept_tripsheet' value='2.2.2'>
+                  <menu node_type='2' display='scan_tripsheet' value='2.2.2.1'/>
+                  <menu node_type='2' display='complete_prompt' value='2.2.2.2'/>
+               </menu>
+               <menu node_type='1' display='bin_enquiry' value='2.2.3'>
+                  <menu node_type='2' display='bin_enquiry' value='2.2.3.1'/>
+               </menu>
+               <menu node_type='1' display='create_tripsheet' value='2.2.4'>
+                  <menu node_type='2' display='create_tripsheet' value='2.2.4.1'/>
+                  <menu node_type='2' display='print_tripsheet' value='2.2.4.2'/>
+                  <menu node_type='2' display='remove_bin' value='2.2.4.3'/>
+                  <menu node_type='2' display='view_bins_on_tripsheet' value='2.2.4.4'/>
+                  <menu node_type='2' display='scan_bins_on_tripsheet' value='2.2.4.5'/>
+               </menu>
+            </menu>
+            <menu node_type='1' display='RMT Bin Sales' value='2.3'>
+               <menu node_type='1' display='bin_load_planning' value='2.3.1'>
+                  <menu node_type='2' display='enter_tripsheet' value='2.3.1.1'/>
+                  <menu node_type='2' display='complete_load' value='2.3.1.2'/>
+               </menu>
+            </menu>
+         </menu>
+      </menus>
+   </BootRecords>
+</SystemSchema>

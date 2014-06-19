@@ -1,0 +1,41 @@
+query: select  DISTINCT voyages.status,voyage_ports.departure_date,  voyage_ports.arrival_date,voyages.id,voyages.voyage_code,voyages.vessel_code,voyages.voyage_number from voyages left join voyage_ports on voyage_ports.voyage_id=voyages.id inner join vessels on voyages.vessel_id=vessels.id where (voyages.voyage_number={voyages.voyage_number}  AND voyage_ports.port_code={voyage_ports.port_code} AND  voyage_ports.arrival_date={voyage_ports.arrival_date}AND voyage_ports.departure_date={voyage_ports.departure_date}AND voyages.voyage_code={voyages.voyage_code}AND voyages.vessel_code={voyages.vessel_code}  AND voyage_ports.departure_date={voyage_ports.departure_date}) group by voyages.status,voyages.voyage_number, voyages.vessel_code,voyages.id,voyages.voyage_code, voyage_ports.departure_date,  voyage_ports.arrival_date order by voyages.id desc
+main_table_name: voyages
+default_report_index_group_name: System
+
+fields:
+  field1:
+   field_name: voyages.voyage_number
+   caption: voyage number
+   field_type: text
+  field2:
+   field_name: voyages.vessel_code
+   caption: vessel code
+   field_type: lookup
+   list: select vessel_code from vessels order by vessel_code
+  field3:
+   field_name: voyage_ports.port_code
+   caption: port code
+   field_type: text
+  field4:
+   field_name: voyage_ports.departure_date
+   caption: departure date
+   field_type: daterange
+  field5:
+   field_name: voyages.voyage_code
+   caption: voyage code
+   field_type: text
+  field6:
+   field_name: voyages.id
+   caption: voyage type
+   field_type: lookup
+   list: "select DISTINCT load_type_code from load_types order by load_type_code desc"
+  field7:
+   field_name: voyage_ports.arrival_date
+   caption: arrival date
+   field_type: daterange
+  field8:
+   field_name: voyages.status
+   caption: status
+   field_type: lookup
+   list: "select DISTINCT status from voyages where status is not null order by status desc"
+

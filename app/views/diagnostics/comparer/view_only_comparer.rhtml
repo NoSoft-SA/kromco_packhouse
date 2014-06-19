@@ -1,0 +1,472 @@
+
+<style type="text/css">
+/*Styles for comparer html*/
+
+
+
+div.action_links{
+color: red;
+font-family: arial;
+font-size:15pt;
+line-height: 14px;
+text-decoration: underline;
+
+
+}
+
+div.field_name{
+font-family:Sans-serif;
+font-size:17px;
+
+}
+div.field_value{
+font-family:"Times New Roman", Times, serif;
+font-size:15px;
+ font-style: italic;
+}
+div.top_table_container {
+    width: 1000px;
+
+}
+
+div.bottom_table_container {
+    width: 1000px;
+
+}
+
+div.recordset_set_header {
+    font-family: "Arial";
+
+    font-size: 16px;
+    color: gray;
+
+}
+
+div.parent_record_header {
+    background-color: #d3d3d3;
+    color: black;
+    /*border-right: solid 1px #000000;*/
+    border-left: solid 1px #000000;
+    border-top: solid 1px #000000;
+    border-bottom: solid 1px #000000;
+    font-size: 16;font-family: arial;
+
+}
+
+div.child_record_header {
+    background-color: #fafad2;
+    border-left: dotted 1px #000000;
+    border-top: dotted 1px #000000;
+    border-bottom: dotted 1px #000000;
+    border-right: dotted 1px #000000;
+    font-size: 16;
+    font-family: arial;
+}
+
+/* When new_parent_header attributes are changed ,change  #empty_td_new_parent_header as well to be the same*/
+div.new_parent_header {
+    background-color: #d3d3d3;
+    color: red;
+    border-left: solid 1px #000000;
+    border-top: solid 1px #000000;
+    border-bottom: solid 1px #000000;
+    font-size: 16;
+    font-family: arial;
+}
+
+#empty_td_new_parent_header {
+    background-color: #d3d3d3;
+    color: red;
+    border-top: solid 1px #000000;
+    border-bottom: solid 1px #000000;
+    font-size: 16;
+    font-family: arial;
+}
+
+div.new_parent_header_checkbox {
+    background-color: #d3d3d3;
+    color: red;
+    border-right: solid 1px #000000;
+    border-top: solid 1px #000000;
+    border-bottom: solid 1px #000000;
+    font-size: 16;
+    font-family: arial;
+}
+
+div.new_child_header {
+    background-color: pink;
+}
+
+div.changed_record_fields_tds {
+
+}
+
+div.new_records_fields_tds {
+
+    background-color: whitesmoke;
+    color: red;
+}
+
+div.new_child_field_tds {
+
+}
+
+div.left_changed_record_field_borders {
+
+}
+
+div.right_changed_record_field_borders {
+
+}
+
+div.checkboxes {
+    float: right;
+    width: 10px;
+
+}
+</style>
+
+<script>
+  function expand_discrep(label,id,column,row) {
+      //alert(column +"_parent_"+row+"_"+id);
+
+      var adject_column;
+      if(column == "right"){
+          adject_column = "left";
+      } else {
+          adject_column = "right";
+      }
+
+      var container = document.getElementById(column +"_parent_"+row+"_"+id);
+
+      var adjent_container = document.getElementById(adject_column +"_parent_"+row+"_"+id);
+      var adjacent_label = document.getElementById(adject_column + "_parent_" + row + "_toggler");
+
+      if(container.style.display == "block") {
+        container.style.display = "none";
+        label.innerHTML = "<img src='/images/expand_diff.png' title='expand' height=\"15\" width=\"15\"/>";
+
+        if(adjent_container != null) {
+            adjent_container.style.display = "none";
+        }
+
+        if(adjacent_label !== null) {
+            adjacent_label.innerHTML = "<img src='/images/expand_diff.png' title='expand' height=\"15\" width=\"15\"/>";
+        }
+      } else {
+        container.style.display = "block";
+//        label.innerHTML = "--";
+        label.innerHTML = "<img src='/images/collapse_diff.png' title='expand' height=\"15\" width=\"15\"/>";
+
+       if(adjent_container != null) {
+         adjent_container.style.display = "block";
+       }
+        if(adjacent_label !== null) {
+//          adjacent_label.innerHTML = "--";
+          adjacent_label.innerHTML = "<img src='/images/collapse_diff.png' title='expand' height=\"15\" width=\"15\"/>";
+        }
+      }
+  }
+
+  function expand_all() {
+      var discrep_details_containers = document.getElementsByClassName("discrep_details_container");
+      for(discrep_details_container in discrep_details_containers) {
+          discrep_details_containers[discrep_details_container].style.display = "block";
+      }
+  }
+
+  function collapse_all() {
+      var discrep_details_containers = document.getElementsByClassName("discrep_details_container");
+      for(discrep_details_container in discrep_details_containers) {
+          discrep_details_containers[discrep_details_container].style.display = "none";
+      }
+  }
+</script>
+
+  <% if ((@list1_diffs== nil && @list2_diffs == nil ) || (@list1_diffs.is_a?(Hash) && @list1_diffs.empty? && @list2_diffs.is_a?(Hash) && @list2_diffs.empty?))%>
+
+
+     NO DIFFERENCES FOUND IN BOTH RECORD OR NOTHING HAS BEEN CHANGED YET!
+
+
+
+  <% else %>
+
+    <table>
+      <tr>
+        <td> <div class="recordset_set_header" style="cursor: pointer;" onclick="expand_all();"> <img src='/images/expand_all.png' title='expand all' height="35" width="35"/> </div> </td>
+        <td> <div style=""><img src='/images/spacer_podmenu.gif' title='collapse all' height="25" width="2"/> </div> </td>
+        <td> <div class="recordset_set_header" style="cursor: pointer;" onclick="collapse_all();"> <img src='/images/collapse_all.png' title='collapse all' height="25" width="25"/> </div> </td>
+      </tr>
+    </table>
+
+    <table cellspacing="0" cellpadding="0" style="border-collapse: collapse;margin-top: 0px;">
+    <% @row_count = -1 %>
+      <tr>
+        <!----------------parent headers for records existing in both lists-->
+        <td>
+          <div class="recordset_set_header" style="width: 500px;"><%= @record_headers['left'] %></div>
+        </td>
+        <td colspan="3">
+          <div class="recordset_set_header" style="width: 500px;"><%= @record_headers['right'] %></div>
+        </td>
+        <!------------------------changed fields------------------------------------------------>
+      </tr>
+    <% @discrepanies_keys.each do |discrep_key| %>
+      <%
+      left_record = @list1_diffs[discrep_key]
+      left_record_children = @list1_diffs[discrep_key].delete('children') if(@list1_diffs[discrep_key])
+      right_record = @list2_diffs[discrep_key]
+      right_record_children = @list2_diffs[discrep_key].delete('children')if(@list2_diffs[discrep_key])
+      children_header_keys = []
+      children_header_keys += left_record_children.keys if(left_record_children && left_record_children.is_a?(Hash))
+      children_header_keys += right_record_children.keys if(right_record_children && right_record_children.is_a?(Hash))
+      children_header_keys = children_header_keys.uniq
+
+      if(!(@list1_diffs.keys.include?(discrep_key) && @list2_diffs.keys.include?(discrep_key)))
+        @parent_values_color = "red"
+      else
+        @parent_values_color = "black"
+      end
+      %>
+      <% @row_count += 1 %> <!-- part of left/right container ids and their children ids-->
+      <tr>
+        <!-- REPEAT THE SAME FOR THE RIGHT RECORD -->
+        <td valign="top"> <!-- id = left_dif_@row_count -->
+          <table cellspacing="0" cellpadding="0" style="margin-bottom: 2px;">
+            <% if(@list1_diffs.keys.include?(discrep_key)) %>
+            <tr> <!-- left diff header-->
+              <td>
+                <table style="width: 500px;" cellspacing="0" cellpadding="0">
+                  <tr>
+                    <td style="border: #808080 solid 1px;font-family: arial;background: url('/images/tlo_podmenu.gif');">
+                      <div>
+                        <table style="width: 100%;" cellspacing="0" cellpadding="0">
+                          <tr>
+                            <td>
+                              <%= "#{@header_list[0]} #{discrep_key}" %>
+                            </td>
+                            <td>
+                              <div id="left_parent_<%= @row_count %>_toggler" onclick="expand_discrep(this,'children_container','left',<%= @row_count %>);" style="text-align: right;padding-right: 10px;cursor: pointer;font: 15 black bold;">
+                                <img src='/images/expand_diff.png' title='expand' height="15" width="15"/>
+                              </div>
+                            </td>
+                          </tr>
+                        </table>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div>
+                        <table cellspacing="0" cellpadding="0" class="discrep_details_container" id="left_parent_<%= @row_count %>_children_container" style="display: block;">
+                          <tr>
+                            <td>
+                              <% if(left_record.keys.length > 0) %>
+                                <table cellspacing="0" cellpadding="0" style="width: 500px;">
+                                  <% left_record.each do |key,val| %>
+                                  <%   if(key != @header_list[0]) %>
+                                  <tr style="color: <%= @parent_values_color %>;font-family: arial;">
+                                    <td style="width: 250px;"> <%= key %></td> <td style="width: 250px;"> <%= val %></td>
+                                  </tr>
+                                  <%   end %>
+                                  <% end %>
+                                </table>
+                              <% end %>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td>
+                              <% if(children_header_keys.length > 0)
+                                 children_header_keys.each do |child_header_key|
+                                   left_record_child_values = left_record_children[child_header_key]
+                              %>
+                              <%   if(left_record_child_values)
+                                   header = left_record_child_values.delete(@header_list[1]) if(left_record_child_values)
+                                   if(right_record_children && right_record_children[child_header_key])
+                                     @child_values_heqader_background_color = "#F3E2A9"
+                                     @child_values_header_border = "dotted 1px #000000"
+                                     @child_values_color = "black"
+                                   else
+                                     @child_values_heqader_background_color = "pink"
+                                     @child_values_header_border = "none"
+                                     @child_values_color = "red"
+                                   end
+                              %>
+                              <table cellspacing="0" cellpadding="0" style="width: 500px;">
+                                <tr>
+                                  <td style="background-color: <%= @child_values_heqader_background_color %>;border: <%= @child_values_header_border %>;">
+                                    <%= "#{@header_list[1]} #{header}" %>
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td>
+                                    <table cellspacing="0" cellpadding="0" style="width: 500px;">
+                                      <% left_record_child_values.each do |left_record_child_values_key,left_record_child_values_val| %>
+                                      <tr style="color: <%= @child_values_color %>;font-family: arial;">
+                                        <td  style="width: 250px;"><%= left_record_child_values_key %></td><td  style="width: 250px;"><%= left_record_child_values_val %></td>
+                                      </tr>
+                                      <% end %>
+                                    </table>
+                                  </td>
+                                </tr>
+                              </table>
+                              <%    else %>
+                              <%        left_record_child_values = right_record_children[child_header_key] %>
+                              <%     header = left_record_child_values[@header_list[1]] %>
+                              <table cellspacing="0" cellpadding="0" style="width: 500px;">
+                                <tr>
+                                  <td>
+                                    &nbsp;
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td>
+                                    <table cellspacing="0" cellpadding="0" style="width: 500px;">
+                                      <% left_record_child_values.each do |left_record_child_values_key,left_record_child_values_val| %>
+                                      <tr style="font-family: arial;">
+                                        <td  style="width: 250px;">&nbsp;</td><td  style="width: 250px;">&nbsp;</td>
+                                      </tr>
+                                      <% end %>
+                                    </table>
+                                  </td>
+                                </tr>
+                              </table>
+                              <%    end %>
+                              <%   end %>
+                              <% end %>
+                            </td>
+                          </tr>
+                        </table>
+                      </div>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <% end %>
+          </table>
+        </td>
+        <!-- REPEAT THE SAME FOR THE RIGHT RECORD -->
+
+        <td valign="top"> <!-- id = right_dif_@row_count -->
+          <table cellspacing="0" cellpadding="0" style="margin-bottom: 2px;">
+            <% if(@list2_diffs.keys.include?(discrep_key)) %>
+            <tr> <!-- right diff header-->
+              <td>
+                <table style="width: 500px;" cellspacing="0" cellpadding="0">
+                  <tr>
+                    <td style="border: #808080 solid 1px;font-family: arial;background: url('/images/tlo_podmenu.gif')">
+                      <div>
+                        <table style="width: 100%;" cellspacing="0" cellpadding="0">
+                          <tr>
+                            <td>
+                              <%= "#{@header_list[0]} #{discrep_key}" %>
+                            </td>
+                            <td>
+                              <div id="right_parent_<%= @row_count %>_toggler" onclick="expand_discrep(this,'children_container','right',<%= @row_count %>);" style="text-align: right;padding-right: 10px;cursor: pointer;font: 15 black bold;">
+                                <img src='/images/expand_diff.png' title='expand' height="15" width="15"/>
+                              </div>
+                            </td>
+                          </tr>
+                        </table>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div>
+                        <table cellspacing="0" cellpadding="0" class="discrep_details_container" id="right_parent_<%= @row_count %>_children_container" style="display: block;">
+                          <tr>
+                            <td>
+                              <% if(right_record && right_record.keys.length > 0) %>
+                                <table cellspacing="0" cellpadding="0" style="width: 500px;">
+                                  <% right_record.each do |key,val| %>
+                                  <%   if(key != @header_list[0]) %>
+                                  <tr style="color: <%= @parent_values_color %>;font-family: arial;">
+                                    <td style="width: 250px;"> <%= key %></td> <td style="width: 250px;"> <%= val %></td>
+                                  </tr>
+                                  <%   end %>
+                                  <% end %>
+                                </table>
+                              <% end %>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td>
+                              <% if(children_header_keys && children_header_keys.length > 0)
+                                 children_header_keys.each do |child_header_key|
+                                   right_record_child_values = right_record_children[child_header_key]
+                              %>
+                              <%   if(right_record_child_values)
+                                   header = right_record_child_values.delete(@header_list[1]) if(right_record_child_values)
+
+                                   if(left_record_children && left_record_children[child_header_key])
+                                     @child_values_heqader_background_color = "#F3E2A9"
+                                     @child_values_header_border = "dotted 1px #000000"
+                                     @child_values_color = "black"
+                                   else
+                                     @child_values_heqader_background_color = "pink"
+                                     @child_values_header_border = "none"
+                                     @child_values_color = "red"
+                                   end
+                              %>
+                              <table cellspacing="0" cellpadding="0" style="width: 500px;">
+                                <tr>
+                                  <td style="background-color: <%= @child_values_heqader_background_color %>;border: <%= @child_values_header_border %>;">
+                                    <%= "#{@header_list[1]} #{header}" %>
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td>
+                                    <table cellspacing="0" cellpadding="0" style="width: 500px;">
+                                      <% right_record_child_values.each do |right_record_child_values_key,right_record_child_values_val| %>
+                                      <tr style="color: <%= @child_values_color %>;font-family: arial;">
+                                        <td  style="width: 250px;"><%= right_record_child_values_key %></td><td  style="width: 250px;"><%= right_record_child_values_val %></td>
+                                      </tr>
+                                      <% end %>
+                                    </table>
+                                  </td>
+                                </tr>
+                              </table>
+                              <%    else %>
+                              <%        right_record_child_values = left_record_children[child_header_key] %>
+                              <%     header = right_record_child_values[@header_list[1]] %>
+                              <table cellspacing="0" cellpadding="0" style="width: 500px;">
+                                <tr>
+                                  <td>
+                                    &nbsp;
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td>
+                                    <table cellspacing="0" cellpadding="0" style="width: 500px;">
+                                      <% right_record_child_values.each do |right_record_child_values_key,right_record_child_values_val| %>
+                                      <tr style="font-family: arial;">
+                                        <td  style="width: 250px;">&nbsp;</td><td  style="width: 250px;">&nbsp;</td>
+                                      </tr>
+                                      <% end %>
+                                    </table>
+                                  </td>
+                                </tr>
+                              </table>
+                              <%    end %>
+                              <%   end %>
+                              <% end %>
+                            </td>
+                          </tr>
+                        </table>
+                      </div>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <% end %>
+          </table>
+        </td>
+      </tr>
+    <% end %>
+    </table>
+
+  <% end %>

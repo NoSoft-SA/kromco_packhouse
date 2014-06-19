@@ -1,0 +1,164 @@
+<h1>DataGridSlick::DataGrid</h1>
+
+    
+<h2>DataGrid for creating javascript slick grid.</h2>
+
+<p>Example (controller):</p>
+
+<div class="CodeRay">
+<pre>
+<span class="instance-variable">@grid</span>         = <span class="constant">DataGridSlick</span>::<span class="constant">DataGrid</span>.new(<span class="predefined-constant">self</span>, data_set, column_configs, plugin, key_based_access, special_commands)
+<span class="instance-variable">@grid</span>.caption = <span class="string"><span class="delimiter">'</span><span class="content">list of my report views</span><span class="delimiter">'</span></span>
+<span class="instance-variable">@grid</span>.grid_id = <span class="string"><span class="delimiter">'</span><span class="content">grid_no_2</span><span class="delimiter">'</span></span>                <span class="comment"># Optional. Required if there are two grids on the same page.</span>
+</pre>
+</div>
+
+<p>Example (view):</p>
+
+<div class="CodeRay">
+<pre>
+<span class="tag">&lt;head&gt;</span>
+..
+<span class="tag">&lt;script&gt;</span>
+  <span class="inline"><span class="inline-delimiter">&lt;%=</span> <span class="instance-variable">@grid</span>.build_grid_data <span class="inline-delimiter">%&gt;</span></span> <span class="comment">&lt;!-- Returns grid rows in an array --&gt;</span>
+<span class="tag">&lt;/script&gt;</span>
+..
+<span class="tag">&lt;/head&gt;</span>
+<span class="tag">&lt;body&gt;</span>
+..
+<span class="inline"><span class="inline-delimiter">&lt;%=</span> <span class="instance-variable">@grid</span>.render_html <span class="inline-delimiter">%&gt;</span></span>       <span class="comment">&lt;!-- Renders the table and pager div as html --&gt;</span>
+<span class="inline"><span class="inline-delimiter">&lt;%=</span> <span class="instance-variable">@grid</span>.render_grid <span class="inline-delimiter">%&gt;</span></span>       <span class="comment">&lt;!-- Renders the javascript creating the grid --&gt;</span>
+</pre>
+</div>
+
+<p>Example (controller inline render calling a helper to build the grid):</p>
+<div class="CodeRay">
+<pre>
+render <span class="symbol">:inline</span> =&gt; <span class="string"><span class="delimiter">%{</span>
+  <span class="inline"><span class="inline-delimiter">&lt;%</span> grid            = build_qc_inspection_type_grid(<span class="instance-variable">@qc_inspection_types</span>,<span class="instance-variable">@can_edit</span>,<span class="instance-variable">@can_delete</span>)<span class="inline-delimiter">%&gt;</span></span>
+  <span class="inline"><span class="inline-delimiter">&lt;%</span> grid.caption    = <span class="string"><span class="delimiter">'</span><span class="content">list of all qc_inspection_types</span><span class="delimiter">'</span></span> <span class="inline-delimiter">%&gt;</span></span>
+  <span class="inline"><span class="inline-delimiter">&lt;%</span> <span class="instance-variable">@header_content</span> = grid.build_grid_data <span class="inline-delimiter">%&gt;</span></span>
+  <span class="inline"><span class="inline-delimiter">&lt;%</span> <span class="instance-variable">@pagination</span>     = pagination_links(<span class="instance-variable">@qc_inspection_type_pages</span>) <span class="keyword">if</span> <span class="instance-variable">@qc_inspection_type_pages</span> != <span class="predefined-constant">nil</span> <span class="inline-delimiter">%&gt;</span></span>
+  <span class="inline"><span class="inline-delimiter">&lt;%=</span> grid.render_html <span class="inline-delimiter">%&gt;</span></span>
+  <span class="inline"><span class="inline-delimiter">&lt;%=</span> grid.render_grid <span class="inline-delimiter">%&gt;</span></span>
+<span class="delimiter">}</span></span>, <span class="symbol">:layout</span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">content</span><span class="delimiter">'</span></span>
+</pre>
+</div>
+
+<h2>Options:</h2>
+<dl><dt>caption
+<dd>
+<p>The grid caption.</p>
+</dd><dt>grid_id
+<dd>
+<p>The html tag id to uniquely identify the grid. You only need to supply this
+if you have more than one grid in the same page/iframe - otherwise the
+default <code>jqgridid</code> will suffice.</p>
+</dd><dt>grouped
+<dd>
+<p>Boolean. Is the grid grouped by column(s)? Defaults to false.</p>
+</dd><dt>group_fields
+<dd>
+<p>Array of strings corresponding to column names. Grid will be grouped by
+these fields if <code>grouped</code> is true.</p>
+</dd><dt>group_collapsed
+<dd>
+<p>Boolean or Integer. Is the group collapsed or expanded? Defaults to false (expanded). If set to an integer, that group level and below will be collapsed. 0 is the top level.</p>
+</dd><dt>groupable_fields
+<dd>
+<p>Array of strings corresponding to column names. If any fields are provided,
+a button becomes available on the grid allowing the user to group by one of
+these columns.</p>
+</dd><dt>group_fields_to_sum
+<dd>
+<p>An Array of column names. These columns will display the sum of the column
+in each footer.</p>
+</dd><dt>group_fields_to_count
+<dd>
+<p>An Array of column names. These columns will display the number of rows in
+the group in each footer.</p>
+</dd><dt>group_fields_to_avg
+<dd>
+<p>An Array of column names. These columns will display the average of the
+column in each footer.</p>
+</dd><dt>group_fields_to_max
+<dd>
+<p>An Array of column names. These columns will display the maximum of the
+column in each footer.</p>
+</dd><dt>group_fields_to_min
+<dd>
+<p>An Array of column names. These columns will display the minimum of the
+column in each footer.</p>
+</dd><dt>fullpage
+<dd>
+<p>Boolean. Should the grid use the full height of the page? Used in most situations.
+Defaults to true.</p>
+</dd><dt>reload_url
+<dd>
+<p>String.  If you provide a url the user will have a button to reload the
+grid which will send a request to the given url.</p>
+</dd><dt>height
+<dd>
+<p>The desired height of the grid in pixels. You should use this instead of
+calling <code>set_grid_min_height</code>.</p>
+</dd><dt>width
+<dd>
+<p>The desired width of the grid in pixels.</p>
+</dd><dt>non_selectable_ids
+<dd>
+<p>An array of ids. Only applicable in a multiselect grid. Rows with matching ids are not selectable.
+Useful when non-selectable rows should be shown alongside selectable ones.</p>
+</dd></dl>
+
+<p>Example (in a helper which calls <code>get_data_grid</code>):</p>
+
+<div class="CodeRay">
+<pre>
+group_headers = [{<span class="symbol">:start_column_name</span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">report_name</span><span class="delimiter">'</span></span>, <span class="symbol">:number_of_columns</span> =&gt; <span class="integer">3</span>, <span class="symbol">:title_text</span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">Report</span><span class="delimiter">'</span></span>},
+                 {<span class="symbol">:start_column_name</span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">fieldlist</span><span class="delimiter">'</span></span>, <span class="symbol">:number_of_columns</span> =&gt; <span class="integer">2</span>, <span class="symbol">:title_text</span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">Technical stuff</span><span class="delimiter">'</span></span>}]
+get_data_grid(data_set, column_configs, <span class="predefined-constant">nil</span>, <span class="predefined-constant">nil</span>, <span class="predefined-constant">nil</span>, {<span class="symbol">:group_headers</span> =&gt; group_headers,
+                                                        <span class="symbol">:caption</span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">Some new grid caption</span><span class="delimiter">'</span></span>,
+                                                        <span class="symbol">:height</span> =&gt; <span class="integer">350</span>,
+                                                        <span class="symbol">:groupable_fields</span> =&gt; [<span class="string"><span class="delimiter">'</span><span class="content">report_name</span><span class="delimiter">'</span></span>, <span class="string"><span class="delimiter">'</span><span class="content">code</span><span class="delimiter">'</span></span>, <span class="string"><span class="delimiter">'</span><span class="content">ranking</span><span class="delimiter">'</span></span>]})
+</pre>
+</div>
+
+<p>Or creating the grid directly:</p>
+
+<div class="CodeRay">
+<pre>
+group_headers = [{<span class="symbol">:start_column_name</span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">report_name</span><span class="delimiter">'</span></span>, <span class="symbol">:number_of_columns</span> =&gt; <span class="integer">3</span>, <span class="symbol">:title_text</span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">Report</span><span class="delimiter">'</span></span>},
+                 {<span class="symbol">:start_column_name</span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">fieldlist</span><span class="delimiter">'</span></span>, <span class="symbol">:number_of_columns</span> =&gt; <span class="integer">2</span>, <span class="symbol">:title_text</span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">Technical stuff</span><span class="delimiter">'</span></span>}]
+<span class="constant">DataGridSlick</span>::<span class="constant">DataGrid</span>.new(<span class="predefined-constant">self</span>, data_set, column_configs, plugin, key_based_access, special_commands, {<span class="symbol">:group_headers</span> =&gt; group_headers,
+                                                        <span class="symbol">:caption</span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">Some new grid caption</span><span class="delimiter">'</span></span>,
+                                                        <span class="symbol">:height</span> =&gt; <span class="integer">350</span>,
+                                                        <span class="symbol">:groupable_fields</span> =&gt; [<span class="string"><span class="delimiter">'</span><span class="content">report_name</span><span class="delimiter">'</span></span>, <span class="string"><span class="delimiter">'</span><span class="content">code</span><span class="delimiter">'</span></span>, <span class="string"><span class="delimiter">'</span><span class="content">ranking</span><span class="delimiter">'</span></span>]})
+</pre>
+</div>
+
+<p>The same thing can be achieved by setting attributes after creating the grid (example from a controller):</p>
+
+<div class="CodeRay">
+<pre>
+<span class="inline"><span class="inline-delimiter">&lt;%</span> grid                  = build_qc_inspection_type_grid(<span class="instance-variable">@qc_inspection_types</span>,<span class="instance-variable">@can_edit</span>,<span class="instance-variable">@can_delete</span>)<span class="inline-delimiter">%&gt;</span></span>
+<span class="inline"><span class="inline-delimiter">&lt;%</span> grid.group_headers    = [{<span class="symbol">:start_column_name</span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">report_name</span><span class="delimiter">'</span></span>, <span class="symbol">:number_of_columns</span> =&gt; <span class="integer">3</span>, <span class="symbol">:title_text</span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">Report</span><span class="delimiter">'</span></span>},
+                            {<span class="symbol">:start_column_name</span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">fieldlist</span><span class="delimiter">'</span></span>, <span class="symbol">:number_of_columns</span> =&gt; <span class="integer">2</span>, <span class="symbol">:title_text</span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">Technical stuff</span><span class="delimiter">'</span></span>}] <span class="inline-delimiter">%&gt;</span></span>
+<span class="inline"><span class="inline-delimiter">&lt;%</span> grid.caption          = <span class="string"><span class="delimiter">'</span><span class="content">Some new grid caption</span><span class="delimiter">'</span></span> <span class="inline-delimiter">%&gt;</span></span>
+<span class="inline"><span class="inline-delimiter">&lt;%</span> grid.height           = <span class="integer">350</span> <span class="inline-delimiter">%&gt;</span></span>
+<span class="inline"><span class="inline-delimiter">&lt;%</span> grid.groupable_fields = [<span class="string"><span class="delimiter">'</span><span class="content">report_name</span><span class="delimiter">'</span></span>, <span class="string"><span class="delimiter">'</span><span class="content">code</span><span class="delimiter">'</span></span>, <span class="string"><span class="delimiter">'</span><span class="content">ranking</span><span class="delimiter">'</span></span>] <span class="inline-delimiter">%&gt;</span></span>
+</pre>
+</div>
+
+
+<p>Example from a helper:</p>
+
+<div class="CodeRay">
+<pre>
+    column_configs &lt;&lt; {<span class="symbol">:field_type</span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">text</span><span class="delimiter">'</span></span>, <span class="symbol">:field_name</span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">unit_price</span><span class="delimiter">'</span></span>, <span class="symbol">:data_type</span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">number</span><span class="delimiter">'</span></span>, <span class="symbol">:column_caption</span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">Unit price</span><span class="delimiter">'</span></span>}
+    column_configs &lt;&lt; {<span class="symbol">:field_type</span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">text</span><span class="delimiter">'</span></span>, <span class="symbol">:field_name</span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">no_cartons</span><span class="delimiter">'</span></span>, <span class="symbol">:data_type</span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">integer</span><span class="delimiter">'</span></span>, <span class="symbol">:column_caption</span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">Cartons</span><span class="delimiter">'</span></span>}
+    column_configs &lt;&lt; {<span class="symbol">:field_type</span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">text</span><span class="delimiter">'</span></span>, <span class="symbol">:field_name</span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">container_code</span><span class="delimiter">'</span></span>, <span class="symbol">:column_caption</span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">Container</span><span class="delimiter">'</span></span>, <span class="symbol">:column_width</span> =&gt; <span class="integer">400</span>}
+    column_configs &lt;&lt; {<span class="symbol">:field_type</span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">text</span><span class="delimiter">'</span></span>, <span class="symbol">:field_name</span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">exchange_rate.exchange_rate</span><span class="delimiter">'</span></span>, <span class="symbol">:column_caption</span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">Roe on etd</span><span class="delimiter">'</span></span>, <span class="symbol">:use_outer_join</span> =&gt; <span class="predefined-constant">true</span>}
+    column_configs &lt;&lt; {<span class="symbol">:field_type</span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">text</span><span class="delimiter">'</span></span>, <span class="symbol">:field_name</span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">invoice_date</span><span class="delimiter">'</span></span>, <span class="symbol">:data_type</span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">date</span><span class="delimiter">'</span></span>, <span class="symbol">:column_caption</span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">Invoice date</span><span class="delimiter">'</span></span>}
+    column_configs &lt;&lt; {<span class="symbol">:field_type</span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">text</span><span class="delimiter">'</span></span>, <span class="symbol">:field_name</span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">completed</span><span class="delimiter">'</span></span>, <span class="symbol">:data_type</span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">boolean</span><span class="delimiter">'</span></span>, <span class="symbol">:column_caption</span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">Done?</span><span class="delimiter">'</span></span>}
+</pre>
+</div>

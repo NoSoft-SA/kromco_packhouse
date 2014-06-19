@@ -1,0 +1,130 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" />
+
+<html>
+
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <style> body, html {margin:0px; padding: 0px;} </style>
+    
+      <%= stylesheet_link_tag "scaffold" %>
+    <script src = "/javascripts/util.js"></script>
+    <script src = "/javascripts/lib/prototype.js" type="text/javascript"></script>
+    <script src = "/javascripts/src/effects.js" type="text/javascript"></script>
+    <script src = "/javascripts/fields_seq.js"></script>  
+    <script src = "/javascripts/separators.js"></script>   
+    <script src = "/javascripts/popupwindow.js"></script>   
+    
+    <script language="JavaScript">
+      var global_js_grid ;
+      function send_info_my_meth_popupwin()
+      {
+      
+     return "Fire";
+      }
+      
+    grid_min_width = <%= grid_min_width%>;
+    grid_min_height = <%= grid_min_height%>;
+     var colSizes = null;
+        
+        <% if session[:alert] != nil %>
+            alert("<%= session[:alert] %>");
+            <% session[:alert]= nil %>
+        <%end%>
+        
+        <%if @info_sticker %>
+            window.parent.add_info_sticker("<%= @info_sticker %>");
+            
+        <%end%>
+        
+            
+          <%if @info %>
+            window.parent.set_info("<%= @info %>");
+            <%if @show_info_popup  %>
+              window.parent.show_info();
+            <%end%>
+         <% else%>
+            window.parent.clear_info();
+         <%end%>
+        
+        function flash_effect()
+        {
+            <% if flash[:notice] && !(@freeze_flash) %>
+                //Effect.SwitchOff('notice');
+                Effect.Fade('notice',{duration: 10});
+  	         <% end %>
+  	    }
+  	    
+    	function show_element(id)
+  		{
+    		elt = document.getElementById(id);
+    		elt.style.display = "inline";
+  
+  		}
+  		
+  		function make_element_visible(id)
+  		{
+    		elt = document.getElementById(id);
+    		elt.style.visibility = "visible";
+  
+  		}
+  		
+  		function show_action_image(clicked_cell)
+  		{
+  		  
+  			  var action_images = clicked_cell.parentNode.getElementsByTagName("img");
+  			  if (action_images != null && action_images.length > 0)
+  			  {
+  			      action_images[action_images.length - 1].style.visibility = "visible";
+  			  }
+  			    
+  		}
+  		
+  		window.parent.set_content_header_caption( <%= @content_header_caption %> );
+  		
+  	</script>
+  	
+  	<%= @header_content %>
+  	
+    <title>Admin</title>
+ 
+     <%= stylesheet_link_tag "depot", "admin", "menu", "main", "3" %>
+   
+	
+  </head>
+  <body  onload ="if(window.parent.contentFrame_loaded) {window.parent.contentFrame_loaded(); } flash_effect();">
+    <!--<div id="banner">
+      <%= @page_title  %>
+    </div>  -->    
+     
+    <div id="maine" style = "vertical-align: top;" > 
+        
+        <% if flash[:notice] -%>
+          <div id="notice"><%= flash[:notice] %></div>
+        <% end -%>
+        <% if flash[:error] -%>
+          <div id="error" class = "error"><%= flash[:error] %></div>
+          <%flash[:error] = nil%>
+        <% end -%>
+        
+	           <table><tr><td/><td id = 'applet_container'>
+		          <%= @content_for_layout %>
+		         
+		          </td>
+		         
+		          <tr><td><td align = 'left'><%= @pagination if @pagination != nil %></td><td/></tr></table>
+
+   </div><div id = 'empty_shell' /> 
+       <script>
+       try
+       {
+		          imdone();
+		      
+		}
+		catch(x)
+		{
+		alert(x);
+		}       
+		      
+		          </script>
+  </body>
+</html>

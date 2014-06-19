@@ -1,0 +1,44 @@
+#!/usr/bin/env ruby
+# EDI In-Process starter
+#
+# Arguments:
+# +in_path+::   The directory to poll for EDI in-flow files.
+# +interval+::  The number of seconds between each poll of the +in_path+.
+#               Can be omitted. Defaults to 5.
+#
+# Creates an InProcess instance with the arguments.
+# InProcess will poll the +in_path+ and process any EDI files saved there every +interval+ seconds.
+begin
+  require 'rubygems' unless ENV['RUBYOPT']
+  require 'pathname'
+  require 'nokogiri'
+
+  # Place the lib dir on the load path so the edi engine files can be loaded relative to it.
+  $LOAD_PATH.unshift File.expand_path(File.join(File.dirname(__FILE__), '../lib'))
+
+  # Change to the root of the rails app and work relative to that
+  Dir.chdir(Pathname(File.join(File.dirname(__FILE__), '../..')).cleanpath)
+
+  require 'edi/edi_errors'
+  require 'edi/edi_helper'
+  require 'edi/edi_setup'
+  require 'edi/edi_field_formatter'
+  require 'edi/raw_fixed_len_record'
+  require 'in_process'
+
+  # Could read config for dir as a default..( EdiHelper could read config when loaded )
+
+  dir_path = ARGV[0]
+  interval = ARGV[1] || 5
+
+  raise EdiProcessError, "Missing argument. Directory must be supplied as a parameter." if dir_path.nil?
+
+rescue Exception => error
+  puts "Error: " << error
+  puts error.backtrace
+  puts "Failed to start EDI In Process."
+  exit 1
+end
+
+
+InProcess.new(dir_path, interval.to_i)

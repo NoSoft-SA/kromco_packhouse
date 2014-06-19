@@ -1,0 +1,63 @@
+<%= stylesheet_link_tag "pdt" %>
+
+   <div id='pdt-container'>
+      <label style='padding-left: 8px;'>SLMS</label>
+      <div id='header'>
+       <div style='border: grey thin solid;'>
+       <% form_for :pdt do |f| %>
+        <table id='header-table'>
+          <tr>
+
+            <td id= "first_level" class="header-table-select">
+               <%= f.select(:first_level_combo, @first_level) %> <%= image_tag 'spinner.gif', :id=>'img_first_level_combo', :style=>"display:none;" %>
+            </td>
+           
+            <%= observe_field "pdt_first_level_combo",
+                              :update=>"second_level",
+                              :before=>"Element.show('img_first_level_combo')",
+                              :complete=>"Element.hide('img_first_level_combo')",
+                              :url=>{:controller=>"pdt_simulator", :action=>"first_level_combo_changed"},
+                              :with=>"'first_level_combo='+value"
+            %>
+            
+            <td id="second_level" class="header-table-select">
+               <%= f.select(:second_level_combo, @second_level) %>
+
+            </td>
+         
+            <td id="third_level" class="header-table-select">
+               <%= f.select(:third_level_combo, @third_level) %>
+                <%= image_tag 'spinner.gif', :id=>'img_third_level_combo', :style=>"display:none;" %>
+        
+            
+            </td>
+                
+       
+            <td  class='actions-drop-down' style='padding-left: 5px;width: 50px;'>
+               <div style='border-left: black thin solid;padding-left: 6px;height: 25px;padding-top: 5px;'>
+                    <%= f.select(:special_actions_combo,['<empty>','1.2.3[Refresh]','1.2.5[Cancel]','1.2.4[Undo]','Log off']) %>
+                   
+                   <%= image_tag 'spinner.gif', :id=>'img_special_actions_combo', :style=>"display:none;" %>
+         <%= observe_field :pdt_special_actions_combo, 
+                  :update => 'pdtContentFrameContainer', 
+                  :before => "Element.show('img_special_actions_combo')" ,
+                  :complete => "Element.hide('img_special_actions_combo')" ,
+                  :url => {:action=>'handle_pdt_simulator_requests', :controller => 'tools/pdt_simulator'},
+                  :with=>"'special_actions_combo=' +value" %>   
+               </div>
+            </td>
+          </tr>
+        </table>
+        <% end %>
+       </div> 
+      </div>
+                                <div class='spacer'></div>
+                                 <div class='spacer'></div>
+<!--####################################################################-->  
+   <div id='pdtContentFrameContainer'>
+    <iframe  name = "pdtContentFrame" id = "pdtContentFrame" style='width: 348px;height: 350px;' src =<%=@src%>  topmargin="0" bottommargin="0" leftmargin="0" rightmargin="0" frameborder="0" Scrolling = "Auto">      
+ 
+    </frame> 
+   </div>
+<!--####################################################################-->  
+   </div>

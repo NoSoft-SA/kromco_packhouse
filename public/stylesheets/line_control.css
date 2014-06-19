@@ -1,0 +1,158 @@
+
+.run_control_main_table {
+  
+ 
+}
+
+.run_line {
+  color: blue;
+
+  font-family: Arial;
+  font-size: 14px;
+  font-weight: bold;
+  border-top: dotted 1px black;
+  border-top: dotted 1px black;
+  border-bottom: dotted 1px black;
+  border-right: dotted 1px black;
+  border-left: dotted 1px black;
+}
+
+.run_line_code {
+  color: green;
+  font-family: Arial;
+  font-size: 11px;
+  border-top: dotted 1px black;
+  border-top: dotted 1px black;
+  border-bottom: dotted 1px black;
+  border-right: dotted 1px black;
+  border-left: dotted 1px black;
+}
+
+.run_line_code_parent {
+  color: green;
+  background-color:lightblue;
+  font-family: Arial;
+  font-size: 11px;
+  border-top: dotted 1px black;
+  border-top: dotted 1px black;
+  border-bottom: dotted 1px black;
+  border-right: dotted 1px black;
+  border-left: dotted 1px black;
+}
+
+.run_line_code_child {
+  color: green;
+  background-color:yellow;
+  font-family: Arial;
+  font-size: 11px;
+  border-top: dotted 1px black;
+  border-top: dotted 1px black;
+  border-bottom: dotted 1px black;
+  border-right: dotted 1px black;
+  border-left: dotted 1px black;
+}
+
+.run_line_code_reconfig {
+  color: orange;
+  font-family: Arial;
+  font-size: 11px;
+  border-top: dotted 1px black;
+  border-top: dotted 1px black;
+  border-bottom: dotted 1px black;
+  border-right: dotted 1px black;
+  border-left: dotted 1px black;
+}
+
+.run_line_code_reconfig_parent {
+  color: orange;
+  font-family: Arial;
+  background-color:lightblue;
+  font-size: 11px;
+  border-top: dotted 1px black;
+  border-top: dotted 1px black;
+  border-bottom: dotted 1px black;
+  border-right: dotted 1px black;
+  border-left: dotted 1px black;
+}
+
+.run_line_code_reconfig_child {
+  color: black;
+  font-family: Arial;
+  background-color:yellow;
+  font-size: 11px;
+  border-top: dotted 1px black;
+  border-top: dotted 1px black;
+  border-bottom: dotted 1px black;
+  border-right: dotted 1px black;
+  border-left: dotted 1px black;
+}
+
+.run_line_code_link {
+  color: green;
+  font-family: Arial;
+  font-size: 11px;
+  
+}
+
+.run_line_code_reconfig_link {
+  color: black;
+  font-family: Arial;
+  font-size: 11px;
+  
+}
+
+.run_stage_active {
+  color: blue;
+  font-family: Arial;
+  background-color: lightgreen;
+  font-size: 12px;
+  border-top: dotted 1px black;
+  border-top: dotted 1px black;
+  border-bottom: dotted 1px black;
+  border-right: dotted 1px black;
+  border-left: dotted 1px black;
+}
+
+.run_stage_complete {
+  color: white;
+  font-family: Arial;
+  background-color: green;
+  font-size: 12px;
+  border-top: solid 1px green;
+  border-top: solid 1px green;
+  border-bottom: solid 1px green;
+  border-right: solid 1px green;
+  border-left: solid 1px green;
+}
+
+.run_stage {
+  color: green;
+  font-family: Arial;
+  background-color: white;
+  font-size: 10px;
+  
+}
+
+.run_stage_inactive {
+  color: blue;
+  font-family: Arial;
+  background-color: white;
+  font-size: 14px;
+  border-top: dotted 1px gray;
+  border-top: dotted 1px gray;
+  border-bottom: dotted 1px gray;
+  border-right: dotted 1px gray;
+  border-left: dotted 1px gray;
+}
+
+.run_step {
+  background-color: #0000FF;
+  font-family: Arial;
+  color: white;
+  font-size: 14px;
+  
+  border-top: dotted 1px black;
+  border-bottom: dotted 1px black;
+  border-right: dotted 1px black;
+  border-left: dotted 1px black;
+}

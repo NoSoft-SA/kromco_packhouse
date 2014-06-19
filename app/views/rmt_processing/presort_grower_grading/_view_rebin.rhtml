@@ -1,0 +1,11 @@
+<tr class="<%= cycle('rowodd','roweven') %> hover-row">
+  <td align="right"><%= view_rebin.rebins_quantity %></td>
+  <td><%= view_rebin.class_code %></td>
+  <td align="right"><%= view_rebin.graded_class %></td>
+  <td align="right"><%= view_rebin.size_code %></td>
+  <td align="right"><%= view_rebin.graded_size %></td>
+  <td align="right"><%= sprintf('%0.2f', view_rebin.total_rebin_mass ) %></td>
+  <td align="right"><%= sprintf('%0.2f', view_rebin.graded_weight ) %></td>
+</tr>
+
+

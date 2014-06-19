@@ -1,0 +1,46 @@
+== Defining Masterfiles for EDI inflows
+
+Defining EDI inflows for masterfiles is very easy if these conventions are followed.
+
+=== Flow naming & configuration
+
+* If the masterfile file type is "AF", the flow will be referred-to as "MFAF".
+* Create the schema as <tt>edi/in/transformers/mfaf.xml</tt>.
+* Create the transformer as <tt>edi/in/transformers/mfaf.rb</tt>.
+* Create the model as <tt>app/models/mf_account_farm.rb</tt> (Class +MfAccountFarm+).
+* Create the database table as <tt>mf_account_farms</tt> with primary key +id+ and a unique key for the masterfile's key attributes.
+* Add <tt>MFAF: TextIn::TextTransformer</tt> to the +IN_FLOW_TYPES+ in <tt>edi/config/config.yml</tt>
+
+=== Schema
+
+The schema file is named mf<i>nn</i>.xml where <i>nn</i> is the file type.
+* The +in_map+ element's +name+ attribute must be "mfaf".
+* The +in_map+ element's +root_identifier+ attribute must be "masterfile".
+* The schema has only one +record+ element with the following attributes:
+  * +name+ must be "masterfile".
+  * +identifier+ must be "masterfile".
+  * +size+ must be "531".
+  * +occurence+ must be "1..n".
+* The +transformer+ must be of type "ruby" with +name+ "apply_masterfile_rec".
+* The first 7 fields comprise the record header (+batch_no+, +from_type+, +update_flag+, +user_name+, +date_tran+, +time_tran+ and +act_flag+).
+* The rest of the fields are the actual masterfile attributes.
+* There is only one record defined in the schema.
+
+=== The model and table
+
+* The table must be defined with attribute names matching those in the schema, except for the fields that make up the first 32 characters of the record (the header portion).
+* The primary key must be an autoincrement +id+ field.
+* There must be a unique key made up of the key fields of the masterfile.
+* The model should <tt>extend MasterfileValidator</tt> and include a class method: +check_types+.
+* +check_types+ must return a hash of possible ways to lookup a masterfile in the format <tt>{ 'typename' => 'attribute1 = ? AND attribute2 < ? ...' }</tt>. Place a ? at each position of the condition clause where a value must be substituted during the check.
+  * Then data can be validated against the masterfile by calling <tt>MasterfileModel.masterfile_has?('typename, [value1, value2, ...])</tt>.
+  * The method returns true if there is a masterfile record with attribute1 == value1 and attribute2 < value2...
+
+=== Transformer
+
+The transformer only needs to implement two (optionally three) methods and include a module:
+* +masterfile_keys+ returns an array of the table's unique key attributes as strings (<tt>['orgzn', 'acct', 'farm']</tt>).
+* +masterfile_klass+ returns the class of the model (+MfAccountFarm+).
+* +masterfile_defaults+ returns a hash of attribute names with default values. This method is optional. (<tt>{'date_end' => Date.new(2090,1,1)}</tt>).
+* Include +EdiMasterfileProcessor+.
+

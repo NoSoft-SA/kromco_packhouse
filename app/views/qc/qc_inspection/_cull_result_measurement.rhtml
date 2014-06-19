@@ -1,0 +1,25 @@
+<tr>
+  <% sample_measure = cull_result_measurement.detect {|a| !a.nil? }
+     desc = sample_measure.qc_measurement_description
+     code = sample_measure.qc_measurement_code %>
+  <td><%= code %>: <%= desc %></td>
+  <% cull_result_measurement.each do |qc_result_measurement| %>
+    <td>
+      <% if qc_result_measurement.nil? %>
+        &nbsp;
+      <% else %>
+        <% key_sample = qc_result_measurement.sample_no; key_id = qc_result_measurement.id; %>
+        <% if qc_result_measurement.annotation_1 && col_headers.include?( qc_result_measurement.annotation_1 ) %>
+          <span id="cull_entry_<%= code.downcase.tr(' _','')+qc_result_measurement.annotation_1.downcase.tr(' _','') %>">
+        <% else %>
+          <%= qc_result_measurement.annotation_1 %>:<br />
+        <% end %>
+        <%= text_field_tag "samples[#{key_sample}][measurement_#{key_id}]", qc_result_measurement.measurement, :size => 8, :class => "numberonly" %>
+        <% if qc_result_measurement.annotation_1 && col_headers.include?( qc_result_measurement.annotation_1 ) %>
+          </span>
+          <% end %>
+        <%= build_up_cull_annotation_fields(qc_result_measurement, max_cols, measurement_rules) %>
+      <% end %>
+    </td>
+  <% end %>
+</tr>

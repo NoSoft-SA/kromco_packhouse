@@ -1,0 +1,101 @@
+ <%= stylesheet_link_tag "pdt" %>
+ 
+ <div id='content'>
+      
+       <div id='output-fields-content'>
+        <table id='output-fields-table' >
+          <tr>
+            <td class="output-fields"> 
+              <label>sdf</label>
+            </td>
+          </tr>
+          <tr>
+            <td class="output-fields">
+              <label></label>
+            </td>
+          </tr>
+          <tr>
+            <td class="output-fields">
+              <label></label>
+            </td>
+          </tr>
+          <tr>
+            <td class="output-fields">
+              <label></label>
+            </td>
+          </tr>
+          <tr>
+            <td class="output-fields"> 
+              <label></label>
+            </td>
+          </tr>
+          <tr>
+            <td class="output-fields">
+              <label></label>
+            </td>
+          </tr>
+          <tr>
+            <td class="output-fields">
+              <label></label>
+            </td>
+          </tr>
+        </table>    
+       </div>
+       
+             <div class='spacer'></div>
+             <div class='spacer'></div>
+             
+       <div id='input-fields-content'>
+        <table id='input-fields-table' border='1'>
+          <tr>
+            <td> 
+              <label>input 1</label>
+            </td>
+            <td> 
+              <%= text_field(nil, nil, "size" => 20) %>
+            </td>
+          </tr>
+          <tr>
+            <td> 
+              <label>input 2</label>
+            </td>
+            <td>
+              <label><%= text_field(nil, nil, "size" => 20) %></label>
+            </td>
+          </tr>
+          <tr>
+            <td> 
+              <label>input 3</label>
+            </td>
+            <td>
+              <label><%= text_field(nil, nil, "size" => 20) %></label>
+            </td>
+          </tr>
+        </table>    
+       </div>
+       
+                <div class='spacer'></div>
+                
+       <div id='three-buttons'>
+         <table id='three-buttons-table'>
+          <tr>
+            <td> 
+              <%= button_to 'button1' %>
+            </td>
+            <td> 
+              <%= button_to 'button2'%>
+            </td>
+            <td> 
+              <%= button_to 'button3' %>
+            </td>
+          </tr>
+         </table>
+       </div>
+       
+      </div>
+      
+            <div class='spacer'></div>
+            
+      <div id='submit'>
+         <%= button_to 'submit' %>
+      </div>

@@ -1,0 +1,27 @@
+ <script src = "/javascripts/context_menu.js"></script>
+ <%
+     menu1 = ApplicationHelper::ContextMenu.new("order","order",true)
+     menu1.add_command("print_export_certificate","/fg/add_order_product")
+     menu1.add_command("export_certificate_addenums","/fg/add_order_product")
+    
+     
+ %>
+   <script>
+   <%= menu1.render %>
+   build_context_menus();
+   </script>
+
+   <table>
+     <tr>
+       <td >
+     <% field_configb = {:link_text => "dispatch_docs",
+						:link_value => @order_id.to_s,
+						:menu_name => "order" ,
+						:css_class => "run_line_code_link_black" }
+
+
+      popup_link = ApplicationHelper::PopupLink.new(nil,nil, 'none','none','none',field_configb,true,nil,self)
+      %>
+      <%= popup_link.build_control %></td>
+     </tr>
+   </table>

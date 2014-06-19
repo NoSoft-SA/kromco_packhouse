@@ -1,0 +1,6 @@
+xml.instruct!
+xml.report do
+  @results.each do |result|
+      xml<<result.to_xml(:dasherize=>false,:skip_instruct=>true,:root=>'data')
+  end
+end

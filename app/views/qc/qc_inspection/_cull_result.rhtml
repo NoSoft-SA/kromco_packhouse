@@ -1,0 +1,16 @@
+<div style="margin: 15px 0 10px;height:400px; overflow:auto;">
+  <table id="cull_results">
+    <% result_measurements = cull_result.cull_measurements
+       col_headers = result_measurements.shift %>
+    <tr><th>&nbsp;</th>
+      <% col_headers.each do |col_header| %>
+        <th><%= col_header.nil? ? '&nbsp;' : col_header %></th>
+      <% end %>
+    </tr>
+    <%= render :partial    => 'cull_result_measurement',
+               :collection => result_measurements,
+               :locals     => {:max_cols => max_cols,
+                               :col_headers => col_headers,
+                               :measurement_rules => measurement_rules } %>
+  </table>
+</div>

@@ -1,0 +1,12 @@
+<% key_id = rebin.id; %>
+<tr class="<%= cycle('rowodd','roweven') %> hover-row">
+  <td><% if rebin.is_split_rebin? %><%= link_to 'Delete', :action => 'delete_rebin', :id => rebin.id %><% else %><%= link_to 'Split', :action => 'split_rebin', :id => rebin.id %><% end %></td>
+  <td align="right"><%= rebin.rebins_quantity %></td>
+  <td><%= rebin.class_code %></td>
+  <td><%= select_tag "rebins[#{key_id}][graded_class]", options_for_select([1,2,3,4], rebin.graded_class) %></td>
+  <td><%= rebin.size_code %></td>
+  <td><%= text_field_tag "rebins[#{key_id}][graded_size]", rebin.graded_size, :size => 4 %></td>
+  <td align="right"><%= sprintf('%0.2f', rebin.total_rebin_mass ) %></td>
+  <td><%= text_field_tag "rebins[#{key_id}][graded_weight]", sprintf('%0.2f', rebin.graded_weight ), :size => 6, :class => 'numeric' %></td>
+</tr>
+

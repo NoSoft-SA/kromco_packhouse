@@ -1,0 +1,11 @@
+.big-font-labels {
+ font-family:  arial;
+ font-size:   14px;
+ font-weight: bold;
+}
+
+.smaller-font-labels {
+ font-family: verdana, arial, helvetica, sans-serif;
+ font-size:   14px;
+ font-weight: bold;
+}

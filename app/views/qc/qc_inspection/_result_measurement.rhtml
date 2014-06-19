@@ -1,0 +1,12 @@
+<% key_sample = result_measurement.sample_no; key_id = result_measurement.id;
+    css_class = "measurement_desc_#{classify_descr(result_measurement.qc_measurement_description)}"
+    css_class << ' copyable_measure' if key_sample == 1 %>
+<tr>
+  <td><%= result_measurement.qc_measurement_description %></td>
+  <td><%= text_field_tag "samples[#{key_sample}][measurement_#{key_id}]", result_measurement.measurement, :size => 8, :class => css_class %>
+    <%= result_measurement.test_uom %>
+    </td>
+
+  <%= build_up_annotation_fields(result_measurement, max_cols, measurement_rules) %>
+
+</tr>

@@ -1,0 +1,29 @@
+<% @content_header_caption = "'select date and time'" %>
+
+<div>
+    <% form_tag :action => 'list_goto_date_time_errors' do %>
+        <table border ="0">
+            
+            <tr>
+                <td><label for="error_type">Select error type:</label></td>
+                <td><%= select_tag("error_type", options_for_select(@error_types, "palletizing"))%></td>
+            </tr>
+            
+            <tr>
+            <td><label for ="view_from_date" style = "font : smaller verdana;"> From: </label></td>
+            <td><%= datetime_select("from", "view_from", :start_year => 1995) %></td>
+            </tr>
+        
+            <tr>
+            <td><label for ="view_to_date" style = "font : smaller verdana;"> To: </label></td>
+            <td><%= datetime_select("to", "view_to", :start_year => 1995) %></td>
+            </tr>
+            
+            <tr>
+                <td></td>
+                <td> <%= submit_tag "list errors" %> </td>
+            </tr>
+        </table>
+        
+    <% end %>
+</div>

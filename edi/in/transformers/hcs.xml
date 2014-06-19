@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<in-map name="hcs" identifier_size="2" root_identifier="BH">
+  <sequence>
+    <record name="csv_heading" identifier="BH" size="0" occurence="1">
+      <fields>
+        <field name="carton_id" size="9" default="Carton_ID" />
+        <field name="pallet_id" size="9" default="Pallet_ID" />
+        <field name="tradingpartner" size="14" default="TradingPartner" />
+        <field name="extended_fg_code" size="16" default="extended_fg_code" />
+        <field name="target_market" size="13" default="Target_Market" />
+        <field name="load_no" size="7" default="Load_No" />
+        <field name="grower_id" size="9" default="Grower_ID" />
+        <field name="intake_consignment_id" size="21" default="Intake_Consignment_ID" />
+        <field name="exit_reference" size="14" default="Exit_Reference" />
+        <field name="weight" size="6" default="Weight" />
+        <field name="raw_material_type" size="17" default="Raw_Material_Type" />
+        <field name="remarks" size="7" default="Remarks" />
+        <field name="container" size="9" default="Container" />
+        <field name="vessel_name" size="11" default="Vessel_Name" />
+        <field name="voyage_no" size="9" default="Voyage_no" />
+        <field name="customerpono" size="12" default="CustomerPONo" />
+        <field name="ucr" size="3" default="UCR" />
+        <field name="sell_by_code" size="12" default="sell_by_code" />
+        <field name="fg_code" size="7" default="fg_code" />
+        <field name="fg_mark_code" size="12" default="fg_mark_code" />
+        <field name="units_per_carton" size="16" default="units_per_carton" />
+        <field name="tu_gross_mass" size="13" default="tu_gross_mass" />
+        <field name="tu_nett_mass" size="12" default="tu_nett_mass" />
+        <field name="ri_diameter_range" size="17" default="ri_diameter_range" />
+        <field name="ri_weight_range" size="15" default="ri_weight_range" />
+        <field name="ru_description" size="14" default="ru_description" />
+        <field name="old_fg_code" size="11" default="old_fg_code" />
+        <field name="marketing_org_code" size="18" default="marketing_org_code" />
+        <field name="grade_code" size="10" default="grade_code" />
+        <field name="standard_size_count_value" size="25" default="standard_size_count_value" />
+        <field name="commodity_code" size="14" default="commodity_code" />
+        <field name="ri_mark_code" size="12" default="ri_mark_code" />
+        <field name="ru_mark_code" size="12" default="ru_mark_code" />
+        <field name="tu_mark_code" size="12" default="tu_mark_code" />
+        <field name="unit_pack_product_code" size="22" default="unit_pack_product_code" />
+        <field name="carton_pack_product_code" size="24" default="carton_pack_product_code" />
+        <field name="marketing_variety_code" size="22" default="marketing_variety_code" />
+        <field name="extended_fg_ru_description" size="26" default="extended_fg_ru_description" />
+        <field name="treatment_type_code" size="19" default="treatment_type_code" />
+        <field name="treatment_description" size="21" default="treatment_description" />
+        <field name="carton_pack_style_code" size="22" default="carton_pack_style_code" />
+        <field name="carton_pack_style_description" size="29" default="carton_pack_style_description" />
+        <field name="basic_pack_code" size="15" default="basic_pack_code" />
+        <field name="short_code" size="10" default="short_code" />
+        <field name="length" size="6" default="length" />
+        <field name="basic_pack_width" size="16" default="basic_pack_width" />
+        <field name="basic_pack_height" size="17" default="basic_pack_height" />
+        <field name="carton_pack_type_type_code" size="26" default="carton_pack_type_type_code" />
+        <field name="carton_pack_type_description" size="28" default="carton_pack_type_description" />
+        <field name="carton_pack_products_height" size="27" default="carton_pack_products_height" />
+        <field name="carton_pack_product_type_code" size="29" default="carton_pack_product_type_code" />
+        <field name="unit_pack_product_type_type_code" size="32" default="unit_pack_product_type_type_code" />
+        <field name="unit_pack_product_type_description" size="34" default="unit_pack_product_type_description" />
+        <field name="subtype_code" size="12" default="subtype_code" />
+        <field name="unit_pack_product_subtype_description" size="37" default="unit_pack_product_subtype_description" />
+        <field name="unit_pack_product_nett_mass" size="27" default="unit_pack_product_nett_mass" />
+        <field name="commodity_description_long" size="26" default="commodity_description_long" />
+        <field name="commodity_description_short" size="27" default="commodity_description_short" />
+        <field name="marketing_variety_description" size="29" default="marketing_variety_description" />
+        <field name="product_class_code" size="18" default="product_class_code" />
+        <field name="size_ref" size="8" default="size_ref" />
+        <field name="cosmetic_code_name" size="18" default="cosmetic_code_name" />
+        <field name="treatment_code" size="14" default="treatment_code" />
+        <field name="actual_count" size="12" default="actual_count" />
+        <field name="hansaworld" size="10" default="HansaWorld" />
+        <field name="account" size="7" default="Account" />
+        <field name="farmsubgroup" size="12" default="FarmSubGroup" />
+        <field name="farmgroup" size="9" default="FarmGroup" />
+        <field name="depot_indicator" size="15" default="Depot_Indicator" />
+        <field name="season" size="6" default="Season" />
+        <field name="linetypedesc" size="12" default="LineTypeDesc" />
+        <field name="port_of_destination" size="19" default="Port_Of_Destination" />
+        <field name="cultivar" size="19" default="Cultivar" />
+        <field name="incoterm" size="8" default="incoterm"/>
+        <field name="carton_price" size="12" default="carton_price"/>	
+        <field name="currency" size="8" default="currency"/>
+      </fields>
+    </record>
+    <record name="hansa_carton_sales" identifier="HCS" size="0" occurence="1..n">
+      <fields>
+        <field name="carton_id" size="12" />
+        <field name="pallet_id" size="18" />
+        <field name="tradingpartner" size="6" />
+        <field name="extended_fg_code" size="66" />
+        <field name="target_market" size="11" />
+        <field name="load_no" size="5" />
+        <field name="grower_id" size="3" />
+        <field name="intake_consignment_id" size="10" />
+        <field name="exit_reference" size="10" />
+        <field name="weight" size="5" type="number" />
+        <field name="raw_material_type" size="3" />
+        <field name="remarks" size="5" required="false" />
+        <field name="container" size="0" required="false" />
+        <field name="vessel_name" size="0" required="false" />
+        <field name="voyage_no" size="6" required="false" />
+        <field name="customerpono" size="5" required="false" />
+        <field name="ucr" size="17" />
+        <field name="sell_by_code" size="3" />
+        <field name="fg_code" size="41" />
+        <field name="fg_mark_code" size="17" />
+        <field name="units_per_carton" size="1" />
+        <field name="tu_gross_mass" size="4" type="number" />
+        <field name="tu_nett_mass" size="5" type="number" />
+        <field name="ri_diameter_range" size="1" required="false" />
+        <field name="ri_weight_range" size="0" required="false" />
+        <field name="ru_description" size="0" required="false" />
+        <field name="old_fg_code" size="21" />
+        <field name="marketing_org_code" size="2" />
+        <field name="grade_code" size="2" />
+        <field name="standard_size_count_value" size="2" type="number" />
+        <field name="commodity_code" size="2" />
+        <field name="ri_mark_code" size="4" />
+        <field name="ru_mark_code" size="4" />
+        <field name="tu_mark_code" size="7" />
+        <field name="unit_pack_product_code" size="8" />
+        <field name="carton_pack_product_code" size="7" />
+        <field name="marketing_variety_code" size="3" />
+        <field name="extended_fg_ru_description" size="0" required="false" />
+        <field name="treatment_type_code" size="9" />
+        <field name="treatment_description" size="10" />
+        <field name="carton_pack_style_code" size="1" />
+        <field name="carton_pack_style_description" size="10" />
+        <field name="basic_pack_code" size="2" />
+        <field name="short_code" size="3" />
+        <field name="length" size="3" type="number" />
+        <field name="basic_pack_width" size="3" type="number" />
+        <field name="basic_pack_height" size="3" type="number" />
+        <field name="carton_pack_type_type_code" size="1" />
+        <field name="carton_pack_type_description" size="6" />
+        <field name="carton_pack_products_height" size="3" type="number" />
+        <field name="carton_pack_product_type_code" size="1" />
+        <field name="unit_pack_product_type_type_code" size="1" />
+        <field name="unit_pack_product_type_description" size="4" />
+        <field name="subtype_code" size="2" />
+        <field name="unit_pack_product_subtype_description" size="9" />
+        <field name="unit_pack_product_nett_mass" size="5" type="number" required="false" />
+        <field name="commodity_description_long" size="6" />
+        <field name="commodity_description_short" size="2" />
+        <field name="marketing_variety_description" size="12" />
+        <field name="product_class_code" size="3" />
+        <field name="size_ref" size="3" />
+        <field name="cosmetic_code_name" size="2" />
+        <field name="treatment_code" size="1" />
+        <field name="actual_count" size="3" type="number" />
+        <field name="hansaworld" size="6" />
+        <field name="account" size="6" />
+        <field name="farmsubgroup" size="6" />
+        <field name="farmgroup" size="6" />
+        <field name="depot_indicator" size="16" />
+        <field name="season" size="4" />
+        <field name="linetypedesc" size="6" />
+        <field name="port_of_destination" size="1" required="false" />
+        <field name="cultivar" size="3" required="false" />
+        <field name="incoterm" size="5" required="false"/>
+        <field name="carton_price" size="7" type="number" required="false"/>	
+        <field name="currency" size="3" required="false"/>
+        </fields>
+    </record>
+  </sequence>
+</in-map>

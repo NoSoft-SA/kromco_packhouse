@@ -1,0 +1,7 @@
+
+   <% grid = build_generic_grid(@results) %>
+   <% grid.caption    = 'results' %>
+   <% @header_content = grid.build_grid_data %>
+
+   <%= grid.render_html %>
+   <%= grid.render_grid %>

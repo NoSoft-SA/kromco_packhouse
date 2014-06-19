@@ -1,0 +1,37 @@
+# Network Address (FROM depot). Set to 999 for test send. Kromco is 031.
+# NB. This value must be quoted.
+network_address: '031'
+
+# Set this flag to true to log the output string from an in-memory outflow.
+log_memory_string: true
+
+# List which Outflows are to be accumulated together.
+# To quickly change between accumulated and non-accumulated,
+# Set the value of the flow type to true or false respectively.
+# Note that not all flows need to be listed here, the default is
+# to not accumulate outflows.
+edi_out_accumulated:
+  PI: true
+  PS: true
+  PM: true
+
+# Logging levels:
+# 0 = Verbose (log everything)
+# 1 = Less verbose, log significant information only.
+# 2 = Log nothing but errors.
+log_levels:
+  edi_in: 0
+  transformer_in: 0
+  edi_out: 0
+  transformer_out: 0
+
+# Logging levels for logging to console:
+# 0 = Verbose (log everything)
+# 1 = Less verbose, log significant information only.
+# 2 = Log nothing but errors.
+console_log_levels:
+  edi_in: 0
+  transformer_in: 0
+  edi_out: 0
+  transformer_out: 0
+

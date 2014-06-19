@@ -1,0 +1,97 @@
+
+
+<table style="border-collapse: collapse;">
+    <tbody>
+        <tr>
+            <td>
+                <table style="height: 70px;border-collapse: collapse;">
+                    <tbody>
+                        <tr>
+                            <td>
+                              <%val = menu_tree[:functional_area]
+                              val = val + "[#{session[:menu_items_friendly_names][menu_tree[:functional_area]].to_s}]" if(menu_tree[:functional_area] != "&#060 empty &#062")
+                              %>
+                              <%= build_field('drop_down',val,{'width'=>300}) %>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                              <% val = menu_tree[:program]
+                              val = val + "[#{session[:menu_items_friendly_names][menu_tree[:program]].to_s}]" if(menu_tree[:program] != "&#060 empty &#062")
+                              %>
+                              <%= build_field('drop_down',val,{'width'=>300}) %>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                              <% val = menu_tree[:program_function]
+                              val = val + "[#{session[:menu_items_friendly_names][menu_tree[:program_function]].to_s}]" if(menu_tree[:program_function] != "&#060 empty &#062")
+                              %>
+                              <%= build_field('drop_down',val,{'width'=>300}) %>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                              <% val = menu_tree[:special_menu]
+                              val = val + "[#{session[:menu_items_friendly_names][menu_tree[:special_menu]].to_s}]" if(menu_tree[:special_menu] != "&#060 empty &#062")
+                              %>
+                              <%= build_field('drop_down',val,{'width'=>300}) %>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+        <tr style="height: 370px;">
+            <td>
+                <table  style="border: none;border-collapse: collapse;">
+                    <tbody>
+                        <tr>
+                            <td style="height: 15px;width: 300px;background: #AFAFAF;"><%= screen_definition.screen_attributes["content_header_caption"] %></td>
+                        </tr>
+                        <tr>
+                            <td style="">
+                              <div style="height: 355px;width: 300px;overflow:scroll;">
+                                <table>
+                                  <% screen_definition.controls.each do |control| %>
+                                    <tr>
+                                      <td NOWRAP style="font-weight: bold;font-size: 11px;">
+                                          <% if(control['label'] && control['type'] != "text_line") %>
+                                            <%= control['label'] %>
+                                          <% elsif(control['type'] != "text_line") %>
+                                            <%= control['name'] %>
+                                          <% end %>
+                                      </td>
+                                      <td><%= build_field(control['type'],control['value']) %>  </td>
+                                    </tr>
+                                  <% end %>
+                                </table>
+                              </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </td>
+        </tr>
+        <tr id="left_buttons_container" style="height: 70px;">
+            <td>
+                <table style="border: none;border-collapse: collapse;">
+                    <tbody>
+                        <tr>
+                          <% if(screen_definition.buttons['B1Enable'] == "true")%>
+                            <td style="width: 100px;"><input type="submit" value=" <%= screen_definition.buttons['B1Label']%> " /></td>
+                          <% end %>
+                          <% if(screen_definition.buttons['B2Enable'] == "true")%>
+                            <td style="width: 100px;"><input type="submit" value=" <%= screen_definition.buttons['B2Label']%> " /></td>
+                          <% end  %>
+                          <% if(screen_definition.buttons['B3Enable'] == "true")%>
+                            <td style="width: 100px;"><input type="submit" value=" <%= screen_definition.buttons['B3Label']%> " /></td>
+                          <% end %>
+                        </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+    </tbody>
+</table>

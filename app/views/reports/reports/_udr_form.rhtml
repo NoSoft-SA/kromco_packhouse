@@ -1,0 +1,57 @@
+     <table border='0'>
+         <tr>
+           <td>Code</td><td><%=form.text_field(:code)%></td>
+           <td rowspan="12" style="vertical-align:top;padding-left:10px;">
+              Link users to this view:
+              <%= select_tag 'linked_users[]', options_for_select(@users, @linked_users), :multiple => true, :class => 'multiselect' %>
+           </td>
+         </tr>
+         <tr>
+           <td>Group Name</td><td><%=form.text_field(:group_name)%></td>
+         </tr>
+         <tr>
+           <td>List of fields</td><td><%=form.text_field(:fieldlist)%></td>
+         </tr>
+         <tr>
+           <td>&nbsp;</td><td><label><%=form.check_box(:show_parameters)%>Change parameters before launch?</label></td>
+         </tr>
+         <tr>
+           <td>&nbsp;</td><td><label><%=form.check_box(:webquery_only)%>Only run as a webquery?</label></td>
+         </tr>
+         <tr>
+            <td>
+                existing report descriptions
+            </td>
+            <td id='existing_reports_td'>
+                <%=form.select(:existing_report, @existing_reports_list)%><%=image_tag 'spinner.gif', :id=>'img_existing_reports', :style=>'display:none;'%>
+            </td>
+                <%=observe_field 'user_defined_report_existing_report',
+                       :update=>'report_name_td',
+                       :before=>'Element.show("img_existing_reports")',
+                       :complete=>'Element.hide("img_existing_reports")',
+                       :url=>{:controller=>'reports', :action=>'existing_reports_combo_changed'},
+                       :with=>'"existing_report="+value'
+                %>
+         </tr>
+         <tr>
+            <td>
+                report description
+            </td>
+            <td id='report_name_td'>
+                <%=form.text_field(:user_defined_report_name)%>
+            </td>
+         </tr>
+         <tr>
+            <td>
+                ranking
+            </td>
+            <td id='ranking_td'>
+                <%=form.text_field(:ranking, :size=>20)%>
+            </td>
+         </tr>
+         <tr> 
+            <td></td>
+            <td> <button>update view</button></td>
+        </tr>
+     </table>
+

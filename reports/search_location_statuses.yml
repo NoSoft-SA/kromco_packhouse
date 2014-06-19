@@ -1,0 +1,30 @@
+query: SELECT * FROM transaction_statuses WHERE(transaction_statuses.status_type_code='COLDSTORE' and transaction_statuses.object_id={transaction_statuses.object_id} and created_on={created_on}and transaction_statuses.status_code={transaction_statuses.status_code} )order by transaction_statuses.id desc
+main_table_name: transaction_statuses
+default_report_index_group_name: System
+
+fields:
+  field1:
+   field_name: created_on
+   caption: date
+   field_type: daterange
+  field2:
+   field_name: transaction_statuses.object_id
+   caption: object id
+   field_type: text
+  field3:
+   field_name: transaction_statuses.status_code
+   caption: status code
+   field_type: lookup
+   list: "select status_code FROM statuses WHERE status_type_code = 'COLDSTORE'order by status_code asc "
+
+
+# select * from transaction_statuses where (transaction_statuses.object_id = '#{object_id}' and transaction_statuses.status_type_code = '#{status_type_code}' order by transaction_statuses.id desc
+
+
+
+
+
+
+
+
+

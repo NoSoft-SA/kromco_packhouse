@@ -1,0 +1,60 @@
+<table style="float:left">
+  <tr>
+    <td>Inspection Test Number:</td>
+    <td class="heading_field"><%= @qc_inspection_test.inspection_test_number %></td>
+  </tr>
+  <%= display_inspection_business_info @qc_inspection_test.qc_inspection %>
+</table>
+
+  <div id="qc_test_add_sample">
+    <% form_remote_tag :url => {:action => 'add_test_sample', :id => @qc_inspection_test.id },
+                                :before   => "Element.show('qc_test_add_sample_spinner');",
+                                :complete => "Element.hide('qc_test_add_sample_spinner');" do %>
+  <fieldset>
+    <legend>Add Samples</legend>
+    <p>
+      Number of samples to add: <%= text_field_tag( 'no_of_samples', nil, :size => 6) %>
+      <%= submit_tag 'add' %>
+      <%=image_tag 'spinner.gif', :id=>'qc_test_add_sample_spinner', :style=>'display:none;'%>
+      <br />(Currently <span id="qc_sample_size"><%= @qc_results.size %></span> samples)
+    </p>
+  </fieldset>
+  <% end %>
+  </div>
+
+  <h3 class="qc_heading">Test Samples</h3>
+
+<% form_for :qc_inspection_test, :url => { :action => 'save_qc_inspection_test', :id => @qc_inspection_test.id } do |f|%>
+
+  <%= render :partial => 'test_form_completion', :locals => {:from_list     => @from_list,
+                                                             :auto_complete => @auto_complete,
+                                                             :f             => f} %>
+
+  <div id="qc_test_results">
+    <p>
+    <button id="copy_samples" onclick="copySamples();return false;">Copy values from first sample to all other samples</button>
+    </p>
+
+    <%= render :partial => 'result', :collection => @qc_results,
+                                     :locals     => {:max_cols => @qc_inspection_test.max_columns_for_measurements,
+                                                     :measurement_rules => @qc_inspection_test.measurement_rules } %>
+  </div>
+
+  <button>Save</button>
+<% end %>
+<script type="text/javascript">
+  // Get the values of all sample 1 measurements (where class is copyable_measure).
+  // For each measure get the class (after removing copyable_measure).
+  // Find all inputs with the same class and set their input values to the value from
+  // sample 1.
+  var copySamples;
+  copySamples = function() {
+    jQuery('#sample_table_1 .copyable_measure').each(function(i, elem) {
+        var val = jQuery(elem).val();
+        var css_class_list = jQuery(elem).attr('class').split(/\s+/)
+        css_class_list.splice(css_class_list.indexOf('copyable_measure'),1);
+        var css_class = css_class_list[0];
+        jQuery('.' + css_class).val(val);
+    });
+  };
+</script>

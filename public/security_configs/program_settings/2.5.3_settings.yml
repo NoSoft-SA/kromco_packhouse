@@ -1,0 +1,25 @@
+--- 
+- !ActiveRecord,2010/FunctionalArea 
+  attributes: 
+    class_name: 
+    functional_area_name: "2.5"
+    id: "45"
+    disabled: f
+    is_non_web_program: t
+    display_name: rmt inter warehouse
+- - !ActiveRecord,2010/Program 
+    attributes: 
+      class_name: BinEnquiry
+      is_leaf: t
+      url_component: 
+      functional_area_name: "2.5"
+      technology: 
+      id: "293"
+      disabled: f
+      description: 
+      functional_area_id: "45"
+      is_non_web_program: t
+      display_name: bin_enquiry
+      program_name: 2.5.3
+  - []
+

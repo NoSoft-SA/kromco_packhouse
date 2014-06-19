@@ -1,0 +1,3 @@
+class PalletViewer < PalletSequenceNavigator
+  
+end

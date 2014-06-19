@@ -1,0 +1,23 @@
+<tr>
+  <% sample_measure = cull_result_measurement_view.detect {|a| !a.nil? }
+     desc = sample_measure.qc_measurement_description
+     code = sample_measure.qc_measurement_code %>
+  <td><%= code %>: <%= desc %></td>
+  <% cull_result_measurement_view.each do |qc_result_measurement| %>
+    <td align="right">
+      <% if qc_result_measurement.nil? %>
+        &nbsp;
+      <% else %>
+        <% key_sample = qc_result_measurement.sample_no; key_id = qc_result_measurement.id; %>
+        <% if qc_result_measurement.annotation_1 && col_headers.include?( qc_result_measurement.annotation_1 ) %>
+  <% @qc_ann_total[qc_result_measurement.annotation_1] += qc_result_measurement.measurement.to_i %>
+        <% else %>
+          <%= qc_result_measurement.annotation_1 %>:<br />
+        <% end %>
+        <%= measure_formatted( qc_result_measurement.measurement, true ) %>
+        <%= build_up_cull_annotation_fields(qc_result_measurement, max_cols, measurement_rules, true) %>
+      <% end %>
+    </td>
+  <% end %>
+</tr>
+

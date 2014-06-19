@@ -1,0 +1,64 @@
+<%= stylesheet_link_tag "scaffold", "depot", "admin", "menu", "main", "3", "delivery" %>
+ <% form_tag :action => 'update_facility',:id=>@facility do %>
+
+<table>
+   <tr>
+       <td>facility type code</td>
+       <td  id = 'facility_type_code_cell'>
+         <!--<select id="facility_facility_type_code" name="facility[facility_type_code]"></select>-->
+         <% facility_type_codes = FacilityType.find_by_sql("select * from facility_types").map{|g|[g.facility_type_code]} %>
+         <%= select('facility','facility_type_code',facility_type_codes) %>
+       </td>
+   </tr>
+   <tr>
+       <td>organization code</td>
+       <td  id = 'organization_code_cell'>
+            <!--<select id="facility_organization_id" name="facility[organization_id]"></select>-->
+            <% organization_codes = Organization.find_by_sql("select * from organizations").map{|o|[o.short_description]} %>
+            
+            <% organization_codes.unshift(@facility.organization.short_description)%>
+            <%= select('organisation','organization_code',organization_codes) %>
+       </td>
+   <tr>
+        <td>facility code</td>
+        <td  id = 'facility_code_cell'>
+           <%= text_field 'facility' , 'facility_code' %>
+        </td>
+   </tr>
+   <tr>
+         <td></td>
+         <td>
+            <%= submit_tag "save" %>
+         </td>
+   </tr>
+</table>
+
+<% end %>
+
+<br>
+<% field_config = {:settings =>
+                      {:id_value =>@facility.id,
+                       :host_and_port =>request.host_with_port.to_s,
+                       :controller =>request.path_parameters['controller'].to_s ,
+                       :target_action => 'new_location',
+                      :link_text =>'new locations'}}
+	
+
+      popup_link = ApplicationHelper::LinkPopUpWindow_field.new(nil,@facility, 'none','none','none',field_config,true,nil,self)
+      %>              
+      <%= popup_link.build_control %>
+
+<br>
+<% field_config = {:settings =>
+                      {:id_value =>@facility.id,
+                       :host_and_port =>request.host_with_port.to_s,
+                       :controller =>request.path_parameters['controller'].to_s ,
+                       :target_action => 'list_locations',
+                      :link_text =>'list locations'}}
+	
+
+      popup_link = ApplicationHelper::LinkPopUpWindow_field.new(nil,@facility, 'none','none','none',field_config,true,nil,self)
+      %>              
+      <%= popup_link.build_control %>
+
+

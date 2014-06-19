@@ -1,0 +1,29 @@
+<% if from_list %>
+  <%= hidden_field_tag :from_list, 'y' %>
+<% end %>
+
+<% if auto_complete %>
+  <%= f.hidden_field :passed, :value => true %>
+  <%= f.hidden_field :complete, :value => true %>
+<% else %>
+  <fieldset><legend>Complete the test</legend>
+    <table>
+      <tr>
+        <td>
+          <label><%= f.radio_button :passed, true %>Test passed?</label>
+        </td>
+        <td>
+          <label><%= f.radio_button :passed, false %>Test failed/incomplete?</label>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label><%= f.radio_button :complete, true %>Test complete?</label>
+        </td>
+        <td>
+          <label><%= f.radio_button :complete, false %>Test still in progress?</label>
+        </td>
+      </tr>
+    </table>
+  </fieldset>
+<% end %>

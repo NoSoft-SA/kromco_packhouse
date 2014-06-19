@@ -1,0 +1,9 @@
+<% @content_header_caption = "'update view for #{dm_session[:report_name]} report'"%>
+
+<%= error_messages_for 'user_defined_report'%>
+
+<% form_for :user_defined_report, :url=>{:action=>'update_all_view', :id=>@user_defined_report} do |form|%>
+
+  <%= render :partial => 'udr_form', :locals => {:form => form} %>
+
+<% end %>

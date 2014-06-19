@@ -1,0 +1,36 @@
+
+<% form_tag :action => 'calculate_quantities',:id=> @quantity_list do %>
+
+
+<TABLE BORDER="1" STYLE="border-collapse: collapse;">
+       <TR>
+			<TD ALIGN=LEFT BGCOLOR="#C0C0C0"><%= @content_header_caption %></TD>
+       </TR>
+</TABLE>
+
+<br><br>
+
+<TABLE STYLE="border-collapse: collapse;"  BORDER="1">
+
+		<TR>
+			<TD  ALIGN=LEFT BGCOLOR="#C0C0C0">quantity required</TD>
+			<TD  ALIGN=RIGHT BGCOLOR="#C0C0C0" SDVAL="200" SDNUM="7177;"><%= @forecast_variety.quantity %></TD>
+		</TR>
+  
+    <% for forecast_variety_indicator in @forecast_variety.forecast_variety_indicators %>
+		<TR>
+			<TD HEIGHT=37 ALIGN=LEFT><%= forecast_variety_indicator.track_slms_indicator_code %>(<%= forecast_variety_indicator.quantity %>)</TD>
+			<!--<TD ALIGN=LEFT><%= Float.round_float(0,(forecast_variety_indicator.quantity.to_f / @forecast_variety.quantity.to_f) * 100).to_i %> <%= text_field 'quantity_list', "_" + forecast_variety_indicator.id.to_s %><%= forecast_variety_indicator.id %></TD>
+			-->
+		
+		    <TD ALIGN=LEFT><%= text_field 'quantity_list', "_" + forecast_variety_indicator.id.to_s %></TD>
+		    
+		</TR>
+	<% end %>
+</TABLE>
+
+<br>
+  <%if @quantity_list != nil %>
+    <%= submit_tag "calc quantities" %>
+  <% end %>
+<% end %>

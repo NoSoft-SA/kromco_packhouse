@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<in-map name="pdf417" identifier_size="1" root_identifier="I">
+  <record name="intake_header" identifier="I" size="144" occurence="1">
+    <transformer>
+      <action type="ruby" name="map_header"/>
+    </transformer>
+    <fields>
+      <field name="doc_type" size="1" default="I" />
+      <field name="doc_type2" size="1" default="N" />
+      <field name="version" size="4" default=" 2.5" />
+      <field name="barcode_type" size="1" default="P" />
+      <field name="record_type" size="1" default="H" />
+      <field name="organization_code" size="2"/>
+      <field name="season" size="4"/>
+      <field name="account_code" size="6" />
+      <field name="truck_number" size="10" required="false" />
+      <field name="transport_type" size="1" required="false" default="T" />
+      <field name="truck_type" size="1" required="false" default="F" />
+      <field name="pack_order_number" size="6" required="false" />
+      <field name="qty_cartons" size="7" type="number" format="ZEROES" />
+      <field name="qty_pallets" size="7" type="number" format="DECIMAL" />
+      <field name="consignment_note_number" size="10" />
+      <field name="depot_code" size="7" required="false" default="KROMCO" />
+      <field name="consignment_date" size="8" type="date" format="DATE" />
+      <field name="carrier" size="8" default="OWN" />
+      <field name="pallet_base_code" size="1" required="false"/>
+      <field name="inspection_date" size="8" required="false" type="date" format="DATE"/>
+      <field name="inspection_point" size="4" required="false" format="ZEROES" default="0" />
+<!-- NOTE: inspector number should be formatted ZEROES according to spec, but KR does have text values. -->
+      <field name="inspector_number" size="4" required="false" default="0000" />
+      <field name="inspection_temp" size="6" required="false" format="TEMP" default="99.99" />
+      <field name="channel" size="1" default="E" />
+      <field name="filler" size="5" required="false"/>
+      <field name="packhouse_code" size="7" required="false"/>
+      <field name="boe" size="6" required="false"/>
+      <field name="barcode_no" size="1" required="false"/>
+      <field name="no_of_barcodes" size="1" type="number" required="false"/>
+      <field name="filler_future" size="15" required="false"/>
+    </fields>
+    <child>
+      <record name="gtin" identifier="G" size="45" occurence="1..n" >
+        <transformer>
+          <action type="ruby" name="map_gtin"/>
+        </transformer>
+        <fields>
+          <field name="record_type" size="1" default="G" />
+          <field name="gtin" size="14"/>
+          <field name="target_market_name" size="2"/>
+          <field name="pick_reference" size="4"/>
+          <field name="product_characteristics" size="5" required="false"/>
+          <field name="n_cartons" size="7" type="number" format="ZEROES" />
+          <field name="n_pallets" size="7" type="number" format="DECIMAL" />
+          <field name="filler" size="5" required="false"/>
+        </fields>
+        <child>
+          <record name="pallet" identifier="P" size="31" occurence="1..n">
+            <transformer>
+              <action type="ruby" name="map_pallet"/>
+            </transformer>
+            <fields>
+              <field name="record_type" size="1" default="P" />
+              <field name="depot_pallet_number" size="18"/>
+              <field name="sell_by_code" size="10" required="false" default="-" />
+              <field name="pallet_base_code" size="1" required="false"/>
+              <field name="mixed_pallet" size="1" required="false"/>
+            </fields>
+            <child>
+              <record name="pallet_sequence" identifier="S" size="49" occurence="1..n">
+                <transformer>
+                  <action type="ruby" name="map_pallet_sequence"/>
+                </transformer>
+                <fields>
+                  <field name="record_type" size="1" default="S" />
+                  <field name="pallet_sequence_number" size="2" type="number"/>
+                  <field name="puc" size="7"/>
+                  <field name="batch_code" size="20" required="false" />
+                  <field name="seq_ctn_qty" size="7" type="number" format="ZEROES" />
+                  <field name="orchard_no" size="5" required="false" />
+                  <field name="target_region" size="5" />
+                  <field name="target_country" size="2" />
+                </fields>
+              </record>
+            </child>
+          </record>
+        </child>
+      </record>
+    </child>
+  </record>
+</in-map>

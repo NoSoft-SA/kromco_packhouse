@@ -1,0 +1,9 @@
+<fieldset class="qc_results">
+  <legend>Sample <%= result.sample_no %></legend>
+  <table id="sample_table_<%= result.sample_no %>">
+    <%= render :partial    => 'result_measurement',
+               :collection => result.qc_result_measurements,
+               :locals     => {:max_cols => max_cols,
+                               :measurement_rules => measurement_rules } %>
+  </table>
+</fieldset>

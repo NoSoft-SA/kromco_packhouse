@@ -1,0 +1,131 @@
+ <%= stylesheet_link_tag "carton_label_preview"%>
+    <script>
+      this.window.resizeTo( 510,475 );
+    </script>
+<div style="overflow: hidden;">
+
+<table style="width: 500px;border-collapse: collapse;">
+  <tr>
+    <td style="width: 15%;">  
+       COMM: <strong><%= @carton_label_preview.commodity_code %></strong>
+    </td>
+    <td style="width: 50%;">
+       VARIETY:
+    </td>
+    <td style="width: 15%;">
+       MARK:
+    </td>
+    <td style="width: 13%;">
+       PACK:
+    </td>
+  </tr>
+  <tr >
+    <td style="width: 15%;">
+        <label class="big-font-labels"><%= @carton_label_preview.commodity_description %></label>    
+    </td>
+    <td style="width: 50%;">
+        <label class="big-font-labels"><%= @carton_label_preview.variety_short_long %></label>
+    </td>
+    <td style="width: 15%;">
+        <label class="big-font-labels"><%= @carton_label_preview.brand_code %></label>
+    </td>
+    <td style="width: 13%;">
+        <label class="big-font-labels"><%= @carton_label_preview.old_pack_code %></label>    
+    </td>
+  </tr>
+</table>
+        <table style="border-bottom: 1px solid black; border-top: 1px solid black; height: 280px;" cellspacing="0">
+            <tr>
+                <td rowspan="3" colspan="2" style="width: 224px; border-right: 1px solid black; text-align:left;">
+                    &nbsp; <%= image_tag('/images/menu/production/carton_setup/fruit121.GIF') %><br />
+                    &nbsp; <font size="1"><%= @carton_label_preview.gtin_readable %></font> </td>
+                <td colspan="2" style="height: 16px">
+                    &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span><span style="font-size: 10pt"><span
+                        style="font-family: Arial"><span style="font-size: 9pt"><%= @carton_label_preview.print_count %>:<br />
+                        </span>
+                        <strong>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; <span style="font-size: 9pt">
+                            <label class="big-font-labels"><%= @carton_label_preview.actual_size_count_code %></label></span></strong></span></span></span></td>
+                <td rowspan="4" colspan="2" style="width: 111px; border-left: 1px solid black; text-align:right; vertical-align:top;">
+                    &nbsp; &nbsp; &nbsp; &nbsp;<%= image_tag('/images/menu/production/carton_setup/fruit111.GIF')%> <br />
+                    &nbsp; <font size="1">1 000016 965163</font> </td>
+            </tr>
+
+            <tr>
+                <td style="width: 64px; height: 17px; border-top: 1px solid black;">
+                    &nbsp;&nbsp; <span><span style="font-size: 10pt"><span style="font-family: Arial"><span
+                        style="font-size: 9pt">GROUP:</span><br />
+                        <strong>&nbsp; &nbsp; &nbsp;&nbsp; <span style="font-size: 9pt"><label class="big-font-labels"><%= @carton_label_preview.grade_code %></label></span></strong></span></span></span></td><td style="width: 60px; height: 17px; border-top: 1px solid black; border-left: 1px solid black;"> &nbsp;<span><span style="font-size: 10pt"><span
+                    style="font-family: Arial"><span style="font-size: 9pt">MARKET:<br />
+                    </span>
+              <strong>&nbsp; &nbsp; &nbsp; &nbsp;<span style="font-size: 9pt"><label class="big-font-labels"><%= @carton_label_preview.target_market_code %></label></span></strong></span></span></span></td>
+            </tr>
+
+            <tr>
+                <td style="width: 64px; height: 47px; border-top: 1px solid black;">
+                    &nbsp;<span style="font-size: 10pt"> &nbsp;&nbsp; </span><span><span style="font-size: 10pt">
+                        <span style="font-family: Arial"><span style="font-size: 9pt">ORG:</span><br />
+                        <strong>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp;<span style="font-size: 9pt"><label class="big-font-labels"><%= @carton_label_preview.organization_code %></label></span></strong></span></span></span></td> <td style="width: 60px; height: 47px; border-top: 1px solid black; border-left: 1px solid black;"> &nbsp; &nbsp; <span>
+                            <span style="font-size: 10pt"><span style="font-family: Arial"><span style="font-size: 9pt">
+                                INV:<br />
+                            </span>
+            <strong>&nbsp; &nbsp; &nbsp; <span style="font-size: 9pt"><label class="big-font-labels"><%= @carton_label_preview.inventory_code %></label></span></strong></span></span></span></td>
+            </tr>
+
+            <tr>
+                <td colspan="2" style="width: 224px; height: 11px; border-top: 1px solid black; border-right: 1px solid black;">
+                    <span><span><span style="font-family: Arial"><span style="font-size: 9pt">BATCH: &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp;&nbsp;
+                        &nbsp;&nbsp;PACK REF: &nbsp; &nbsp;Packer:<br />
+                        <strong><%= @carton_label_preview.batch_code %> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <%= @carton_label_preview.pick_ref %> &nbsp;&nbsp;&nbsp; &nbsp;<font color="red">[no scan]</font></strong></span></span></span></span></td>
+                <td style="width: 85px; text-align:center; height: 11px; border-top: 1px solid black;" colspan="2"> <b><span style="font-size: 11pt">
+                    <span style="font-size: 10pt">&nbsp; &nbsp; <span style="font-family: Arial">&nbsp;<span
+                        style="font-size: 9pt">
+                    <label class="big-font-labels"><%= @carton_label_preview.pallet_format_product_code %></label></span></span></span><span style="font-family: Arial">
+                        </span></span></b></td>
+            </tr>
+            
+            <tr>
+                <td colspan="4" style="border-top: 1px solid black; height: 11px;">
+                   <table> 
+                     <tr>
+                       <td>
+                         <label><%= @carton_label_preview.diameter_heading %></label>
+                       </td>
+                       <td>  
+                         <label><%= @carton_label_preview.marking_heading %></label>
+                       </td>
+                     </tr>
+                     <tr>
+                        <td style="width: 150px;">
+                         <label class="smaller-font-labels" ><%= @carton_label_preview.diameter %></label>
+                        </td>
+                        <td>  
+                         <label class="smaller-font-labels"><%= @carton_label_preview.marking %></label>
+                        </td>
+                      </tr>
+                   </table>
+                    </td>
+                <td colspan="2" style="width: 111px; border-top: 1px solid black; border-left: 1px solid black; height: 11px;">
+                    <span style="font-size: 11pt"><strong>&nbsp; &nbsp;&nbsp; <span style="font-size: 9pt">
+                       <label class="smaller-font-labels"><%= @carton_label_preview.class_code %></label></span></strong></span></td>
+            </tr>
+            <tr>
+                <td colspan="6" style="border-top: 1px solid black;">
+                    <span><span><span style="font-family: Arial"><span style="font-size: 9pt"><span>PHC NR: &nbsp; &nbsp; PUC NR: &nbsp;&nbsp; EurepGAP Certificate
+                        &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; Nature's Choice Certificate<br />
+                    </span>
+                        <strong><%= @carton_label_preview.phc %> &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; <%= @carton_label_preview.puc_code %> &nbsp; &nbsp; &nbsp;&nbsp;&nbsp; <%= @carton_label_preview.egap %>
+                            &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <%= @carton_label_preview.nature_choice_certificate %></strong></span></span></span></span></td>
+            </tr>
+            <tr>
+                <td colspan="6" style="border-top: 1px solid black; height: 17px;">
+                    &nbsp;<strong><span style="font-size: 8pt; font-family: Arial;"><%= @carton_label_preview.extended_fg_code %></span></strong></td>
+            </tr>
+            <tr>
+                <td colspan="6" style="height: 29px; border-top: 1px solid black;">
+                    <span style="font-size: 11pt"><strong>&nbsp;</strong><span style="font-size: 8pt; font-family: Arial;">Exporter</span><strong><span
+                        style="font-family: Arial"> &nbsp; &nbsp; &nbsp; </span><span style="font-size: 9pt; font-family: Arial;"><%= @carton_label_preview.organization_address_1 %><br />
+                        </span>&nbsp;</strong><span style="font-family: Arial"><span style="font-size: 8pt">Address:</span><strong> &nbsp; &nbsp;
+                            &nbsp; &nbsp;&nbsp; <span style="font-size: 9pt"><%= @carton_label_preview.organization_address_2 %></span></strong></span></span></td>
+            </tr>
+        </table>
+    </div>

@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<in-map name="ti" identifier_size="2" root_identifier="BH">
+  <sequence>
+    <record name="doc_header" identifier="BH" size="87" occurence="1">
+      <fields>
+        <field name="header" size="2" default="BH" />
+        <field name="network_address" size="3" format="ZEROES" />
+        <field name="batch_number" size="6" format="ZEROES" />
+        <field name="create_date" size="8" format="DATE"/>
+        <field name="create_time" size="8" format="HMS" />
+        <field name="system_provider" size="30" required="false" default="JJ Multitier" />
+        <field name="system_version" size="30" required="false"  default="Ver.2003.01" />
+      </fields>
+      <children>
+        <record name="in_consignment" identifier="IC" size="446" occurence="1..n" >
+          <fields>
+            <field name="record_type" size="2" default="IC" />
+            <field name="load_id" size="10" />
+            <field name="location_type" size="2" default="DP" />
+            <field name="location_code" size="7" default="KROMCO" />
+            <field name="document_number" size="10" />
+            <field name="truck_level" size="1" default="P" />
+            <field name="organisation" size="2" />
+            <field name="document_type" size="2" />
+            <field name="document_date" size="8" format="DATE" />
+            <field name="rail_date" size="8" format="DATE" />
+            <field name="account" size="6" required="false" />
+            <field name="channel" size="1" default="E" />
+            <field name="pro_no" size="5" format="ZEROES" />
+            <field name="carton_quantity" size="8" format="ZEROES" />
+            <field name="pallet_quantity" size="9" format="DECIMAL" />
+            <field name="full_pallet" size="8" format="ZEROES" />
+            <field name="inc_pallet" size="8" format="ZEROES" />
+            <field name="season" size="4" />
+            <field name="client_ref" size="10" required="false" />
+            <field name="endorse1" size="2" required="false" />
+            <field name="endorse2" size="2" required="false" />
+            <field name="endorse3" size="2" required="false" />
+            <field name="endorse4" size="2" required="false" />
+            <field name="order_no" size="6" required="false" />
+            <field name="from_location_type" size="2" default="DP" />
+            <field name="from_location_code" size="7" default="KROMCO" />
+            <field name="document_status" size="1" default="C" />
+            <field name="inspector" size="4" required="false" />
+            <field name="inspector_flag" size="1" default="Y" />
+            <field name="inspection_date" size="8" format="DATE" required="false" />
+            <field name="inspection_time" size="5" format="HM" required="false" />
+            <field name="inspection_point" size="4" required="false" />
+            <field name="inspection_report" size="6" required="false" />
+            <field name="evaluation_from_number" size="6" required="false" />
+            <field name="evaluation_to_number" size="6" required="false" />
+            <field name="temperature" size="6" format="TEMP" default="+99.99" />
+            <field name="batch" size="5" format="ZEROES" required="false" />
+            <field name="transmission_flag" size="1" default="N" />
+            <field name="revision_number" size="5" format="ZEROES" />
+            <field name="message_number" size="8" format="ZEROES" default="0" />
+            <field name="transaction_user" size="7" default="KROMCO" />
+            <field name="transaction_date" size="8" format="DATE" />
+            <field name="transaction_time" size="5" format="HM" />
+            <field name="load_reference" size="10" required="false" />
+            <field name="load_name" size="25" required="false" />
+            <field name="transport_type" size="1" default="T" />
+            <field name="truck_type" size="1" default="F" />
+            <field name="arrival_date" size="8" format="DATE" />
+            <field name="arrival_time" size="5" format="HM" />
+            <field name="intake_point" size="2" required="false" default="C4"/>
+            <field name="carrier" size="8" default="KROMCO" />
+            <field name="pallet_quantity_2" size="9" format="DECIMAL" />
+            <field name="carton_quantity_2" size="8" format="ZEROES" />
+            <field name="truck_number" size="12" default="KROMCO" />
+            <field name="fully_loaded" size="1" required="false" />
+            <field name="instruction_type" size="1" required="false" />
+            <field name="master_order_number" size="6" required="false" />
+            <field name="client_reference" size="10" required="false" />
+            <field name="trip_number" size="8" required="false" />
+            <field name="temperature1" size="6" format="TEMP" default="+99.99" />
+            <field name="temperature2" size="6" format="TEMP" default="+99.99" />
+            <field name="temperature3" size="6" format="TEMP" default="+99.99" />
+            <field name="temperature4" size="6" format="TEMP" default="+99.99" />
+            <field name="load_type" size="1" required="false" />
+            <field name="ship_number" size="6" required="false" />
+            <field name="orchard" size="5" required="false" />
+            <field name="reference_number" size="8" required="false" />
+            <field name="pallet_base_type" size="1" required="false" />
+            <field name="bill_of_entry_number" size="6" required="false" />
+            <field name="inspec_temperature" size="6" format="TEMP" required="false" />
+            <field name="principal" size="2" required="false" />
+            <field name="phyto_date" size="8" format="DATE" required="false" />
+            <field name="waybill_no_old" size="7" required="false" />
+            <field name="lot_no" size="10" required="false" />
+            <field name="packh_code" size="7" required="false" />
+            <field name="sellbycode" size="10" required="false" />
+            <field name="waybill_no" size="10" required="false" />
+          </fields>
+          <children>
+            <record name="in_pallet" identifier="IP" size="573" occurence="0..n" >
+              <fields>
+                <field name="record_type" size="2" default="IP" />
+                <field name="load_id" size="10" />
+                <field name="location_type" size="2" default="DP" />
+                <field name="location_code" size="7" default="KROMCO" />
+                <field name="document_number" size="10" />
+                <field name="pallet_id" size="9" />
+                <field name="sequence_number" size="5" format="ZEROES" />
+                <field name="unit_type" size="1" default="P" />
+                <field name="position" size="6" default="000000" />
+                <field name="sender" size="2" required="false" />
+                <field name="agent" size="2" required="false" />
+                <field name="container_number" size="11" required="false" />
+                <field name="channel" size="1" default="E" />
+                <field name="organisation" size="2" />
+                <field name="country" size="2" default="ZA" required="false" />
+                <field name="commodity_group" size="2" />
+                <field name="commodity" size="2" />
+                <field name="variety_group" size="2" />
+                <field name="variety" size="3" />
+                <field name="sub_variety" size="3" required="false" />
+                <field name="actual_variety" size="3" required="false" />
+                <field name="pack" size="4" />
+                <field name="grade" size="4" />
+                <field name="mark" size="5" />
+                <field name="count" size="5" />
+                <field name="inventory_code" size="2" required="false" />
+                <field name="picking_reference" size="4" />
+                <field name="farm_from_code" size="7" />
+                <field name="product_group" size="2" required="false" />
+                <field name="product_characteristic" size="3" required="false" />
+                <field name="target_market" size="2" />
+                <field name="actual_grade" size="4" required="false" />
+                <field name="carton_quantity" size="5" format="ZEROES" />
+                <field name="pallet_quantity" size="9" format="DECIMAL" />
+                <field name="mixed_indicator" size="1" default="N" />
+                <field name="remarks" size="8" required="false" />
+                <field name="reason" size="4" required="false" />
+                <field name="intake_date" size="8" format="DATE" />
+                <field name="intake_time" size="5" format="HM" />
+                <field name="intake_point" size="2" default="C4" />
+                <field name="original_intake_depot" size="7" default="KROMCO" />
+                <field name="original_intake_date" size="8" format="DATE" />
+                <field name="order_number" size="6" required="false" />
+                <field name="stock_pool" size="2" default="CE" />
+                <field name="temperature" size="6" format="TEMP" default="+99.99" />
+                <field name="pallet_marks" size="1" required="false" />
+                <field name="transmission_flag" size="1" default="N" />
+                <field name="revision_number" size="5" format="ZEROES" default="0" />
+                <field name="message_number" size="8" format="ZEROES" default="0" />
+                <field name="transaction_user" size="7" default="KROMCO" />
+                <field name="transaction_date" size="8" format="DATE" />
+                <field name="transaction_time" size="5" format="HM" />
+                <field name="cartons_rejected" size="5" format="ZEROES" default="0" />
+                <field name="cartons_discarded" size="5" format="ZEROES" default="0" />
+                <field name="cartons_evaluation" size="5" format="ZEROES" default="0" />
+                <field name="mix_indicator" size="1" default="N" />
+                <field name="pallet_base_type" size="1" />
+                <field name="combo_pallet_id" size="9" required="false" />
+                <field name="temperature_device_id" size="20" required="false" />
+                <field name="temperature_device_type" size="2" required="false" />
+                <field name="principal" size="2" required="false" />
+                <field name="sscc" size="18" />
+                <field name="mass" size="9" format="%+9.3f" required="false" />
+                <field name="saftbin1" size="16" required="false" />
+                <field name="saftbin2" size="16" required="false" />
+                <field name="saftbin3" size="16" required="false" />
+                <field name="orig_account" size="6" required="false" default="8385" />
+                <field name="inspec_date" size="8" format="DATE" required="false" />
+                <field name="stack_variance" size="1" required="false" />
+                <field name="store_type" size="1" required="false" />
+                <field name="batch_no" size="20" required="false" />
+                <field name="waybill_no" size="10" required="false" />
+                <field name="gtin" size="14" required="false" />
+                <field name="packh_code" size="7" required="false" />
+                <field name="steri_flag" size="2" required="false" />
+                <field name="steri_dest" size="2" required="false" />
+                <field name="label_type" size="1" required="false" />
+                <field name="prov_flag" size="1" required="false" />
+                <field name="sellbycode" size="10" required="false" default=""  />
+                <field name="orchard" size="8" required="false" />
+                <field name="combo_sscc" size="18" required="false" />
+                <field name="expiry_code" size="10" required="false" />
+                <field name="orchard" size="15" required="false" />
+                <field name="target_region" size="5" required="false" />
+                <field name="target_country" size="2" required="false" />
+                <field name="global_gap_number" size="20" required="false" />
+                <field name="lot_no" size="20" required="false" />
+                <field name="traceability_code" size="20" required="false" />
+	      <field name="season" size="4" required="false" />
+                <field name="orig_inspec_date" size="8" required="false" format="DATE" />			
+              </fields>
+            </record>
+          </children>
+        </record>
+      </children>
+    </record>
+    <record name="doc_trailer" identifier="BT" size="112" occurence="1">
+      <fields>
+        <field name="trailer" size="2" default="BT" />
+        <field name="network_address" size="3" format="ZEROES" />
+        <field name="batch_number" size="6" format="ZEROES" />
+        <field name="record_count" size="7" format="ZEROES" />
+        <field name="ic_record_count" size="5" format="ZEROES" />
+        <field name="is_record_count" size="5" format="ZEROES" />
+        <field name="ip_record_count" size="8" format="ZEROES" />
+        <field name="ev_record_count" size="8" format="ZEROES" default="0" />
+        <field name="total_ic_cartons" size="8" format="ZEROES" />
+        <field name="total_ic_pallets" size="9" format="DECIMAL" />
+        <field name="total_dummy_ic_cartons" size="8" format="ZEROES" default="0" />
+        <field name="total_dummy_ic_pallets" size="9" format="DECIMAL" default="0.0" />
+        <field name="total_is_cartons" size="8" format="ZEROES" />
+        <field name="total_is_pallets" size="9" format="DECIMAL" />
+        <field name="total_ip_cartons" size="8" format="ZEROES" />
+        <field name="total_ip_pallets" size="9" format="DECIMAL" />
+      </fields>
+    </record>
+  </sequence>
+</in-map>
+
+

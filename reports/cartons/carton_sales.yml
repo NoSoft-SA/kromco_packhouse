@@ -1,0 +1,12 @@
+query: select     farm_code,    schedule_track_indicator_code,    variety,    fg_code_old,    inventory_code,    line_type,    actual_size_count_code,    target_market_code,    commodity_code,    old_pack_code,    grade_code,    sell_by_code,    production_run_code,    organization_code,    extended_fg_code,    size_ref,    standard_size_count_value,    unit_pack_product_type_description,    subtype_code,    sum_quantity,    sum_carton_fruit_nett_mass,    sum_eqvalent_cartons,    season_code,    start_date_time, rmt_product_code from vwcartons_sales  WHERE(season_code={season_code} and start_date_time={start_date_time})
+main_table_name: cartons
+fields:
+ field1:
+  field_name: season_code
+  caption: season_code
+  field_type: lookup
+  list: " select distinct season from seasons order by season" 
+ field15:
+  field_name: start_date_time
+  caption: shift_calendar_date
+  field_type: daterange

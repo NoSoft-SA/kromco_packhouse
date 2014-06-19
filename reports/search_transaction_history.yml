@@ -1,0 +1,25 @@
+query: select inventory_transactions.*,inventory_transaction_assets.* FROM inventory_transactions JOIN inventory_transaction_assets ON inventory_transactions.id = inventory_transaction_assets.inventory_transaction_id JOIN asset_items ON asset_items.id=inventory_transaction_assets.asset_item_id JOIN transaction_business_names ON transaction_business_names.id = inventory_transactions.transaction_business_name_id WHERE( inventory_transaction_assets.created_on={inventory_transaction_assets.created_on} and inventory_transactions.transaction_type_code={inventory_transactions.transaction_type_code} and transaction_business_names.transaction_business_name_code={transaction_business_names.transaction_business_name_code} and inventory_transaction_assets.location_code={inventory_transaction_assets.location_code} and asset_items.asset_number={asset_items.asset_number}) ORDER BY inventory_transaction_assets.created_on DESC
+main_table_name: inventory_transactions
+
+fields:
+  field1:
+   field_name: inventory_transaction_assets.created_on
+   caption: created on
+   field_type: daterange
+  field2:
+   field_name: inventory_transaction_assets.location_code
+   caption: location code
+   field_type: lookup
+   list: select distinct location_code from asset_locations inner join locations on locations.id = asset_locations.location_id
+  field3:
+   field_name: inventory_transactions.transaction_type_code
+   caption: transaction type code
+   field_type: text
+  field4:
+   field_name: transaction_business_names.transaction_business_name_code
+   caption: transaction_business_name_code
+   field_type: text
+  field5:
+   field_name: asset_items.asset_number
+   caption: asset_number
+   field_type: text

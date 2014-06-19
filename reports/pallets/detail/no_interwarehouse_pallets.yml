@@ -1,0 +1,69 @@
+query: select * FROM vwpallets WHERE ( exit_ref is null and location_code = 'PACKHOUSE' and pallet_number={pallet_number} and commodity_code={commodity_code} and marketing_variety_code={marketing_variety_code} and brand_code={brand_code} and old_pack_code={old_pack_code} and grade_code={grade_code}  and target_market_code={target_market_code}  and inventory_code={inventory_code} and organization_code={organization_code} and season_code={season_code} and fg_code_old={fg_code_old} and oldest_pack_date_time={oldest_pack_date_time} and qc_result_status={qc_result_status} and ppecb_inspection_id={ppecb_inspection_id} and qc_status_code={qc_status_code} and pick_reference_code={pick_reference_code} and pallet_format_product_code={pallet_format_product_code} and sector_code={sector_code} and age={age} and sell_by_code={sell_by_code} and build_status={build_status} and standard_size_count_value={standard_size_count_value} and size_count_code={size_count_code} and size_ref={size_ref} and parent_location_code={parent_location_code} and load_detail_id={load_detail_id} and consignment_note_number={consignment_note_number} and order_number={order_number} and load_number={load_number} and  load_order_id={load_order_id}  and packed_by={packed_by})
+main_table_name: pallets
+fields:
+ field1:
+  field_name: pallet_number
+  caption: pallet_number
+  field_type: text 
+ field2:
+  field_name: commodity_code
+  caption: commodity_code
+  field_type: lookup
+  list: "select commodity_code from commodities order by commodity_code"  
+ field3:
+  field_name: marketing_variety_code
+  caption: marketing_variety_code
+  field_type: lookup
+  list: "select distinct marketing_variety_code from marketing_varieties order by marketing_variety_code"
+ field4:
+  field_name: brand_code
+  caption: brand_code
+  field_type: lookup
+  list: "select distinct brand_code from marks order by brand_code"
+ field5:
+  field_name: old_pack_code
+  caption: old_pack_code
+  field_type: lookup
+  list: "select old_pack_code from old_packs order by  old_pack_code"
+ field6:
+  field_name: grade_code
+  caption: grade_code
+  field_type: lookup
+  list: "select grade_code from grades order by grade_code" 
+ field7:
+  field_name: target_market_code
+  caption: target_market_code
+  field_type: lookup
+  list: "select target_market_code from target_markets order by target_market_code" 
+ field8:
+  field_name: inventory_code
+  caption: inventory_code
+  field_type: lookup
+  list: "select inv_code from vw_inv_code order by inv_code" 
+ field9:
+  field_name: organization_code
+  caption: organization_code
+  field_type: lookup
+  list: "select party_name from parties_roles where role_name ='MARKETER'  order by party_name" 
+ field10:
+  field_name: season_code
+  caption: season_code
+  field_type: lookup
+  list: " select distinct season from seasons order by season" 
+ field11:
+  field_name: fg_code_old
+  caption: fg_code_old
+  field_type: text
+ field12:
+  field_name: oldest_pack_date_time
+  caption: from_datetime
+  field_type: daterange    
+ field13:
+  field_name: pallet_format_product_code
+  caption: pallet_format_product_code
+  field_type: text 
+ field14:
+  field_name: packed_by
+  caption: packed_by
+  field_type: lookup
+  list: "select distinct status_code from statuses where status_type_code = 'packed_by' order by status_code"  

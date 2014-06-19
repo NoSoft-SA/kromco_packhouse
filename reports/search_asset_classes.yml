@@ -1,0 +1,13 @@
+query: select DISTINCT asset_items.* FROM asset_items left outer join asset_locations on asset_locations.asset_item_id = asset_items.id left outer join locations on locations.id = asset_locations.location_id WHERE( locations.location_code={locations.location_code} and asset_items.asset_number={asset_items.asset_number})
+main_table_name: asset_items
+default_report_index_group_name: System
+
+fields:
+  field1:
+   field_name: locations.location_code
+   caption: location code
+   field_type: text
+  field2:
+   field_name: asset_items.asset_number
+   caption: pack material product code
+   field_type: text

@@ -1,0 +1,141 @@
+
+<% if @stop_running  %>
+  <script>
+    alert('<%=@stop_running %>');
+    poller.stop();
+  </script>
+<% elsif  @run_progress.is_complete? %>
+<div class ="action">all actions have been committed</div>
+<%  end %>
+
+
+<% if @run_progress.run_completion_stats.error  %>
+  <div class ="error"><%=  @run_progress.run_completion_stats.error %></div>
+<%  end %>
+<% if ! @run_progress.any_committed_action?  && !@run_progress.run_completion_stats.error%>
+  <div class ="action"><img src="/images/progress.gif" style="visibility:visible"/>loading completer components...please wait</div>
+<%  end %>
+<% if @run_progress.run_completion_stats.generic_action  %>
+  <div class ="action"><img src="/images/progress.gif" style="visibility:visible"/>   <%=  @run_progress.run_completion_stats.generic_action %></div>
+<%  end %>
+
+<table style="text-align: left; width: 787px; height: 328px;" border="0"
+cellpadding="2" cellspacing="2">
+<tbody>
+<tr>
+<td class ="second_heading"style="vertical-align: top;">object<br>
+</td>
+<td class ="second_heading" colspan="1" rowspan="1" style="vertical-align: top;">intended
+action<br>
+</td>
+<td class ="second_heading" colspan="1" style="vertical-align: top;">objects affected <br>
+</td>
+<td class ="second_heading" style="vertical-align: top;">complete<br>
+</td>
+</tr>
+<tr>
+<td class ="object_heading" colspan="1" rowspan="3" style="vertical-align: top;">bins<br>
+</td>
+
+<td id = "bins_tipped" class = <%= @run_progress.run_completion_stats.get_style_class('bins_tipped') %>   style="vertical-align: bottom;">tip  </td>
+<td id = "bins_tipped_n"  class = <%= @run_progress.run_completion_stats.get_style_class('bins_tipped') %>  style="vertical-align: bottom;"><%= @run_progress.run_completion_stats.bins_tipped_req.to_s %>
+</td>
+<td id = "bins_tipped_p" class = <%= @run_progress.run_completion_stats.get_style_class('bins_tipped',true) %>  style="vertical-align: bottom;"><%= @run_progress.run_completion_stats.bins_tipped_done.to_s %>   <img src="/images/progress.gif" style="visibility:<%= @run_progress.run_completion_stats.get_progress_style('bins_tipped') %>"/>
+</td>
+</tr>
+<tr>
+<td id = "bins_scrapped"  class = <%= @run_progress.run_completion_stats.get_style_class('bins_scrapped') %> style="vertical-align: bottom;">scrap
+</td>
+<td id = "bins_scrapped_n" class = <%= @run_progress.run_completion_stats.get_style_class('bins_scrapped') %> style="vertical-align: bottom;"><%= @run_progress.run_completion_stats.bins_scrapped_req.to_s %>
+</td>
+<td id = "bins_scrapped_p"  class = <%= @run_progress.run_completion_stats.get_style_class('bins_scrapped',true) %> style="vertical-align: bottom;"><%= @run_progress.run_completion_stats.bins_scrapped_done.to_s %>   <img src="/images/progress.gif" style="visibility:<%= @run_progress.run_completion_stats.get_progress_style('bins_scrapped') %>"/>
+</td>
+</tr>
+<tr>
+<td id = "bins_reclassified" class = <%= @run_progress.run_completion_stats.get_style_class('bins_reclassified') %> style="vertical-align: bottom;">reclassify
+</td>
+<td id = "bins_reclassified_n" class = <%= @run_progress.run_completion_stats.get_style_class('bins_reclassified') %> style="vertical-align: bottom;"><%= @run_progress.run_completion_stats.bins_reclassified_req.to_s %>
+</td>
+<td id = "bins_reclassified_p" class = <%= @run_progress.run_completion_stats.get_style_class('bins_reclassified',true) %> style="vertical-align: bottom;"><%= @run_progress.run_completion_stats.bins_reclassified_done.to_s %>   <img src="/images/progress.gif" style="visibility:<%= @run_progress.run_completion_stats.get_progress_style('bins_reclassified') %>"/>
+</td>
+</tr>
+<tr>
+<td  class ="object_heading"  colspan="1" rowspan="5" style="vertical-align: top;">pallets
+</td>
+<td id = "pallets_scrapped" class = <%= @run_progress.run_completion_stats.get_style_class('pallets_scrapped') %> style="vertical-align: bottom;">scrap
+</td>
+<td id = "pallets_scrapped_n" class = <%= @run_progress.run_completion_stats.get_style_class('pallets_scrapped') %> style="vertical-align: bottom;"><%= @run_progress.run_completion_stats.pallets_scrapped_req.to_s %>
+</td>
+<td d = "pallets_scrapped_p" class = <%= @run_progress.run_completion_stats.get_style_class('pallets_scrapped',true) %>  style="vertical-align: bottom;"><%= @run_progress.run_completion_stats.pallets_scrapped_done.to_s %>    <img src="/images/progress.gif" style="visibility:<%= @run_progress.run_completion_stats.get_progress_style('pallets_scrapped') %>"/>
+</td>
+</tr>
+<tr>
+<td id = "pallets_created" class = <%= @run_progress.run_completion_stats.get_style_class('pallets_created') %>>create
+</td>
+<td id = "pallets_created_n"  class = <%= @run_progress.run_completion_stats.get_style_class('pallets_created') %> style="vertical-align: bottom;"><%= @run_progress.run_completion_stats.pallets_created_req.to_s %>
+</td>
+<td id = "pallets_created_p"  class = <%= @run_progress.run_completion_stats.get_style_class('pallets_created',true) %> style="vertical-align: bottom;"><%= @run_progress.run_completion_stats.pallets_created_done.to_s %>   <img src="/images/progress.gif" style="visibility:<%= @run_progress.run_completion_stats.get_progress_style('pallets_created') %>"/>
+</td>
+</tr>
+<tr>
+<td id = "pallets_reclassified" class = <%= @run_progress.run_completion_stats.get_style_class('pallets_reclassified') %> style="vertical-align: bottom;">reclassify
+</td>
+<td id = "pallets_reclassified_n"  class = <%= @run_progress.run_completion_stats.get_style_class('pallets_reclassified') %> style="vertical-align: bottom;"><%= @run_progress.run_completion_stats.pallets_reclassified_req.to_s %>
+</td>
+<td id = "pallets_reclassified_p" class = <%= @run_progress.run_completion_stats.get_style_class('pallets_reclassified',true) %> style="vertical-align: bottom;"><%= @run_progress.run_completion_stats.pallets_reclassified_done.to_s %>   <img src="/images/progress.gif" style="visibility:<%= @run_progress.run_completion_stats.get_progress_style('pallets_reclassified') %>"/>
+</td>
+</tr>
+
+<tr>
+<td id = "pallets_built_up" class = <%= @run_progress.run_completion_stats.get_style_class('pallet_build_ups') %> style="vertical-align: bottom;">built up
+</td>
+<td id = "pallets_built_up_n"  class = <%= @run_progress.run_completion_stats.get_style_class('pallet_build_ups') %> style="vertical-align: bottom;"><%= @run_progress.run_completion_stats.pallet_build_ups_req.to_s %>
+</td>
+<td id = "pallets_built_up_p" class = <%= @run_progress.run_completion_stats.get_style_class('pallet_build_ups',true) %> style="vertical-align: bottom;"><%= @run_progress.run_completion_stats.pallet_build_ups_done.to_s %>   <img src="/images/progress.gif" style="visibility:<%= @run_progress.run_completion_stats.get_progress_style('pallet_build_ups') %>"/>
+</td>
+</tr>
+
+<tr>
+<td id = "pallets_qc_resets" class = <%= @run_progress.run_completion_stats.get_style_class('pallets_qc_resets') %> style="vertical-align: bottom;">reset qc
+</td>
+<td id = "pallets_qc_resets_n" class = <%= @run_progress.run_completion_stats.get_style_class('pallets_qc_resets') %> style="vertical-align: bottom;"><%= @run_progress.run_completion_stats.pallets_qc_resets_req.to_s %>
+</td>
+<td id = "pallets_qc_resets_p" class = <%= @run_progress.run_completion_stats.get_style_class('pallets_qc_resets',true) %> style="vertical-align: bottom;"><%= @run_progress.run_completion_stats.pallets_qc_resets_done.to_s %>   <img src="/images/progress.gif" style="visibility:<%= @run_progress.run_completion_stats.get_progress_style('pallets_qc_resets') %>"/>
+</td>
+</tr>
+<tr>
+<td  class ="object_heading"  colspan="1" rowspan="4" style="vertical-align: top;">cartons</td>
+<td id = "cartons_scrapped" class = <%= @run_progress.run_completion_stats.get_style_class('cartons_scrapped') %> style="vertical-align: bottom;">scrap
+</td>
+<td id = "cartons_scrapped_n" class = <%= @run_progress.run_completion_stats.get_style_class('cartons_scrapped') %> style="vertical-align: bottom;"><%= @run_progress.run_completion_stats.cartons_scrapped_req.to_s %>
+</td>
+<td id = "cartons_scrapped_p" class = <%= @run_progress.run_completion_stats.get_style_class('cartons_scrapped',true) %> style="vertical-align: bottom;"><%= @run_progress.run_completion_stats.cartons_scrapped_done.to_s %>   <img src="/images/progress.gif" style="visibility:<%= @run_progress.run_completion_stats.get_progress_style('cartons_scrapped') %>"/>
+</td>
+</tr>
+<tr>
+<td id = "cartons_created" class = <%= @run_progress.run_completion_stats.get_style_class('cartons_created') %>  style="vertical-align: bottom;">create
+</td>
+<td id = "cartons_created_n" class = <%= @run_progress.run_completion_stats.get_style_class('cartons_created') %> style="vertical-align: bottom;"><%= @run_progress.run_completion_stats.cartons_created_req.to_s %>
+</td>
+<td id = "cartons_created_p" class = <%= @run_progress.run_completion_stats.get_style_class('cartons_created',true) %> style="vertical-align: bottom;"><%= @run_progress.run_completion_stats.cartons_created_done.to_s %>   <img src="/images/progress.gif" style="visibility:<%= @run_progress.run_completion_stats.get_progress_style('cartons_created') %>"/>
+</td>
+</tr>
+<tr>
+<td id = "cartons_reclassified" class = <%= @run_progress.run_completion_stats.get_style_class('cartons_reclassified') %> style="vertical-align: bottom;">reclassify
+</td>
+<td id = "cartons_reclassified_n" class = <%= @run_progress.run_completion_stats.get_style_class('cartons_reclassified') %>  style="vertical-align: bottom;"><%= @run_progress.run_completion_stats.cartons_reclassified_req.to_s %>
+</td>
+<td id = "cartons_reclassified_p" class = <%= @run_progress.run_completion_stats.get_style_class('cartons_reclassified',true) %>  style="vertical-align: bottom;"><%= @run_progress.run_completion_stats.cartons_reclassified_done.to_s %>    <img src="/images/progress.gif" style="visibility:<%= @run_progress.run_completion_stats.get_progress_style('cartons_reclassified') %>"/>
+</td>
+</tr>
+<tr>
+<td id = "cartons_pallet_refs_changed" class = <%= @run_progress.run_completion_stats.get_style_class('cartons_pallet_refs_changed') %>  style="vertical-align: bottom;">change pallet refs
+</td>
+<td id = "cartons_pallet_refs_changed_n" class = <%= @run_progress.run_completion_stats.get_style_class('cartons_pallet_refs_changed') %> style="vertical-align: bottom;"><%= @run_progress.run_completion_stats.cartons_pallet_refs_changed_req.to_s %>
+</td>
+<td id = "cartons_pallet_refs_changed_p" class = <%= @run_progress.run_completion_stats.get_style_class('cartons_pallet_refs_changed',true) %> style="vertical-align: bottom;"><%= @run_progress.run_completion_stats.cartons_pallet_refs_changed_req.to_s %>   <img src="/images/progress.gif" style="visibility:<%= @run_progress.run_completion_stats.get_progress_style('cartons_pallet_refs_changed') %>"/>
+</td>
+</tr>
+
+</tbody>
+    </table>

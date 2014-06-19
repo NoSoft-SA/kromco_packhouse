@@ -1,0 +1,124 @@
+<script src="/javascripts/context_menu.js"></script>
+
+<% if session[:grower_commitment].commitment_document_delivered == true && !session[:grower_commitment].grower_commitment_data_capture_date_time
+     field_config = {:id_value      =>@grower_commitment_id,
+                       :host_and_port =>request.host_with_port.to_s,
+                       :controller    =>request.path_parameters['controller'].to_s,
+                       :target_action => 'new_spray_program_result',
+                       :link_text     =>'add_spray_result',
+                       :link_type     =>'child_form'}
+
+       popup_link = ApplicationHelper::LinkWindowField.new(nil, nil, 'none', 'none', 'none', field_config, true, nil, self)
+       link = popup_link.build_control if(!@is_view)
+ end 
+  @child_form_caption = ["list_spray_results_form", "spray results" ]
+  @child_form_caption = ["list_spray_results_form", "spray results  "+link.to_s] if @show_add_spray_result_link
+
+   menu1 = ApplicationHelper::ContextMenu.new("quality_control", "quality_control", true)
+   menu1.add_command("list", "/quality_control/grower_commitment/list_mrl_results")
+   menu1.add_command("add_new", "/quality_control/grower_commitment/new_mrl_result") if (!session[:grower_commitment].mrl_data_capture_date_time && !@is_view)
+%>
+<script>
+    <%= menu1.render %>
+    build_context_menus();
+</script>
+
+<div>
+  <table class='iframe_table'>
+
+    <tr class='iframe_table_rows'>
+      <td class='iframe_table_rows'>cultivar</td>
+      <td class='iframe_table_rows'> spray_result</td class='iframe_table_rows'>
+      <td class='iframe_table_rows'>protocol</td>
+      <td class='iframe_table_rows'>result_comment</td>
+      <td class='iframe_table_rows'>commodity code</td>
+      <td class='iframe_table_rows'>rmt variety code</td>
+      <td class='iframe_table_rows'>list mrl results</td>
+      <td class='iframe_table_rows_edit'>edit</td>
+
+      <% if @spray_program_result != nil %>
+      <td class='iframe_table_rows_delete'>cancel</td>
+
+          <% @spray_program_result.each do |spray_grogram_result|
+             if(!spray_grogram_result.cancelled)
+          %>
+              <%  the_class = 'iframe_table_rows_td'
+                 if(spray_grogram_result.mrl_results.length > 0)
+                  cancellations = 0
+                  passed = 0
+                  spray_grogram_result.mrl_results.each do |mrl_result|
+                      if(mrl_result && !mrl_result.cancelled && mrl_result.mrl_result && mrl_result.mrl_result.upcase == "FAILED")
+#                      if(mrl_result && !mrl_result.cancelled && mrl_result.mrl_result && mrl_result.mrl_result.upcase != "PASSED")
+                        the_class = 'iframe_table_rows_td_red'
+                        break
+                      elsif(mrl_result && !mrl_result.cancelled && mrl_result.mrl_result && (mrl_result.mrl_result.upcase == "PASSED" || mrl_result.mrl_result.upcase == "PENDING"))
+                        passed += 1
+                      elsif(mrl_result && mrl_result.cancelled)
+                        cancellations += 1
+                      end
+                    end
+                     the_class = 'iframe_table_rows_td_orange' if(cancellations > 0 && passed == 0 && the_class != 'iframe_table_rows_td_red')
+                  else
+                   the_class = 'iframe_table_rows_td_orange'
+                  end
+
+                 if(spray_grogram_result.spray_result.to_s.upcase == "FAILED")
+                   the_class = 'iframe_table_rows_td_red'  
+                 end
+              %>
+                <tr class='<%=the_class%>'>
+
+                  <td class='<%=the_class%>'><%= spray_grogram_result.rmt_variety.id %></td>
+                  <td class='<%=the_class%>'><%= spray_grogram_result.spray_result %></td>
+                  <td class='<%=the_class%>'> <%= spray_grogram_result.spray_program_code %></td> 
+                  <td class='<%=the_class%>'><%= spray_grogram_result.spray_result_comment %></td>
+                  <td class='<%=the_class%>'><%= spray_grogram_result.commodity_code %></td>
+                  <td class='<%=the_class%>'><%= spray_grogram_result.rmt_variety_code %></td>
+                  <td>
+                    <% field_configb = {:link_text  => "mrl_results",
+                                        :link_value => spray_grogram_result.id.to_s,
+                                        :menu_name  => "quality_control",
+                                        :css_class  => "run_line_code_link_black"}
+
+
+                       popup_link = ApplicationHelper::PopupLink.new(nil, nil, 'none', 'none', 'none', field_configb, true, nil, self)
+                    %>
+                    <%= popup_link.build_control %>
+                  </td>
+                  <td class='<%=the_class%>'>
+
+
+                    <% if !@is_view && session[:grower_commitment].grower_commitment_data_capture_date_time == nil  && !spray_grogram_result.cancelled%>
+                        <% field_config = {:id_value      =>spray_grogram_result.id.to_s,
+                                           :host_and_port =>request.host_with_port.to_s,
+                                           :controller    =>request.path_parameters['controller'].to_s,
+                                           :target_action => 'edit_spray_program_result',
+                                           :link_text     =>'edit'}
+
+
+                           popup_link = ApplicationHelper::LinkWindowField.new(nil, nil, 'none', 'none', 'none', field_config, true, nil, self) %>
+                        <%= popup_link.build_control %>
+                    <% end %>
+                  </td>
+
+
+                  <td class='<%=the_class%>'>
+                    <%if !@is_view && session[:grower_commitment].grower_commitment_data_capture_date_time == nil  && !spray_grogram_result.cancelled%>
+                      <% field_config = {:id_value      =>spray_grogram_result.id.to_s,
+                                           :host_and_port =>request.host_with_port.to_s,
+                                           :controller    =>request.path_parameters['controller'].to_s,
+                                           :target_action => 'cancel_spray_program_result',
+                                           :link_text     =>'cancel'}
+
+
+                           popup_link = ApplicationHelper::LinkWindowField.new(nil, nil, 'none', 'none', 'none', field_config, true, nil, self) %>
+                        <%= popup_link.build_control %>
+                    <%
+                       end
+                     end %>
+                  </td>
+            </tr>
+        <% end %>
+    <% end %>
+  </table>
+</div>

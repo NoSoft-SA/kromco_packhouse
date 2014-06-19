@@ -1,0 +1,64 @@
+<h3>Accept/Reject this inspection</h3>
+
+<table style="float:left">
+  <tr>
+    <td>Inspection Reference:</td>
+    <td class="heading_field"><%= @qc_inspection.inspection_reference %></td>
+  </tr>
+  <%= display_inspection_business_info @qc_inspection %>
+</table>
+
+<div id="qc_test_summary_form">
+  <fieldset><legend>Complete the inspection</legend>
+  <% if @qc_inspection.status == QcInspection::STATUS_COMPLETED %>
+    <p>Status: <%= @qc_inspection.status %></p>
+    <p><% if @qc_inspection.passed %>
+         Passed.
+       <% else %>
+         Failed.
+         <% if @qc_inspection.failed_for_target_market -%>
+           (Failed for Target Market <%= @qc_inspection.failed_target_market %>)
+         <% end -%>
+         <ul>
+         <% @qc_inspection.qc_reasons.each do |qc_reason| %>
+           <li><%= qc_reason.qc_reason_description %></li>
+         <% end %>
+         </ul>
+       <% end %>
+    </p>
+  <% elsif @qc_inspection.all_tests_complete? %>
+    <% form_for :qc_inspection, :url => {:action => 'set_completion_status', :id => @qc_inspection.id} do |f| %>
+      <p>
+      <label><%= f.radio_button :passed, true, :onclick => "$('tm_display').hide();" %>Test passed?</label>
+      <label><%= f.radio_button :passed, false, :onclick => "$('tm_display').show();" %>Test failed?</label>
+      <span id="tm_display" style="display:none;">
+         <% if @qc_inspection.qc_inspection_type.can_fail_for_target_market -%>
+           <br />
+           <label><%= f.check_box :failed_for_target_market, :onclick => "if( $('qc_inspection_failed_for_target_market').checked) {$('tm_fail_code').show();} else {$('tm_fail_code').hide(); }" %>Failed for Target Market?</label>
+           <span id="tm_fail_code" style="display:<%= @qc_inspection.failed_for_target_market ? 'inherit' : 'none' %>;">
+          (Target Market code <%= f.text_field :failed_target_market, :size => 4 %>)
+      </span>
+        <% end -%>
+      </span>
+      </p>
+      <% unless @qc_reasons.empty? %>
+        <p>
+        Choose applicable reasons for fail: <br />
+        <% @qc_reasons.each do |qc_reason| %>
+          <label><%= check_box_tag "reason_ids[]", qc_reason[1] %><%= qc_reason[0] %></label><br />
+        <% end %>
+        </p>
+      <% end %>
+      <p>
+      <%= submit_tag 'Complete' %>
+      </p>
+    <% end %>
+  <% else %>
+    Tests are not all complete,<br /> this inspection cannot be completed.
+  <% end %>
+</fieldset>
+</div>
+
+<hr style="clear:left" />
+  <%= render :partial => 'test_summary', :collection => @qc_inspection_tests %>
+

@@ -1,0 +1,52 @@
+query: select bin_number,farm_code||'_'||track_slms_indicator_1_code as  orchard_code,farm_code, farm_group_code, track_slms_indicator_1_code, farm_code, pack_material_product_code,weight,treatment_code, commodity_code, season,  variety_code, pc_code_code, ripe_point_code, created_on from vwbins where ((destroyed = false or destroyed is null) and commodity_code = 'AP' and season={season} and created_on={created_on} and product_class_code={product_class_code} and bin_number={bin_number} and farm_code={farm_code} and farm_group_code={farm_group_code}and delivery_number={delivery_number} and track_slms_indicator_1_code={track_slms_indicator_1_code} and location_code={location_code} and rmt_product_code={rmt_product_code}) ORDER BY bin_number asc
+main_table_name: bins
+fields:
+ field1:
+  field_name:  season
+  caption: season
+  field_type: lookup
+  list: "select distinct season from seasons order by season"  
+ field2:
+  field_name: created_on
+  caption: created_on
+  field_type: daterange  
+ field3:
+  field_name:  product_class_code
+  caption: product_class_code
+  field_type: lookup
+  list: "select distinct product_class_code from product_classes order by product_class_code asc"  
+ field4:
+  field_name: bin_number
+  caption: bin_number
+  field_type: text 
+ field5:
+  field_name:  farm_code
+  caption: farm_code
+  field_type: lookup
+  list: "select farm_code from farms order by farm_code"  
+ field6:
+  field_name:  farm_group_code
+  caption: farm_group_code
+  field_type: lookup
+  list: "select distinct farm_group_code from farms order by farm_group_code"  
+ field7:
+  field_name:  delivery_number
+  caption: delivery_number
+  field_type: lookup
+  list: "select distinct delivery_number from deliveries order by delivery_number asc"    
+ field8:
+  field_name:  track_slms_indicator_1_code
+  caption: track_slms_indicator_1_code
+  field_type: lookup
+  list: "select distinct track_slms_indicator_code from track_slms_indicators where track_indicator_type_code = 'RMI' order by track_slms_indicator_code"  
+ field9:
+  field_name: location_code
+  caption: location_code
+  field_type: text 
+ field10:
+  field_name: rmt_product_code
+  caption: rmt_product_code
+  field_type: text   
+
+  
+  

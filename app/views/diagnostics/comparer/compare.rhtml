@@ -1,0 +1,672 @@
+
+<style type="text/css">
+/*Styles for comparer html*/
+
+
+
+div.action_links{
+color: red;
+font-family: arial;
+font-size:15pt;
+line-height: 14px;
+text-decoration: underline;
+
+
+}
+
+div.field_name{
+font-family:Sans-serif;
+font-size:17px;
+
+}
+div.field_value{
+font-family:"Times New Roman", Times, serif;
+font-size:15px;
+ font-style: italic;
+}
+div.top_table_container {
+    width: 1000px;
+
+}
+
+div.bottom_table_container {
+    width: 1000px;
+
+}
+
+div.recordset_set_header {
+    font-family: "Arial";
+
+    font-size: 16px;
+    color: gray;
+
+}
+
+div.parent_record_header {
+    background-color: #d3d3d3;
+    color: black;
+    /*border-right: solid 1px #000000;*/
+    border-left: solid 1px #000000;
+    border-top: solid 1px #000000;
+    border-bottom: solid 1px #000000;
+    font-size: 16;
+    font-family: arial;
+
+}
+
+div.child_record_header {
+    background-color: #fafad2;
+    border-left: dotted 1px #000000;
+    border-top: dotted 1px #000000;
+    border-bottom: dotted 1px #000000;
+    border-right: dotted 1px #000000;
+    font-size: 16;
+    font-family: arial;
+}
+
+/* When new_parent_header attributes are changed ,change  #empty_td_new_parent_header as well to be the same*/
+div.new_parent_header {
+    background-color: #d3d3d3;
+    color: red;
+    border-left: solid 1px #000000;
+    border-top: solid 1px #000000;
+    border-bottom: solid 1px #000000;
+    font-size: 16;
+    font-family: arial;
+}
+
+#empty_td_new_parent_header {
+    background-color: #d3d3d3;
+    color: red;
+    border-top: solid 1px #000000;
+    border-bottom: solid 1px #000000;
+    font-size: 16;
+    font-family: arial;
+}
+
+div.new_parent_header_checkbox {
+    background-color: #d3d3d3;
+    color: red;
+    border-right: solid 1px #000000;
+    border-top: solid 1px #000000;
+    border-bottom: solid 1px #000000;
+    font-size: 16;
+    font-family: arial;
+}
+
+div.new_child_header {
+    background-color: pink;
+}
+
+div.changed_record_fields_tds {
+
+}
+
+div.new_records_fields_tds {
+
+    background-color: whitesmoke;
+    color: red;
+}
+
+div.new_child_field_tds {
+
+}
+
+div.left_changed_record_field_borders {
+
+}
+
+div.right_changed_record_field_borders {
+
+}
+
+div.checkboxes {
+    float: right;
+    width: 10px;
+
+}
+
+
+
+
+
+</style>
+
+
+  <% if (@list1_diffs== nil && @list2_diffs == nil ) %>
+
+
+     NO DIFFERENCES FOUND !
+
+
+
+  <% else %>
+
+
+
+     <% if @mode=="editing" %>
+        <%= start_form_tag({:action=> "ok_cancel"}) %>
+        <% else %>
+        <%= start_form_tag({:action=> "merge"}) %>
+        <% end %>
+
+
+
+        <table cellpadding="5">
+          <tr>
+           <% if @action_links &&  @action_links!=nil %>
+            <% for element in @action_links %>
+             <td>
+               <div class="action_links">
+               <%=link_to "#{element['name']}", :controller => "#{element['controller']}", :action => "#{element['action']}",:id => "#{element['id']}" %>
+               </div>
+             </td>
+            <% end %>
+            <% end %>
+           </tr>
+        </table>
+
+
+
+
+
+    <div class="top_table_container">
+    <table class="top_table_container" align="center" cellspacing="0" cellpadding="0" width="1000">
+    <tr>
+
+      <!----------------parent headers for records existing in both lists-->
+      <td colspan="3" align="left" class="left_changed_record_field_borders">
+        <div class="left_changed_record_field_borders"> <div class="recordset_set_header"><%= @record_headers['left'] if !@list1_diffs.empty? %></div>
+      </div></td>
+      <td colspan="3">
+        <div class="recordset_set_header"><%= @record_headers['right'] if !@list2_diffs.empty? %></div>
+      </td>
+      <!------------------------changed fields------------------------------------------------>
+    </tr>
+    <% if !@list1_diffs.empty? %>
+        <% for record in @list1_diffs %>
+            <% if !@list2_diffs.empty? && @list2_diffs.has_key?(record[0]) %>
+                <% co_record = @list2_diffs[record[0]] %>
+                <tr>
+                  <td colspan="3">
+                     <div class="left_changed_record_field_borders"> <div class="parent_record_header"><%= "#{@header_list[0]} #{record[1][@header_list[0]]}" %></div>
+                  </div></td>
+                  <td colspan="3">
+                    <div class="parent_record_header"><%= "#{@header_list[0]} #{co_record[@header_list[0]]}" %></div>
+                  </td>
+                </tr>
+                <% for key in record[1].keys %>
+    <% if key  %>
+                    <% if (key!="id" && key !="children" && !key.include?("_id")) %>
+                        <% if co_record[key]!= record[1][key] %>
+                            <tr >
+                              <td width="225"><div class="changed_record_fields_tds"><div class="field_name"><%= key %></div></div></td>
+                              <td width="225"><div class="changed_record_fields_tds"><div class="field_value"><%= record[1][key] %></div></div></td>
+                              <td width="50" >
+                                <% if @view==false %> <div class="left_changed_record_field_borders">  <div class="changed_record_fields_tds"><%= check_box("list", "#{record[0]}"+"!"+"#{key}"+"!"+"data"+"!"+"parent"+"!"+"left") %>
+                                </div></div><% end %></td>
+                              <td width="225"><div class="changed_record_fields_tds"><div class="field_name"><%= key %></div></div></td>
+                              <td width="225"><div class="changed_record_fields_tds"><div class="field_value"><%= co_record[key] %></div></div></td>
+                              <td width="50">
+                                <% if @view==false %> <div class="changed_record_fields_tds"><%= check_box("list", "#{record[0]}"+"!"+ "#{key}"+"!"+"data"+"!"+"parent"+"!"+"right") %>
+                                <% end %></div></td>
+                            </tr>
+                        <% end %>
+                    <% end %>
+    <!-------------------changed record in children existing in both records------------------------------------->
+                     <% if key =="children" %>
+                        <% for child in record[1][key] %>
+                            <% if  @child2_diffs && @child2_diffs.has_key?(child[0]) %>
+                                <% co_child = @child2_diffs[child[0]] %>
+                                <tr>
+                                  <td colspan="3" class="td">
+                                     <div class="left_changed_record_field_borders"> <div class="child_record_header"><%= @header_list[1] +" " + child[1][@header_list[1]].to_s %></div>
+                                  </div></td>
+                                  <td colspan="3">
+                                    <div class="child_record_header"><%=@header_list[1] +" " +  co_child[@header_list[1]].to_s %></div>
+                                  </td>
+                                </tr>
+                                <% for element in child[1].keys %>
+                                    <% if (element!="id" && element!=@header_list[1] && !element.include?("_id")) %>
+                                        <% if co_child[element]!= child[1][element] %>
+                                            <tr>
+                                              <td width="225"><div class="changed_record_fields_tds"><div class="field_name"><%= element %></div></div></td>
+                                              <td width="225"><div class="changed_record_fields_tds"><div class="field_value">&nbsp;<%= child[1][element] %></div></div></td>
+                                              <td width="50" class="td">
+                                                <% if @view==false %><div class="left_changed_record_field_borders"><div class="changed_record_fields_tds"><%= check_box("list", "#{child[0]}"+"!"+"#{element}"+"!"+"data"+"!"+"child"+"#{record[0]}"+"!"+"left") %>
+                                                </div></div><% end %></td>
+                                              <td width="225"><div class="changed_record_fields_tds"><div class="field_name"><%= element %></div></div></td>
+                                              <td width="225"><div class="changed_record_fields_tds"><div class="field_value">&nbsp;<%= co_child[element] %></div></div></td>
+                                              <td width="50">
+                                                <% if @view==false %><div class="changed_record_fields_tds"><%= check_box("list", "#{child[0]}"+"!"+"#{element}"+"!"+"data"+"!"+"child"+"#{record[0]}"+"!"+"right") %>
+                                                </div><% end %></td>
+
+                                            </tr>
+                                        <% end %>
+                                    <% end %>
+                                <% end %>
+                            <% else %>
+                                <tr>
+                                  <% if @view==false %>
+                                      <td colspan="2">
+                                        <div class="new_child_header"><%= @header_list[1] +" " +child[1][@header_list[1]].to_s %></div>
+                                      </td>
+                                      <td class="td">
+                                        <div class="left_changed_record_field_borders"><div class="new_child_header"><%= check_box("list", "#{child[0]}"+"!"+"#{@header_list[1]}"+"!"+"structure"+"!"+"child"+"#{record[0]}"+"!"+"left") %>
+                                      </div></div></td>
+                                  <% else %>
+                                      <td colspan="3" class="td">
+                                       <div class="left_changed_record_field_borders"><div class="new_child_field_tds"> <div class="new_child_header"><%=@header_list[1] +" " + child[1][@header_list[1]].to_s %></div>
+                                      </div></div></td>
+                                  <% end %>
+                                  <td colspan="3"></td>
+                                </tr>
+                                <% for element in child[1].keys %>
+                                    <% if (element!="id" && element !=@header_list[1] && !element.include?("_id")) %>
+                                        <tr>
+                                          <td width="225"><div class="new_child_field_tds"><div class="field_name"><%= element %></div></div></td>
+                                          <td width="225" colspan="2"><div class="left_changed_record_field_borders"><div class="new_child_field_tds"><div class="field_value"><%= child[1][element] %></div></div></div></td>
+                                          <td  colspan="3"></td>
+                                        </tr>
+                                    <% end %>
+                                <% end %>
+                            <% end %>
+                        <% end %>
+    <% end %>
+                    <% end %>
+                <% end %>
+       <!-------------------------children existing in record in right list only (record exists in both lists)- -->
+                <% if co_record.keys.include?("children")&& !record[1].keys.include?("children") %>
+                    <% for baby in co_record['children'] %>
+                        <% if @child1_diffs && !@child1_diffs.has_key?(baby[0]) %>
+                            <tr>
+                              </td>
+                              <td colspan="3"></td>
+                              <% if @view==false %>
+                                  <td colspan="2">
+                                    <div class="new_child_header"><%=@header_list[1] +" " + baby[1][@header_list[1]].to_s %></div>
+                                  </td>
+                                  <td>
+                                    <div class="new_child_header"><%= check_box("list", "#{baby[0]}"+"!"+"#{@header_list[1]}"+"!"+"new_"+"#{record[0]}"+"!"+"structure"+"!"+"child"+"#{record[0]}"+"!"+"right") %></div>
+                                  </td>
+                              <% else %>
+                                  <td colspan="3">
+                                    <div class="new_child_header"><%=@header_list[1] +" " + baby[1][@header_list[1]].to_s %></div>
+                                  </td>
+                              <% end %>
+
+                            </tr>
+                            <% for element in baby[1].keys %>
+                                <% if (element!="id" && element !=@header_list[1] && !element.include?("_id")) %>
+                                    <tr class="new_records_fields_tds">
+                                      <td colspan="3"><div class="new_child_field_tds"></div></td>
+
+                                      <td width="225"><div class="new_child_field_tds"><div class="field_name"><%= element %></div></div></td>
+                                      <td width="225" colspan="2"><div class="new_child_field_tds"><div class="field_value">&nbsp;<%= baby[1][element] %></div></div></td>
+
+                                    </tr>
+                                <% end %>
+                            <% end %>
+                        <% end %>
+                    <% end %>
+
+
+    <!------------both records have children but child only exists in right_list--------------------->
+                <% elsif co_record.keys.include?("children")&& record[1].keys.include?("children") %>
+                                <% for baby in co_record['children'] %>
+                        <% if @child1_diffs && !@child1_diffs.has_key?(baby[0]) %>
+                            <tr>
+                              </td>
+                              <td colspan="3"></td>
+                              <% if @view==false %>
+                                  <td colspan="2">
+                                    <div class="new_child_header"><%= @header_list[1] +" " +baby[1][@header_list[1]].to_s %></div>
+                                  </td>
+                                  <td>
+                                    <div class="new_child_header"><%= check_box("list", "#{baby[0]}"+"!"+"#{@header_list[1]}"+"!"+"new_"+"#{record[0]}"+"!"+"structure"+"!"+"child"+"#{record[0]}"+"!"+"right") %></div>
+                                  </td>
+                              <% else %>
+                                  <td colspan="3">
+                                    <div class="new_child_header"><%= @header_list[1] +" " +baby[1][@header_list[1]].to_s %></div>
+                                  </td>
+                              <% end %>
+
+                            </tr>
+                            <% for element in baby[1].keys %>
+                                <% if (element!="id" && element !=@header_list[1] && !element.include?("_id")) %>
+                                    <tr class="new_records_fields_tds">
+                                      <td colspan="3"><div class="new_child_field_tds"></div></td>
+
+                                      <td width="225"><div class="new_child_field_tds"><div class="field_name"><%= element %></div></div></td>
+                                      <td width="225" colspan="2"><div class="new_child_field_tds"><div class="field_value">&nbsp;<%= baby[1][element] %></div></div></td>
+
+                                    </tr>
+                                <% end %>
+                            <% end %>
+                        <% end %>
+                    <% end %>
+
+
+                <% end %>
+    <!-------------------records existing in the left list only -------------------------------------->
+            <% elsif !@list2_diffs.empty? && !@list2_diffs.has_key?(record[0]) %>
+
+                <tr>
+                    <% if @view==false %>
+                        <td  colspan="2">
+
+                          <div class="new_parent_header"><%= @header_list[0] +" " +record[1][@header_list[0]].to_s %></div>
+                        </td>
+                        <td>
+                         <div class="new_parent_header_checkbox"><%= check_box("list", "#{record[0]}"+"!"+"#{@header_list[0]}"+"!"+"!"+"structure"+"!"+"parent"+"!"+"left") %>
+                          </div>
+                        </td>
+                    <% else %>
+                          <td width="225">
+                            <div class="new_parent_header"><%= @header_list[0] +" " +record[1][@header_list[0]].to_s %></div>
+                          </td>
+                          <td width="225" id="empty_td_new_parent_header">&nbsp;</td>
+                          <td width="50"><div  class="new_parent_header_checkbox">&nbsp;</div></td>
+                    <% end %>
+                    <td colspan="3"></td>
+
+                </tr>
+                <% for key in record[1].keys %>
+                    <% if (key!="id" && key !="children" && key!=@header_list[0]&& !key.include?("_id")) %>
+                        <tr new_records_fields_tds>
+                          <td width="225">
+                            <div class="new_records_fields_tds"><div class="field_name"><%= key %></div></div>
+                          </td>
+                          <td width="225" colspan="2">
+                            <div class="left_changed_record_field_borders"><div class="new_records_fields_tds"><div class="field_value">&nbsp;<%= record[1][key] %></div>
+                          </div></div></td>
+
+                          <td width="225" colspan="3"></td>
+                        </tr>
+
+                    <% elsif key =="children" %>
+
+                        <% for child in record[1][key] %>
+                            <tr>
+                              <td colspan="3">
+                                <div class="left_changed_record_field_borders"><div class="new_child_header">
+                                  <%= @header_list[1] +" " +child[1][@header_list[1]].to_s %>
+                                </div></div>
+                              </td>
+                              <td colspan="3"></td>
+                            </tr>
+                            <% for element in child[1].keys %>
+                                <% if (element!="id") %>
+                                    <tr>
+                                      <td width="225">
+                                        <div class="new_records_fields_tds"><div class="field_name"><%= element %></div></div>
+                                      </td>
+                                      <td colspan="2">
+                                        <div class="left_changed_record_field_borders"><div class="new_records_fields_tds"><div class="field_value"><%= child[1][element] %></div>
+                                     </div></div> </td>
+
+                                      <td colspan="3"></td>
+
+                                    </tr>
+                                <% end %>
+                            <% end %>
+                        <% end %>
+                    <% end %>
+                <% end %>
+    <!------------------------------if right list is empty ------------------------------------------->
+
+            <% elsif  @list2_diffs.empty? %>
+                <tr>
+                  <% if @view==false %>
+                      <td colspan="2">
+                        <div class="parent_record_header"><%=@header_list[0] +" " + record[1][@header_list[0]].to_s %></div>
+                      </td>
+                      <td>
+                        <div class="left_changed_record_field_borders"><div class="parent_record_header"><%= check_box("list", "#{record[0]}"+"!"+"#{@header_list[0]}"+"!"+"!"+"structure"+"!"+"parent"+"!"+"left") %></div>
+                      </div></td>
+                  <% else %>
+                      <td colspan="3">
+                        <div class="left_changed_record_field_borders"><div class="parent_record_header"><%=@header_list[0] +" " + record[1][@header_list[0]].to_s %></div>
+                      </div></td>
+                  <% end %>
+                  <td colspan="3"></td>
+                </tr>
+                <% for key in record[1].keys %>
+                    <% if (key!="id" && key !="children" && key!=@header_list[0]&& !key.include?("_id")) %>
+                        <tr>
+                          <td width="225">
+                            <div class="new_records_fields_tds"><div class="field_name"><%= key %></div></div>
+                          </td>
+                          <td colspan="2">
+                            <div class="left_changed_record_field_borders"><div class="new_records_fields_tds"><div class="field_value"><%= record[1][key] %></div>
+                          </div></div></td>
+
+                          <td colspan="3"></td>
+
+                        </tr>
+
+                    <% elsif key =="children" %>
+
+                        <% for child in record[1][key] %>
+                            <tr>
+                              <td colspan="3">
+                                <div class="new_child_header">
+                                  <div class="left_changed_record_field_borders"><%= @header_list[1] +" " +child[1][@header_list[1]].to_s %>
+                                </div></div>
+                              </td>
+                              <td colspan="3"></td>
+                            </tr>
+                            <% for element in child[1].keys %>
+                                <% if (element!="id") %>
+                                    <tr>
+                                      <td width="225">
+                                        <div class="new_records_fields_tds"><div class="field_name"><%= element %></div></div>
+                                      </td>
+                                      <td colspan="2">
+                                        <div class="left_changed_record_field_borders"><div class="new_records_fields_tds"><div class="field_value">&nbsp;<%= child[1][element] %></div>
+                                      </div></div></td>
+
+                                      <td width="225"></td>
+                                      <td width="225"></td>
+                                      <td width="50"></td>
+                                    </tr>
+                                <% end %>
+                            <% end %>
+                        <% end %>
+                    <% end %>
+                <% end %>
+
+
+            <% end %>
+        <% end %>
+    <% end %>
+    <tr>
+
+        <tr>
+          <!-----------------------------records existing in right list only -->
+          <% if !@list2_diffs.empty? %>--
+              <% for rec in @list2_diffs %>
+                  <!--------------------left list is not empty but record only exists in right list -->
+                  <% if !@list1_diffs.empty? && !@list1_diffs.has_key?(rec[0]) %>
+                    <tr >
+
+                      <% if @view==false %>
+                           <td width="225"></td>
+                           <td width="225"></td>
+                           <td width="50"></td>
+                          <td  width="300" >
+                            <div class="right_changed_record_field_borders"> <div class="parent_record_header"><%=@header_list[0] +" " + rec[1][@header_list[0]].to_s %></div></div>
+                          </td>
+                          <td  width="150"  id="empty_td_new_parent_header">&nbsp;</td>
+                          <td width="50">
+                            <div  class="new_parent_header_checkbox"><%= check_box("list", "#{rec[0]}"+"!"+"#{@header_list[0]}"+"!"+"new_"+"#{rec[0]}"+ "!"+"structure"+"!"+"parent"+"!"+"right") %>
+                          </div></td>
+                      <% else %>
+                           <td width="225"></td>
+                           <td width="225"></td>
+                           <td width="50"></td>
+                          <td colspan="3">
+                          <div class="parent_record_header"><%= @header_list[0] +" " + rec[1][@header_list[0]].to_s %></div>
+                          </td>
+                          <td width="225" id="empty_td_new_parent_header">&nbsp;</td>
+                          <td width="50"><div  class="new_parent_header_checkbox">&nbsp;</div></td>
+                      <% end %>
+                    </tr>
+                    <% for key in rec[1].keys %>
+                        <% if (key!="id" && key !="children" && key!= @header_list[0]&& !key.include?("_id")) %>
+                            <tr>
+                              <td width="225"></td>
+                              <td width="225"></td>
+                              <td width="50"></td>
+                              <td width="225">
+                                <div class=" right_changed_record_field_borders"><div class="new_records_fields_tds"><div class="field_name"><%= key %></div>
+                              </div></div></td>
+                              <td width="225" colspan="2"><div class="new_records_fields_tds"><div class="field_value">&nbsp;<%= rec[1][key] %></div></div></td>
+
+                        <% elsif key=="children" %>
+                            <% for child in rec[1][key] %>
+                                <tr>
+                                  <td colspan="3" ></td>
+                                  <td colspan="3">
+                                    <div class=" right_changed_record_field_borders"><div class="new_child_header">
+                                    <%=@header_list[1] +" " + child[1][@header_list[1]].to_s %>
+                                    </div></div>
+                                  </td>
+                                </tr>
+                                <% for element in child[1].keys %>
+                                    <% if (element!="id" && !key.include?("_id")) %>
+                                        <tr>
+                                          <td width="225"></td>
+                                          <td width="225"></td>
+                                          <td width="50"></td>
+                                          <td width="225">
+                                            <div class=" right_changed_record_field_borders"><div class="new_records_fields_tds"><div class="field_name"><%= element %></div>
+                                          </div></div></td>
+                                          <td width="225" colspan="2"><div class="new_records_fields_tds"><div class="field_value">&nbsp;<%= child[1][element] %></div></div></td>
+                                          </tr>
+                                    <% end %>
+                                <% end %>
+                            <% end %>
+                        <% end %>
+                    <% end %>
+    <!----------------------------left list is empty --------------------------------------->
+                <% elsif @list1_diffs.empty?  %>
+
+                    <tr>
+                      </td>
+                      <td colspan="3" ></td>
+                      <% if @view==false %>
+                          <td >
+                            <div class=" right_changed_record_field_borders"><div class="new_parent_header"><%=@header_list[0] +" " + rec[1][@header_list[0]].to_s %></div>
+                          </div></td>
+                          <td id="empty_td_new_parent_header"></td>
+                          <td>
+                            <div class="new_parent_header"><%= check_box("list", "#{rec[0]}"+"!"+"#{@header_list[0]}"+"!"+"new_"+"#{rec[0]}"+ "!"+"structure"+"!"+"parent"+"!"+"right") %>
+                            </div>
+                          </td>
+                      <% else %>
+                          <td width="225">
+                            <div class="new_parent_header"><%=@header_list[0] +" " + rec[1][@header_list[0]].to_s %></div>
+                          </td>
+                          <td colspan="2" id="empty_td_new_parent_header">&nbsp;</td>
+
+                      <% end %>
+                    </tr>
+                    <% for key in rec[1].keys %>
+                        <% if (key!="id" && key !="children" && key!= @header_list[0]&& !key.include?("_id")) %>
+                            <tr>
+                              <td width="225"></td>
+                              <td width="225"></td>
+                              <td width="50"></td>
+                              <td>
+                                <div class=" right_changed_record_field_borders"><div class="new_records_fields_tds"><div class="field_name"><%= key %></div></div></div></td>
+                              <td colspan="2">
+                                <div class="new_records_fields_tds"><div class="field_value">&nbsp;<%= rec[1][key] %></div></div>
+                            </tr>
+                        <% elsif key=="children" %>
+                            <% for child in rec[1][key] %>
+                                <tr>
+                                  <td colspan="3" ></td>
+                                  <td colspan="3">
+                                    <div class=" right_changed_record_field_borders"><div class="new_child_header">
+                                      <%= @header_list[1] +" " +child[1][@header_list[1]].to_s %>
+                                    </div></div>
+                                  </td>
+                                </tr>
+                                <% for element in child[1].keys %>
+                                    <% if (element!="id"&& !element.include?("_id")) %>
+                                        <tr>
+                                          <td width="225"></td>
+                                          <td width="225"></td>
+                                          <td width="50"></td>
+                                          <td>
+                                            <div class=" right_changed_record_field_borders"><div class="new_records_fields_tds"><div class="field_name"><%= element %></div>
+                                          </div></div></td>
+                                          <td colspan="2">
+                                            <div class="new_records_fields_tds"><div class="field_value">&nbsp;<%= child[1][element] %></div></div>
+                                          </td>
+
+                                        </tr>
+                                    <% end %>
+                                <% end %>
+                            <% end %>
+                        <% end %>
+                    <% end %>
+
+                <% end %>
+            <% end %>
+        <% end %>
+
+
+
+
+
+    </tr>
+    </table>
+    </div>
+
+
+        <% if @view==false && (!@list1_diffs.empty? && !@list2_diffs.empty?)&& @mode!="editing" %>
+
+            <table width="1000">
+              <tr>
+                <td colspan="6" align="center"><%= submit_tag "merge" %></td>
+              </tr>
+            </table>
+        <% elsif @view==false && (!@list1_diffs.empty? && @list2_diffs.empty?)&& @mode!="editing" %>
+            </table></div>
+            <table width="1000">
+              <tr>
+                <td colspan="6" align="center"><%= submit_tag "merge" %></td>
+              </tr>
+            </table>
+        <% elsif @view==false && (@list1_diffs.empty? && !@list2_diffs.empty?)&& @mode!="editing" %>
+            </table></div>
+            <table width="1000">
+              <tr>
+                <td colspan="6" align="center"><%= submit_tag "merge" %></td>
+              </tr>
+            </table>
+        <% elsif @mode=="editing" %>
+           </table></div>
+            <table width="1000">
+              <tr>
+               <td></td> <td  align="center"><%= submit_tag "ok" %></td><td><%= submit_tag "cancel" %> <td /></td>
+              </tr>
+            </table>
+
+
+    <% end %>
+    <%= end_form_tag %>
+
+
+  <% end %>
+
+
+
+
+
+
+
+
+

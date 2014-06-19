@@ -1,0 +1,25 @@
+      <%= start_form_tag({:action=> "create_dir"}, { :onSubmit => "show_element('ident_spinner');" }) %>
+
+<table>
+	<% @page_title = "Choose directories to compare" %>
+  <tr>
+    <td>Source Directory:</td>
+    <td><%= text_field("dirr", "dir_name1") %></td>
+  </tr>
+  <tr>
+    <td>Compare to target Directory:</td>
+    <td><%= text_field("dirr", "dir_name2") %></td>
+  </tr>
+
+  <tr>
+    <td></td>
+    <td><input type="submit" value=" Compare files " />
+    <%= image_tag("spinner.gif", :align => 'absmiddle', :border=> 0, :id=>"ident_spinner", :style=>"display: none;" ) %>
+    </td>
+  </tr>
+</table>
+
+
+
+
+

@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<in-map name="pm" identifier_size="2" root_identifier="BH">
+  <sequence>
+    <record name="doc_header" identifier="BH" size="37" occurence="1">
+      <fields>
+        <field name="header" size="2" default="BH" />
+        <field name="network_address" size="3" format="ZEROES" />
+        <field name="batch_number" size="6" format="ZEROES" />
+        <field name="create_date" size="8" format="DATE"/>
+        <field name="create_time" size="8" format="HMS" />
+        <field name="version_number" size="10" required="false" />
+      </fields>
+      <children>
+    <record name="pallet_movement" identifier="PM" size="443" occurence="1..n" >
+      <fields>
+        <field name="record_type" size="2" default="PM" />
+        <field name="load_id" size="10" required="false" />
+        <field name="location_type" size="2" default="DP" />
+        <field name="location_code" size="7" default="KROMCO" />
+        <field name="document_number" size="10" />
+        <field name="orig_pallet_id" size="9" />
+        <field name="sequence_number" size="5" format="ZEROES" />
+        <field name="unit_type" size="1" default="P" />
+        <field name="position" size="6" default="KROMCO" />
+        <field name="sender" size="2" required="false" />
+        <field name="agent" size="2" required="false" />
+        <field name="container_number" size="11" required="false" />
+        <field name="channel" size="1" default="E" />
+        <field name="organisation" size="2" />
+        <field name="country" size="2" default="ZA" />
+        <field name="commodity_group" size="2" required="false" />
+        <field name="commodity" size="2" />
+        <field name="variety_group" size="2" required="false" />
+        <field name="variety" size="3" />
+        <field name="sub_variety" size="3" required="false" />
+        <field name="actual_variety" size="3" required="false" />
+        <field name="pack" size="4" />
+        <field name="grade" size="4" />
+        <field name="mark" size="5" />
+        <field name="count" size="5" />
+        <field name="inventory_code" size="2" />
+        <field name="picking_reference" size="4" />
+        <field name="farm_from_code" size="7" />
+        <field name="product_group" size="2" required="false" />
+        <field name="product_characteristic" size="3" required="false" />
+        <field name="target_market" size="2" />
+        <field name="actual_grade" size="4" required="false" />
+        <field name="carton_quantity" size="5" format="ZEROES" />
+        <field name="pallet_quantity" size="9" format="DECIMAL" />
+        <field name="mixed_indicator" size="1" default="N" />
+        <field name="remarks" size="8" required="false" />
+        <field name="reason" size="4" required="false" />
+        <field name="intake_date" size="8" format="DATE" />
+        <field name="intake_time" size="5" format="HM" />
+        <field name="intake_point" size="2" required="false" />
+        <field name="original_intake_depot" size="7" default="KROMCO" />
+        <field name="original_intake_date" size="8" format="DATE" />
+        <field name="order_number" size="6" required="false" />
+        <field name="stock_pool" size="2" default="CE" />
+        <field name="temperature" size="6" format="TEMP" default="+99.99" />
+        <field name="pallet_marks" size="1" required="false" />
+        <field name="transmission_flag" size="1" required="false" />
+        <field name="revision_number" size="5" format="ZEROES" default="0" />
+        <field name="message_number" size="8" required="false" />
+        <field name="transaction_user" size="7" default="KROMCO" />
+        <field name="transaction_date" size="8" format="DATE" />
+        <field name="transaction_time" size="5" format="HM" />
+        <field name="cartons_rejected" size="5" format="ZEROES" default="0" required="false" />
+        <field name="cartons_discarded" size="5" format="ZEROES" default="0" required="false" />
+        <field name="cartons_evaluation" size="5" format="ZEROES" default="0" required="false" />
+        <field name="mox_indicator" size="1" required="false" />
+        <field name="pallet_base_type" size="1" />
+        <field name="original_document_number" size="10" required="false" />
+        <field name="history_type" size="2" default="QI" />
+        <field name="cold_date" size="8" format="DATE" />
+        <field name="new_pallet_id" size="9" required="false" />
+        <field name="temperature_device" size="20" required="false" />
+        <field name="temp_device_type" size="2" required="false" />
+        <field name="principal" size="2" required="false" />
+        <field name="sscc" size="18" />
+        <field name="new_sscc" size="18" />
+        <field name="gtin" size="14" required="false" />
+        <field name="err_sequence" size="5" required="false" />
+        <field name="pallet_id" size="18" required="false" />
+        <field name="average_temperature" size="6" required="false" />
+        <field name="max_temperature" size="6" required="false" />
+        <field name="above_hours" size="5" required="false" />
+        <field name="mininum_temperature" size="6" required="false" />
+        <field name="below_hours" size="5" required="false" />
+        <field name="truck_setting" size="6" required="false" />
+        <field name="location_code2" size="7" default="KROMCO" />
+        <field name="xmit_flag" size="1" required="false" />
+        <field name="tran_user" size="7" required="false" />
+        <field name="tran_time" size="8" format="HMS" required="false" />
+        <field name="tran_date" size="6" format="DATE" required="false" />
+        <field name="download" size="1" required="false" />
+        </fields>
+    </record>
+      </children>
+    </record>
+    <record name="doc_trailer" identifier="BT" size="112" occurence="1">
+      <fields>
+        <field name="trailer" size="2" default="BT" />
+        <field name="network_address" size="3" format="ZEROES" />
+        <field name="batch_number" size="6" format="ZEROES" />
+        <field name="record_count" size="7" format="ZEROES" />
+        <field name="ic_record_count" size="5" format="ZEROES" />
+        <field name="is_record_count" size="5" format="ZEROES" />
+        <field name="ip_record_count" size="8" format="ZEROES" />
+        <field name="ev_record_count" size="8" format="ZEROES" default="0" />
+        <field name="total_ic_cartons" size="8" format="ZEROES" />
+        <field name="total_ic_pallets" size="9" format="DECIMAL" />
+        <field name="total_dummy_ic_cartons" size="8" format="ZEROES" default="0" />
+        <field name="total_dummy_ic_pallets" size="9" format="DECIMAL" default="0.0" />
+        <field name="total_is_cartons" size="8" format="ZEROES" />
+        <field name="total_is_pallets" size="9" format="DECIMAL" />
+        <field name="total_ip_cartons" size="8" format="ZEROES" />
+        <field name="total_ip_pallets" size="9" format="DECIMAL" />
+      </fields>
+    </record>
+  </sequence>
+</in-map>

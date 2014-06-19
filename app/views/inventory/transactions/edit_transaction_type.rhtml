@@ -1,0 +1,28 @@
+
+<%= build_transaction_type_form(@transaction_type,'update_transaction_type','update',true) %>
+
+<br>
+<% field_config = {:settings =>
+                      {:id_column =>@transaction_type,
+                       :host_and_port =>request.host_with_port.to_s,
+                       :controller =>request.path_parameters['controller'].to_s ,
+                       :target_action => 'new_transaction_sub_type',
+                      :link_text =>'new transaction sub type'}}
+	
+
+      popup_link = ApplicationHelper::LinkWindowField.new(nil,nil, 'none','none','none',field_config,true,nil,self)
+      %>              
+      <%= popup_link.build_control %>
+
+<br>
+<% field_config = {:settings =>
+                      {:id_column =>@transaction_type,
+                       :host_and_port =>request.host_with_port.to_s,
+                       :controller =>request.path_parameters['controller'].to_s ,
+                       :target_action => 'list_transaction_sub_types',
+                      :link_text =>'list ltransaction sub types'}}
+	
+
+      popup_link = ApplicationHelper::LinkWindowField.new(nil,nil, 'none','none','none',field_config,true,nil,self)
+      %>              
+      <%= popup_link.build_control %>

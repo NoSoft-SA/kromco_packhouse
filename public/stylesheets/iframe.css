@@ -1,0 +1,186 @@
+    .iframe_table_rows 
+        {
+                   
+            border-collapse: inherit;
+            border-spacing: 0px;
+            empty-cells: show;
+            caption-side: top;
+            border: 0.5px solid black;
+            background-color:lightgray;
+            color:blue;
+            font-weight:bold;
+            font-size:10px;
+            font-family:arial;
+        }
+
+
+       
+ .iframe_table_rows td
+        {
+                 
+        border-collapse: inherit;
+            border-spacing: 0px;
+            empty-cells: show;
+            caption-side: top;
+            border-style:solid;
+            border-width:thin;
+            border-color:black;
+            background-color:lightgray;
+            color:blue;
+            font-weight:bold;
+            font-size:11px;
+            font-family:arial;
+            border-top: black thin solid;
+            border-bottom: black thin solid;
+              border-left: black thin solid;
+               border-right: black thin solid;
+        }
+         .iframe_table_rows_td 
+        {
+                 
+        border-collapse: inherit;
+            border-spacing: 0px;
+            empty-cells: show;
+            caption-side: top;
+            border-style:solid;
+            border-width:thin;
+            border-color:black;
+            background-color: lightgreen;
+            color:blue;
+          
+            font-size:11px;
+            font-family:arial;
+            border-top: black thin solid;
+             border-bottom: black thin solid;
+              border-left: black thin solid;
+               border-right: black thin solid;
+        }
+
+    .iframe_table_rows_td_orange 
+        {
+
+        border-collapse: inherit;
+            border-spacing: 0px;
+            empty-cells: show;
+            caption-side: top;
+            border-style:solid;
+            border-width:thin;
+            border-color:black;
+            background-color: orange;
+            color:blue;
+
+            font-size:11px;
+            font-family:arial;
+            border-top: black thin solid;
+             border-bottom: black thin solid;
+              border-left: black thin solid;
+               border-right: black thin solid;
+        }
+                 .iframe_table_rows_td_red
+        {
+                 
+        border-collapse: inherit;
+            border-spacing: 0px;
+            empty-cells: show;
+            caption-side: top;
+            border-style:solid;
+            border-width:thin;
+            border-color:black;
+            background-color:#E95F5F;
+            color:black;
+          
+            font-size:11px;
+            font-family:arial;
+            border-top: black thin solid;
+            border-bottom: black thin solid;
+              border-left: black thin solid;
+               border-right: black thin solid;
+        }
+        
+        
+.iframe_table
+
+
+        {
+           table-layout: auto;
+           border-collapse: inherit;
+           border-spacing: 0px;
+           empty-cells: show;
+           caption-side: top;
+  border-collapse:collapse;
+        }
+        
+        
+.nested_iframe         
+{
+table-layout: auto;
+border-collapse: inherit;
+border-spacing: 0px;
+empty-cells: show;
+caption-side: top;
+border-style: solid;
+border-width: thin;
+}
+
+.run_line_code_link_black {
+  color: black;
+  font-family: Arial;
+  font-size: 11px;
+  
+}
+.iframe_table_rows_td_pass
+{
+        border-collapse: inherit;
+            border-spacing: 0px;
+            empty-cells: show;
+            caption-side: top;
+            border-style:solid;
+            border-width:thin;
+            border-color:black;
+            background-color:lightgray;
+            color:black;
+          
+            font-size:11px;
+            font-family:arial;
+            border-top: black thin solid;
+          border-bottom: black thin solid;
+              border-left: black thin solid;
+               border-right: black thin solid;
+}
+
+
+
+.iframe_table_rows_td_orange
+{
+        border-collapse: inherit;
+            border-spacing: 0px;
+            empty-cells: show;
+            caption-side: top;
+            border-style:solid;
+            border-width:thin;
+            border-color:black;
+            background-color:#FFA500;
+            color:black;
+          
+            font-size:11px;
+            font-family:arial;
+            border-top: black thin solid;
+            border-bottom: black thin solid;
+              border-left: black thin solid;
+               border-right: black thin solid;
+}
+
+.iframe_table_rows_edit
+{
+            border-collapse: inherit;
+            border-spacing: 0px;
+            empty-cells: show;
+            caption-side: top;
+            border: 0.5px solid black;
+            background-color:lightgray;
+            color:black;
+            font-weight:bold;
+            font-size:10px;
+            font-family:arial;
+            
+}

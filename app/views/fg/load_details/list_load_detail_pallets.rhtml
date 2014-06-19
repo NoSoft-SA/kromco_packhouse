@@ -1,0 +1,26 @@
+<html>
+  <head>
+    <script type="text/javascript">
+          var hook = true;
+          window.onbeforeunload = function() {
+            if (hook) {
+              return "Do you want to update any information? Else the updated inforamtion will be lost.BUT IF YOU ARE REMOVING PALETS FROM LOAD CLICK leave this page"
+            }
+          }
+     </script>
+  </head>
+  <body>
+<%= start_form_tag({:action=> "update_edited_load_detail_pallets"}) %>
+
+<% grid            = build_pallets_grid(@pallets ,@can_edit,@can_delete) %>
+<% grid.caption    = 'pallets' %>
+<% @header_content = grid.build_grid_data %>
+
+<% @pagination = pagination_links(@load_detail_pages) if @load_detail_pages != nil %>
+<%= grid.render_html %>
+<%= grid.render_grid %>
+
+<%= submit_tag "update" %>
+<%= end_form_tag %>
+  </body>
+</html>

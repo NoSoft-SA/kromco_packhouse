@@ -1,0 +1,354 @@
+<%= error_messages_for 'forecast' %>
+<%= stylesheet_link_tag "forecast"%>
+
+<!--=========== Building the forecast_varieties pop menu ==========-->
+<script src = "/javascripts/context_menu.js"></script>
+
+<% menu1 = ApplicationHelper::ContextMenu.new("forecast_varieties","forecasts")
+    menu1.add_command("edit_forecast_variety","/rmt_processing/forecast/edit_forecast_variety")
+    menu1.add_command("add_indicator","/rmt_processing/forecast/add_forecast_variety_indicator")
+    menu1.add_command("set_quantities","/rmt_processing/forecast/set_quantities")
+    menu1.add_command("remove_forecast_variety","/rmt_processing/forecast/delete_forecast_variety")
+    
+   menu2 = ApplicationHelper::ContextMenu.new("forecast_variety_indicators","forecasts")
+    
+    menu2.add_command("add indicator","/rmt_processing/forecast/add_forecast_variety_indicators_track_slms_indicator")
+    menu2.add_command("edit","/rmt_processing/forecast/edit_forecast_variety_indicator")
+    menu2.add_command("delete","/rmt_processing/forecast/delete_forecast_variety_indicator")
+    menu2.add_command("indicators","/rmt_processing/forecast/list_forecast_variety_indicators_track_slms_indicators")
+    menu2.add_command("print bin tickets", "/rmt_processing/forecast/print_bin_tickets")
+  %>
+  
+  <script>
+    <%= menu1.render %>
+      build_context_menus();
+  </script>
+  
+  <script>
+    <%= menu2.render %>
+      build_context_menus();
+  </script>
+<!--================================================================-->
+<div class="edit-forecast-form">
+
+ <% form_tag :action => 'update_forecast',:id=>@forecast do %>
+  <!--take code into a partial and render it-->
+     <!--Main table-->
+     <table>
+       <tr>  
+         <td>  
+         <!--Forecast columns names table-->
+           <table>
+               <tr>
+                 <td>
+                   <label>forecast type code</label>
+                 </td>
+               </tr>
+               <tr> 
+                 <td>
+                   <label>forecast code</label>
+                 </td>
+               </tr>
+               <tr> 
+                 <td>
+                   <label>forecast description</label>
+                 </td>
+               </tr>
+               <tr> 
+                 <td>
+                   <label>farm code</label>
+                 </td>
+               </tr>
+               <tr> 
+                 <td>
+                   <label>season code</label>
+                 </td>
+               </tr>
+               <tr> 
+                 <td>
+                   <label>delivery date</label>
+                 </td>
+               </tr>
+               <tr> 
+                 <td>
+                   <label>forecast status code</label>
+                 </td>
+               </tr>
+               <tr>  
+                 <td >
+                   <label>sequence number</label>
+                 </td>
+               </tr> 
+               <tr>  
+                 <td style='padding-top: 15px;'>
+                   <label>forecast report</label>
+                 </td>
+               </tr>     
+           </table>
+         <!--end of Forecast column names table-->
+         </td>
+         <td>
+         <!--Forecast columns values table-->  
+           <table>
+               <tr>
+                 <td class="uneditable-label-field">
+                   <label><%=@forecast.forecast_type_code%></label>
+                 </td>
+               </tr>
+               <tr> 
+                 <td class="uneditable-label-field">
+                   <label><%=@forecast.forecast_code%></label>
+                 </td>
+               </tr>
+               <tr> 
+                 <td>
+                    <%= text_field 'forecast', 'forecast_description' %>
+                 </td>
+               </tr>
+               <tr> 
+                 <td>
+                   <%= select('forecast','farm_code',@farm_codes) %>
+                 </td>
+               </tr>
+               <tr> 
+                 <td>
+                   <label><%= select('forecast','season_code',@season_codes) %></label>
+                 </td>
+               </tr>
+               <tr> 
+                 <td>
+                   <label><%= datetime_select 'forecast', 'delivery_date' %></label>
+                 </td>
+               </tr>
+               <tr> 
+                 <td class="uneditable-label-field">
+                   <label><%=@forecast.forecast_status_code%></label>
+                 </td>
+               </tr>
+               <tr>  
+                 <td class="uneditable-label-field">
+                   <label><%=@forecast.sequence_number%></label>
+                 </td>
+               </tr> 
+               <tr>
+                 <td >
+                    <% params_hash =  { "report_type" => "Forecast","report_user_ref"=>"Printed_from_Luks_Rails_server","printer_name" => "Primo","show_report"=>"yes", "reference_id" => 1, "reference_type" => "forecasts","paraSeason_code" => @forecast.season_code,"paraFarm_code" => @forecast.farm_code }  %>
+                    <%= link_to(image_tag("/images/view.png", :border => 0),generate_report_parameters(params_hash),:popup => true) %>
+                 </td>
+               </tr>    
+           </table>
+         <!--end of Forecast columns values table-->
+         </td>  
+       </tr>
+       <tr>
+         <td></td>
+       </tr>
+       <tr>
+         <td></td>
+       </tr>
+       <tr>
+         <td></td>
+         <td>
+         <!--Track indicators heading and add_indicators link table-->
+           <table>
+             <tr>
+               <td class="uneditable-bold-label-field">
+                    track indicators
+               </td>
+               <td class="action_link">
+                    <%= link_to "add track indicator", {:action => 'add_track_indicator',:id=>@forecast}%> 
+               </td>
+             </tr>
+            <%for track_slms_indicator in @track_slms_indicators%>
+             <tr>
+                <td>
+                   <%= track_slms_indicator.track_indicator_type_code %>
+                </td>
+                <td class="action_link">
+                   <%= link_to "remove", {:action => 'remove_forecast_track_indicator',:id=>track_slms_indicator.id}%>
+                </td>
+             </tr>
+            <%end%>
+           </table>
+         <!--end of Track indicators heading and add_indicators link table-->
+         </td>
+        </tr>
+        <tr>
+          <td></td>
+        </tr>
+        
+        <tr>
+         <td>
+         </td>
+         <td>
+         <!--Forecast varieties heading and add_indicators link table-->
+           <table>
+             <tr>
+               <td class="uneditable-bold-label-field">
+                    forecast varieties
+               </td>
+               <td class="action_link">
+                    <%= link_to "add forecast variety", {:action => 'add_forecast_variety',:id=>@forecast}%>
+               </td>
+             </tr>
+           </table>
+         <!--end of Forecast varieties heading and add_indicators link table-->
+         </td>
+       </tr>
+       
+       <tr>
+         <td></td>
+        </tr>
+        
+        <tr>
+         <td></td>
+         <td>
+         <!--Forecast varieties LIST table-->
+           <table border="1" class="forecast-header-table">
+             <!--table headings row-->
+             <tr id="forecast-header-table-headings">
+               <td>
+                    <label>commodity code</label>
+               </td>
+               <td>
+                    <label>orchard code</label>
+               </td>
+               <td>
+                    <label>rmt variety code</label>
+               </td>
+               <td>
+                    <label>indicator code</label>
+               </td>
+               <td>
+                    <label>tickets printed</label>
+               </td>
+               <td>
+                    <label>quantity</label>
+               </td>
+               <td>
+                    <label>status</label>
+               </td>
+             </tr>
+             <!--end of table headings row-->
+             <!--</tr>-->
+              <%i=1%>
+        <% for forecast_variety in @forecast.forecast_varieties %>
+           <% if forecast_variety.status_code == "balanced"%>
+             <tr style="background-color: lime;font-weight: bold;">
+           <% else %>
+              <tr style="background-color: orange;font-weight: bold;">
+           <% end %>
+               <td>
+                    <label><%= forecast_variety.commodity_code %></label>
+               </td>
+               <td>
+                    <label><%= forecast_variety.orchard_code %></label>
+               </td>
+               <td>
+
+     <% link_class = "action_link" %>     
+                    
+     <% field_config = {:link_text => forecast_variety.rmt_variety_code,
+						:link_value => forecast_variety.id.to_s,
+						:menu_name => "forecast_varieties",
+						:css_class => link_class}
+	
+    
+      popup_link = ApplicationHelper::PopupLink.new(nil,nil, 'none','none','none',field_config,true,nil,self)
+      %>              
+      <%= popup_link.build_control %>
+      
+                    
+               </td>
+               <td>
+                    <label></label>
+               </td>
+               <td>
+                    <label></label>
+               </td>
+               <td>
+                    <label><%= forecast_variety.quantity %></label>
+               </td>
+               <td>
+                   <% if forecast_variety.status_code == "balanced"%>
+                    <label style="color: green;font-weight: 400;">
+                   <% else %>
+                    <label style="color: red;font-weight: 400;">
+                   <% end %>
+                    qty_<%= forecast_variety.status_code %>
+                 </label>
+               </td>
+             </tr>
+             
+             <!-- forecast_variety_indicators list for the current forecast_variety-->
+            <%j=1%>
+             <% for forecast_variety_indicator in forecast_variety.forecast_variety_indicators %>
+             <tr>
+               <% if i == @forecast.forecast_varieties.length %>
+               <td style="border-right: white thin solid;border-top: black thin solid; border-left: white thin solid;border-bottom: white thin solid; ">
+                    
+               </td>
+               <td style="border-top: black thin solid; border-left: white thin solid;border-bottom: white thin solid; ">
+               <% else %>  
+                    <%if j != (forecast_variety.forecast_variety_indicators.length)%>
+                    <td style="border-right: white thin solid;border-top: black thin solid; border-left: white thin solid;border-bottom: white thin solid; ">
+                    
+                    </td>
+                    <td style="border-top: black thin solid; border-left: white thin solid;border-bottom: white thin solid; ">
+                    </td>
+                    <%else%>
+               <td style="border-right: white thin solid;border-top: black thin solid; border-left: white thin solid;border-bottom: black thin solid; ">
+                    
+               </td>
+               <td style="border-top: black thin solid; border-left: white thin solid;border-bottom: black thin solid; ">
+                    <% end %>
+               <% end %>
+               
+               <td style="border-top: black thin solid; border-left: white thin solid;border-bottom: white thin solid; ">
+                    
+               </td>
+
+               <td>
+                    <!--<label><%= forecast_variety_indicator.track_slms_indicator_code %></label>-->
+     <% link_class = "action_link" %>     
+                    
+     <% field_config = {:link_text => forecast_variety_indicator.track_slms_indicator_code,
+						:link_value => forecast_variety_indicator.id.to_s,
+						:menu_name => "forecast_variety_indicators",
+						:css_class => link_class}
+	
+    
+      popup_link = ApplicationHelper::PopupLink.new(nil,nil, 'none','none','none',field_config,true,nil,self)
+      %>              
+      <%= popup_link.build_control %>
+               </td>
+               <td>
+                    <label><%= forecast_variety_indicator.number_tickets_printed %></label>
+               </td>
+               <td>
+                    <label><%= forecast_variety_indicator.quantity %></label>
+               </td>
+               <td>
+                    <label></label>
+               </td>
+               <%j+=1%>
+             <% end %>
+             <!-- end of forecast_variety_indicators list-->
+             <%i+=1%>
+       <% end %>
+           </table>
+         <!--end of Forecast varieties LIST table-->
+         </td>
+       </tr>
+       <tr>
+         <td></td>
+         <td>
+           <%= submit_tag "update_forecast" %>
+         </td>
+       </tr>
+     </table>
+    <!--End of main table--> 
+<% end %>
+          
+
+</div>

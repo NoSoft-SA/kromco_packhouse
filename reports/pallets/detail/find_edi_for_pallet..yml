@@ -1,0 +1,41 @@
+query: select * FROM vw_find_edi_for_pallet WHERE (pallet_number={pallet_number} and dispatch_consignment_number={dispatch_consignment_number} and load_number={load_number} and flow_type={flow_type} and edi_out_filename={edi_out_filename}  and out_destination_dir={out_destination_dir}  and order_number={order_number} and organization={organization} and customer={customer} )
+main_table_name: pallets
+fields:
+ field1:
+  field_name: pallet_number
+  caption: pallet_number
+  field_type: text 
+ field2:
+  field_name: dispatch_consignment_number
+  caption: dispatch_consignment_number
+  field_type: text 
+ field3:
+  field_name: load_number
+  caption: load_number
+  field_type: text 
+ field4:
+  field_name: flow_type
+  caption: flow_type
+  field_type: text 
+ field5:
+  field_name: edi_out_filename
+  caption: edi_out_filename
+  field_type: text 
+ field6:
+  field_name: out_destination_dir
+  caption: out_destination_dir
+  field_type: text 
+ field7:
+  field_name: order_number
+  caption: order_number
+  field_type: text   
+ field8:
+  field_name: organization
+  caption: organization
+  field_type: text     
+ field9:
+  field_name: customer
+  caption: customer
+  field_type: text   
+    
+   

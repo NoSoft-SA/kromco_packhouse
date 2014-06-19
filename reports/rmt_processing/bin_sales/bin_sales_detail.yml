@@ -1,0 +1,14 @@
+query: select     remarks,     trading_partner_party_name,     bin_order_number,     order_create_date,     customer_order_number,     remarks_1,     remarks_2,     updated_at,     bin_load_number,     vehicle_license_number,     hualier_party_name,     size_code,     product_class_code,     variety_code,    commodity_code,    fruit_weight,    total_weight,    bin_number,    bin_order_load_detail_id,    track_slms_indicator_code,    bin_order_load_id,    farm_code,    required_quantity,    pack_material_product_code,    id from vw_binsales_detail WHERE (trading_partner_party_name={trading_partner_party_name} and  order_create_date={order_create_date})
+main_table_name: bin_orders
+fields:
+ field1:
+  field_name: trading_partner_party_name
+  caption: trading_partner_party_name
+  field_type: lookup
+  list: "select distinct party_name from parties_roles where role_name = 'TRADING PARTNER' order by party_name"  
+ field2:
+  field_name: order_create_date
+  caption: order_create_date
+  field_type: daterange
+
+  

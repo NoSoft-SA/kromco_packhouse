@@ -1,0 +1,32 @@
+<% @content_header_caption = "'allocate drench to delivery'" %>
+
+<% form_for  :drench_line, :url=>{:controller=>'rmt_processing/delivery', :action=>'save_drench_allocations', :onSubmit=> "show_element('img_drench_line_code');"} do |f| %>
+    
+    <table border="0">
+        <tr>
+            <td class="drench_fields">
+                select drench line:
+            </td>
+            <td class="drench_fields">
+                <%= f.select(:drench_line_code, @drench_line_codes) %>
+            </td>
+        </tr>
+    </table>
+    <%= observe_field "drench_line_drench_line_code", 
+            :update => 'drench_stations',
+            :url => {:action => 'get_drench_station_codes'}, 
+            :with => "'drench_line_code='+value"
+    %>
+       
+   
+    <div id="drench_stations">
+        
+    </div>
+    
+    <table boder="0">
+        <tr>
+            <td class="drench_fields"></td>
+            <td class="drench_fields"><%= submit_tag 'Allocate'%> <img src='/public/images/spinner.gif' style='display:none;' id='img_drench_line_code'/>
+        <tr>
+    </table>
+<% end %>

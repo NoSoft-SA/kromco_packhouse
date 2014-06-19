@@ -1,0 +1,31 @@
+<pre class="grower_grading">
+  Grower Grading Preview
+  ----------------------
+
+  Grower:                 <%= @pool_graded_summary.pool_graded_farm_list %> <%= ' '*(20-@pool_graded_summary.farm_code.length) %> Input weight:              <%= sprintf('%d', @pool_graded_summary.bin_mass) %>
+  Commodity code:         <%= @pool_graded_summary.commodity_code %> <%= ' '*(20-@pool_graded_summary.commodity_code.length) %> Season:                    <%= @pool_graded_summary.season_code %>
+  Variety code:           <%= @track_slms_indicator.rmt_variety_code %> <%= ' '*(20-@track_slms_indicator.rmt_variety_code.length) %> Track SLMS indicator code: <%= @track_slms_indicator.track_slms_indicator_code %>
+
+  Production Schedule No: <%= @pool_graded_summary.production_schedule_name %>
+  Production Run Code:    <%= @pool_graded_summary.production_run_code %>
+
+  Size/class
+
+           |   CL1  |   CL2  |   CL3  |   CL4  ||   CL1  |   CL2  |   CL3  |   CL4  |
+  ---------|--------|--------|--------|--------||--------|--------|--------|--------|
+  <% @pool_graded_details.each do |pool_graded_detail| -%>
+  <%=pool_graded_detail[0].to_s.rjust(6) %> | <%= pool_graded_detail[1].rjust(6) %> | <%= pool_graded_detail[2].rjust(6) %> | <%= pool_graded_detail[3].rjust(6) %> | <%= pool_graded_detail[4].rjust(6) %> || <%= pool_graded_detail[5].rjust(6) %> | <%= pool_graded_detail[6].rjust(6) %> | <%= pool_graded_detail[7].rjust(6) %> | <%= pool_graded_detail[8].rjust(6) %> |  
+  <% end -%>
+---------|--------|--------|--------|--------||--------|--------|--------|--------|
+    <%=@totals[0].rjust(6) %> | <%= @totals[1].rjust(6) %> | <%= @totals[2].rjust(6) %> | <%= @totals[3].rjust(6) %> | <%= @totals[4].rjust(6) %> || <%= @totals[5].rjust(6) %> | <%= @totals[6].rjust(6) %> | <%= @totals[7].rjust(6) %> | <%= @totals[8].rjust(6) %> |  
+  ---------|--------|--------|--------|--------||--------|--------|--------|--------|
+
+  Total 1-4: <%= sprintf('%0.2f', @total1).rjust(6) %>
+  Total 5-8: <%= sprintf('%d', @total2).rjust(6) %>
+  Total cartons: <%= @carton_count %>
+</pre>
+
+  <script>
+    window.opener.frames[1].location.href ='/rmt_processing/grower_grading/edit_pool_graded_summary/<%= @pool_graded_summary.id %>';
+  </script>
+

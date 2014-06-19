@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<in-map name="hwe" identifier_size="2" root_identifier="BH">
+  <sequence>
+    <record name="csv_heading" identifier="BH" size="0" occurence="1">
+      <fields>
+        <field name="FG_ITEM_DESCRIPTION" size="19" default="FG_ITEM_DESCRIPTION" />
+        <field name="FG_ITEM_CODE" size="12" default="FG_ITEM_CODE" />
+        <field name="ALTERNATE_CODE" size="14" default="ALTERNATE_CODE" />
+        <field name="CLASSIFICATION" size="14" default="CLASSIFICATION" />
+      </fields>
+    </record>
+    <record name="hansa_export" identifier="HWE" size="0" occurence="1..n">
+      <fields>
+        <field name="fg_item_description" size="80" />
+        <field name="fg_item_code" size="80" required="false" />
+        <field name="alternate_code" size="20" />
+        <field name="classification" size="80" />
+      </fields>
+    </record>
+  </sequence>
+</in-map>

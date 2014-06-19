@@ -1,0 +1,7 @@
+query: select * from vw_pms_cartons where (activitylogdatetime={activitylogdatetime} and fgcode={fgcode} ) 
+main_table_name: cartons
+fields:
+  field1:
+   field_name: activitylogdatetime
+   caption: from_datetime
+   field_type: daterange

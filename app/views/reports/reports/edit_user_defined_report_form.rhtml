@@ -1,0 +1,121 @@
+<% @content_header_caption = "'update view for #{dm_session[:report_name]} report'"%>
+
+<%= error_messages_for 'user_defined_report'%>
+
+<% form_for :user_defined_report, :url=>{:action=>'update_my_view', :id=>@user_defined_report} do |form|%>
+
+  <%= render :partial => 'udr_form', :locals => {:form => form} %>
+     <!--table border='0'>
+         <tr>
+            <td>
+                tag1
+            </td>
+            <td id='tag1_td'>
+                <%#=form.select(:tag1, @tag_list)%><%#=image_tag 'spinner.gif', :id=>'img_tag1', :style=>'display:none;'%>
+            </td>
+                <%#=observe_field 'user_defined_report_tag1',
+                       :update=>'existing_reports_td',
+                       :before=>'Element.show("img_tag1")',
+                       :complete=>'Element.hide("img_tag1")',
+                       :url=>{:controller=>'reports', :action=>'tag1_combo_changed'},
+                       :with=>'"tag1="+value'
+                %>
+         </tr>
+         <tr>
+            <td>
+                tag2
+            </td>
+            <td id='tag2_td'>
+                <%#=form.select(:tag2, @tag_list)%><%#=image_tag 'spinner.gif', :id=>'img_tag2', :style=>'display:none;'%>
+            </td>
+                <%#=observe_field 'user_defined_report_tag2',
+                       :update=>'existing_reports_td',
+                       :before=>'Element.show("img_tag2")',
+                       :complete=>'Element.hide("img_tag2")',
+                       :url=>{:controller=>'reports', :action=>'tag2_combo_changed'},
+                       :with=>'"tag2="+value'
+                %>
+         </tr>
+         <tr>
+            <td>
+                tag3
+            </td>
+            <td id='tag3_td'>
+                <%#=form.select(:tag3, @tag_list)%><%#=image_tag 'spinner.gif', :id=>'img_tag3', :style=>'display:none;'%>
+            </td>
+                <%#=observe_field 'user_defined_report_tag3',
+                       :update=>'existing_reports_td',
+                       :before=>'Element.show("img_tag3")',
+                       :complete=>'Element.hide("img_tag3")',
+                       :url=>{:controller=>'reports', :action=>'tag3_combo_changed'},
+                       :with=>'"tag3="+value'
+                %>
+         </tr>
+         <tr>
+            <td>
+                tag4
+            </td>
+            <td id='tag4_td'>
+                <%#=form.select(:tag4, @tag_list)%><%#=image_tag 'spinner.gif', :id=>'img_tag4', :style=>'display:none;'%>
+            </td>
+                <%#=observe_field 'user_defined_report_tag4',
+                       :update=>'existing_reports_td',
+                       :before=>'Element.show("img_tag4")',
+                       :complete=>'Element.hide("img_tag4")',
+                       :url=>{:controller=>'reports', :action=>'tag4_combo_changed'},
+                       :with=>'"tag4="+value'
+                %>
+         </tr>
+         <tr>
+            <td>
+                tag5
+            </td>
+            <td id='tag5_td'>
+                <%#=form.select(:tag5, @tag_list)%><%#=image_tag 'spinner.gif', :id=>'img_tag5', :style=>'display:none;'%>
+            </td>
+                <%#=observe_field 'user_defined_report_tag5',
+                       :update=>'existing_reports_td',
+                       :before=>'Element.show("img_tag5")',
+                       :complete=>'Element.hide("img_tag5")',
+                       :url=>{:controller=>'reports', :action=>'tag5_combo_changed'},
+                       :with=>'"tag5="+value'
+                %>
+         </tr>
+         <tr>
+            <td>
+                existing user defined report names
+            </td>
+            <td id='existing_reports_td'>
+                <%#=form.select(:existing_report, @existing_reports_list)%><%#=image_tag 'spinner.gif', :id=>'img_existing_reports', :style=>'display:none;'%>
+            </td>
+                <%#=observe_field 'user_defined_report_existing_report',
+                       :update=>'report_name_td',
+                       :before=>'Element.show("img_existing_reports")',
+                       :complete=>'Element.hide("img_existing_reports")',
+                       :url=>{:controller=>'reports', :action=>'existing_reports_combo_changed'},
+                       :with=>'"existing_report="+value'
+                %>
+         </tr>
+         <tr>
+            <td>
+                user defined report name
+            </td>
+            <td id='report_name_td'>
+                <%#=form.text_field(:user_defined_report_name)%>
+            </td>
+         </tr>
+         <tr>
+            <td>
+                ranking
+            </td>
+            <td id='ranking_td'>
+                <%#=form.text_field(:ranking, :size=>20)%>
+            </td>
+         </tr>
+         <tr> 
+            <td></td>
+            <td> <button>update view</button></td>
+        </tr>
+     </table-->
+
+<% end %>

@@ -1,0 +1,58 @@
+<div id="calculations2" style="display:none; overflow:auto;">
+  <table class="thinbordertable">
+    <thead>
+      <tr>
+        <th>function</th>
+        <th>column</th>
+        <th>Group by [columns]</th>
+        <th>Order by [columns]</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><%= select_tag :function_dropdown, options_for_select(function_list), :onchange => "dmCalcFunc.function_dropdown_changed(this);" %></td>
+        <td><%= select_tag :columns_dropdown, options_for_select([""] + numeric_cols) %></td>
+        <td><%= select_tag :group_by_dropdown, options_for_select(column_array) %></td>
+        <td><%= select_tag :order_by_dropdown, options_for_select(column_array) %></td>
+      </tr>
+      <tr>
+        <td colspan="2"><a href="#" onclick="dmCalcFunc.add_function();return false;" class="ds_link">Add Function</a></td>
+        <td>
+          <a href="#" onclick="dmCalcFunc.add_group_by_column();return false;" class="ds_link">Add Column</a> |
+          <a href="#" onclick="dmCalcFunc.add_all_group_by_columns();return false;" class="ds_link">Add ALL</a> |
+          <a href="#" onclick="dmCalcFunc.clear_group_by_columns();return false;" class="ds_link">Clear</a>
+        </td>
+        <td>
+          <%= select_tag :order_by_criteria, options_for_select(["","ASC", "DESC"]) %>
+          <a href="#" onclick="dmCalcFunc.add_order_by_column();return false;" class="ds_link">Add Column</a> |
+          <a href="#" onclick="dmCalcFunc.add_all_order_by_columns();return false;" class="ds_link">Add ALL</a> |
+          <a href="#" onclick="dmCalcFunc.clear_order_by_columns();return false;" class="ds_link">Clear</a>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="2" class="ui-widget-header" style="text-align:center">
+          current function(s)
+        </td>
+        <td class="ui-widget-header" style="text-align:center">
+          current group by columns
+        </td>
+        <td class="ui-widget-header" style="text-align:center">
+          current order by columns
+        </td>
+      </tr>
+      <tr>
+        <td colspan="2">
+          <div style="height:150px;overflow:auto;"><ul id="calcfuncsul" style="list-style:none;padding-left:10px;margin-top:1px;"></ul></div>
+        </td>
+        <td>
+          <div style="height:150px;overflow:auto;"><ol id="grpsol" style="margin-top:1px;"></ol></div>
+        </td>
+        <td>
+          <div style="height:150px;overflow:auto;"><ol id="ordsol" style="margin-top:1px;"></ol></div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <p>Drag and drop columns to change their order. Click on <%= image_tag 'expanded.png' %> to remove a column.</p>
+</div>
+

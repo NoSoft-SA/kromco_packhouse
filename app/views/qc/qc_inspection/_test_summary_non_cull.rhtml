@@ -1,0 +1,15 @@
+<table>
+<% qc_inspection_test.averages.each do |ave| %>
+  <tr><td><%= ave[:description] %>:</td><td>Ave: <%= measure_formatted( ave[:value] ) %></td><td>Min: <%= measure_formatted( ave[:min] ) %></td><td>Max: <%= measure_formatted( ave[:max] ) %></td></tr>
+<% end %>
+</table>
+<a href='#' onclick="$('test_summary_measure_detail_<%= qc_inspection_test.id %>').toggle();return false;">Show/Hide detail</a>
+<div id="test_summary_measure_detail_<%= qc_inspection_test.id %>" style="display:none">
+  <table>
+<% qc_inspection_test.qc_results.find(:all, :order => 'sample_no').each do |qc_result| %>
+  <% qc_result.qc_result_measurements.each do |qc_result_measurement| %>
+    <tr><td><%= qc_result_measurement.qc_measurement_description %>:</td><td><%= measure_formatted( qc_result_measurement.measurement ) %></td></tr>
+  <% end %>
+<% end %>
+  </table>
+</div>
