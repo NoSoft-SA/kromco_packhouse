@@ -92,17 +92,26 @@ class EdiOutDestination < ActiveRecord::Base
         # 3. Flow_type= ‘lf’, hub_address=’ETI’, organization_code =public.orders.customer_party_role_id.party_name
 
         # Send the HCS flow:
+	
         destinations << self.find_by_flow_type_and_organization_code_and_hub_address('hcs', 'KR', '031')
 	if destinations.last.nil?
           org_err = "KR (HCS sub-flow)"
           hub_err = '031'
         end
-	
+
         # Send the PO flow:
         party_role = PartiesRole.find(model.order.customer_party_role_id)
         # First check if this organization should receive EDI
-        return nothing_to_create unless organization_receives_edi( party_role.party_name )
-        return nothing_to_create unless organization_flow_receives_edi( party_role.party_name, flow_type )
+        if !organization_receives_edi( party_role.party_name )
+	    org_err = party_role.party_name
+            hub_err = model.order.depot_code
+	end
+	
+        if !organization_flow_receives_edi( party_role.party_name, flow_type )
+	    org_err = party_role.party_name
+            hub_err = model.order.depot_code		
+	end
+	
   
         if party_role.nil?
           destinations << nil

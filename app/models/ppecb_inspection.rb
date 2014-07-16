@@ -49,7 +49,10 @@ class PpecbInspection < ActiveRecord::Base
     self.pallet.ppecb_inspection_id = self.id
     self.pallet.update
 
-    EdiOutProposal.send_doc(self, 'PM') if self.inspection_level_code.upcase == "RE-INSPECTION"
+    if self.pallet.organization_code == "CA"
+	EdiOutProposal.send_doc(self, 'PM') if self.inspection_level_code.upcase == "RE-INSPECTION"
+    end
+    
     return true
   end
 
