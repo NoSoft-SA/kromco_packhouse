@@ -1,7 +1,8 @@
 class PoolGradedPsBin < ActiveRecord::Base
 
  belongs_to   :pool_graded_ps_summaries
- attr_accessor :weight_adjusted_plus,:weight_adjusted_minus,:total_calculated_weight,:total_adjusted_weight,:round_check,:rmt_bin_weight,:pesage_maf_weight,:maf_total_lot_weight ,:waste_weight
+ attr_accessor :weight_adjusted_plus,:weight_adjusted_minus,:total_calculated_weight,:total_adjusted_weight,:round_check,:rmt_bin_weight,:pesage_maf_weight,:maf_total_lot_weight ,:waste_weight ,
+               :total_graded_weight_plus_round_check_plus_pesage_maf_weight_plus_waste ,:round_check_2
 
  #validates_presence_of :maf_class
  #validates_presence_of :maf_colour
@@ -25,7 +26,7 @@ class PoolGradedPsBin < ActiveRecord::Base
       Nom_article as maf_article,Nom_calibre as maf_count,Poids as maf_weight,Poids_total_calibre as maf_lot_weight,
       Nb_palox as maf_infeed_bin_qty
       FROM [productionv50].[dbo].[Viewlotapportresultatagreage]
-      WHERE Numero_lot = #{pool_graded_ps_summary.maf_lot_number}
+      WHERE Numero_lot = #{pool_graded_ps_summary.maf_lot_number} and  Nom_article <>  'Recycling'
       ORDER BY Numero_lot,Num_couleur,Num_calibre
       ")}
 

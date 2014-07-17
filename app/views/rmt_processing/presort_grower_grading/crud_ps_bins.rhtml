@@ -86,27 +86,25 @@
         border: 1px solid #963;
         height: 800px;
         overflow: auto;
-        width:5000px
+        width:1580px
     }
-
-        /* Reset overflow value to hidden for all non-IE browsers. */
+    /* Reset overflow value to hidden for all non-IE browsers. */
     html>body div.tableContainer {
         overflow: hidden;
-        width: 1640px
+        width: 1580px
     }
 
-        /* define width of table. IE browsers only                 */
+    /* define width of table. IE browsers only                 */
     div.tableContainer table {
         float: left;
-        width: 900px
+        width: 1580px
     }
 
-        /* define width of table. Add 16px to width for scrollbar.           */
-        /* All other non-IE browsers.                                        */
+    /* define width of table. Add 16px to width for scrollbar.           */
+    /* All other non-IE browsers.                                        */
     html>body div.tableContainer table {
-        width: 1809px
+        width: 1580px
     }
-
         /* set table header to a fixed position. WinIE 6.x only                                       */
         /* In WinIE 6.x, any element with a position property set to relative and is a child of       */
         /* an element that has an overflow property set, the relative value translates into fixed.    */
@@ -180,12 +178,14 @@
 
     }
 
-        /* define width of TH elements: 1st, 2nd, and 3rd respectively.          */
-        /* Add 16px to last TH for scrollbar padding. All other non-IE browsers. */
-        /* http://www.w3.org/TR/REC-CSS2/selector.html#adjacent-selectors        */
-    html>body thead.fixedHeader th {
-        width: 118px
-    }
+    /* define width of TH elements: 1st, 2nd, and 3rd respectively.          */
+    /* Add 16px to last TH for scrollbar padding. All other non-IE browsers. */
+    /* http://www.w3.org/TR/REC-CSS2/selector.html#adjacent-selectors        */
+
+
+   /* html>body thead.fixedHeader th  {
+        width: 116px
+    }   */
 
     tbody.scrollContent tr.alternateRow tr:hover  {
        color: #ffff99;
@@ -196,16 +196,25 @@
         /* define width of TD elements: 1st, 2nd, and 3rd respectively.          */
         /* All other non-IE browsers.                                            */
         /* http://www.w3.org/TR/REC-CSS2/selector.html#adjacent-selectors        */
-    html>body tbody.scrollContent td {
-        width:118px
-    }
 
 
-    -->
+    /*html>body tbody.scrollContent td  {
+        width: 111px
+    }  */
+
+
+    th{ width:100px;}
+    th.col2 { width: 150px;}
+    th.col10 { width: 125px;}
+    th.col11 { width: 128px;}
+    th.col12 { width: 125px;} /*-- firefox th.col12 { width: 122px;} */
 </style>
 </head><body>
 
 <% form_for :pool_graded_ps_summary, :url => { :action => 'save_pool_graded_ps_bins', :id => @pool_graded_ps_summary.id } do |f|%>
+<% if @pool_graded_ps_bins.empty? %>
+    No bins for this  pool_graded_ps_summary
+<% else %>
     <p>MAF Lot Number: <b><%= @pool_graded_ps_summary.maf_lot_number %></b> </p>
     <p>MAF Tipped Quantity: <b><%= @pool_graded_ps_summary.maf_tipped_lot_qty %></b> </p>
     <p>MAF Total Lot Weight: <b><%= sprintf('%0.2f',@pool_graded_ps_summary.maf_total_lot_weight) %></b> </p>
@@ -213,12 +222,12 @@
 <div><br/></div>
 
 <div id="tableContainer" class="tableContainer">
-<table border="0" cellpadding="0" cellspacing="0" width="800px" class="scrollTable">
+<table border="0" cellpadding="0" cellspacing="0" width="1580px" class="scrollTable">
 <tr><%= render :partial => 'ps_bin_action' %></tr>
 <thead class="fixedHeader">
 <tr >
   <th >&nbsp;</th>
-  <th>MAF<br />Article</th>
+  <th class="col2">MAF<br />Article</th>
   <th>MAF<br /> Class</th>
   <th>Graded<br /> Class</th>
   <th>MAF<br /> Colour</th>
@@ -226,10 +235,11 @@
   <th>MAF_Article<br />Count</th>
   <th>MAF<br />Count</th>
   <th>Graded<br />Count</th>
-  <th>MAF<br />Weight</th>
-  <th>Graded<br />Weight</th>
-  <th>Weight<br />Adjusted<br /> + </th>
-  <th>Weight<br />Adjusted<br /> - </th>
+  <th class="col10">MAF<br />Weight</th>
+  <th class="col11">Graded<br />Weight</th>
+  <th class="col12">Weight<br />Adjusted<br /> + </th>
+  <th class="col12">Weight<br />Adjusted<br /> - </th>
+
 </tr>
 </thead>
 <tbody class="scrollContent" >
@@ -246,7 +256,7 @@
   <td>&nbsp;</td>
   <td align="left" colspan="2"><strong>Totals</strong></td>
   <td align="left"><strong><%= text_field_tag "total_maf_weight", sprintf('%0.2f', @pool_graded_ps_bins.sum{|p| p.maf_weight }), :size => 8 ,:class => 'totals',:disabled=>true %></strong></td>
-  <td align="left"><strong><% if !@pool_graded_ps_bins.empty? && @pool_graded_ps_bins[0].total_calculated_weight %><%= text_field_tag "total_graded_weight",sprintf('%0.2f',@pool_graded_ps_bins[0].total_calculated_weight), :size => 8 ,:class => 'totals',:disabled=>true %><% else %><%= text_field_tag "total_graded_weight",sprintf('%0.2f',@pool_graded_ps_bins.sum{|p| p.maf_weight } ), :size => 6 ,:class => 'numeric',:disabled=>true %><% end %></strong></td>
+  <td align="left"><strong><% if !@pool_graded_ps_bins.empty? && @pool_graded_ps_bins[0].total_calculated_weight %><%= text_field_tag "total_graded_weight",sprintf('%0.2f',@pool_graded_ps_bins[0].total_calculated_weight), :size => 8 ,:class => 'totals',:disabled=>true %><% else %><%= text_field_tag "total_graded_weight",sprintf('%0.2f',@pool_graded_ps_bins.sum{|p| p.maf_weight } ), :size => 8 ,:class => 'totals',:disabled=>true %><% end %></strong></td>
   <td align="left"><strong><%= text_field_tag "total_adjusted_weight_plus",sprintf('%0.2f',@pool_graded_ps_bins.sum{|p| p.weight_adjusted_plus } ), :size => 8 ,:class => 'totals',:disabled=>true %></strong></td></strong>
   <td align="left"><strong><%= text_field_tag "total_adjusted_weight_minus",sprintf('%0.2f',@pool_graded_ps_bins.sum{|p| p.weight_adjusted_minus } ), :size => 8 ,:class => 'totals',:disabled=>true %></strong></td>
 </tr>
@@ -258,20 +268,19 @@
   <td>&nbsp;</td>
   <td>&nbsp;</td>
   <td>&nbsp;</td>
-  <td align="left" colspan="2"><strong>Round Check</strong></td>
+  <td align="left" colspan="2"><strong>Check</strong></td>
+  <td>&nbsp;</td>
   <td align="left"><strong><% if !@pool_graded_ps_bins.empty? && @pool_graded_ps_bins[0].round_check %><%= text_field_tag "round_check",sprintf('%0.2f',@pool_graded_ps_bins[0].round_check), :size => 8 ,:class => 'numeric',:disabled=>true %><% else %><%= text_field_tag "round_check",sprintf('%0.2f',0.0  ), :size => 6 ,:class => 'numeric',:disabled=>true %><% end %></strong></td>  <td>&nbsp;</td>
-  <td>&nbsp;</td>
-  <td>&nbsp;</td>
-  <td>&nbsp;</td>
+   <td>&nbsp;</td>
 </tr>
 <tr>
   <td colspan="13">&nbsp;</td>
 </tr>
 
 <tr class="<%= cycle('rowodd','roweven') %> ">
-  <%= render :partial => 'pesage_record', :collection => @pool_graded_ps_bins %>
+  <%= render :partial => 'pesage_record', :collection => @pesage_record %>
 </tr>
-<tr class="<%= cycle('rowodd','roweven') %> ">
+<!--<tr class="<%= cycle('rowodd','roweven') %> ">
   <td>&nbsp;</td>
   <td>&nbsp;</td>
   <td>&nbsp;</td>
@@ -280,11 +289,24 @@
   <td>&nbsp;</td>
   <td>&nbsp;</td>
   <td align="left" colspan="2">Total waste</td>
-  <td align="left"><strong><% if !@pool_graded_ps_bins.empty? && @pool_graded_ps_bins[0].waste_weight %><%= text_field_tag "waste",sprintf('%0.2f',@pool_graded_ps_bins[0].waste_weight ), :size => 8 ,:class => 'red_label_field',:disabled=>true %><% else %><%  end %></strong></td>
+  <td>&nbsp;</td>
+  <td align="left"><strong><%# if !@pool_graded_ps_bins.empty? && @pool_graded_ps_bins[0].waste_weight %><#%= text_field_tag "waste",sprintf('%0.2f',@pool_graded_ps_bins[0].waste_weight ), :size => 8 ,:class => 'totals',:disabled=>true %><%# else %><#%  end %></strong></td>
+   <td>&nbsp;</td>
+  <td>&nbsp;</td>
+</tr>-->
+<tr class="<%= cycle('rowodd','roweven') %> ">
   <td>&nbsp;</td>
   <td>&nbsp;</td>
   <td>&nbsp;</td>
   <td>&nbsp;</td>
+  <td>&nbsp;</td>
+  <td>&nbsp;</td>
+  <td>&nbsp;</td>
+  <td>&nbsp;</td>
+  <td>&nbsp;</td>
+  <td>&nbsp;</td>
+  <td align="left" ><strong><% if !@pool_graded_ps_bins.empty? && @pool_graded_ps_bins[0].total_graded_weight_plus_round_check_plus_pesage_maf_weight_plus_waste %><%= text_field_tag "total_graded_weight_plus_round_check_plus_pesage_maf_weight_plus_waste",sprintf('%0.2f',@pool_graded_ps_bins[0].total_graded_weight_plus_round_check_plus_pesage_maf_weight_plus_waste ), :size => 8 ,:class => 'totals',:disabled=>true %><% else %><%  end %></strong></td>
+
 </tr>
 <tr>
   <td>&nbsp;</td>
@@ -295,9 +317,22 @@
   <td>&nbsp;</td>
   <td>&nbsp;</td>
   <td align="left" colspan="2">RMT Sample Bin Weight</td>
+  <td>&nbsp;</td>
   <td align="left"><strong><%= text_field_tag "waste",sprintf('%0.2f',@pool_graded_ps_summary.rmt_bin_weight ),:size => 8 ,:class => 'totals',:disabled=>true %></strong></td>
   <td>&nbsp;</td>
   <td>&nbsp;</td>
+</tr>
+<tr>
+  <td>&nbsp;</td>
+  <td>&nbsp;</td>
+  <td>&nbsp;</td>
+  <td>&nbsp;</td>
+  <td>&nbsp;</td>
+  <td>&nbsp;</td>
+  <td>&nbsp;</td>
+  <td align="left" colspan="2"><strong>Check</strong></td>
+  <td>&nbsp;</td>
+  <td align="left"><strong><% if !@pool_graded_ps_bins.empty? && @pool_graded_ps_bins[0].round_check_2 %><%= text_field_tag "round_check_2",sprintf('%0.2f',@pool_graded_ps_bins[0].round_check_2), :size => 8 ,:class => 'numeric',:disabled=>true %><% else %><%= text_field_tag "round_check_2",sprintf('%0.2f',0.0  ), :size => 6 ,:class => 'numeric',:disabled=>true %><% end %></strong></td>  <td>&nbsp;</td>
   <td>&nbsp;</td>
   <td>&nbsp;</td>
 </tr>
@@ -306,4 +341,5 @@
 </div>
     <button>Save</button>
 </body></html>
+<% end %>
 <% end %>
