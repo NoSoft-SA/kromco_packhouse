@@ -7,7 +7,6 @@
 # _DECIMAL_::   Left-pads a numeric with zeroes up to expected length. 2 decimal places. <b>(29.3 => 00029.30, -12.01 => 00012.01)</b> (-ve number will have - sign in place of left-most zero).
 # _SIGNED_::    Left-pads a numeric with zeroes up to expected length (with +/-sign). <b>(29 => +0029, -12 => -0012)</b>
 # _SIGNDEC_::   Left-pads a numeric with zeroes up to expected length (with +/-sign). 2 decimal places. <b>(29.3 => +0029.30, -12.01 => -0012.01)</b>
-# _SIGN3DEC_::   Left-pads a numeric with zeroes up to expected length (with +/-sign). 3 decimal places. <b>(29.3 => +0029.300, -12.01 => -0012.010)</b>
 # _TEMP_::      Temperature with sign. <b>(+23.45, -02.12)</b>
 # <em>TEMP1DEC</em>::  Temperature with sign and single decimal. <b>(+23.4, -02.1)</b>
 # _DATE_::      Date in YYYYMMDD format. <b>(20101225)</b>
@@ -40,8 +39,6 @@ module EdiFieldFormatter
       sprintf("%+0#{len}d", raw_value)
     when 'SIGNDEC'
       sprintf("%+0#{len}.2f", raw_value)
-    when 'SIGN3DEC'
-      sprintf("%+0#{len}.3f", raw_value)      
     when 'DATE' # Specify ISO etc
       raw_value.strftime('%Y%m%d')
     when 'DATETIME'

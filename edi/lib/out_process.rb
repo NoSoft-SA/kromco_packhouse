@@ -29,7 +29,7 @@ class OutProcess
       load_libs
       puts "libraries loaded"
 
-      proc_dir = "edi/logs/out/" +  Time.now.strftime("%Y_%m_%d")
+      proc_dir = "edi/logs/out"
       FileUtils.makedirs(proc_dir)
       edi_log = EdiHelper.make_edi_log(proc_dir, 'out')
 
@@ -106,14 +106,21 @@ class OutProcess
       modes = [@mode]
     end
 
+    EdiHelper.edi_log.write "EDI OUT: Starting checking loop..."
+    EdiHelper.edi_log.write "(Alter the log levels in the config file and the change will apply as soon as there is a proposal to process)"
+    check_log_levels
+
     modes.each do |mode|
       snapshot = EdiOutProposal.find(:all, :conditions => PROPOSAL_CONDITIONS[mode])
 
       # Before processing proposals, check if the log levels have been changed and apply them.
       if snapshot.length > 0
         check_log_levels
+        snap_log_level = 2
+      else
+        snap_log_level = 0
       end
-      EdiHelper.edi_log.write "EDI OUT: Snapshot: #{snapshot.length} records to process..."
+      EdiHelper.edi_log.write "EDI OUT: Snapshot: #{snapshot.length} #{mode} records to process...", snap_log_level
       check_time = Time.now-10
       snapshot.each do |proposal|
         starting_at = Time.now

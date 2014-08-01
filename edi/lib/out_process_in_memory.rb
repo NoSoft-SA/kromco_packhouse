@@ -12,7 +12,7 @@ class OutProcessInMemory < OutProcess
 
     load_libs( true )
 
-    proc_dir = "edi/logs/out/" +  Time.now.strftime("%Y_%m_%d")
+    proc_dir = "edi/logs/out"
     FileUtils.makedirs(proc_dir)
     edi_log = EdiHelper.make_edi_log(proc_dir, 'out')
 

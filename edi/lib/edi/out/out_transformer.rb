@@ -7,9 +7,9 @@ class OutTransformer
   attr_reader   :filename, :edi_string
 
   def initialize
-    @edi_string          = ''
-    @return_a_string     = false
-    @field_delimiter     = '|' # Delimiter for csv.
+    @edi_string      = ''
+    @return_a_string = false
+    @field_delimiter = '|' # Delimiter for csv.
   end
 
   # Transform records into an EDI out flow.
@@ -210,9 +210,10 @@ class OutTransformer
   # This method is optionally implemented by each specific document type transformer when required.
   # If the table_and_attribute_names method is implemented, there should be no need to override this method.
   def file_sent( proposal, filename )
-    table_name, file_field, err_field = table_and_attribute_names
+    table_name, file_field, err_field, time_field = table_and_attribute_names
     unless table_name.blank? || file_field.blank? || err_field.blank?
-      upd = "UPDATE #{table_name} SET #{file_field} = '#{filename}', #{err_field} = NULL WHERE id = #{proposal.record_id}"
+      time_upd = time_field.blank? ? '' : ", #{time_field} = '#{Time.now}'"
+      upd = "UPDATE #{table_name} SET #{file_field} = '#{filename}', #{err_field} = NULL#{time_upd} WHERE id = #{proposal.record_id}"
       ActiveRecord::Base.connection.execute(upd)
     end
   end
@@ -225,7 +226,7 @@ class OutTransformer
   # This method is optionally implemented by each specific document type transformer when required.
   # If the table_and_attribute_names method is implemented, there should be no need to override this method.
   def record_error_instance( proposal, err_entry )
-    table_name, file_field, err_field = table_and_attribute_names
+    table_name, file_field, err_field, time_field = table_and_attribute_names
     unless table_name.blank? || err_field.blank?
       upd = "UPDATE #{table_name} SET #{err_field} = #{err_entry.id} WHERE id = #{proposal.record_id}"
       ActiveRecord::Base.connection.execute(upd)
@@ -233,16 +234,19 @@ class OutTransformer
   end
 
   # Names for table, edi_file_name and edi_error_id.
+  # Optionally a time field can be added at the end (e.g. +edi_created_at+).
   # If this method is implemented, the base definitions of +file_sent+ and +record_error_instance+
   # will write the edi file name and the id of an edi error to the given table.
+  # If provided, the time field will be updated with the current time.
   #
-  # Returns an array of strings: table_name, edi_file_name attribute and edi_error_id attribute.
+  # Returns an array of strings: table_name, edi_file_name attribute, edi_error_id attribute and (optionally) edi_created_at attribute.
   #
   # This method is optionally implemented by each specific document type transformer when required.
   def table_and_attribute_names
     #e.g. ['orders', 'edi_file_name', 'edi_error_id']
+    # or: ['orders', 'edi_file_name', 'edi_error_id', 'edi_created_at']
     []
-  end 
+  end
 
   # --- ^ METHODS FOR OVERRRIDE ^ ---
 

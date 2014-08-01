@@ -20,7 +20,7 @@ class CsvOutTransformer < OutTransformer
     begin
       path = "edi/in/transformers/#{flow_type.downcase}.xml"
       if !File.exist?(path)
-        raise EdiProcessError "CsvOutTransformer [Flow: '#{flow_type}', Rec: '#{record_type}']: File: #{path} does not exist"
+        raise EdiProcessError, "CsvOutTransformer [Flow: '#{flow_type}', Rec: '#{record_type}']: File: #{path} does not exist"
       else
         xml_doc = nil
         File.open( path ) do |file|

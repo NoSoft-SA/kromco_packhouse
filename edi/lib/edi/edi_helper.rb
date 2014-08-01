@@ -9,6 +9,8 @@ module EdiHelper
                     outbox_processor_debug.rb bin_ticket_printing.rb mrl_label_printing.rb
                     pallet_label_printing.rb rw_active_carton.rb pallet_label_printing.rb
                     mrl_result_print_command.rb send_edi_script.rb}
+  # These files define modules that must be loaded before the models that include them:
+  MODULE_MODELS  = %w{shared_org_person.rb invoice.rb}
 
   # Should in-memory string be logged?
   def self.log_memory_string
@@ -18,7 +20,6 @@ module EdiHelper
   def self.log_memory_string=(value)
     @@log_memory_string = value
   end
-
   # This network address (from Depot)
   def self.network_address
     @@network_address ||= '999'
@@ -28,8 +29,18 @@ module EdiHelper
     @@network_address = value
   end
 
+  # Should in-memory string be logged?
+  def self.process_dot_zip_files
+    @@process_dot_zip_files ||= false
+  end
+
+  def self.process_dot_zip_files=(value)
+    @@process_dot_zip_files = value
+  end
   # Create a log file for EDI processes.
   def self.make_edi_log( dir, type='in' )
+    logname = File.join(dir, "edi_#{type}.log")
+    FileUtils.mv( logname, logname + ".#{Time.now.strftime('%Y%m%d%H%M')}" ) if File.exists?(logname)
     @@edi_log = Log.new(dir, "edi_#{type}.log", "edi_#{type}")
   end
 

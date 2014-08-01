@@ -13,13 +13,26 @@ class InProcess
       load_libs
       puts "libraries loaded"
 
-      proc_dir = "edi/logs/in/" +  Time.now.strftime("%Y_%m_%d")
+      proc_dir = "edi/logs/in"
       FileUtils.makedirs(proc_dir)
       edi_log = EdiHelper.make_edi_log(proc_dir)
       edi_log.write "loading models..."
 
       load_models
       edi_log.write "models loaded"
+
+      edi_log.write "loading status man....."
+      load_status_man
+      edi_log.write "status man loaded"
+
+      edi_log.write "loading comparer tool....."
+      load_comparer_tool
+      edi_log.write "comparer tool loaded"
+
+      edi_log.write "loading inventory model....."
+      load_inventory_model
+      edi_log.write "inventory model loaded"
+
       edi_log.write "loading edi modules..."
 
       load_edi_modules

@@ -70,6 +70,8 @@ class FolderProcessor
 
      def handle_error(file_name,flow_type)
        if !($!.to_s ==   "schema validation error" || $!.to_s == "transformation error")
+          err_msg = $!.message
+          err_stack = $!.backtrace
           options = {:flow_type   => flow_type,
                      :edi_type    => "directory_processing",
                      :action_type => file_name,
@@ -77,10 +79,20 @@ class FolderProcessor
 
           options[:logged_on_user] = @user if @user
           options[:ip] = @ip if @ip
+          begin
           err_entry = EdiError.record_error( $!, options )
 
-         @logger.write err_entry.description,2
-         @logger.write err_entry.stack_trace,0
+          rescue ActiveRecord::StatementInvalid
+            @logger.write "Logging of error to db failed.Propable reason is illegal character in file. System reported: " + $!,2
+          rescue
+            @logger.write "Logging of error to db failed.Reason: " + $!,2
+
+          ensure
+
+            @logger.write err_msg,2
+            @logger.write err_stack.join("\n").to_s,0
+
+          end
          
       end
 
@@ -163,7 +175,20 @@ class FolderProcessor
 
              FileUtils.touch(File.join(@dir_path, 'J&JMesEdi.lck'))
              #File.open(@dir_path + "/" + "J&JMesEdi.lck","w") {|f|} #lock the directory, so file reading is not interfered with
-             lines =  IO.readlines(@dir_path + "/" + e)
+             #lines =  IO.readlines(@dir_path + "/" + e)
+             if running_on_windows?
+               f = File.new(@dir_path + "/" + e, 'r')
+             else
+               f = File.new(@dir_path + "/" + e, 'r', File::SYNC)
+               unless f.flock(File::LOCK_EX | File::LOCK_NB) # Try to get an exclusive lock on the file (non-blocking).
+                 @logger.write "Could not lock file: #{e} - probably still being written. Skipped for later processing...",2
+                 next 
+               end
+               # Free the lock - it was only used to see if the file has been completely downloaded.
+               f.flock(File::LOCK_UN)
+             end
+             lines = f.readlines
+             f.close
              lines.each do |line|
                line.chop!() if(transformer_class_name != "TextIn::CsvInTransformer")
                if pre_processor
@@ -204,7 +229,7 @@ class FolderProcessor
     # Returns true if the file is a compressed file that cannot be processed, false otherwise.
     # Attempts to unzip the file and returns false if the unzip succeeds.
     def skip_compressed_file?( file_name )
-      if RUBY_PLATFORM =~ /mswin32/ || RUBY_PLATFORM =~ /mingw32/
+      if running_on_windows?
         false # Can't run this check on Windows
       else
         path     = File.join(@dir_path, file_name)
@@ -250,7 +275,7 @@ class FolderProcessor
      
     # Check if the input file is of an encoding type we can handle.
     def bad_encoding?( file_name )
-      if RUBY_PLATFORM =~ /mswin32/ || RUBY_PLATFORM =~ /mingw32/
+      if running_on_windows?
         false # Can't run this check on Windows
       else
         path     = File.join(@dir_path, file_name)
@@ -259,6 +284,7 @@ class FolderProcessor
         if $?.exitstatus == 0 && filetype =~ /ascii|utf/i
           false
         else
+          @logger.write "File: #{path} is encoded as #{filetype}. Exit status is #{$?.exitstatus}.", 2
           FileUtils.mkpath(File.join(@dir_path, 'encoding_errors') )
           FileUtils.mv( path, File.join(@dir_path, 'encoding_errors', file_name) )
           true # Only process ASCII or UTF-8
@@ -273,6 +299,11 @@ class FolderProcessor
       path = File.join(@dir_path, file_name)
       FileUtils.mkpath(File.join(@dir_path, 'unprocessable_masterfiles') )
       FileUtils.mv( path, File.join(@dir_path, 'unprocessable_masterfiles', file_name) )
+    end
+
+    # Returns boolean: true if we are running on Windows, false otherwise.
+    def running_on_windows?
+      RUBY_PLATFORM =~ /mswin32/ || RUBY_PLATFORM =~ /mingw32/
     end
 
 end

@@ -60,7 +60,19 @@ class RecordPadder
   def pad_record(text_line)
     flow_type   = Inflector.underscore(self.class.to_s).split("_")[0].upcase()
     record_type = text_line.slice(0..1).upcase()
-    text_line.ljust(RecordPadder.required_record_length(flow_type, record_type, text_line.length))
+
+
+    #remove x-tra spaces to right, i.e where the passed in text-line > schema required length
+    if text_line.length() > RecordPadder.required_record_length(flow_type, record_type, text_line.length)
+         text_line.slice!(RecordPadder.required_record_length(flow_type, record_type, text_line.length)..text_line.length())
+         return   text_line
+    else
+      text_line.ljust(RecordPadder.required_record_length(flow_type, record_type, text_line.length))
+
+    end
+
+
+
   end
 
 end

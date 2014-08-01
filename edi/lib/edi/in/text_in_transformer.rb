@@ -145,11 +145,11 @@ module TextIn
           "fields"
          
           #@record = FixedLenRecord.new(@raw_record,e.get_elements("field"),@identifier)
-          @record = FixedLenRecord.new(@raw_record,e.xpath("field"),@identifier)
+          @record = transformer.new_text_record(@raw_record,e.xpath("field"),@identifier)          
         when
           "child","children"
-          #@child = TextTransformer.create_command(e,@transformer,e.name,self)
-          @child = TextTransformer.create_command(e,@transformer,e.node_name,self)
+          #@child = InTransformer.create_command(e,@transformer,e.name,self)
+          @child = InTransformer.create_command(e,@transformer,e.node_name,self)
         else
           raise EdiValidationError, "Node: " + e.name + " not supported inside 'record' node. Can only be 'transformer' or 'child' or 'fields' "
         end
@@ -206,7 +206,7 @@ module TextIn
     # In the special case of a masterfile, always returns +masterfile+.
     def record_type?
       size = @transformer.identifier_size
-      if @identifier == 'masterfile'
+      if @identifier == 'masterfile' || @identifier == 'uniform_file'
         @identifier
       else
         @raw_record.slice(0..size-1)
@@ -225,7 +225,8 @@ module TextIn
         #@occurence = @schema.attribute("occurence").to_s
         @occurence = @schema["occurence"].to_s
         if @occurence && @occurence.index("..n")
-             if @transformer.next_record_type?() == @seq_list[0]
+             if @seq_list.include?(@transformer.next_record_type?()) #@transformer.next_record_type?() == @seq_list[0]
+
                return true
              else
                return false
@@ -246,7 +247,7 @@ module TextIn
                @seq_list.each do |seq_item_name|
                  seq_item_schema = @seq_schemas[seq_item_name]
                     #command = TextTransformer.create_command(seq_item_schema,@transformer,seq_item_schema.name,self)
-                    command = TextTransformer.create_command(seq_item_schema,@transformer,seq_item_schema.node_name,self)
+                    command = InTransformer.create_command(seq_item_schema,@transformer,seq_item_schema.node_name,self)
                     command.parse
                      @commands.push(command)
 
@@ -255,7 +256,7 @@ module TextIn
            end
 
 
-        i = 3
+
       end
 
      def execute
@@ -387,14 +388,12 @@ module TextIn
   end
 
 
-  
-  class TextTransformer
-
+  class InTransformer
     # require 'rexml/document'
     # include REXML
     include InTransformerSupport
 
-    attr_accessor :flow_type,:doc_events_handler
+    attr_accessor :flow_type,:doc_name,:doc_events_handler
     attr_reader :user_variables
 
     def identifier_size
@@ -404,9 +403,28 @@ module TextIn
     def get_cursor
       return @cursor
     end
-      
+
+    #-----------
+    #-- LUKS ---
+    #-----------
+    def get_file_line_number
+      @file_line_number
+    end
+
+    def set_file_contents(raw_text_array)
+      @file_contents = raw_text_array.to_s
+    end
+
+    def get_file_contents
+      @file_contents
+    end
+
     def initialize(raw_text,flow_type,user = nil,ip = nil,doc_name = nil, in_or_out='in', schema=nil )
 
+      #-----------
+      #-- LUKS ---
+      #-----------
+      @file_line_number = 0
       @cursor = 0
       @flow_type = flow_type
       @raw_text = raw_text
@@ -484,7 +502,7 @@ module TextIn
 
     end
 
-    
+
     def log(message,level = nil)
       @logger.write message,level
     end
@@ -522,23 +540,7 @@ module TextIn
       end
     end
 
-    def next_record(size)
-      record = @raw_text.slice(@cursor..@cursor + size -1)
-      @cursor += size
-      return record
-    end
-
-    def undo_next_record(size)
-      @cursor -= size
-    end
-
-
-    def next_record_type?()
-      return @raw_text.slice(@cursor..@cursor + @identifier_size - 1)
-    end
-
-    
-    def TextTransformer.create_command(schema,transformer,node_name,parent)
+    def InTransformer.create_command(schema,transformer,node_name,parent)
       case node_name
       when "record"
         #if schema.attribute('occurence') && schema.attribute('occurence').to_s.index("..n")
@@ -553,7 +555,7 @@ module TextIn
         return Alternatives.new(transformer,schema,parent)
       when "child","children"
         #return TextTransformer.create_command(schema.get_elements('*')[0],transformer,schema.get_elements('*')[0].name,parent)
-        return TextTransformer.create_command(schema.xpath('*')[0], transformer, schema.xpath('*')[0].node_name, parent)
+        return InTransformer.create_command(schema.xpath('*')[0], transformer, schema.xpath('*')[0].node_name, parent)
       else
         raise EdiValidationError, "Node: " + node_name + " is not a known command "
       end
@@ -604,7 +606,7 @@ module TextIn
       #   @root_identifier = @xml_doc.root.attributes["root_identifier"].to_s
       # end
 
-      if 'masterfile' != @root_identifier
+      if 'masterfile' != @root_identifier && 'uniform_file' != @root_identifier
         root_doc_id = @raw_text.slice(0, @identifier_size)
         raise EdiValidationError, " schema requires doc(root) identifier: " + @root_identifier + " . Provided document has root doc type of " + root_doc_id if root_doc_id != @root_identifier
       end
@@ -622,20 +624,70 @@ module TextIn
         case e.node_name
         when
           "record"
-          @root_command = TextTransformer.create_command(e,self,e.name,nil)
+          @root_command = InTransformer.create_command(e,self,e.name,nil)
 
         when
           "sequence"
-          @root_command = TextTransformer.create_command(e,self,e.name,nil)
+          @root_command = InTransformer.create_command(e,self,e.name,nil)
         when
           "alternatives"
-          @root_command = TextTransformer.create_command(e,self,e.name,nil)
+          @root_command = InTransformer.create_command(e,self,e.name,nil)
         else
           raise EdiValidationError, "Node: " + e.name + " not supported as root command. Must be 'sequence' or 'alternatives' or 'record' "
         end
       # end
     end
+  end
+  
+  class CsvInTransformer < InTransformer
+    def validate_schema
+      super
+      raise EdiValidationError, "csv delimiter is not defined" if(!@xml_doc.root["delimiter"])
+    end
 
+    def next_record_type?()
+      return "uniform_file"
+    end
+
+    def next_record(size)
+      record = @raw_text[@cursor]
+      @cursor += 1
+      @file_line_number += 1
+      return record
+    end
+
+    def undo_next_record(size)
+      @cursor -= 1
+      @file_line_number -= 1
+    end
+
+    def new_text_record(raw_text,field_descriptors,record_type)
+      CsvRecord.new(raw_text,field_descriptors,record_type,@xml_doc.root["delimiter"])
+    end
+        
+  end
+  
+  class TextTransformer  < InTransformer
+
+    def next_record_type?()
+      return @raw_text.slice(@cursor..@cursor + @identifier_size - 1)
+    end
+
+    def next_record(size)
+      record = @raw_text.slice(@cursor..@cursor + size -1)
+      @cursor += size
+      @file_line_number += 1
+      return record
+    end
+
+    def undo_next_record(size)
+      @cursor -= size
+      @file_line_number += 1
+    end
+
+    def new_text_record(raw_text,field_descriptors,record_type)
+      FixedLenRecord.new(raw_text,field_descriptors,record_type)
+    end
   end
     
 end

@@ -29,7 +29,9 @@ module InTransformerSupport
       :edi_type    => "edi_in",
       :transformer => "XmlInTransformer",
       :action_type => type,
-      :edi_filename => EdiHelper.edi_in_process_file}
+      :edi_filename => EdiHelper.edi_in_process_file,
+      :error_line_number=> self.get_file_line_number,
+      :raw_text=> self.get_file_contents}
 
     options[:logged_on_user] = @user if @user
     options[:ip] = @ip if @ip
