@@ -437,9 +437,13 @@ class RmtProcessing::PresortGrowerGradingController < ApplicationController
               :maf_article => bin.maf_article,
               :maf_article_count => bin.maf_article_count,
               :maf_weight => bin.maf_weight,
+              :graded_weight => bin.maf_weight,
               :maf_class => bin.maf_class,
+              :graded_class => bin.maf_class,
               :maf_colour => bin.maf_colour,
+              :graded_colour => bin.maf_colour,
               :maf_count => bin.maf_count,
+              :graded_count => bin.maf_count,
               :created_by => bin.created_by)
           pool_graded_ps_bin.save
         end
