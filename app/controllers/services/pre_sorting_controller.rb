@@ -527,7 +527,7 @@ class Services::PreSortingController < ApplicationController
     join grower_commitments on grower_commitments.id=spray_program_results.grower_commitment_id
     join seasons on seasons.season=grower_commitments.season
     where grower_commitments.farm_id='#{bin.farm_id}' and seasons.season_code='#{bin.season_code}'
-    and spray_program_results.rmt_variety_code='#{bin.rmt_product.variety.rmt_variety_code}'")
+    and spray_program_results.rmt_variety_code='#{bin.rmt_product.variety.rmt_variety_code}' order by spray_program_results.id desc limit 1")
 
     if (spray_program_results.map { |spr| spr.grower_commitment_id }.uniq.length > 1)
       raise "there is more than one grower_commitment for farm:#{bin.farm.farm_code} and season:#{bin.season_code}"

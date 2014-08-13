@@ -6,8 +6,6 @@ class PalletEnquiry < PDTTransaction
 
   def build_default_screen
 
-
-
     field_configs = Array.new
     field_configs[field_configs.length] = {:type=>'text_box', :name=>'carton_or_pallet',
                                            :label=>'carton or pallet',:is_required=>'true'}

@@ -25,7 +25,7 @@ class PoolGradedPsBin < ActiveRecord::Base
       select Numero_lot as maf_lot_number,Code_adherent as maf_farm_code,Code_clone as maf_rmt_code,
       Nom_article as maf_article,Nom_calibre as maf_count,Poids as maf_weight,Poids_total_calibre as maf_lot_weight,
       Nb_palox as maf_infeed_bin_qty
-      FROM [productionv50].[dbo].[Viewlotapportresultatagreage]
+      FROM [productionv50].[dbo].[Viewlotapportresultat]
       WHERE Numero_lot = #{pool_graded_ps_summary.maf_lot_number} and  Nom_article <>  'Recycling'
       ORDER BY Numero_lot,Num_couleur,Num_calibre
       ")}
@@ -43,7 +43,7 @@ class PoolGradedPsBin < ActiveRecord::Base
        errmsg = "SQL Integration returned an error running \"select Numero_lot as maf_lot_number,Code_adherent as maf_farm_code,Code_clone as maf_rmt_code,
       Nom_article as maf_article,Nom_calibre as maf_count,Poids as maf_weight,Poids_total_calibre as maf_lot_weight,
       Nb_palox as maf_infeed_bin_qty
-      FROM [productionv50].[dbo].[Viewlotapportresultatagreage]
+      FROM [productionv50].[dbo].[Viewlotapportresultat]
       WHERE Numero_lot = #{pool_graded_ps_summary.maf_lot_number}
       ORDER BY Numero_lot,Num_couleur,Num_calibre \". The http code is #{response.code}. Message: #{err}."
 

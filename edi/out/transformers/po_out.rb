@@ -19,7 +19,7 @@ class PoOut < TextOutTransformer
     @total_carton_count, @total_pallet_count = [0,0]
 
     EdiHelper.transform_log.write "Transforming Dispatch Transmission (PO) for LoadOrder #{@record_map['id']}.."
-    @load_id = "#{EdiHelper.network_address}-#{@record_map['order_id'].to_s.rjust(6, '0')}"
+    @load_id = "#{EdiHelper.network_address}-#{@record_map['load_id'].to_s.rjust(6, '0')}"
 
     begin
       @load_o  = LoadOrder.find(@record_map['id'])

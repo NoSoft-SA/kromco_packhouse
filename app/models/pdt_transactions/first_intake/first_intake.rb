@@ -11,7 +11,7 @@ class FirstIntake < PDTTransaction
     field_configs[field_configs.length] = {:type=>"text_box",:name=>"scan_pallet",:is_required=>"true"}
     field_configs[field_configs.length] = {:type=>"text_box",:name=>"consignment", :label=>"scan consignment", :value=>@cons_no, :is_required=>"true"}
     field_configs[field_configs.length] = {:type=>"text_box",:name=>"carton_quantity",:is_required=>"true", :required_type=>"number"}
-    field_configs[field_configs.length] = {:type=>"drop_down",:name=>"pallet_format",:is_required=>"true",:list => pallet_format_codes}
+    field_configs[field_configs.length] = {:type=>"drop_down",:name=>"pallet_format",:is_required=>"true",:list => pallet_format_codes, :value => "X_H_WGN"}
 
     screen_attributes = {:auto_submit=>"true",:auto_submit_to=>"new_pallet_submit",:content_header_caption=>"new pallet"}
     buttons = {"B3Label"=>"Clear" ,"B2Label"=>"Cancel","B1Submit"=>"new_pallet_submit","B1Label"=>"Submit","B1Enable"=>"false","B2Enable"=>"false","B3Enable"=>"false" }
