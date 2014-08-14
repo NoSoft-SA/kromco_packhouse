@@ -32,64 +32,7 @@ class RmtProcessing::PresortGrowerGradingController < ApplicationController
     }
   end
 
-  def get_maf_ps_binss(ps_summary, refresh=nil)
-    #view-source:http://192.168.10.7:3000/services/pre_sorting/bin_created?bin=704
-    begin
 
-      @lot_number=ps_summary.maf_lot_number
-      http = Net::HTTP.new(Globals.bin_created_mssql_server_host, Globals.bin_created_mssql_presort_server_port)
-      request = Net::HTTP::Post.new("/select")
-      parameters = {'method' => 'select', 'statement' => Base64.encode64("
-      select Numero_lot as maf_lot_number,Code_adherent as maf_farm_code,Code_clone as maf_rmt_code,
-      Nom_article as maf_article,Nom_calibre as maf_count,Poids as maf_weight,Poids_total_calibre as maf_lot_weight,
-      Nb_palox as maf_infeed_bin_qty
-      FROM [productionv50].[dbo].[Viewlotapportresultat]
-      WHERE Numero_lot = #{@lot_number}
-      ORDER BY Numero_lot,Num_couleur,Num_calibre
-      ")}
-
-      request.set_form_data(parameters)
-      response = http.request(request)
-      puts "---\n#{response.code} - #{response.message}\n---\n"
-
-      if '200' == response.code
-        res = response.body.split('resultset>').last.split('</res').first
-        results = Marshal.load(Base64.decode64(res))
-      else
-        err = response.body.split('</message>').first.split('<message>').last
-        errmsg = "SQL Integration returned an error running \"select Numero_lot as maf_lot_number,Code_adherent as maf_farm_code,Code_clone as maf_rmt_code,
-      Nom_article as maf_article,Nom_calibre as maf_count,Poids as maf_weight,Poids_total_calibre as maf_lot_weight,
-      Nb_palox as maf_infeed_bin_qty
-      FROM [productionv50].[dbo].[Viewlotapportresultat]
-      WHERE Numero_lot = #{@lot_number}
-      ORDER BY Numero_lot,Num_couleur,Num_calibre \". The http code is #{response.code}. Message: #{err}."
-
-        logger.error ">>>> #{errmsg}"
-        raise errmsg
-        return
-      end
-
-      raise "no bins  Palox" if (results.empty?)
-
-      maf_pool_graded_ps_bins=results
-      if refresh
-        delete_pool_graded_ps_summary_bins(pool_graded_ps_summary_id)
-      end
-      maf_pool_graded_ps_bins=File.open("C:/projects/docs 2014/kromco/ps_grading/pool_graded_ps_bins.csv").readlines
-      maf_pool_graded_ps_bins.delete_at(0)
-
-      maf_pool_graded_ps_bins.each do |maf_bin|
-        maf_bin_attr=maf_bin.split(",")
-        maf_article=maf_bin_attr[2].split("_")
-        inmemory_maf_bin=PoolGradedPsBin.new(:pool_graded_ps_summary_id => pool_graded_ps_summary_id, :maf_farm_code => maf_bin_attr[0], :maf_rmt_code => maf_bin_attr[1], :maf_article => maf_bin_attr[2],
-                                             :maf_count => maf_bin_attr[3], :graded_count => maf_bin_attr[3], :maf_weight => maf_bin_attr[4], :maf_class => maf_article[0], :graded_class => maf_article[0], :maf_colour => maf_article[1], :graded_colour => maf_article[1],
-                                             :created_by => ActiveRequest.get_active_request.user)
-        maf_pool_graded_ps_bin_recordset << inmemory_maf_bin
-      end
-    rescue
-      return $!.message
-    end
-  end
 
   def delete_ps_bin
     session[:ps_bin_id]=params[:id]
