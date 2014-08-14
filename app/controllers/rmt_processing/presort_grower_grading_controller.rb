@@ -166,10 +166,23 @@ class RmtProcessing::PresortGrowerGradingController < ApplicationController
       flash[:error] = error
       add_line and return
     end
+    maf_farm_code=nil
+    maf_rmt_code=nil
+    pool_graded_farm=PoolGradedPsFarm.find_by_pool_graded_ps_summary_id(session[:active_doc]['ps_summary'])
+    if pool_graded_farm
+      maf_farm_code=pool_graded_farm.farm_code
+      maf_rmt_code = pool_graded_farm.track_slms_indicator_code
+    end
     pool_graded_ps_summary=PoolGradedPsSummary.find(session[:active_doc]['ps_summary'])
     params[:ps_bin]['maf_article']=params[:ps_bin]['maf_class'].to_s + "_" + params[:ps_bin]['maf_colour'].to_s + "_" + params[:ps_bin]['maf_article_count'].to_s
     ps_bin=PoolGradedPsBin.new(params[:ps_bin])
     ps_bin.pool_graded_ps_summary_id=session[:active_doc]['ps_summary']
+    ps_bin.maf_farm_code= maf_farm_code
+    ps_bin.maf_rmt_code=maf_rmt_code
+    ps_bin.graded_class =  params[:ps_bin]['maf_class']
+    ps_bin.graded_colour = params[:ps_bin]['maf_colour']
+    ps_bin.graded_count =  params[:ps_bin]['maf_count']
+    ps_bin.graded_weight = params[:ps_bin]['maf_weight']
     if ps_bin.save
       #ps_bin.graded_weight = params[:maf_weight]
       maf_total_lot_weight = PoolGradedPsBin.find_by_sql("select SUM(maf_weight) as maf_weight from pool_graded_ps_bins where pool_graded_ps_summary_id=#{session[:active_doc]['ps_summary']} ")[0]['maf_weight'] #and maf_class <>'pesage'
