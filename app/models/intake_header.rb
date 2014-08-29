@@ -250,14 +250,22 @@ class IntakeHeader < ActiveRecord::Base
   #----------------------------------------------------------------------------------------------------------------
   #  This is called after depot pallet and cartons have been created. It creates a ppecb inspection record and then
   #  copies the fields
-
+  #  Change as from 280814: ppecb record created for every pallet on intake
   #-----------------------------------------------------------------------------------------------------------------
   def create_inspection_records
-    existing_inspection = get_existing_inspection
+    #existing_inspection = get_existing_inspection
     self.transaction do
-      if !existing_inspection
+     # if !existing_inspection
+      self.pallets.each do |pallet|
 
-        pallet                           = self.pallets[0]
+       # pallet                           = self.pallets[0]
+        depot_pallet = DepotPallet.find_by_depot_pallet_number_and_intake_header_id(pallet.pallet_number, self.id)
+
+        inspection_date = depot_pallet.inspection_date == nil ? self.inspection_date : depot_pallet.inspection_date
+        inspection_point = depot_pallet.inspection_point == nil ? self.inspection_point : depot_pallet.inspection_point
+        inspector_number = depot_pallet.inspector_number == nil ? self.inspector_number : depot_pallet.inspector_number
+
+
         carton                           = pallet.cartons[0]
 
         inspection                       = PpecbInspection.new
@@ -266,22 +274,22 @@ class IntakeHeader < ActiveRecord::Base
         inspection.carton_qty            = pallet.cartons.length()
         inspection.inspection_report     = self.id.to_s
 
-        inspection.created_at            = self.inspection_date
+        inspection.created_at            = inspection_date
         inspection.grade_code            = carton.grade_code
         inspection.inspection_level_code = 'RESULT-TRANSFER'
 
-        inspection.inspection_point      = self.inspection_point
+        inspection.inspection_point      = inspection_point
 
         inspection.inspection_type_code  = self.inspection_type_code
         inspection.inspection_type_id    = InspectionType.find_by_inspection_type_code_and_grade_code(self.inspection_type_code, carton.grade_code).id
-        inspection.inspector_number      =  self.inspector_number
+        inspection.inspector_number      =  inspector_number
         inspection.pallet_id             = pallet.id
         inspection.pallet_number         = pallet.pallet_number
         inspection.passed                = true
         inspection.target_market_code    = carton.target_market_code
         inspection.ignore_cascade_ctn_updates   = true
         inspection.save!
-      end
+     # end
 
 
 
@@ -299,6 +307,7 @@ class IntakeHeader < ActiveRecord::Base
 
       Pallet.connection.execute(carton_update_query)
     end
+  end
 
 
   end

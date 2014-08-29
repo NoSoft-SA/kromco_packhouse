@@ -51,6 +51,12 @@ class Po   < DocEventHandlers
       pfp = "X_S_" +  kromco_base_code_rec.pallet_base_code
       depot_pallet.pallet_format_product_code = pfp
       depot_pallet.orig_cons = record.fields['orig_cons']
+      depot_pallet.inspection_date = record.fields['Inspec_date']
+
+      depot_pallet.inspection_date = record.fields['Inspec_date']
+      depot_pallet.inspector_number = record.fields['Inspector']
+      depot_pallet.inspection_point = record.fields['Inspect_pnt']
+
       depot_pallet.save #create
     end
 
