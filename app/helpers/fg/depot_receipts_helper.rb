@@ -40,7 +40,7 @@ module Fg::DepotReceiptsHelper
 
     session[:intake_header_form][:recool_required_observer] = recool_required_observer
 
-    season_codes = Season.find_by_sql("SELECT DISTINCT season FROM seasons").map { |g| [g.season] }
+    season_codes = Season.find_by_sql("SELECT DISTINCT season FROM seasons").map { |g| "#{g.season}" }
     season_codes.unshift("<empty>")
 
     intake_type_codes                                       = IntakeType.find_by_sql("SELECT DISTINCT intake_type_code FROM intake_types").map { |g| [g.intake_type_code] }
@@ -76,7 +76,7 @@ module Fg::DepotReceiptsHelper
     if is_edit
       field_configs[field_configs.length()] = {:field_type=>'LabelField', :field_name=>'intake_header_number'}
     end
-    
+
     field_configs[field_configs.length()] = {:field_type=>'DropDownField', :field_name=>'season', :settings=>{:list=>season_codes}}
     field_configs[field_configs.length()] = {:field_type=>'DropDownField', :field_name=>'intake_type_code', :settings=>{:list=>intake_type_codes}}
     field_configs[field_configs.length()] = {:field_type=>'DropDownField', :field_name=>'depot_code', :settings=>{:list=>depot_codes}}
