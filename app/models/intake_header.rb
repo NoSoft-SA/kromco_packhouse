@@ -295,14 +295,12 @@ class IntakeHeader < ActiveRecord::Base
 
       #update all pallets without an inspection
       pallet_update_query = ActiveRecord::Base.extend_update_sql_with_request("update pallets set ppecb_inspection_id = #{inspection.id}, qc_status_code = 'INSPECTED',qc_result_status = 'PASSED'
-                     WHERE pallets.intake_header_id = #{self.id} ")
+                     WHERE pallets.id = #{pallet.id} ")
 
       Pallet.connection.execute(pallet_update_query)
 
-      carton_update_query = ActiveRecord::Base.extend_update_sql_with_request("update cartons set ppecb_inspection_id = #{inspection.id}, qc_status_code = 'INSPECTED',qc_result_status = 'PASSED' from pallets
-                               where cartons.pallet_id = pallets.id and
-
-                                pallets.intake_header_id = #{self.id}
+      carton_update_query = ActiveRecord::Base.extend_update_sql_with_request("update cartons set ppecb_inspection_id = #{inspection.id}, qc_status_code = 'INSPECTED',qc_result_status = 'PASSED'
+                               where cartons.pallet_id = #{pallet.id}
                                ")
 
       Pallet.connection.execute(carton_update_query)
