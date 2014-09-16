@@ -62,16 +62,10 @@ class PoolGradedPsBin < ActiveRecord::Base
    end
 
    maf_pool_graded_ps_bins.each do |maf_bin|
-     maf_article=maf_bin['maf_article'].split("_")
-     if maf_bin['maf_article'].upcase.index("PESAGE")
-       maf_bin['maf_article']  =  " WASTE_ALL_PSG"
-       maf_article[0]="WASTE"
-       maf_article[1]="ALL"
-       maf_bin['maf_count']="PSG"
-       maf_article[2]="PSG"
-     end
-     inmemory_maf_bin=PoolGradedPsBin.new(:pool_graded_ps_summary_id=>pool_graded_ps_summary.id,:maf_farm_code=>maf_bin['maf_farm_code'],:maf_rmt_code=>maf_bin['maf_rmt_code'],:maf_article=>maf_bin['maf_article'],
-                                          :maf_count=>maf_bin['maf_count'],:maf_weight=>maf_bin['maf_weight'],:maf_class=>maf_article[0],:maf_colour=>maf_article[1],:maf_article_count=>maf_article[2],:created_by=>ActiveRequest.get_active_request.user)
+     maf_article_components=PoolGradedPsBin.get_maf_article_components(maf_bin)
+
+     inmemory_maf_bin=PoolGradedPsBin.new(:pool_graded_ps_summary_id=>pool_graded_ps_summary.id,:maf_farm_code=>maf_bin['maf_farm_code'],:maf_rmt_code=>maf_bin['maf_rmt_code'],:maf_article=>maf_article_components['maf_article'],
+                                          :maf_count=>maf_article_components['maf_count'],:maf_weight=>maf_bin['maf_weight'],:maf_class=>maf_article_components['maf_class'],:maf_colour=>maf_article_components['maf_colour'],:maf_article_count=>maf_article_components['maf_article_count'],:created_by=>ActiveRequest.get_active_request.user)
      maf_tipped_qty=maf_bin['maf_infeed_bin_qty']  if !maf_tipped_qty
      maf_total_lot_weight = maf_bin['maf_lot_weight'] if !maf_total_lot_weight
      maf_ps_bin_recordset << inmemory_maf_bin
@@ -89,6 +83,35 @@ class PoolGradedPsBin < ActiveRecord::Base
      maf_pool_graded_ps_bin_recordset << representative_bin
    end
    return maf_pool_graded_ps_bin_recordset,maf_tipped_qty ,maf_total_lot_weight
+ end
+
+ def self.get_maf_article_components(maf_bin)
+   component={}
+   maf_article_ary=maf_bin['maf_article'].split("_")
+   if maf_bin['maf_article'].upcase.index("PESAGE")
+     component['maf_article']= " WASTE_ALL_PSG"
+     component['maf_class']="WASTE"
+     component['maf_colour']="ALL"
+     component['maf_count']="PSG"
+     component['maf_article_count']="PSG"
+   elsif   maf_article_ary[0] =="2L"  ||  maf_article_ary[0] =="3"
+     component['maf_article']=  maf_bin['maf_article']
+     component['maf_class']=maf_article_ary[0]
+     component['maf_colour']=maf_article_ary[1]
+     component['maf_count']=maf_bin['maf_count']
+     component['maf_article_count']=maf_article_ary[2]
+   else
+     maf_article_ary.delete_at(2)
+     maf_article_ary.push(maf_bin['maf_count'])
+     component['maf_article']=  maf_bin['maf_article']
+     component['maf_class']=maf_article_ary[0]
+     component['maf_colour']=maf_article_ary[1]
+     component['maf_count']=maf_bin['maf_count']
+     component['maf_article_count']=maf_article_ary[2]
+   end
+
+
+   return component
  end
 
   def self.delete_pool_graded_ps_summary_bins(pool_graded_ps_summary_id)

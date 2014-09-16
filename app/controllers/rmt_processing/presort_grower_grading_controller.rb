@@ -206,13 +206,13 @@ class RmtProcessing::PresortGrowerGradingController < ApplicationController
       total_calculated_weight= 0.0
       pesage_maf_weight = sprintf('%0.2f', 0.0).to_f
       #pesage_record= @pool_graded_ps_summary.pool_graded_ps_bins.find(:all, :conditions => ["maf_class = (?)", 'Upper(Pesage')])
-      pesage_record=PoolGradedPsBin.find_by_sql("select * from pool_graded_ps_bins where pool_graded_ps_summary_id=#{@pool_graded_ps_summary.id} and UPPER(maf_class) = 'PESAGE' ")
+      pesage_record=PoolGradedPsBin.find_by_sql("select * from pool_graded_ps_bins where pool_graded_ps_summary_id=#{@pool_graded_ps_summary.id} and UPPER(maf_class) like 'WASTE%' ")
       pesage_maf_weight =sprintf('%0.2f', pesage_record[0]['maf_weight']).to_f if !pesage_record.empty?
       total_maf_weight = sprintf('%0.2f', @pool_graded_ps_bins.sum { |p| p.maf_weight }).to_f - pesage_maf_weight
       maf_weitsi=[]
       @pool_graded_ps_bins.each do |bin|
-        if bin.maf_class.upcase == "PESAGE"
-        else
+        #if bin.maf_class.upcase.index("WASTE")
+        #else
           #----------------------
           if (bin.graded == true)
             weight_diff=bin.graded_weight - bin.maf_weight
@@ -232,7 +232,7 @@ class RmtProcessing::PresortGrowerGradingController < ApplicationController
             maf_weitsi <<   bin.maf_weight
             total_calculated_weight=total_calculated_weight + bin.maf_weight
           end
-        end
+        #end
       end
 
       total_calculated_weight = sprintf('%0.2f', total_calculated_weight).to_f
@@ -254,11 +254,11 @@ class RmtProcessing::PresortGrowerGradingController < ApplicationController
         bin.round_check_2 =sprintf('%0.2f', round_check_2).to_f
       end
       @pool_graded_ps_bins.each do |bin|
-        if bin.maf_class.upcase == "PESAGE"
+        if bin.maf_class.upcase.index("WASTE")
           pesge_record << bin
         end
 
-        @pool_graded_ps_bins.delete(bin) if bin.maf_class.upcase == "PESAGE"
+        @pool_graded_ps_bins.delete(bin) if bin.maf_class.upcase.index("PESAGE")
       end
 
       @pesage_record = pesge_record
