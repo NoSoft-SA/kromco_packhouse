@@ -63,6 +63,13 @@ class PoolGradedPsBin < ActiveRecord::Base
 
    maf_pool_graded_ps_bins.each do |maf_bin|
      maf_article=maf_bin['maf_article'].split("_")
+     if maf_bin['maf_article'].upcase.index("PESAGE")
+       maf_bin['maf_article']  =  " WASTE_ALL_PSG"
+       maf_article[0]="WASTE"
+       maf_article[1]="ALL"
+       maf_bin['maf_count']="PSG"
+       maf_article[2]="PSG"
+     end
      inmemory_maf_bin=PoolGradedPsBin.new(:pool_graded_ps_summary_id=>pool_graded_ps_summary.id,:maf_farm_code=>maf_bin['maf_farm_code'],:maf_rmt_code=>maf_bin['maf_rmt_code'],:maf_article=>maf_bin['maf_article'],
                                           :maf_count=>maf_bin['maf_count'],:maf_weight=>maf_bin['maf_weight'],:maf_class=>maf_article[0],:maf_colour=>maf_article[1],:maf_article_count=>maf_article[2],:created_by=>ActiveRequest.get_active_request.user)
      maf_tipped_qty=maf_bin['maf_infeed_bin_qty']  if !maf_tipped_qty
