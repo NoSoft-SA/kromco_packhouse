@@ -780,7 +780,7 @@ end
       confirm_update_order
 
           order_type =OrderType.find(@order.order_type_id).order_type_code	
-	RAILS_DEFAULT_LOGGER.info("EOE order type "+order_type.strip)	  
+	#RAILS_DEFAULT_LOGGER.info("EOE order type "+order_type.strip)	  
 	    if !(order_type.strip=="MO" || order_type.strip=="MQ")
 		user_name = session[:user_id].user_name
                 department_name=User.find_by_user_name(user_name).department_name
@@ -793,7 +793,7 @@ end
            else
              trading_partner=""
            end		
-		RAILS_DEFAULT_LOGGER.info("EOE username/dept "+user_name+"/"+ department_name)
+		#RAILS_DEFAULT_LOGGER.info("EOE username/dept "+user_name+"/"+ department_name)
                 if department_name.upcase.strip=="PLANNING" || department_name.upcase.strip=="MARKETING"
 			
 		    msg = "Order has been updated by #{user_name} .<br> Order number:  #{@order.order_number}.<br>" 
@@ -1533,6 +1533,7 @@ end
   end
 
   def ship_delivery
+     # RAILS_DEFAULT_LOGGER.info("NAE SHIP DELIVERY - ORDER CONTROLLER")	  
     load_order=LoadOrder.find(params[:id])
     @order = Order.find("#{load_order.order_id}")
     @order.user = session[:user_id].user_name
