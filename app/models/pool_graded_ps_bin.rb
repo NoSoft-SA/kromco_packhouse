@@ -88,6 +88,10 @@ class PoolGradedPsBin < ActiveRecord::Base
  def self.get_maf_article_components(maf_bin)
    component={}
    maf_article_ary=maf_bin['maf_article'].split("_")
+   if maf_bin['maf_article']=="1L_25-100_70-110"
+     maf_article_ary
+   end
+
    if maf_bin['maf_article'].upcase.index("PESAGE")
      component['maf_article']= " WASTE_ALL_PSG"
      component['maf_class']="WASTE"
@@ -103,7 +107,7 @@ class PoolGradedPsBin < ActiveRecord::Base
    else
      maf_article_ary.delete_at(2)
      maf_article_ary.push(maf_bin['maf_count'])
-     component['maf_article']=  maf_bin['maf_article']
+     component['maf_article']=  maf_article_ary.join("_")
      component['maf_class']=maf_article_ary[0]
      component['maf_colour']=maf_article_ary[1]
      component['maf_count']=maf_bin['maf_count']
