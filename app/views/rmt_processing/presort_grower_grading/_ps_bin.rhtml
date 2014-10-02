@@ -1,30 +1,3 @@
-<!-- works well for firefox<style type="text/css">
-    td.col1 { width: 100px;}
-    td.col2 { width: 150px;}
-    td.col3 { width: 100px;}
-    td.red { width: 100px;
-              border-right: red thin solid;
-              border-top: red thin solid;
-              border-left: red thin solid;
-              border-bottom: red thin solid;
-              background-color: #ffc6ab; }
-    td.col5 { width: 100px;}
-    td.col6 { width: 100px;
-              border-right: red thin solid;
-              border-top: red thin solid;
-              border-left: red thin solid;
-              border-bottom: red thin solid;
-              background-color: #ffc6ab;}
-    td.col7 { width: 100px;}
-    td.col8 { width: 100px;}
-    td.col9 { width: 100px;}
-    td.col10 { width:20px;}
-    td.col11 { width: 100px;}
-    td.col12 { width: 100px;}
-    td.col13 { width: 100px;}
-    td.col14 { width: 100px;}
-    td.col15 { width: 100px;}
-</style> -->
 <style type="text/css">
     td.col1 { width: 100px;}
     td.col2 { width: 150px;}
@@ -85,7 +58,9 @@
   <td class="col8"><%= ps_bin.maf_count %></td>
   <td class="red"><% if ps_bin.graded_count %><%= select_tag "ps_bins[#{key_id}][graded_count]", options_for_select(counts,ps_bin.graded_count) %><% else %><%= select_tag "ps_bins[#{key_id}][graded_count]", options_for_select(counts,ps_bin.maf_count)%><% end %></td>
   <td class="col10"><%= sprintf('%0.2f',ps_bin.maf_weight) %></td>
-  <td class="col11" onchange="adjust_weights('ps_bins[total_graded_weight_hidden_field]','<%= pool_graded_ps_bin_ids%>','ps_bins[<%= key_id %>][graded_weight]',<%= ps_bin.maf_weight %>,'ps_bins[<%= key_id %>][weight_adjusted_plus]','ps_bins[<%= key_id %>][weight_adjusted_minus]','<%= ps_bin_weight_minus_ids%>','<%= ps_bin_weight_plus_ids%>')">
+  <td class="col11"  onkeydown="displayunicode(event,'ps_bins[total_graded_weight_hidden_field]','<%= pool_graded_ps_bin_ids%>','ps_bins[<%= key_id %>][graded_weight]',<%= ps_bin.maf_weight %>,'ps_bins[<%= key_id %>][weight_adjusted_plus]','ps_bins[<%= key_id %>][weight_adjusted_minus]','<%= ps_bin_weight_minus_ids%>','<%= ps_bin_weight_plus_ids%>')"
+      onchange="adjust_weights(false,'ps_bins[total_graded_weight_hidden_field]','<%= pool_graded_ps_bin_ids%>','ps_bins[<%= key_id %>][graded_weight]',<%= ps_bin.maf_weight %>,'ps_bins[<%= key_id %>][weight_adjusted_plus]','ps_bins[<%= key_id %>][weight_adjusted_minus]','<%= ps_bin_weight_minus_ids%>','<%= ps_bin_weight_plus_ids%>')"
+      >
     <% if (ps_bin.graded == false || ps_bin.graded == nil || ps_bin.graded == "f" ) && (ps_bin.graded_weight==0  ||   ps_bin.graded_weight== nil || ps_bin.graded_weight== sprintf('%0.2f',0.0 ).to_f)%>
       <%= text_field_tag "ps_bins[#{key_id}][graded_weight]", sprintf('%0.2f', ps_bin.maf_weight).to_f, :size => 6, :class => 'numeric' %>
     <% else %>
@@ -101,7 +76,16 @@
 
 <script>
 
-    function adjust_weights(total_graded_weight_hidden_field,ps_bin_ids, graded_weight, maf_weight, weight_adjusted_plus, weight_adjusted_minus, ps_bin_weight_minus_ids, ps_bin_weight_plus_ids) {
+    function displayunicode(e,total_graded_weight_hidden_field,ps_bin_ids, graded_weight, maf_weight, weight_adjusted_plus, weight_adjusted_minus, ps_bin_weight_minus_ids, ps_bin_weight_plus_ids){
+            var unicode=e.keyCode? e.keyCode : e.charCode
+        if (unicode==40){
+            var to_change_focus =true
+            adjust_weights(to_change_focus,total_graded_weight_hidden_field,ps_bin_ids, graded_weight, maf_weight, weight_adjusted_plus, weight_adjusted_minus, ps_bin_weight_minus_ids, ps_bin_weight_plus_ids)
+        }
+    }
+
+
+    function adjust_weights(to_change_focus,total_graded_weight_hidden_field,ps_bin_ids, graded_weight, maf_weight, weight_adjusted_plus, weight_adjusted_minus, ps_bin_weight_minus_ids, ps_bin_weight_plus_ids) {
 
         var var_graded_weight = document.getElementById(graded_weight)
         var var_weight_adjusted_plus = document.getElementById(weight_adjusted_plus)
@@ -124,7 +108,32 @@
             calculate_total_weight_adjusted_plus(var_weight_adjusted_plus.value, ps_bin_weight_plus_ids)
         }
 
+        if  (to_change_focus==true) {
+            change_focus(graded_weight,ps_bin_ids)
+        }
+
+
     }
+
+
+    function change_focus(current_graded_weight,ps_bin_ids){
+
+        var var_graded_weight = document.getElementById(current_graded_weight)
+        var var_graded_weight_id =var_graded_weight.id
+        var str = ps_bin_ids;
+        var res = str.split(",");
+        var text = "";
+        var current_position
+        for (var i = 0; i < res.length; i++) {
+            text += res[i] + "<br>";
+            if (res[i].toString()==var_graded_weight_id.toString()){
+                var next_i = i + 1
+                document.getElementById(res[next_i]).focus();
+                //alert(next_i);
+            }
+        }
+    }
+
     function calculate_total_graded_weight(total_graded_weight_hidden_field,ps_bin_ids, adjusted_weight, graded_weight, maf_weight) {
         var str = ps_bin_ids;
         var res = str.split(",");
