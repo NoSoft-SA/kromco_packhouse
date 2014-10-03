@@ -602,10 +602,40 @@ class Production::RunsController < ApplicationController
   end
 
 
+  def validate_production_run_details_params(line_code,production_run_details_params,new_record=nil)
+    error=[]
+    if line_code.to_i > 40
+     if  production_run_details_params['treatment_id']=="" || production_run_details_params['treatment_id']==nil   || production_run_details_params['treatment_id']=="<empty>"
+       error << "treatment_code is empty"
+     end
+     if  production_run_details_params['size_id']=="" || production_run_details_params['size_id']==nil   || production_run_details_params['size_id']=="<empty>"
+       error << "size_code is empty"
+     end
+     if  production_run_details_params['ripe_point_id']=="" || production_run_details_params['ripe_point_id']==nil   || production_run_details_params['ripe_point_id_id']=="<empty>"
+       error << "ripe_point_code is empty"
+     end
+     if  production_run_details_params['product_class_id']=="" || production_run_details_params['product_class_id']==nil   || production_run_details_params['product_class_id']=="<empty>"
+       error << "product_class_code is empty"
+     end
+     if  production_run_details_params['track_indicator_id']=="" || production_run_details_params['track_indicator_id']==nil   || production_run_details_params['track_indicator_id']=="<empty>"
+       error << "track_indicator_code is empty"
+     end
+    end
+    return error
+  end
+
+
   def update_run_details
-
-
     @production_run = ProductionRun.find(session[:current_production_run].id)
+
+    error =validate_production_run_details_params(@production_run.line_code,params['production_run'])
+    if !error.empty?
+      flash[:error] = "record cannot be saved: <BR> #{error.join("<BR>")}"
+      edit_run_details  and return
+    end
+
+
+
     #params['production_run'][:rmt_product_type_id]=RmtProductType.find_by_rmt_product_type_code(@production_run.production_schedule.rmt_setup.rmt_product.rmt_product_type_code).id
     #params['production_run'][:commodity_id]= Commodity.find_by_commodity_code(@production_run.production_schedule.rmt_setup.commodity_code).id
     #params['production_run'][:variety_id]=  RmtVariety.find_by_rmt_variety_code(@production_run.production_schedule.rmt_setup.variety_code).id
@@ -1924,6 +1954,13 @@ class Production::RunsController < ApplicationController
   end
 
   def create_production_run
+
+    @production_run = ProductionRun.new(params[:production_run])
+    error =validate_production_run_details_params(@production_run.line_code,params['production_run'])
+    if !error.empty?
+      flash[:error] = "record cannot be saved: <BR> #{error.join("<BR>")}"
+      edit_run_details  and return
+    end
     #begin
     session[:commodity_id]=nil
     if params[:page]
@@ -2171,11 +2208,16 @@ class Production::RunsController < ApplicationController
   def edit_bintip_criteria
 
     can_edit = authorise('runs', 'production_run_bintip_criteria_setup', session[:user_id].user_name)
-
-
     @bintip_criteria_setup = session[:current_production_run].run_bintip_criterium
+    @bintip_criteria_setup.treatment_code=true
+    @bintip_criteria_setup.commodity_code=true
+    @bintip_criteria_setup.variety_code=true
+    @bintip_criteria_setup.class_code=true
+    @bintip_criteria_setup.pc_code=true
+    @bintip_criteria_setup.track_indicator_code=true
+    @bintip_criteria_setup.size_code=true
+    @bintip_criteria_setup.ripe_point_code=true
     render_edit_bintip_criterium !can_edit
-
   end
 
   def view_bintip_criteria
