@@ -672,6 +672,9 @@ end
 	field_configs[2] =  {:field_type => 'DropDownField',
 						:field_name => 'treatment_type_code',
 						:settings => {:list => treatment_type_codes}}
+						
+	field_configs[3] = {:field_type => 'TextField',
+						:field_name => 'ranking'}						
  
 	build_form(treatment,field_configs,action,'treatment',caption,is_edit)
 
@@ -730,6 +733,7 @@ end
 	column_configs[0] = {:field_type => 'text',:field_name => 'treatment_code'}
 	column_configs[1] = {:field_type => 'text',:field_name => 'treatment_type_code'}
 	column_configs[2] = {:field_type => 'text',:field_name => 'description'}
+	column_configs[3] = {:field_type => 'text',:field_name => 'ranking'}	
 #	----------------------
 #	define action columns
 #	----------------------

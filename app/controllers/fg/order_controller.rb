@@ -763,10 +763,10 @@ end
                                            inner join load_details on pallets.load_detail_id=load_details.id
                                            inner join load_orders on load_details.load_order_id=load_orders.id
                                            inner join  orders on load_orders.order_id=orders.id
-                                           where orders.id=#{@order.id} ")
+                                           where orders.id=#{@order.id} and pallets.orig_target_market_code is null")
     party_name=PartiesRole.find(@order.customer_party_role_id).party_name
     session[:updating_order]=true
-    if (party_name=="KR" || party_name=="KM") && (@order.changed_tm==false || @order.changed_tm==nil) && !order_pallets.empty?
+    if (party_name=="KR" || party_name=="KM") && ((@order.changed_tm==false || @order.changed_tm==nil) && !order_pallets.empty?) or (@order.changed_tm==true && !order_pallets.empty?)
       @msg = "Do you want to change the target market? "
       render :inline => %{
        <script>

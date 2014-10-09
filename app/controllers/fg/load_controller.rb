@@ -147,7 +147,7 @@ class Fg::LoadController < ApplicationController
       load_details=LoadDetail.find_by_sql("select load_details.* from load_details inner join pallets on pallets.load_detail_id=load_details.id where pallets.pallet_number in (#{pallet_numbers})")
 
 
-      Pallet.find_by_sql(ActiveRecord::Base.extend_update_sql_with_request("UPDATE pallets SET load_detail_id = null,remarks1 = null,  remarks2 = null,  remarks3 = null,  remarks4 = null,  remarks5 = null WHERE pallet_number in (#{pallet_numbers})"))
+      Pallet.find_by_sql(ActiveRecord::Base.extend_update_sql_with_request("UPDATE pallets SET load_detail_id = null,remarks1 = null,  remarks2 = null,  remarks3 = null,  remarks4 = null,  remarks5 = null, target_market_code=orig_target_market_code, orig_target_market_code = null WHERE pallet_number in (#{pallet_numbers})"))
 
       for load_detail in load_details
         li_pallets =Pallet.find_all_by_load_detail_id(load_detail.id)

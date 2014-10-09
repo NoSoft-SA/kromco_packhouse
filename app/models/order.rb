@@ -340,7 +340,7 @@ class Order < ActiveRecord::Base
                      inner join load_details on pallets.load_detail_id=load_details.id
                      inner join load_orders on load_details.load_order_id=load_orders.id
                      inner join  orders on load_orders.order_id=orders.id
-                     where orders.id=#{self.id} ")
+                     where orders.id=#{self.id} and pallets.orig_target_market_code is null")
     #pallet_nums=pallets.map { |k|"'#{k.pallet_number}'"  }.join(",") if !pallets.empty?
     #if !pallets.empty?()
     #  msg=get_invalid_ctns_for_tm_grade(pallet_nums,target_market)
