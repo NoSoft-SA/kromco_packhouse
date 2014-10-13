@@ -78,18 +78,19 @@ class Production::RunsController < ApplicationController
 
   def production_run_ripe_point_code_changed
     ripe_point_id=get_selected_combo_value(params)
-    pc_name =PcCode.find_by_sql("select pc_codes.pc_name from pc_codes join ripe_points on ripe_points.pc_code_id=pc_codes.id where ripe_points.id=#{ripe_point_id} ")
-    if !pc_name.empty?
-      @pc_name=pc_name[0].pc_name
+    ripe_point_id = nil if ripe_point_id=="empty"
+    if ripe_point_id
+    @pc_codes =PcCode.find_by_sql("select pc_codes.pc_name ,pc_codes.id from pc_codes join ripe_points on ripe_points.pc_code_id=pc_codes.id where ripe_points.id=#{ripe_point_id} ").map{|p|[p.pc_name,p.id]}
+    @pc_codes.unshift("<empty>") if !@pc_codes.empty?
     else
-      @pc_name=nil
+      @pc_codes=[]
     end
     render :inline => %{
-    <%= pc_name_content = @pc_name%>
+    <%= pc_name_content = select('production_run','pc_code_id',@pc_codes)%>
     <script>
-     <%= update_element_function(
-        "pc_name_cell", :action => :update,
-        :content => pc_name_content) %>
+      <%= update_element_function(
+      "pc_code_id_cell", :action => :update,
+      :content => pc_name_content) %>
     </script>
     }
   end
@@ -604,20 +605,21 @@ class Production::RunsController < ApplicationController
 
   def validate_production_run_details_params(line_code,production_run_details_params,new_record=nil)
     error=[]
-    if line_code.to_i > 40
-     if  production_run_details_params['treatment_id']=="" || production_run_details_params['treatment_id']==nil   || production_run_details_params['treatment_id']=="<empty>"
+    line=Line.find_by_line_code(line_code)
+    if line.is_dedicated
+     if  production_run_details_params['treatment_id']=="" || production_run_details_params['treatment_id']==nil   || production_run_details_params['treatment_id']=="<empty>"  || production_run_details_params['treatment_id']=="empty"
        error << "treatment_code is empty"
      end
-     if  production_run_details_params['size_id']=="" || production_run_details_params['size_id']==nil   || production_run_details_params['size_id']=="<empty>"
+     if  production_run_details_params['size_id']=="" || production_run_details_params['size_id']==nil   || production_run_details_params['size_id']=="<empty>"   || production_run_details_params['size_id']=="empty"
        error << "size_code is empty"
      end
-     if  production_run_details_params['ripe_point_id']=="" || production_run_details_params['ripe_point_id']==nil   || production_run_details_params['ripe_point_id_id']=="<empty>"
+     if  production_run_details_params['ripe_point_id']=="" || production_run_details_params['ripe_point_id']==nil   || production_run_details_params['ripe_point_id_id']=="<empty>"  || production_run_details_params['ripe_point_id_id']=="empty"
        error << "ripe_point_code is empty"
      end
-     if  production_run_details_params['product_class_id']=="" || production_run_details_params['product_class_id']==nil   || production_run_details_params['product_class_id']=="<empty>"
+     if  production_run_details_params['product_class_id']=="" || production_run_details_params['product_class_id']==nil   || production_run_details_params['product_class_id']=="<empty>"    || production_run_details_params['product_class_id']=="empty"
        error << "product_class_code is empty"
      end
-     if  production_run_details_params['track_indicator_id']=="" || production_run_details_params['track_indicator_id']==nil   || production_run_details_params['track_indicator_id']=="<empty>"
+     if  production_run_details_params['track_indicator_id']=="" || production_run_details_params['track_indicator_id']==nil   || production_run_details_params['track_indicator_id']=="<empty>"   || production_run_details_params['track_indicator_id']=="empty"
        error << "track_indicator_code is empty"
      end
     end
