@@ -16,6 +16,21 @@ class Production::RunsController < ApplicationController
     true
   end
 
+  def production_line_code_changed
+    line=Line.find_by_line_code(get_selected_combo_value(params))
+    @farm_codes = FarmGroup.find_by_farm_group_code(session[:current_closed_schedule].farm_group_code).farms.map{|f|f.farm_code}
+    if line.is_dedicated
+      @farm_codes.unshift("OP")
+    else
+      @farm_codes.unshift("<empty>")
+    end
+
+    render :inline => %{
+    <%= select('production_run','line_code',@farm_codes)%>
+
+		}
+  end
+
   def production_run_rmt_variety_code_changed
     rmt_variety_id=get_selected_combo_value(params)
     @treatment_codes=Treatment.find_by_sql("select distinct treatments.id,treatments.treatment_code
@@ -2215,10 +2230,10 @@ class Production::RunsController < ApplicationController
     @bintip_criteria_setup.commodity_code=true
     @bintip_criteria_setup.variety_code=true
     @bintip_criteria_setup.class_code=true
-    @bintip_criteria_setup.pc_code=true
+    @bintip_criteria_setup.pc_code=false
     @bintip_criteria_setup.track_indicator_code=true
     @bintip_criteria_setup.size_code=true
-    @bintip_criteria_setup.ripe_point_code=true
+    @bintip_criteria_setup.ripe_point_code=false
     render_edit_bintip_criterium !can_edit
   end
 

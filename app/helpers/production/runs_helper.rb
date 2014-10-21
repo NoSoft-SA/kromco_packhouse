@@ -374,6 +374,11 @@ end
    session[:production_run_form]= Hash.new
    lines = Line.lines_for_packhouse(Facility.active_pack_house.facility_code)
 
+   combos_js_for_lines = gen_combos_clear_js_for_combos(["production_run_line_code","production_run_farm_code"])
+   lines_observer  = {:updated_field_id => "farm_code_cell",
+                     :remote_method => 'production_line_code_changed',
+                     :on_completed_js => combos_js_for_lines["production_run_line_code"]}
+
    combos_js = gen_combos_clear_js_for_combos(["production_run_farm_code","production_run_parent_run_code"])
 
 	#Observers for combos representing the key fields of fkey table: carton_setup_id
@@ -416,7 +421,7 @@ end
   if production_run.new_record?
    field_configs[2] =  {:field_type => 'DropDownField',
 						:field_name => 'line_code?required',
-						:settings => {:list => lines}}
+						:settings => {:list => lines},:observer=> lines_observer}
 
 
   else
