@@ -19,7 +19,7 @@ class Production::RunsController < ApplicationController
   def production_line_code_changed
     line=Line.find_by_line_code(get_selected_combo_value(params))
     @farm_codes = FarmGroup.find_by_farm_group_code(session[:current_closed_schedule].farm_group_code).farms.map{|f|f.farm_code}
-    if line.is_dedicated
+    if line && line.is_dedicated
       @farm_codes.unshift("OP")
     else
       @farm_codes.unshift("<empty>")
