@@ -393,7 +393,7 @@ end
 	 parent_runs.unshift "<empty>"
    parent_runs.delete_if{|r|r == current_run}
 
-  if production_run.pc_code_id==nil
+  if production_run && production_run.pc_code_id==nil
     if production_run && production_run.ripe_point_id
       production_run.pc_code_id =PcCode.find_by_sql("select pc_codes.pc_name,pc_codes.id from pc_codes join ripe_points on ripe_points.pc_code_id=pc_codes.id where ripe_points.id=#{production_run.ripe_point_id} ")[0].id
     end
