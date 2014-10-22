@@ -96,7 +96,6 @@ class Production::RunsController < ApplicationController
     ripe_point_id = nil if ripe_point_id=="empty"
     if ripe_point_id
     @pc_codes =PcCode.find_by_sql("select pc_codes.pc_name ,pc_codes.id from pc_codes join ripe_points on ripe_points.pc_code_id=pc_codes.id where ripe_points.id=#{ripe_point_id} ").map{|p|[p.pc_name,p.id]}
-    @pc_codes.unshift("<empty>") if !@pc_codes.empty?
     else
       @pc_codes=[]
     end
