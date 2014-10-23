@@ -162,7 +162,7 @@ module Inventory::FacilitiesHelper
                                              :field_name => 'location_status',
                                              :settings   => {
                                                  :show_label    => true,
-                                                 :label_caption => "current_location_status",
+                                                 :label_caption => "current location status",
                                                  :is_separator  => false}}
 
     field_configs[field_configs.length()] = {:field_type  =>'DropDownField',
@@ -171,9 +171,11 @@ module Inventory::FacilitiesHelper
                                              :non_db_field=>true,
                                              :settings    =>{
                                                  :list          =>statuses,
-                                                 :label_caption =>'change_status_to'}
+                                                 :label_caption =>'change_status_to'}}
 
-    }
+
+    field_configs[field_configs.length()] = {:field_type=>'PopupDateTimeSelector', :field_name=>'status_changed_date_time',:settings=>{:label_caption=>'date_time'}}
+
 
     build_form(location, field_configs, action, 'location', caption, is_edit)
 

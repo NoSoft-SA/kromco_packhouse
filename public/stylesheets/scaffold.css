@@ -8,6 +8,7 @@ body { background-color: #fff; color: #333; }
     border-bottom: none;
     font-weight:900 ;
     text-align: left;
+    color: red;
 }
 
 .red_label_field{

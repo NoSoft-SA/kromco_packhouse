@@ -86,7 +86,7 @@ module Fg::OrderProductHelper
     field_configs[field_configs.length()] = {:field_type => 'LabelField',
                                              :field_name => 'extended_fg_code'}
 
-       
+
     field_configs[field_configs.length()] = {:field_type => 'LabelField',
                                              :field_name => 'marketing_org'}
 
@@ -131,7 +131,7 @@ module Fg::OrderProductHelper
 
     field_configs[field_configs.length()] = {:field_type =>  'LabelField',
                                              :field_name => 'inspection_type_code'}
-             
+
 #    field_configs[field_configs.length()] = {:field_type =>  'LabelField',
 #                                             :field_name => 'price'}
 
@@ -171,8 +171,8 @@ module Fg::OrderProductHelper
 
 
   def build_order_product_grid(data_set, can_edit, can_delete,multi_select)
-     
-   
+
+
     column_configs = Array.new
     require File.dirname(__FILE__) + "/../../../app/helpers/fg/order_product_plugins.rb"
     if !session[:current_viewing_order]
@@ -208,6 +208,8 @@ module Fg::OrderProductHelper
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'old_fg_code',:col_width=>200}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'extended_fg_code',:col_width=>250}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'item_pack_product_code',:col_width=>250}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'old_pack_code',:col_width=>100}
+
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'required_quantity',:column_caption=>'Required',:col_width=>66}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'available_quantities',:column_caption=>'Available',:col_width=>66}
 
@@ -215,7 +217,6 @@ module Fg::OrderProductHelper
     #column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'marketing_org',:col_width=>90}
     #column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'commodity_code',:column_caption=>'commodity',:col_width=>40}
     #column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'marketing_variety_code',:column_caption=>'marketing_variety',:col_width=>97}
-    #column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'old_pack_code',:column_caption=>'old_pack',:col_width=>100}
     #column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'brand_code',:column_caption=>'brand',:col_width=>100}
     #column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'size_ref',:col_width=>50}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'grade_code',:column_caption=>'grade',:col_width=>36}
@@ -228,6 +229,7 @@ module Fg::OrderProductHelper
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'season_code',:column_caption=>'season',:col_width=>44}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'pick_reference',:column_caption=>'pick_ref',:col_width=>44}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'inspection_type_code',:column_caption=>'inspection_type',:col_width=>67}
+
     #column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'location',:col_width=>95}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'carton_count',:column_caption=>'ctn_qty',:col_width=>56}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'carton_weight',:column_caption=>'ctn_weight',:col_width=>56}

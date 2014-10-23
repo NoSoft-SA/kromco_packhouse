@@ -158,27 +158,25 @@ code # TODO: WHAT IS THIS DOING HERE?
         new_status_code           = params[:location][:location_code]
         session[:new_status_code] =new_status_code
         location                  = session[:location].location_code
+        session[:status_changed_date_time] =params[:location][:status_changed_date_time]
         bins_in_location(session[:location].id) and return
 
       end
 
     rescue
        raise $!
-#      @error = build_error_div($!.to_s)
-#      render :inline=>%{<%= @error %>}, :layout=>'content'and return
-
     end
   end
 
 
   def bins_in_location(location_id)
     location_code = session[:location].location_code
-    stock_items   = StockItem.find_all_by_location_id(location_id)
+    stock_items   = StockItem.find_by_sql("select * from stock_items where location_id =#{location_id} and (destroyed = false or destroyed is null)").map{|p|"'#{p.inventory_reference}'"}
 
     if session[:new_status_code]=="LOADING" || session[:new_status_code]=="EMPTY"
 
-        StatusMan.set_status(session[:new_status_code], session[:location].location_type_code, session[:location], session[:user_id].user_name)
-        render :inline => %{<script>
+      StatusMan.set_status(session[:new_status_code], session[:location].location_type_code, session[:location], session[:user_id].user_name)
+      render :inline => %{<script>
                           alert(" status changed");
                           window.opener.frames[1].location.href = '/inventory/facilities/build_list_locations_grid';
                           window.close();
@@ -186,11 +184,9 @@ code # TODO: WHAT IS THIS DOING HERE?
                      </script>} and return
     else
       if !stock_items.empty?
-         rebins =Bin.get_rebins(location_id)
-         session[:rebins]=rebins
-         bins=Bin.get_bins(stock_items)
-         session[:bins] = bins
-         session[:rmt_products]=nil
+        bins=Bin.get_bins(stock_items)
+        session[:bins] = bins
+        session[:rmt_products]=nil
 
       elsif stock_items.empty? && session[:new_status_code]=="OPEN"
         StatusMan.set_status(session[:new_status_code], session[:location].location_type_code, session[:location], session[:user_id].user_name)
@@ -211,24 +207,53 @@ code # TODO: WHAT IS THIS DOING HERE?
         rmt_products =Bin.group_bins_by_rmt_product(bins)
 
       else
-          result =session[:location].change_status(session[:bins],session[:rebins],session[:rmt_products],session[:new_status_code],session[:user_id])
-          if result == nil
-            render :inline => %{<script>
+        result =session[:location].change_status(session[:bins],session[:rebins],session[:rmt_products],session[:new_status_code],session[:user_id])
+        if result == nil
+          render :inline => %{<script>
                               alert(" status changed");
                               window.opener.frames[1].location.href = '/inventory/facilities/build_list_locations_grid';
                               window.close();
                                </script>} and return
-          else
-            raise result
-            #@error = build_error_div(result)
-            # render :inline=>%{<%= @error %>}, :layout=>'content'and return
-          end
+        else
+          raise result
+        end
 
       end
 
       session[:rmt_products]=rmt_products
-      render_bins_for_location
+      calc_new_rmt_products
     end
+  end
+
+  def calc_new_rmt_products
+    session[:rmt_products].each do |rmt_product|
+      new_ripe_point_code=nil
+      new_ripe_point= ActiveRecord::Base.connection.select_one("select  dest_ripe_point_code from cold_store_ripe_point_codes
+                          where (orig_ripe_point_code='#{rmt_product['ripe_point_code']}' and coldstore_status_change='#{session[:new_status_code]}'  ) ")
+
+      if new_ripe_point
+        new_ripe_point_code=new_ripe_point['dest_ripe_point_code']
+      end
+
+      rmt_product['new_ripe_point_code']=new_ripe_point_code
+
+      if new_ripe_point_code
+        new_rmt_product_code = RmtProduct.find_by_sql("select rmt_product_code,id FROM rmt_products WHERE
+                                             commodity_code='#{rmt_product['commodity_code']}' AND
+                                             variety_code='#{rmt_product['variety_code']}' AND
+                                             size_code='#{rmt_product['size_code']}' AND
+                                             product_class_code='#{rmt_product['product_class_code']}' AND
+                                             treatment_code='#{rmt_product['treatment_code']}' AND
+                                             ripe_point_code ='#{new_ripe_point_code}'")
+        if !new_rmt_product_code.empty?
+          rmt_product['new_rmt_product_code'] = new_rmt_product_code[0]['rmt_product_code']
+          rmt_product['new_rmt_product_id']= new_rmt_product_code[0]['id']
+        end
+      end
+
+    end
+    session[:rmt_products]
+    render_bins_for_location
   end
 
   def render_bins_for_location
@@ -241,8 +266,7 @@ code # TODO: WHAT IS THIS DOING HERE?
     column_configs << {:field_type => 'text', :field_name => 'rmt_product_code'}
     column_configs << {:field_type => 'text', :field_name => 'new_rmt_product_code'}
     column_configs << {:field_type => 'text', :field_name => 'product_class_code'}
-    column_configs << {:field_type => 'link_window', :field_name => 'ripe_point_code',
-                                              :settings =>{ :target_action => 'set_ripe_point_code',:id_column => 'id'}}
+    column_configs << {:field_type => 'text', :field_name => 'ripe_point_code'}
     column_configs << {:field_type => 'text', :field_name => 'new_ripe_point_code'}
     column_configs << {:field_type => 'text', :field_name => 'variety_code'}
     column_configs << {:field_type => 'text', :field_name => 'bins'}
@@ -363,8 +387,24 @@ code # TODO: WHAT IS THIS DOING HERE?
 
 
   def change_location_status
+    if session[:new_status_code].upcase.index("SEALED") ||  session[:new_status_code].upcase.index("SHORT")
+      empty_new_rmt_codes=[]
+       session[:rmt_products].each do |rmt_product|
+         rmt_product.each do |key,value|
+           empty_new_rmt_codes << value  if (key=='new_rmt_product_code' && (value==nil || value=="" || value=='' ))
+         end
+       end
+      if !empty_new_rmt_codes.empty?
+        flash[:error]="Status cannot be changed .One or more groups do not have a new rmt product code"
+        render :inline => %{<script>
+                        window.opener.location.href = '/inventory/facilities/render_bins_for_location/';
+                         window.close();
+                      </script>}    and return
+      end
 
-        result =session[:location].change_status(session[:bins],session[:rebins],session[:rmt_products],session[:new_status_code],session[:user_id])
+      end
+
+        result =session[:location].change_status(session[:bins],session[:rebins],session[:rmt_products],session[:new_status_code],session[:user_id],session[:status_changed_date_time] )
         if result == nil
          render :inline => %{<script>
                             alert(" status changed");
