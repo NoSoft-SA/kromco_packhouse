@@ -207,7 +207,7 @@ code # TODO: WHAT IS THIS DOING HERE?
         rmt_products =Bin.group_bins_by_rmt_product(bins)
 
       else
-        result =session[:location].change_status(session[:bins],session[:rebins],session[:rmt_products],session[:new_status_code],session[:user_id])
+        result =session[:location].change_status(session[:bins],session[:rebins],session[:rmt_products],session[:new_status_code],session[:user_id],session[:status_changed_date_time])
         if result == nil
           render :inline => %{<script>
                               alert(" status changed");

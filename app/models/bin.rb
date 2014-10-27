@@ -73,7 +73,7 @@ class Bin < ActiveRecord::Base
       bins = Bin.find_by_sql("select bins.* from bins
             inner join stock_items on bins.bin_number=stock_items.inventory_reference
             inner join rmt_products on bins.rmt_product_id=rmt_products.id
-            where bin_number  in (#{inventory_references.join(",") }) and (stock_items.stock_type_code='BIN' OR stock_items.stock_type_code='PRESORT' OR stock_items.stock_type_code='REBIN') and (stock_items.destroyed is null or stock_items.destroyed = false) and sealed_ca_location_id is null")
+            where bin_number  in (#{inventory_references.join(",") }) and (stock_items.stock_type_code='BIN' OR stock_items.stock_type_code='PRESORT' OR stock_items.stock_type_code='REBIN') and (stock_items.destroyed is null or stock_items.destroyed = false) ")
       return bins
   end
 
