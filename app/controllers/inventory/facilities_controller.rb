@@ -141,6 +141,7 @@ code # TODO: WHAT IS THIS DOING HERE?
     location_id        = params[:id]
     @location          = Location.find(location_id)
     session[:location] =@location
+    @location.status_changed_date_time=Time.now
     @caption           = "set status for    #{@location.location_code.to_s}  "
     render :inline => %{
 
@@ -261,34 +262,13 @@ code # TODO: WHAT IS THIS DOING HERE?
     @rmt_products = session[:rmt_products]
     location_code = session[:location].location_code
 
-      render :inline => %{
-    <% column_configs = []
-    column_configs << {:field_type => 'text', :field_name => 'rmt_product_code'}
-    column_configs << {:field_type => 'text', :field_name => 'new_rmt_product_code'}
-    column_configs << {:field_type => 'text', :field_name => 'product_class_code'}
-    column_configs << {:field_type => 'text', :field_name => 'ripe_point_code'}
-    column_configs << {:field_type => 'text', :field_name => 'new_ripe_point_code'}
-    column_configs << {:field_type => 'text', :field_name => 'variety_code'}
-    column_configs << {:field_type => 'text', :field_name => 'bins'}
-    column_configs << {:field_type => 'text', :field_name => 'id'}
-
-    grid_command =    {:field_type=>'link_window_field',:field_name =>'change_location_status',
-                       :settings =>
-                      {
-                       :host_and_port =>request.host_with_port.to_s,
-                       :controller =>request.path_parameters['controller'].to_s ,
-                       :target_action => 'change_location_status',
-                       :link_text => "change_location_status"
-                       }}
-                             %>
-      <% grid            = get_data_grid(@rmt_products,column_configs,nil,true,grid_command) %>
-      <% grid.caption    = 'rmt_product_codes in : #{location_code}' %>
-      <% @header_content = grid.build_grid_data %>
-
-      <% @pagination = pagination_links(@rmt_products_pages) if @rmt_products_pages != nil %>
-      <%= grid.render_html %>
-      <%= grid.render_grid %>
-      }, :layout => 'content'
+    render :inline => %{
+            <% grid            = build_rmt_product_codes_grid(@rmt_products) %>
+            <% grid.caption    = 'rmt_product_codes in : #{location_code}' %>
+            <% @header_content = grid.build_grid_data %>
+            <%= grid.render_html %>
+            <%= grid.render_grid %>
+            }, :layout => 'content'
 
 
   end

@@ -1,5 +1,7 @@
 class Location < ActiveRecord::Base
 
+  attr_accessor :status_changed_date_time
+
 #	===========================
 # 	Association declarations:
 #	===========================
@@ -186,7 +188,7 @@ class Location < ActiveRecord::Base
 
     if  new_rmt_product_id
       set_map = {:rmt_product_id => "'#{new_rmt_product_id}'"}
-      sealed_bins_set_map = {:rmt_product_id => "'#{new_rmt_product_id}'"}
+      #sealed_bins_set_map = {:rmt_product_id => "'#{new_rmt_product_id}'"}
     end
 
     sealed_ca_date_time=Time.now.to_formatted_s(:db)
@@ -194,7 +196,7 @@ class Location < ActiveRecord::Base
       set_map.store("sealed_ca_location_id", self.id)
       set_map.store("sealed_ca_date_time", "'#{sealed_ca_date_time}'")
       set_map.store("coldstore_type", "'#{coldstore_type}'")
-      sealed_bins_set_map.store("coldstore_type", "'#{coldstore_type}'")
+      #sealed_bins_set_map.store("coldstore_type", "'#{coldstore_type}'")
     elsif  new_status_code.upcase.include?("OPEN")
       set_map.store("sealed_ca_open_date_time", "'#{status_changed_date_time}'")
       sealed_bins_set_map.store("sealed_ca_open_date_time", "'#{status_changed_date_time}'")
@@ -221,7 +223,6 @@ class Location < ActiveRecord::Base
           update_bins(new_status_code, bin_numbers,status_changed_date_time)
         end
         StatusMan.set_status(new_status_code, self.location_type_code, self, user.user_name)
-        self.update_attributes(:status_changed_date_time => status_changed_date_time)
         return nil
 
       end
@@ -240,89 +241,7 @@ class Location < ActiveRecord::Base
     end
   end
 
-  def change_status_og(bins, rebins, rmt_products, new_status_code, user)
-  begin
-    ActiveRecord::Base.transaction do
 
-      count = 0
-      coldstore_type="CA"
-      if rmt_products !=nil
-        for rmt_product in rmt_products
-          if  rmt_product['new_rmt_product_id']!=nil && (rmt_product['new_rmt_product_id']!= rmt_product['id'])
-            bin_nums = Array.new
-            for bin in bins
-              if bin.rmt_product_id == rmt_product['id']
-                count = count + 1
-                bin_nums << "#{bin.bin_number}".to_s
-              end
-            end
-            set_map = {}
-            sealed_ca_date_time=Time.now.to_formatted_s(:db)
-            set_map = {:rmt_product_id => "'#{rmt_product['new_rmt_product_id']}'"}
-            if new_status_code.upcase.include?("SEALED")
-              set_map.store("sealed_ca_location_id", self.id)
-              set_map.store("sealed_ca_date_time", "'#{sealed_ca_date_time}'")
-              set_map.store("coldstore_type", "'#{coldstore_type}'")
-            end
-            Bin.bulk_update(set_map, 'bin_number', bin_nums, nil) if !bin_nums.empty? && !set_map.empty?
-          else
-            bin_nums = Array.new
-            for bin in bins
-              count = count + 1
-              bin_nums << "#{bin.bin_number}".to_s
-            end
-            sealed_ca_date_time=Time.now.to_formatted_s(:db)
-            set_map = {}
-            if new_status_code.upcase.include?("SEALED")
-              set_map.store("sealed_ca_location_id", self.id)
-              set_map.store("sealed_ca_date_time", "'#{sealed_ca_date_time}'")
-              set_map.store("coldstore_type", "'#{coldstore_type}'")
-            end
-            Bin.bulk_update(set_map, 'bin_number', bin_nums, nil) if !bin_nums.empty? && !set_map.empty?
-          end
-        end
-      else
-        bin_nums = Array.new
-        for bin in bins
-          count = count + 1
-          bin_nums << "#{bin.bin_number}".to_s
-        end
-        sealed_ca_date_time=Time.now.to_formatted_s(:db)
-        set_map = {}
-        if new_status_code.upcase.include?("SEALED")
-          set_map.store("sealed_ca_location_id", self.id)
-          set_map.store("sealed_ca_date_time", "'#{sealed_ca_date_time}'")
-          set_map.store("coldstore_type", "'#{coldstore_type}'")
-        end
-        Bin.bulk_update(set_map, 'bin_number', bin_nums, nil) if !bin_nums.empty? && !set_map.empty?
-      end
-
-      #-----------------updating rebins sealed_ca_location_id-------------------------
-      if !rebins.empty?
-        bin_numbers=Array.new
-        for rebin in rebins
-          bin_numbers << rebin.bin_number.to_s
-        end
-        sealed_ca_date_time=Time.now.to_formatted_s(:db)
-        if new_status_code.upcase.include?("SEALED")
-          count = count + 1
-          Bin.bulk_update({:sealed_ca_location_id => "'#{self.id}'", :sealed_ca_date_time => "'#{sealed_ca_date_time}'",:coldstore_type => "'#{coldstore_type}'"}, 'bin_number', bin_numbers, nil) if !bin_numbers.empty? && !set_map.empty?
-        end
-      end
-      #-------------------------------------------------------------------------------
-      #if count==0 && new_status_code.upcase.include?("SEALED")
-      #  return "BINS RMT CODE HAS NOT CHANGED THEREFORE CANNOT  CHANGE LOCATION STATUS !"
-      #end
-      StatusMan.set_status(new_status_code, self.location_type_code, self, user.user_name)
-
-      return nil
-      #        end
-
-    end
-  rescue
-    return $!.to_s
-  end
-end
 
 
 

@@ -1,5 +1,29 @@
 module Inventory::FacilitiesHelper
 
+  def build_rmt_product_codes_grid(data_set)
+    column_configs = []
+    column_configs << {:field_type => 'text', :field_name => 'rmt_product_code',:col_width=>275}
+    column_configs << {:field_type => 'text', :field_name => 'new_rmt_product_code',:col_width=>275}
+    column_configs << {:field_type => 'text', :field_name => 'product_class_code',:col_width=>200}
+    column_configs << {:field_type => 'text', :field_name => 'ripe_point_code'}
+    column_configs << {:field_type => 'text', :field_name => 'new_ripe_point_code'}
+    column_configs << {:field_type => 'text', :field_name => 'variety_code'}
+    column_configs << {:field_type => 'text', :field_name => 'bins'}
+    column_configs << {:field_type => 'text', :field_name => 'id'}
+
+    grid_command =    {:field_type=>'link_window_field',:field_name =>'change_location_status',
+                       :settings =>
+                           {
+                               :host_and_port =>request.host_with_port.to_s,
+                               :controller =>request.path_parameters['controller'].to_s ,
+                               :target_action => 'change_location_status',
+                               :link_text => "change_location_status"
+                           }}
+
+    return get_data_grid(data_set,column_configs,nil,true,grid_command)
+    set_grid_min_width(1200)
+  end
+
   def build_set_ripe_point_code_form(ripe_point, action, caption, is_edit)
 
 
