@@ -46,7 +46,11 @@ module RmtProcessing::PresortStagingRunHelper
     field_configs = []
     statuses = get_statuses(presort_staging_run)
     if presort_staging_run.status=='EDITING'
-
+      product_class_codes=ProductClass.find_by_sql("select distinct product_classes.id,product_classes.product_class_code  from product_classes ").map{|p|[p.product_class_code,p.id]}
+      product_class_codes.unshift("<empty>") if !product_class_codes.empty?
+      treatment_codes=Treatment.find_by_sql("select distinct treatments.id,treatments.treatment_code from treatments ").map{|p|[p.treatment_code,p.id]}
+      treatment_codes.unshift("<empty>") if !treatment_codes.empty?
+      size_codes=Size.find_by_sql(" select  distinct sizes.id,sizes.size_code  from sizes ").map{|p|[p.size_code,p.id]}
       rmt_variety_codes=RmtVariety.find(:all).map{|p|[p.rmt_variety_code,p.id]}
       season_codes=Season.find(:all).map{|p|[p.season_code,p.id]}
       track_slms_indicator_codes = TrackSlmsIndicator.find_by_sql('select  id,track_slms_indicator_code from track_slms_indicators').map{|g|[g.track_slms_indicator_code,g.id]}
@@ -64,6 +68,9 @@ module RmtProcessing::PresortStagingRunHelper
 
       field_configs << {:field_type => 'DropDownField',
                         :field_name => 'status',:settings => {:list => statuses}, :show_label => true}
+
+      field_configs[field_configs.length()] = {:field_type => 'LabelField', :field_name => 'cop', :non_db_field=>true, :settings => { :is_separator => false, :static_value => '', :css_class => "borderless_label_field"}}
+
 
       field_configs << {:field_type => 'DropDownField',
                         :field_name => 'rmt_variety_id?required',
@@ -85,6 +92,23 @@ module RmtProcessing::PresortStagingRunHelper
                         :field_name => 'farm_group_id?required',
                         :settings => {:list => farm_groups},:label_caption=>'farm group code'}
 
+      field_configs[field_configs.length()] = {:field_type => 'LabelField', :field_name => 'cop', :non_db_field=>true, :settings => { :is_separator => false, :static_value => '', :css_class => "borderless_label_field"}}
+
+
+      field_configs << {:field_type => 'DropDownField',
+                        :field_name => 'product_class_id',
+                        :settings => {:list => product_class_codes},:label_caption=>'product class code'}
+
+      field_configs << {:field_type => 'DropDownField',
+                        :field_name => 'size_id',
+                        :settings => {:list =>size_codes,:label_caption=>'size code'}}
+
+
+      field_configs << {:field_type => 'DropDownField',
+                        :field_name => 'treatment_id',
+                        :settings => {:list =>treatment_codes,:label_caption=>'treatment code'}}
+
+
       field_configs[field_configs.length()] = {:field_type => 'LinkWindowField',
                                                :field_name => '',
                                                :settings   => {
@@ -93,7 +117,6 @@ module RmtProcessing::PresortStagingRunHelper
                                                :link_text     => "bins_available",#link_values['bins_available'].to_s,
                                                :id_value      => presort_staging_run.id  } }
 
-      #field_configs[field_configs.length()] = {:field_type => 'LabelField', :field_name => 'cop', :non_db_field=>true, :settings => { :is_separator => false, :static_value => '', :css_class => "borderless_label_field"}}
 
 
       field_configs[field_configs.length()] = {:field_type => 'LinkWindowField',
@@ -124,6 +147,9 @@ module RmtProcessing::PresortStagingRunHelper
 
 
     else
+      product_class_code=ProductClass.find(presort_staging_run.product_class_id).product_class_code if  presort_staging_run.product_class_id
+      treatment_code=Treatment.find(presort_staging_run.treatment_id).treatment_code  if  presort_staging_run.treatment_id
+      size_codes=Size.find(presort_staging_run.size_id).size_code    if  presort_staging_run.size_id
       season_code=Season.find(presort_staging_run.season_id).season_code
       farm_group_code = FarmGroup.find(presort_staging_run.farm_group_id).farm_group_code
       rmt_variety_code=RmtVariety.find(presort_staging_run.rmt_variety_id).rmt_variety_code
@@ -139,6 +165,9 @@ module RmtProcessing::PresortStagingRunHelper
       #                  :field_name => 'status', :show_label => true}
       field_configs << {:field_type => 'DropDownField',
                         :field_name => 'status',:settings => {:list => statuses}, :show_label => true}
+
+      field_configs[field_configs.length()] = {:field_type => 'LabelField', :field_name => 'cop', :non_db_field=>true, :settings => { :is_separator => false, :static_value => '', :css_class => "borderless_label_field"}}
+
 
       field_configs << {:field_type => 'LabelField',
                         :field_name => 'rmt_variety_id',
@@ -160,6 +189,23 @@ module RmtProcessing::PresortStagingRunHelper
                         :field_name => 'farm_group_id',
                         :settings => {:label_caption=>'farm group code',:static_value =>farm_group_code, :show_label => true} }
 
+
+
+      field_configs[field_configs.length()] = {:field_type => 'LabelField', :field_name => 'cop', :non_db_field=>true, :settings => { :is_separator => false, :static_value => '', :css_class => "borderless_label_field"}}
+
+      field_configs << {:field_type => 'LabelField',
+                        :field_name => 'product_class_id',
+                        :label_caption=>'product class code'}
+
+      field_configs << {:field_type => 'LabelField',
+                        :field_name => 'size_id',
+                        :label_caption=>'size code'}
+
+
+      field_configs << {:field_type => 'LabelField',
+                        :field_name => 'treatment_id',
+                       :label_caption=>'treatment code'}
+
       field_configs[field_configs.length()] = {:field_type => 'LinkWindowField',
                                                :field_name => '',
                                                :settings   => {
@@ -168,7 +214,6 @@ module RmtProcessing::PresortStagingRunHelper
                                                    :link_text     => 'bins_available',#link_values['bins_available'].to_s,
                                                    :id_value      => presort_staging_run.id  } }
 
-      #field_configs[field_configs.length()] = {:field_type => 'LabelField', :field_name => 'cop', :non_db_field=>true, :settings => { :is_separator => false, :static_value => '', :css_class => "borderless_label_field"}}
 
 
       field_configs[field_configs.length()] = {:field_type => 'LinkWindowField',
@@ -200,7 +245,7 @@ module RmtProcessing::PresortStagingRunHelper
 
     if presort_staging_run.status
       @submit_button_align = "left"
-      set_form_layout "2", nil,1,10
+      set_form_layout "3", nil,1,15
     end
     #if presort_staging_run.status=='EDITING'
       build_form(presort_staging_run,field_configs,action,'presort_staging_run',caption,is_edit)
@@ -240,11 +285,15 @@ module RmtProcessing::PresortStagingRunHelper
     link_values['bins_staged']=PresortStagingRun.bins_staged(presort_staging_run.id)[0].length
     return  link_values
   end
- 
+
  def build_presort_staging_run_form(presort_staging_run,action,caption,is_edit = nil,is_create_retry = nil)
 
 	session[:presort_staging_run_form]= Hash.new
-
+  product_class_codes=ProductClass.find_by_sql("select distinct product_classes.id,product_classes.product_class_code  from product_classes ").map{|p|[p.product_class_code,p.id]}
+  product_class_codes.unshift("<empty>") if !product_class_codes.empty?
+  treatment_codes=Treatment.find_by_sql("select distinct treatments.id,treatments.treatment_code from treatments ").map{|p|[p.treatment_code,p.id]}
+  treatment_codes.unshift("<empty>") if !treatment_codes.empty?
+  size_codes=Size.find_by_sql(" select  distinct sizes.id,sizes.size_code  from sizes ").map{|p|[p.size_code,p.id]}
   rmt_variety_codes=RmtVariety.find(:all).map{|p|[p.rmt_variety_code,p.id]}
   season_codes=Season.find(:all).map{|p|[p.season_code,p.id]}
   track_slms_indicator_codes = TrackSlmsIndicator.find_by_sql("select  id,track_slms_indicator_code from track_slms_indicators where track_indicator_type_code='RMI'").map{|g|[g.track_slms_indicator_code,g.id]}
@@ -281,11 +330,23 @@ module RmtProcessing::PresortStagingRunHelper
                       :field_name => 'farm_group_id?required',
                       :settings => {:list => farm_groups},:label_caption=>'farm group code'}
 
+   field_configs << {:field_type => 'DropDownField',
+                     :field_name => 'treatment_id',
+                     :settings => {:list =>treatment_codes,:label_caption=>'treatment code'}}
+
+   field_configs << {:field_type => 'DropDownField',
+                     :field_name => 'product_class_id',
+                     :settings => {:list => product_class_codes},:label_caption=>'product class code'}
+
+   field_configs << {:field_type => 'DropDownField',
+                     :field_name => 'size_id',
+                     :settings => {:list =>size_codes,:label_caption=>'size code'}}
+
 	build_form(presort_staging_run,field_configs,action,'presort_staging_run',caption,is_edit)
 
 end
- 
- 
+
+
  def build_presort_staging_run_search_form(presort_staging_run,action,caption,is_flat_search = nil)
 #	--------------------------------------------------------------------------------------------------
 #	Define an observer for each index field
@@ -339,6 +400,9 @@ end
   column_configs << {:field_type => 'text', :field_name => 'track_slms_indicator_code'}
   column_configs << {:field_type => 'text', :field_name => 'farm_group_code'}
   column_configs << {:field_type => 'text', :field_name => 'season_code'}
+  column_configs << {:field_type => 'text', :field_name => 'product_class_code'}
+  column_configs << {:field_type => 'text', :field_name => 'treatment_code'}
+  column_configs << {:field_type => 'text', :field_name => 'size_code'}
 	column_configs << {:field_type => 'text', :field_name => 'created_on', :data_type => 'date', :column_caption => 'Created on'}
 	column_configs << {:field_type => 'text', :field_name => 'completed_on', :data_type => 'date', :column_caption => 'Completed on'}
 	column_configs << {:field_type => 'text', :field_name => 'created_by', :column_caption => 'Created by'}

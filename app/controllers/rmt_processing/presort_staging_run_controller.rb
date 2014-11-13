@@ -209,7 +209,7 @@ class  RmtProcessing::PresortStagingRunController < ApplicationController
 
   def get_runs(status=nil)
     if status
-    list_query = "select p.*,
+    list_query = "select p.*,pc.product_class_code ,tm.treatment_code,sizes.size_code,
      s.season_code,f.farm_group_code,r.rmt_variety_code,t.track_slms_indicator_code ,ripe_points.ripe_point_code
      from presort_staging_runs p
      inner join seasons s on p.season_id=s.id
@@ -217,16 +217,22 @@ class  RmtProcessing::PresortStagingRunController < ApplicationController
      inner join rmt_varieties r on p.rmt_variety_id=r.id
      inner join track_slms_indicators t on p.track_slms_indicator_id=t.id
      inner join ripe_points on p.ripe_point_id=ripe_points.id
+     left  join product_classes pc on p.product_class_id=pc.id
+     left  join  treatments tm on p.treatment_id=tm.id
+     left  join  sizes on p.size_id=sizes.id
      where p.status='#{status}' order by p.id desc"
     else
-      list_query = "select p.*,ripe_points.ripe_point_code,
-     s.season_code,f.farm_group_code,r.rmt_variety_code,t.track_slms_indicator_code
+      list_query = "select p.*,pc.product_class_code ,tm.treatment_code,sizes.size_code,
+     ripe_points.ripe_point_code,     s.season_code,f.farm_group_code,r.rmt_variety_code,t.track_slms_indicator_code
      from presort_staging_runs p
      inner join seasons s on p.season_id=s.id
      inner join farm_groups f on p.farm_group_id=f.id
      inner join rmt_varieties r on p.rmt_variety_id=r.id
      inner join track_slms_indicators t on p.track_slms_indicator_id=t.id order by p.id desc
-     inner join ripe_points on p.ripe_point_id=ripe_points.id"
+     inner join ripe_points on p.ripe_point_id=ripe_points.id
+     left  join product_classes pc on p.product_class_id=pc.id
+     left  join  treatments tm on p.treatment_id=tm.id
+     left  join sizes on p.size_id=sizes.id"
     end
 
     session[:query]="ActiveRecord::Base.connection.select_all(\"#{list_query}\")"
