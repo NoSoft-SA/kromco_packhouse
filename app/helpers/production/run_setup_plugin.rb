@@ -37,8 +37,7 @@ module RunSetupPlugins
 
     def render_cell(column_name, cell_value, record)
       if (column_name=="rank")
-        @env.
-        return @env.text_field('run', "#{record['id']}_#{column_name}", {:size =>2, :value => record[column_name],:onkeydown=>"displayunicode(event)"})
+        return @env.text_field('run', "#{record['id']}_#{column_name}", {:size =>2, :value => record[column_name]})
       end
     end
 
