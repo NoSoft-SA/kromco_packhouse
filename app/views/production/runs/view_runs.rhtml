@@ -1,0 +1,55 @@
+
+
+<%= stylesheet_link_tag "view_run" %>
+
+
+<script src = "/javascripts/context_menu.js"></script>
+
+<head>
+  <style>
+      th, td {
+          padding-right:50px;
+          padding-bottom: 2;
+          padding-left:5px;
+      }
+        .f {
+        /* font-weight: bold;
+          padding-right:10px;   */
+      }
+  </style>
+</head>
+
+
+<body>
+<%= stylesheet_link_tag "line_control" %>
+
+<table border ="1" style="width:100%">
+  <tr><th class="t_header"></th><th class="t_header">Active Run</th><th class="t_header">Next run</th></tr>
+  <tr><td class="attri_names">Production run code:</td><td class="active_run" ><%= @production_run.production_run_code %></td><td class="next_run"><%= @next_production_run.production_run_code  %></td> </tr>
+  <% @production_run.attributes.each do |key,value| %>
+      <% if key=="production_run_code" %>
+      <% elsif key=="farm_code" %>  <tr><td class="attri_names">Farm code:</td><td class="active_run"><%= value %></td><td class="next_run"><%= @next_production_run.farm_code  %></td> </tr>
+      <% elsif key=="treatment_code" %>  <tr><td class="attri_names">Treatment code:</td><td class="active_run"><%= value %></td><td class="next_run"><%= @next_production_run.treatment_code  %></td> </tr>
+      <% elsif key=="size_code" %>  <tr><td class="attri_names">Size code:</td><td class="active_run"><%=value %></td><td class="next_run"><%= @next_production_run.size_code  %></td> </tr>
+      <% elsif key=="ripe_point_code" %>  <tr><td class="attri_names">Ripe point code:</td><td class="active_run"><%= value %></td><td class="next_run"><%= @next_production_run.ripe_point_code  %></td> </tr>
+      <% elsif key=="pc_code" %>  <tr><td class="attri_names">Pc code:</td><td class="active_run"><%= value %></td><td class="next_run"><%= @next_production_run.pc_code  %></td> </tr>
+      <% elsif key=="product_class_code" %>  <tr><td class="attri_names">Product class code:</td><td class="active_run"><%= value %></td><td class="next_run"><%= @next_production_run.product_class_code  %></td> </tr>
+      <% elsif key=="track_indicator_code" %>  <tr><td class="attri_names">Track indicator code:</td><td class="active_run"><%= value %></td><td class="next_run"><%= @next_production_run.track_indicator_code  %></td> </tr>
+      <% end %>
+  <% end %>
+</table>
+</body>
+<p></p>
+<p></p>
+<p></p>
+<p></p>
+<p></p>
+<p></p>
+<button onclick="goBack()">Go Back</button>
+
+<script>
+    function goBack() {
+        window.history.back()
+    }
+</script>
+

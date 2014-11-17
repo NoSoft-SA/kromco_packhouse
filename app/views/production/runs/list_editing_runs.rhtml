@@ -1,0 +1,15 @@
+
+<%= start_form_tag({:action=> "update_ranked_runs"}) %>
+
+<% grid            = build_production_run_grid(@production_runs,@can_edit_run,nil,nil,"editing_runs") %>
+<% grid.caption    =  @caption %>
+<% @header_content = grid.build_grid_data %>
+<% grid.height = '380' %>
+
+<% @pagination = pagination_links(@production_runs_pages) if @production_runs_pages != nil %>
+<%= grid.render_html %>
+<%= grid.render_grid %>
+<%#if !@view_order %>
+    <%= submit_tag "update" %>
+<%#end %>
+<%= end_form_tag %>

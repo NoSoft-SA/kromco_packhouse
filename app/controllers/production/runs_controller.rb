@@ -16,6 +16,100 @@ class Production::RunsController < ApplicationController
     true
   end
 
+  def view_next_run
+    return if authorise_for_web(program_name?, 'production_run_control')==false
+    begin
+    @production_run = ProductionRun.new
+    @next_production_run = nil
+
+    id = params[:id]
+    if id  &&          @production_run=ProductionRun.find_by_sql("
+      select
+      production_runs.*,pc_codes.pc_name , treatments.treatment_code,sizes.size_code,ripe_points.ripe_point_code,track_indicators.track_indicator_code,product_classes.product_class_code
+      from production_runs
+      left join ripe_points on ripe_points.id=production_runs.ripe_point_id
+      left join  pc_codes on  ripe_points.pc_code_id=pc_codes.id
+      left join  treatments  on treatments.id=production_runs.treatment_id
+      left join  sizes on sizes.id= production_runs.size_id
+      left join  track_indicators on  track_indicators.id = production_runs.track_indicator_id
+      left join  product_classes  on  product_classes.id= production_runs.product_class_id
+      where production_runs.id=#{id} ")[0]
+      warn_msg = nil
+      session[:current_closed_schedule] = @production_run.production_schedule
+      session[:current_production_run] = @production_run
+      @next_production_run=get_next_run(@production_run)
+      if !@next_production_run
+        flash[:error] = "Next run not set  "
+        control_line @production_run.line_code and return
+      else
+        render :template => "production/runs/view_runs", :layout => "content"
+
+      end
+    else
+
+    end
+    rescue
+      handle_error("Production run could not be executed")
+  end
+
+  end
+
+  def  get_next_run(production_run)
+    current_closed_schedule = session[:current_production_run].production_schedule
+    current_run_rank= production_run.rank
+    current_run_rank=0 if !current_run_rank
+    current_closed_schedule_runs=ProductionRun.find_by_sql("
+      select
+      production_runs.*,pc_codes.pc_name , treatments.treatment_code,sizes.size_code,ripe_points.ripe_point_code,track_indicators.track_indicator_code,product_classes.product_class_code
+      from production_runs
+      left join ripe_points on ripe_points.id=production_runs.ripe_point_id
+      left join  pc_codes on  ripe_points.pc_code_id=pc_codes.id
+      left join  treatments  on treatments.id=production_runs.treatment_id
+      left join  sizes on sizes.id= production_runs.size_id
+      left join  track_indicators on  track_indicators.id = production_runs.track_indicator_id
+      left join  product_classes  on  product_classes.id= production_runs.product_class_id
+      where production_runs.production_schedule_id=#{current_closed_schedule.id.to_s} ")
+    next_run=nil
+    if current_closed_schedule_runs
+      next_run=current_closed_schedule_runs.find_all { |k| k.rank.to_i==current_run_rank.to_i + 1}[0]
+    end
+    return next_run
+  end
+
+
+
+
+  def render_build_mini_production_run_view
+
+    render :inline => %{
+		<% @child_form_caption =  @child_form_caption%>
+
+		<%= build_mini_production_run_view(@production_run,nil)%>
+
+		}, :layout => 'content'
+  end
+
+
+
+
+
+
+
+  def update_ranked_runs
+    return if authorise_for_web(program_name?, 'production_run_setup')==false
+      params[:run].each do |k,v|
+        k = k.split('_')
+        key = k.shift
+
+        ActiveRecord::Base.transaction do
+            ActiveRecord::Base.connection.execute("update production_runs set rank=#{v} where id = #{key.to_i}") if v!=""
+            ActiveRecord::Base.connection.execute("update production_runs set rank=null where id = #{key.to_i}") if v==""
+        end
+      end
+    editing_runs
+  end
+
+
   def production_line_code_changed
     line=Line.find_by_line_code(get_selected_combo_value(params))
     @farm_codes = FarmGroup.find_by_farm_group_code(session[:current_closed_schedule].farm_group_code).farms.map{|f|f.farm_code}
@@ -1044,20 +1138,23 @@ class Production::RunsController < ApplicationController
     else
       @schedule = session[:current_closed_schedule]
     end
+    list_query =
+        "select
+      production_runs.*,pc_codes.pc_name , treatments.treatment_code,sizes.size_code,ripe_points.ripe_point_code,track_indicators.track_indicator_code,product_classes.product_class_code
+      from production_runs
+      left join ripe_points on ripe_points.id=production_runs.ripe_point_id
+      left join  pc_codes on  ripe_points.pc_code_id=pc_codes.id
+      left join  treatments  on treatments.id=production_runs.treatment_id
+      left join  sizes on sizes.id= production_runs.size_id
+      left join  track_indicators on  track_indicators.id = production_runs.track_indicator_id
+      left join  product_classes  on  product_classes.id= production_runs.product_class_id
+      where  production_runs.production_schedule_id= #{@schedule.id.to_s} and (production_run_status=\'active\') "
 
-
-    list_query = "@production_runs_pages = Paginator.new self, ProductionRun.count(\"production_schedule_id = '#{@schedule.id.to_s}' and production_run_status = 'active'\"), @@page_size,@current_page
-	 @production_runs = ProductionRun.find_all_by_production_schedule_id_and_production_run_status('#{@schedule.id.to_s}','active',
-				 :limit => @production_runs_pages.items_per_page,
-				 :order => 'production_run_number',
-				 :offset => @production_runs_pages.current.offset)"
-    session[:query] = list_query
+    session[:query]="ActiveRecord::Base.connection.select_all(\"#{list_query}\")"
     session[:current_schedule_active_runs_query]= session[:query]
 
     render_list_active_runs
-    # rescue
-    #  handle_error("active runs could not be fetched for the schedule")
-    # end
+
   end
 
 
@@ -1080,15 +1177,21 @@ class Production::RunsController < ApplicationController
     else
       @schedule = session[:current_closed_schedule]
     end
+    list_query =
+        "select
+      production_runs.*,pc_codes.pc_name , treatments.treatment_code,sizes.size_code,ripe_points.ripe_point_code,track_indicators.track_indicator_code,product_classes.product_class_code
+      from production_runs
+      left join ripe_points on ripe_points.id=production_runs.ripe_point_id
+      left join  pc_codes on  ripe_points.pc_code_id=pc_codes.id
+      left join  treatments  on treatments.id=production_runs.treatment_id
+      left join  sizes on sizes.id= production_runs.size_id
+      left join  track_indicators on  track_indicators.id = production_runs.track_indicator_id
+      left join  product_classes  on  product_classes.id= production_runs.product_class_id
+      where  production_runs.production_schedule_id= #{@schedule.id.to_s} and (production_run_status=\'completed\') "
 
+    session[:query]="ActiveRecord::Base.connection.select_all(\"#{list_query}\")"
 
-    list_query = "@production_runs_pages = Paginator.new self, ProductionRun.count(\"production_schedule_id = '#{@schedule.id.to_s}' and production_run_status = 'completed'\"), @@page_size,@current_page
-	 @production_runs = ProductionRun.find_all_by_production_schedule_id_and_production_run_status('#{@schedule.id.to_s}','completed',
-				 :limit => @production_runs_pages.items_per_page,
-				 :order => 'production_run_number',
-				 :offset => @production_runs_pages.current.offset)"
-    session[:query] = list_query
-    session[:current_schedule_completed_runs_query]= session[:query]
+   session[:current_schedule_completed_runs_query]= session[:query]
 
     render_list_active_runs true
     # rescue
@@ -1161,12 +1264,20 @@ class Production::RunsController < ApplicationController
         @schedule = session[:current_closed_schedule]
       end
 
-      list_query = "@production_runs_pages = Paginator.new self, ProductionRun.count(\"production_schedule_id = '#{@schedule.id.to_s}' and (production_run_status = 'configuring' or production_run_status = 'reconfiguring' or production_run_status = 'restored')\"), @@page_size,@current_page
-	 @production_runs = ProductionRun.find_all_by_production_schedule_id_and_production_run_status('#{@schedule.id.to_s}',['configuring','reconfiguring','restored'],
-				 :limit => @production_runs_pages.items_per_page,
-				 :order => 'production_run_number',
-				 :offset => @production_runs_pages.current.offset)"
-      session[:query] = list_query
+      list_query =
+      "select
+      production_runs.*,pc_codes.pc_name , treatments.treatment_code,sizes.size_code,ripe_points.ripe_point_code,track_indicators.track_indicator_code,product_classes.product_class_code
+      from production_runs
+      left join ripe_points on ripe_points.id=production_runs.ripe_point_id
+      left join  pc_codes on  ripe_points.pc_code_id=pc_codes.id
+      left join  treatments  on treatments.id=production_runs.treatment_id
+      left join  sizes on sizes.id= production_runs.size_id
+      left join  track_indicators on  track_indicators.id = production_runs.track_indicator_id
+      left join  product_classes  on  product_classes.id= production_runs.product_class_id
+      where  production_runs.production_schedule_id= #{@schedule.id.to_s} and (production_run_status=\'configuring\' or production_run_status=\'reconfiguring\' or production_run_status=\'restored\' ) "
+
+      session[:query]="ActiveRecord::Base.connection.select_all(\"#{list_query}\")"
+
       session[:current_schedule_runs_query]= session[:query]
 
       render_list_editing_runs
@@ -1189,19 +1300,19 @@ class Production::RunsController < ApplicationController
       redirect_to_index("There are no <strong> editing </strong >runs for the selected schedule")
       return
     end
-
+    render :template => "production/runs/list_editing_runs", :layout => "content"
     #@caption = "'<font color = \"brown\">list of configuring runs for schedule: " + @schedule.production_schedule_name + "</font>'"
-    @caption = "list of configuring runs for schedule: " + @schedule.production_schedule_name
+    #@caption = "list of configuring runs for schedule: " + @schedule.production_schedule_name
+    #
+    #render :inline => %{
+    #  <% grid            = build_production_run_grid(@production_runs,@can_edit_run) %>
+    #  <% grid.caption    = @caption %>
+    #  <% @header_content = grid.build_grid_data %>
 
-    render :inline => %{
-      <% grid            = build_production_run_grid(@production_runs,@can_edit_run) %>
-      <% grid.caption    = @caption %>
-      <% @header_content = grid.build_grid_data %>
-
-      <% @pagination = pagination_links(@production_runs_pages) if @production_runs_pages != nil %>
-      <%= grid.render_html %>
-      <%= grid.render_grid %>
-      }, :layout => 'content'
+    #  <% @pagination = pagination_links(@production_runs_pages) if @production_runs_pages != nil %>
+    #  <%= grid.render_html %>
+    #  <%= grid.render_grid %>
+    #  }, :layout => 'content'
   end
 
 
@@ -1520,12 +1631,34 @@ class Production::RunsController < ApplicationController
     packhouse = Facility.active_pack_house.facility_code
     @line_id = Line.get_line_for_packhouse_and_line_code(packhouse, @selected_line_code).id
     @runs_on_line = ProductionRun.get_active_runs_for_line(@line_id)
+    recent_run_ids=get_recent_rebinning_run_on_line(@runs_on_line)
     puts "n runs on line: " + @runs_on_line.length.to_s
   end
+
+  def get_recent_rebinning_run_on_line(runs_on_line)
+      run_ids=runs_on_line.map{|p|p.id}.sort
+      @recent_run_id = run_ids.last
+ end
+
 
 
   def execute_run_from_ctl_line
     execute_production_run(true)
+  end
+
+  def execute_next_run_from_ctl_line
+    id = params[:id]
+    if id && @production_run = ProductionRun.find(id)
+      next_production_run=get_next_run(@production_run)
+    end
+    if !next_production_run
+      flash[:error] = "Next run not set  "
+      control_line @production_run.line_code and return
+    else
+      params[:id]=next_production_run.id
+      execute_production_run(true)
+    end
+
   end
 
 

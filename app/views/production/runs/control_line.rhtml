@@ -1,11 +1,11 @@
 
   <%= stylesheet_link_tag "line_control" %>
-  
+
   <script src = "/javascripts/context_menu.js"></script>
-  
-  
+
+
   <% @content_header_caption = "'control line'" %>
- 
+
 <table>
   <!-- HEADER ROW -->
   <tr>
@@ -15,7 +15,7 @@
     <td class = "run_step">palletizing</td>
     <td class = "run_step">rebinning</td>
   </tr>
-  
+
   <!---------------------------------------------------------------------------------
    Build 2 context(popup) menus: one for active_runs and one reconfiguring runs. Menu
    commands must be:
@@ -26,11 +26,11 @@
      -> set schedule (should set the run's schedule to 'current schedule so that user can quickly browse schedule details)
    -> RECONFIGURING:
      -> execute run
-     -> edit run (should take user to edit form for run) 
+     -> edit run (should take user to edit form for run)
      -> clone_run
      -> set schedule
   ----------------------------------------------------------------------------------->
-  
+
   <!---------------------------------------------------------------------------------
    Build a row for each active run. Fill in each run_stage depending on the stage of
    the run. Run steps and stages that denote them as active are:
@@ -38,43 +38,51 @@
    CARTON_LABELING: bintipping_plus,carton_labeling_plus
    REBINNING: all stages
   ----------------------------------------------------------------------------------->
-  <% if @runs_on_line.length == 0 
+  <% if @runs_on_line.length == 0
         flash[:notice] = "THERE ARE NO RUNS ACTIVE ON THIS LINE"
         @freeze_flash = true
     end
-    
-    
-      
-    menu1 = ApplicationHelper::ContextMenu.new("reconfiguring","control_line")
-    menu1.add_command("execute run","/production/runs/execute_run_from_ctl_line")
-    menu1.add_command("edit run","/production/runs/edit_production_run")
-    menu1.add_command("clone run","/production/runs/clone_production_run")
-    menu1.add_command("set schedule","/production/runs/set_current_schedule")
-    
-    menu2 = ApplicationHelper::ContextMenu.new("active","control_line")
-    menu2.add_command("reconfigure run","/production/runs/reconfigure_run")
-    menu2.add_command("view run","/production/runs/view_run")
-    menu2.add_command("clone run","/production/runs/clone_production_run")
-    menu2.add_command("set schedule","/production/runs/set_current_schedule")
-    
+      menu1 = ApplicationHelper::ContextMenu.new("reconfiguring","control_line")
+      menu1.add_command("execute run","/production/runs/execute_run_from_ctl_line")
+      menu1.add_command("edit run","/production/runs/edit_production_run")
+      menu1.add_command("clone run","/production/runs/clone_production_run")
+      menu1.add_command("set schedule","/production/runs/set_current_schedule")
+      menu1.add_command("view_next_run","/production/runs/view_next_run")
+
+      menu2 = ApplicationHelper::ContextMenu.new("active","control_line")
+      menu2.add_command("reconfigure run","/production/runs/reconfigure_run")
+      menu2.add_command("view run","/production/runs/view_run")
+      menu2.add_command("clone run","/production/runs/clone_production_run")
+      menu2.add_command("set schedule","/production/runs/set_current_schedule")
+      menu2.add_command("view_next_run","/production/runs/view_next_run")
+
+      menu3 = ApplicationHelper::ContextMenu.new("active_bintipping_cartonlabeling_run","control_line")
+      menu3.add_command("reconfigure run","/production/runs/reconfigure_run")
+      menu3.add_command("view run","/production/runs/view_run")
+      menu3.add_command("clone run","/production/runs/clone_production_run")
+      menu3.add_command("set schedule","/production/runs/set_current_schedule")
+      menu3.add_command("execute_next_run","/production/runs/execute_next_run_from_ctl_line")
+      menu3.add_command("view_next_run","/production/runs/view_next_run")
+
   %>
-  
+
   <script>
     <%= menu1.render %>
     <%= menu2.render%>
+    <%= menu3.render%>
       build_context_menus();
-  
+
   </script>
-  
+
   <% @runs_on_line.each do |run|%>
-   
+
     <%run.sync_run_stat%>
     <tr>
-    
+
     <!--  IMAGES NEEDED BY ALL ACTION LINKS -->
     <%complete_image = image_tag("complete.png",:border => 0)%>
     <%loading_image = image_tag('spinner.gif',:id => run.id.to_s, :align => 'absmiddle', :border=> 0, :style=>'visibility: hidden' )%>
-    
+
     <!-- RUN COMPLETE ACTION -->
     <%run_complete_link = ""
       run_complete_link = link_to(complete_image, {:action => "complete_run", :id => run.id},{:class => 'complete_action' ,:onclick => "if(!confirm(\"Are you sure you want to complete the entire run?\"))return false; else make_element_visible('" + run.id.to_s + "');"}) if run.production_run_stage != "rebinning"
@@ -107,24 +115,41 @@
        end
        warning = ""
        oldest_rebin_time = ProductionRun.get_oldest_rebin_date_time(@line_id,run.id)
-       
+
        compared_time = 72.hours.ago
        if oldest_rebin_time && oldest_rebin_time.to_time < compared_time
-          warning = "<br>" + image_tag('warning.png',:border => 0) + "<font color = 'red'> Some rebins are more than 3 days old!'</font>" 
+          warning = "<br>" + image_tag('warning.png',:border => 0) + "<font color = 'red'> Some rebins are more than 3 days old!'</font>"
        end
     %>
-    
+
     <%
-      field_config = {:link_text => run.production_run_code,
-						:link_value => run.id.to_s,
-						:menu_name => run.production_run_status,
-						:css_class => run_link_class}
-    
+       if run.production_run_stage.upcase.index("CARTON_LABELING") || run.production_run_stage.upcase.index("REBINNING")
+         if run.id==@recent_run_id
+           field_config = {:link_text => run.production_run_code,
+                           :link_value => run.id.to_s,
+                           :menu_name => "active_bintipping_cartonlabeling_run",
+                           :css_class => run_link_class}
+           else
+             field_config = {:link_text => run.production_run_code,
+                             :link_value => run.id.to_s,
+                             :menu_name => run.production_run_status,
+                             :css_class => run_link_class}
+         end
+
+       else
+         field_config = {:link_text => run.production_run_code,
+                         :link_value => run.id.to_s,
+                         :menu_name => run.production_run_status,
+                         :css_class => run_link_class}
+       end
+
+
+
       popup_link = ApplicationHelper::PopupLink.new(nil,nil, 'none','none','none',field_config,true,nil,self)
     %>
-    
+
     <td class= <%= run_class%>> <%= popup_link.build_control %><font color = 'darkorange'>(<%= run.day_line_batch_code %>)</font><%= run_complete_link %><%= loading_image %><%= warning%></td>
-    
+
     <!--BINTIPPING CELL -->
     <% bintipping_class = case run.production_run_stage
       when "bintipping_only","bintipping_plus" then "run_stage_active"
@@ -132,7 +157,7 @@
       else "run_stage_inactive"
      end
     %>
-    
+
     <% bintipping_complete_link = ""
      if run.production_run_stage == "bintipping_only" or run.production_run_stage == "bintipping_plus"
         bintipping_complete_link = link_to(complete_image, {:action => "complete_run_stage", :id => run.id},{:class => 'complete_action' ,:onclick => "if(!confirm(\"Are you sure you want to complete bintipping?\"))return false; else show_action_image(this);"})
@@ -140,17 +165,17 @@
     %>
    <% pack = 0
     pack = run.production_run_stat.cartons_weight/run.production_run_stat.bins_tipped_weight if run.production_run_stat.cartons_weight > 0 && run.production_run_stat.bins_tipped_weight > 0
-    pack = pack * 100 
+    pack = pack * 100
     pack = Float.round_float(2,pack) if pack > 0.0
     %>
-   
+
     <% weight_color = 'darkgreen'
       weight_color = 'lightgreen' if bintipping_class == "run_stage_complete"
     %>
-    
-   
+
+
    <td class = <%= bintipping_class %> ><%= run.production_run_stat.bins_tipped %><font color = '<%= weight_color %>'>(weight: <%= run.production_run_stat.bins_tipped_weight %> pack : <strong><%= pack %>%)</strong></font><%= bintipping_complete_link %><%= loading_image %></td>
-   
+
    <!--CARTON LABELING CELL -->
     <% carton_labeling_class = case run.production_run_stage
       when "bintipping_plus","carton_labeling_plus" then "run_stage_active"
@@ -158,7 +183,7 @@
       else "run_stage_inactive"
      end
     %>
-    
+
      <% carton_labeling_complete_link = ""
      if run.production_run_stage == "carton_labeling_plus"
         carton_labeling_complete_link = link_to(complete_image, {:action => "complete_run_stage", :id => run.id},{:class => 'complete_action' ,:onclick => "if(!confirm(\"Are you sure you want to complete carton labeling and palletizing?\"))return false; else show_action_image(this);"})
@@ -167,21 +192,21 @@
     <% weight_color = 'darkgreen'
       weight_color = 'lightgreen' if carton_labeling_class == "run_stage_complete"
     %>
-    
+
     <td class = <%= carton_labeling_class %> ><%= run.production_run_stat.cartons_printed%><font color = '<%= weight_color%>'>(weight: <%= run.production_run_stat.cartons_weight%>)</font><%= carton_labeling_complete_link%><%= loading_image %></td>
     <!--PALLETIZING CELL -->
     <td class = <%= carton_labeling_class %> ><%= run.production_run_stat.pallets_completed%></td>
-   
+
     <!--REBINNING CELL -->
      <% rebinning_complete_link = ""
      if run.production_run_stage == "rebinning"
         rebinning_complete_link = link_to(complete_image, {:action => "complete_run", :id => run.id},{:class => 'complete_action' ,:onclick => "if(!confirm(\"Are you sure you want to complete rebinning?\"))return false; else show_action_image(this);"})
      end
     %>
-    
-    
+
+
     <td class = 'run_stage_active' ><%= run.production_run_stat.rebins_printed%><font color = 'darkgreen'>(weight: <%= run.production_run_stat.rebins_weight%>)</font><%= rebinning_complete_link%><%= loading_image %></td>
-   
+
    <!-- CELL DENOTING THE CURRENT RUN STAGE-->
   <td class = 'run_stage'>(<%= run.production_run_stage + "<font color='black'> " + related_run + "</font>"%>)</td>
   </tr>

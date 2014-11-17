@@ -1,5 +1,79 @@
 module Production::RunsHelper
+  def build_mini_production_run_view(run,action,ignore_pack_groups = nil)
 
+  field_configs = Array.new
+  require File.dirname(__FILE__) + "/../../../app/helpers/production/run_setup_plugin.rb"
+
+  field_configs[field_configs.length()] = {:field_type => 'LabelField',
+                                           :field_name => 'production_run_code'}
+
+
+  field_configs[field_configs.length()] =  {:field_type => 'LabelField',
+                                            :field_name => 'farm_code'}
+
+
+  field_configs[field_configs.length()] =  {:field_type => 'LabelField',
+                                            :field_name => 'puc_code'}
+
+  pc_code =PcCode.find_by_sql("select pc_codes.pc_name from pc_codes join ripe_points on ripe_points.pc_code_id=pc_codes.id where ripe_points.id=#{run.ripe_point_id} ")[0].pc_name if   run.ripe_point_id
+  treatment_code=Treatment.find_by_sql("select  id,treatment_code from treatments where id = #{run.treatment_id} ")[0].treatment_code  if run.treatment_id
+  size_code=Size.find_by_sql("select id,size_code  from sizes where id = #{run.size_id}")[0].size_code  if run.size_id
+  ripe_point_code=RipePoint.find_by_sql("select   id,ripe_point_code from ripe_points where id = #{run.ripe_point_id}")[0].ripe_point_code  if run.ripe_point_id
+  track_indicator_code = TrackIndicator.find_by_sql("select  id,track_indicator_code from track_indicators where id = #{run.track_indicator_id} ")[0].track_indicator_code  if run.track_indicator_id
+  product_class_code=ProductClass.find_by_sql("select distinct product_classes.id,product_classes.product_class_code from product_classes   where id = #{run.product_class_id}")[0].product_class_code if   run.product_class_id
+
+  field_configs << {:field_type => 'LabelField',
+                    :field_name => 'treatment_id',
+                    :settings => {:static_value =>treatment_code,:label_caption=>'treatment code',:show_label=>true}}
+
+  field_configs << {:field_type => 'LabelField',
+                    :field_name => 'size_id',
+                    :settings => {:static_value =>size_code,:label_caption=>'size code',:show_label=>true}}
+
+  field_configs << {:field_type => 'LabelField',
+                    :field_name => 'ripe_point_id',
+                    :settings => {:static_value=>ripe_point_code,:label_caption=>'ripe point code',:show_label=>true}}
+
+  field_configs << {:field_type => 'LabelField',
+                    :field_name => 'pc_code_id',
+                    :settings => {:static_value=> pc_code,:show_label=>true,:label_caption=> 'pc code'}}
+
+  field_configs << {:field_type => 'LabelField',
+                    :field_name => 'product_class_id',
+                    :settings => {:static_value=> product_class_code,:label_caption=>'product class code',:show_label=>true}}
+
+  field_configs << {:field_type => 'LabelField',
+                    :field_name => 'track_indicator_id',
+                    :settings => {:static_value=> track_indicator_code,:show_label=>true,:label_caption=> 'track indicator code'}}
+  build_form(run,field_configs,action,'production_run','back',nil,nil,nil,nil,RunSetupPlugins::RunSetupFormPlugin.new)
+
+end
+  def build_base_current_and_next_production_run_view(run,action,ignore_pack_groups = nil)
+    field_configs = Array.new
+    field_configs[field_configs.length()] = {:field_type => 'Screen',
+                                             :field_name => "child_form1",
+                                             :settings =>{
+                                                 :controller => 'production/runs',
+                                                 :target_action => 'view_mini_run',
+                                                 :width => 1200,
+                                                 :height => 250,
+                                                 :id_value => run.id,
+                                                 :no_scroll => true
+                                             }
+    }
+    field_configs[field_configs.length()] = {:field_type => 'Screen',
+                                             :field_name => "child_form2",
+                                             :settings =>{
+                                                 :controller => 'production/runs',
+                                                 :target_action => 'view_mini_next_run',
+                                                 :width => 1200,
+                                                 :height => 250,
+                                                 :id_value => run.id,
+                                                 :no_scroll => true
+                                             }
+    }
+    build_form(run,field_configs,'control_line','line_selection',"")
+  end
 
 
  def build_select_line_form
@@ -1384,19 +1458,26 @@ end
 
 end
 
-def build_production_run_grid(data_set,can_edit,is_active_runs_grid = nil,run_type = nil)
+def build_production_run_grid(data_set,can_edit,is_active_runs_grid = nil,run_type = nil,editing_runs=nil)
 
 	column_configs = Array.new
 	 require File.dirname(__FILE__) + "/../../../app/helpers/production/run_setup_plugin.rb"
 
 
 	column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'production_run_code',:col_width => 162}
+  column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'rank',:col_width =>30}  if editing_runs
+  column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'puc_code',:col_width => 70}
+  column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'farm_code',:col_width => 60}
+  column_configs[column_configs.length()] = {:field_type => 'text',:field_name =>  'pc_code'}
+  column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'treatment_code'}
+  column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'size_code',}
+  column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'ripe_point_code'}
+  column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'product_class_code'}
+  column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'track_indicator_code'}
   column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'parent_run_code',:column_caption => "parent",:col_width => 162}
   column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'child_run_code',:column_caption => "child",:col_width => 162}
-	column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'farm_code',:col_width => 60}
 	column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'account_code',:col_width => 70}
-	column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'puc_code',:col_width => 70}
-	column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'line_code',:col_width => 37}
+	column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'line_code',:col_width =>80}
 	column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'production_run_status',:col_width => 83,:column_caption => 'status'}
 	column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'production_run_stage',:col_width => 83,:column_caption => 'stage'}
 	column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'day_line_batch_code',:batch => 50}
@@ -1465,7 +1546,7 @@ def build_production_run_grid(data_set,can_edit,is_active_runs_grid = nil,run_ty
 	  end
 	end
 
- return get_data_grid(data_set,column_configs,RunSetupPlugins::RunEditGridPlugin.new)
+ return get_data_grid(data_set,column_configs,RunSetupPlugins::RunEditGridPlugin.new(self,request),true)
 
 end
 
