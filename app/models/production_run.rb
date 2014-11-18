@@ -57,7 +57,7 @@ class ProductionRun < ActiveRecord::Base
          INNER JOIN public.production_schedules ON (public.production_runs.production_schedule_id = public.production_schedules.id)
          INNER JOIN public.rmt_setups ON (public.production_schedules.id = public.rmt_setups.production_schedule_id)
          WHERE
-         (public.rmt_setups.commodity_code = '#{commodity}') AND 
+         (public.rmt_setups.commodity_code = '#{commodity}') AND
          (public.rmt_setups.variety_code = '#{variety}')"
 
     return ProductionRun.find_by_sql(sql)
@@ -355,7 +355,7 @@ class ProductionRun < ActiveRecord::Base
       #Clone run itself
       #------------------
 
-      self.export_attributes(cloned_run, true, ["parent_run_code", "child_run_code"])
+      self.export_attributes(cloned_run, true, ["parent_run_code", "child_run_code","rank"])
       cloned_run.is_cloning            = true
       cloned_run.production_run_status = "configuring"
       cloned_run.production_run_stage  = nil
@@ -1286,7 +1286,7 @@ class ProductionRun < ActiveRecord::Base
 
     query = "SELECT max(production_runs.production_run_number)as maxval
            FROM
-           public.production_runs where 
+           public.production_runs where
            (production_runs.production_schedule_name = '#{schedule_name}')"
 
     val   = connection.select_one(query)
@@ -1349,7 +1349,7 @@ class ProductionRun < ActiveRecord::Base
 
     query              = "SELECT max(production_runs.day_line_batch_number)as maxval
            FROM
-           public.production_runs where 
+           public.production_runs where
            (production_runs.line_id = '#{line_id}' and start_date_time > '#{twelve_am_today}' and
            start_date_time < '#{twelve_am_tomorrow}'
             )"

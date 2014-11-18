@@ -55,7 +55,7 @@ class Production::RunsController < ApplicationController
   end
 
   def  get_next_run(production_run)
-    current_closed_schedule = session[:current_production_run].production_schedule
+    current_closed_schedule = production_run.production_schedule
     current_run_rank= production_run.rank
     current_run_rank=0 if !current_run_rank
     current_closed_schedule_runs=ProductionRun.find_by_sql("
@@ -68,10 +68,14 @@ class Production::RunsController < ApplicationController
       left join  sizes on sizes.id= production_runs.size_id
       left join  track_indicators on  track_indicators.id = production_runs.track_indicator_id
       left join  product_classes  on  product_classes.id= production_runs.product_class_id
-      where production_runs.production_schedule_id=#{current_closed_schedule.id.to_s} ")
+      where production_runs.production_schedule_id=#{current_closed_schedule.id.to_s} and production_runs.rank is not null ")
     next_run=nil
     if current_closed_schedule_runs
-      next_run=current_closed_schedule_runs.find_all { |k| k.rank.to_i==current_run_rank.to_i + 1}[0]
+      ranks=current_closed_schedule_runs.sort! { |a,b| a.rank <=> b.rank }
+      runs = ranks.select do |e|
+        e.rank.to_i > current_run_rank.to_i
+      end
+      next_run=runs[0]
     end
     return next_run
   end
