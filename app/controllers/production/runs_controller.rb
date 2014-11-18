@@ -25,7 +25,7 @@ class Production::RunsController < ApplicationController
     id = params[:id]
     if id  &&          @production_run=ProductionRun.find_by_sql("
       select
-      production_runs.*,pc_codes.pc_name , treatments.treatment_code,sizes.size_code,ripe_points.ripe_point_code,track_indicators.track_indicator_code,product_classes.product_class_code
+      production_runs.*,pc_codes.pc_name as pc_code, treatments.treatment_code,sizes.size_code,ripe_points.ripe_point_code,track_indicators.track_indicator_code,product_classes.product_class_code
       from production_runs
       left join ripe_points on ripe_points.id=production_runs.ripe_point_id
       left join  pc_codes on  ripe_points.pc_code_id=pc_codes.id
@@ -60,7 +60,7 @@ class Production::RunsController < ApplicationController
     current_run_rank=0 if !current_run_rank
     current_closed_schedule_runs=ProductionRun.find_by_sql("
       select
-      production_runs.*,pc_codes.pc_name , treatments.treatment_code,sizes.size_code,ripe_points.ripe_point_code,track_indicators.track_indicator_code,product_classes.product_class_code
+      production_runs.*,pc_codes.pc_name as pc_code, treatments.treatment_code,sizes.size_code,ripe_points.ripe_point_code,track_indicators.track_indicator_code,product_classes.product_class_code
       from production_runs
       left join ripe_points on ripe_points.id=production_runs.ripe_point_id
       left join  pc_codes on  ripe_points.pc_code_id=pc_codes.id
@@ -1304,19 +1304,8 @@ class Production::RunsController < ApplicationController
       redirect_to_index("There are no <strong> editing </strong >runs for the selected schedule")
       return
     end
+    @caption = "list of configuring runs for schedule: " + @schedule.production_schedule_name
     render :template => "production/runs/list_editing_runs", :layout => "content"
-    #@caption = "'<font color = \"brown\">list of configuring runs for schedule: " + @schedule.production_schedule_name + "</font>'"
-    #@caption = "list of configuring runs for schedule: " + @schedule.production_schedule_name
-    #
-    #render :inline => %{
-    #  <% grid            = build_production_run_grid(@production_runs,@can_edit_run) %>
-    #  <% grid.caption    = @caption %>
-    #  <% @header_content = grid.build_grid_data %>
-
-    #  <% @pagination = pagination_links(@production_runs_pages) if @production_runs_pages != nil %>
-    #  <%= grid.render_html %>
-    #  <%= grid.render_grid %>
-    #  }, :layout => 'content'
   end
 
 
