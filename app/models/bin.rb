@@ -44,7 +44,7 @@ class Bin < ActiveRecord::Base
                and (bin_location_setups.treatment_code='ALL' or bin_location_setups.treatment_code='#{bin.rmt_product.treatment_code}'))
               order by bin_location_setups.priority ASC
           "
-    #RAILS_DEFAULT_LOGGER.info ("query: " + query )
+    #RAILS_DEFAULT_LOGGER.info ("query: " + query )     	  
     puts query
     ActiveRecord::Base.connection.select_all(query)
   end
@@ -61,7 +61,7 @@ class Bin < ActiveRecord::Base
     end
   end
 
-  def Bin.get_rebins(location_id) #old coldstore set status code
+  def Bin.get_rebins(location_id)
      rebins=Bin.find_by_sql(" select bins.* from bins
         inner join stock_items on bins.bin_number=stock_items.inventory_reference
         inner join rmt_products on bins.rmt_product_id=rmt_products.id
@@ -69,12 +69,18 @@ class Bin < ActiveRecord::Base
     return rebins
   end
 
-  def Bin.get_bins(inventory_references)
-      bins = Bin.find_by_sql("select bins.* from bins
-            inner join stock_items on bins.bin_number=stock_items.inventory_reference
-            inner join rmt_products on bins.rmt_product_id=rmt_products.id
-            where bin_number  in (#{inventory_references.join(",") }) and (stock_items.stock_type_code='BIN' OR stock_items.stock_type_code='PRESORT' OR stock_items.stock_type_code='REBIN') and (stock_items.destroyed is null or stock_items.destroyed = false) ")
-      return bins
+  def Bin.get_bins(stock_items)
+    inventory_references=Array.new
+    for item in stock_items
+      inventory_reference = item.inventory_reference
+      inventory_references << "bins.bin_number  = '#{inventory_reference}'"
+    end
+    inventory_references_join = inventory_references.join("  OR  ")  #TODO remove comment below!
+    bins = Bin.find_by_sql("select bins.* from bins
+          inner join stock_items on bins.bin_number=stock_items.inventory_reference    
+          inner join rmt_products on bins.rmt_product_id=rmt_products.id
+          where  (#{inventory_references_join }) ")#and (stock_items.stock_type_code='BIN' OR stock_items.stock_type_code='PRESORT') and (stock_items.destroyed is null or stock_items.destroyed = false) and sealed_ca_location_id is null")
+    return bins
   end
 
   def Bin.group_bins_by_rmt_product(bins)
