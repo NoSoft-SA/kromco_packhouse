@@ -253,14 +253,21 @@ class Services::PreSortingController < ApplicationController
 
   def handle_error(error, is_tree = nil, is_tree_content = nil, error_type = 'presort', render_error_view=false)
     @err_entry = super(error, is_tree, is_tree_content, error_type, render_error_view)
+    if(params[:action]=="bin_created" or params[:action]=="bin_tipped")
+      if(presort_integration_retry=PresortIntegrationRetry.find_by_bin_number_and_event_type(params[:bin].strip,params[:action].strip))
+        presort_integration_retry.update_attributes({:process_attempts=>presort_integration_retry.process_attempts+1,:error=>error})
+      else
+        presort_integration_retry= PresortIntegrationRetry.new({:event_type=>params[:action].strip,:bin_number=>params[:bin].strip,:error=>error})
+        presort_integration_retry.save
+      end
+    end
     return "<error msg=\"#{error}\" />"
     #return "<error msg=\"Error Occured: Contact IT\" />"
   end
 
   def create_presort_log(result)
-    action = params[:action]
-    input_params = params.delete_if { |key, val| (key=='controller' || key=='action') }
-    presort_log = PresortLog.new({:action => action, :input_params => "{#{input_params.map { |k, v| "'#{k}'=>'#{v}'" }.join(",")}}", :output_xml => result, :rails_error_id => (@err_entry ? @err_entry.id : nil)})
+    input_params = "#{params.find_all { |key, val| (key!='controller' && key!='action') }.map { |k, v| "#{k}=#{v}" }.join(",")}"
+    presort_log = PresortLog.new({:action => params[:action], :input_params => input_params, :output_xml => result, :rails_error_id => (@err_entry ? @err_entry.id : nil)})
     presort_log.save
   end
 
@@ -386,7 +393,7 @@ class Services::PreSortingController < ApplicationController
       stage_ok_bins(presort_staging_child_run, validation_results)
 
       Inventory.move_stock('PRESORT_STAGING', presort_staging_child_run.presort_staging_run.presort_run_code, 'PRESORT_STAGING', [bin1, bin2, bin3].compact)
-      create_apport_bins([bin1, bin2, bin3].compact)
+      create_apport_bins([bin1, bin2, bin3].compact,presort_staging_child_run)
     end
   end
 
@@ -418,7 +425,7 @@ class Services::PreSortingController < ApplicationController
     end
   end
 
-  def create_apport_bins(bins)
+  def create_apport_bins(bins,presort_staging_child_run)
     apport_bins_or_clause = " bins.bin_number='#{bins.join("' or bins.bin_number='")}' "
     insert_ql = ""
     Bin.find(:all, :conditions => apport_bins_or_clause).each do |apport_bin|
@@ -427,15 +434,23 @@ class Services::PreSortingController < ApplicationController
 
       RAILS_DEFAULT_LOGGER.info ("Time.now.to_formatted_s(:db): " + Time.now.to_formatted_s(:db))
 
+      if(presort_staging_child_run.farm.farm_code.to_s.upcase=='0P')
+        code_apporteur = '0P'
+        nom_parcelle = "0P_#{track_indicator_rec.track_slms_indicator_code}"
+      else
+        code_apporteur = "#{apport_bin.farm.farm_code}"
+        nom_parcelle = "#{apport_bin.farm.farm_code}_#{track_indicator_rec.track_slms_indicator_code}"
+      end
+
       insert_ql = insert_ql.to_s + "INSERT INTO Apport (NumPalox,DateApport,CodeParcelle,CodeVariete,
         CodeApporteur,CodeEmballage,Nombre,Poids,
         NumApport,TypeTraitement,NomParcelle,NomVariete,
         NomApporteur,CodeEspece,NomEspece,
         Partie,Year,Free_int1,Free_int2,Free_string1,
         Free_string2,Free_string3)
-        VALUES('#{apport_bin.bin_number}',getdate(),'#{apport_bin.farm.farm_code}_#{track_indicator_rec.track_slms_indicator_code}','#{track_indicator_rec.track_slms_indicator_code}'
-        ,'#{apport_bin.farm.farm_code}','#{apport_bin.pack_material_product.pack_material_product_code}','#{apport_bin.id}','#{apport_bin.weight}'
-        ,'#{apport_bin.presort_staging_run_child_id}','#{apport_bin.rmt_product.treatment_code}','#{apport_bin.farm.farm_code}_#{track_indicator_rec.track_slms_indicator_code}','#{track_indicator_rec.track_slms_indicator_description}'
+        VALUES('#{apport_bin.bin_number}',getdate(),'#{apport_bin.orchard_code}','#{track_indicator_rec.track_slms_indicator_code}'
+        ,'#{code_apporteur}','#{apport_bin.pack_material_product.pack_material_product_code}','#{apport_bin.id}','#{apport_bin.weight}'
+        ,'#{apport_bin.presort_staging_run_child_id}','#{apport_bin.rmt_product.treatment_code}','#{nom_parcelle}','#{track_indicator_rec.track_slms_indicator_description}'
         ,'#{apport_bin.farm.farm_description}','#{apport_bin.rmt_product.variety.rmt_variety.commodity.commodity_code}','#{apport_bin.rmt_product.variety.rmt_variety.commodity.commodity_description_long}'
         ,'#{apport_bin.production_run_rebin_id}','#{season.season}','#{apport_bin.track_indicator2_id}','#{season.season}','#{apport_bin.rmt_product.variety.rmt_variety.rmt_variety_code}'
         ,'#{apport_bin.farm.farm_group_id}','#{apport_bin.rmt_product_id}');\n"
@@ -472,7 +487,7 @@ class Services::PreSortingController < ApplicationController
       bin_results = {:bin_num => bin_num, :bin_item => bin_nums.index(bin_num)+1}
       if ((errs = valid_bin?(bin_num, staging_run)).empty?)
         bin = Bin.find_by_bin_number(bin_num)
-        if (bin.farm.farm_code == staging_child_run.farm.farm_code)
+        if (bin.farm.farm_code == staging_child_run.farm.farm_code || staging_child_run.farm.farm_code.to_s.upcase=='0P')
           bin_results[:status] = 'OK'
         elsif (bin.farm.farm_group_code == staging_run.farm_group.farm_group_code)
           if (!overridden)
@@ -557,6 +572,11 @@ class Services::PreSortingController < ApplicationController
   end
 
   def valid_bin_for_run?(bin_num, staging_run)
+
+    treatment_filter = staging_run.treatment_id ? " and rmt_products.treatment_id=#{staging_run.treatment_id}" : " and (true)"
+    product_class_filter = staging_run.product_class_id  ? " and rmt_products.product_class_id=#{staging_run.product_class_id}" : " and (true)"
+    size_filter = staging_run.size_id ? " and rmt_products.size_id=#{staging_run.size_id}" : " and (true)"
+
     bins_found = ActiveRecord::Base.connection.select_one("
     select count(bins.bin_number)
     from bins
@@ -573,7 +593,10 @@ class Services::PreSortingController < ApplicationController
     inner join ripe_points on  rmt_products.ripe_point_id=ripe_points.id
     inner join stock_types on stock_items.stock_type_id=stock_types.id
     where      ( locations.location_code LIKE 'RA_6%'  OR  locations.location_code LIKE 'RA_7%' OR locations.location_code LIKE 'PRESORT%')  AND bins.bin_number='#{bin_num}' and
-    seasons.id=#{staging_run.season_id} and farm_groups.id =#{staging_run.farm_group_id} and rmt_varieties.id=#{staging_run.rmt_variety_id} and track_slms_indicators.id=#{staging_run.track_slms_indicator_id} and ripe_points.id=#{staging_run.ripe_point_id}")['count'].to_i
+    seasons.id=#{staging_run.season_id} and farm_groups.id =#{staging_run.farm_group_id} and rmt_varieties.id=#{staging_run.rmt_variety_id} and track_slms_indicators.id=#{staging_run.track_slms_indicator_id}
+    and ripe_points.id=#{staging_run.ripe_point_id}
+    #{treatment_filter} #{product_class_filter} #{size_filter}
+    ")['count'].to_i
     return true if (bins_found > 0)
     return false
   end
@@ -638,6 +661,18 @@ class Services::PreSortingController < ApplicationController
         errs << "bin ripe_point_code[#{bin.rmt_product.ripe_point.ripe_point_code}] does not match that of the active staging_run ripe_point_code[#{staging_run.ripe_point.ripe_point_code}]"
       end
 
+      if (staging_run.treatment_id && bin.rmt_product.treatment.id != staging_run.treatment_id)
+        errs << "bin treatment_code[#{bin.rmt_product.treatment.treatment_code}] does not match that of the active staging_run ripe_point_code[#{staging_run.treatment.treatment_code}]"
+      end
+
+      if (staging_run.product_class_id && bin.rmt_product.product_class.id != staging_run.product_class_id)
+        errs << "bin product_class_code[#{bin.rmt_product.product_class.product_class_code}] does not match that of the active staging_run ripe_point_code[#{staging_run.product_class.product_class_code}]"
+      end
+
+      if (staging_run.size_id && bin.rmt_product.size.id != staging_run.size_id)
+        errs << "bin size_code[#{bin.rmt_product.size.size_code}] does not match that of the active staging_run ripe_point_code[#{staging_run.size.size_code}]"
+      end
+
       if (!(bin_location=Location.find(:first, :conditions => "bins.bin_number='#{bin_num}'", :joins => "join stock_items on stock_items.location_id=locations.id join bins on stock_items.inventory_reference=bins.bin_number")))
         errs << "bin does not have a location_code"
       elsif (bin_location.location_code[0..3] != 'RA_6' && bin_location.location_code[0..3] != 'RA_7' &&bin_location.location_code[0..6] != 'PRESORT')
@@ -680,6 +715,8 @@ class Services::PreSortingController < ApplicationController
     integration_flows.each do |integration_flow|
       if (integration_flow[0].strip == 'bin_tipped')
         @tipped_bin = integration_flow[1].split('=')[1]
+        params[:bin] = @tipped_bin
+        params[:action] = 'bin_tipped'
         @progress << "#{integration_flows.index(integration_flow) + 1}.Integration Flow: bin_tipped?bin=#{@tipped_bin} <br> "
         if (error = bin_tipped_intergration)
           presort_log_result = "<result>#{handle_error(error)}</result>"
@@ -691,7 +728,9 @@ class Services::PreSortingController < ApplicationController
         create_presort_log(presort_log_result)
       elsif (integration_flow[0].strip == 'bin_created')
         @created_bin = integration_flow[1].split('=')[1]
-        @progress << "#{integration_flows.index(integration_flow) + 1}.Integration Flow: bin_created?bin=#{@created_bin} <br> "
+        params[:bin] = @created_bin
+        params[:action] = 'bin_created'
+            @progress << "#{integration_flows.index(integration_flow) + 1}.Integration Flow: bin_created?bin=#{@created_bin} <br> "
         if (error = bin_created_intergration)
           presort_log_result = "<result>#{handle_error(error)}</result>"
           @progress << "#{error} <br><br> "
