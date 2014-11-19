@@ -725,7 +725,7 @@ def build_orchard_form(orchard,action,caption,is_edit = nil,is_create_retry = ni
      orchard_commodity_id_observer  = {:updated_field_id => "orchard_rmt_variety_id_cell",
                                        :remote_method => 'orchard_commodity_id_search_combo_changed',
                                        :on_completed_js => search_combos_js["orchard_orchard_commodity_id"]}
-
+q
      # if orchard_commodity_id == nil
      #   orchard_rmt_variety_id = ["Select a value from commodity_code"]
      # else
