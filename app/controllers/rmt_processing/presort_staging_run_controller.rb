@@ -38,7 +38,7 @@ class  RmtProcessing::PresortStagingRunController < ApplicationController
   def location_farm_bins
     location_farm_code=params[:id].split("@")
     presort_staging_run=PresortStagingRun.find(session[:active_doc]['presort_staging_run'])
-    bins_query=PresortStagingRun.get_bins_per_location_farm(location_farm_code[0],location_farm_code[1],presort_staging_run.season_id,presort_staging_run.rmt_variety_id,presort_staging_run.track_slms_indicator_id,presort_staging_run.ripe_point_id)
+    bins_query=PresortStagingRun.get_bins_per_location_farm(location_farm_code[0],location_farm_code[1],presort_staging_run)
     @bins=bins_query[0]
     session[:query]="ActiveRecord::Base.connection.select_all(\"#{bins_query[1]}\")"
     @caption="'bins available for LOCATION: #{location_farm_code[0]} and  FARM: #{location_farm_code[1]}'"
@@ -47,7 +47,7 @@ class  RmtProcessing::PresortStagingRunController < ApplicationController
 
   def bins_available_locations
     presort_staging_run=PresortStagingRun.find(params[:id])
-    locations_query=PresortStagingRun.get_available_locations(presort_staging_run.season_id,presort_staging_run.rmt_variety_id,presort_staging_run.track_slms_indicator_id,presort_staging_run.farm_group_id,presort_staging_run.ripe_point_id)
+    locations_query=PresortStagingRun.get_available_locations(presort_staging_run)
     @locations=locations_query[0]
     #@locations.each do |location|
     #  bin_age =Location.bin_age(location)
@@ -81,7 +81,8 @@ class  RmtProcessing::PresortStagingRunController < ApplicationController
 
   def bins_available
     presort_staging_run=PresortStagingRun.find(params[:id])
-    bins_query=PresortStagingRun.get_bins_available(presort_staging_run.season_id,presort_staging_run.rmt_variety_id,presort_staging_run.track_slms_indicator_id,presort_staging_run.farm_group_id,presort_staging_run.ripe_point_id)
+    bins_query=PresortStagingRun.get_bins_available(presort_staging_run)
+
     @bins=bins_query[0]
     session[:query]="ActiveRecord::Base.connection.select_all(\"#{bins_query[1]}\")"
     @caption="'bins available  for #{presort_staging_run.presort_run_code}'"

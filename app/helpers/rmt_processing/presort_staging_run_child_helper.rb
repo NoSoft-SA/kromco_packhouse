@@ -17,13 +17,13 @@ module RmtProcessing::PresortStagingRunChildHelper
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'bin_number',:col_width=>114}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'delivery_number',:col_width=>100}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'location_code',:col_width=>114}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'farm_code',:column_caption=>'farm',:col_width=>100}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'commodity_code',:col_width=>105}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'rmt_variety_code',:col_width=>121}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'ripe_point_code',:col_width=>50}
-
-    #column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'class',:col_width=>100}
-    #column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'size',:col_width=>100}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'farm_code',:column_caption=>'farm',:col_width=>40}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'commodity_code',:column_caption=>'commodity',:col_width=>80}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'rmt_variety_code',:column_caption=>'rmt_variety',:col_width=>90}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'ripe_point_code',:column_caption=>'ripe_point',:col_width=>80}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'product_class_code',:column_caption=>'product_class',:col_width=>80}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'treatment_code',:column_caption=>'treatment',:col_width=>80}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'size_code',:column_caption=>'size',:col_width=>30}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'is_half_bin',:col_width=>100}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'orchard_code',:column_caption=>'orchard',:col_width=>100}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'production_run_tipped_id',:col_width=>209}
@@ -74,7 +74,7 @@ module RmtProcessing::PresortStagingRunChildHelper
     statuses.delete_if {|x| x == "ACTIVE"  }if  parent.status !="ACTIVE"
     return statuses
   end
- 
+
  def build_presort_staging_run_child_form(presort_staging_run_child,action,caption,is_edit = nil,is_create_retry = nil)
 #	--------------------------------------------------------------------------------------------------
 #	Define a set of observers for each composite foreign key- in effect an observer per combo involved
@@ -84,16 +84,22 @@ module RmtProcessing::PresortStagingRunChildHelper
 #	---------------------------------
 #	 Define fields to build form from
 #	---------------------------------
-    farm_codes = FarmGroup.find_by_sql("select distinct f.id,f.farm_code from farms f
+
+
+    farms = FarmGroup.find_by_sql("select distinct f.id,f.farm_code,pc.product_class_code
+                                        from farms f
                                         inner join farm_groups fg on f.farm_group_id=fg.id
                                         inner join presort_staging_runs r on r.farm_group_id=fg.id
+                                        left join product_classes pc on r.product_class_id=pc.id
                                         where r.id= #{session[:active_doc]['presort_staging_run']}
-                                        and f.id not in (select farm_id from presort_staging_run_children where presort_staging_run_id=#{session[:active_doc]['presort_staging_run']}
-
-
-
-
-) ").map{|g|[g.farm_code,g.id]}
+                                        and f.id not in (select farm_id from presort_staging_run_children where presort_staging_run_id=#{session[:active_doc]['presort_staging_run']}) ")
+    parent_product_class_code=farms[0].product_class_code
+    if parent_product_class_code != "2L"
+      farms.select do |e|
+        farms.delete(e) if e.farm_code=="0P"
+      end
+    end
+    farm_codes= farms.map{|g|[g.farm_code,g.id]}
     farm_codes.unshift("<empty>")
 	 field_configs = []
     if farm_codes.length == 1 && farm_codes[0]=="<empty>"
@@ -112,8 +118,8 @@ module RmtProcessing::PresortStagingRunChildHelper
 
 
 end
- 
- 
+
+
  def build_presort_staging_run_child_search_form(presort_staging_run_child,action,caption,is_flat_search = nil)
 #	--------------------------------------------------------------------------------------------------
 #	Define an observer for each index field

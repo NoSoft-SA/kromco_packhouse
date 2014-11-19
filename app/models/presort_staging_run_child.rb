@@ -1,5 +1,5 @@
 class PresortStagingRunChild < ActiveRecord::Base
-	
+
 #	===========================
 # 	Association declarations:
 #	===========================
@@ -19,16 +19,19 @@ class PresortStagingRunChild < ActiveRecord::Base
      return active_babies
    end
 
+
+
   def PresortStagingRunChild.editing_chidren(parent_id)
     editing_babies=PresortStagingRunChild.find_by_sql("select * from presort_staging_run_children
                    where presort_staging_run_id=#{parent_id} and status='EDITING'")
     return editing_babies
   end
 
-  def PresortStagingRunChild.get_bins_per_location_farm(location_code,farm_code,season_id,rmt_variety_id,track_slms_indicator_id,farm_id,ripe_point_id)
+  def PresortStagingRunChild.get_bins_per_location_farm(location_code,farm_code,presort_run,farm_id)
+    class_treatment_size_filter=PresortStagingRun.get_class_treatment_size_filter(presort_run)
+
     list_query="
-    select bins.*,ripe_points.ripe_point_code,
-    --deliveries.delivery_number ,
+    select bins.*,ripe_points.ripe_point_code,    pc.product_class_code ,tm.treatment_code,sizes.size_code,
     rmt_products.rmt_product_code,rmt_varieties.rmt_variety_code,
     farms.farm_code,
     track_slms_indicators.track_slms_indicator_code as indicator_code1,
@@ -39,7 +42,6 @@ class PresortStagingRunChild < ActiveRecord::Base
     from bins
     inner join stock_items on stock_items.inventory_reference=bins.bin_number
     inner join locations on stock_items.location_id=locations.id
-   --inner join deliveries on bins.delivery_id=deliveries.id
     inner join rmt_products on bins.rmt_product_id=rmt_products.id
     inner join varieties on  rmt_products.variety_id=varieties.id
     inner join rmt_varieties on varieties.rmt_variety_id=rmt_varieties.id
@@ -50,16 +52,23 @@ class PresortStagingRunChild < ActiveRecord::Base
     inner join farm_groups on farms.farm_group_id=farm_groups.id
     inner join ripe_points on  rmt_products.ripe_point_id=ripe_points.id
     inner join stock_types on stock_items.stock_type_id=stock_types.id
-    where locations.location_code='#{location_code}' and farms.farm_code='#{farm_code}' and  ripe_points.id=#{ripe_point_id} and
-    seasons.id=#{season_id} and rmt_varieties.id=#{rmt_variety_id} and bins.track_indicator1_id=#{track_slms_indicator_id}
+    left  join product_classes pc on rmt_products.product_class_id=pc.id
+    left  join  treatments tm on rmt_products.treatment_id=tm.id
+    left  join  sizes on rmt_products.size_id=sizes.id
+    where locations.location_code='#{location_code}' and farms.farm_code='#{farm_code}' and  ripe_points.id=#{presort_run.ripe_point_id} and
+    seasons.id=#{presort_run.season_id} and rmt_varieties.id=#{presort_run.rmt_variety_id} and bins.track_indicator1_id=#{presort_run.track_slms_indicator_id}
     and farms.id=#{farm_id} and bins.presort_staging_run_child_id is null and
-    and bins.exit_ref is null and bins.production_run_rebin_id is null and bins.bin_order_load_detail_id is null and bins.delivery_id is not null
-     "
+    bins.exit_ref is null and bins.production_run_rebin_id is null and bins.bin_order_load_detail_id is null and bins.delivery_id is not null
+        #{class_treatment_size_filter['treatment_filter']} #{class_treatment_size_filter['product_class_filter']} #{class_treatment_size_filter['size_filter']}
+
+    "
     bins= ActiveRecord::Base.connection.select_all("#{list_query}")
     return [bins ,list_query]
   end
 
-  def PresortStagingRunChild.get_available_locations(season_id,rmt_variety_id,track_slms_indicator_id,farm_group_id,farm_id,ripe_point_id)
+  def PresortStagingRunChild.get_available_locations(presort_run,farm_id)
+    class_treatment_size_filter=PresortStagingRun.get_class_treatment_size_filter(presort_run)
+
     list_query="
     select
     COUNT(bins.bin_number) as qty_bins_available,MIN(bins.created_on) as bin_age,
@@ -79,11 +88,12 @@ class PresortStagingRunChild < ActiveRecord::Base
     inner join farm_groups on farms.farm_group_id=farm_groups.id
     inner join ripe_points on  rmt_products.ripe_point_id=ripe_points.id
     inner join stock_types on stock_items.stock_type_id=stock_types.id
-    where  ripe_points.id=#{ripe_point_id} and  ( locations.location_code LIKE 'RA_6%'  OR  locations.location_code LIKE 'RA_7%' OR locations.location_code LIKE 'PRESORT%')  AND
-    bins.presort_staging_run_child_id is null and seasons.id=#{season_id} and farm_groups.id =#{farm_group_id} and rmt_varieties.id=#{rmt_variety_id}
-    and track_slms_indicators.id=#{track_slms_indicator_id}  and farms.id=#{farm_id}
+    where  ripe_points.id=#{presort_run.ripe_point_id} and  ( locations.location_code LIKE 'RA_6%'  OR  locations.location_code LIKE 'RA_7%' OR locations.location_code LIKE 'PRESORT%')  AND
+    bins.presort_staging_run_child_id is null and seasons.id=#{presort_run.season_id} and farm_groups.id =#{presort_run.farm_group_id} and rmt_varieties.id=#{presort_run.rmt_variety_id}
+    and track_slms_indicators.id=#{presort_run.track_slms_indicator_id}  and farms.id=#{farm_id}
     and bins.exit_ref is null and bins.production_run_rebin_id is null and bins.bin_order_load_detail_id is null and
-     bins.delivery_id is not null
+     bins.delivery_id is not null      #{class_treatment_size_filter['treatment_filter']} #{class_treatment_size_filter['product_class_filter']} #{class_treatment_size_filter['size_filter']}
+
     group by   farms.farm_code,locations.location_code"
     locations= ActiveRecord::Base.connection.select_all("#{list_query}")
     return [locations ,list_query]
@@ -91,8 +101,7 @@ class PresortStagingRunChild < ActiveRecord::Base
 
   def PresortStagingRunChild.bins_staged(child_id)
     list_query="
-    select bins.*,ripe_points.ripe_point_code,
-    --deliveries.delivery_number ,
+    select bins.*,ripe_points.ripe_point_code,pc.product_class_code ,tm.treatment_code,sizes.size_code,
     rmt_products.rmt_product_code,rmt_varieties.rmt_variety_code,
     farms.farm_code,
     track_slms_indicators.track_slms_indicator_code as indicator_code1,
@@ -104,7 +113,6 @@ class PresortStagingRunChild < ActiveRecord::Base
     from bins
     inner join stock_items on stock_items.inventory_reference=bins.bin_number
     inner join locations on stock_items.location_id=locations.id
-    --inner join deliveries on bins.delivery_id=deliveries.id
     inner join rmt_products on bins.rmt_product_id=rmt_products.id
     inner join varieties on  rmt_products.variety_id=varieties.id
     inner join rmt_varieties on varieties.rmt_variety_id=rmt_varieties.id
@@ -115,6 +123,9 @@ class PresortStagingRunChild < ActiveRecord::Base
     inner join farm_groups on farms.farm_group_id=farm_groups.id
     inner join ripe_points on  rmt_products.ripe_point_id=ripe_points.id
     left join presort_staging_runs on bins.presort_staging_run_id=presort_staging_runs.id
+    left  join product_classes pc on rmt_products.product_class_id=pc.id
+    left  join  treatments tm on rmt_products.treatment_id=tm.id
+    left  join  sizes on rmt_products.size_id=sizes.id
     where   bins.presort_staging_run_child_id = #{child_id}
  "
     bins= ActiveRecord::Base.connection.select_all("#{list_query}")
@@ -122,10 +133,11 @@ class PresortStagingRunChild < ActiveRecord::Base
   end
 
 
-  def PresortStagingRunChild.get_bins_available(season_id,rmt_variety_id,track_slms_indicator_id,farm_group_id,farm_id,ripe_point_id)
+  def PresortStagingRunChild.get_bins_available(presort_run,farm_id)
+    class_treatment_size_filter=PresortStagingRun.get_class_treatment_size_filter(presort_run)
+
     list_query="
-    select bins.*, ripe_points.ripe_point_code,
-    --deliveries.delivery_number ,
+    select bins.*, ripe_points.ripe_point_code,pc.product_class_code ,tm.treatment_code,sizes.size_code,
     rmt_products.rmt_product_code,rmt_varieties.rmt_variety_code,
     farms.farm_code,
     track_slms_indicators.track_slms_indicator_code as indicator_code1,
@@ -136,7 +148,6 @@ class PresortStagingRunChild < ActiveRecord::Base
     from bins
     inner join stock_items on stock_items.inventory_reference=bins.bin_number
     inner join locations on stock_items.location_id=locations.id
-    --inner join deliveries on bins.delivery_id=deliveries.id
     inner join rmt_products on bins.rmt_product_id=rmt_products.id
     inner join varieties on  rmt_products.variety_id=varieties.id
     inner join rmt_varieties on varieties.rmt_variety_id=rmt_varieties.id
@@ -147,10 +158,15 @@ class PresortStagingRunChild < ActiveRecord::Base
     inner join farm_groups on farms.farm_group_id=farm_groups.id
     inner join ripe_points on  rmt_products.ripe_point_id=ripe_points.id
     inner join stock_types on stock_items.stock_type_id=stock_types.id
-    where   bins.presort_staging_run_child_id is null and   ripe_points.id=#{ripe_point_id} and ( locations.location_code LIKE 'RA_6%'  OR  locations.location_code LIKE 'RA_7%')  AND
-    seasons.id=#{season_id} and farm_groups.id =#{farm_group_id} and rmt_varieties.id=#{rmt_variety_id} and bins.track_indicator1_id=#{track_slms_indicator_id} and farms.id=#{farm_id}
+    left  join product_classes pc on rmt_products.product_class_id=pc.id
+    left  join  treatments tm on rmt_products.treatment_id=tm.id
+    left  join  sizes on rmt_products.size_id=sizes.id
+    where   bins.presort_staging_run_child_id is null and   ripe_points.id=#{presort_run.ripe_point_id} and ( locations.location_code LIKE 'RA_6%'  OR  locations.location_code LIKE 'RA_7%')  AND
+    seasons.id=#{presort_run.season_id} and farm_groups.id =#{presort_run.farm_group_id} and rmt_varieties.id=#{presort_run.rmt_variety_id} and bins.track_indicator1_id=#{presort_run.track_slms_indicator_id}
+      and farms.id=#{farm_id}
     and bins.exit_ref is null and bins.production_run_rebin_id is null and bins.bin_order_load_detail_id is null and
-     bins.delivery_id is not null "
+     bins.delivery_id is not null     #{class_treatment_size_filter['treatment_filter']} #{class_treatment_size_filter['product_class_filter']} #{class_treatment_size_filter['size_filter']}
+    "
     bins= ActiveRecord::Base.connection.select_all("#{list_query}")
     return [bins ,list_query]
 
@@ -180,7 +196,7 @@ class PresortStagingRunChild < ActiveRecord::Base
     return sequence
   end
 
-def validate 
+def validate
 #	first check whether combo fields have been selected
 	 is_valid = true
    if is_valid

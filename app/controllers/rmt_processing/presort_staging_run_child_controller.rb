@@ -67,7 +67,7 @@ class  RmtProcessing::PresortStagingRunChildController < ApplicationController
     presort_staging_run_child=PresortStagingRunChild.find_by_sql("select farms.farm_code,presort_staging_run_children.*
                              from presort_staging_run_children inner join farms on presort_staging_run_children.farm_id=farms.id where presort_staging_run_children.id=#{params[:id]}")[0]
     presort_staging_run=PresortStagingRun.find(session[:active_doc]['presort_staging_run'])
-    locations_query=PresortStagingRunChild.get_available_locations(presort_staging_run.season_id,presort_staging_run.rmt_variety_id,presort_staging_run.track_slms_indicator_id,presort_staging_run.farm_group_id,presort_staging_run_child.farm_id,presort_staging_run.ripe_point_id)
+    locations_query=PresortStagingRunChild.get_available_locations(presort_staging_run,presort_staging_run_child.farm_id)
     @locations=locations_query[0]
     @locations.each do |location|
       bin_age =Location.bin_age(location)
@@ -85,7 +85,7 @@ class  RmtProcessing::PresortStagingRunChildController < ApplicationController
     presort_staging_run=PresortStagingRun.find(session[:active_doc]['presort_staging_run'])
     presort_staging_run_child=PresortStagingRunChild.find_by_sql("select farms.farm_code,presort_staging_run_children.*
                              from presort_staging_run_children inner join farms on presort_staging_run_children.farm_id=farms.id where presort_staging_run_children.id=#{location_farm_code[2]}")[0]
-    bins_query=PresortStagingRunChild.get_bins_per_location_farm(location_farm_code[0],location_farm_code[1],presort_staging_run.season_id,presort_staging_run.rmt_variety_id,presort_staging_run.track_slms_indicator_id,presort_staging_run_child.farm_id,presort_staging_run.ripe_point_id)
+    bins_query=PresortStagingRunChild.get_bins_per_location_farm(location_farm_code[0],location_farm_code[1],presort_staging_run,presort_staging_run_child.farm_id)
     @bins=bins_query[0]
     session[:query]="ActiveRecord::Base.connection.select_all(\"#{bins_query[1]}\")"
     @caption="'bins available for LOCATION: #{location_farm_code[0]} and  FARM: #{location_farm_code[1]}'"
@@ -107,7 +107,7 @@ class  RmtProcessing::PresortStagingRunChildController < ApplicationController
     presort_staging_run_child=PresortStagingRunChild.find_by_sql("select farms.farm_code,presort_staging_run_children.*
                              from presort_staging_run_children inner join farms on presort_staging_run_children.farm_id=farms.id where presort_staging_run_children.id=#{params[:id]}")[0]
     presort_staging_run=PresortStagingRun.find(session[:active_doc]['presort_staging_run'])
-    bins_query=PresortStagingRunChild.get_bins_available(presort_staging_run.season_id,presort_staging_run.rmt_variety_id,presort_staging_run.track_slms_indicator_id,presort_staging_run.farm_group_id,presort_staging_run_child.farm_id,presort_staging_run.ripe_point_id)
+    bins_query=PresortStagingRunChild.get_bins_available(presort_staging_run,presort_staging_run_child.farm_id)
     @bins=bins_query[0]
     session[:query]="ActiveRecord::Base.connection.select_all(\"#{bins_query[1]}\")"
     @caption="' available locations for child ( #{presort_staging_run_child.presort_staging_run_child_code}) for FARM: #{presort_staging_run_child.farm_code}'"

@@ -17,11 +17,13 @@ module RmtProcessing::PresortStagingRunHelper
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'bin_number',:col_width=>114}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'delivery_number',:col_width=>100}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'location_code',:col_width=>114}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'farm_code',:column_caption=>'farm',:col_width=>100}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'commodity_code',:col_width=>105}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'rmt_variety_code',:col_width=>121}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'ripe_point_code',:col_width=>50}
-    #column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'size',:col_width=>100}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'farm_code',:column_caption=>'farm',:col_width=>40}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'commodity_code',:column_caption=>'commodity',:col_width=>80}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'rmt_variety_code',:column_caption=>'rmt_variety',:col_width=>90}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'ripe_point_code',:column_caption=>'ripe_point',:col_width=>80}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'product_class_code',:column_caption=>'product_class',:col_width=>80}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'treatment_code',:column_caption=>'treatment',:col_width=>80}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'size_code',:column_caption=>'size',:col_width=>30}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'is_half_bin',:col_width=>100}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'orchard_code',:column_caption=>'orchard',:col_width=>100}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'production_run_tipped_id',:col_width=>209}
@@ -280,8 +282,8 @@ module RmtProcessing::PresortStagingRunHelper
 
   def calc_link_values(presort_staging_run)
     link_values={}
-    link_values['bins_available']=PresortStagingRun.get_bins_available(presort_staging_run.season_id,presort_staging_run.rmt_variety_id,presort_staging_run.track_slms_indicator_id,presort_staging_run.farm_group_id,presort_staging_run.ripe_point_id)[0].length
-    link_values['bins_available_locations']=PresortStagingRun.count_available_locations(presort_staging_run.season_id,presort_staging_run.rmt_variety_id,presort_staging_run.track_slms_indicator_id,presort_staging_run.farm_group_id,presort_staging_run.ripe_point_id).length
+    link_values['bins_available']=PresortStagingRun.get_bins_available(presort_staging_run)[0].length
+    link_values['bins_available_locations']=PresortStagingRun.count_available_locations(presort_staging_run).length
     link_values['bins_staged']=PresortStagingRun.bins_staged(presort_staging_run.id)[0].length
     return  link_values
   end
