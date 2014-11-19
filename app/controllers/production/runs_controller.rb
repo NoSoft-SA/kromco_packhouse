@@ -70,7 +70,7 @@ class Production::RunsController < ApplicationController
       left join  product_classes  on  product_classes.id= production_runs.product_class_id
       where production_runs.production_schedule_id=#{current_closed_schedule.id.to_s} and production_runs.rank is not null ")
     next_run=nil
-    if current_closed_schedule_runs
+    if !current_closed_schedule_runs.empty?
       ranks=current_closed_schedule_runs.sort! { |a,b| a.rank <=> b.rank }
       runs = ranks.select do |e|
         e.rank.to_i > current_run_rank.to_i
