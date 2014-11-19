@@ -707,9 +707,17 @@ class RmtProcessing::DeliveryController < ApplicationController
       @puc = ""
     end
 
-#	render (inline) the html to replace the contents of the td that contains the label field 
+    #MM102014 - add  orchard id
+    @orchard_id = ["select a value from commodity_code and rmt_variety_code"]
+
+    #	render (inline) the html to replace the contents of the td that contains the label field
     render :inline => %{
-            <%= @puc %>
+            <%= @puc_content = @puc %>
+            <%= @orchard_id_content = select('delivery','orchard_id',@orchard_id,{:sorted=>true}) %>
+            <script>
+                <%= update_element_function("puc_code_cell", :action => :update,:content => @puc_content) %>
+                <%= update_element_function("orchard_id_cell", :action => :update,:content => @orchard_id_content) %>
+            </script>
         }
   end
 
@@ -764,45 +772,54 @@ class RmtProcessing::DeliveryController < ApplicationController
       @season_codes.unshift("<empty>")
     end
     @rmt_product_ids = ['select a value from rmt_variety_code and rmt_product_type_code']
+
+    #MM102014 - add  orchard id
+    @orchard_id = ["select a value from rmt_variety_code"]
+
     #render inline to replace the contents of the td that contains the dropdown
+
     render :inline => %{
           <%= select('delivery', 'rmt_variety_code', @rmt_variety_codes,{:sorted=>true}) %>
           <img src = '/images/spinner.gif' style = 'display:none;' id = 'img_delivery_rmt_variety_code'/>
-          <%= observe_field('delivery_rmt_variety_code',:update => 'rmt_product_id_cell',:url => {:action => session[:delivery_form][:rmt_variety_code_observer][:remote_method]},:loading => "show_element('img_delivery_rmt_variety_code');",:complete => session[:delivery_form][:rmt_variety_code_observer][:on_completed_js])%>
+          <%= observe_field('delivery_rmt_variety_code',:update => 'orchard_id_cell',:url => {:action => session[:delivery_form][:rmt_variety_code_observer][:remote_method]},:loading => "show_element('img_delivery_rmt_variety_code');",:complete => session[:delivery_form][:rmt_variety_code_observer][:on_completed_js])%>
 
           <% @content = select('delivery', 'season_code', @season_codes,{:sorted=>true})
-             @rmt_product_id_content = select('delivery', 'rmt_product_id', @rmt_product_ids) 
+             @orchard_id_content = select('delivery','orchard_id',@orchard_id)
+             @rmt_product_id_content = select('delivery', 'rmt_product_id', @rmt_product_ids)
           %>
           <script>
-              <%= update_element_function(
-                  "season_code_cell", :action=>:update,
-                  :content=>@content
-              )
-              %>
+              <%= update_element_function("season_code_cell", :action=>:update,:content=>@content) %>
 
-              <%= update_element_function(
-                  "rmt_product_id_cell", :action=>:update,
-                  :content=>@rmt_product_id_content
-              )
-              %>
+              <%= update_element_function("orchard_id_cell", :action => :update,:content => @orchard_id_content) %>
+
+              <%= update_element_function("rmt_product_id_cell", :action=>:update,:content=>@rmt_product_id_content) %>
           </script>
-}
+    }
+
   end
 
   def rmt_variety_code_changed
     rmt_variety_code = get_selected_combo_value(params)
     session[:delivery_form][:rmt_variety_code_combo_selection] = rmt_variety_code
-    @rmt_product_codes = ['select a value from rmt_product_type_code above']
+
+    @rmt_product_codes = ["select a value from rmt_product_type_code above"]
+
+    #MM102014 - add  orchard id
+    farm_code = session[:delivery_form][:farm_code_combo_selection]
+    puc_code = session[:delivery_form][:puc_code]
+    commodity_code = session[:delivery_form][:commodity_code_combo_selection]
+    @orchard_id = Orchard.find_by_sql("select distinct orchards.id,orchards.orchard_code,orchards.orchard_description from orchards inner join rmt_varieties on orchards.orchard_rmt_variety_id = rmt_varieties.id inner join commodities on rmt_varieties.commodity_id = commodities.id inner join farm_puc_accounts on orchards.farm_id = farm_puc_accounts.farm_id where farm_code = '#{farm_code}' and puc_code = '#{puc_code}' and rmt_varieties.commodity_code = '#{commodity_code}' and rmt_varieties.rmt_variety_code = '#{rmt_variety_code}'").map{|g|["#{g.orchard_code} - #{g.orchard_description}", g.id]}
+    # @orchard_id.unshift(["<empty>", nil]) if !@orchard_id.empty?
+
     render :inline => %{
-      <%= select('delivery', 'rmt_product_id', @rmt_product_codes,{:sorted=>true}) %>
-      <script>
-        <%= update_element_function(
-            "advised_rmt_product_code_cell", :action=>:update,
-            :content=>""
-        )
+		    <%= @orchard_id_content = select('delivery','orchard_id',@orchard_id,{:sorted=>true})
+            @rmt_product_codes_content = select('delivery','rmt_product_id',@rmt_product_codes,{:sorted=>true})
         %>
-      </script>
-    }
+        <script>
+          <%= update_element_function("orchard_id_cell", :action => :update,:content => @orchard_id_content) %>
+          <%= update_element_function("advised_rmt_product_code_cell", :action => :update,:content => @rmt_product_codes_content) %>
+        </script>
+		}
 
     #if authorise(program_name?, 'choose_rmt_product_code', session[:user_id])
     #  @rmt_product_codes = RmtProduct.find_by_sql("select rmt_product_code,id from rmt_products where variety_code='#{session[:delivery_form][:rmt_variety_code_combo_selection]}' and commodity_code='#{session[:delivery_form][:commodity_code_combo_selection]}' and rmt_product_type_code='orchard_run' ORDER BY rmt_product_code").map { |g| [g.rmt_product_code, g.id] }
@@ -834,6 +851,7 @@ class RmtProcessing::DeliveryController < ApplicationController
     #                  %>
     #                </script>
     #                }
+
   end
 
   def mrl_result_type_changed
@@ -895,6 +913,10 @@ class RmtProcessing::DeliveryController < ApplicationController
     commodity_code = session[:delivery_search_form][:commodity_code_combo_selection]
     #date_from = params[:delivery][:date_delivered_from].to_formatted_s(:db)
     #date_to = params[:delivery][:date_delivered_to].to_formatted_s(:db)
+
+    @orchard_id = Delivery.find_by_sql("select distinct season_code from deliveries where farm_code = '#{farm_code}' and puc_code = '#{puc_code}' and commodity_code = '#{commodity_code}' and rmt_variety_code = '#{rmt_variety_code}'").map { |g| [g.season_code] }
+    @orchard_id.unshift("<empty>")
+
     @season_codes = Delivery.find_by_sql("select distinct season_code from deliveries where farm_code = '#{farm_code}' and puc_code = '#{puc_code}' and commodity_code = '#{commodity_code}' and rmt_variety_code = '#{rmt_variety_code}'").map { |g| [g.season_code] }
     @season_codes.unshift("<empty>")
     #render inline to replace the values of season code dropdown
@@ -902,6 +924,20 @@ class RmtProcessing::DeliveryController < ApplicationController
             <%= select('delivery','season_code',@season_codes) %>
         }
   end
+
+  # def delivery_orchard_id_search_combo_changed
+  #   orchard_id = get_selected_combo_value(params)
+  #   session[:delivery_search_form][:orchard_id_combo_selection] = orchard_id
+  #   farm_code = session[:delivery_search_form][:farm_code_combo_selection]
+  #   puc_code = session[:delivery_search_form][:puc_code_combo_selection]
+  #   commodity_code = session[:delivery_search_form][:commodity_code_combo_selection]
+  #   rmt_variety_code = session[:delivery_search_form][:rmt_variety_code_combo_selection]
+  #   @orchard_id = Orchard.find_by_sql("select distinct season_code from deliveries where farm_code = '#{farm_code}' and puc_code = '#{puc_code}' and commodity_code = '#{commodity_code}' and rmt_variety_code = '#{rmt_variety_code}'").map { |g| [g.season_code] }
+  #   @orchard_id.unshift("<empty>")
+  #   render :inline => %{
+  #           <%= select('delivery','season_code',@season_codes) %>
+  #       }
+  # end
 
 #=============================================================================================================
 #   Add Delivery_Track_Indicator code

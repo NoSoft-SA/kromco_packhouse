@@ -10,6 +10,8 @@ class MarketingVariety < ActiveRecord::Base
 	has_many :track_slms_indicators
 	has_one :slms_variety, :as => :variety
 	has_many :track_slms_varieties
+  #MM072014
+  has_many :carton_presort_conversions#, :dependent => :destroy
  
 #	============================
 #	 Validations declarations:

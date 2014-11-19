@@ -16,22 +16,454 @@ module RmtProcessing::DeliveryHelper
 
   end
 
+#   def build_delivery_form(delivery, action, caption, show_100_fruit_sample_link, show_print_tripsheet_link, is_edit = nil, is_create_retry = nil)
+#
+#     #delivery,action,caption,is_edit = nil,is_create_retry = nil
+#
+# #	--------------------------------------------------------------------------------------------------
+# #	Define a set of observers for each composite foreign key- in effect an observer per combo involved
+# #	in a composite foreign key
+# #	--------------------------------------------------------------------------------------------------
+#     session[:delivery_form]                             = Hash.new
+#     #generate javascript for the on_complete ajax event for each combo
+#     combos_js_for_delivery                              = gen_combos_clear_js_for_combos(["delivery_farm_code", "delivery_commodity_code", "delivery_rmt_product_code", "delivery_rmt_variety_code","delivery_commodity_id"])
+#     search_combos_js = gen_combos_clear_js_for_combos(["delivery_rmt_product_type_code","delivery_rmt_product_code"])
+#     #Observers for search combos
+#     rmt_product_type_code_observer  = {:updated_field_id => "rmt_product_id_cell",
+#              :remote_method => 'rmt_product_type_code_combo_changed',
+#              :on_completed_js => search_combos_js["delivery_rmt_product_type_code"]}
+#
+#     farm_code_observer                                  = {:updated_field_id =>'puc_code_cell',
+#                                                            :remote_method    =>'farm_code_changed',
+#                                                            :on_completed_js  =>combos_js_for_delivery["delivery_farm_code"]}
+#
+#     on_complete_js                                      = "\n img = document.getElementById('img_delivery_commodity_code');"
+#     on_complete_js                                      += "\n if(img != null) img.style.display = 'none';"
+#     commodity_code_observer                             = {:updated_field_id =>'rmt_variety_code_cell',
+#                                                            :remote_method    =>'commodity_code_changed',
+#                                                            :on_completed_js  =>on_complete_js}
+#
+#     on_complete_rmt_variety_code_js                     = "\n img = document.getElementById('img_delivery_rmt_variety_code');"
+#     on_complete_rmt_variety_code_js                     += "\n if(img != null) img.style.display = 'none';"
+#
+#     rmt_variety_code_observer                           = {:updated_field_id =>'rmt_product_id_cell',#'orchard_id_cell',#
+#                                                            :remote_method    =>'rmt_variety_code_changed',
+#                                                            :on_completed_js  =>on_complete_rmt_variety_code_js}
+#
+#     on_completed_js                                     = "\n img = document.getElementById('img_delivery_mrl_result_type');"
+#     on_completed_js                                     += "\n if(img != null) img.style.display = 'none';"
+#     mrl_result_type_observer                            = {:updated_field_id =>'ajax_distributor_cell',
+#                                                            :remote_method    =>'mrl_result_type_changed',
+#                                                            :on_completed_js  =>on_completed_js}
+#
+#     session[:delivery_form][:farm_code_observer]        = farm_code_observer
+#     session[:delivery_form][:commodity_code_observer]   = commodity_code_observer
+#     session[:delivery_form][:rmt_product_type_code_observer]   = rmt_product_type_code_observer
+#     session[:delivery_form][:rmt_variety_code_observer] = rmt_variety_code_observer
+#     session[:delivery_form][:mrl_result_type_observer]  = mrl_result_type_observer
+#
+#     combos_js_for_non_delivery_fields                   = gen_combos_clear_js_for_combos(["delivery_ripe_code","delivery_ripe_point_code"])#,"delivery_treatment_code"])
+#     ripe_code_observer                                  = {:updated_field_id =>'ripe_point_code_cell',
+#                                                            :remote_method    =>'ripe_code_changed',
+#                                                            :on_completed_js  =>combos_js_for_non_delivery_fields["delivery_ripe_code"]}
+#
+#     on_completed_js                                     = "\n img = document.getElementById('img_delivery_ripe_point_code');"
+#     on_completed_js                                     += "\n if(img != null) img.style.display = 'none';"
+#     ripe_point_code_observer                                 = {:updated_field_id =>'rmt_product_id_cell',
+#                                                            :remote_method    =>'ripe_point_code_changed',
+#                                                            :on_completed_js  =>on_completed_js}
+#
+#     on_completed_js                                     = "\n img = document.getElementById('img_delivery_treatment_code');"
+#     on_completed_js                                     += "\n if(img != null) img.style.display = 'none';"
+#     treatment_code_observer                             = {:updated_field_id =>'rmt_product_id_cell',
+#                                                            :remote_method    =>'treatment_code_changed',
+#                                                            :on_completed_js  =>on_completed_js}
+#
+#
+#     session[:delivery_form][:treatment_code_observer]  = treatment_code_observer
+#     session[:delivery_form][:ripe_code_observer]       = ripe_code_observer
+#     session[:delivery_form][:ripe_point_code_observer]       = ripe_point_code_observer
+#
+#     farm_codes                                          = nil
+#     commodity_codes                                     = nil
+#     rmt_variety_codes                                   = nil
+#     #MM102014 - add  orchard id
+#     orchard_id = nil
+#     unit_type_codes                                     = nil
+#     season_codes                                        = nil
+#
+#     commodity_code                                      = nil
+#     rmt_variety_code                                    = nil
+#     season_code                                         = nil
+#     mrl_result_types                                    = nil
+#
+#     if session[:new_delivery]!= nil
+#       farm_codes = Farm.find_by_sql("select distinct farm_code from farms").map { |g| [g.farm_code] }
+#       farm_codes.delete(session[:new_delivery][:farm_code])
+#       farm_codes.unshift(session[:new_delivery][:farm_code])
+#     else
+#       farm_codes = Farm.find_by_sql("select distinct farm_code from farms").map { |g| [g.farm_code] }
+#     end
+#
+#     if is_edit
+#       delivery_track_indicators = DeliveryTrackIndicator.find_by_sql("select * from delivery_track_indicators where delivery_id = '#{delivery.id}'")
+#     end
+#     mrl_result_types  = MrlResultType.find_by_sql("select distinct mrl_result_type_code from mrl_result_types").map { |g| [g.mrl_result_type_code] }
+#     commodity_codes   = RmtVariety.find_by_sql("select distinct commodity_code from rmt_varieties").map { |g| [g.commodity_code] }
+#     rmt_product_type_codes   = RmtProductType.find(:all,:select=>"distinct rmt_product_type_code").map { |g| [g.rmt_product_type_code] }
+#     destination_process_vars = ['PRESORT','RA','CA']
+#     bin_products      = Delivery.get_unit_type_codes
+#     season_codes      = Season.find_by_sql("select distinct season_code from seasons").map { |g| [g.season_code] }
+#
+#     rmt_variety_codes = ["select a value from commodity_code"]
+#     rmt_product_codes = ["select a value from commodity_code and rmt_variety_code and rmt_product_type_code"]
+#
+#     #MM102014 - add orchard id
+#     orchard_id = ["select a value from farm_code and commodity_code and rmt_variety_code"]
+#
+#     # orchard_id = Orchard.find_by_sql("select orchards.id,orchards.orchard_code,orchards.orchard_description from orchards inner join rmt_varieties on orchards.orchard_rmt_variety_id = rmt_varieties.id inner join commodities on rmt_varieties.commodity_id = commodities.id where rmt_varieties.commodity_code = '#{session[:delivery_form][:commodity_code_combo_selection]}' and rmt_varieties.rmt_variety_code = '#{session[:delivery_form][:rmt_variety_code_combo_selection]}'").map{|g|["#{g.orchard_code} - #{g.orchard_description}", g.id]} # farm_code = '#{session[:delivery_form][:farm_code_combo_selection]}' and puc_code = '#{session[:delivery_form][:puc_code]}' and
+#     # orchard_id.unshift(delivery.orchard_id)
+#
+#     treatment_codes   = Treatment.find_by_sql("select distinct treatment_code from treatments where treatment_type_code = 'PRE_HARVEST'").map { |g| [g.treatment_code] }
+#     ripe_codes = RipeTime.find_by_sql("select distinct ripe_code from ripe_times").map { |r| [r.ripe_code] }
+#     ripe_codes.unshift("<empty>")
+#     ripe_point_codes = ["select a value from ripe_code"]
+#     if is_edit || is_create_retry
+#       session[:delivery_form][:commodity_code_combo_selection] = delivery.commodity_code
+#       rmt_variety_codes = RmtVariety.find_by_sql("select distinct rmt_variety_code from rmt_varieties where commodity_code = '#{session[:delivery_form][:commodity_code_combo_selection]}' ORDER BY rmt_variety_code ASC").map{|g|[g.rmt_variety_code]}
+#       rmt_variety_codes.unshift(delivery.rmt_variety_code)
+#
+#       #MM102014 - add orchard id
+#       # orchard_id = Orchard.find_by_sql("select orchards.id,orchards.orchard_code,orchards.orchard_description from orchards inner join rmt_varieties on orchards.orchard_rmt_variety_id = rmt_varieties.id inner join commodities on rmt_varieties.commodity_id = commodities.id where rmt_varieties.commodity_code = '#{session[:delivery_form][:commodity_code_combo_selection]}'").map{|g|["#{g.orchard_code} - #{g.orchard_description}", g.id]} # farm_code = '#{session[:delivery_form][:farm_code_combo_selection]}' and puc_code = '#{session[:delivery_form][:puc_code]}' and and rmt_varieties.rmt_variety_code = '#{session[:delivery_form][:rmt_variety_code_combo_selection]}'
+#       # orchard_id.unshift(delivery.orchard_id)
+#
+#       ripe_point_codes = RipePoint.find_by_sql("select distinct ripe_point_code from ripe_points ORDER BY ripe_point_code ASC").map{|h| [h.ripe_point_code]}
+# #      ripe_point_codes.unshift(delivery.ripe_point_code)
+# #      ============
+#       session[:delivery_form][:rmt_variety_code_combo_selection] =  delivery.rmt_variety_code
+#       session[:delivery_form][:commodity_code_combo_selection] = delivery.commodity_code
+#       rmt_product_codes = RmtProduct.find_by_sql("select rmt_product_code,id from rmt_products where variety_code='#{session[:delivery_form][:rmt_variety_code_combo_selection]}' and commodity_code='#{session[:delivery_form][:commodity_code_combo_selection]}' and rmt_product_type_code='orchard_run' ORDER BY rmt_product_code").map{|g|[g.rmt_product_code,g.id]}
+#       rmt_product_codes.unshift([RmtProduct.find(delivery.rmt_product_id).rmt_product_code, delivery.rmt_product_id]) if(delivery.rmt_product_id && delivery.rmt_product_id > 0)
+#       rmt_product_codes.unshift("<empty>")
+# #       ============
+#     end
+#
+#     track_slms_indicator = TrackSlmsIndicator.find_by_track_indicator_type_code("LOB")
+#     if track_slms_indicator != nil
+#       commodity_code                             = track_slms_indicator.commodity_code
+#       rmt_variety_code                           = track_slms_indicator.rmt_variety_code
+#       season_code                                = track_slms_indicator.season_code
+#       session[:delivery_form][:commodity_code]   = commodity_code
+#       session[:delivery_form][:rmt_variety_code] = rmt_variety_code
+#       session[:delivery_form][:season_code]      = season_code
+#
+#     end
+#
+#     destination_complexes = Location.find(:all,:conditions=>"location_type_code='COMPLEX'").map{|l| l.location_code}
+#
+# #	---------------------------------
+# #	 Define fields to build form from
+# #	---------------------------------
+#
+#     field_configs                         = Array.new
+#     field_configs[field_configs.length()] = {:field_type => 'DropDownField',
+#                                              :field_name => 'farm_code',
+#                                              :settings   =>{:list=>farm_codes},
+#                                              :observer   =>farm_code_observer}
+#
+#     field_configs[field_configs.length()] = {:field_type => 'LabelField',
+#                                              :field_name => 'puc_code',
+#                                              :settings   =>{:css_class=>'delivery_label'}}
+#
+#     field_configs[field_configs.length()] = {:field_type => 'TextField',
+#                                              :field_name => 'pick_team'}
+#
+#     field_configs[field_configs.length()] = {:field_type => 'TextField',
+#                                              :field_name => 'orchard_description'}
+#
+#     if !is_edit || (is_edit && delivery_track_indicators.length == 0)
+#       field_configs[field_configs.length()] = {:field_type => 'DropDownField',
+#                                                :field_name => 'destination_process_var',
+#                                                :settings   =>{:list=>destination_process_vars}}
+#
+#       field_configs[field_configs.length()] = {:field_type => 'DropDownField',
+#                                                :field_name => 'commodity_code',
+#                                                :settings   =>{:list=>commodity_codes},
+#                                                :observer   =>commodity_code_observer}
+#
+#       field_configs[field_configs.length()] = {:field_type => 'DropDownField',
+#                                                :field_name => 'rmt_variety_code',
+#                                                :settings   =>{:list=>rmt_variety_codes, :no_empty => true},
+#                                                :observer   =>rmt_variety_code_observer}
+#
+#       field_configs[field_configs.length()] = {:field_type => 'DropDownField',
+#                                                :field_name => 'orchard_id',
+#                                                :settings   =>{:list=>orchard_id}}#,
+#                                                #:observer   =>orchard_id_observer}
+#       #
+#       #field_configs[field_configs.length()] = {:field_type => 'DropDownField',
+#       #                                         :field_name => 'rmt_product_type_code',
+#       #                                         :settings   =>{:list=>rmt_product_type_codes},
+#       #                                         :observer   =>rmt_product_type_code_observer}
+#     else
+#       session[:delivery_form][:commodity_code_combo_selection] = delivery.commodity_code
+#       session[:delivery_form][:rmt_product_type_code_combo_selection] = delivery.rmt_product.rmt_product_type_code if(delivery.rmt_product)
+#       session[:delivery_form][:rmt_variety_code_combo_selection] = delivery.rmt_variety_code
+#       session[:delivery_form][:ripe_point_code_combo_selection] = delivery.ripe_point_code
+#
+#       #MM102014 - add orchard id
+#       # session[:delivery_form][:orchard_id_combo_selection] = delivery.orchard_id
+#
+#       field_configs[field_configs.length()] = {:field_type => 'LabelField',
+#                                                :field_name => 'destination_process_var',
+#                                                :settings   =>{:css_class=>'delivery_label'}}
+#
+#       field_configs[field_configs.length()] = {:field_type => 'LabelField',
+#                                                :field_name => 'commodity_code',
+#                                                :settings   =>{:css_class=>'delivery_label'}}
+#
+#       field_configs[field_configs.length()] = {:field_type => 'LabelField',
+#                                                :field_name => 'rmt_variety_code',
+#                                                :settings   =>{:css_class=>'delivery_label'}}
+#
+#       if(@hundred_fruit_sample_completed && !delivery.rmt_product_type_code)
+#         field_configs[field_configs.length()] = {:field_type => 'DropDownField',
+#                                                  :field_name => 'rmt_product_type_code',
+#                                                  :settings   =>{:list=>rmt_product_type_codes},
+#                                                  :observer   =>rmt_product_type_code_observer}
+#       elsif(@hundred_fruit_sample_completed)
+#         field_configs[field_configs.length()] = {:field_type => 'LabelField',
+#                                                :field_name => 'rmt_product_type_code',
+#                                                :settings   =>{:css_class=>'delivery_label'}}
+#       end
+#
+#     end
+#
+#     # if is_edit || is_create_retry
+#     #   farm_code = session[:delivery_form][:farm_code_combo_selection]
+#     #   puc_code = session[:delivery_form][:puc_code]
+#     #   commodity_code = session[:delivery_form][:commodity_code_combo_selection]
+#     #
+#     #   orchard_id = Orchard.find_by_sql("select orchards.orchard_code,orchards.orchard_description from orchards").map { |g| [g.orchard_code] } # farm_code = '#{farm_code}' and
+#     #
+#     #   # orchard_id = Orchard.find_by_sql("select orchards.orchard_code,orchards.orchard_description from orchards
+#     #   #                                  inner join rmt_varieties on orchards.orchard_rmt_variety_id = rmt_varieties.id
+#     #   #                                  inner join commodities on rmt_varieties.commodity_id = commodities.id
+#     #   #                                  where puc_code = '#{puc_code}' and commodity_code = '#{commodity_code}' and rmt_variety_code = '#{rmt_variety_code}'").map { |g| [g.orchard_code] } # farm_code = '#{farm_code}' and
+#     #   orchard_id.unshift("<empty>")
+#     # else
+#     #   orchard_id = ["select a value from farm_code and commodity_code and rmt_variety_code"]
+#     # end
+#
+#     #:observer   =>orchard_id_observer}
+#
+#     #--------------------------------1------------------------
+# #--------------------------------------------------------
+#     if(@hundred_fruit_sample_completed)
+#       field_configs[field_configs.length()] = {:field_type => 'DropDownField',
+#                                                :field_name => 'ripe_code',
+#                                                :settings   =>{:list=>ripe_codes},#, :no_empty => true},
+#                                                :observer   =>ripe_code_observer}
+#
+#       field_configs[field_configs.length()] = {:field_type => 'LabelField',
+#                                                :field_name => 'advised_ripe_point_code',
+#                                                :settings   =>{:css_class=>'delivery_label'}}
+#
+#       field_configs[field_configs.length()] = {:field_type => 'DropDownField',
+#                                                :field_name => 'ripe_point_code',
+#                                                :settings   =>{:list=>ripe_point_codes},#, :no_empty => true},
+#                                                :observer   =>ripe_point_code_observer}
+#
+#       field_configs[field_configs.length()] = {:field_type => 'DropDownField',
+#                                                      :field_name => 'treatment_code',
+#                                                      :settings   =>{:list=>treatment_codes},
+#                                                      :observer   =>treatment_code_observer}
+#
+#       field_configs[field_configs.length()] = {:field_type => 'LabelField',
+#                                                :field_name => 'advised_rmt_product_code',
+#                                                :settings   =>{:css_class=>'delivery_label',:show_label=>true}}
+#
+#       field_configs[field_configs.length()] = {:field_type => 'DropDownField',
+#                                                :field_name => 'rmt_product_id',
+#                                                :settings   =>{:label_caption=>'rmt product code',
+#                                                               :list         =>rmt_product_codes}}#, :no_empty => true}}
+#     end
+#
+#     field_configs[field_configs.length()] = {:field_type => 'DropDownField',
+#                                              :field_name => 'destination_complex',
+#                                              :settings   =>{:list=>destination_complexes}}
+# #-------------------------------1-------------------------
+# #--------------------------------------------------------
+#     if !is_edit || (is_edit && delivery_track_indicators.length == 0)
+#       field_configs[field_configs.length()] = {:field_type => 'DropDownField',
+#                                                :field_name => 'season_code',
+#                                                :settings   =>{:list=>season_codes}}
+#     else
+#
+#       field_configs[field_configs.length()] = {:field_type => 'LabelField',
+#                                                :field_name => 'season_code',
+#                                                :settings   =>{:css_class=>'delivery_label'}}
+#     end
+#
+#     field_configs[field_configs.length()] = {:field_type => 'CheckBox',
+#                                              :field_name => 'residue_free'}
+#
+#     field_configs[field_configs.length()] = {:field_type => 'TextField',
+#                                              :field_name => 'orchard_code'}
+#
+#     field_configs[field_configs.length()] = {:field_type => 'TextField',
+#                                              :field_name => 'delivery_number_preprinted'}
+#
+#     field_configs[field_configs.length()] = {:field_type => 'LabelField',
+#                                              :field_name => 'delivery_number',
+#                                              :settings   =>{:css_class=>'delivery_label'}}
+#
+#     field_configs[field_configs.length()] = {:field_type => 'TextField',
+#                                              :field_name => 'delivery_description'}
+#
+#     field_configs[field_configs.length()] = {:field_type => 'TextField',
+#                                              :field_name => 'truck_registration_number'}
+#
+#     field_configs[field_configs.length()] = {:field_type => 'DropDownField',
+#                                              :field_name => 'pack_material_product_code',
+#                                              :settings   =>{:list=>bin_products}}
+#
+#     field_configs[field_configs.length()] = {:field_type => 'PopupDateTimeSelector',
+#                                              :field_name => 'date_delivered'}
+#
+#     field_configs[field_configs.length()] = {:field_type => 'PopupDateTimeSelector',
+#                                              :field_name => 'date_time_picked'}
+#
+#     field_configs[field_configs.length()] = {:field_type => 'TextField',
+#                                              :field_name => 'quantity_full_bins'}
+#
+#     field_configs[field_configs.length()] = {:field_type => 'TextField',
+#                                              :field_name => 'quantity_partial_units'}
+#
+#     field_configs[field_configs.length()] = {:field_type => 'TextField',
+#                                              :field_name => 'quantity_empty_units'}
+#
+#     field_configs[field_configs.length()] = {:field_type => 'TextField',
+#                                              :field_name => 'quantity_damaged_units'}
+#
+#     field_configs[field_configs.length()] = {:field_type => 'TextField',
+#                                              :field_name => 'remarks'}
+#
+#     field_configs[field_configs.length()] = {:field_type => 'LabelField',
+#                                              :field_name => 'operator_override',
+#                                              :settings   =>{:css_class=>'delivery_label'}}
+#
+#     field_configs[field_configs.length()] = {:field_type => 'LabelField',
+#                                              :field_name => 'date_override',
+#                                              :settings   =>{:css_class=>'delivery_label'}}
+#
+#     field_configs[field_configs.length()] = {:field_type => 'LabelField',
+#                                              :field_name => 'drench_delivery',
+#                                              :settings   =>{:css_class=>'delivery_label'}}
+#
+#     field_configs[field_configs.length()] = {:field_type => 'LabelField',
+#                                              :field_name => 'sample_bins',
+#                                              :settings   =>{:css_class=>'delivery_label'}}
+#
+#     if delivery.delivery_sample_bins && delivery.delivery_sample_bins.length() > 0
+#       sequences =   format_delivery_sample_bin_sequences(delivery.delivery_sample_bins.map{|d|d.sample_bin_sequence_number.to_s})
+#        field_configs[field_configs.length()] = {:field_type => 'LabelField',
+#                                                 :field_name => 'sample sequences',
+#                                                 :settings => {:static_value => sequences,:css_class => "blue_label_field", :show_label => true}}
+#
+#     end
+#
+#     field_configs[field_configs.length()] = {:field_type => 'LabelField',
+#                                              :field_name => 'mrl_required',
+#                                              :settings   =>{:css_class=>'delivery_label'}}
+#
+#     if session[:new_delivery]!= nil
+#       if session[:new_delivery].delivery_status != nil && session[:new_delivery].delivery_status != ""
+#         field_configs[field_configs.length()] = {:field_type => 'LabelField',
+#                                                  :field_name => 'delivery_status',
+#                                                  :settings   =>{:static_value =>session[:new_delivery].delivery_status, :show_label=>true}}
+#       else
+#         field_configs[field_configs.length()] = {:field_type => 'LabelField',
+#                                                  :field_name => 'delivery_status',
+#                                                  :settings   =>{:css_class    =>'delivery_status',
+#                                                                 :static_value =>'capturing', :show_label=>true}}
+#       end
+#     else
+#       field_configs[field_configs.length()] = {:field_type => 'LabelField',
+#                                                :field_name => 'delivery_status',
+#                                                :settings   =>{:css_class    =>'delivery_status',
+#                                                               :static_value =>'capturing', :show_label=>true}}
+#     end
+#
+#     field_configs[field_configs.length()] = {:field_type => 'DropDownField',
+#                                              :field_name => 'mrl_result_type',
+#                                              :settings   =>{:list=>mrl_result_types, :label_caption=>'mrl analysis type'},
+#                                              :observer   =>mrl_result_type_observer}
+#
+#     if is_edit
+#       field_configs[field_configs.length()] = {:field_type=>'LinkField',
+#                                                :field_name=>'drenching',
+#                                                :settings  =>{:link_text    =>'allocate drench',
+#                                                              :target_action=>'allocate_drench',
+#                                                              :css_class    =>'indicator_link'}}
+#
+#       delivery_drench_stations              = DeliveryDrenchStation.find_all_by_delivery_id(delivery.id)
+#       drench_line = {:field_type => 'LabelField',
+#                      :field_name => 'delivery_drench_line',
+#                      :settings   =>{:static_value =>delivery_drench_stations[0].drench_station.drench_line.drench_line_code, :show_label=>true}} if delivery_drench_stations.length > 0
+#       count                          = 0
+#       delivery_drench_stations_array = Array.new
+#       delivery_drench_stations.each do |dds|
+#         count+=1
+#         delivery_drench_stations_array.push({:field_type => 'LabelField',
+#                                              :field_name => 'delivery_drench_station_' + count.to_s,
+#                                              :settings   =>{:static_value =>dds.drench_station.drench_station_code, :show_label=>true}})
+#       end
+#       field_configs.push(drench_line) if drench_line
+#       field_configs += delivery_drench_stations_array
+#     end
+#
+#     if (show_print_tripsheet_link)
+#       field_configs[field_configs.length()] = {:field_type => 'LinkWindowField',
+#                                                :field_name => '',
+#                                                :settings   => {
+#                                                    :target_action => 'print_tripsheet',
+#                                                    :link_text     => "print tripsheet",
+#                                                    :id_value      => delivery.id.to_s
+#                                                }}
+#     end
+#     field_configs[field_configs.length()] = {:field_type => 'LinkWindowField',
+#                                                :field_name => '',
+#                                                :settings   => {
+#                                                    :target_action => 'print_composite_report',
+#                                                    :link_text     => "print composite report",
+#                                                    :id_value      => delivery.delivery_number.to_s
+#                                                }}
+#
+#     field_configs[field_configs.length()] = {:field_type  =>'HiddenField',
+#                                              :field_name  =>'ajax_distributor',
+#                                              :non_db_field=>true}
+#
+#     build_form(delivery, field_configs, action, 'delivery', caption, is_edit)
+#
+#   end
+
   def build_delivery_form(delivery, action, caption, show_100_fruit_sample_link, show_print_tripsheet_link, is_edit = nil, is_create_retry = nil)
 
     #delivery,action,caption,is_edit = nil,is_create_retry = nil
 
-#	--------------------------------------------------------------------------------------------------
-#	Define a set of observers for each composite foreign key- in effect an observer per combo involved
-#	in a composite foreign key
-#	--------------------------------------------------------------------------------------------------
+    #	--------------------------------------------------------------------------------------------------
+    #	Define a set of observers for each composite foreign key- in effect an observer per combo involved
+    #	in a composite foreign key
+    #	--------------------------------------------------------------------------------------------------
     session[:delivery_form]                             = Hash.new
     #generate javascript for the on_complete ajax event for each combo
-    combos_js_for_delivery                              = gen_combos_clear_js_for_combos(["delivery_farm_code", "delivery_commodity_code", "delivery_rmt_product_code"])
+    combos_js_for_delivery                              = gen_combos_clear_js_for_combos(["delivery_farm_code", "delivery_commodity_code", "delivery_rmt_product_code", "delivery_rmt_variety_code","delivery_commodity_id"])
     search_combos_js = gen_combos_clear_js_for_combos(["delivery_rmt_product_type_code","delivery_rmt_product_code"])
     #Observers for search combos
     rmt_product_type_code_observer  = {:updated_field_id => "rmt_product_id_cell",
-             :remote_method => 'rmt_product_type_code_combo_changed',
-             :on_completed_js => search_combos_js["delivery_rmt_product_type_code"]}
+                                       :remote_method => 'rmt_product_type_code_combo_changed',
+                                       :on_completed_js => search_combos_js["delivery_rmt_product_type_code"]}
 
     farm_code_observer                                  = {:updated_field_id =>'puc_code_cell',
                                                            :remote_method    =>'farm_code_changed',
@@ -45,7 +477,8 @@ module RmtProcessing::DeliveryHelper
 
     on_complete_rmt_variety_code_js                     = "\n img = document.getElementById('img_delivery_rmt_variety_code');"
     on_complete_rmt_variety_code_js                     += "\n if(img != null) img.style.display = 'none';"
-    rmt_variety_code_observer                           = {:updated_field_id =>'rmt_product_id_cell',
+
+    rmt_variety_code_observer                           = {:updated_field_id =>'orchard_id_cell',#'rmt_product_id_cell',#
                                                            :remote_method    =>'rmt_variety_code_changed',
                                                            :on_completed_js  =>on_complete_rmt_variety_code_js}
 
@@ -69,8 +502,8 @@ module RmtProcessing::DeliveryHelper
     on_completed_js                                     = "\n img = document.getElementById('img_delivery_ripe_point_code');"
     on_completed_js                                     += "\n if(img != null) img.style.display = 'none';"
     ripe_point_code_observer                                 = {:updated_field_id =>'rmt_product_id_cell',
-                                                           :remote_method    =>'ripe_point_code_changed',
-                                                           :on_completed_js  =>on_completed_js}
+                                                                :remote_method    =>'ripe_point_code_changed',
+                                                                :on_completed_js  =>on_completed_js}
 
     on_completed_js                                     = "\n img = document.getElementById('img_delivery_treatment_code');"
     on_completed_js                                     += "\n if(img != null) img.style.display = 'none';"
@@ -82,10 +515,12 @@ module RmtProcessing::DeliveryHelper
     session[:delivery_form][:treatment_code_observer]  = treatment_code_observer
     session[:delivery_form][:ripe_code_observer]       = ripe_code_observer
     session[:delivery_form][:ripe_point_code_observer]       = ripe_point_code_observer
-    
+
     farm_codes                                          = nil
     commodity_codes                                     = nil
     rmt_variety_codes                                   = nil
+    #MM102014 - add  orchard id
+    orchard_id = nil
     unit_type_codes                                     = nil
     season_codes                                        = nil
 
@@ -115,6 +550,12 @@ module RmtProcessing::DeliveryHelper
     rmt_variety_codes = ["select a value from commodity_code"]
     rmt_product_codes = ["select a value from commodity_code and rmt_variety_code and rmt_product_type_code"]
 
+    #MM102014 - add orchard id
+    orchard_id = ["select a value from farm_code and commodity_code and rmt_variety_code"]
+
+    # orchard_id = Orchard.find_by_sql("select orchards.id,orchards.orchard_code,orchards.orchard_description from orchards inner join rmt_varieties on orchards.orchard_rmt_variety_id = rmt_varieties.id inner join commodities on rmt_varieties.commodity_id = commodities.id where rmt_varieties.commodity_code = '#{session[:delivery_form][:commodity_code_combo_selection]}' and rmt_varieties.rmt_variety_code = '#{session[:delivery_form][:rmt_variety_code_combo_selection]}'").map{|g|["#{g.orchard_code} - #{g.orchard_description}", g.id]} # farm_code = '#{session[:delivery_form][:farm_code_combo_selection]}' and puc_code = '#{session[:delivery_form][:puc_code]}' and
+    # orchard_id.unshift(delivery.orchard_id)
+
     treatment_codes   = Treatment.find_by_sql("select distinct treatment_code from treatments where treatment_type_code = 'PRE_HARVEST'").map { |g| [g.treatment_code] }
     ripe_codes = RipeTime.find_by_sql("select distinct ripe_code from ripe_times").map { |r| [r.ripe_code] }
     ripe_codes.unshift("<empty>")
@@ -124,9 +565,13 @@ module RmtProcessing::DeliveryHelper
       rmt_variety_codes = RmtVariety.find_by_sql("select distinct rmt_variety_code from rmt_varieties where commodity_code = '#{session[:delivery_form][:commodity_code_combo_selection]}' ORDER BY rmt_variety_code ASC").map{|g|[g.rmt_variety_code]}
       rmt_variety_codes.unshift(delivery.rmt_variety_code)
 
+      #MM102014 - add orchard id
+      # orchard_id = Orchard.find_by_sql("select orchards.id,orchards.orchard_code,orchards.orchard_description from orchards inner join rmt_varieties on orchards.orchard_rmt_variety_id = rmt_varieties.id inner join commodities on rmt_varieties.commodity_id = commodities.id where rmt_varieties.commodity_code = '#{session[:delivery_form][:commodity_code_combo_selection]}'").map{|g|["#{g.orchard_code} - #{g.orchard_description}", g.id]} # farm_code = '#{session[:delivery_form][:farm_code_combo_selection]}' and puc_code = '#{session[:delivery_form][:puc_code]}' and and rmt_varieties.rmt_variety_code = '#{session[:delivery_form][:rmt_variety_code_combo_selection]}'
+      # orchard_id.unshift(delivery.orchard_id)
+
       ripe_point_codes = RipePoint.find_by_sql("select distinct ripe_point_code from ripe_points ORDER BY ripe_point_code ASC").map{|h| [h.ripe_point_code]}
-#      ripe_point_codes.unshift(delivery.ripe_point_code)
-#      ============
+      #      ripe_point_codes.unshift(delivery.ripe_point_code)
+      #      ============
       session[:delivery_form][:rmt_variety_code_combo_selection] =  delivery.rmt_variety_code
       session[:delivery_form][:commodity_code_combo_selection] = delivery.commodity_code
       rmt_product_codes = RmtProduct.find_by_sql("select rmt_product_code,id from rmt_products where variety_code='#{session[:delivery_form][:rmt_variety_code_combo_selection]}' and commodity_code='#{session[:delivery_form][:commodity_code_combo_selection]}' and rmt_product_type_code='orchard_run' ORDER BY rmt_product_code").map{|g|[g.rmt_product_code,g.id]}
@@ -165,8 +610,10 @@ module RmtProcessing::DeliveryHelper
     field_configs[field_configs.length()] = {:field_type => 'TextField',
                                              :field_name => 'pick_team'}
 
-    field_configs[field_configs.length()] = {:field_type => 'TextField',
-                                             :field_name => 'orchard_description'}
+    #MM102014 - add orchard id
+    # field_configs[field_configs.length()] = {:field_type => 'TextField',
+    #                                          :field_name => 'orchard_description'}
+
     if !is_edit || (is_edit && delivery_track_indicators.length == 0)
       field_configs[field_configs.length()] = {:field_type => 'DropDownField',
                                                :field_name => 'destination_process_var',
@@ -182,7 +629,15 @@ module RmtProcessing::DeliveryHelper
                                                :settings   =>{:list=>rmt_variety_codes, :no_empty => true},
                                                :observer   =>rmt_variety_code_observer}
 
-      #
+      #MM102014 - add orchard id
+      field_configs[field_configs.length()] = {:field_type => 'DropDownField',
+                                               :field_name => 'orchard_id',
+                                               :settings   =>{:list=>orchard_id}}#,
+      #:observer   =>orchard_id_observer}
+
+      field_configs[field_configs.length()] = {:field_type => 'LabelField',
+                                               :field_name => 'orchard_description'}
+
       #field_configs[field_configs.length()] = {:field_type => 'DropDownField',
       #                                         :field_name => 'rmt_product_type_code',
       #                                         :settings   =>{:list=>rmt_product_type_codes},
@@ -203,7 +658,7 @@ module RmtProcessing::DeliveryHelper
 
       field_configs[field_configs.length()] = {:field_type => 'LabelField',
                                                :field_name => 'rmt_variety_code',
-                                               :settings   =>{:css_class=>'delivery_label'}}      
+                                               :settings   =>{:css_class=>'delivery_label'}}
 
       if(@hundred_fruit_sample_completed && !delivery.rmt_product_type_code)
         field_configs[field_configs.length()] = {:field_type => 'DropDownField',
@@ -212,13 +667,32 @@ module RmtProcessing::DeliveryHelper
                                                  :observer   =>rmt_product_type_code_observer}
       elsif(@hundred_fruit_sample_completed)
         field_configs[field_configs.length()] = {:field_type => 'LabelField',
-                                               :field_name => 'rmt_product_type_code',
-                                               :settings   =>{:css_class=>'delivery_label'}}
+                                                 :field_name => 'rmt_product_type_code',
+                                                 :settings   =>{:css_class=>'delivery_label'}}
       end
 
     end
-#--------------------------------1------------------------
-#--------------------------------------------------------
+
+    # if is_edit || is_create_retry
+    #   farm_code = session[:delivery_form][:farm_code_combo_selection]
+    #   puc_code = session[:delivery_form][:puc_code]
+    #   commodity_code = session[:delivery_form][:commodity_code_combo_selection]
+    #
+    #   orchard_id = Orchard.find_by_sql("select orchards.orchard_code,orchards.orchard_description from orchards").map { |g| [g.orchard_code] } # farm_code = '#{farm_code}' and
+    #
+    #   # orchard_id = Orchard.find_by_sql("select orchards.orchard_code,orchards.orchard_description from orchards
+    #   #                                  inner join rmt_varieties on orchards.orchard_rmt_variety_id = rmt_varieties.id
+    #   #                                  inner join commodities on rmt_varieties.commodity_id = commodities.id
+    #   #                                  where puc_code = '#{puc_code}' and commodity_code = '#{commodity_code}' and rmt_variety_code = '#{rmt_variety_code}'").map { |g| [g.orchard_code] } # farm_code = '#{farm_code}' and
+    #   orchard_id.unshift("<empty>")
+    # else
+    #   orchard_id = ["select a value from farm_code and commodity_code and rmt_variety_code"]
+    # end
+
+    #:observer   =>orchard_id_observer}
+
+    #--------------------------------1------------------------
+    #--------------------------------------------------------
     if(@hundred_fruit_sample_completed)
       field_configs[field_configs.length()] = {:field_type => 'DropDownField',
                                                :field_name => 'ripe_code',
@@ -235,10 +709,10 @@ module RmtProcessing::DeliveryHelper
                                                :observer   =>ripe_point_code_observer}
 
       field_configs[field_configs.length()] = {:field_type => 'DropDownField',
-                                                     :field_name => 'treatment_code',
-                                                     :settings   =>{:list=>treatment_codes},
-                                                     :observer   =>treatment_code_observer}
-      
+                                               :field_name => 'treatment_code',
+                                               :settings   =>{:list=>treatment_codes},
+                                               :observer   =>treatment_code_observer}
+
       field_configs[field_configs.length()] = {:field_type => 'LabelField',
                                                :field_name => 'advised_rmt_product_code',
                                                :settings   =>{:css_class=>'delivery_label',:show_label=>true}}
@@ -252,8 +726,8 @@ module RmtProcessing::DeliveryHelper
     field_configs[field_configs.length()] = {:field_type => 'DropDownField',
                                              :field_name => 'destination_complex',
                                              :settings   =>{:list=>destination_complexes}}
-#-------------------------------1-------------------------
-#--------------------------------------------------------
+    #-------------------------------1-------------------------
+    #--------------------------------------------------------
     if !is_edit || (is_edit && delivery_track_indicators.length == 0)
       field_configs[field_configs.length()] = {:field_type => 'DropDownField',
                                                :field_name => 'season_code',
@@ -327,9 +801,9 @@ module RmtProcessing::DeliveryHelper
 
     if delivery.delivery_sample_bins && delivery.delivery_sample_bins.length() > 0
       sequences =   format_delivery_sample_bin_sequences(delivery.delivery_sample_bins.map{|d|d.sample_bin_sequence_number.to_s})
-       field_configs[field_configs.length()] = {:field_type => 'LabelField',
-                                                :field_name => 'sample sequences',
-                                                :settings => {:static_value => sequences,:css_class => "blue_label_field", :show_label => true}}
+      field_configs[field_configs.length()] = {:field_type => 'LabelField',
+                                               :field_name => 'sample sequences',
+                                               :settings => {:static_value => sequences,:css_class => "blue_label_field", :show_label => true}}
 
     end
 
@@ -393,12 +867,12 @@ module RmtProcessing::DeliveryHelper
                                                }}
     end
     field_configs[field_configs.length()] = {:field_type => 'LinkWindowField',
-                                               :field_name => '',
-                                               :settings   => {
-                                                   :target_action => 'print_composite_report',
-                                                   :link_text     => "print composite report",
-                                                   :id_value      => delivery.delivery_number.to_s
-                                               }}
+                                             :field_name => '',
+                                             :settings   => {
+                                                 :target_action => 'print_composite_report',
+                                                 :link_text     => "print composite report",
+                                                 :id_value      => delivery.delivery_number.to_s
+                                             }}
 
     field_configs[field_configs.length()] = {:field_type  =>'HiddenField',
                                              :field_name  =>'ajax_distributor',
@@ -407,7 +881,6 @@ module RmtProcessing::DeliveryHelper
     build_form(delivery, field_configs, action, 'delivery', caption, is_edit)
 
   end
-
 
   def format_delivery_sample_bin_sequences(numeros)
     grp = ""

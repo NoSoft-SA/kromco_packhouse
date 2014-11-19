@@ -140,7 +140,6 @@ def create_person
    begin
 	 @person = Person.new(params[:person])
 	 if @person.save
-
 		 redirect_to_index("'new record created successfully'","'create successful'")
 	else
 		@is_create_retry = true

@@ -7,7 +7,12 @@ class RmtVariety < ActiveRecord::Base
  
 	belongs_to :variety_group
 	belongs_to :commodity
- 
+
+  #MM072014
+  has_many :carton_presort_conversions#, :dependent => :destroy
+  #MM102014 - add Commodities and rmt varieties
+  has_many :orchards, :dependent => :destroy
+
 #	============================
 #	 Validations declarations:
 #	============================

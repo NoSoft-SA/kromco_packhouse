@@ -669,16 +669,25 @@ end
                             :settings =>{:static_value =>'ORCHARDS'}}
                             
         if farm!=nil
-            orchards = Orchard.find(:all, :conditions =>["farm_id = ?", farm.id])
-            
-            orchards.each {|orchard|
-                
-                field_configs[field_configs.length()] = {:field_type =>'LinkField',  :field_name =>'',
-                            :settings =>{:link_text =>orchard.orchard_code.to_s ,
-                                         :target_action =>'edit_orchard',
-                                         :css_class =>'orchards',
-                                         :id_column =>"orchards.find(" + orchard.id.to_s + ")"}}
-            }
+          # orchards = Orchard.find(:all, :conditions =>["farm_id = ?", farm.id])
+
+          #MM102014 - show orchard orchard_description,commodity and rmt variety
+          orchards =Orchard.find_by_sql("select orchards.* ,commodities.commodity_description_long as commodity, rmt_varieties.rmt_variety_description as rmt_variety from orchards
+                                        left outer join rmt_varieties on orchards.orchard_rmt_variety_id = rmt_varieties.id
+                                        left outer join commodities on rmt_varieties.commodity_id = commodities.id
+                                        where farm_id = #{farm.id}")
+          orchards.each {|orchard|
+
+            #MM102014 - show orchard orchard_description,commodity and rmt variety
+            link_text =  "#{orchard.orchard_code.to_s} - #{orchard.orchard_description.to_s} ( #{orchard.commodity.to_s} , #{orchard.rmt_variety.to_s} )"
+
+            field_configs[field_configs.length()] = {:field_type =>'LinkField',  :field_name =>'',
+                                                     :settings =>{:link_text =>"#{link_text}",#orchard.orchard_code.to_s ,
+                                                                  :target_action =>'edit_orchard',
+                                                                  :css_class =>'orchards',
+                                                                  :id_column =>"orchards.find(" + orchard.id.to_s + ")"}}
+          }
+
         end
                             
         field_configs[field_configs.length()] = {:field_type =>'LinkField', :field_name =>'new orchard',
@@ -706,9 +715,37 @@ def build_orchard_form(orchard,action,caption,is_edit = nil,is_create_retry = ni
     #   Define form fields
     #-------------------------------------------------
      field_configs = Array.new
-     
-     field_configs[0] = {:field_type =>'TextField', :field_name =>'orchard_code'}
-     field_configs[field_configs.length()] = {:field_type =>'TextField', :field_name =>'orchard_description'}
+
+     #MM102014 - add Commodities and rmt varieties
+     orchard_commodity_id = Commodity.find_by_sql("select * from commodities").map{|g|["#{g.commodity_code} - #{g.commodity_description_long}", g.id]}
+
+     search_combos_js = gen_combos_clear_js_for_combos(["orchard_orchard_commodity_id","orchard_orchard_rmt_variety_id"])
+     orchard_commodity_id_observer  = {:updated_field_id => "orchard_rmt_variety_id_cell",
+                                       :remote_method => 'orchard_commodity_id_search_combo_changed',
+                                       :on_completed_js => search_combos_js["orchard_orchard_commodity_id"]}
+
+     if orchard_commodity_id == nil
+       orchard_rmt_variety_id = ["Select a value from commodity_code"]
+     else
+       orchard_rmt_variety_id = RmtVariety.find_by_sql("select * from rmt_varieties where commodity_id = #{session[:orchard_commodity_id]}").map{|g|["#{g.rmt_variety_code} - #{g.rmt_variety_description}", g.id]}
+     end
+
+     field_configs <<  {:field_type => 'DropDownField',
+                        :field_name => 'orchard_commodity_id?required',
+                        :non_db_field => true,
+                        :settings => {:list => orchard_commodity_id, :label_caption => 'commodity_code'},
+                        :observer => orchard_commodity_id_observer}
+
+     field_configs <<  {:field_type => 'DropDownField',
+                        :field_name => 'orchard_rmt_variety_id?required',
+                        :settings => {:list => orchard_rmt_variety_id, :label_caption => 'rmt_variety_code'}}
+
+     field_configs << {:field_type =>'TextField', :field_name =>'orchard_code'}
+
+     field_configs << {:field_type =>'TextField', :field_name =>'orchard_description'}
+
+     # field_configs[0] = {:field_type =>'TextField', :field_name =>'orchard_code'}
+     # field_configs[field_configs.length()] = {:field_type =>'TextField', :field_name =>'orchard_description'}
      
      build_form(orchard,field_configs,action,'orchard',caption,is_edit)
      
@@ -716,16 +753,52 @@ end
 
 def build_edit_orchard_form(orchard,action,caption,is_edit=nil,is_create_retry=nil)
     field_configs = Array.new
-     
-     field_configs[0] = {:field_type =>'TextField', :field_name =>'orchard_code'}
-     field_configs[field_configs.length()] = {:field_type =>'TextField', :field_name =>'orchard_description'}
-     field_configs[field_configs.length()] = {:field_type =>'LinkField', :field_name =>'',
+
+    #MM102014 - add Commodities and rmt varieties
+    orchard_rmt_variety_id = orchard.orchard_rmt_variety_id
+    orchard_commodity_id = Commodity.find_by_sql("select commodities.* from orchards inner join rmt_varieties on orchards.orchard_rmt_variety_id = rmt_varieties.id inner join commodities on rmt_varieties.commodity_id = commodities.id where rmt_varieties.id = #{orchard_rmt_variety_id}").map{|g|[ g.id]}
+    orchard_commodity = Commodity.find_by_sql("select commodities.* from orchards inner join rmt_varieties on orchards.orchard_rmt_variety_id = rmt_varieties.id inner join commodities on rmt_varieties.commodity_id = commodities.id where rmt_varieties.id = #{orchard_rmt_variety_id}").map{|g|["#{g.commodity_code} - #{g.commodity_description_long}"]}
+
+
+    orchard_commodity_id_list = Commodity.find_by_sql("select * from commodities").map{|g|["#{g.commodity_code} - #{g.commodity_description_long}", g.id]}
+    orchard_rmt_variety_id_list = RmtVariety.find_by_sql("select * from rmt_varieties where commodity_id = #{orchard_commodity_id}").map{|g|["#{g.rmt_variety_code} - #{g.rmt_variety_description}", g.id]}
+    orchard_commodity_id_list.unshift(["#{orchard_commodity}",orchard.orchard_commodity_id])
+
+    search_combos_js = gen_combos_clear_js_for_combos(["orchard_orchard_commodity_id","orchard_orchard_rmt_variety_id"])
+    orchard_commodity_id_observer  = {:updated_field_id => "orchard_rmt_variety_id_cell",
+                                      :remote_method => 'orchard_commodity_id_search_combo_changed',
+                                      :on_completed_js => search_combos_js["orchard_orchard_commodity_id"]}
+
+    field_configs <<  {:field_type => 'DropDownField',
+                       :field_name => 'orchard_commodity_id?required',
+                       :non_db_field => true,
+                       :settings => {:list => orchard_commodity_id_list, :label_caption => 'commodity_code'},
+                       :observer => orchard_commodity_id_observer}
+
+    # field_configs[field_configs.length()] = {:field_type => 'LabelField',
+    #                                          :field_name => 'orchard_commodity_id?required',
+    #                                          :non_db_field => true,
+    #                                          :settings =>{:show_label => true,
+    #                                                       :static_value =>"#{orchard_commodity}"}}
+
+    field_configs <<  {:field_type => 'DropDownField',
+                       :field_name => 'orchard_rmt_variety_id?required',
+                       :settings => {:list => orchard_rmt_variety_id_list, :label_caption => 'rmt_variety_code'}}
+
+    field_configs << {:field_type =>'TextField', :field_name =>'orchard_code'}
+
+    field_configs << {:field_type =>'TextField', :field_name =>'orchard_description'}
+
+    # field_configs[0] = {:field_type =>'TextField', :field_name =>'orchard_code'}
+    # field_configs[field_configs.length()] = {:field_type =>'TextField', :field_name =>'orchard_description'}
+
+    field_configs[field_configs.length()] = {:field_type =>'LinkField', :field_name =>'',
                                               :settings =>{:link_text =>'remove orchard',
                                                            :target_action =>'delete_orchard',
                                                            :css_class =>'orchards-delete',
                                                            :id_column =>'id'}}
      
-     build_form(orchard,field_configs,action,'orchard',caption,is_edit)
+    build_form(orchard,field_configs,action,'orchard',caption,is_edit)
 end
     
 #-------------------------------------------------------------------------------------------------

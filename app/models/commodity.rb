@@ -1,6 +1,11 @@
 class Commodity < ActiveRecord::Base
  
  belongs_to :commodity_group
+ #MM072014
+ has_many :carton_presort_conversions#, :dependent => :destroy
+ #MM102014 - add Commodities and rmt varieties
+ #has_many :orchards, :dependent => :destroy
+
  validates_presence_of :commodity_code
  
  
@@ -52,8 +57,5 @@ def self.get_all_commodity_group_codes
 
 	commodity_group_codes = CommodityGroup.find_by_sql('select distinct commodity_group_code from commodity_groups').map{|g|[g.commodity_group_code]}
 end
-
-
- 
 
 end

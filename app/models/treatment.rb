@@ -12,6 +12,8 @@ class Treatment < ActiveRecord::Base
 #	============================
 	validates_presence_of :treatment_type_code
 	validates_presence_of :treatment_code
+  #MM072014
+  has_many :carton_presort_conversions#, :dependent => :destroy
 #	=====================
 #	 Complex validations:
 #	=====================

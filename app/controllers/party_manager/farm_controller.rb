@@ -1260,6 +1260,8 @@ def create_orchard
           my_farm_id = ""
        end
 
+      #MM102014 - add Commodities and rmt varieties
+      params[:orchard].delete("orchard_commodity_id")
       @orchard = Orchard.new(params[:orchard])
       @orchard.farm_id = my_farm_id
       if @orchard.save
@@ -1322,6 +1324,26 @@ def delete_orchard
         handle_error("Orchard could not be deleted")
     end
 end
+
+  #MM102014 -
+
+  def orchard_commodity_id_search_combo_changed
+
+    orchard_commodity_id = get_selected_combo_value(params)
+    session[:orchard_commodity_id] = orchard_commodity_id
+
+    @orchard_rmt_variety_id = RmtVariety.find_by_sql("select * from rmt_varieties where commodity_id = '#{orchard_commodity_id}'").map{|g|["#{g.rmt_variety_code} - #{g.rmt_variety_description}", g.id]}
+
+    render :inline => %{
+      <%=
+          orchard_rmt_variety_id_content = select('orchard','orchard_rmt_variety_id',@orchard_rmt_variety_id)
+      %>
+      <script>
+          <%= update_element_function("orchard_rmt_variety_id_cell", :action => :update,:content => orchard_rmt_variety_id_content) %>
+      </script>
+		}
+
+  end
 
 #-----------------------------------------------------------------------------------
 #    End of Happymore's additional codes

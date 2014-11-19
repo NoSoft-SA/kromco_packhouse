@@ -3,8 +3,9 @@ class Grade < ActiveRecord::Base
 #	===========================
 # 	Association declarations:
 #	===========================
- 
-  
+
+  #MM072014
+  has_many :carton_presort_conversions#, :dependent => :destroy
  
 #	============================
 #	 Validations declarations:
