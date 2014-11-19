@@ -156,8 +156,8 @@ class Delivery < ActiveRecord::Base
 
   end
 
-
-    validates_presence_of :farm_code, :pick_team, :orchard_code, :commodity_code, :rmt_variety_code
+    #MM112014 - remove validates_presence_of :orchard_code and add validates_presence_of :orchard_id
+    validates_presence_of :farm_code, :pick_team, :orchard_id, :commodity_code, :rmt_variety_code
     validates_presence_of :delivery_number_preprinted, :truck_registration_number, :pack_material_product_code
     validates_uniqueness_of :delivery_number_preprinted
     validates_presence_of :season_code, :quantity_full_bins #, :quantity_partial_units, :quantity_empty_units, :quantity_damaged_units

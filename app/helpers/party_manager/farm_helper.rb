@@ -718,17 +718,20 @@ def build_orchard_form(orchard,action,caption,is_edit = nil,is_create_retry = ni
 
      #MM102014 - add Commodities and rmt varieties
      orchard_commodity_id = Commodity.find_by_sql("select * from commodities").map{|g|["#{g.commodity_code} - #{g.commodity_description_long}", g.id]}
+     # orchard_commodity_id.unshift(["<empty>", nil])
+     orchard_rmt_variety_id = ["Select a value from commodity_code"]
 
      search_combos_js = gen_combos_clear_js_for_combos(["orchard_orchard_commodity_id","orchard_orchard_rmt_variety_id"])
      orchard_commodity_id_observer  = {:updated_field_id => "orchard_rmt_variety_id_cell",
                                        :remote_method => 'orchard_commodity_id_search_combo_changed',
                                        :on_completed_js => search_combos_js["orchard_orchard_commodity_id"]}
 
-     if orchard_commodity_id == nil
-       orchard_rmt_variety_id = ["Select a value from commodity_code"]
-     else
-       orchard_rmt_variety_id = RmtVariety.find_by_sql("select * from rmt_varieties where commodity_id = #{session[:orchard_commodity_id]}").map{|g|["#{g.rmt_variety_code} - #{g.rmt_variety_description}", g.id]}
-     end
+     # if orchard_commodity_id == nil
+     #   orchard_rmt_variety_id = ["Select a value from commodity_code"]
+     # else
+     #   orchard_rmt_variety_id = ["Select a value from commodity_code"]
+     #   # orchard_rmt_variety_id = RmtVariety.find_by_sql("select * from rmt_varieties where commodity_id = #{session[:orchard_commodity_id]}").map{|g|["#{g.rmt_variety_code} - #{g.rmt_variety_description}", g.id]}
+     # end
 
      field_configs <<  {:field_type => 'DropDownField',
                         :field_name => 'orchard_commodity_id?required',

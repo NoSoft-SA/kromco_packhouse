@@ -482,6 +482,14 @@ module RmtProcessing::DeliveryHelper
                                                            :remote_method    =>'rmt_variety_code_changed',
                                                            :on_completed_js  =>on_complete_rmt_variety_code_js}
 
+    #MM112014 - populate orchard description
+    on_complete_orchard_id_js                     = "\n img = document.getElementById('img_delivery_orchard_id');"
+    on_complete_orchard_id_js                     += "\n if(img != null) img.style.display = 'none';"
+
+    orchard_id_observer                                 = {:updated_field_id =>'orchard_description_cell',
+                                                           :remote_method    =>'orchard_id_changed',
+                                                           :on_completed_js  =>on_complete_orchard_id_js}
+
     on_completed_js                                     = "\n img = document.getElementById('img_delivery_mrl_result_type');"
     on_completed_js                                     += "\n if(img != null) img.style.display = 'none';"
     mrl_result_type_observer                            = {:updated_field_id =>'ajax_distributor_cell',
@@ -492,6 +500,8 @@ module RmtProcessing::DeliveryHelper
     session[:delivery_form][:commodity_code_observer]   = commodity_code_observer
     session[:delivery_form][:rmt_product_type_code_observer]   = rmt_product_type_code_observer
     session[:delivery_form][:rmt_variety_code_observer] = rmt_variety_code_observer
+    #MM112014 - add orchard id
+    session[:delivery_form][:orchard_id_observer] = orchard_id_observer
     session[:delivery_form][:mrl_result_type_observer]  = mrl_result_type_observer
 
     combos_js_for_non_delivery_fields                   = gen_combos_clear_js_for_combos(["delivery_ripe_code","delivery_ripe_point_code"])#,"delivery_treatment_code"])
@@ -632,8 +642,8 @@ module RmtProcessing::DeliveryHelper
       #MM102014 - add orchard id
       field_configs[field_configs.length()] = {:field_type => 'DropDownField',
                                                :field_name => 'orchard_id',
-                                               :settings   =>{:list=>orchard_id}}#,
-      #:observer   =>orchard_id_observer}
+                                               :settings   =>{:list=>orchard_id},
+                                               :observer   =>orchard_id_observer}
 
       field_configs[field_configs.length()] = {:field_type => 'LabelField',
                                                :field_name => 'orchard_description'}
@@ -742,8 +752,8 @@ module RmtProcessing::DeliveryHelper
     field_configs[field_configs.length()] = {:field_type => 'CheckBox',
                                              :field_name => 'residue_free'}
 
-    field_configs[field_configs.length()] = {:field_type => 'TextField',
-                                             :field_name => 'orchard_code'}
+    # field_configs[field_configs.length()] = {:field_type => 'TextField',
+    #                                          :field_name => 'orchard_code'}
 
     field_configs[field_configs.length()] = {:field_type => 'TextField',
                                              :field_name => 'delivery_number_preprinted'}
