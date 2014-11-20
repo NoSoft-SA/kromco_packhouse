@@ -2,7 +2,7 @@ class PresortStagingRunEnquiry < PDTTransaction
   attr_accessor :presort_staging_run_id
 
   def build_default_screen
-    active_run= PresortStagingRun.find_by_sql("select distinct  p.*,ripe_points.ripe_point_code,    pc.product_class_code ,tm.treatment_code,sizes.size_code,
+    active_run= PresortStagingRun.find_by_sql("select distinct  p.*,ripe_points.ripe_point_code,    pcs.product_class_code ,tm.treatment_code,sizes.size_code,
      s.season_code ,fg.farm_group_code,r.rmt_variety_code,t.track_slms_indicator_code,farms.farm_code,pc.farm_id
      from presort_staging_runs p
      LEFT join presort_staging_run_children pc on pc.presort_staging_run_id=p.id AND pc.status='ACTIVE'
@@ -12,7 +12,7 @@ class PresortStagingRunEnquiry < PDTTransaction
      LEFT join track_slms_indicators t on p.track_slms_indicator_id=t.id
      LEFT join ripe_points on p.ripe_point_id=ripe_points.id
      LEFT join farms on pc.farm_id=farms.id
-     LEFT join product_classes pc on p.product_class_id=pc.id
+     LEFT join product_classes pcs on p.product_class_id=pcs.id
      LEFT join  treatments tm on p.treatment_id=tm.id
      LEFT join  sizes on p.size_id=sizes.id
      where p.status='ACTIVE' ")
@@ -35,6 +35,9 @@ class PresortStagingRunEnquiry < PDTTransaction
       inner join farm_groups on farms.farm_group_id=farm_groups.id
       inner join ripe_points on  rmt_products.ripe_point_id=ripe_points.id
       inner join stock_types on stock_items.stock_type_id=stock_types.id
+      LEFT join product_classes pc on rmt_products.product_class_id=pc.id
+      LEFT join  treatments tm on rmt_products.treatment_id=tm.id
+      LEFT join  sizes on rmt_products.size_id=sizes.id
       where   ripe_points.id=#{active_run.ripe_point_id} and    ( locations.location_code LIKE 'RA_6%'  OR  locations.location_code LIKE 'RA_7%' OR locations.location_code LIKE 'PRESORT%')  AND
       bins.presort_staging_run_child_id is null and seasons.id=#{active_run.season_id} and farm_groups.id =#{active_run.farm_group_id} and stock_items.stock_type_code='BIN'
       and rmt_varieties.id=#{active_run.rmt_variety_id} and track_slms_indicators.id=#{active_run.track_slms_indicator_id} and (destroyed = false or destroyed is null)
