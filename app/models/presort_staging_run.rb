@@ -5,6 +5,9 @@ class PresortStagingRun < ActiveRecord::Base
 #	===========================
 
 
+	belongs_to :treatment
+	belongs_to :size
+	belongs_to :product_class
 	belongs_to :track_slms_indicator
 	belongs_to :farm_group
 	belongs_to :season
