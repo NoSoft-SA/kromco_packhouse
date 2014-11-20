@@ -15,6 +15,7 @@ class Delivery < ActiveRecord::Base
     has_many :bins
     has_many :delivery_scans,:dependent => :destroy
     has_many :delivery_bin_scans,:dependent => :destroy
+    belongs_to :orchard
 
 #	==========================
 #	 Validations declarations:
