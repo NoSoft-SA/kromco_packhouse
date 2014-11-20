@@ -39,7 +39,7 @@ class PresortStagingRunEnquiry < PDTTransaction
       LEFT join  treatments tm on rmt_products.treatment_id=tm.id
       LEFT join  sizes on rmt_products.size_id=sizes.id
       where   ripe_points.id=#{active_run.ripe_point_id} and    ( locations.location_code LIKE 'RA_6%'  OR  locations.location_code LIKE 'RA_7%' OR locations.location_code LIKE 'PRESORT%')  AND
-      bins.presort_staging_run_child_id is null and seasons.id=#{active_run.season_id} and farm_groups.id =#{active_run.farm_group_id} and stock_items.stock_type_code='BIN'
+      bins.presort_staging_run_child_id is null and seasons.id=#{active_run.season_id} and farm_groups.id =#{active_run.farm_group_id} and stock_items.stock_type_code in ('BIN','PRESORT')
       and rmt_varieties.id=#{active_run.rmt_variety_id} and track_slms_indicators.id=#{active_run.track_slms_indicator_id} and (destroyed = false or destroyed is null)
       and bins.farm_id= #{active_run.farm_id}    #{class_treatment_size_filter['treatment_filter']} #{class_treatment_size_filter['product_class_filter']} #{class_treatment_size_filter['size_filter']}
       group by   farms.farm_code,locations.location_code order by MIN(bins.created_on) asc limit 30"

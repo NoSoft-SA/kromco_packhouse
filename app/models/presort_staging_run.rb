@@ -77,8 +77,7 @@ class PresortStagingRun < ActiveRecord::Base
     left  join  sizes on rmt_products.size_id=sizes.id
     where locations.location_code='#{location_code}' and farms.farm_code='#{farm_code}' and ripe_points.id=#{presort_run.ripe_point_id}    and
     seasons.id=#{presort_run.season_id} and rmt_varieties.id=#{presort_run.rmt_variety_id} and track_slms_indicators.id=#{presort_run.track_slms_indicator_id} and bins.presort_staging_run_child_id is null
-    and bins.exit_ref is null and bins.production_run_rebin_id is null and bins.bin_order_load_detail_id is null and
-     bins.delivery_id is not null  #{class_treatment_size_filter['treatment_filter']} #{class_treatment_size_filter['product_class_filter']} #{class_treatment_size_filter['size_filter']}
+    and bins.exit_ref is null and bins.production_run_rebin_id is null and bins.bin_order_load_detail_id is null   #{class_treatment_size_filter['treatment_filter']} #{class_treatment_size_filter['product_class_filter']} #{class_treatment_size_filter['size_filter']}
      "
     bins= ActiveRecord::Base.connection.select_all("#{list_query}")
     return [bins ,list_query]
@@ -108,8 +107,7 @@ class PresortStagingRun < ActiveRecord::Base
     left  join  sizes on rmt_products.size_id=sizes.id
     where      ( locations.location_code LIKE 'RA_6%'  OR  locations.location_code LIKE 'RA_7%' OR locations.location_code LIKE 'PRESORT%')  AND
     bins.presort_staging_run_child_id is null and seasons.id=#{presort_run.season_id} and farm_groups.id =#{presort_run.farm_group_id} and rmt_varieties.id=#{presort_run.rmt_variety_id} and track_slms_indicators.id=#{presort_run.track_slms_indicator_id} and ripe_points.id=#{presort_run.ripe_point_id}
-    and bins.exit_ref is null and bins.production_run_rebin_id is null and bins.bin_order_load_detail_id is null and
-     bins.delivery_id is not null  #{class_treatment_size_filter['treatment_filter']} #{class_treatment_size_filter['product_class_filter']} #{class_treatment_size_filter['size_filter']}
+    and bins.exit_ref is null and bins.production_run_rebin_id is null and bins.bin_order_load_detail_id is null   #{class_treatment_size_filter['treatment_filter']} #{class_treatment_size_filter['product_class_filter']} #{class_treatment_size_filter['size_filter']}
     group by   locations.location_code"
     locations= ActiveRecord::Base.connection.select_all("#{list_query}")
     return locations
@@ -143,8 +141,7 @@ class PresortStagingRun < ActiveRecord::Base
     where   ripe_points.id=#{presort_staging_run.ripe_point_id} and    ( locations.location_code LIKE 'RA_6%'  OR  locations.location_code LIKE 'RA_7%' OR locations.location_code LIKE 'PRESORT%')  AND
     bins.presort_staging_run_child_id is null and seasons.id=#{presort_staging_run.season_id} and farm_groups.id =#{presort_staging_run.farm_group_id} and rmt_varieties.id=#{presort_staging_run.rmt_variety_id}
     and track_slms_indicators.id=#{presort_staging_run.track_slms_indicator_id}
-    and bins.exit_ref is null and bins.production_run_rebin_id is null and bins.bin_order_load_detail_id is null and
-     bins.delivery_id is not null  #{class_treatment_size_filter['treatment_filter']} #{class_treatment_size_filter['product_class_filter']} #{class_treatment_size_filter['size_filter']}
+    and bins.exit_ref is null and bins.production_run_rebin_id is null and bins.bin_order_load_detail_id is null   #{class_treatment_size_filter['treatment_filter']} #{class_treatment_size_filter['product_class_filter']} #{class_treatment_size_filter['size_filter']}
     group by   farms.farm_code,locations.location_code
     order by locations.location_code ASC"
     locations= ActiveRecord::Base.connection.select_all("#{list_query}")
@@ -222,8 +219,7 @@ class PresortStagingRun < ActiveRecord::Base
     left  join  sizes on rmt_products.size_id=sizes.id
     where   bins.presort_staging_run_id is null and   ( locations.location_code LIKE 'RA_6%'  OR  locations.location_code LIKE 'RA_7%' OR locations.location_code LIKE 'PRESORT%')
     AND seasons.id=#{presort_run.season_id} and farm_groups.id =#{presort_run.farm_group_id} and rmt_varieties.id=#{presort_run.rmt_variety_id} and track_slms_indicators.id=#{presort_run.track_slms_indicator_id}
-    and ripe_points.id=#{presort_run.ripe_point_id}     and bins.exit_ref is null and bins.production_run_rebin_id is null and bins.bin_order_load_detail_id is null and
-    bins.delivery_id is not null   #{class_treatment_size_filter['treatment_filter']} #{class_treatment_size_filter['product_class_filter']} #{class_treatment_size_filter['size_filter']} "
+    and ripe_points.id=#{presort_run.ripe_point_id}     and bins.exit_ref is null and bins.production_run_rebin_id is null and bins.bin_order_load_detail_id is null    #{class_treatment_size_filter['treatment_filter']} #{class_treatment_size_filter['product_class_filter']} #{class_treatment_size_filter['size_filter']} "
 
     bins= ActiveRecord::Base.connection.select_all("#{list_query}")
     return [bins ,list_query]
