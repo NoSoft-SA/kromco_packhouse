@@ -6,15 +6,7 @@ require "lib/masterfile_validator"
 
 include Inventory
 
-time_interval = (!ARGV[0]) ? 5 : ARGV[0].to_i
-
-config = YAML.load(File.read('config/database.yml'))['production']
-ActiveRecord::Base.establish_connection({:adapter => config['adapter'],
-        :host => config['host'],
-        :database => config['database'],
-        :username => config['username'],
-        :password => config['password'],
-        :port => config['port']})
+time_interval = (!ARGV[2]) ? 5 : ARGV[2].to_i
 
 while (true)
   asset_move_requests = AssetMoveRequest.find(:all,:conditions=>"process_attempts=0")
@@ -49,7 +41,3 @@ while (true)
 
   sleep(time_interval.minutes)
 end
-
-ActiveRecord::Base.connection.disconnect!()
-ActiveRecord::Base.remove_connection
-
