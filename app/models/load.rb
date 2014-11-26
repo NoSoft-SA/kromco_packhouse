@@ -137,7 +137,7 @@ class Load < ActiveRecord::Base
       # {required_qty} * pseudo_pallet.price_per_kg * pseudo_pallet.carton_weight}
       #(use values any pseudo_pallet in current group)
       #-------------------------------------------------------------------------------------
-      item_pack_product_groups =pseudo_pallets.group(['item_pack_product_code'], nil, true)
+      item_pack_product_groups =pseudo_pallets.group(['item_pack_product_code','old_fg_code'], nil, true)
       extended_fg_group_sub_totals = 0
       order_plt_nums=[]
       for item_pack_product_group in item_pack_product_groups

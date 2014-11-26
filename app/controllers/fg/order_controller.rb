@@ -130,7 +130,7 @@ class Fg::OrderController < ApplicationController
 
   def send_price_notification(order)
     customer_party_name = PartiesRole.find(order.consignee_party_role_id).party_name
-    customer_remarks = PartiesRole.find(order.consignee_party_role_id).remarks	
+    customer_remarks = PartiesRole.find(order.consignee_party_role_id).remarks
     msg="order products for order : #{order.order_number} have a price.  Customer: #{customer_party_name} -  #{customer_remarks}"
     order.notify_price(msg)
   end
@@ -692,8 +692,8 @@ end
     else
       trading_partner=""
     end
-    msg = "Order of type #{order_type} has been created.<br> Order number:  #{order.order_number}.<br>" 
-    msg += " " + "Customer: #{trading_partner.party_name} - #{trading_partner.remarks}.<br>" 
+    msg = "Order of type #{order_type} has been created.<br> Order number:  #{order.order_number}.<br>"
+    msg += " " + "Customer: #{trading_partner.party_name} - #{trading_partner.remarks}.<br>"
     msg += " " + "Load date:  #{order.loading_date.to_date if order.loading_date}.<br>"
     msg += " " + "Memo pad:  #{customer.customer_memo_pad}"
     subj = "Early order: #{order.order_number} for Customer: #{trading_partner.party_name} - #{trading_partner.remarks}"
@@ -779,8 +779,8 @@ end
     else
       confirm_update_order
 
-          order_type =OrderType.find(@order.order_type_id).order_type_code	
-	#RAILS_DEFAULT_LOGGER.info("EOE order type "+order_type.strip)	  
+          order_type =OrderType.find(@order.order_type_id).order_type_code
+	#RAILS_DEFAULT_LOGGER.info("EOE order type "+order_type.strip)
 	    if !(order_type.strip=="MO" || order_type.strip=="MQ")
 		user_name = session[:user_id].user_name
                 department_name=User.find_by_user_name(user_name).department_name
@@ -792,16 +792,16 @@ end
              trading_partner=trading_partner[0]
            else
              trading_partner=""
-           end		
+           end
 		#RAILS_DEFAULT_LOGGER.info("EOE username/dept "+user_name+"/"+ department_name)
                 if department_name.upcase.strip=="PLANNING" || department_name.upcase.strip=="MARKETING"
-			
-		    msg = "Order has been updated by #{user_name} .<br> Order number:  #{@order.order_number}.<br>" 
+
+		    msg = "Order has been updated by #{user_name} .<br> Order number:  #{@order.order_number}.<br>"
 		    subj = "Early order: #{@order.order_number} for Customer: #{trading_partner.party_name} - #{trading_partner.remarks} has been updated"
-		    @order.notify_order_updated_by_marketer(msg,subj)			
-			
+		    @order.notify_order_updated_by_marketer(msg,subj)
+
 		end
-	    end      
+	    end
     end
   end
 
@@ -872,7 +872,7 @@ end
               end
 
             end
-		
+
 
         session[:updating_order]=nil
         session['order_id'] = id
@@ -1056,6 +1056,7 @@ end
     render :inline => %{
       <% column_configs = []
          column_configs << {:field_type=>'text', :field_name=>'item_pack_product_code'}
+         column_configs << {:field_type=>'text', :field_name=>'old_fg_code'}
          column_configs << {:field_type=>'text', :field_name=>'carton_count'}
          column_configs << {:field_type=>'text', :field_name=>'carton_weight'}
          column_configs << {:field_type=>'text', :field_name=>'price_per_kg'}
@@ -1533,7 +1534,7 @@ end
   end
 
   def ship_delivery
-     # RAILS_DEFAULT_LOGGER.info("NAE SHIP DELIVERY - ORDER CONTROLLER")	  
+     # RAILS_DEFAULT_LOGGER.info("NAE SHIP DELIVERY - ORDER CONTROLLER")
     load_order=LoadOrder.find(params[:id])
     @order = Order.find("#{load_order.order_id}")
     @order.user = session[:user_id].user_name
