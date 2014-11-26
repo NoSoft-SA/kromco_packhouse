@@ -79,7 +79,7 @@ class Order < ActiveRecord::Base
 
     RAILS_DEFAULT_LOGGER.info("SENT MAIL FOR early_order_created")
   end
-  
+
     def notify_order_updated_by_marketer(msg,subj)
     RAILS_DEFAULT_LOGGER.info("SENDING MAIL FOR early_order_updated_by_marketer")
     easy_order_mail_log=EasyOrderMailLog.new
@@ -462,7 +462,7 @@ class Order < ActiveRecord::Base
 
 
   def ship_delivery(load_id)
- 
+
     Order.transaction do
       order_id = self.id.to_i
       pallets = Pallet.find_by_sql("select pallets.* from pallets
@@ -503,7 +503,7 @@ class Order < ActiveRecord::Base
 
       #EdiOutProposal.send_doc(@load_order, 'HCS')
       EdiOutProposal.send_doc(@load_order, 'PO')
-   
+
 
       Inventory.remove_stock(nil, 'PALLET', "SHIP_DISPATCH_DELIVERY", @load_order.id, 'IN_TRANSIT', pallet_numbers)
 
@@ -699,7 +699,7 @@ class Order < ActiveRecord::Base
         @order_product.update_attribute(:available_quantities, "#{item_pack['carton_count']}")
         #@order_product.update_attribute(:carton_count, "#{item_pack['carton_count']}")
 
-        @order_product.update_attribute(:item_pack_product_code, "#{item_pack['item_pack_product_code']}")
+        @order_product.update_attributes({:item_pack_product_code=>item_pack['item_pack_product_code'],:old_fg_code=>item_pack['old_fg_code']})
         sequence_number = self.calc_order_product_sequence_number
         @order_product.update_attribute(:sequence_number, "#{sequence_number}")
       end
