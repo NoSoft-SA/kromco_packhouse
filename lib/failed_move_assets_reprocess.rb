@@ -13,8 +13,13 @@ raise"invalid run mode: #{ARGV[3]}" if(ARGV[3] &&(ARGV[3]!='true' && ARGV[3]!='f
 run_continuously = (ARGV[3]=='true') ? true : false
 line_break_formatting = !run_continuously ? '<br>' : nil
 
+puts "ARGV[3] = #{ARGV[3]}"
+puts "running script continuously? #{run_continuously}"
+puts("Script initiated[#{Time.now}]")
+
 while (true)
   asset_move_requests_reprocess = AssetMoveRequest.find(:all,:conditions=>"process_attempts > 0")
+  puts("Processing #{asset_move_requests_reprocess.size} records[#{Time.now}]")
   asset_move_requests_reprocess.each do |mv_asset_req|
     begin
       ActiveRecord::Base.transaction do
@@ -46,6 +51,8 @@ while (true)
     end
   end
 
+  puts
   break if(!run_continuously)
   sleep(time_interval.minutes)
 end
+puts("Script terminated[#{Time.now}]")
