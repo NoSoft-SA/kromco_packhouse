@@ -436,10 +436,12 @@ class Services::PreSortingController < ApplicationController
 
       if(presort_staging_child_run.farm.farm_code.to_s.upcase=='0P')
         code_apporteur = '0P'
+        code_parcelle = "0P_#{track_indicator_rec.track_slms_indicator_code}"
         nom_parcelle = "0P_#{track_indicator_rec.track_slms_indicator_code}"
       else
         code_apporteur = "#{apport_bin.farm.farm_code}"
-        nom_parcelle = "#{apport_bin.farm.farm_code}_#{track_indicator_rec.track_slms_indicator_code}"
+        nom_parcelle = "#{apport_bin.orchard_code}_#{track_indicator_rec.track_slms_indicator_code}"
+        code_parcelle = "#{apport_bin.orchard_code}_#{track_indicator_rec.track_slms_indicator_code}"
       end
 
       insert_ql = insert_ql.to_s + "INSERT INTO Apport (NumPalox,DateApport,CodeParcelle,CodeVariete,
@@ -448,7 +450,7 @@ class Services::PreSortingController < ApplicationController
         NomApporteur,CodeEspece,NomEspece,
         Partie,Year,Free_int1,Free_int2,Free_string1,
         Free_string2,Free_string3)
-        VALUES('#{apport_bin.bin_number}',getdate(),'#{apport_bin.orchard_code}','#{track_indicator_rec.track_slms_indicator_code}'
+        VALUES('#{apport_bin.bin_number}',getdate(),'#{code_parcelle}','#{track_indicator_rec.track_slms_indicator_code}'
         ,'#{code_apporteur}','#{apport_bin.pack_material_product.pack_material_product_code}','#{apport_bin.id}','#{apport_bin.weight}'
         ,'#{apport_bin.presort_staging_run_child_id}','#{apport_bin.rmt_product.treatment_code}','#{nom_parcelle}','#{track_indicator_rec.track_slms_indicator_description}'
         ,'#{apport_bin.farm.farm_description}','#{apport_bin.rmt_product.variety.rmt_variety.commodity.commodity_code}','#{apport_bin.rmt_product.variety.rmt_variety.commodity.commodity_description_long}'
