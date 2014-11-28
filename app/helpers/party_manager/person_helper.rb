@@ -16,8 +16,9 @@ module PartyManager::PersonHelper
 
    if is_edit
      id = person.id
-     industry_number = person.industry_number.to_s
-     messcada_values = MesscadaPeopleViewMesscadaRfidAllocation.find_by_sql("SELECT * from messcada_people_view_messcada_rfid_allocations where person_id = #{id} and industry_number = '#{industry_number}'")
+     # industry_number = person.industry_number.to_s
+     messcada_values = MesscadaPeopleViewMesscadaRfidAllocation.find_by_sql("SELECT * from messcada_people_view_messcada_rfid_allocations where person_id = #{id}")
+     # messcada_values = MesscadaPeopleViewMesscadaRfidAllocation.find_by_sql("SELECT * from messcada_people_view_messcada_rfid_allocations where person_id = #{id} and industry_number = '#{industry_number}'")
      if messcada_values.empty?
      else
        person.rfid = messcada_values[0].rfid
