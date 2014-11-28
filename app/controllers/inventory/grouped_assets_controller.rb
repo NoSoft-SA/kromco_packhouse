@@ -922,7 +922,7 @@ class Inventory::GroupedAssetsController < ApplicationController
   def list_stock_transaction_histories
     if(params[:inventory_transaction][:transaction_date_time_date2from].to_s.strip=="" || params[:inventory_transaction][:transaction_date_time_date2to].to_s.strip=="")
       flash[:error] = 'transaction_date_time must be filled in completely'
-      params[:id] = id
+      # params[:id] = id
       search_stock_transaction_histories
       return
     end
