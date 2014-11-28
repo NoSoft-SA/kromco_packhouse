@@ -273,7 +273,7 @@ class SequenceCrud < PDTTransactionState
       pal_seq.intake_header_id =  self.parent.intake_header_id
       #-------------------
       intake_header = IntakeHeader.find(self.parent.intake_header_id)
-      pal_seq.pack_date_time = DepotPallet.calc_packdate_from_pick_ref(@current_pallet_sequence["pick_reference"],intake_header.season.to_s).to_formatted_s(:db).to_s
+      pal_seq.pack_date_time = DepotPallet.calc_packdate_from_pick_ref(@current_pallet_sequence["pick_reference"],intake_header.created_on.year.to_s).to_formatted_s(:db).to_s
       #-------------------
       pal_seq.create
       @pallet_sequences.push(pal_seq.to_map)

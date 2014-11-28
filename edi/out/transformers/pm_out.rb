@@ -71,7 +71,7 @@ class PmOut < TextOutTransformer
                   cartons.puc, cartons.actual_size_count_code, pallets.pick_reference_code, cartons.gtin, cartons.sell_by_code,
                   pallets.pallet_number, cartons.organization_code, cartons.commodity_code, cartons.variety_short_long,
                   cartons.old_pack_code, cartons.grade_code, pallets.pt_product_characteristics, commodities.commodity_group_code,
-                  marketing_varieties.variety_group_code, marks.brand_code, pallet_bases.edi_out_pallet_base",
+                  marketing_varieties.variety_group_code, marks.brand_code,pallets.pallet_format_product_id, pallet_bases.edi_out_pallet_base",
                  :joins => "join cartons on cartons.pallet_id = pallets.id
                   join commodities on commodities.commodity_code = cartons.commodity_code
                   join marketing_varieties on marketing_varieties.marketing_variety_code = SUBSTRING(cartons.variety_short_long from 1 for 3)
