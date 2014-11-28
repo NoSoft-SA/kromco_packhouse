@@ -24,7 +24,7 @@ module PartyManager::PersonHelper
        person.rfid = messcada_values[0].rfid
        person.start_date = messcada_values[0].start_date
        person.end_date = messcada_values[0].end_date
-       rfid_list.unshift(["#{person.rfid}",person.rfid])
+       #rfid_list.unshift(["#{person.rfid}",person.rfid])
      end
    end
 
