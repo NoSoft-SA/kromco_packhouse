@@ -59,9 +59,6 @@ module PartyManager::PersonHelper
    field_configs << {:field_type => 'PopupDateSelector',
                      :field_name => 'end_date'}
 
-   # field_configs << {:field_type => 'TextField',
-   #                   :field_name => 'rfid'}
-
   # field_configs[0] = {:field_type => 'TextField',
 	# 					:field_name => 'first_name'}
   #
