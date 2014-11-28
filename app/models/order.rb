@@ -697,7 +697,7 @@ class Order < ActiveRecord::Base
           price_per_kg=latest_shipped_similar_order_product.price_per_kg
           price_per_carton=latest_shipped_similar_order_product.price_per_carton
         end
-        @order_product.update_attribute(:price_per_kg=>price_per_kg ,:price_per_carton=>price_per_carton,:available_quantities=>item_pack['carton_count'],
+        @order_product.update_attributes(:price_per_kg=>price_per_kg ,:price_per_carton=>price_per_carton,:available_quantities=>item_pack['carton_count'],
           :item_pack_product_code=>item_pack['item_pack_product_code'],:old_fg_code=>item_pack['old_fg_code'])
 
 
