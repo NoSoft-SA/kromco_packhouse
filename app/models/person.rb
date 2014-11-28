@@ -6,12 +6,19 @@ class Person < ActiveRecord::Base
 #	===========================
  
 	belongs_to :party
- 
+
+  #MM112014 - messcada changes
+  has_one :messcada_people_view_messcada_rfid_allocation,:dependent => :destroy
+
+  attr_accessor :rfid,:start_date,:end_date
+
 #	============================
 #	 Validations declarations:
 #	============================
 	validates_presence_of :first_name
 	validates_presence_of :last_name
+  validates_presence_of :rfid
+
 #	=====================
 #	 Complex validations:
 #	=====================
@@ -28,7 +35,7 @@ def validate_uniqueness
 	 exists = Person.find_by_first_name_and_last_name(self.first_name,self.last_name)
 	 if exists != nil 
 		errors.add_to_base("There already exists a record with the combined values of fields: 'first_name' and 'last_name' ")
-	end
+   end
 end
 #	===========================
 #	 foreign key validations:
@@ -138,13 +145,22 @@ def self.party_type_ids_for_party_name(party_name)
     party.party_name = self.first_name + "_" + self.last_name
     party.save
     self.party = party
- 
  end
- 
+
+  def save_allocation
+    #MM112014 - messcada changes
+    allocations = nil
+    allocations = MesscadaPeopleViewMesscadaRfidAllocation.new
+    allocations.industry_number = self.industry_number
+    allocations.rfid = self.rfid
+    allocations.start_date = self.start_date
+    allocations.end_date = self.end_date
+    allocations.person_id = self.id
+    allocations.save
+  end
+
  def after_destroy
   self.party.destroy
- 
  end
- 
 
 end

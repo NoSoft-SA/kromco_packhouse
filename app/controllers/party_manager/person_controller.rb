@@ -22,10 +22,14 @@ def list_people
 		session[:people_page] = nil
 	end
 
+  #MM112014 - messcada changes
 	list_query = "@person_pages = Paginator.new self, Person.count, @@page_size,@current_page
 	 @people = Person.find(:all,
-				 :limit => @person_pages.items_per_page,
-				 :offset => @person_pages.current.offset)"
+         :limit => @person_pages.items_per_page,
+				 :order => 'first_name',
+			   :offset => @person_pages.current.offset,
+         :include => 'messcada_people_view_messcada_rfid_allocation')"
+
 	session[:query] = list_query
 	render_list_people
 end
@@ -138,13 +142,14 @@ end
  
 def create_person
    begin
-	 @person = Person.new(params[:person])
-	 if @person.save
-		 redirect_to_index("'new record created successfully'","'create successful'")
-	else
-		@is_create_retry = true
-		render_new_person
-	 end
+     @person = Person.new(params[:person])
+     if @person.save
+        @person.save_allocation
+       redirect_to_index("'new record created successfully'","'create successful'")
+     else
+       @is_create_retry = true
+       render_new_person
+     end
    rescue
      handle_error("Person could not be created")
    end
@@ -164,7 +169,7 @@ def edit_person
 	return if authorise_for_web('person','edit')==false 
 	 id = params[:id]
 	 if id && @person = Person.find(id)
-		render_edit_person
+     render_edit_person
 
 	 end
 end
@@ -200,7 +205,18 @@ def update_person
               parties_role.party_name=new_party_name
               parties_role.update
             end
-           end
+            #MM112014 - messcada changes
+            allocations = MesscadaPeopleViewMesscadaRfidAllocation.find_by_person_id(id)
+            if allocations
+               allocations.industry_number = @person.industry_number
+               allocations.rfid = @person.rfid
+               allocations.start_date = @person.start_date
+               allocations.end_date = @person.end_date
+               allocations.update
+            else
+              @person.save_allocation
+            end
+      end
 		 if @person
 			@people = eval(session[:query])
 			render_list_people
@@ -241,13 +257,34 @@ def person_first_name_search_combo_changed
 	@last_names.unshift("<empty>")
 
 #	render (inline) the html to replace the contents of the td that contains the dropdown 
-	render :inline => %{
-		<%= select('person','last_name',@last_names)%>
+	# render :inline => %{
+	# 	<%= select('person','last_name',@last_names)%>
+  #
+	# 	}
 
+  #MM112014 - messcada changes
+  render :inline => %{
+		<%= select('person','last_name',@last_names)%>
+		<img src = '/images/spinner.gif' style = 'display:none;' id = 'img_person_last_name'/>
+		<%= observe_field('person_last_name',:update => 'industry_number_cell',:url => {:action => session[:person_search_form][:last_name_observer][:remote_method]},:loading => "show_element('img_person_last_name');",:complete => session[:person_search_form][:last_name_observer][:on_completed_js])%>
 		}
 
 end
 
+  #MM112014 - messcada changes
+  def person_last_name_search_combo_changed
+    last_name = get_selected_combo_value(params)
+    session[:person_search_form][:last_name_combo_selection] = last_name
+    @industry_numbers = Person.find_by_sql("Select distinct industry_number from people where first_name = '#{session[:person_search_form][:first_name_combo_selection]}' and last_name = '#{last_name}'").map{|g|[g.industry_number]}
+    # @industry_numbers.unshift("<empty>")
+
+#	render (inline) the html to replace the contents of the td that contains the dropdown
+    render :inline => %{
+		<%= select('person','industry_number',@industry_numbers)%>
+
+		}
+
+  end
 
 
 end
