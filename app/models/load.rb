@@ -34,7 +34,7 @@ class Load < ActiveRecord::Base
                                          inner join loads on load_orders.load_id=loads.id
                                        where load_orders.load_id=#{self.id}")[0].order_type_code
       if order_type.strip=="MO" || order_type.strip=="MQ"
-         #count(public.cartons.id) AS carton_count
+        #count(public.cartons.id) AS carton_count
         query ="SELECT count(public.cartons.id) AS carton_count,public.cartons.carton_fruit_nett_mass AS carton_weight,pallets.carton_quantity_actual,
                   pallets.id,cartons.pallet_number,pallets.build_status,pallets.load_detail_id,item_pack_products.commodity_code,
                   item_pack_products.marketing_variety_code,cartons.target_market_code,item_pack_products.grade_code,cartons.inventory_code,
@@ -120,7 +120,7 @@ class Load < ActiveRecord::Base
     ActiveRecord::Base.transaction do
       load_order = LoadOrder.find_by_load_id(self.id)
       order=Order.find(load_order.order_id)
-    #------------------------------------------------------------------------
+      #------------------------------------------------------------------------
       #update the {order_quantity} field value of the [order] record to the sum of {carton_count} field of passed-in
       #pseudo_pallets
       #------------------------------------------------------------------------
@@ -151,7 +151,7 @@ class Load < ActiveRecord::Base
         #break down the item_pack_product_code into fields that exit on [order_product]
         #--------------------------------------------------------------------------------------------
         #existing_order_product=OrderProduct.find_by_item_pack_product_code_and_order_id(item_pack_product_group[0]['item_pack_product_code'],order.order_id)
-        existing_order_product=OrderProduct.find_by_sql("select * from order_products where (item_pack_product_code='#{item_pack_product_group[0]['item_pack_product_code']}' and order_id=#{order.id})")
+        existing_order_product=OrderProduct.find_by_sql("select * from order_products where (item_pack_product_code='#{item_pack_product_group[0]['item_pack_product_code']}' and old_fg_code='#{item_pack_product_group[0]['old_fg_code']}' and order_id=#{order.id})")
         if existing_order_product.empty?
           order_product = OrderProduct.new
           order_product.order_id = order.id
