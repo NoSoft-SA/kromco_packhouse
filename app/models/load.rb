@@ -34,7 +34,7 @@ class Load < ActiveRecord::Base
                                          inner join loads on load_orders.load_id=loads.id
                                        where load_orders.load_id=#{self.id}")[0].order_type_code
       if order_type.strip=="MO" || order_type.strip=="MQ"
-         #count(public.cartons.id) AS carton_count
+        #count(public.cartons.id) AS carton_count
         query ="SELECT count(public.cartons.id) AS carton_count,public.cartons.carton_fruit_nett_mass AS carton_weight,pallets.carton_quantity_actual,
                   pallets.id,cartons.pallet_number,pallets.build_status,pallets.load_detail_id,item_pack_products.commodity_code,
                   item_pack_products.marketing_variety_code,cartons.target_market_code,item_pack_products.grade_code,cartons.inventory_code,
@@ -120,7 +120,7 @@ class Load < ActiveRecord::Base
     ActiveRecord::Base.transaction do
       load_order = LoadOrder.find_by_load_id(self.id)
       order=Order.find(load_order.order_id)
-    #------------------------------------------------------------------------
+      #------------------------------------------------------------------------
       #update the {order_quantity} field value of the [order] record to the sum of {carton_count} field of passed-in
       #pseudo_pallets
       #------------------------------------------------------------------------
@@ -137,12 +137,14 @@ class Load < ActiveRecord::Base
       # {required_qty} * pseudo_pallet.price_per_kg * pseudo_pallet.carton_weight}
       #(use values any pseudo_pallet in current group)
       #-------------------------------------------------------------------------------------
-      item_pack_product_groups =pseudo_pallets.group(['item_pack_product_code'], nil, true)
+      item_pack_product_groups =pseudo_pallets.group(['item_pack_product_code','old_fg_code'], nil, true)
       extended_fg_group_sub_totals = 0
       order_plt_nums=[]
       for item_pack_product_group in item_pack_product_groups
         group_required_quantity = 0
         carton_count=0
+        price_per_kg=nil
+        price_per_carton=nil
         for pseudo_pallet in item_pack_product_group
           group_required_quantity += pseudo_pallet['carton_quantity_actual'].to_i
           carton_count +=pseudo_pallet['carton_count'].to_i
@@ -151,7 +153,7 @@ class Load < ActiveRecord::Base
         #break down the item_pack_product_code into fields that exit on [order_product]
         #--------------------------------------------------------------------------------------------
         #existing_order_product=OrderProduct.find_by_item_pack_product_code_and_order_id(item_pack_product_group[0]['item_pack_product_code'],order.order_id)
-        existing_order_product=OrderProduct.find_by_sql("select * from order_products where (item_pack_product_code='#{item_pack_product_group[0]['item_pack_product_code']}' and order_id=#{order.id})")
+        existing_order_product=OrderProduct.find_by_sql("select * from order_products where (item_pack_product_code='#{item_pack_product_group[0]['item_pack_product_code']}' and old_fg_code='#{item_pack_product_group[0]['old_fg_code']}' and order_id=#{order.id})")
         if existing_order_product.empty?
           order_product = OrderProduct.new
           order_product.order_id = order.id
@@ -178,6 +180,7 @@ class Load < ActiveRecord::Base
                                     "cosmetic_code_name" => "#{item_pack_product[6]}",
                                     "size_ref" => "#{item_pack_product[7]}"
           }
+          sequence_number = self.calc_order_product_sequence_number(order)
           order_product['commodity_code'] = item_pack_product_hash["commodity_code"]
           order_product['marketing_variety_code']= item_pack_product_hash["marketing_variety_code"]
           order_product['product_class_code'] = item_pack_product_hash["product_class_code"]
@@ -187,43 +190,32 @@ class Load < ActiveRecord::Base
           order_product['cosmetic_code_name'] = item_pack_product_hash["cosmetic_code_name"]
           order_product['size_ref'] = item_pack_product_hash["size_ref"]
           order_product['order_number'] = self.attributes['order_number']
-          order_product.update_attribute(:required_quantity, "#{carton_count}")
-          order_product.update_attribute(:available_quantities, "#{carton_count}")
-          order_product.update_attribute(:carton_count, "#{carton_count}")
-          sequence_number = self.calc_order_product_sequence_number(order)
-          order_product.update_attribute(:sequence_number, "#{sequence_number}")
 
-#          subtotal = 0
-#          sum_carton_weight = 0
-#          for pallet in item_pack_product_group
-#            price_per_kg =pallet['price_per_kg'].to_f
-#            carton_weight = pallet['carton_weight'].to_f
-#            pallet_total = pallet['carton_count'].to_f * price_per_kg * carton_weight
-#            subtotal += pallet_total
-#            sum_carton_weight +=carton_weight
-#          end
-#
-#
-#          price_per_carton = item_pack_product_group[0]['price_per_kg'].to_f * (sum_carton_weight/item_pack_product_group.length())
-#          price_per_carton = "%.2f" % price_per_carton
-#          subtotal ="%.2f" %subtotal
-#          price_per_kg = "%.2f" % item_pack_product_group[0]['price_per_kg']
-#          average_carton_weight = sum_carton_weight/item_pack_product_group.length()
-#          average_carton_weight = "%.2f" %average_carton_weight
-#          sequence_number = calc_order_product_sequence_number(order)
-#order_product.update_attributes!({
-#                                :price_per_carton=>price_per_carton,
-#                                :price_per_kg=>price_per_kg,
-#                                :carton_weight=>carton_weight,
-#                                :sequence_number=>sequence_number
-#                              })
+          latest_shipped_similar_order_product=OrderProduct.find_by_sql("select op.* from order_products op
+            join orders o on op.order_id=o.id
+            where op.item_pack_product_code='#{order_product.item_pack_product_code}' and op.old_fg_code='#{order_product.old_fg_code}'  and o.consignee_party_role_id=#{order.consignee_party_role_id}
+            and o.order_status='SHIPPED'")[0]
+
+          if latest_shipped_similar_order_product
+            price_per_kg=latest_shipped_similar_order_product.price_per_kg
+            price_per_carton=latest_shipped_similar_order_product.price_per_carton
+          end
+          order_product.update_attributes(:price_per_kg=>price_per_kg ,:price_per_carton=>price_per_carton,:required_quantity=>carton_count, :carton_count=>carton_count,
+                                          :available_quantities=> carton_count,:sequence_number=>sequence_number)
 
         else
           order_product=existing_order_product[0]
+          latest_shipped_similar_order_product=OrderProduct.find_by_sql("select op.* from order_products op
+            join orders o on op.order_id=o.id
+            where op.item_pack_product_code='#{order_product.item_pack_product_code}' and op.old_fg_code='#{order_product.old_fg_code}'  and o.consignee_party_role_id=#{order.consignee_party_role_id}
+            and o.order_status='SHIPPED'")[0]
+          if latest_shipped_similar_order_product
+            price_per_kg=latest_shipped_similar_order_product.price_per_kg
+            price_per_carton=latest_shipped_similar_order_product.price_per_carton
+          end
           carton_count = order_product.carton_count + carton_count
-          order_product.update_attribute(:required_quantity, "#{carton_count}")
-          order_product.update_attribute(:available_quantities, "#{carton_count}")
-          order_product.update_attribute(:carton_count, "#{carton_count}")
+          order_product.update_attributes(:price_per_kg=>price_per_kg ,:price_per_carton=>price_per_carton,:required_quantity=>carton_count, :carton_count=>carton_count,
+                                          :available_quantities=> carton_count,:sequence_number=>sequence_number)
         end
         order_product_attributes =order_product.attributes
         load_detail = LoadDetail.new

@@ -6,12 +6,19 @@ class Person < ActiveRecord::Base
 #	===========================
  
 	belongs_to :party
- 
+
+  #MM112014 - messcada changes
+  has_one :messcada_people_view_messcada_rfid_allocation,:dependent => :destroy
+
+  attr_accessor :rfid,:start_date,:end_date
+
 #	============================
 #	 Validations declarations:
 #	============================
 	validates_presence_of :first_name
 	validates_presence_of :last_name
+
+
 #	=====================
 #	 Complex validations:
 #	=====================
@@ -21,14 +28,27 @@ def validate
 	#validates uniqueness for this record
 	 if self.new_record?
 		 validate_uniqueness
-	 end
+   end
+
+   self.rfid = nil if self.rfid == ""
+
+  if !unique_rf_id?
+    errors.add_to_base("RFID already allocated")
+  end
+
+
 end
 
 def validate_uniqueness
 	 exists = Person.find_by_first_name_and_last_name(self.first_name,self.last_name)
 	 if exists != nil 
 		errors.add_to_base("There already exists a record with the combined values of fields: 'first_name' and 'last_name' ")
-	end
+
+
+   end
+
+
+
 end
 #	===========================
 #	 foreign key validations:
@@ -124,6 +144,20 @@ def self.party_type_ids_for_party_name(party_name)
   
 
  end
+
+
+  def unique_rf_id?
+    if self.rfid && self.messcada_people_view_messcada_rfid_allocation && self.messcada_people_view_messcada_rfid_allocation.rfid != self.rfid.to_i||self.rfid && !self.messcada_people_view_messcada_rfid_allocation
+      val = ActiveRecord::Base.connection.select_one("select count(*) from messcada_people_view_messcada_rfid_allocations where rfid=#{self.rfid}")['count'].to_i
+      if val > 0
+        return false
+      end
+
+    end
+
+    return true
+
+  end
  
  
  def before_save
@@ -138,13 +172,36 @@ def self.party_type_ids_for_party_name(party_name)
     party.party_name = self.first_name + "_" + self.last_name
     party.save
     self.party = party
- 
  end
- 
+
+
+  def after_save
+    save_allocation
+
+  end
+
+  def save_allocation
+    #MM112014 - messcada changes
+    if self.rfid && self.rfid.to_i > 0 && unique_rf_id?
+
+      if allocations = MesscadaPeopleViewMesscadaRfidAllocation.find_by_person_id(id)
+      else
+        allocations = MesscadaPeopleViewMesscadaRfidAllocation.new
+      end
+
+
+      allocations.industry_number = self.industry_number
+      allocations.rfid = self.rfid.to_i
+      allocations.start_date = self.start_date
+      allocations.end_date = self.end_date
+      allocations.person_id = self.id
+      allocations.save
+    end
+
+  end
+
  def after_destroy
   self.party.destroy
- 
  end
- 
 
 end

@@ -79,7 +79,7 @@ class Order < ActiveRecord::Base
 
     RAILS_DEFAULT_LOGGER.info("SENT MAIL FOR early_order_created")
   end
-  
+
     def notify_order_updated_by_marketer(msg,subj)
     RAILS_DEFAULT_LOGGER.info("SENDING MAIL FOR early_order_updated_by_marketer")
     easy_order_mail_log=EasyOrderMailLog.new
@@ -462,7 +462,7 @@ class Order < ActiveRecord::Base
 
 
   def ship_delivery(load_id)
- 
+
     Order.transaction do
       order_id = self.id.to_i
       pallets = Pallet.find_by_sql("select pallets.* from pallets
@@ -503,7 +503,7 @@ class Order < ActiveRecord::Base
 
       #EdiOutProposal.send_doc(@load_order, 'HCS')
       EdiOutProposal.send_doc(@load_order, 'PO')
-   
+
 
       Inventory.remove_stock(nil, 'PALLET', "SHIP_DISPATCH_DELIVERY", @load_order.id, 'IN_TRANSIT', pallet_numbers)
 
@@ -675,7 +675,7 @@ class Order < ActiveRecord::Base
   def selected_items(selected_item_packs, parameter_fields_values)
     Order.transaction do
       order_id = self.id
-
+      sequence_number = self.calc_order_product_sequence_number
       for item_pack in selected_item_packs
         @order_product = OrderProduct.new
         @order_product.order_id = self.id
@@ -687,21 +687,20 @@ class Order < ActiveRecord::Base
             @order_product.update_attribute("#{field_name_field_name}", "#{field_name[:field_value]}") if  !field_name_field_name.upcase.index("PRICE")
           end
         end
-#        price_per_carton              = item_pack['carton_count'].to_i* item_pack['carton_weight']
-#        item_pack['price_per_carton'] = "#{price_per_carton}"
-#        subtotal                      = item_pack['carton_count'].to_f * item_pack['price_per_kg'].to_f * item_pack['carton_weight'].to_f
-#        subtotal                      = "%.2f" %subtotal
-#        @order_product.update_attribute(:subtotal, "#{subtotal}")
-#        @order_product.update_attribute(:order_id, "#{order_id}")
-#        @order_product.update_attribute(:price_per_kg, "#{item_pack['price_per_kg']}")
-#        @order_product.update_attribute(:carton_weight, "#{item_pack['carton_weight']}")
-#        @order_product.update_attribute(:price_per_carton, "#{item_pack['price_per_carton']}")
-        @order_product.update_attribute(:available_quantities, "#{item_pack['carton_count']}")
-        #@order_product.update_attribute(:carton_count, "#{item_pack['carton_count']}")
+        price_per_kg=nil
+        price_per_carton=nil
+        latest_shipped_similar_order_product=OrderProduct.find_by_sql("select op.* from order_products op
+            join orders o on op.order_id=o.id
+            where op.item_pack_product_code='#{item_pack['item_pack_product_code']}' and op.old_fg_code='#{item_pack['old_fg_code']}'  and o.consignee_party_role_id=#{self.consignee_party_role_id}
+            and o.order_status='SHIPPED'")[0]
+        if latest_shipped_similar_order_product
+          price_per_kg=latest_shipped_similar_order_product.price_per_kg
+          price_per_carton=latest_shipped_similar_order_product.price_per_carton
+        end
+        @order_product.update_attributes(:price_per_kg=>price_per_kg ,:price_per_carton=>price_per_carton,:available_quantities=>item_pack['carton_count'],
+          :item_pack_product_code=>item_pack['item_pack_product_code'],:old_fg_code=>item_pack['old_fg_code'])
 
-        @order_product.update_attribute(:item_pack_product_code, "#{item_pack['item_pack_product_code']}")
-        sequence_number = self.calc_order_product_sequence_number
-        @order_product.update_attribute(:sequence_number, "#{sequence_number}")
+
       end
     end
 

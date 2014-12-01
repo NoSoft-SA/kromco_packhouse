@@ -868,7 +868,11 @@ module DataGridJquery
         val = active_record[@field_name]
       else
         begin
-          val =  eval("active_record." + @field_name)
+          if @field_name.index(".") && eval("active_record." + @field_name.split(".")[0])||!@field_name.index(".")
+            val =  eval("active_record." + @field_name)
+          end
+
+
         rescue NoMethodError
           if !@grid.key_based_access && @column_config[:use_outer_join]
             val = ''
@@ -917,7 +921,12 @@ module DataGridJquery
       if @grid.key_based_access
         result = get_cell_value_by_key(active_record, row_nr)
       else
-        result =  eval("active_record." + @field_name)
+
+        if @field_name.index(".") && eval("active_record." + @field_name.split(".")[0])||!@field_name.index(".")
+          result =  eval("active_record." + @field_name)
+        end
+
+
       end
     rescue NoMethodError
       if !@grid.key_based_access && @column_config[:use_outer_join]

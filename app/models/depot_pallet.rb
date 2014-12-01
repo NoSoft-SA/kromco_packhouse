@@ -16,7 +16,16 @@ class DepotPallet < ActiveRecord::Base
     week_begin_date = iso_week_date.at_beginning_of_week
     fin_date =  (wday - 1).days.since(week_begin_date)
 
+    #---------------------------------------------------------------------------------------------------------------------------------------
+    # Try to handle scenario where, in the early part of year(Jan typically), cartons were packed during last month (or 2) of previous year
+    # In such a case the current calender year, and the season, of the carton would be correct, but the pack-date would be one year in future
+    #----------------------------------------------------------------------------------------------------------------------------------------
+    if fin_date > Time.now()
+      fin_date - 1.year
+    else
       return fin_date
+    end
+
   end
 
 
