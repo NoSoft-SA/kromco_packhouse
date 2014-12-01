@@ -592,11 +592,13 @@ class Fg::OrderController < ApplicationController
     else
       user_name = session[:user_id].user_name
       department_name=User.find_by_user_name(user_name).department_name
+      customer_party_role_id = PartiesRole.find_by_sql("select * from parties_roles where party_name='KR' and role_name = 'CUSTOMER'")[0].id
       @order=Order.new
       @order.is_export=true
       @order.order_type_id=OrderType.find_by_order_type_code("MO").id if department_name.upcase.strip=="PLANNING" || department_name.upcase.strip=="MARKETING"
       @order.depot_id=Depot.find_by_depot_code("031").id
       @order.order_date=Time.now
+      @order.customer_party_role_id=customer_party_role_id
     end
 
     render :inline => %{
