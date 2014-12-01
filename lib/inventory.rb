@@ -266,17 +266,17 @@ module Inventory
     private
 
     def log_transaction
-      if  @stock_item_before #!@stock_item_after.new_record?
+      # if  @stock_item_before #!@stock_item_after.new_record?
         inventory_transaction_stock = InventoryTransactionStock.new
         raise "no existing inventory transaction" if  !@inventory_transaction
         inventory_transaction_stock.inventory_transaction_id = @inventory_transaction.id
 
-        inventory_transaction_stock.stock_item_id = @stock_item_before.id
-        inventory_transaction_stock.location_id = @stock_item_before.location_id
-        inventory_transaction_stock.location_code = @stock_item_before.location_code
-        inventory_transaction_stock.location_from = @stock_item_before.location_code
+        inventory_transaction_stock.stock_item = @stock_item_after
+        inventory_transaction_stock.location_id = @stock_item_after.location_id
+        inventory_transaction_stock.location_code = @stock_item_after.location_code
+        inventory_transaction_stock.location_from = @stock_item_before.location_code if(@stock_item_before)
 
-        inventory_transaction_stock.location_to = @inventory_transaction.location_to #Hans - Shuoldn't this be the next location i.e. @stock_item_after.inventory_transaction.location_to
+        inventory_transaction_stock.location_to = @inventory_transaction.location_to
         inventory_transaction_stock.transaction_type_code = @inventory_transaction.transaction_type_code
         inventory_transaction_stock.transaction_business_name = @inventory_transaction.transaction_business_name_code
         inventory_transaction_stock.transaction_quantity_plus = @inventory_transaction.transaction_quantity_plus
@@ -285,7 +285,7 @@ module Inventory
         inventory_transaction_stock.reference_number = @inventory_transaction.reference_number
         inventory_transaction_stock.current_location = @stock_item_after.location_code
         inventory_transaction_stock.save!
-      end
+      # end
     end
 
     def log_status
