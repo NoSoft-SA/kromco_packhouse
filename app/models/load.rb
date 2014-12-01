@@ -194,7 +194,7 @@ class Load < ActiveRecord::Base
           latest_shipped_similar_order_product=OrderProduct.find_by_sql("select op.* from order_products op
             join orders o on op.order_id=o.id
             where op.item_pack_product_code='#{order_product.item_pack_product_code}' and op.old_fg_code='#{order_product.old_fg_code}'  and o.consignee_party_role_id=#{order.consignee_party_role_id}
-            and o.order_status='SHIPPED'")[0]
+            and o.order_status='SHIPPED' order by o.id desc")[0]
 
           if latest_shipped_similar_order_product
             price_per_kg=latest_shipped_similar_order_product.price_per_kg
@@ -208,7 +208,7 @@ class Load < ActiveRecord::Base
           latest_shipped_similar_order_product=OrderProduct.find_by_sql("select op.* from order_products op
             join orders o on op.order_id=o.id
             where op.item_pack_product_code='#{order_product.item_pack_product_code}' and op.old_fg_code='#{order_product.old_fg_code}'  and o.consignee_party_role_id=#{order.consignee_party_role_id}
-            and o.order_status='SHIPPED'")[0]
+            and o.order_status='SHIPPED' order by o.id desc ")[0]
           if latest_shipped_similar_order_product
             price_per_kg=latest_shipped_similar_order_product.price_per_kg
             price_per_carton=latest_shipped_similar_order_product.price_per_carton
