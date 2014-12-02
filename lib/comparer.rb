@@ -279,7 +279,10 @@ class Comparer
         elsif  element=="sequence_edited"     || element=="stock_transfer_id"          || element==""
         elsif  element=="qc_status_code"      || element==""                           || element=="qc_failed_tm"   || element=="mates_header_id"
         elsif  element=="qc_forced_result_id"        || element=="validated"       || element=="load_instruction_vehicle_id"
-         elsif   element=="exit_ref"       ||  element=="exit_ref_date_time" || element=="packhouse_code" || element=="rw_action"
+        elsif   element=="exit_ref"       ||  element=="exit_ref_date_time" || element=="packhouse_code" || element=="rw_action"
+        elsif   element=="parent_record_id" || element=="parent_record_type" ||  element=="record_identifier" ||
+                 element=="transaction_reference_id_column" ||  element=="table_name" ||  element=="affected_by_program" ||  element=="affected_by_function" ||  element=="affected_by_env"
+
         elsif element =="children"
             if (left_list[key][element]!= nil && right_list[key][element]==nil)
               lft_diffs[element]                                        =left_list[key][element]
@@ -330,7 +333,7 @@ class Comparer
           end
 #          end
         end
-    
+
         if right_list[key].keys.include?("children")&& !value.keys.include?("children")
           kids            =Hash.new
           kids["children"]=right_list[key]["children"]

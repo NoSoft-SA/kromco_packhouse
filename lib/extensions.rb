@@ -305,10 +305,31 @@ class ActiveRecord::Base
 
   before_validation :clear_combo_prompts
   before_save :trim_attribute_values, :set_request_details
+  before_update :log_changes
   before_create :set_request_details_for_create
   before_update :set_request_details
+  before_destroy :log_changes
 
   attr_accessor :unchanged_fields, :changed_fields
+
+  def  log_changes
+    if self.new_record?
+      else
+      if Globals.tables_to_be_logged_in_changed_logs.include?(self.class.to_s.tableize)
+          record_before = {}
+          record_after  = {}
+          changed_fields=self.changed_fields?
+          if !changed_fields.empty?
+            changed_fields.each do |key,val|
+              record_before[key]=val[0]
+              record_after[key]=val[1]
+            end
+          end
+          ChangeLog.create_log(record_before,record_after,self,options = {})
+        end
+      end
+
+  end
 
 
   def authorise(program, permission, user)

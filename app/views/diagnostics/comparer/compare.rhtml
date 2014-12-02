@@ -484,7 +484,7 @@ div.checkboxes {
 
         <tr>
           <!-----------------------------records existing in right list only -->
-          <% if !@list2_diffs.empty? %>--
+          <% if !@list2_diffs.empty? %>
               <% for rec in @list2_diffs %>
                   <!--------------------left list is not empty but record only exists in right list -->
                   <% if !@list1_diffs.empty? && !@list1_diffs.has_key?(rec[0]) %>
