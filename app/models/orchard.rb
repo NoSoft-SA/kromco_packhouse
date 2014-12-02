@@ -3,7 +3,7 @@ class Orchard < ActiveRecord::Base
   belongs_to :farm
 
   #MM102014-add virtual variable commodity id
-  attr_accessor :orchard_commodity_id, :commodity_code#, :commodity_description_long
+  attr_accessor :orchard_commodity_id, :commodity_code
 #===================================
 #   Validations
 #===================================
