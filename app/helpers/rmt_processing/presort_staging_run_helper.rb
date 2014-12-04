@@ -47,7 +47,6 @@ module RmtProcessing::PresortStagingRunHelper
 #	---------------------------------
     field_configs = []
     statuses = get_statuses(presort_staging_run)
-    presort_staging_run.status='ACTIVE'
     if presort_staging_run.status=='EDITING'
       product_class_codes=ProductClass.find_by_sql("select distinct product_classes.id,product_classes.product_class_code  from product_classes ").map{|p|[p.product_class_code,p.id]}
       product_class_codes.unshift("<empty>") if !product_class_codes.empty?
