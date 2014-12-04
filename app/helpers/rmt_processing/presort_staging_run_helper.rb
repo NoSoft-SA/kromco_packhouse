@@ -47,6 +47,7 @@ module RmtProcessing::PresortStagingRunHelper
 #	---------------------------------
     field_configs = []
     statuses = get_statuses(presort_staging_run)
+    presort_staging_run.status='ACTIVE'
     if presort_staging_run.status=='EDITING'
       product_class_codes=ProductClass.find_by_sql("select distinct product_classes.id,product_classes.product_class_code  from product_classes ").map{|p|[p.product_class_code,p.id]}
       product_class_codes.unshift("<empty>") if !product_class_codes.empty?
@@ -151,7 +152,7 @@ module RmtProcessing::PresortStagingRunHelper
     else
       product_class_code=ProductClass.find(presort_staging_run.product_class_id).product_class_code if  presort_staging_run.product_class_id
       treatment_code=Treatment.find(presort_staging_run.treatment_id).treatment_code  if  presort_staging_run.treatment_id
-      size_codes=Size.find(presort_staging_run.size_id).size_code    if  presort_staging_run.size_id
+      size_code=Size.find(presort_staging_run.size_id).size_code    if  presort_staging_run.size_id
       season_code=Season.find(presort_staging_run.season_id).season_code
       farm_group_code = FarmGroup.find(presort_staging_run.farm_group_id).farm_group_code
       rmt_variety_code=RmtVariety.find(presort_staging_run.rmt_variety_id).rmt_variety_code
@@ -197,16 +198,16 @@ module RmtProcessing::PresortStagingRunHelper
 
       field_configs << {:field_type => 'LabelField',
                         :field_name => 'product_class_id',
-                        :label_caption=>'product class code'}
+                        :settings => {:label_caption=>'product class code', :static_value =>product_class_code, :show_label => true}}
 
       field_configs << {:field_type => 'LabelField',
                         :field_name => 'size_id',
-                        :label_caption=>'size code'}
+                       :settings => { :label_caption=>'size code',:static_value =>size_code, :show_label => true}}
 
 
       field_configs << {:field_type => 'LabelField',
                         :field_name => 'treatment_id',
-                       :label_caption=>'treatment code'}
+                      :settings => { :label_caption=>'treatment code',:static_value =>treatment_code, :show_label => true}}
 
       field_configs[field_configs.length()] = {:field_type => 'LinkWindowField',
                                                :field_name => '',
