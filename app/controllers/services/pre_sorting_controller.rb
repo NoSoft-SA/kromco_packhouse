@@ -97,7 +97,7 @@ class Services::PreSortingController < ApplicationController
 
       ActiveRecord::Base.transaction do
         bin = Bin.new({:created_on => Time.now, :bin_number => representative_bin['Numero_palox'], :rmt_product_id => rmt_product.id, :farm_id => farm.id,
-                       :orchard_code => representative_bin['Code_parcelle'], :pack_material_product_id => pack_material_product.id,
+                       :orchard_code => representative_bin['Code_parcelle'].split('_')[0], :pack_material_product_id => pack_material_product.id,
                        :track_indicator1_id => palox_bin_presort_run.track_slms_indicator.id, :track_indicator2_id => representative_bin['Int_lot_libre1'], :season_code => palox_bin_presort_run.season.season_code,
                        :weight => representative_bin['Palox_poids'], :map_ps_lot_no_mix => map_ps_lot_no_mix, :mix_ps_bin => mix_ps_bin,
                        :code_cumul => representative_bin['Code_cumul'], :numero_lot_max => representative_bin['Numero_lot_max'],
@@ -435,13 +435,18 @@ class Services::PreSortingController < ApplicationController
       RAILS_DEFAULT_LOGGER.info ("Time.now.to_formatted_s(:db): " + Time.now.to_formatted_s(:db))
 
       if(presort_staging_child_run.farm.farm_code.to_s.upcase=='0P')
-        code_apporteur = '0P'
-        code_parcelle = "0P_#{track_indicator_rec.track_slms_indicator_code}"
-        nom_parcelle = "0P_#{track_indicator_rec.track_slms_indicator_code}"
+        code_apporteur = "0P"
+        code_parcelle = "0P"
+        nom_parcelle = "0P"
       else
         code_apporteur = "#{apport_bin.farm.farm_code}"
-        nom_parcelle = "#{apport_bin.orchard_code}_#{track_indicator_rec.track_slms_indicator_code}"
-        code_parcelle = "#{apport_bin.orchard_code}_#{track_indicator_rec.track_slms_indicator_code}"
+        if season.season.to_i == 2014
+          nom_parcelle = "#{apport_bin.farm.farm_code}_#{track_indicator_rec.track_slms_indicator_code}"
+          code_parcelle = "#{apport_bin.farm.farm_code}_#{track_indicator_rec.track_slms_indicator_code}"
+        else
+          nom_parcelle = "#{apport_bin.orchard_code}_#{apport_bin.farm.farm_code}_#{track_indicator_rec.track_slms_indicator_code}"
+          code_parcelle = "#{apport_bin.orchard_code}_#{apport_bin.farm.farm_code}_#{track_indicator_rec.track_slms_indicator_code}"
+        end
       end
 
       insert_ql = insert_ql.to_s + "INSERT INTO Apport (NumPalox,DateApport,CodeParcelle,CodeVariete,
