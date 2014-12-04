@@ -95,9 +95,15 @@ class Services::PreSortingController < ApplicationController
         mix_ps_bin = 'MIX_PS_BIN'
       end
 
+      if palox_bin_presort_run.season.season.to_i == 2014
+        orchard_code = representative_bin['Code_parcelle']
+      else
+        orchard_code = representative_bin['Code_parcelle'].split('_')[0]
+      end
+
       ActiveRecord::Base.transaction do
         bin = Bin.new({:created_on => Time.now, :bin_number => representative_bin['Numero_palox'], :rmt_product_id => rmt_product.id, :farm_id => farm.id,
-                       :orchard_code => representative_bin['Code_parcelle'].split('_')[0], :pack_material_product_id => pack_material_product.id,
+                       :orchard_code => orchard_code, :pack_material_product_id => pack_material_product.id,
                        :track_indicator1_id => palox_bin_presort_run.track_slms_indicator.id, :track_indicator2_id => representative_bin['Int_lot_libre1'], :season_code => palox_bin_presort_run.season.season_code,
                        :weight => representative_bin['Palox_poids'], :map_ps_lot_no_mix => map_ps_lot_no_mix, :mix_ps_bin => mix_ps_bin,
                        :code_cumul => representative_bin['Code_cumul'], :numero_lot_max => representative_bin['Numero_lot_max'],
