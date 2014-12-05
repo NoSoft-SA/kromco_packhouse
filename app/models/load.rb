@@ -145,6 +145,7 @@ class Load < ActiveRecord::Base
         carton_count=0
         price_per_kg=nil
         price_per_carton=nil
+        subtotal=0
         for pseudo_pallet in item_pack_product_group
           group_required_quantity += pseudo_pallet['carton_quantity_actual'].to_i
           carton_count +=pseudo_pallet['carton_count'].to_i
@@ -199,8 +200,9 @@ class Load < ActiveRecord::Base
           if latest_shipped_similar_order_product
             price_per_kg=latest_shipped_similar_order_product.price_per_kg
             price_per_carton=latest_shipped_similar_order_product.price_per_carton
+            subtotal =  price_per_carton * carton_count   if  price_per_carton
           end
-          order_product.update_attributes(:price_per_kg=>price_per_kg ,:price_per_carton=>price_per_carton,:required_quantity=>carton_count, :carton_count=>carton_count,
+          order_product.update_attributes(:price_per_kg=>price_per_kg ,:price_per_carton=>price_per_carton,:required_quantity=>carton_count, :carton_count=>carton_count,:subtotal=> subtotal,
                                           :available_quantities=> carton_count,:sequence_number=>sequence_number)
 
         else
@@ -209,12 +211,14 @@ class Load < ActiveRecord::Base
             join orders o on op.order_id=o.id
             where op.item_pack_product_code='#{order_product.item_pack_product_code}' and op.old_fg_code='#{order_product.old_fg_code}'  and o.consignee_party_role_id=#{order.consignee_party_role_id}
             and o.order_status='SHIPPED' order by o.id desc ")[0]
+          carton_count = order_product.carton_count + carton_count
           if latest_shipped_similar_order_product
             price_per_kg=latest_shipped_similar_order_product.price_per_kg
             price_per_carton=latest_shipped_similar_order_product.price_per_carton
+            subtotal =  price_per_carton * carton_count   if  price_per_carton
           end
-          carton_count = order_product.carton_count + carton_count
-          order_product.update_attributes(:price_per_kg=>price_per_kg ,:price_per_carton=>price_per_carton,:required_quantity=>carton_count, :carton_count=>carton_count,
+
+          order_product.update_attributes(:price_per_kg=>price_per_kg ,:price_per_carton=>price_per_carton,:required_quantity=>carton_count, :carton_count=>carton_count,:subtotal=> subtotal,
                                           :available_quantities=> carton_count,:sequence_number=>sequence_number)
         end
         order_product_attributes =order_product.attributes
