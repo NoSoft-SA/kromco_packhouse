@@ -21,8 +21,7 @@ class Globals
   end
 
   def Globals.tables_to_be_logged_in_changed_logs
-    return ["orders","voyages","messcada_people_party_view","messcada_rfid_allocations","messcada_people_view_messcada_rfid_allocations",
-    "messcada_people_group_members"]
+    return ["orders","voyages","people","messcada_people_view_messcada_rfid_allocations"]
   end
 
   def Globals.properties?
