@@ -36,15 +36,12 @@ def validate
     errors.add_to_base("RFID already allocated")
   end
 
-
 end
 
 def validate_uniqueness
 	 exists = Person.find_by_first_name_and_last_name(self.first_name,self.last_name)
 	 if exists != nil 
 		errors.add_to_base("There already exists a record with the combined values of fields: 'first_name' and 'last_name' ")
-
-
    end
 
 
@@ -183,13 +180,14 @@ def self.party_type_ids_for_party_name(party_name)
   def save_allocation
     #MM112014 - messcada changes
     if self.rfid && self.rfid.to_i > 0 && unique_rf_id?
-
       if allocations = MesscadaPeopleViewMesscadaRfidAllocation.find_by_person_id(id)
+        # person_id = allocations.person_id
+        # old_rfid = allocations.rfid.to_i
+        # new_rfid = self.rfid.to_i
+        # save_allocation_change(person_id,old_rfid,new_rfid) if new_rfid != old_rfid
       else
         allocations = MesscadaPeopleViewMesscadaRfidAllocation.new
       end
-
-
       allocations.industry_number = self.industry_number
       allocations.rfid = self.rfid.to_i
       allocations.start_date = self.start_date
@@ -197,7 +195,22 @@ def self.party_type_ids_for_party_name(party_name)
       allocations.person_id = self.id
       allocations.save
     end
+  end
 
+  def save_allocation_change(person_id,old_rfid,new_rfid)
+    #MM112014 - messcada changes
+    allocation_filename = "/home/miracle/Desktop/kromco/allocation_changes.txt"
+    allocation_strings = Array.new
+    allocation_strings << "#{person_id}"
+    allocation_strings << ", "
+    allocation_strings << "#{old_rfid}"
+    allocation_strings << ", "
+    allocation_strings << "#{new_rfid}"
+    allocation_strings << "\n"
+    File.open(allocation_filename,"a") do |f|
+      f.write(allocation_strings)
+      f.close
+    end
   end
 
  def after_destroy

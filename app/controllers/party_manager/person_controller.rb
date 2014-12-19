@@ -208,9 +208,6 @@ class PartyManager::PersonController < ApplicationController
             parties_role.party_name=new_party_name
             parties_role.update
           end
-          #MM112014 - messcada changes
-
-
         end
         if @person.errors.empty?
           @people = eval(session[:query])
@@ -248,13 +245,13 @@ class PartyManager::PersonController < ApplicationController
     @last_names = Person.find_by_sql("Select distinct last_name from people where first_name = '#{first_name}'").map { |g| [g.last_name] }
     @last_names.unshift("<empty>")
 
-#	render (inline) the html to replace the contents of the td that contains the dropdown 
-# render :inline => %{
-# 	<%= select('person','last_name',@last_names)%>
-#
-# 	}
+    #	render (inline) the html to replace the contents of the td that contains the dropdown
+    # render :inline => %{
+    # 	<%= select('person','last_name',@last_names)%>
+    #
+    # 	}
 
-#MM112014 - messcada changes
+    #MM112014 - messcada changes
     render :inline => %{
 		<%= select('person','last_name',@last_names)%>
 		<img src = '/images/spinner.gif' style = 'display:none;' id = 'img_person_last_name'/>
