@@ -68,7 +68,8 @@ class PartyManager::MesscadaCrudController < ApplicationController
       @facility = MesscadaFacility.new(params[:facility])
       if @facility.save
         session[:facility_id] = @facility.id
-        orchard_reload_main_page("list_facilities",session[:facility_id],"'facility created successfully'",0)
+        session[:facility_code] = @facility.code
+        orchard_reload_main_page("list_facilities",session[:facility_code],"'facility created successfully'",0)
       else
         @is_create_retry = true
         render_new_facility
@@ -100,6 +101,7 @@ class PartyManager::MesscadaCrudController < ApplicationController
     id = params[:id]
     if id && @facility = MesscadaFacility.find(id)
       session[:facility_id]  = @facility.id
+      session[:facility_code] = @facility.code
       render_edit_facility
     end
   end
@@ -117,7 +119,8 @@ class PartyManager::MesscadaCrudController < ApplicationController
     id = params[:facility][:id]
     if id && @facility = MesscadaFacility.find(id)
       ActiveRecord::Base.transaction do
-        @facility.update_attributes(params[:facility])
+        # @facility.update_attributes(params[:facility])
+        @facility.save
       end
     end
     if @facility.errors.empty?
@@ -172,6 +175,7 @@ class PartyManager::MesscadaCrudController < ApplicationController
     begin
       @server = MesscadaServer.new(params[:server])
       @server.facility_id = session[:facility_id]
+      @server.facility_code = session[:facility_code]
       if @server.save
         facility_code = @server.facility_code
         orchard_reload_page("link_to_facility_code",facility_code,"'server created successfully'",0)
@@ -214,6 +218,7 @@ class PartyManager::MesscadaCrudController < ApplicationController
     id = params[:id]
     if id && @server = MesscadaServer.find(id)
       session[:server_id] = @server.id
+      session[:server_code] = @server.code
       render_edit_server
     end
   end
@@ -288,6 +293,7 @@ class PartyManager::MesscadaCrudController < ApplicationController
     begin
       @cluster = MesscadaCluster.new(params[:cluster])
       @cluster.server_id = session[:server_id]
+      @cluster.server_code = session[:server_code]
       if @cluster.save
         server_code = @cluster.server_code
         orchard_reload_page("link_to_server_code",server_code,"'cluster created successfully'",0)
@@ -330,6 +336,7 @@ class PartyManager::MesscadaCrudController < ApplicationController
     id = params[:id]
     if id && @cluster = MesscadaCluster.find(id)
       session[:cluster_id] = @cluster.id
+      session[:cluster_code] = @cluster.code
       render_edit_cluster
     end
   end
@@ -404,6 +411,7 @@ class PartyManager::MesscadaCrudController < ApplicationController
     begin
       @modules = MesscadaModule.new(params[:modules])
       @modules.cluster_id = session[:cluster_id]
+      @modules.cluster_code = session[:cluster_code]
       if @modules.save
          cluster_code = @modules.cluster_code
          orchard_reload_page("link_to_cluster_code",cluster_code,"'module created successfully'",0)
@@ -446,6 +454,7 @@ class PartyManager::MesscadaCrudController < ApplicationController
     id = params[:id]
     if id && @modules = MesscadaModule.find(id)
       session[:module_id] = @modules.id
+      session[:module_code] = @modules.code
       render_edit_module
     end
   end
@@ -519,6 +528,7 @@ class PartyManager::MesscadaCrudController < ApplicationController
     begin
       @peripheral = MesscadaPeripheral.new(params[:peripheral])
       @peripheral.module_id = session[:module_id]
+      @peripheral.module_code = session[:module_code]
       if @peripheral.save
         module_code = @peripheral.module_code
         orchard_reload_page("link_to_module_code",module_code,"'peripheral created successfully'",0)
@@ -562,6 +572,7 @@ class PartyManager::MesscadaCrudController < ApplicationController
     id = params[:id]
     if id && @peripheral = MesscadaPeripheral.find(id)
       session[:peripheral_id] = @peripheral.id
+      session[:peripheral_code] = @peripheral.code
       render_edit_peripheral
     end
   end
@@ -636,6 +647,7 @@ class PartyManager::MesscadaCrudController < ApplicationController
     begin
       @peripheral_printer = MesscadaPeripheralPrinter.new(params[:peripheral_printer])
       @peripheral_printer.peripheral_id = session[:peripheral_id]
+      @peripheral_printer.peripheral_code = session[:peripheral_code]
       if @peripheral_printer.save
         peripheral_code = @peripheral_printer.peripheral_code
         orchard_reload_page("link_to_peripheral_code",peripheral_code,"'peripheral printer created successfully'",0)

@@ -6,30 +6,20 @@ class MesscadaServer < ActiveRecord::Base
 
   # attr_accessor :facility_code
 
-  validates_presence_of :code
+  validates_presence_of :code,:tcp_ip,:tcp_port,:web_ip,:web_port,:desc_short
 
-  # def validate
-  #   validate_uniqueness
-  # end
-  #
-  # def validate_uniqueness
-  #   exists = MesscadaServer.find_by_code(self.code)
-  #   if exists != nil
-  #     errors.add_to_base("There already exists a record with the code value of fields: '#{self.code}' ")
-  #   end
-  # end
-  #
-  # def unique_code_and_facilty_code
-  #   if self.code && self.facilty_code
-  #     val = ActiveRecord::Base.connection.select_one("select count(*) from messcada_servers where code=#{self.code} and facility_code=#{self.facility_code}")['count'].to_i
-  #     if val > 0
-  #       return false
-  #     end
-  #
-  #   end
-  #
-  #   return true
-  # end
+  def validate
+    if self.new_record?
+      validate_uniqueness
+    end
+  end
+
+  def validate_uniqueness
+    exists = MesscadaServer.find_by_code(self.code)
+    if exists != nil
+      errors.add_to_base("There already exists a record with the code value of fields: '#{self.code}' ")
+    end
+  end
 
   def before_save
 

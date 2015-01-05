@@ -358,7 +358,7 @@ module PartyManager::MesscadaCrudHelper
 
     module_function_types = ["Local ","Demand","Tapout","Mobile", "Robot", "Dashboard", "MAF"]
 
-    module_types = ["CLM ","CMS","CSM","EDI","GEN","INT","MOB","PAL","REB","RFS","SRT","SRV","TIP","PRN","SCL","SCN","QUALITY-CONTROL","PRODUCT-WEIGHT","DASHBOARD","STAGING-CONTAINERS","PRESORT","TIP","CLM","COLD"]
+    module_types = ["CLM","CMS","CSM","EDI","GEN","INT","MOB","PAL","REB","RFS","SRT","SRV","TIP","PRN","SCL","SCN","QUALITY-CONTROL","PRODUCT-WEIGHT","DASHBOARD","STAGING-CONTAINERS","PRESORT","TIP-AND-LABEL","CLM-GROUP","COLD-STORAGE"]
 
     if is_edit
       id = modules.id

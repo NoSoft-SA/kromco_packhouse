@@ -4,30 +4,20 @@ class MesscadaCluster < ActiveRecord::Base
   belongs_to :messcada_server
   has_many :messcada_modules #, :dependent => :destroy
 
-  validates_presence_of :code
+  validates_presence_of :code, :desc_short
 
-  # def validate
-  #   validate_uniqueness
-  # end
-  #
-  # def validate_uniqueness
-  #   exists = MesscadaCluster.find_by_code(self.code)
-  #   if exists != nil
-  #     errors.add_to_base("There already exists a record with the code value of fields: '#{self.code}' ")
-  #   end
-  # end
-  #
-  # def unique_code_and_facilty_code
-  #   if self.code && self.facilty_code
-  #     val = ActiveRecord::Base.connection.select_one("select count(*) from messcada_servers where code=#{self.code} and facility_code=#{self.facility_code}")['count'].to_i
-  #     if val > 0
-  #       return false
-  #     end
-  #
-  #   end
-  #
-  #   return true
-  # end
+  def validate
+    if self.new_record?
+      validate_uniqueness
+    end
+  end
+
+  def validate_uniqueness
+    exists = MesscadaCluster.find_by_code(self.code)
+    if exists != nil
+      errors.add_to_base("There already exists a record with the code value of fields: '#{self.code}' ")
+    end
+  end
 
   def before_save
     server = MesscadaServer.find(self.server_id)

@@ -5,16 +5,18 @@ class MesscadaFacility < ActiveRecord::Base
 
    validates_presence_of :code, :desc_short
 
-  # def validate
-  #   validate_uniqueness
-  # end
-  #
-  # def validate_uniqueness
-  #   # exists = MesscadaFacility.find_by_code(self.code)
-  #   # if exists != nil
-  #   #   errors.add_to_base("There already exists a record with the code value of fields: '#{self.code}' ")
-  #   # end
-  # end
+  def validate
+    if self.new_record?
+        validate_uniqueness
+    end
+  end
+
+  def validate_uniqueness
+    exists = MesscadaFacility.find_by_code(self.code)
+    if exists != nil
+      errors.add_to_base("There already exists a record with the code value of fields: '#{self.code}' ")
+    end
+  end
 
   def before_save
 

@@ -4,30 +4,20 @@ class MesscadaModule < ActiveRecord::Base
   belongs_to :messcada_cluster
   has_many :messcada_peripherals #, :dependent => :destroy
 
-  validates_presence_of :code
+  validates_presence_of :code,:module_type_code,:module_function_type_code,:ip,:port
 
-  # def validate
-  #   validate_uniqueness
-  # end
-  #
-  # def validate_uniqueness
-  #   exists = MesscadaModule.find_by_code(self.code)
-  #   if exists != nil
-  #     errors.add_to_base("There already exists a record with the code value of fields: '#{self.code}' ")
-  #   end
-  # end
-  #
-  # def unique_code_and_facilty_code
-  #   if self.code && self.facilty_code
-  #     val = ActiveRecord::Base.connection.select_one("select count(*) from messcada_servers where code=#{self.code} and facility_code=#{self.facility_code}")['count'].to_i
-  #     if val > 0
-  #       return false
-  #     end
-  #
-  #   end
-  #
-  #   return true
-  # end
+  def validate
+    if self.new_record?
+      validate_uniqueness
+    end
+  end
+
+  def validate_uniqueness
+    exists = MesscadaModule.find_by_code(self.code)
+    if exists != nil
+      errors.add_to_base("There already exists a record with the code value of fields: '#{self.code}' ")
+    end
+  end
 
   def before_save
 

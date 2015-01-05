@@ -5,30 +5,23 @@ class MesscadaPeripheral < ActiveRecord::Base
 
   has_many :messcada_peripheral_printers #, :dependent => :destroy
 
-  validates_presence_of :code
+  validates_presence_of :code,:peripheral_type_code,:peripheral_group_code,:comms_type_code,:ip,:port,:baud,
+                        :databooleans,:stopboolean,:flow_control,:button_tooltip,:input_buffer_length,:output_buffer_length,
+                        :timeout_milli_seconds,:device_name,:parameters,:communication_parameters,:network_parameters,
+                        :dbms_parameters,:application_parameters
 
-  # def validate
-  #   validate_uniqueness
-  # end
-  #
-  # def validate_uniqueness
-  #   exists = MesscadaPeripheral.find_by_code(self.code)
-  #   if exists != nil
-  #     errors.add_to_base("There already exists a record with the code value of fields: '#{self.code}' ")
-  #   end
-  # end
-  #
-  # def unique_code_and_facilty_code
-  #   if self.code && self.facilty_code
-  #     val = ActiveRecord::Base.connection.select_one("select count(*) from messcada_servers where code=#{self.code} and facility_code=#{self.facility_code}")['count'].to_i
-  #     if val > 0
-  #       return false
-  #     end
-  #
-  #   end
-  #
-  #   return true
-  # end
+  def validate
+    if self.new_record?
+      validate_uniqueness
+    end
+  end
+
+  def validate_uniqueness
+    exists = MesscadaPeripheral.find_by_code(self.code)
+    if exists != nil
+      errors.add_to_base("There already exists a record with the code value of fields: '#{self.code}' ")
+    end
+  end
 
   def before_save
 
