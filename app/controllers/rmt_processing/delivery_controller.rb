@@ -856,7 +856,7 @@ class RmtProcessing::DeliveryController < ApplicationController
 
   end
 
-#MM112014 - add orchard id
+  #MM112014 - add orchard id
   def orchard_id_changed
     orchard_id = get_selected_combo_value(params)
     session[:delivery_form][:orchard_id_combo_selection] = orchard_id
