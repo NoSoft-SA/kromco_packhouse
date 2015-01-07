@@ -57,6 +57,7 @@ end
 
   def after_create
     begin
+    if(self.commodity_code.to_s.upcase=='AP')
       http = Net::HTTP.new(Globals.bin_scanned_mssql_server_host, Globals.bin_created_mssql_presort_server_port)
       request = Net::HTTP::Post.new("/exec")
       parameters = {'method' => 'insert', 'statement' => Base64.encode64("INSERT INTO [productionv50].[dbo].[Clone] ([Code_clone],[Code_variete],[Nom_clone]) VALUES('#{self.track_slms_indicator_code}','#{self.track_slms_indicator_code}','#{self.track_slms_indicator_description}')")}
@@ -68,6 +69,7 @@ end
         errmsg = " \"NSERT INTO [productionv50].[dbo].[Clone]\". The http code is #{response.code}. Message: #{err}."
         raise errmsg
       end
+    end 
     rescue
       raise "SQL MF Automatic Integration returned an error: #{$!.message}"
     end

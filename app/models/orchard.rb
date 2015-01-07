@@ -1,30 +1,34 @@
 class Orchard < ActiveRecord::Base
-
+    
   belongs_to :farm
 
   #MM102014-add virtual variable commodity id
   attr_accessor :orchard_commodity_id, :commodity_code#, :commodity_description_long
-  #===================================
-  #   Validations
-  #===================================
+#===================================
+#   Validations
+#===================================
   validates_presence_of :orchard_code
   validates_uniqueness_of :orchard_code
 
   def validate
-    if self.new_record?
-      validate_uniqueness
-    end
+      if self.new_record?
+          validate_uniqueness
+      end
   end
 
   def validate_uniqueness
-    exists = Orchard.find_by_farm_id_and_orchard_code(self.farm_id,self.orchard_code)
-    if exists != nil
-      errors.add_to_base("There already exists a record with the combined values of fields: 'orchard_code'")
-    end
+      exists = Orchard.find_by_farm_id_and_orchard_code(self.farm_id,self.orchard_code)
+      if exists != nil
+          errors.add_to_base("There already exists a record with the combined values of fields: 'orchard_code'")
+      end
   end
 
   def after_create
     begin
+      rmt = RmtVariety.find_by_sql("select commodity_code from rmt_varieties where rmt_varieties.id = #{self.orchard_rmt_variety_id}")
+      RAILS_DEFAULT_LOGGER.info ("NAFIESA COMMODITY: " + rmt[0].commodity_code)    
+      if rmt[0].commodity_code=='AP' 
+	      
       http = Net::HTTP.new(Globals.bin_created_mssql_server_host, Globals.bin_created_mssql_presort_server_port)
       request = Net::HTTP::Post.new("/select")
       parameters = {'method' => 'select', 'statement' => Base64.encode64("SELECT TOP 1 [Index_parcelle]
@@ -70,7 +74,8 @@ class Orchard < ActiveRecord::Base
         errmsg = " \"INSERT INTO [productionv50].[dbo].[Parcelle]\". The http code is #{response.code}. Message: #{err}."
         raise errmsg
       end
-
+	    
+    end
     rescue
       raise "SQL MF Automatic Integration returned an error: #{$!.message}"
     end
