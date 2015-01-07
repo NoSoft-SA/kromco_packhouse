@@ -11,7 +11,7 @@ class Production::MesscadaCrudController < ApplicationController
   end
 
   def orchard_reload_page(function_name,function_id,message,frame_id)
-    @url = "/party_manager/messcada_crud/#{function_name}/#{function_id}";
+    @url = "/production/messcada_crud/#{function_name}/#{function_id}";
     @frame_id = frame_id
     session[:alert] = "#{message}"
     render :inline => %{
@@ -24,7 +24,7 @@ class Production::MesscadaCrudController < ApplicationController
   end
 
   def orchard_reload_main_page(function_name,function_id,message,frame_id)
-    @url = "/party_manager/messcada_crud/#{function_name}/#{function_id}";
+    @url = "/production/messcada_crud/#{function_name}/#{function_id}";
     @frame_id = frame_id
     session[:alert] = "#{message}"
     render :inline => %{
@@ -36,7 +36,7 @@ class Production::MesscadaCrudController < ApplicationController
   end
 
   def orchard_reload_page_grids(function_name,function_id,message,frame_id)
-    @url = "/party_manager/messcada_crud/#{function_name}/#{function_id}";
+    @url = "/production/messcada_crud/#{function_name}/#{function_id}";
     @frame_id = frame_id
     session[:alert] = "#{message}"
     render :inline => %{
