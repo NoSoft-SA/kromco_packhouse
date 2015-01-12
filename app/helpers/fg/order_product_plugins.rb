@@ -28,6 +28,8 @@
         end
         elsif column_name=="price_histories" && (!cell_value || cell_value == "false" || cell_value.to_s.strip == "")
           return true
+        elsif column_name=="get_historic_pricing" && (!cell_value || cell_value == "false" || cell_value.to_s.strip == "")
+          return true
         else
           return false
         end
@@ -42,6 +44,17 @@
         #'cancel_cell_rendering' method and return true.
         #-------------------------------------------------------------------
         def render_cell(column_name, cell_value, record)
+
+          if column_name=="get_historic_pricing"
+            column_config = {:id_value => record['id'],
+                             :image => 'historic_pricing',
+                             :host_and_port => @request.host_with_port.to_s,
+                             :controller => @request.path_parameters['controller'].to_s,
+                             :target_action => 'get_historic_pricing'}
+            popup_link = ApplicationHelper::LinkWindowField.new(nil, nil, 'none', 'none', 'none', column_config, true, nil, @env)
+            return popup_link.build_control
+          end
+
           if !@env.session.data[:current_viewing_order]
             if(column_name=="price_per_carton" || column_name=="price_per_kg" || column_name=="fob")
               return @env.text_field('order_product', "#{record['id']}_#{column_name}", {:size=>5,:value=>record[column_name]})
@@ -65,7 +78,8 @@
             popup_link = ApplicationHelper::LinkWindowField.new(nil, nil, 'none', 'none', 'none', column_config, true, nil, @env)
                       return popup_link.build_control
           end
-          
+
+
           if column_name=="subtotal"
             if record['price_per_carton']==nil
               subtotal=0
@@ -116,4 +130,4 @@ end
 end
     end
 #=end
-# =begin  
+# =begin

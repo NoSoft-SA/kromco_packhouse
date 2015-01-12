@@ -690,17 +690,19 @@ class Order < ActiveRecord::Base
         price_per_kg=nil
         price_per_carton=nil
         subtotal=0
-        latest_shipped_similar_order_product=OrderProduct.find_by_sql("select op.* from order_products op
-            join orders o on op.order_id=o.id
-            where op.item_pack_product_code='#{item_pack['item_pack_product_code']}' and op.old_fg_code='#{item_pack['old_fg_code']}'  and o.consignee_party_role_id=#{self.consignee_party_role_id}
-            and o.order_status='SHIPPED' order by o.id desc")[0]
-        if latest_shipped_similar_order_product
-          price_per_kg=latest_shipped_similar_order_product.price_per_kg
-          price_per_carton=latest_shipped_similar_order_product.price_per_carton
-          subtotal =  price_per_carton * item_pack['carton_count']   if  price_per_carton
-        end
-        @order_product.update_attributes(:price_per_kg=>price_per_kg ,:price_per_carton=>price_per_carton,:available_quantities=>item_pack['carton_count'],:subtotal=> subtotal,
-          :item_pack_product_code=>item_pack['item_pack_product_code'],:old_fg_code=>item_pack['old_fg_code'])
+        #latest_shipped_similar_order_product=OrderProduct.find_by_sql("select op.* from order_products op
+        #    join orders o on op.order_id=o.id
+        #    where op.item_pack_product_code='#{item_pack['item_pack_product_code']}' and op.old_fg_code='#{item_pack['old_fg_code']}'  and o.consignee_party_role_id=#{self.consignee_party_role_id}
+        #    and o.order_status='SHIPPED' order by o.id desc")[0]
+        #if latest_shipped_similar_order_product
+        #  price_per_kg=latest_shipped_similar_order_product.price_per_kg
+        #  price_per_carton=latest_shipped_similar_order_product.price_per_carton
+        #  subtotal =  price_per_carton * item_pack['carton_count']   if  price_per_carton
+        #end
+        #@order_product.update_attributes(:price_per_kg=>price_per_kg ,:price_per_carton=>price_per_carton,:available_quantities=>item_pack['carton_count'],:subtotal=> subtotal,
+        #  :item_pack_product_code=>item_pack['item_pack_product_code'],:old_fg_code=>item_pack['old_fg_code'])
+
+        @order_product.update_attributes(:available_quantities=>item_pack['carton_count'],:item_pack_product_code=>item_pack['item_pack_product_code'],:old_fg_code=>item_pack['old_fg_code'])
 
 
       end

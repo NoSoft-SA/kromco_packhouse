@@ -8,6 +8,33 @@ class Fg::OrderProductController < ApplicationController
     true
   end
 
+  def get_historic_pricing
+    order_product=OrderProduct.find(params[:id])
+    order=session[:order]
+    latest_shipped_similar_order_product=OrderProduct.find_by_sql("select op.* from order_products op
+            join orders o on op.order_id=o.id
+            where op.item_pack_product_code='#{order_product.item_pack_product_code}' and op.old_fg_code='#{order_product.old_fg_code}'  and o.consignee_party_role_id=#{order.consignee_party_role_id}
+            and o.order_status='SHIPPED' order by o.id desc ")[0]
+    price_per_kg=nil
+    price_per_carton=nil
+    subtotal=0
+    if latest_shipped_similar_order_product
+      price_per_kg=latest_shipped_similar_order_product.price_per_kg
+      price_per_carton=latest_shipped_similar_order_product.price_per_carton
+      subtotal =  price_per_carton * order_product.carton_count   if  price_per_carton
+    end
+    order_product.update_attributes(:price_per_kg=>price_per_kg ,:price_per_carton=>price_per_carton,:subtotal=> subtotal)
+
+    @total = order.calculate_order_amount(order.id)
+    render :inline => %{
+                          <script>
+                            alert('price edited successfully');
+                            window.opener.frames[1].frames[0].location.reload(true);
+                            window.opener.frames[1].document.getElementById("total_order_amount_cell").innerHTML= '<%= @total%>';
+                            window.close();
+                        </script>} and return
+  end
+
   def selected_order_products
     load_order=LoadOrder.find_by_load_id(session[:load_id])
     @order_id=load_order.order_id
@@ -141,8 +168,8 @@ class Fg::OrderProductController < ApplicationController
   end
 
   def price_histories
-    return if authorise_for_web(program_name?, 'edit_product_price')==false
-    
+    #return if authorise_for_web(program_name?, 'edit_product_price')==false
+
     @order_product=OrderProduct.find(params[:id])
     render_price_histories
   end
@@ -316,7 +343,7 @@ class Fg::OrderProductController < ApplicationController
   def render_order_product_search_form(is_flat_search = nil)
     session[:is_flat_search] = @is_flat_search
     render :inline => %{
-		<% @content_header_caption = "'search  order_products'"%> 
+		<% @content_header_caption = "'search  order_products'"%>
 
 		<%= build_order_product_search_form(nil,'submit_order_products_search','submit_order_products_search',@is_flat_search)%>
 
@@ -415,7 +442,7 @@ class Fg::OrderProductController < ApplicationController
   def render_new_order_product
 #	 render (inline) the edit template
     render :inline => %{
-		<% @content_header_caption = "'create new order_product'"%> 
+		<% @content_header_caption = "'create new order_product'"%>
 
 		<%= build_order_product_form(@order_product,'create_order_product','create_order_product',false,@is_create_retry)%>
 
@@ -437,7 +464,7 @@ class Fg::OrderProductController < ApplicationController
     session[:price_per_carton]=@order_product.price_per_carton
 #	 render (inline) the edit template
     render :inline => %{
-		<% @content_header_caption = "'edit order_product'"%> 
+		<% @content_header_caption = "'edit order_product'"%>
 
 		<%= build_order_product_form(@order_product,'update_order_product','update_order_product',true)%>
 
@@ -531,7 +558,7 @@ class Fg::OrderProductController < ApplicationController
     order_number = get_selected_combo_value(params)
     session[:order_product_form][:order_number_combo_selection] = order_number
     @customer_party_role_ids = OrderProduct.customer_party_role_ids_for_order_number(order_number)
-#	render (inline) the html to replace the contents of the td that contains the dropdown 
+#	render (inline) the html to replace the contents of the td that contains the dropdown
     render :inline => %{
 		<%= select('order_product','customer_party_role_id',@customer_party_role_ids)%>
 

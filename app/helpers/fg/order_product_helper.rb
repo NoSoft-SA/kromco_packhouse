@@ -52,6 +52,7 @@ module Fg::OrderProductHelper
                                                              :no_scroll => true
                                                      }
             }
+     @submit_button_align = "left"
      build_form(order_product, field_configs, action, 'order_product', caption, is_edit)
 
    end
@@ -193,6 +194,11 @@ module Fg::OrderProductHelper
                                                            :id_column => 'id'}}
 
     end
+    column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name => 'get_historic_pricing',:col_width=>150,
+                                               :settings =>
+                                                   {:link_text => '',
+                                                    :target_action => 'get_historic_pricing',
+                                                    :id_column => 'id'}}
 
     column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name => 'price_histories',
                                                         :col_width=>30,
