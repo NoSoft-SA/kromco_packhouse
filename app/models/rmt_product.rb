@@ -21,6 +21,32 @@ class RmtProduct < ActiveRecord::Base
     begin
       if(self.rmt_product_type_code.to_s.upcase=='PRESORT')
         code_article_client = "#{self.product_class_code}_#{self.treatment_code}_#{self.size_code}"
+
+
+        http = Net::HTTP.new(Globals.bin_scanned_mssql_server_host, Globals.bin_created_mssql_presort_server_port)
+        request = Net::HTTP::Post.new("/select")
+        parameters = {'method' => 'select', 'statement' => Base64.encode64("select * from [productionv50].[dbo].[Articleclient] where [productionv50].[dbo].[Articleclient].[Code_Articleclient]='#{code_article_client}'")}
+        request.set_form_data(parameters)
+        response = http.request(request)
+        puts "---\n#{response.code} - #{response.message}\n---\n"
+
+        if '200' == response.code
+          res = response.body.split('resultset>').last.split('</res').first
+          if((results = Marshal.load(Base64.decode64(res))).length > 0)
+            errmsg = "\"[productionv50].[dbo].[Articleclient].[Code_Articleclient]='#{code_article_client}' already exists.\"."
+            logger.error ">>>> #{errmsg}"
+            raise errmsg
+            return
+          end
+        else
+          err = response.body.split('</message>').first.split('<message>').last
+          errmsg = "MAF rmt_product_code intergration unique check failed: The http code is #{response.code}. Message: #{err}."
+          logger.error ">>>> #{errmsg}"
+          raise errmsg
+          return
+        end
+
+
         http = Net::HTTP.new(Globals.bin_scanned_mssql_server_host, Globals.bin_created_mssql_presort_server_port)
         request = Net::HTTP::Post.new("/exec")
         parameters = {'method' => 'insert', 'statement' => Base64.encode64("INSERT INTO [productionv50].[dbo].[Articleclient] ([Code_articleclient],[Nom_articleclient]) VALUES('#{code_article_client}','#{code_article_client}')")}
