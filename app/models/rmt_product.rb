@@ -33,10 +33,7 @@ class RmtProduct < ActiveRecord::Base
         if '200' == response.code
           res = response.body.split('resultset>').last.split('</res').first
           if((results = Marshal.load(Base64.decode64(res))).length > 0)
-            errmsg = "\"[productionv50].[dbo].[Articleclient].[Code_Articleclient]='#{code_article_client}' already exists.\"."
-            logger.error ">>>> #{errmsg}"
-            raise errmsg
-            return
+             return
           end
         else
           err = response.body.split('</message>').first.split('<message>').last
