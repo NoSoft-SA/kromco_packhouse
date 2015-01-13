@@ -195,11 +195,6 @@ module Fg::OrderProductHelper
                                                            :id_column => 'id'}}
 
     end
-    column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name => 'get_historic_pricing',:col_width=>150,
-                                               :settings =>
-                                                   {:link_text => '',
-                                                    :target_action => 'get_historic_pricing',
-                                                    :id_column => 'id'}}
 
     column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name => 'price_histories',
                                                         :col_width=>30,
@@ -208,42 +203,35 @@ module Fg::OrderProductHelper
                                                                 :target_action => 'price_histories',
                                                                 :id_column => 'id'}}
     end
-
+    grid_command =    {:field_type=>'link_window_field',:field_name =>'get_historic_pricing',
+                       :settings =>
+                           {
+                               :host_and_port =>request.host_with_port.to_s,
+                               :controller =>request.path_parameters['controller'].to_s,
+                               :target_action =>'get_historic_pricing',
+                               :link_text => 'get_historic_pricing',
+                               :id_value=>'id'
+                           }}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'price_per_kg',:column_caption=>'price/kg',:format => 'currency_default',:col_width=>50}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'price_per_carton',:column_caption=>'price/carton',:format => 'currency_default',:col_width=>50}
-    #column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'fob',:col_width=>50}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'old_fg_code',:col_width=>200}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'extended_fg_code',:col_width=>250}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'item_pack_product_code',:col_width=>250}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'old_pack_code',:col_width=>100}
-
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'required_quantity',:column_caption=>'Required',:col_width=>66}
+     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'required_quantity',:column_caption=>'Required',:col_width=>66}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'available_quantities',:column_caption=>'Available',:col_width=>66}
-
-    #column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'sequence_number',:column_caption=>'seq_num',:col_width=>49}
-    #column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'marketing_org',:col_width=>90}
-    #column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'commodity_code',:column_caption=>'commodity',:col_width=>40}
-    #column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'marketing_variety_code',:column_caption=>'marketing_variety',:col_width=>97}
-    #column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'brand_code',:column_caption=>'brand',:col_width=>100}
-    #column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'size_ref',:col_width=>50}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'grade_code',:column_caption=>'grade',:col_width=>36}
-    #column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'inventory_code',:column_caption=>'inventory',:col_width=>105}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'target_market_code',:column_caption=>'target_market',:col_width=>215}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'puc',:col_width=>49}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'pallet_format_product_code',:col_width=>79}
-    #column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'pc_code',:col_width=>160}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'iso_week_code',:column_caption=>'iso_week',:col_width=>37}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'season_code',:column_caption=>'season',:col_width=>44}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'pick_reference',:column_caption=>'pick_ref',:col_width=>44}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'inspection_type_code',:column_caption=>'inspection_type',:col_width=>67}
 
-    #column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'location',:col_width=>95}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'carton_count',:column_caption=>'ctn_qty',:col_width=>56}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'carton_weight',:column_caption=>'ctn_weight',:col_width=>56}
 
-    #column_configs[column_configs.length()]= {:field_type => 'text', :field_name =>  'price', :format => 'currency_default'}
-#    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'price_per_kg',:column_caption=>'price/kg',:format => 'currency_default',:col_width=>53}
-#    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'price_per_carton',:column_caption=>'price/ctn',:format => 'currency_default',:col_width=>56}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'subtotal', :col_width=>115 }
 
     column_configs[column_configs.length()]= {:field_type => 'text', :field_name => 'id' }
@@ -252,7 +240,7 @@ module Fg::OrderProductHelper
      set_grid_min_width(900)
      hide_grid_client_controls()
 
-      get_data_grid(data_set,column_configs,FgPlugins::OrderProductGridPlugin.new(self,request))
+      get_data_grid(data_set,column_configs,FgPlugins::OrderProductGridPlugin.new(self,request),true,grid_command)
 
   end
 

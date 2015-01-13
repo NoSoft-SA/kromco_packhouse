@@ -9,24 +9,29 @@ class Fg::OrderProductController < ApplicationController
   end
 
   def get_historic_pricing
-    order_product=OrderProduct.find(params[:id])
+    order_products= OrderProduct.find_by_sql("select * from order_products where order_id=#{session[:order].id}")
     order=session[:order]
-    latest_shipped_similar_order_product=OrderProduct.find_by_sql("select op.* from order_products op
-            join orders o on op.order_id=o.id
-            where op.item_pack_product_code='#{order_product.item_pack_product_code}' and op.old_fg_code='#{order_product.old_fg_code}'  and o.consignee_party_role_id=#{order.consignee_party_role_id}
-            and o.order_status='SHIPPED' order by o.id desc ")[0]
-    price_per_kg=nil
-    price_per_carton=nil
-    subtotal=0
-    if latest_shipped_similar_order_product
-      price_per_kg=latest_shipped_similar_order_product.price_per_kg
-      price_per_carton=latest_shipped_similar_order_product.price_per_carton
-      subtotal =  price_per_carton * order_product.carton_count   if  price_per_carton  &&  order_product.carton_count
+    if !order_products.empty?
+      order_products.each do |order_product|
+        price_per_kg=nil
+        price_per_carton=nil
+        subtotal=0
+        latest_shipped_similar_order_product=OrderProduct.find_by_sql("select op.* from order_products op
+              join orders o on op.order_id=o.id
+              where op.item_pack_product_code='#{order_product.item_pack_product_code}' and op.old_fg_code='#{order_product.old_fg_code}'  and o.consignee_party_role_id=#{order.consignee_party_role_id}
+              and o.order_status='SHIPPED' order by o.id desc ")[0]
+
+        if latest_shipped_similar_order_product
+          price_per_kg=latest_shipped_similar_order_product.price_per_kg
+          price_per_carton=latest_shipped_similar_order_product.price_per_carton
+          subtotal =  price_per_carton * order_product.carton_count   if  price_per_carton  &&  order_product.carton_count
+        end
+        order_product.update_attributes(:price_per_kg=>price_per_kg ,:price_per_carton=>price_per_carton,:subtotal=> subtotal)
+      end
     end
-    order_product.update_attributes(:price_per_kg=>price_per_kg ,:price_per_carton=>price_per_carton,:subtotal=> subtotal)
 
     @total = order.calculate_order_amount(order.id)
-    if subtotal==0
+    if @total==0
       render :inline => %{
                           <script>
                             alert('Historic Price not found');
@@ -36,9 +41,10 @@ class Fg::OrderProductController < ApplicationController
       render :inline => %{
                           <script>
                             alert('Price set');
-                            window.opener.frames[1].frames[0].location.reload(true);
-                            window.opener.frames[1].document.getElementById("total_order_amount_cell").innerHTML= '<%= @total%>';
                             window.close();
+                            window.opener.location.reload(true);
+                            window.opener.frames[1].document.getElementById("total_order_amount_cell").innerHTML= '<%= @total%>';
+
                         </script>} and return
     end
 
