@@ -293,6 +293,7 @@ class Load < ActiveRecord::Base
                               })
 
       Order.get_and_upgrade_prelim_orders(order_plt_nums)
+
     end
 
   end

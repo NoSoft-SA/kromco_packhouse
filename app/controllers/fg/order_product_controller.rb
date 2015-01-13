@@ -21,9 +21,8 @@ class Fg::OrderProductController < ApplicationController
     if latest_shipped_similar_order_product
       price_per_kg=latest_shipped_similar_order_product.price_per_kg
       price_per_carton=latest_shipped_similar_order_product.price_per_carton
-      subtotal =  price_per_carton * order_product.carton_count   if  price_per_carton
+      subtotal =  price_per_carton * order_product.carton_count   if  price_per_carton  &&  order_product.carton_count
     end
-
     order_product.update_attributes(:price_per_kg=>price_per_kg ,:price_per_carton=>price_per_carton,:subtotal=> subtotal)
 
     @total = order.calculate_order_amount(order.id)
@@ -36,7 +35,7 @@ class Fg::OrderProductController < ApplicationController
     else
       render :inline => %{
                           <script>
-                            alert('price edited successfully');
+                            alert('Price set');
                             window.opener.frames[1].frames[0].location.reload(true);
                             window.opener.frames[1].document.getElementById("total_order_amount_cell").innerHTML= '<%= @total%>';
                             window.close();

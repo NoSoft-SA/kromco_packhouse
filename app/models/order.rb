@@ -702,6 +702,7 @@ class Order < ActiveRecord::Base
         #@order_product.update_attributes(:price_per_kg=>price_per_kg ,:price_per_carton=>price_per_carton,:available_quantities=>item_pack['carton_count'],:subtotal=> subtotal,
         #  :item_pack_product_code=>item_pack['item_pack_product_code'],:old_fg_code=>item_pack['old_fg_code'])
 
+
         @order_product.update_attributes(:available_quantities=>item_pack['carton_count'],:item_pack_product_code=>item_pack['item_pack_product_code'],:old_fg_code=>item_pack['old_fg_code'])
 
 
