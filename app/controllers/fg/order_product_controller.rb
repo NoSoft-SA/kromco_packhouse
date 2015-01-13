@@ -23,16 +23,26 @@ class Fg::OrderProductController < ApplicationController
       price_per_carton=latest_shipped_similar_order_product.price_per_carton
       subtotal =  price_per_carton * order_product.carton_count   if  price_per_carton
     end
+
     order_product.update_attributes(:price_per_kg=>price_per_kg ,:price_per_carton=>price_per_carton,:subtotal=> subtotal)
 
     @total = order.calculate_order_amount(order.id)
-    render :inline => %{
+    if subtotal==0
+      render :inline => %{
+                          <script>
+                            alert('Historic Price not found');
+                            window.close();
+                        </script>} and return
+    else
+      render :inline => %{
                           <script>
                             alert('price edited successfully');
                             window.opener.frames[1].frames[0].location.reload(true);
                             window.opener.frames[1].document.getElementById("total_order_amount_cell").innerHTML= '<%= @total%>';
                             window.close();
                         </script>} and return
+    end
+
   end
 
   def selected_order_products
