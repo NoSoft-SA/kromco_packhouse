@@ -43,9 +43,25 @@ module Production::MesscadaCrudHelper
                         :field_name => "messcada_servers",
                         :settings   => {:target_action => 'list_servers',
                                         :id_value      => facility.id,
-                                        :width         => 1500,
-                                        :height        => 500,
-                                        :no_scroll     => true}}
+                                        # :width         => 1500,
+                                        # :height        => 1500,
+                                        :no_scroll     => true
+                        }
+      }
+
+      session[:field_name] = "facility_code"
+      session[:field_value] = facility.code
+
+      field_configs << {:field_type => 'Screen',
+                        :field_name => "messcada_peripherals",
+                        :settings   => {:target_action => 'list_peripherals',
+                                        :id_value      => facility.code,
+                                        # :width         => 1000,
+                                        # :height        => 500,
+                                        :no_scroll     => true
+                        }
+      }
+
     end
 
     @submit_button_align = "left"
@@ -56,7 +72,7 @@ module Production::MesscadaCrudHelper
   end
 
 
-  def build_facilities_grid(data_set,can_edit,can_delete)
+  def build_facilities_grid(data_set,can_edit,can_delete,is_select)
 
     column_configs = Array.new
     column_configs << {:field_type => 'text',:field_name => 'id', :col_width => 60}
@@ -99,6 +115,8 @@ module Production::MesscadaCrudHelper
                         :link_text     => "add facilities"}
     }
 
+    set_grid_min_height(500)
+    set_grid_min_width(1500)
     return get_data_grid(data_set,column_configs,nil,nil,grid_command)
 
   end
@@ -164,9 +182,25 @@ module Production::MesscadaCrudHelper
                         :field_name => "messcada_clusters",
                         :settings   => {:target_action => 'list_clusters',
                                         :id_value      => server.id,
-                                        :width         => 1500,
-                                        :height        => 500,
-                                        :no_scroll     => true}}
+                                        # :width         => 1500,
+                                        # :height        => 500,
+                                        :no_scroll     => true
+                        }
+      }
+
+      session[:field_name] = "server_code"
+      session[:field_value] = server.code
+
+      field_configs << {:field_type => 'Screen',
+                        :field_name => "messcada_peripherals",
+                        :settings   => {:target_action => 'list_peripherals',
+                                        :id_value      => server.code,
+                                        # :width         => 1500,
+                                        # :height        => 500,
+                                        :no_scroll     => true
+                        }
+      }
+
     end
 
     @submit_button_align = "left"
@@ -175,7 +209,7 @@ module Production::MesscadaCrudHelper
 
   end
 
-  def build_servers_grid(data_set,can_edit,can_delete,is_edit)
+  def build_servers_grid(data_set,can_edit,can_delete,is_edit,is_select)
 
     column_configs = Array.new
     column_configs << {:field_type => 'text',:field_name => 'id', :col_width => 60}
@@ -189,6 +223,7 @@ module Production::MesscadaCrudHelper
     column_configs << {:field_type => 'text',:field_name => 'desc_short', :col_width => 100}
     column_configs << {:field_type => 'text',:field_name => 'desc_medium', :col_width => 150}
     column_configs << {:field_type => 'text',:field_name => 'desc_long', :col_width => 200}
+    column_configs << {:field_type => 'text',:field_name => 'id', :col_width => 60}
 
     if can_edit
       column_configs << {:field_type => 'link_window',:field_name => 'edit server',
@@ -217,12 +252,18 @@ module Production::MesscadaCrudHelper
                       :settings   => {
                           :host_and_port => request.host_with_port.to_s,
                           :controller    => request.path_parameters['controller'].to_s ,
-                          :target_action => 'new_server',
+                          :target_action => 'add_servers',
                           :link_text     => "add servers"
                       }
       }
     end
 
+    if is_select
+      @multi_select = "selected_servers"
+    end
+
+    set_grid_min_height(500)
+    set_grid_min_width(1500)
     return get_data_grid(data_set,column_configs,nil,nil,grid_command)
 
   end
@@ -291,9 +332,25 @@ module Production::MesscadaCrudHelper
                         :field_name => "messcada_modules",
                         :settings   => {:target_action => 'list_modules',
                                         :id_value      => cluster.id,
-                                        :width         => 1500,
-                                        :height        => 500,
-                                        :no_scroll     => true}}
+                                        # :width         => 1500,
+                                        # :height        => 500,
+                                        :no_scroll     => true
+                        }
+      }
+
+      session[:field_name] = "cluster_code"
+      session[:field_value] = cluster.code
+
+      field_configs << {:field_type => 'Screen',
+                        :field_name => "messcada_peripherals",
+                        :settings   => {:target_action => 'list_peripherals',
+                                        :id_value      => cluster.code,
+                                        # :width         => 1500,
+                                        # :height        => 500,
+                                        :no_scroll     => true
+                        }
+      }
+
     end
 
     @submit_button_align = "left"
@@ -302,7 +359,7 @@ module Production::MesscadaCrudHelper
 
   end
 
-  def build_clusters_grid(data_set,can_edit,can_delete,is_edit)
+  def build_clusters_grid(data_set,can_edit,can_delete,is_edit,is_select)
 
     column_configs = Array.new
     column_configs << {:field_type => 'text',:field_name => 'id', :col_width => 60}
@@ -345,6 +402,8 @@ module Production::MesscadaCrudHelper
       }
     end
 
+    set_grid_min_height(500)
+    set_grid_min_width(1500)
     return get_data_grid(data_set,column_configs,nil,nil,grid_command)
 
   end
@@ -457,9 +516,12 @@ module Production::MesscadaCrudHelper
                         :field_name => "messcada_peripherals",
                         :settings   => {:target_action => 'list_peripherals',
                                         :id_value      => modules.id,
-                                        :width         => 1500,
-                                        :height        => 500,
-                                        :no_scroll     => true}}
+                                        # :width         => 1500,
+                                        # :height        => 500,
+                                        :no_scroll     => true
+                        }
+      }
+
     end
 
     @submit_button_align = "left"
@@ -468,7 +530,7 @@ module Production::MesscadaCrudHelper
 
   end
 
-  def build_modules_grid(data_set,can_edit,can_delete,is_edit)
+  def build_modules_grid(data_set,can_edit,can_delete,is_edit,is_select)
 
     column_configs = Array.new
     column_configs << {:field_type => 'text',:field_name => 'id', :col_width => 60}
@@ -519,6 +581,8 @@ module Production::MesscadaCrudHelper
       }
     end
 
+    set_grid_min_height(500)
+    set_grid_min_width(1500)
     return get_data_grid(data_set,column_configs,nil,nil,grid_command)
 
   end
@@ -709,9 +773,12 @@ module Production::MesscadaCrudHelper
                         :field_name => "messcada_peripheral_printers",
                         :settings   => {:target_action => 'list_peripheral_printers',
                                         :id_value      => peripheral.id,
-                                        :width         => 1500,
-                                        :height        => 500,
-                                        :no_scroll     => true}}
+                                        # :width         => 1500,
+                                        # :height        => 500,
+                                        :no_scroll     => true
+                        }
+      }
+
     end
 
     @submit_button_align = "left"
@@ -720,7 +787,7 @@ module Production::MesscadaCrudHelper
 
   end
 
-  def build_peripherals_grid(data_set,can_edit,can_delete,is_edit)
+  def build_peripherals_grid(data_set,can_edit,can_delete,is_edit,is_select)
 
     column_configs = Array.new
     column_configs << {:field_type => 'text',:field_name => 'id', :col_width => 60}
@@ -756,6 +823,7 @@ module Production::MesscadaCrudHelper
     column_configs << {:field_type => 'text',:field_name => 'network_parameters', :col_width => 100}
     column_configs << {:field_type => 'text',:field_name => 'dbms_parameters', :col_width => 100}
     column_configs << {:field_type => 'text',:field_name => 'application_parameters', :col_width => 100}
+    column_configs << {:field_type => 'text',:field_name => 'id', :col_width => 60}
 
     if can_edit
       column_configs << {:field_type => 'link_window',:field_name => 'edit peripheral',
@@ -782,16 +850,21 @@ module Production::MesscadaCrudHelper
                       :settings   => {
                           :host_and_port => request.host_with_port.to_s,
                           :controller    => request.path_parameters['controller'].to_s ,
-                          :target_action => 'new_peripheral',
+                          :target_action => 'add_peripherals',
                           :link_text     => "add peripheral"
                       }
       }
     end
 
+    if is_select
+      @multi_select = "selected_peripherals"
+    end
+
+    set_grid_min_height(500)
+    set_grid_min_width(1500)
     return get_data_grid(data_set,column_configs,nil,nil,grid_command)
 
   end
-
 
 
   #messcada_peripherals
@@ -894,8 +967,8 @@ module Production::MesscadaCrudHelper
     #                     :field_name => "messcada_servers",
     #                     :settings   => {:target_action => 'list_servers',
     #                                     :id_value      => peripheral_printer.id,
-    #                                     :width         => 1500,
-    #                                     :height        => 500,
+    #                                     # :width         => 1500,
+    #                                     # :height        => 500,
     #                                     :no_scroll     => true}}
     # end
 
@@ -955,6 +1028,8 @@ module Production::MesscadaCrudHelper
       }
     end
 
+    set_grid_min_height(500)
+    set_grid_min_width(1500)
     return get_data_grid(data_set,column_configs,nil,nil,grid_command)
 
   end
