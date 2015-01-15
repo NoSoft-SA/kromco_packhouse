@@ -173,18 +173,19 @@ def self.party_type_ids_for_party_name(party_name)
 
 
   def after_save
-    save_allocation
-
+    if self.rfid.to_i > 0
+      save_allocation
+    else
+      allocations = MesscadaPeopleViewMesscadaRfidAllocation.find_by_person_id(id)
+      allocations.destroy
+    end
   end
 
   def save_allocation
     #MM112014 - messcada changes
     if self.rfid && self.rfid.to_i > 0 && unique_rf_id?
       if allocations = MesscadaPeopleViewMesscadaRfidAllocation.find_by_person_id(id)
-        # person_id = allocations.person_id
-        # old_rfid = allocations.rfid.to_i
-        # new_rfid = self.rfid.to_i
-        # save_allocation_change(person_id,old_rfid,new_rfid) if new_rfid != old_rfid
+
       else
         allocations = MesscadaPeopleViewMesscadaRfidAllocation.new
       end

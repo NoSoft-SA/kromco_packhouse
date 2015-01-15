@@ -13,6 +13,7 @@ module PartyManager::PersonHelper
 
    #MM112014 - messcada changes
    rfid_list = MesscadaRfidAllocation.find_by_sql('select distinct rfid,id from messcada_rfid_allocations').map{|g|["#{g.rfid}", g.rfid]}
+   rfid_list.unshift ["empty",nil]
 
    if is_edit
      id = person.id
@@ -49,6 +50,7 @@ module PartyManager::PersonHelper
 
    field_configs << {:field_type => 'DropDownField',
                      :field_name => 'rfid',
+                     :editable => true,
                      :settings => {:list => rfid_list}}
 
    field_configs << {:field_type => 'PopupDateSelector',

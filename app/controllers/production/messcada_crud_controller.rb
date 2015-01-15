@@ -776,7 +776,7 @@ class Production::MesscadaCrudController < ApplicationController
     selected_messcada_peripherals = selected_records?(messcada_peripherals,nil,nil)
     MesscadaPeripheral.save_selected_messcada_peripherals(selected_messcada_peripherals,session[:field_name],session[:field_value])
     if session[:field_name].to_s == "module_id"
-      orchard_reload_page("link_to_module_code",session[:field_value],"'peripheral added successfully'",1)
+      orchard_reload_page("link_to_module_code",session[:module_code],"'peripheral added successfully'",1)
     else
       orchard_reload_page("link_to_" + session[:field_name].to_s + "",session[:field_value],"'peripheral added successfully'",1)
     end
