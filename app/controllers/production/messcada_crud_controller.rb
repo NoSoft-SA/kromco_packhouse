@@ -757,7 +757,7 @@ class Production::MesscadaCrudController < ApplicationController
   def add_messcada_peripherals
     @is_select = true
     session[:belongs_to_module] = true #???
-    query = "select * from  messcada_peripherals MP
+    query = "select  * from  messcada_peripherals MP
             where (MP." + session[:field_name].to_s + " IS NULL OR  MP."  + session[:field_name].to_s +  " != '#{session[:field_value]}')
             and MP.code NOT IN
             (
