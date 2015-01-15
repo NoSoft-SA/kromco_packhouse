@@ -806,7 +806,11 @@ class RmtProcessing::DeliveryController < ApplicationController
     farm_code = session[:delivery_form][:farm_code_combo_selection]
     puc_code = session[:delivery_form][:puc_code]
     commodity_code = session[:delivery_form][:commodity_code_combo_selection]
-    @orchard_id = Orchard.find_by_sql("select distinct orchards.id,orchards.orchard_code,orchards.orchard_description from orchards inner join rmt_varieties on orchards.orchard_rmt_variety_id = rmt_varieties.id inner join commodities on rmt_varieties.commodity_id = commodities.id inner join farm_puc_accounts on orchards.farm_id = farm_puc_accounts.farm_id where farm_code = '#{farm_code}' and puc_code = '#{puc_code}' and rmt_varieties.commodity_code = '#{commodity_code}' and rmt_varieties.rmt_variety_code = '#{rmt_variety_code}'").map{|g|["#{g.orchard_code} - #{g.orchard_description}", g.id]}
+    @orchard_id = Orchard.find_by_sql("select distinct orchards.id,orchards.orchard_code,orchards.orchard_description from orchards
+                                      inner join rmt_varieties on orchards.orchard_rmt_variety_id = rmt_varieties.id
+                                      inner join commodities on rmt_varieties.commodity_id = commodities.id
+                                      inner join farm_puc_accounts on orchards.farm_id = farm_puc_accounts.farm_id
+                                      where farm_code = '#{farm_code}' and puc_code = '#{puc_code}' and rmt_varieties.commodity_code = '#{commodity_code}' and rmt_varieties.rmt_variety_code = '#{rmt_variety_code}'").map{|g|["#{g.orchard_code} - #{g.orchard_description}", g.id]}
     @orchard_id.unshift(["<empty>", nil]) #if !@orchard_id.empty?
 
     # render :inline => %{
@@ -944,7 +948,11 @@ class RmtProcessing::DeliveryController < ApplicationController
     #date_from = params[:delivery][:date_delivered_from].to_formatted_s(:db)
     #date_to = params[:delivery][:date_delivered_to].to_formatted_s(:db)
 
-    @orchard_id = Delivery.find_by_sql("select distinct season_code from deliveries where farm_code = '#{farm_code}' and puc_code = '#{puc_code}' and commodity_code = '#{commodity_code}' and rmt_variety_code = '#{rmt_variety_code}'").map { |g| [g.season_code] }
+    @orchard_id = Orchard.find_by_sql("select distinct orchards.id,orchards.orchard_code,orchards.orchard_description from orchards
+                                      inner join rmt_varieties on orchards.orchard_rmt_variety_id = rmt_varieties.id
+                                      inner join commodities on rmt_varieties.commodity_id = commodities.id
+                                      inner join farm_puc_accounts on orchards.farm_id = farm_puc_accounts.farm_id
+                                      where farm_code = '#{farm_code}' and puc_code = '#{puc_code}' and rmt_varieties.commodity_code = '#{commodity_code}' and rmt_varieties.rmt_variety_code = '#{rmt_variety_code}'").map{|g|["#{g.orchard_code} - #{g.orchard_description}", g.id]}
     @orchard_id.unshift("<empty>")
 
     @season_codes = Delivery.find_by_sql("select distinct season_code from deliveries where farm_code = '#{farm_code}' and puc_code = '#{puc_code}' and commodity_code = '#{commodity_code}' and rmt_variety_code = '#{rmt_variety_code}'").map { |g| [g.season_code] }
