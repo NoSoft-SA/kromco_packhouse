@@ -143,7 +143,7 @@ class PartyManager::PersonController < ApplicationController
   def create_person
     begin
       @person = Person.new(params[:person])
-      @person.rfid = params[:person][:rfid].to_i
+      @person.rfid = params[:person][:rfid].to_s
 
       if @person.save
 
@@ -199,7 +199,7 @@ class PartyManager::PersonController < ApplicationController
       id = params[:person][:id]
       if id && @person = Person.find(id)
         ActiveRecord::Base.transaction do
-          @person.rfid = params[:person][:rfid].to_i
+          @person.rfid = params[:person][:rfid].to_s
           @person.update_attributes(params[:person])
           old_party_name=session[:editing_person]['first_name'] + "_" + session[:editing_person]['last_name']
           parties_role = PartiesRole.find_by_party_name(old_party_name)
