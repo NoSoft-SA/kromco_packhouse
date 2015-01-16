@@ -177,7 +177,7 @@ def self.party_type_ids_for_party_name(party_name)
       save_allocation
     else
       allocations = MesscadaPeopleViewMesscadaRfidAllocation.find_by_person_id(id)
-      allocations.destroy
+      allocations.destroy if allocations != nil
     end
   end
 
