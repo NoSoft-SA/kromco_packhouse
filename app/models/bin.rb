@@ -44,7 +44,7 @@ class Bin < ActiveRecord::Base
                and (bin_location_setups.treatment_code='ALL' or bin_location_setups.treatment_code='#{bin.rmt_product.treatment_code}'))
               order by bin_location_setups.priority ASC
           "
-    #RAILS_DEFAULT_LOGGER.info ("query: " + query )     	  
+    #RAILS_DEFAULT_LOGGER.info ("query: " + query )
     puts query
     ActiveRecord::Base.connection.select_all(query)
   end
@@ -77,7 +77,7 @@ class Bin < ActiveRecord::Base
     end
     inventory_references_join = inventory_references.join("  OR  ")  #TODO remove comment below!
     bins = Bin.find_by_sql("select bins.* from bins
-          inner join stock_items on bins.bin_number=stock_items.inventory_reference    
+          inner join stock_items on bins.bin_number=stock_items.inventory_reference
           inner join rmt_products on bins.rmt_product_id=rmt_products.id
           where  (#{inventory_references_join }) ")#and (stock_items.stock_type_code='BIN' OR stock_items.stock_type_code='PRESORT') and (stock_items.destroyed is null or stock_items.destroyed = false) and sealed_ca_location_id is null")
     return bins
@@ -116,7 +116,7 @@ class Bin < ActiveRecord::Base
           if  bin_order_load_status=="COMPLETE"
             stock_item=StockItem.find_by_inventory_reference(bin.bin_number)
             if stock_item.destroyed && bin.exit_ref
-              Inventory.undo_destroy_stock(bin.bin_number, "BIN_SALES", bin_order.bin_order_number)
+              Inventory.undo_destroy_stock([bin.bin_number], "BIN_SALES", bin_order.bin_order_number)
             end
           end
           Bin.find_by_sql(ActiveRecord::Base.extend_update_sql_with_request("update bins set exit_ref = null where id = #{bin.id}"))
