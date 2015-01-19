@@ -43,8 +43,8 @@ module Production::MesscadaCrudHelper
                         :field_name => "messcada_servers",
                         :settings   => {:target_action => 'list_servers',
                                         :id_value      => facility.id,
-                                        # :width         => 1500,
-                                        # :height        => 1500,
+                                        :width         => 1100,
+                                        :height        => 300,
                                         :no_scroll     => true
                         }
       }
@@ -56,11 +56,12 @@ module Production::MesscadaCrudHelper
                         :field_name => "messcada_peripherals",
                         :settings   => {:target_action => 'list_peripherals',
                                         :id_value      => facility.code,
-                                        # :width         => 1000,
-                                        # :height        => 500,
+                                        :width         => 1100,
+                                        :height        => 300,
                                         :no_scroll     => true
                         }
       }
+
 
     end
 
@@ -86,7 +87,7 @@ module Production::MesscadaCrudHelper
     column_configs << {:field_type => 'text',:field_name => 'desc_long', :col_width => 300}
 
     if can_edit
-      column_configs <<  {:field_type => 'link_window',:field_name => 'edit facility',
+      column_configs <<  {:field_type => 'action',:field_name => 'edit facility',
                                                  :settings =>
                                                      {:link_text => 'edit',
                                                       :target_action => 'edit_facility',
@@ -115,8 +116,9 @@ module Production::MesscadaCrudHelper
                         :link_text     => "add facilities"}
     }
 
-    set_grid_min_height(500)
-    set_grid_min_width(1500)
+    set_grid_min_height(150)
+    set_grid_min_width(850)
+    hide_grid_client_controls()
     return get_data_grid(data_set,column_configs,nil,nil,grid_command)
 
   end
@@ -182,8 +184,8 @@ module Production::MesscadaCrudHelper
                         :field_name => "messcada_clusters",
                         :settings   => {:target_action => 'list_clusters',
                                         :id_value      => server.id,
-                                        # :width         => 1500,
-                                        # :height        => 500,
+                                        :width         => 1100,
+                                        :height        => 300,
                                         :no_scroll     => true
                         }
       }
@@ -195,8 +197,8 @@ module Production::MesscadaCrudHelper
                         :field_name => "messcada_peripherals",
                         :settings   => {:target_action => 'list_peripherals',
                                         :id_value      => server.code,
-                                        # :width         => 1500,
-                                        # :height        => 500,
+                                        :width         => 1100,
+                                        :height        => 300,
                                         :no_scroll     => true
                         }
       }
@@ -226,10 +228,10 @@ module Production::MesscadaCrudHelper
     column_configs << {:field_type => 'text',:field_name => 'id', :col_width => 60}
 
     if can_edit
-      column_configs << {:field_type => 'link_window',:field_name => 'edit server',
+      column_configs << {:field_type => 'action',:field_name => 'edit server',
                                                  :settings =>
                                                      {:link_text => 'edit',
-                                                      :target_action => 'edit_server',
+                                                      :target_action => 'render_edit_server',
                                                       :id_column => 'id',
                                                       :col_width => 100
                                                      }
@@ -262,8 +264,9 @@ module Production::MesscadaCrudHelper
       @multi_select = "selected_servers"
     end
 
-    set_grid_min_height(500)
-    set_grid_min_width(1500)
+    set_grid_min_height(150)
+    set_grid_min_width(850)
+    hide_grid_client_controls()
     return get_data_grid(data_set,column_configs,nil,nil,grid_command)
 
   end
@@ -332,8 +335,8 @@ module Production::MesscadaCrudHelper
                         :field_name => "messcada_modules",
                         :settings   => {:target_action => 'list_modules',
                                         :id_value      => cluster.id,
-                                        # :width         => 1500,
-                                        # :height        => 500,
+                                        :width         => 1100,
+                                        :height        => 300,
                                         :no_scroll     => true
                         }
       }
@@ -345,8 +348,8 @@ module Production::MesscadaCrudHelper
                         :field_name => "messcada_peripherals",
                         :settings   => {:target_action => 'list_peripherals',
                                         :id_value      => cluster.code,
-                                        # :width         => 1500,
-                                        # :height        => 500,
+                                        :width         => 1100,
+                                        :height        => 300,
                                         :no_scroll     => true
                         }
       }
@@ -372,10 +375,10 @@ module Production::MesscadaCrudHelper
     column_configs << {:field_type => 'text',:field_name => 'desc_long', :col_width => 200}
 
     if can_edit
-      column_configs << {:field_type => 'link_window',:field_name => 'edit cluster',
+      column_configs << {:field_type => 'action',:field_name => 'edit cluster',
                                                  :settings =>
                                                      {:link_text => 'edit',
-                                                      :target_action => 'edit_cluster',
+                                                      :target_action => 'render_edit_cluster',
                                                       :id_column => 'id', :col_width => 100
                                                      }
       }
@@ -402,8 +405,9 @@ module Production::MesscadaCrudHelper
       }
     end
 
-    set_grid_min_height(500)
-    set_grid_min_width(1500)
+    set_grid_min_height(150)
+    set_grid_min_width(850)
+    hide_grid_client_controls()
     return get_data_grid(data_set,column_configs,nil,nil,grid_command)
 
   end
@@ -516,8 +520,8 @@ module Production::MesscadaCrudHelper
                         :field_name => "messcada_peripherals",
                         :settings   => {:target_action => 'list_peripherals',
                                         :id_value      => modules.id,
-                                        # :width         => 1500,
-                                        # :height        => 500,
+                                        :width         => 1100,
+                                        :height        => 300,
                                         :no_scroll     => true
                         }
       }
@@ -551,10 +555,10 @@ module Production::MesscadaCrudHelper
     column_configs << {:field_type => 'text',:field_name => 'button_multiples', :data_type => 'boolean', :col_width => 100}
 
     if can_edit
-      column_configs << {:field_type => 'link_window',:field_name => 'edit module',
+      column_configs << {:field_type => 'action',:field_name => 'edit module',
                                                  :settings =>
                                                      {:link_text => 'edit',
-                                                      :target_action => 'edit_module',
+                                                      :target_action => 'render_edit_module',
                                                       :id_column => 'id', :col_width => 100
                                                      }
       }
@@ -581,8 +585,9 @@ module Production::MesscadaCrudHelper
       }
     end
 
-    set_grid_min_height(500)
-    set_grid_min_width(1500)
+    set_grid_min_height(150)
+    set_grid_min_width(850)
+    hide_grid_client_controls()
     return get_data_grid(data_set,column_configs,nil,nil,grid_command)
 
   end
@@ -773,8 +778,8 @@ module Production::MesscadaCrudHelper
                         :field_name => "messcada_peripheral_printers",
                         :settings   => {:target_action => 'list_peripheral_printers',
                                         :id_value      => peripheral.id,
-                                        # :width         => 1500,
-                                        # :height        => 500,
+                                        :width         => 1100,
+                                        :height        => 300,
                                         :no_scroll     => true
                         }
       }
@@ -826,10 +831,10 @@ module Production::MesscadaCrudHelper
     column_configs << {:field_type => 'text',:field_name => 'id', :col_width => 60}
 
     if can_edit
-      column_configs << {:field_type => 'link_window',:field_name => 'edit peripheral',
+      column_configs << {:field_type => 'action',:field_name => 'edit peripheral',
                                                  :settings =>
                                                      {:link_text => 'edit',
-                                                      :target_action => 'edit_peripheral',
+                                                      :target_action => 'render_edit_peripheral',
                                                       :id_column => 'id', :col_width => 100
                                                      }
       }
@@ -860,8 +865,9 @@ module Production::MesscadaCrudHelper
       @multi_select = "selected_peripherals"
     end
 
-    set_grid_min_height(500)
-    set_grid_min_width(1500)
+    set_grid_min_height(150)
+    set_grid_min_width(850)
+    hide_grid_client_controls()
     return get_data_grid(data_set,column_configs,nil,nil,grid_command)
 
   end
@@ -967,8 +973,8 @@ module Production::MesscadaCrudHelper
     #                     :field_name => "messcada_servers",
     #                     :settings   => {:target_action => 'list_servers',
     #                                     :id_value      => peripheral_printer.id,
-    #                                     # :width         => 1500,
-    #                                     # :height        => 500,
+    #                                     # :width         => 1100,
+    #                                     # :height        => 300,
     #                                     :no_scroll     => true}}
     # end
 
@@ -998,10 +1004,10 @@ module Production::MesscadaCrudHelper
     column_configs << {:field_type => 'text',:field_name => 'render_amount', :col_width => 100}
 
     if can_edit
-      column_configs << {:field_type => 'link_window',:field_name => 'edit peripheral printer',
+      column_configs << {:field_type => 'action',:field_name => 'edit peripheral printer',
                          :settings =>
                              {:link_text => 'edit',
-                              :target_action => 'edit_peripheral_printer',
+                              :target_action => 'render_edit_peripheral_printer',
                               :id_column => 'id', :col_width => 100
                              }
       }
@@ -1028,8 +1034,9 @@ module Production::MesscadaCrudHelper
       }
     end
 
-    set_grid_min_height(500)
-    set_grid_min_width(1500)
+    set_grid_min_height(150)
+    set_grid_min_width(850)
+    hide_grid_client_controls()
     return get_data_grid(data_set,column_configs,nil,nil,grid_command)
 
   end

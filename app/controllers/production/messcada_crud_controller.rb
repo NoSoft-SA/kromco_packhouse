@@ -33,7 +33,37 @@ class Production::MesscadaCrudController < ApplicationController
     true
   end
 
-  def orchard_reload_page(function_name,function_id,message,frame_id)
+  def reload_main_page(function_name,function_id)
+    @url = "/production/messcada_crud/#{function_name}/#{function_id}";
+    session[:alert] = "Record created successfully"
+    render :inline => %{
+                          <script>
+                            window.close();
+                            window.opener.frames[1].location.href = "<%=@url%>";
+                          </script>
+                          }, :layout => 'content'
+  end
+
+  def main_page(function_name,function_id)
+    @url = "/production/messcada_crud/#{function_name}/#{function_id}";
+    render :inline => %{
+                          <script>
+                            parent.location.href = "<%=@url%>";
+                          </script>
+                          }#, :layout => 'content'
+  end
+
+  def update_main_page(function_name,function_id)
+    @url = "/production/messcada_crud/#{function_name}/#{function_id}";
+    session[:alert] = "Record updated successfully"
+    render :inline => %{
+                          <script>
+                            parent.frames[1].location.href = "<%=@url%>";
+                          </script>
+                          }#, :layout => 'content'
+  end
+
+  def reload_page(function_name,function_id,message,frame_id)
     @url = "/production/messcada_crud/#{function_name}/#{function_id}";
     @frame_id = frame_id
     session[:alert] = "#{message}"
@@ -46,19 +76,7 @@ class Production::MesscadaCrudController < ApplicationController
                           }, :layout => 'content'
   end
 
-  def orchard_reload_main_page(function_name,function_id,message,frame_id)
-    @url = "/production/messcada_crud/#{function_name}/#{function_id}";
-    @frame_id = frame_id
-    session[:alert] = "#{message}"
-    render :inline => %{
-                          <script>
-                            window.close();
-                            window.opener.frames[1].location.href = "<%=@url%>";
-                          </script>
-                          }, :layout => 'content'
-  end
-
-  def orchard_reload_page_grids(function_name,function_id,message,frame_id)
+  def reload_page_grids(function_name,function_id,message,frame_id)
     @url = "/production/messcada_crud/#{function_name}/#{function_id}";
     @frame_id = frame_id
     session[:alert] = "#{message}"
@@ -92,7 +110,7 @@ class Production::MesscadaCrudController < ApplicationController
       if @facility.save
         session[:facility_id] = @facility.id
         session[:facility_code] = @facility.code
-        orchard_reload_main_page("list_facilities",session[:facility_code],"'facility created successfully'",0)
+        reload_main_page("list_facilities",session[:facility_code])
       else
         @is_create_retry = true
         render_new_facility
@@ -115,6 +133,7 @@ class Production::MesscadaCrudController < ApplicationController
     render :inline => %{
       <% grid            = build_facilities_grid(@facilities,@can_edit,@can_delete,@is_select) %>
       <% grid.caption    = 'list of all facilities' %>
+      <% grid.height = '200' %>
       <% @header_content = grid.build_grid_data %>
       <%= grid.render_html %>
       <%= grid.render_grid %>
@@ -122,6 +141,7 @@ class Production::MesscadaCrudController < ApplicationController
   end
 
   def edit_facility
+    session[:is_edit] = true
     id = params[:id]
     if id && @facility = MesscadaFacility.find(id)
       session[:facility_id]  = @facility.id
@@ -143,11 +163,12 @@ class Production::MesscadaCrudController < ApplicationController
     id = params[:facility][:id]
     if id && @facility = MesscadaFacility.find(id)
       ActiveRecord::Base.transaction do
-        @facility.save
+        @facility.update_attributes(params[:facility])
+        # @facility.save
       end
     end
     if @facility.errors.empty?
-      orchard_reload_main_page("list_facilities",session[:facility_id],"'facility updated successfully'",0)
+      update_main_page("list_facilities",session[:facility_id])
     else
       render_edit_facility
     end
@@ -212,7 +233,7 @@ class Production::MesscadaCrudController < ApplicationController
 
       if @server.save
         facility_code = @server.facility_code
-        orchard_reload_page("link_to_facility_code",facility_code,"'server created successfully'",0)
+        main_page("link_to_facility_code",facility_code)
       else
         @is_create_retry = true
         render_new_server
@@ -224,14 +245,14 @@ class Production::MesscadaCrudController < ApplicationController
 
   def list_servers
     @is_select = false
+    session[:is_edit] = false
     if params[:id] == "" or params[:id] == nil
       query = "select * from  messcada_servers MS order by MS.code"
-      @is_edit = false
     else
       query = "select * from  messcada_servers MS
               where MS.facility_id = #{params[:id]}
               order by MS.code"
-      @is_edit = true
+      session[:is_edit] = true
     end
     @servers = MesscadaServer.find_by_sql(query)
     render_servers_list
@@ -240,11 +261,12 @@ class Production::MesscadaCrudController < ApplicationController
   def render_servers_list
     @can_edit = true
     @can_delete = true
+    @is_edit = session[:is_edit]
 
-    if @is_edit
+    if session[:is_edit]
       session[:child_form_id]=""
       session[:child_form_header_link_field] = ""
-      session[:child_form_header_link_field] = "<a style='font: bold 11px arial;text-decoration:underline;cursor:pointer;padding-bottom: 2px;padding-left: 2px;' id='#{request.host_with_port}/production/messcada_crud/add_messcada_servers' onclick='javascript:parent.call_open_window(this);' >add_messcada_servers</a>"
+      session[:child_form_header_link_field] = "<a style='font: bold 11px arial;text-decoration:underline;cursor:pointer;padding-bottom: 2px;padding-left: 2px;' id='#{request.host_with_port}/production/messcada_crud/add_messcada_servers' onclick='javascript:parent.call_open_window(this);' >add_existing_messcada_servers</a>"
       session[:child_form_id] = "messcada_servers"
     end
 
@@ -252,6 +274,7 @@ class Production::MesscadaCrudController < ApplicationController
       <% @child_form_caption = [session[:child_form_id], session[:child_form_header_link_field]] %>
       <% grid            = build_servers_grid(@servers,@can_edit,@can_delete,@is_edit,@is_select) %>
       <% grid.caption    = 'list of all servers' %>
+      <% grid.height = '200' %>
       <% @header_content = grid.build_grid_data %>
       <%= grid.render_html %>
       <%= grid.render_grid %>
@@ -263,11 +286,24 @@ class Production::MesscadaCrudController < ApplicationController
     if id && @server = MesscadaServer.find(id)
       session[:server_id] = @server.id
       session[:server_code] = @server.code
-      render_edit_server
+      render_active_edit_server
     end
   end
 
   def render_edit_server
+    id = params[:id]
+    if id && @server = MesscadaServer.find(id)
+      session[:server_id] = @server.id
+      session[:server_code] = @server.code
+    end
+    if session[:is_edit]
+      main_page("edit_server",id)
+    else
+      render_active_edit_server
+    end
+  end
+
+  def render_active_edit_server
     render :inline => %{
 		<% @content_header_caption = "'edit server'"%>
 
@@ -281,16 +317,17 @@ class Production::MesscadaCrudController < ApplicationController
     id = params[:server][:id]
     if id && @server = MesscadaServer.find(id)
       ActiveRecord::Base.transaction do
-        @server.run_before_save
-        @server.save
+        @server.update_attributes(params[:server])
+        # @server.run_before_save
+        # @server.save
       end
     end
     if @server.errors.empty?
       facility_code = @server.facility_code
-      if @is_edit
-        orchard_reload_page("link_to_facility_code",facility_code,"'server updated successfully'",0)
+      if session[:is_edit]
+        update_main_page("link_to_facility_code",facility_code)
       else
-        orchard_reload_main_page("list_servers",nil,"'server updated successfully'",0)
+        update_main_page("list_servers",nil)
       end
     else
       render_edit_server
@@ -319,7 +356,7 @@ class Production::MesscadaCrudController < ApplicationController
   def link_to_server_code
     server_code = params[:id]
     if server_code && @server = MesscadaServer.find_by_code(server_code)
-      render_edit_server
+      render_active_edit_server
     end
   end
 
@@ -343,7 +380,7 @@ class Production::MesscadaCrudController < ApplicationController
     messcada_servers = session[:messcada_servers]
     selected_messcada_servers = selected_records?(messcada_servers,nil,nil)
     MesscadaServer.save_selected_messcada_servers(selected_messcada_servers,session[:facility_id])
-    orchard_reload_page("link_to_facility_code",session[:facility_code],"'server added successfully'",0)
+    reload_main_page("link_to_facility_code",session[:facility_code])
   end
 
   #messcada_clusters
@@ -368,7 +405,7 @@ class Production::MesscadaCrudController < ApplicationController
       @cluster.server_code = session[:server_code]
       if @cluster.save
         server_code = @cluster.server_code
-        orchard_reload_page("link_to_server_code",server_code,"'cluster created successfully'",0)
+        main_page("link_to_server_code",server_code)
       else
         @is_create_retry = true
         render_new_cluster
@@ -379,14 +416,14 @@ class Production::MesscadaCrudController < ApplicationController
   end
 
   def list_clusters
+    session[:is_edit] = false
     if params[:id] == "" or params[:id] == nil
       query = "select * from  messcada_clusters MC order by MC.code"
-      @is_edit = false
     else
       query = "select * from  messcada_clusters MC
               where MC.server_id = #{params[:id]}
               order by MC.code"
-      @is_edit = true
+      session[:is_edit] = true
     end
     @clusters = MesscadaCluster.find_by_sql(query)
     render_clusters_list
@@ -395,11 +432,12 @@ class Production::MesscadaCrudController < ApplicationController
   def render_clusters_list
     @can_edit = true
     @can_delete = true
+    @is_edit = session[:is_edit]
 
-    if @is_edit
+    if session[:is_edit]
       session[:child_form_id]=""
       session[:child_form_header_link_field] = ""
-      session[:child_form_header_link_field] = "<a style='font: bold 11px arial;text-decoration:underline;cursor:pointer;padding-bottom: 2px;padding-left: 2px;' id='#{request.host_with_port}/production/messcada_crud/add_messcada_peripherals' onclick='javascript:parent.call_open_window(this);' >add_messcada_peripherals</a>"
+      session[:child_form_header_link_field] = "<a style='font: bold 11px arial;text-decoration:underline;cursor:pointer;padding-bottom: 2px;padding-left: 2px;' id='#{request.host_with_port}/production/messcada_crud/add_messcada_peripherals' onclick='javascript:parent.call_open_window(this);' >add_existing_messcada_peripherals</a>"
       session[:child_form_id] = "messcada_peripherals"
     end
 
@@ -407,6 +445,7 @@ class Production::MesscadaCrudController < ApplicationController
       <% @child_form_caption = [session[:child_form_id], session[:child_form_header_link_field]] %>
       <% grid            = build_clusters_grid(@clusters,@can_edit,@can_delete,@is_edit,@is_select) %>
       <% grid.caption    = 'list of all clusters' %>
+      <% grid.height = '200' %>
       <% @header_content = grid.build_grid_data %>
       <%= grid.render_html %>
       <%= grid.render_grid %>
@@ -418,11 +457,24 @@ class Production::MesscadaCrudController < ApplicationController
     if id && @cluster = MesscadaCluster.find(id)
       session[:cluster_id] = @cluster.id
       session[:cluster_code] = @cluster.code
-      render_edit_cluster
+      render_active_edit_cluster
     end
   end
 
   def render_edit_cluster
+    id = params[:id]
+    if id && @cluster = MesscadaCluster.find(id)
+      session[:cluster_id] = @cluster.id
+      session[:cluster_code] = @cluster.code
+    end
+    if session[:is_edit]
+      main_page("edit_cluster",id)
+    else
+      render_active_edit_cluster
+    end
+  end
+
+  def render_active_edit_cluster
     render :inline => %{
 		<% @content_header_caption = "'edit cluster'"%>
 
@@ -436,15 +488,16 @@ class Production::MesscadaCrudController < ApplicationController
     id = params[:cluster][:id]
     if id && @cluster = MesscadaCluster.find(id)
       ActiveRecord::Base.transaction do
-        @cluster.save
+        @cluster.update_attributes(params[:cluster])
+        # @cluster.save
       end
     end
     if @cluster.errors.empty?
       server_code = @cluster.server_code
-      if @is_edit
-        orchard_reload_page("link_to_server_code",server_code,"'cluster updated successfully'",0)
+      if session[:is_edit]
+        update_main_page("link_to_server_code",server_code)
       else
-        orchard_reload_main_page("list_clusters",nil,"'cluster updated successfully'",0)
+        update_main_page("list_clusters",nil)
       end
     else
       render_edit_cluster
@@ -473,7 +526,7 @@ class Production::MesscadaCrudController < ApplicationController
   def link_to_cluster_code
     cluster_code = params[:id]
     if cluster_code && @cluster = MesscadaCluster.find_by_code(cluster_code)
-      render_edit_cluster
+      render_active_edit_cluster
     end
   end
 
@@ -499,7 +552,7 @@ class Production::MesscadaCrudController < ApplicationController
       @modules.cluster_code = session[:cluster_code]
       if @modules.save
          cluster_code = @modules.cluster_code
-         orchard_reload_page("link_to_cluster_code",cluster_code,"'module created successfully'",0)
+         main_page("link_to_cluster_code",cluster_code)
       else
         @is_create_retry = true
         render_new_module
@@ -510,14 +563,14 @@ class Production::MesscadaCrudController < ApplicationController
   end
 
   def list_modules
+    session[:is_edit] = false
     if params[:id] == "" or params[:id] == nil
       query = "select * from  messcada_modules MM order by MM.code"
-      @is_edit = false
     else
       query = "select * from  messcada_modules MM
               where MM.cluster_id = #{params[:id]}
               order by MM.code"
-      @is_edit = true
+      session[:is_edit] = true
     end
     @modules = MesscadaModule.find_by_sql(query)
     render_modules_list
@@ -526,11 +579,12 @@ class Production::MesscadaCrudController < ApplicationController
   def render_modules_list
     @can_edit = true
     @can_delete = true
+    @is_edit = session[:is_edit]
 
-    if @is_edit
+    if session[:is_edit]
       session[:child_form_id]=""
       session[:child_form_header_link_field] = ""
-      session[:child_form_header_link_field] = "<a style='font: bold 11px arial;text-decoration:underline;cursor:pointer;padding-bottom: 2px;padding-left: 2px;' id='#{request.host_with_port}/production/messcada_crud/add_messcada_peripherals' onclick='javascript:parent.call_open_window(this);' >add_messcada_peripherals</a>"
+      session[:child_form_header_link_field] = "<a style='font: bold 11px arial;text-decoration:underline;cursor:pointer;padding-bottom: 2px;padding-left: 2px;' id='#{request.host_with_port}/production/messcada_crud/add_messcada_peripherals' onclick='javascript:parent.call_open_window(this);' >add_existing_messcada_peripherals</a>"
       session[:child_form_id] = "messcada_peripherals"
     end
 
@@ -538,6 +592,7 @@ class Production::MesscadaCrudController < ApplicationController
       <% @child_form_caption = [session[:child_form_id], session[:child_form_header_link_field]] %>
       <% grid            = build_modules_grid(@modules,@can_edit,@can_delete,@is_edit,@is_select) %>
       <% grid.caption    = 'list of all modules' %>
+      <% grid.height = '200' %>
       <% @header_content = grid.build_grid_data %>
       <%= grid.render_html %>
       <%= grid.render_grid %>
@@ -553,11 +608,28 @@ class Production::MesscadaCrudController < ApplicationController
       session[:module_code] = @modules.code
       session[:field_name] = "module_id"
       session[:field_value] = session[:module_id]
-      render_edit_module
+      render_active_edit_module
     end
   end
 
   def render_edit_module
+    id = params[:id]
+    session[:field_name] = ""
+    session[:field_value] = ""
+    if id && @modules = MesscadaModule.find(id)
+      session[:module_id] = @modules.id
+      session[:module_code] = @modules.code
+      session[:field_name] = "module_id"
+      session[:field_value] = session[:module_id]
+    end
+    if session[:is_edit]
+      main_page("edit_module",id)
+    else
+      render_active_edit_module
+    end
+  end
+
+  def render_active_edit_module
     render :inline => %{
 		<% @content_header_caption = "'edit module'"%>
 
@@ -571,15 +643,16 @@ class Production::MesscadaCrudController < ApplicationController
     id = params[:modules][:id]
     if id && @modules = MesscadaModule.find(id)
       ActiveRecord::Base.transaction do
-        @modules.save
+        @modules.update_attributes(params[:modules])
+        # @modules.save
       end
     end
     if @modules.errors.empty?
       cluster_code = @modules.cluster_code
-      if @is_edit
-        orchard_reload_page("link_to_cluster_code",cluster_code,"'module updated successfully'",0)
+      if session[:is_edit]
+        update_main_page("link_to_cluster_code",cluster_code)
       else
-        orchard_reload_main_page("list_modules",nil,"'module updated successfully'",0)
+        update_main_page("list_modules",nil)
       end
     else
       render_edit_module
@@ -607,7 +680,7 @@ class Production::MesscadaCrudController < ApplicationController
   def link_to_module_code
     module_code = params[:id]
     if module_code && @modules = MesscadaModule.find_by_code(module_code)
-      render_edit_module
+      render_active_edit_module
     end
   end
 
@@ -644,7 +717,7 @@ class Production::MesscadaCrudController < ApplicationController
 
       if @peripheral.save
         module_code = @peripheral.module_code
-        orchard_reload_page("link_to_module_code",module_code,"'peripheral created successfully'",0)
+        main_page("link_to_module_code",module_code)
       else
         @is_create_retry = true
         render_new_peripheral
@@ -655,15 +728,15 @@ class Production::MesscadaCrudController < ApplicationController
   end
 
   def list_peripherals
+    session[:is_edit] = false
     if params[:id] == "" or params[:id] == nil
       query = "select * from  messcada_peripherals MP
               order by MP.code"
-      @is_edit = false
     else
       query = "select * from  messcada_peripherals MP
                 where " + session[:field_name].to_s + " = '#{params[:id]}'
                 order by MP.code"
-      @is_edit = true
+      session[:is_edit] = true
     end
     @peripherals = MesscadaPeripheral.find_by_sql(query)
     render_peripherals_list
@@ -672,11 +745,11 @@ class Production::MesscadaCrudController < ApplicationController
   def render_peripherals_list
     @can_edit = true
     @can_delete = true
-
-    if @is_edit
+    @is_edit = session[:is_edit]
+    if session[:is_edit]
       session[:child_form_id]=""
       session[:child_form_header_link_field] = ""
-      session[:child_form_header_link_field] = "<a style='font: bold 11px arial;text-decoration:underline;cursor:pointer;padding-bottom: 2px;padding-left: 2px;' id='#{request.host_with_port}/production/messcada_crud/add_messcada_peripherals' onclick='javascript:parent.call_open_window(this);' >add_messcada_peripherals</a>"
+      session[:child_form_header_link_field] = "<a style='font: bold 11px arial;text-decoration:underline;cursor:pointer;padding-bottom: 2px;padding-left: 2px;' id='#{request.host_with_port}/production/messcada_crud/add_messcada_peripherals' onclick='javascript:parent.call_open_window(this);' >add_existing_messcada_peripherals</a>"
       session[:child_form_id] = "messcada_peripherals"
     end
 
@@ -684,6 +757,7 @@ class Production::MesscadaCrudController < ApplicationController
       <% @child_form_caption = [session[:child_form_id], session[:child_form_header_link_field]] %>
       <% grid            = build_peripherals_grid(@peripherals,@can_edit,@can_delete,@is_edit,@is_select) %>
       <% grid.caption    = 'list of all peripherals' %>
+      <% grid.height = '200' %>
       <% @header_content = grid.build_grid_data %>
       <%= grid.render_html %>
       <%= grid.render_grid %>
@@ -695,11 +769,24 @@ class Production::MesscadaCrudController < ApplicationController
     if id && @peripheral = MesscadaPeripheral.find(id)
       session[:peripheral_id] = @peripheral.id
       session[:peripheral_code] = @peripheral.code
-      render_edit_peripheral
+      render_active_edit_peripheral
     end
   end
 
   def render_edit_peripheral
+    id = params[:id]
+    if id && @peripheral = MesscadaPeripheral.find(id)
+      session[:peripheral_id] = @peripheral.id
+      session[:peripheral_code] = @peripheral.code
+    end
+    if session[:is_edit]
+      main_page("edit_peripheral",id)
+    else
+      render_active_edit_peripheral
+    end
+  end
+
+  def render_active_edit_peripheral
     render :inline => %{
 		<% @content_header_caption = "'edit peripheral'"%>
 
@@ -713,16 +800,17 @@ class Production::MesscadaCrudController < ApplicationController
     id = params[:peripheral][:id]
     if id && @peripheral = MesscadaPeripheral.find(id)
       ActiveRecord::Base.transaction do
+        @peripheral.update_attributes(params[:peripheral])
         # @peripheral.run_before_save
-        @peripheral.save
+        # @peripheral.save
       end
     end
     if @peripheral.errors.empty?
       module_code = @peripheral.module_code
-      if @is_edit
-        orchard_reload_page("link_to_module_code",module_code,"'peripheral updated successfully'",0)
+      if session[:is_edit]
+        update_main_page("link_to_module_code",module_code)
       else
-        orchard_reload_main_page("list_peripherals",nil,"'peripheral updated successfully'",0)
+        update_main_page("list_peripherals",nil)
       end
     else
       render_edit_peripheral
@@ -750,7 +838,7 @@ class Production::MesscadaCrudController < ApplicationController
   def link_to_peripheral_code
     peripheral_code = params[:id]
     if peripheral_code && @peripheral = MesscadaPeripheral.find_by_code(peripheral_code)
-      render_edit_peripheral
+      render_active_edit_peripheral
     end
   end
 
@@ -776,9 +864,9 @@ class Production::MesscadaCrudController < ApplicationController
     selected_messcada_peripherals = selected_records?(messcada_peripherals,nil,nil)
     MesscadaPeripheral.save_selected_messcada_peripherals(selected_messcada_peripherals,session[:field_name],session[:field_value])
     if session[:field_name].to_s == "module_id"
-      orchard_reload_page("link_to_module_code",session[:module_code],"'peripheral added successfully'",1)
+      reload_main_page("link_to_module_code",session[:module_code])
     else
-      orchard_reload_page("link_to_" + session[:field_name].to_s + "",session[:field_value],"'peripheral added successfully'",1)
+      reload_main_page("link_to_" + session[:field_name].to_s + "",session[:field_value])
     end
   end
 
@@ -804,7 +892,7 @@ class Production::MesscadaCrudController < ApplicationController
       @peripheral_printer.peripheral_code = session[:peripheral_code]
       if @peripheral_printer.save
         peripheral_code = @peripheral_printer.peripheral_code
-        orchard_reload_page("link_to_peripheral_code",peripheral_code,"'peripheral printer created successfully'",0)
+        main_page("link_to_peripheral_code",peripheral_code)
       else
         @is_create_retry = true
         render_new_peripheral_printer
@@ -815,17 +903,17 @@ class Production::MesscadaCrudController < ApplicationController
   end
 
   def list_peripheral_printers
+    session[:is_edit] = false
     if params[:id] == "" or params[:id] == nil
       query = "select MPP.*,MP.module_code,MP.cluster_code,MP.server_code,MP.facility_code from  messcada_peripheral_printers MPP
               inner join messcada_peripherals MP on MPP.peripheral_id = MP.id
               order by MPP.id"
-      @is_edit = false
     else
       query = "select MPP.*,MP.module_code,MP.cluster_code,MP.server_code,MP.facility_code from  messcada_peripheral_printers MPP
               inner join messcada_peripherals MP on MPP.peripheral_id = MP.id
               where MPP.peripheral_id = #{params[:id]}
               order by MPP.id"
-      @is_edit = true
+      session[:is_edit] = true
     end
     @peripheral_printers = MesscadaPeripheral.find_by_sql(query)
     render_peripheral_printers_list
@@ -834,9 +922,11 @@ class Production::MesscadaCrudController < ApplicationController
   def render_peripheral_printers_list
     @can_edit = true
     @can_delete = true
+    @is_edit = session[:is_edit]
     render :inline => %{
       <% grid            = build_peripheral_printers_grid(@peripheral_printers,@can_edit,@can_delete,@is_edit) %>
       <% grid.caption    = 'list of all peripheral printers' %>
+      <% grid.height = '200' %>
       <% @header_content = grid.build_grid_data %>
       <%= grid.render_html %>
       <%= grid.render_grid %>
@@ -847,11 +937,23 @@ class Production::MesscadaCrudController < ApplicationController
     id = params[:id]
     if id && @peripheral_printer = MesscadaPeripheralPrinter.find(id)
       session[:peripheral_printer_id] = @peripheral_printer.id
-      render_edit_peripheral_printer
+      render_active_edit_peripheral_printer
     end
   end
 
   def render_edit_peripheral_printer
+    id = params[:id]
+    if id && @peripheral_printer = MesscadaPeripheralPrinter.find(id)
+      session[:peripheral_printer_id] = @peripheral_printer.id
+      if session[:is_edit]
+        main_page("edit_peripheral_printer",id)
+      else
+        render_active_edit_peripheral_printer
+      end
+    end
+  end
+
+  def render_active_edit_peripheral_printer
     render :inline => %{
 		<% @content_header_caption = "'edit peripheral printer'"%>
 
@@ -865,15 +967,16 @@ class Production::MesscadaCrudController < ApplicationController
     id = params[:peripheral_printer][:id]
     if id && @peripheral_printer = MesscadaPeripheralPrinter.find(id)
       ActiveRecord::Base.transaction do
-        @peripheral_printer.save
+        @peripheral_printer.update_attributes(params[:peripheral_printer])
+        # @peripheral_printer.save
       end
     end
     if @peripheral_printer.errors.empty?
       peripheral_code = @peripheral_printer.peripheral_code
-      if @is_edit
-        orchard_reload_page("link_to_peripheral_code",peripheral_code,"'peripheral printer updated successfully'",0)
+      if session[:is_edit]
+        update_main_page("link_to_peripheral_code",peripheral_code)
       else
-        orchard_reload_main_page("list_peripheral_printers",nil,"'peripheral_printer updated successfully'",0)
+        update_main_page("list_peripheral_printers",nil)
       end
     else
       render_edit_peripheral_printer
@@ -901,7 +1004,7 @@ class Production::MesscadaCrudController < ApplicationController
   def link_to_peripheral_printer_code
     peripheral_printer_code = params[:id]
     if peripheral_printer_code && @peripheral_printer = MesscadaPeripheralPrinter.find_by_code(peripheral_printer_code)
-      render_edit_peripheral_printer
+      render_active_edit_peripheral_printer
     end
   end
 

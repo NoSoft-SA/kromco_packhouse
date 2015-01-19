@@ -58,8 +58,8 @@ class MesscadaServer < ActiveRecord::Base
         # messcada_server.created_at = server.created_at
         # messcada_server.updated_at = server.updated_at
 
-        messcada_server.facility_id=facility_id
-        messcada_server.run_before_save
+        messcada_server.facility_id=facility_id if server.facility_id !=nil
+        messcada_server.run_before_save if server.facility_id !=nil
 
         messcada_server.save
 
