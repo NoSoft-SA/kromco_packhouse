@@ -6,29 +6,6 @@ class Production::MesscadaCrudController < ApplicationController
     "messcada_crud"
   end
 
-  def clear_session_values
-    session[:alert] = ""
-    session[:field_name] = ""
-    session[:field_value] = ""
-    session[:child_form_id]=""
-    session[:child_form_header_link_field] = ""
-    session[:facility_id] = ""
-    session[:facility_code] = ""
-    session[:belongs_to_facility] = false
-    session[:server_id] = ""
-    session[:server_code] = ""
-    session[:messcada_servers_def] = ""
-    session[:cluster_id] = ""
-    session[:cluster_code] = ""
-    session[:module_id] = ""
-    session[:module_code] = ""
-    session[:belongs_to_module] = false
-    session[:peripheral_id] = ""
-    session[:peripheral_code] = ""
-    session[:messcada_peripherals_def] = ""
-    session[:peripheral_printer_id] = ""
-  end
-
   def bypass_generic_security?
     true
   end
@@ -110,7 +87,7 @@ class Production::MesscadaCrudController < ApplicationController
       if @facility.save
         session[:facility_id] = @facility.id
         session[:facility_code] = @facility.code
-        reload_main_page("list_facilities",session[:facility_code])
+        update_main_page("edit_facility",session[:facility_id])
       else
         @is_create_retry = true
         render_new_facility
@@ -184,7 +161,7 @@ class Production::MesscadaCrudController < ApplicationController
                             <script>
                             alert('Record removed');
                             window.close();
-                             window.opener.frames[1].frames[0].location.reload(true);
+                             window.opener.frames[1].location.reload(true);
                             </script>
                                }, :layout => 'content'
       end
@@ -232,8 +209,8 @@ class Production::MesscadaCrudController < ApplicationController
       end
 
       if @server.save
-        facility_code = @server.facility_code
-        main_page("link_to_facility_code",facility_code)
+        id = @server.id
+        update_main_page("edit_server",id)
       else
         @is_create_retry = true
         render_new_server
@@ -344,7 +321,7 @@ class Production::MesscadaCrudController < ApplicationController
                             <script>
                             alert('Record removed');
                             window.close();
-                             window.opener.frames[1].frames[0].location.reload(true);
+                             window.opener.frames[1].location.reload(true);
                             </script>
                                }, :layout => 'content'
       end
@@ -514,7 +491,7 @@ class Production::MesscadaCrudController < ApplicationController
                             <script>
                             alert('Record removed');
                             window.close();
-                             window.opener.frames[1].frames[0].location.reload(true);
+                             window.opener.frames[1].location.reload(true);
                             </script>
                                }, :layout => 'content'
       end
@@ -668,7 +645,7 @@ class Production::MesscadaCrudController < ApplicationController
                             <script>
                             alert('Record removed');
                             window.close();
-                             window.opener.frames[1].frames[0].location.reload(true);
+                             window.opener.frames[1].location.reload(true);
                             </script>
                                }, :layout => 'content'
       end
@@ -826,7 +803,7 @@ class Production::MesscadaCrudController < ApplicationController
                             <script>
                             alert('Record removed');
                             window.close();
-                             window.opener.frames[1].frames[0].location.reload(true);
+                             window.opener.frames[1].location.reload(true);
                             </script>
                                }, :layout => 'content'
       end
@@ -992,7 +969,7 @@ class Production::MesscadaCrudController < ApplicationController
                             <script>
                             alert('Record removed');
                             window.close();
-                             window.opener.frames[1].frames[0].location.reload(true);
+                             window.opener.frames[1].location.reload(true);
                             </script>
                                }, :layout => 'content'
       end

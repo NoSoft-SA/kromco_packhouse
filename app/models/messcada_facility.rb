@@ -1,7 +1,7 @@
 class MesscadaFacility < ActiveRecord::Base
 
   #MM122014 - messcada changes
-  has_many :messcada_servers #, :dependent => :destroy
+  has_many :messcada_servers#, :dependent => :destroy
 
    validates_presence_of :code, :desc_short
 
