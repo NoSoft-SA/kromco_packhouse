@@ -70,16 +70,10 @@ class Bin < ActiveRecord::Base
   end
 
   def Bin.get_bins(stock_items)
-    inventory_references=Array.new
-    for item in stock_items
-      inventory_reference = item.inventory_reference
-      inventory_references << "bins.bin_number  = '#{inventory_reference}'"
-    end
-    inventory_references_join = inventory_references.join("  OR  ")  #TODO remove comment below!
     bins = Bin.find_by_sql("select bins.* from bins
           inner join stock_items on bins.bin_number=stock_items.inventory_reference
           inner join rmt_products on bins.rmt_product_id=rmt_products.id
-          where  (#{inventory_references_join }) ")#and (stock_items.stock_type_code='BIN' OR stock_items.stock_type_code='PRESORT') and (stock_items.destroyed is null or stock_items.destroyed = false) and sealed_ca_location_id is null")
+          where stock_items.inventory_reference in (#{stock_items.join(",")}) ")#and (stock_items.stock_type_code='BIN' OR stock_items.stock_type_code='PRESORT') and (stock_items.destroyed is null or stock_items.destroyed = false) and sealed_ca_location_id is null")
     return bins
   end
 
