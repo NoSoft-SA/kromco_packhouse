@@ -600,7 +600,8 @@ module Production::MesscadaCrudHelper
 
     field_configs = Array.new
 
-    comm_types = ["LAN - Local Area Network ","RS232 - RS232","USB - USB","KBDROBOT - Keyboard robot"]
+    comm_types = ["LAN ","RS232","USB","KBDROBOT"]
+    # comm_types = ["LAN - Local Area Network ","RS232 - RS232","USB - USB","KBDROBOT - Keyboard robot"]
 
     peripheral_types = ["DM ","IM ","Mark","Zebra","MS", "Metler", "Symbol", "IMP","Domino "]
 
@@ -698,8 +699,8 @@ module Production::MesscadaCrudHelper
 
     field_configs << {:field_type => 'DropDownField',
                       :field_name => 'comms_type_code?required',
-                      :settings => {:list => comm_types,
-                                    :prompt => 'select a comm_type'
+                      :settings => {:list => comm_types#,
+                                    #:prompt => 'select a comm_type'
                       }
     }
 
