@@ -40,6 +40,17 @@ class Production::MesscadaCrudController < ApplicationController
                           }#, :layout => 'content'
   end
 
+  def update_page(function_name,function_id)
+    @url = "/production/messcada_crud/#{function_name}/#{function_id}";
+    session[:alert] = "Record updated successfully"
+    render :inline => %{
+                          <script>
+                            window.close();
+                            parent.frames[1].location.href = "<%=@url%>";
+                          </script>
+                          }#, :layout => 'content'
+  end
+
   def reload_page(function_name,function_id,message,frame_id)
     @url = "/production/messcada_crud/#{function_name}/#{function_id}";
     @frame_id = frame_id

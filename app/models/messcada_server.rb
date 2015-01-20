@@ -65,7 +65,7 @@ class MesscadaServer < ActiveRecord::Base
 
       end
     end
-    return nil
+    # return nil
   end
 
   def destroy_clusters
