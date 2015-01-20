@@ -33,4 +33,9 @@ class MesscadaCluster < ActiveRecord::Base
 
   end
 
+  def destroy_modules
+    modules = MesscadaModule.find_by_cluster_id(self.id)
+    modules.destroy_peripherals if modules !=nil
+    modules.destroy if modules !=nil
+  end
 end

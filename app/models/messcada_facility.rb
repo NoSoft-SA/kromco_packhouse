@@ -26,4 +26,10 @@ class MesscadaFacility < ActiveRecord::Base
 
   end
 
+  def destroy_servers
+    server = MesscadaServer.find_by_facility_id(self.id)
+    server.destroy_clusters if server !=nil
+    server.destroy if server !=nil
+  end
+
 end

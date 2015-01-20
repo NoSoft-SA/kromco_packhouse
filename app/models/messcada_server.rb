@@ -68,4 +68,10 @@ class MesscadaServer < ActiveRecord::Base
     return nil
   end
 
+  def destroy_clusters
+    cluster = MesscadaCluster.find_by_server_id(self.id)
+    cluster.destroy_modules if cluster !=nil
+    cluster.destroy if cluster !=nil
+  end
+
 end

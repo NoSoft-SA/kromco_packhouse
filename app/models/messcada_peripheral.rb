@@ -158,4 +158,9 @@ class MesscadaPeripheral < ActiveRecord::Base
     return nil
   end
 
+  def destroy_peripheral_printers
+    peripheral_printers = MesscadaPeripheralPrinter.find_by_peripheral_id(self.id)
+    peripheral_printers.destroy if peripheral_printers !=nil
+  end
+
 end

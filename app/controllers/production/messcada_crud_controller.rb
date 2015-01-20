@@ -156,6 +156,7 @@ class Production::MesscadaCrudController < ApplicationController
     begin
       id = params[:id]
       if id && facility = MesscadaFacility.find(id)
+        facility.destroy_servers
         facility.destroy
         render :inline => %{
                             <script>
@@ -316,6 +317,7 @@ class Production::MesscadaCrudController < ApplicationController
     begin
       id = params[:id]
       if id && server = MesscadaServer.find(id)
+        server.destroy_clusters
         server.destroy
         render :inline => %{
                             <script>
@@ -486,6 +488,7 @@ class Production::MesscadaCrudController < ApplicationController
     begin
       id = params[:id]
       if id && cluster = MesscadaCluster.find(id)
+        cluster.destroy_modules
         cluster.destroy
         render :inline => %{
                             <script>
@@ -640,6 +643,7 @@ class Production::MesscadaCrudController < ApplicationController
     begin
       id = params[:id]
       if id && modules = MesscadaModule.find(id)
+        modules.destroy_peripherals
         modules.destroy
         render :inline => %{
                             <script>
@@ -798,6 +802,7 @@ class Production::MesscadaCrudController < ApplicationController
     begin
       id = params[:id]
       if id && peripherals = MesscadaPeripheral.find(id)
+        peripherals.destroy_peripheral_printers
         peripherals.destroy
         render :inline => %{
                             <script>

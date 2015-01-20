@@ -38,4 +38,10 @@ class MesscadaModule < ActiveRecord::Base
 
   end
 
+  def destroy_peripherals
+    peripherals = MesscadaPeripheral.find_by_module_id(self.id)
+    peripherals.destroy_peripheral_printers if peripherals !=nil
+    peripherals.destroy if peripherals !=nil
+  end
+
 end

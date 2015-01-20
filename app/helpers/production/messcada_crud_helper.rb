@@ -419,7 +419,7 @@ module Production::MesscadaCrudHelper
 
     field_configs = Array.new
 
-    module_function_types = ["Local ","Demand","Tapout","Mobile", "Robot", "Dashboard", "MAF"]
+    module_function_types = ["Local","Demand","Tapout","Mobile", "Robot", "Dashboard", "MAF"]
 
     module_types = ["CLM","CMS","CSM","EDI","GEN","INT","MOB","PAL","REB","RFS","SRT","SRV","TIP","PRN","SCL","SCN","QUALITY-CONTROL","PRODUCT-WEIGHT","DASHBOARD","STAGING-CONTAINERS","PRESORT","TIP-AND-LABEL","CLM-GROUP","COLD-STORAGE"]
 
@@ -600,10 +600,9 @@ module Production::MesscadaCrudHelper
 
     field_configs = Array.new
 
-    comm_types = ["LAN ","RS232","USB","KBDROBOT"]
-    # comm_types = ["LAN - Local Area Network ","RS232 - RS232","USB - USB","KBDROBOT - Keyboard robot"]
+    comm_types = ["LAN","RS232","USB","KBDROBOT"]
 
-    peripheral_types = ["DM ","IM ","Mark","Zebra","MS", "Metler", "Symbol", "IMP","Domino "]
+    peripheral_types = ["DM","IM","Mark","Zebra","MS", "Metler", "Symbol", "IMP","Domino"]
 
     peripheral_group_types =["PRN","PRINTER","SCALE","SCANNER"]
 
