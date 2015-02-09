@@ -59,17 +59,17 @@ class QualityControl::GrowerCommitmentController < ApplicationController
 
 #@mrl_result_msg =  generic_printer.genric_print_mrl_label(farm_id,rmt_variety_id,season_id,session[:user_id].user_name.to_s,mrl_result_type_code,orchard_code,puc_code)
 #-----------
-    mrl_label_page1_report                ="reportUnit=/RMT/mrl_label_page1&"
+    mrl_label_page1_report                ="reportUnit=/reports/MES/RMT/mrl_label_page1&"
     mrl_label_page1_report_parameters     = "output=pdf&mrl_result_id=" + mrl_result.id.to_s
     @mrl_label_page1_url                  = Globals.get_jasper_server_report_server_ip + Globals.get_jasper_server + mrl_label_page1_report +Globals.get_jasperserver_username_password + mrl_label_page1_report_parameters
 
 
-    mrl_label_page2_report                ="reportUnit=/RMT/mrl_label_page2&"
+    mrl_label_page2_report                ="reportUnit=/reports/MES/RMT/mrl_label_page2&"
     mrl_label_page2_report_parameters     = "output=pdf&mrl_result_id=" + mrl_result.id.to_s
     @mrl_label_page2_url                  = Globals.get_jasper_server_report_server_ip + Globals.get_jasper_server + mrl_label_page2_report +Globals.get_jasperserver_username_password + mrl_label_page2_report_parameters
 
 
-    mrl_label_page3_report                ="reportUnit=/RMT/mrl_label_page3&"
+    mrl_label_page3_report                ="reportUnit=/reports/MES/RMT/mrl_label_page3&"
     mrl_label_page3_report_parameters     = "output=pdf&mrl_result_id=" + mrl_result.id.to_s
     @mrl_label_page3_url                  = Globals.get_jasper_server_report_server_ip + Globals.get_jasper_server + mrl_label_page3_report +Globals.get_jasperserver_username_password + mrl_label_page3_report_parameters
 

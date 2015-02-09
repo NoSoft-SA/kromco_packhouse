@@ -859,7 +859,7 @@ class Inventory::GroupedAssetsController < ApplicationController
 #    delivery = Delivery.find_by_delivery_number(params[:id].split("!")[0])
 #    report_parameters= "output=pdf&delivery_id=#{delivery.id}"
 
-    report_unit ="reportUnit=/RMT/Bins_Moved&"
+    report_unit ="reportUnit=/reports/MES/RMT/Bins_Moved&"
     report_parameters= "output=pdf&inventory_transaction_id=#{params[:id]}"
     @url = Globals.get_jasper_server_report_server_ip + Globals.get_jasper_server + report_unit +Globals.get_jasperserver_username_password +  report_parameters
 
@@ -871,7 +871,7 @@ class Inventory::GroupedAssetsController < ApplicationController
   end
 
   def view_bins_removed_report
-    report_unit ="reportUnit=/RMT/Bins_Issued&"
+    report_unit ="reportUnit=/reports/MES/RMT/Bins_Issued&"
     report_parameters= "output=pdf&inventory_transaction_id=#{params[:id]}"
     @url = Globals.get_jasper_server_report_server_ip + Globals.get_jasper_server + report_unit +Globals.get_jasperserver_username_password +  report_parameters
 
@@ -883,7 +883,7 @@ class Inventory::GroupedAssetsController < ApplicationController
   end
 
   def view_bins_added_report
-    report_unit ="reportUnit=/RMT/Bins_Received&"
+    report_unit ="reportUnit=/reports/MES/RMT/Bins_Received&"
     report_parameters= "output=pdf&inventory_transaction_id=#{params[:id]}"
     @url = Globals.get_jasper_server_report_server_ip + Globals.get_jasper_server + report_unit +Globals.get_jasperserver_username_password +  report_parameters
 
@@ -922,7 +922,7 @@ class Inventory::GroupedAssetsController < ApplicationController
   def list_stock_transaction_histories
     if(params[:inventory_transaction][:transaction_date_time_date2from].to_s.strip=="" || params[:inventory_transaction][:transaction_date_time_date2to].to_s.strip=="")
       flash[:error] = 'transaction_date_time must be filled in completely'
-      # params[:id] = id
+      params[:id] = id
       search_stock_transaction_histories
       return
     end

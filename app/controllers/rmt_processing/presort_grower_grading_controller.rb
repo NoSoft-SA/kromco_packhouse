@@ -24,7 +24,7 @@ class RmtProcessing::PresortGrowerGradingController < ApplicationController
 
   def preview_ps_grades
     #@ps_grades = "http://172.16.16.1:8080/jasperserver/flow.html?_flowId=viewReportFlow&reportUnit=/Presort/ps_grower_grading&j_username=jasperadmin&j_password=jasperadmin&output=pdf&pool_graded_ps_summary_id=#{params[:id]}"
-    report_unit ="reportUnit=/Presort/ps_grower_grading&"
+    report_unit ="reportUnit=/reports/MES/Presort/ps_grower_grading&"
     report_parameters= "output=pdf&pool_graded_ps_summary_id=" + params[:id]
     @ps_grades = Globals.get_jasper_server_report_server_ip + Globals.get_jasper_server + report_unit +Globals.get_jasperserver_username_password + report_parameters
     

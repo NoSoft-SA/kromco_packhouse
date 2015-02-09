@@ -210,7 +210,7 @@ class Fg::DepotReceiptsController < ApplicationController
 
   def print_depots_receipt
     intake_header_id = params[:id]
-    report_unit ="reportUnit=/FG/depot_intake&"
+    report_unit ="reportUnit=/reports/MES/FG/depot_intake&"
     report_parameters= "output=pdf&intake_header_id=" + "#{intake_header_id}"
     redirect_to_path(Globals.get_jasper_server_report_server_ip + Globals.get_jasper_server + report_unit +Globals.get_jasperserver_username_password +  report_parameters)
   end

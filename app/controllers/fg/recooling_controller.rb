@@ -32,7 +32,7 @@ class Fg::RecoolingController < ApplicationController
 
   def view_reports
     job_id = params[:id]
-        report_unit ="reportUnit=/FG/recooling_job&"
+        report_unit ="reportUnit=/reports/MES/FG/recooling_job&"
     report_parameters="output=pdf&job_id=" +"#{job_id}" 
     redirect_to_path(Globals.get_jasper_server_report_server_ip + Globals.get_jasper_server + report_unit +Globals.get_jasperserver_username_password +  report_parameters)
 

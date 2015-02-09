@@ -21,21 +21,21 @@ def current_load
 
 
   def tripsheet
-    report_unit ="reportUnit=/RMT/binsales_tripsheet&"
+    report_unit ="reportUnit=/reports/MES/RMT/binsales_tripsheet&"
     report_parameters="output=pdf&bin_order_load_id=" +"#{params[:id].to_i}"
     redirect_to_path(Globals.get_jasper_server_report_server_ip + Globals.get_jasper_server + report_unit +Globals.get_jasperserver_username_password + report_parameters)
   end
 
   def  delivery_note
 
-    report_unit ="reportUnit=/RMT/binsales_delivery_note&"
+    report_unit ="reportUnit=/reports/MES/RMT/binsales_delivery_note&"
     report_parameters="output=pdf&bin_order_load_id=" +"#{params[:id].to_i}"
     redirect_to_path(Globals.get_jasper_server_report_server_ip + Globals.get_jasper_server + report_unit +Globals.get_jasperserver_username_password + report_parameters)
   end
 
   def delivery
 
-     report_unit ="reportUnit=/RMT/binsales_delivery_note&"
+     report_unit ="reportUnit=/reports/MES/RMT/binsales_delivery_note&"
     report_parameters="output=pdf&bin_order_load_id=" +"#{params[:id].to_i}"
     redirect_to_path(Globals.get_jasper_server_report_server_ip + Globals.get_jasper_server + report_unit +Globals.get_jasperserver_username_password + report_parameters)
   end

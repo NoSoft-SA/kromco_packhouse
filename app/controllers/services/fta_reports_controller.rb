@@ -24,7 +24,7 @@ class Services::FtaReportsController < ApplicationController
   def view_fta_report
     @fta_instrument = InstrumentsFtaSession.find(params[:id])
 
-    report_unit ="reportUnit=/RMT/FTA&"
+    report_unit ="reportUnit=/reports/MES/RMT/FTA&"
     report_parameters="output=pdf&session_id=#{@fta_instrument.id}"
     redirect_to_path(Globals.get_jasper_server_report_server_ip + Globals.get_jasper_server + report_unit +Globals.get_jasperserver_username_password + report_parameters)
 
@@ -80,7 +80,7 @@ class Services::FtaReportsController < ApplicationController
   def view_rfm_report
     @rfm_instrument = InstrumentsRfmSession.find(params[:id])
 
-    report_unit ="reportUnit=/RMT/RFM&"
+    report_unit ="reportUnit=/reports/MES/RMT/RFM&"
     report_parameters="output=pdf&session_id=#{@rfm_instrument.id}"
     redirect_to_path(Globals.get_jasper_server_report_server_ip + Globals.get_jasper_server + report_unit +Globals.get_jasperserver_username_password + report_parameters)
 

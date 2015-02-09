@@ -810,10 +810,9 @@ class RmtProcessing::DeliveryController < ApplicationController
                                       inner join rmt_varieties on orchards.orchard_rmt_variety_id = rmt_varieties.id
                                       inner join commodities on rmt_varieties.commodity_id = commodities.id
                                       inner join farms on orchards.farm_id = farms.id
-                                      where farm_code = '#{farm_code}' and puc_code = '#{puc_code}' and rmt_varieties.commodity_code = '#{commodity_code}' and rmt_varieties.rmt_variety_code = '#{rmt_variety_code}'").map{|g|["#{g.orchard_code} - #{g.orchard_description}", g.id]}
+                                      where farm_code = '#{farm_code}' and rmt_varieties.commodity_code = '#{commodity_code}' and rmt_varieties.rmt_variety_code = '#{rmt_variety_code}'").map{|g|["#{g.orchard_code} - #{g.orchard_description}", g.id]}
     @orchard_id.unshift(["<empty>", nil]) #if !@orchard_id.empty?
 
-    # --inner join farm_puc_accounts on orchards.farm_id = farm_puc_accounts.farm_id
     # render :inline => %{
 		#     <%= @orchard_id_content = select('delivery','orchard_id',@orchard_id,{:sorted=>true})
      #    %>
@@ -952,10 +951,10 @@ class RmtProcessing::DeliveryController < ApplicationController
     @orchard_id = Orchard.find_by_sql("select distinct orchards.id,orchards.orchard_code,orchards.orchard_description from orchards
                                       inner join rmt_varieties on orchards.orchard_rmt_variety_id = rmt_varieties.id
                                       inner join commodities on rmt_varieties.commodity_id = commodities.id
-                                      inner join farms on orchards.farm_id = farms.id
+                                      inner join farm_puc_accounts on orchards.farm_id = farm_puc_accounts.farm_id
                                       where farm_code = '#{farm_code}' and puc_code = '#{puc_code}' and rmt_varieties.commodity_code = '#{commodity_code}' and rmt_varieties.rmt_variety_code = '#{rmt_variety_code}'").map{|g|["#{g.orchard_code} - #{g.orchard_description}", g.id]}
     @orchard_id.unshift("<empty>")
-    # --inner join farm_puc_accounts on orchards.farm_id = farm_puc_accounts.farm_id
+
     @season_codes = Delivery.find_by_sql("select distinct season_code from deliveries where farm_code = '#{farm_code}' and puc_code = '#{puc_code}' and commodity_code = '#{commodity_code}' and rmt_variety_code = '#{rmt_variety_code}'").map { |g| [g.season_code] }
     @season_codes.unshift("<empty>")
     #render inline to replace the values of season code dropdown
@@ -2280,7 +2279,7 @@ class RmtProcessing::DeliveryController < ApplicationController
   end
 
   def print_composite_report
-    report_unit ="reportUnit=/RMT/composite_report&"
+    report_unit ="reportUnit=/reports/MES/RMT/composite_report&"
     report_parameters= "output=pdf&delivery_number=" + params[:id]
     @url = Globals.get_jasper_server_report_server_ip + Globals.get_jasper_server + report_unit +Globals.get_jasperserver_username_password + report_parameters
 
@@ -2309,7 +2308,7 @@ class RmtProcessing::DeliveryController < ApplicationController
     end
 
     session[:alert] = 'tripsheet successfully printed'
-    report_unit ="reportUnit=/RMT/delivery_tripsheet&"
+    report_unit ="reportUnit=/reports/MES/RMT/delivery_tripsheet&"
     report_parameters= "output=pdf&delivery_number=" + @delivery.delivery_number.to_s
     @url = Globals.get_jasper_server_report_server_ip + Globals.get_jasper_server + report_unit +Globals.get_jasperserver_username_password + report_parameters
 

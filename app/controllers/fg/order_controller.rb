@@ -1513,7 +1513,7 @@ end
   def print_export_certificate
 
     load_order_id = params[:id]
-    report_unit ="reportUnit=/FG/ExportCertificate&"
+    report_unit ="reportUnit=/reports/MES/FG/ExportCertificate&"
     report_parameters="output=pdf&load_order_id=" +"#{load_order_id}"
     redirect_to_path(Globals.get_jasper_server_report_server_ip + Globals.get_jasper_server + report_unit +Globals.get_jasperserver_username_password + report_parameters)
   end
@@ -1521,7 +1521,7 @@ end
   def export_certificate_addenums
 
     load_order_id = params[:id]
-    report_unit ="reportUnit=/FG/addendum&"
+    report_unit ="reportUnit=/reports/MES/FG/addendum&"
     report_parameters="output=pdf&load_order_id=" +"#{load_order_id}"
     redirect_to_path(Globals.get_jasper_server_report_server_ip + Globals.get_jasper_server + report_unit +Globals.get_jasperserver_username_password + report_parameters)
 
@@ -1732,7 +1732,7 @@ end
      load.dispatch_consignment_printed_date=Time.now.to_formatted_s(:db)
      load.update
    end
-    report_unit ="reportUnit=/FG/dispatch_consignment&"
+    report_unit ="reportUnit=/reports/MES/FG/dispatch_consignment&"
     report_parameters="output=pdf&load_order_id=" +"#{load_order_id}" + "&pallet_report=detail"
     redirect_to_path(Globals.get_jasper_server_report_server_ip + Globals.get_jasper_server + report_unit +Globals.get_jasperserver_username_password + report_parameters)
 
@@ -1745,7 +1745,7 @@ end
      load.dispatch_consignment_printed_date=Time.now.to_formatted_s(:db)
      load.update
    end
-    report_unit = "reportUnit=/FG/dispatch_consignment&"
+    report_unit = "reportUnit=/reports/MES/FG/dispatch_consignment&"
     report_parameters = "output=pdf&load_order_id=" +"#{load_order_id}" + "&pallet_report=summary"
     redirect_to_path(Globals.get_jasper_server_report_server_ip + Globals.get_jasper_server + report_unit +Globals.get_jasperserver_username_password + report_parameters)
 

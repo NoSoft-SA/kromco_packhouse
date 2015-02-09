@@ -306,7 +306,7 @@ class  Qc::QcInspectionController < ApplicationController
     @can_edit = authorise(program_name(@qc_inspection_type_code),'edit',session[:user_id])
     @can_delete = authorise(program_name(@qc_inspection_type_code),'delete',session[:user_id])
     if @qc_inspection.status == QcInspection::STATUS_COMPLETED
-#      @can_edit   = false
+      @can_edit   = false
       @can_delete = false
     end
     @qc_inspection_tests =  eval(session[:inspection_tests_query]) if !@qc_inspection_tests
@@ -603,7 +603,7 @@ class  Qc::QcInspectionController < ApplicationController
      rep_id = params[:id]
      insp_id = params[:qc_inspection_id]
     qc_inspection_type_report = QcInspectionTypeReport.find(rep_id)
-    report_unit               = "reportUnit=/QC/#{qc_inspection_type_report.report_name}&"
+    report_unit               = "reportUnit=/reports/MES/QC/#{qc_inspection_type_report.report_name}&"
     report_parameters         = "output=pdf&qc_inspection_id=#{insp_id}"
     RAILS_DEFAULT_LOGGER.info ("QCQCQC report_unit : " + report_unit.to_s)        
     RAILS_DEFAULT_LOGGER.info ("QCQCQC report_parameters : " + report_parameters.to_s)            

@@ -16,7 +16,6 @@ class Fg::IntakeController < ApplicationController
   end
  
 
-
   def set_printer_submit
     printer_name = params['printer']['friendly_name']
     printer = Printer.find_by_friendly_name(printer_name)
@@ -624,7 +623,7 @@ class Fg::IntakeController < ApplicationController
     id = params[:id]
     @intake_production= IntakeHeadersProduction.find(id)
     consignment_note_number =  @intake_production.consignment_note_number
-    report_unit ="reportUnit=/FG/first_intake&"
+    report_unit ="reportUnit=/reports/MES/FG/first_intake&"
     report_parameters="output=pdf&consignment_note_number="+ "#{consignment_note_number}"
     redirect_to_path(Globals.get_jasper_server_report_server_ip + Globals.get_jasper_server + report_unit +Globals.get_jasperserver_username_password + report_parameters)
   end

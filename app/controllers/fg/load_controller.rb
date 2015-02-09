@@ -821,7 +821,7 @@ class Fg::LoadController < ApplicationController
     load_id = params[:id]
     load_order_id = LoadOrder.find_by_sql("SELECT id FROM load_orders WHERE load_id = '#{load_id}'")
     load_order_id = load_order_id[0]['id']
-    report_unit ="reportUnit=/FG/pick_slip&"
+    report_unit ="reportUnit=/reports/MES/FG/pick_slip&"
     report_parameters="output=pdf&load_order_id=" +"#{load_order_id}"
     redirect_to_path(Globals.get_jasper_server_report_server_ip + Globals.get_jasper_server + report_unit +Globals.get_jasperserver_username_password + report_parameters)
   end
