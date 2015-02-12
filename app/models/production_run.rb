@@ -17,6 +17,7 @@ class ProductionRun < ActiveRecord::Base
   has_many :production_run_stage_histories, :dependent => :destroy
   has_one :production_run_stat, :dependent => :destroy
   has_many :cartons
+  belongs_to :ripe_point
 
   has_many :tipped_bins, :class_name => 'Bin', :foreign_key => 'production_run_tipped_id'
   has_many :rebins, :class_name => 'Bin', :foreign_key => 'production_run_rebin_id'

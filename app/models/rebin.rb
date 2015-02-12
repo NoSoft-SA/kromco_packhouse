@@ -5,8 +5,14 @@ class Rebin
   #----------------------------------------------------------------
   #Map attribute readers from other colums to native fields on this class
   #----------------------------------------------------------------
+
   def Rebin.create_rebin(rebin_link, station_code, unique_num, result)
     require 'date'
+
+    is_dp_line = false
+    is_dp_line = true if station_code.slice(0,2).to_i >= 41 && station_code.slice(0,2).to_i <= 48
+
+
 
     if Bin.find_by_print_number_and_rebin_status_and_binfill_station_code(unique_num, "not printed", station_code)
       result[:err_type] = 1
@@ -18,12 +24,21 @@ class Rebin
       return nil
     end
 
+    run = ProductionRun.find(rebin_link.production_run_id)
+
+
      rebin = Bin.new
      rebin_num   = MesControlFile.next_seq_web(MesControlFile::BIN)
      template    = rebin_link.rebin_template
      rebin.bin_number         = rebin_num
      rebin.binfill_station_code = station_code
+
+     #default & for NON DP
      track_slms_indicator_rec = TrackSlmsIndicator.find_by_track_slms_indicator_code(rebin_link.rebin_template.track_indicator_code)
+
+     if is_dp_line && run.track_indicator_id
+       track_slms_indicator_rec = TrackSlmsIndicator.find(run.track_indicator_id)
+     end
 
      if  track_slms_indicator_rec == nil
        result[:err_type] = 3
@@ -32,7 +47,23 @@ class Rebin
        rebin.track_indicator1_id = track_slms_indicator_rec.id
      end
 
+    #default & for non DP
     rmt_product =    RmtProduct.find_by_rmt_product_code(rebin_link.rebin_template.rmt_product_code)
+    ripe_point_code = rmt_product.ripe_point_code #default
+    if run.ripe_point_id #for DP rebins
+      ripe_point_code = run.ripe_point.ripe_point_code
+    end
+
+    if is_dp_line
+      rmt_product = RmtProduct.create_if_needed("rebin",rmt_product.variety.commodity.commodity_group.commodity_group_code,
+                                                rmt_product.commodity_code,
+                                                rmt_product.variety_code,
+                                                rmt_product.size_code,
+                                                rmt_product.product_class_code,
+                                                ripe_point_code,
+                                                rmt_product.treatment_code,"KROMC")
+    end
+
     rebin.rmt_product_id =   rmt_product.id
     farm = Farm.find_by_farm_code(rebin_link.production_run.farm_code)
     rebin.farm_id = farm.id
