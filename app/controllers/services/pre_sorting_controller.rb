@@ -43,7 +43,7 @@ class Services::PreSortingController < ApplicationController
         results = Marshal.load(Base64.decode64(res))
       else
         err = response.body.split('</message>').first.split('<message>').last
-        errmsg = "SQL Integration returned an error running \"select * from ViewpaloxKromco where ViewpaloxKromco.Numero_palox=#{@created_bin}\". The http code is #{response.code}. Message: #{err}."
+        errmsg = "SQL Integration returned an error running : select * from ViewpaloxKromco where ViewpaloxKromco.Numero_palox=#{@created_bin}. The http code is #{response.code}. Message: #{err}."
         logger.error ">>>> #{errmsg}"
         raise errmsg
         return
@@ -152,7 +152,11 @@ class Services::PreSortingController < ApplicationController
   def bin_created
     @created_bin = params[:bin]
     if (error = bin_created_intergration)
-      render_result(handle_error(error))
+      if(error.strip == "Bin:#{@created_bin} already exists in Kromco Mes db" )
+        render_result("<error msg=\"#{error}\" />")
+      else
+        render_result(handle_error(error))
+      end
     else
       render_result("<bins><bin result_status=\"OK\" msg=\"created bin #{@created_bin}\" /></bins>")
     end
@@ -175,7 +179,7 @@ class Services::PreSortingController < ApplicationController
         results = Marshal.load(Base64.decode64(res))
       else
         err = response.body.split('</message>').first.split('<message>').last
-        errmsg = "SQL Integration returned an error running \"select Apport.* from Apport where Apport.NumPalox='#{@tipped_bin}'\". The http code is #{response.code}. Message: #{err}."
+        errmsg = "SQL Integration returned an error running: select Apport.* from Apport where Apport.NumPalox='#{@tipped_bin}'. The http code is #{response.code}. Message: #{err}."
         logger.error ">>>> #{errmsg}"
         raise errmsg
         return
@@ -205,7 +209,11 @@ class Services::PreSortingController < ApplicationController
   def bin_tipped
     @tipped_bin = params[:bin]
     if (error = bin_tipped_intergration)
-      render_result(handle_error(error))
+      if(error.strip == "Bin:#{@tipped_bin} already tipped" )
+        render_result("<error msg=\"#{error}\" />")
+      else
+        render_result(handle_error(error))
+      end
     else
       render_result("<bins><bin result_status=\"OK\" msg=\"tipped bin #{@tipped_bin}\" /></bins>")
     end
@@ -309,15 +317,110 @@ class Services::PreSortingController < ApplicationController
     "<run_info />"
   end
 
+  def forced_staging
+    render :inline => %{
+     		<% @content_header_caption = "'enter bin numbers to to be staged'"%>
+
+     		<%= build_forced_staging_form("forced_staging_submit","stage")%>
+
+     		}, :layout => 'content'
+  end
+
+  def forced_staging_submit
+    session[:current_force_stage_bin_number] = params['staging']['bin1']
+    @bin1 = Bin.find_by_bin_number(params['staging']['bin1'])
+    session[:current_force_stage_bin_farm] = @bin1.farm_id
+    bin_track_slms_indicator=TrackSlmsIndicator.find(@bin1.track_indicator1_id)
+
+    treatment_filter = @bin1.rmt_product.treatment ? " and rmt_products.treatment_id=#{@bin1.rmt_product.treatment.id}" : " and (true)"
+    product_class_filter = @bin1.rmt_product.product_class  ? " and rmt_products.product_class_id=#{@bin1.rmt_product.product_class.id}" : " and (true)"
+    size_filter = @bin1.rmt_product.size ? " and rmt_products.size_id=#{@bin1.rmt_product.size.id}" : " and (true)"
+
+    @presort_staging_runs = PresortStagingRun.find_by_sql("
+      select p.presort_run_code ,pc.product_class_code ,tm.treatment_code,sizes.size_code,ripe_points.ripe_point_code,p.id ,t.track_slms_indicator_code,r.rmt_variety_code,s.season_code
+      ,p.status ,p.created_on ,p.completed_on ,p.created_by ,f.farm_group_code
+      from presort_staging_runs p
+      inner join presort_staging_run_children rc on rc.presort_staging_run_id=p.id
+      inner join farms fm on fm.id=rc.farm_id
+      inner join seasons s on p.season_id=s.id
+      inner join farm_groups f on p.farm_group_id=f.id
+      inner join rmt_varieties r on p.rmt_variety_id=r.id
+      inner join rmt_products on  rmt_products.variety_id=r.id
+      inner join track_slms_indicators t on p.track_slms_indicator_id=t.id
+      inner join ripe_points on p.ripe_point_id=ripe_points.id
+      left  join  product_classes pc on p.product_class_id=pc.id
+      left  join  treatments tm on p.treatment_id=tm.id
+      left  join sizes on p.size_id=sizes.id
+      where fm.id='#{@bin1.farm_id}' and s.season_code='#{@bin1.season_code}' and f.id=#{@bin1.farm.farm_group.id} and r.id=#{@bin1.rmt_product.variety.rmt_variety.id}
+      and t.id=#{bin_track_slms_indicator.id}
+      and ripe_points.id=#{@bin1.rmt_product.ripe_point.id}
+      #{treatment_filter} #{product_class_filter} #{size_filter}
+      group by pc.product_class_code ,tm.treatment_code,sizes.size_code,ripe_points.ripe_point_code,p.id ,t.track_slms_indicator_code,r.rmt_variety_code,s.season_code
+      ,p.presort_run_code ,p.status ,p.created_on ,p.completed_on ,p.created_by ,f.farm_group_code
+      order by p.id desc
+    ")
+
+    render :inline => %{
+      <% grid = build_presort_staging_run_grid(@presort_staging_runs,@can_edit,@can_delete)%>
+      <% @content_header_caption = "'select a run to stage bin:  #{@bin1.bin_number}'"%>
+      <% grid.caption = 'select a run to stage this bin: #{session[:current_force_stage_bin_number]}'%>
+      <% @header_content = grid.build_grid_data %>
+      <% @pagination = pagination_links(@presort_staging_run_pages) if @presort_staging_run_pages != nil %>
+      <%= grid.render_html %>
+      <%= grid.render_grid %>
+    },:layout => 'content'
+  end
+
+  def select_presort_staging_run
+    @presort_staging_run_children = PresortStagingRunChild.find(:all,
+                                                                :conditions=>"presort_staging_run_id=#{params[:id]} and (farms.id=#{session[:current_force_stage_bin_farm]} or farms.farm_code='0P')",
+                                                                :select => "presort_staging_run_children.*,farms.farm_code",
+                                                                :joins => "inner join farms on presort_staging_run_children.farm_id=farms.id")
+    render :inline => %{
+      <% grid = build_presort_staging_run_child_grid(@presort_staging_run_children)%>
+      <% grid.caption = 'select a run child to stage bin: #{session[:current_force_stage_bin_number] }'%>
+      <%grid.height='200'%>
+      <% @header_content = grid.build_grid_data %>
+
+      <% @pagination = pagination_links(@presort_staging_run_child_pages) if @presort_staging_run_child_pages != nil %>
+      <%= grid.render_html %>
+      <%= grid.render_grid %>
+    },:layout => 'content'
+  end
+
+  def force_stage_bin
+    pre_sort_staging_run_child=PresortStagingRunChild.find(params[:id])
+
+    bins_validation_results =  get_stage_bins_results(pre_sort_staging_run_child.presort_staging_run,pre_sort_staging_run_child,session[:current_force_stage_bin_number], nil, nil,nil)
+
+    if(bins_validation_results[0][:status] == "OK")
+      flash[:notice] = "bin[#{session[:current_force_stage_bin_number] }] has been successfully staged against run[#{pre_sort_staging_run_child.presort_staging_run_child_code}]"
+      params.delete(:id)
+      params[:bin1] = session[:current_force_stage_bin_number]
+      create_presort_log(gen_bins_scanned_xml(bins_validation_results))
+    else
+      flash[:error] = bins_validation_results[0][:msg]
+    end
+    # return render_result(gen_bins_scanned_xml(bins_validation_results))
+    forced_staging
+  end
+
   def bins_scanned_internal(bin1, bin2 = nil, bin3 = nil, overridden = nil)
 
     if (error=validate_active_run)
       return handle_error(error)
     end
 
-    bin_nums = [bin1, bin2, bin3].compact
     active_pre_sort_stagin_run=PresortStagingRun.find(:first, :conditions => "status='ACTIVE' or status='active'")
     active_pre_sort_stagin_run_child=PresortStagingRunChild.find(:first, :conditions => "presort_staging_run_id=#{@active_pre_sort_stagin_run.id} and (status='ACTIVE' or status='active')")
+
+    bins_validation_results =  get_stage_bins_results(active_pre_sort_stagin_run,active_pre_sort_stagin_run_child,bin1, bin2, bin3,overridden)
+
+    return gen_bins_scanned_xml(bins_validation_results)
+  end
+
+  def get_stage_bins_results(active_pre_sort_stagin_run,active_pre_sort_stagin_run_child,bin1, bin2, bin3,overridden)
+    bin_nums = [bin1, bin2, bin3].compact
     bins_validation_results = validate_bins(bin_nums, active_pre_sort_stagin_run, active_pre_sort_stagin_run_child, overridden)
     bin_statuses = bins_validation_results.group_by { |a| a[:status] }.keys.uniq.sort
 
@@ -349,7 +452,8 @@ class Services::PreSortingController < ApplicationController
     else
       log_bin_staging_errors(bins_validation_results.group_by { |a| a[:status] }['FAILED'], active_pre_sort_stagin_run_child.id)
     end
-    return gen_bins_scanned_xml(bins_validation_results)
+
+    return bins_validation_results
   end
 
   def log_bin_staging_errors(bins_validation_results, active_pre_sort_stagin_run_child_id)
@@ -484,7 +588,7 @@ class Services::PreSortingController < ApplicationController
         results = Marshal.load(Base64.decode64(res))
       else
         err = response.body.split('</message>').first.split('<message>').last
-        errmsg = "SQL Integration returned an error running \"INSERT INTO Apport\". The http code is #{response.code}. Message: #{err}."
+        errmsg = "SQL Integration returned an error running : INSERT INTO Apport. The http code is #{response.code}. Message: #{err}."
         logger.error ">>>> #{errmsg}"
         raise errmsg
         return
