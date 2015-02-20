@@ -281,7 +281,7 @@ class Services::PreSortingController < ApplicationController
 
   def create_presort_log(result)
     input_params = "#{params.find_all { |key, val| (key!='controller' && key!='action') }.map { |k, v| "#{k}=#{v}" }.join(",")}"
-    presort_log = PresortLog.new({:action => params[:action], :input_params => input_params, :output_xml => result, :rails_error_id => (@err_entry ? @err_entry.id : nil)})
+    presort_log = PresortLog.new({:action => params[:action], :input_params => input_params, :output_xml => result, :rails_error_id => (@err_entry ? @err_entry.id : nil),:user_ip=>request.remote_ip,:user=>session[:user_id].user_name})
     presort_log.save
   end
 
