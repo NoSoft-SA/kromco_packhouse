@@ -149,10 +149,19 @@ class Services::PreSortingController < ApplicationController
     end
   end
 
+  def clear_bin_presort_integration_retries(bin_number,event_type)
+    if(presort_integration_retry=PresortIntegrationRetry.find_by_bin_number_and_event_type(bin_number.strip,event_type.strip))
+      presort_integration_retry_history = PresortIntegrationRetryHistory.new({:event_type=>presort_integration_retry.event_type,:process_attempts=>presort_integration_retry.process_attempts,:bin_number=>presort_integration_retry.bin_number,:error=>presort_integration_retry.error})
+      presort_integration_retry_history.save!
+      presort_integration_retry.destroy
+    end
+  end
+
   def bin_created
     @created_bin = params[:bin]
     if (error = bin_created_intergration)
       if(error.strip == "Bin:#{@created_bin} already exists in Kromco Mes db" )
+        clear_bin_presort_integration_retries(@created_bin,'bin_created')
         render_result("<error msg=\"#{error}\" />")
       else
         render_result(handle_error(error))
@@ -210,6 +219,7 @@ class Services::PreSortingController < ApplicationController
     @tipped_bin = params[:bin]
     if (error = bin_tipped_intergration)
       if(error.strip == "Bin:#{@tipped_bin} already tipped" )
+        clear_bin_presort_integration_retries(@tipped_bin,'bin_tipped')
         render_result("<error msg=\"#{error}\" />")
       else
         render_result(handle_error(error))
@@ -334,10 +344,6 @@ class Services::PreSortingController < ApplicationController
     session[:current_force_stage_bin_farm] = @bin1.farm_id
     bin_track_slms_indicator=TrackSlmsIndicator.find(@bin1.track_indicator1_id)
 
-    treatment_filter = @bin1.rmt_product.treatment ? " and rmt_products.treatment_id=#{@bin1.rmt_product.treatment.id}" : " and (true)"
-    product_class_filter = @bin1.rmt_product.product_class  ? " and rmt_products.product_class_id=#{@bin1.rmt_product.product_class.id}" : " and (true)"
-    size_filter = @bin1.rmt_product.size ? " and rmt_products.size_id=#{@bin1.rmt_product.size.id}" : " and (true)"
-
     @presort_staging_runs = PresortStagingRun.find_by_sql("
       select p.presort_run_code ,pc.product_class_code ,tm.treatment_code,sizes.size_code,ripe_points.ripe_point_code,p.id ,t.track_slms_indicator_code,r.rmt_variety_code,s.season_code
       ,p.status ,p.created_on ,p.completed_on ,p.created_by ,f.farm_group_code
@@ -347,7 +353,6 @@ class Services::PreSortingController < ApplicationController
       inner join seasons s on p.season_id=s.id
       inner join farm_groups f on p.farm_group_id=f.id
       inner join rmt_varieties r on p.rmt_variety_id=r.id
-      inner join rmt_products on  rmt_products.variety_id=r.id
       inner join track_slms_indicators t on p.track_slms_indicator_id=t.id
       inner join ripe_points on p.ripe_point_id=ripe_points.id
       left  join  product_classes pc on p.product_class_id=pc.id
@@ -356,7 +361,6 @@ class Services::PreSortingController < ApplicationController
       where fm.id='#{@bin1.farm_id}' and s.season_code='#{@bin1.season_code}' and f.id=#{@bin1.farm.farm_group.id} and r.id=#{@bin1.rmt_product.variety.rmt_variety.id}
       and t.id=#{bin_track_slms_indicator.id}
       and ripe_points.id=#{@bin1.rmt_product.ripe_point.id}
-      #{treatment_filter} #{product_class_filter} #{size_filter}
       group by pc.product_class_code ,tm.treatment_code,sizes.size_code,ripe_points.ripe_point_code,p.id ,t.track_slms_indicator_code,r.rmt_variety_code,s.season_code
       ,p.presort_run_code ,p.status ,p.created_on ,p.completed_on ,p.created_by ,f.farm_group_code
       order by p.id desc
