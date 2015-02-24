@@ -46,7 +46,7 @@ class Services::PreSortingController < ApplicationController
         errmsg = "SQL Integration returned an error running : select * from ViewpaloxKromco where ViewpaloxKromco.Numero_palox=#{@created_bin}. The http code is #{response.code}. Message: #{err}."
         logger.error ">>>> #{errmsg}"
         raise errmsg
-        return
+        # return
       end
 
       if (results.empty?)
@@ -59,7 +59,7 @@ class Services::PreSortingController < ApplicationController
       
       if (representative_bin['Palox_poids'].to_s == "")
         raise "Presorted Bin:#{@created_bin}:  Palox_poids is null"
-        return
+        # return
       end
 
       
@@ -279,10 +279,12 @@ class Services::PreSortingController < ApplicationController
     @err_entry = super(error, is_tree, is_tree_content, error_type, render_error_view)
     if(params[:action]=="bin_created" or params[:action]=="bin_tipped")
       if(presort_integration_retry=PresortIntegrationRetry.find_by_bin_number_and_event_type(params[:bin].strip,params[:action].strip))
-        presort_integration_retry.update_attributes({:process_attempts=>presort_integration_retry.process_attempts+1,:error=>error})
+        presort_integration_retry.process_attempts=presort_integration_retry.process_attempts+1
+        presort_integration_retry.error=error
+        presort_integration_retry.update
       else
         presort_integration_retry= PresortIntegrationRetry.new({:event_type=>params[:action].strip,:bin_number=>params[:bin].strip,:error=>error})
-        presort_integration_retry.save
+        presort_integration_retry.create
       end
     end
     return "<error msg=\"#{error}\" />"
