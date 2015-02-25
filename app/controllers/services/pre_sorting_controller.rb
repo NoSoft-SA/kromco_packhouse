@@ -547,6 +547,38 @@ class Services::PreSortingController < ApplicationController
     apport_bins_or_clause = " bins.bin_number='#{bins.join("' or bins.bin_number='")}' "
     insert_ql = ""
     Bin.find(:all, :conditions => apport_bins_or_clause).each do |apport_bin|
+#-------------------------------------------------------- error=delete_untipped_maf_opharned_bin_records(apport_bin.bin_number)
+      http = Net::HTTP.new(Globals.bin_scanned_mssql_server_host, Globals.bin_scanned_mssql_integration_server_port)
+      request = Net::HTTP::Post.new("/select")
+      parameters = {'method' => 'select', 'statement' => Base64.encode64("select * from Apport where NumPalox = '#{apport_bin.bin_number}' and LotMAF is null and DateLecture is null and StatusMAF is null")}
+      request.set_form_data(parameters)
+      response = http.request(request)
+
+      if '200' == response.code
+        res = response.body.split('resultset>').last.split('</res').first
+        results = Marshal.load(Base64.decode64(res))
+        if (!results.empty?)
+          http = Net::HTTP.new(Globals.bin_scanned_mssql_server_host, Globals.bin_scanned_mssql_integration_server_port)
+          request = Net::HTTP::Post.new("/exec")
+          parameters = {'method' => 'delete', 'statement' => Base64.encode64("delete from Apport where NumPalox = '#{apport_bin.bin_number}' and LotMAF is null and DateLecture is null and StatusMAF is null")}
+          request.set_form_data(parameters)
+          response = http.request(request)
+          if '200' == response.code
+          else
+            err = response.body.split('</message>').first.split('<message>').last
+            errmsg = "Could not delete Apport bin record. Sql error: delete from Apport where NumPalox = '#{apport_bin.bin_number}' and LotMAF is null and DateLecture is null and StatusMAF is null. The http code is #{response.code}. Message: #{err}."
+            logger.error ">>>> #{errmsg}"
+            raise errmsg
+          end
+        end
+      else
+        err = response.body.split('</message>').first.split('<message>').last
+        errmsg = "Failed to lookup Apport validation bin: select * from Apport where NumPalox = '#{apport_bin.bin_number}' and LotMAF is null and DateLecture is null and StatusMAF is null. The http code is #{response.code}. Message: #{err}."
+        logger.error ">>>> #{errmsg}"
+        raise errmsg
+      end
+#-------------------------------------------------------------------------------------------------------------------------------
+
       track_indicator_rec = TrackSlmsIndicator.find(apport_bin.track_indicator1_id)
       season = Season.find_by_season_code(apport_bin.season_code)
 
@@ -579,11 +611,12 @@ class Services::PreSortingController < ApplicationController
         ,'#{apport_bin.farm.farm_description}','#{apport_bin.rmt_product.variety.rmt_variety.commodity.commodity_code}','#{apport_bin.rmt_product.variety.rmt_variety.commodity.commodity_description_long}'
         ,'#{apport_bin.production_run_rebin_id}','#{season.season}','#{apport_bin.track_indicator2_id}','#{season.season}','#{apport_bin.rmt_product.variety.rmt_variety.rmt_variety_code}'
         ,'#{apport_bin.farm.farm_group_id}','#{apport_bin.rmt_product_id}');\n"
+
     end
 
-    RAILS_DEFAULT_LOGGER.info ("insert_ql.to_s: " + insert_ql.to_s)
+    # RAILS_DEFAULT_LOGGER.info ("insert_ql.to_s: " + insert_ql.to_s)
+    # puts insert_ql
 
-    #puts insert_ql
     if (!insert_ql.strip.empty?)
       http = Net::HTTP.new(Globals.bin_scanned_mssql_server_host, Globals.bin_scanned_mssql_integration_server_port)
       request = Net::HTTP::Post.new("/exec")
@@ -604,6 +637,7 @@ class Services::PreSortingController < ApplicationController
 
       #raise "#{response.code} - #{response.message}" if(results.is_a?(String) && results.upcase.include?('ERROR'))
     end
+
   end
 
   def validate_bins(bin_nums, staging_run, staging_child_run, overridden = nil)
