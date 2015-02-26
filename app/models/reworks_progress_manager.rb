@@ -259,7 +259,7 @@ class ReworksProgressManager
 
    def calc_bins_reclassified_req
 #     @conn.select_one("select count(*) as count from rw_active_rebins where rw_run_id = #{@rw_run.id.to_s} and upper(reworks_action) = 'RECLASSIFIED'" )['count'].to_i
-      @conn.select_one("select count(*) as count from rw_active_bins where rw_run_id = #{@rw_run.id.to_s} and upper(reworks_action) = 'RECLASSIFIED'" )['count'].to_i
+      @conn.select_one("select count(*) as count from rw_active_bins where rw_run_id = #{@rw_run.id.to_s} and (upper(reworks_action) = 'RECLASSIFIED' or upper(reworks_action) = 'WEIGHT_CHANGED')" )['count'].to_i
    end
 
 

@@ -49,6 +49,44 @@ class Production::ReworksController < ApplicationController
       rw_bins
   end
 
+
+  def weigh_bin
+    @rw_bin = RwActiveBin.find(params[:id])
+
+    @content_header_caption = "'Override bin weight'"
+      render :inline =>
+                 %{
+
+		<%= build_weigh_bin_form(@rw_bin)%>
+
+      }, :layout => 'content'
+      return
+
+
+  end
+
+
+  def weigh_bin_submit
+    @rw_bin = RwActiveBin.find(params[:rw_bin][:id])
+
+    new_weight = params[:rw_bin][:weight].to_f
+
+    if new_weight > 0
+      @rw_bin.weight = new_weight
+      @rw_bin.reworks_action = "WEIGHT_CHANGED"
+      @rw_bin.weight_changed = true
+      @rw_bin.save!
+      flash[:notice] = "New weight saved(#{new_weight})"
+      rw_bins
+    else
+      flash[:error] = "You did not specify a value for weight"
+      @params[:id] = @rw_bin.id
+      weigh_bin
+    end
+
+
+  end
+
   def receive_scrap_bins
      bins    = session[:current_bin_list]
      selected_bins = selected_records?(bins, nil,nil)
