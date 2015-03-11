@@ -274,7 +274,10 @@ module Inventory
         inventory_transaction_stock.stock_item = @stock_item_after
         inventory_transaction_stock.location_id = @stock_item_after.location_id
         inventory_transaction_stock.location_code = @stock_item_after.location_code
-        inventory_transaction_stock.location_from = @stock_item_before.location_code if(@stock_item_before)
+        if(@stock_item_before)
+          inventory_transaction_stock.location_from = @stock_item_before.location_code
+          inventory_transaction_stock.previous_trans_date_time = @stock_item_before.updated_at
+        end
 
         inventory_transaction_stock.location_to = @inventory_transaction.location_to
         inventory_transaction_stock.transaction_type_code = @inventory_transaction.transaction_type_code
