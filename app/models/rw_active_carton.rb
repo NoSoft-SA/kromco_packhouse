@@ -968,7 +968,9 @@ class RwActiveCarton < ActiveRecord::Base
     #pallet.carton_setup_id = self.carton_template.carton_setup_id if self.carton_template
     pallet.pallet_format_product_code = pallet_format_product_code
     pallet.pallet_id                  = nil
+
     new_sequence                      = MesControlFile.next_seq(3)
+
     new_pallet_num_str                = new_sequence.to_s + RwActivePallet.calc_check_digit(new_sequence.to_s)
     pallet.pallet_number              = new_pallet_num_str
     pallet.build_status               = "partial"
@@ -993,6 +995,7 @@ class RwActiveCarton < ActiveRecord::Base
     pallet.carton_pack_product_code   = self.carton_pack_product_code
     pallet.oldest_pack_date_time = Time.now()
     pallet.ppecb_inspection_id = nil
+    pallet.load_detail_id = self.rw_active_pallet.load_detail_id
 
     pallet.create
     return pallet

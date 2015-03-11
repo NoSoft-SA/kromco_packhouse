@@ -2956,7 +2956,7 @@ end
 
     #@active_bins = RwActiveBin.find_all_by_rw_run_id(session[:current_rw_run].id)
     @active_bins = RwActiveBin.find_by_sql("select transaction_statuses.status_code,
-                    ripe_points.cold_store_type_code,locations.location_code as sealed_ca_location_code,stock_items.location_code,stock_items.stock_type_code,
+                    rw_active_bins.coldstore_type as cold_store_type_code,locations.location_code as sealed_ca_location_code,stock_items.location_code,stock_items.stock_type_code,
                     rmt_products.product_class_code,rmt_products.ripe_point_code,rmt_products.size_code,
                     rw_active_bins.*,pack_material_products.pack_material_product_code,rmt_products.rmt_product_code,farms.farm_code,
                     rw_active_bins.rebin_track_indicator_code,rw_active_bins.season_code,
