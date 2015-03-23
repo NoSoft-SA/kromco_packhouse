@@ -31,12 +31,12 @@ class PrintTripsheet < PDTTransaction
    @printer = self.pdt_screen_def.get_input_control_value("printer")
    vehicle_job = VehicleJob.find_by_vehicle_job_number(@vehicle_job_no)
    if vehicle_job
-      http_conn = Net::HTTP.new(Globals.get_crystal_reports_server_ip, Globals.get_crystal_reports_server_port)
-      report_parameters = "vehicle_job_number=" + vehicle_job.vehicle_job_number.to_s + "&reference_type=vehicle_jobs&reference_id=6&report_type=Tripsheet_IW&printer_name=" + @printer.to_s + "&report_user_ref=" + vehicle_job.id.to_s
-      response = http_conn.request_get(Globals.get_crystal_reports_server + report_parameters)
-      puts "Body : " + response.body.to_s
-      puts "Response : " + response.to_s
-      if response.body.to_s.strip == ""
+      out_file_type = "PDF"
+      out_file_name = "interwarehouse_tripsheet_#{Time.now.strftime("%m_%d_%Y_%H_%M_%S")}"
+      out_file_path = Globals.jasper_reports_pdf_downloads + "/#{out_file_name}"
+      err = JasperReports.generate_report('interwarehouse_tripsheet',self.pdt_screen_def.user,{:vehicle_job_number=>vehicle_job.vehicle_job_number,:printer=>@printer,:MODE=>"PRINT",:OUT_FILE_NAME=>out_file_path,:OUT_FILE_TYPE=>out_file_type})
+
+      if(!err)
         ActiveRecord::Base.transaction do
           # create vehicle_job_statuses record
           vehicle_job_status = VehicleJobStatus.new
@@ -48,8 +48,7 @@ class PrintTripsheet < PDTTransaction
           return result = PDTTransaction.build_msg_screen_definition(nil, nil, nil, ["Tripsheet was printed successifully!"])
         end
        else
-        error_msg = response.body.to_s.gsub("<error>", "").gsub("</error>","").gsub("<![CDATA[","").gsub("]]>","")
-        errors_array = error_msg.split(". ")
+        errors_array = [err.gsub("<BR>","")]
         field_configs = Array.new
         errors_array.each do |err_line|
           field_configs[field_configs.length] = {:type=>"text_line", :name=>"output",:value=>err_line}
