@@ -412,8 +412,18 @@ class RwRun < ActiveRecord::Base
               end
 
             progress_stats.event_bin_tipped
+
           end
 
+
+          if bin.weight_changed
+            progress_stats.event_bin_reclassified
+            stock_type =StockItem.find_by_inventory_reference(bin.bin_number).stock_type_code
+            if stock_type == "PRESORT" && bin.bin.mix_ps_bin == 'MIX_PS_BIN'
+              bin.set_child_weights
+            end
+
+          end
 
           reclassed_bin = RwReclassedBin.new
           bin.export_attributes(reclassed_bin, true)

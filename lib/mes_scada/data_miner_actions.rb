@@ -1180,7 +1180,7 @@ module MesScada
     end
 
 
-    def render_generic_grid(reload_url=nil)
+    def render_generic_grid(reload_url=nil, caption=nil)
       conn                    = User.connection
       @recordset              = conn.select_all(Globals.cleanup_where(dm_session[:search_engine_query_definition]))
       @stat                   = dm_session[:search_engine_query_definition]
@@ -1189,6 +1189,7 @@ module MesScada
       @se_grid_action_columns = dm_session[:search_engine_grid_action_columns]
       @multi_sel              = dm_session[:search_engine_multi_select]
       @reload_url             = reload_url || "http://#{request.host_with_port}/reports/reports/reload_generic_grid"
+      @caption                = caption || 'view results'
       # logger.info ">>> query: #{dm_session[:search_engine_query_definition].inspect}"
       # logger.info ">>> cols: #{dm_session[:columns_list].inspect}"
       # logger.info ">>> action: #{dm_session[:search_engine_grid_action_columns].inspect}"
@@ -1207,7 +1208,7 @@ module MesScada
         render :inline => %{
 
           <% grid            = build_generic_grid(@recordset, @stat, @columns_list,@se_grid_action_columns,@multi_sel, @grid_configs)%>
-          <% grid.caption    = 'view results' if grid.caption == DataGridJquery::DataGrid::DEFAULT_CAPTION %>
+          <% grid.caption    = @caption if grid.caption == DataGridJquery::DataGrid::DEFAULT_CAPTION %>
           <% grid.fullpage   = true %>
           <% grid.reload_url = @reload_url %>
           <% @header_content = grid.build_grid_data %>

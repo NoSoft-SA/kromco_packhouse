@@ -4,6 +4,7 @@ class Bin < ActiveRecord::Base
   belongs_to :production_run, :foreign_key => 'production_run_rebin_id'
 
   has_many :bin_track_indicator
+  has_many :ps_mix_lots
   has_many :rw_receipt_bin
   belongs_to :delivery
   belongs_to :rmt_product

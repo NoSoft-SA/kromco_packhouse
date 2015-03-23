@@ -669,6 +669,25 @@ module Production::ReworksHelper
 
   end
 
+
+
+  def build_weigh_bin_form(bin)
+
+    field_configs = Array.new
+
+    field_configs[0] =  {:field_type => 'LabelField',
+                         :field_name => 'original_weight',:settings => {:static_value => Bin.find_by_bin_number(bin.bin_number).weight.to_s,:show_label => true}}
+
+    field_configs[1] =  {:field_type => 'TextField',
+                         :field_name => 'weight'}
+
+
+    build_form(bin, field_configs, 'weigh_bin_submit', 'rw_bin', 'set weight',true)
+
+
+
+  end
+
 #==============
 #RECEIVED GRIDS
 #==============
@@ -884,6 +903,9 @@ module Production::ReworksHelper
 
   end
 
+
+
+
   def build_bulk_edit_bins_form(bin, action, caption, is_edit=nil, is_create_retry=nil)
 
 
@@ -919,6 +941,9 @@ module Production::ReworksHelper
     session[:bulk_edit_bins_form][:rmt_product_observer ] = rmt_product_observer
 
     track_indicator_codes =TrackIndicator.find_by_sql("select  track_indicator_code from track_indicators").map { |q| [q.track_indicator_code] }
+    coldstore_type_codes = ColdStoreType.find(:all).map{|c|c.cold_store_type_code}
+
+
     farm_ids=Farm.find(:all).map{|s|[s.farm_code,s.id]}
     orchard_codes =Orchard.find(:all).map{|s|[s.id,s.orchard_code]}
     rmt_product_ids = RmtProduct.find_by_sql('select id, rmt_product_code from rmt_products').map { |r| [r.rmt_product_code, r.id ] }
@@ -965,6 +990,15 @@ module Production::ReworksHelper
                                                  :label_caption => "rmt product code",:show_label=> true,},
                                              :observer =>  rmt_product_observer
                                             }
+
+
+    field_configs[field_configs.length()] = {:field_type=>'DropDownField',
+                                             :field_name=>'coldstore_type',
+
+                                             :settings=>{
+                                                 :list =>coldstore_type_codes}
+    }
+
 
     field_configs[field_configs.length()] = {:field_type=>'DropDownField',:field_name=>'track_indicator1_id',
                                             :settings=>{:list=>track_slms_indicator_ids, :label_caption =>'track indicator1 code'}}
@@ -1143,6 +1177,14 @@ module Production::ReworksHelper
                                                          {:image => 'reworks_remove',
                                                           :target_action => 'remove_bin_from_reworks',
                                                           :id_column => 'id'}, :html_options => {:prompt => "Are you sure you want to cancel the reception of this bin?"}}
+
+
+
+      column_configs[column_configs.length()] = {:field_type => 'action', :field_name => 'weigh_bin', :col_width => 43,
+                                                 :settings =>
+                                                     {:image => 'scale',
+                                                      :target_action => 'weigh_bin',
+                                                      :id_column => 'id'}}
 
 
       column_configs[column_configs.length()] = {:field_type => 'action', :field_name => 'scrap_bin', :col_width => 43,

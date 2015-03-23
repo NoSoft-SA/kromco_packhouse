@@ -1007,6 +1007,7 @@ end
 def create_track_indicator
    begin
 	 @track_indicator = TrackIndicator.new(params[:track_indicator])
+	 @track_indicator.rmt_variety_id = RmtVariety.find_by_rmt_variety_code(params[:track_indicator][:rmt_variety_code]).id
 	 if @track_indicator.save
 
 		 redirect_to_index("'new record created successfully'","'create successful'")

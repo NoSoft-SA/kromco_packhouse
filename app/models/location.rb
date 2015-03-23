@@ -156,31 +156,23 @@ class Location < ActiveRecord::Base
 
   end
 
-  def extract_bin_numbers(bins,rmt_product_id=nil)
-    bin_nums = []
+  def extract_bin_numbers(bins, rmt_product_id=nil)
+    non_sealed_bin_nums = []
     sealed_bin_nums=[]
-    for bin in bins
-      if rmt_product_id
-        if bin.rmt_product_id == rmt_product_id
+    all_bins=[]
+     bins.each do |bin|
           if bin.sealed_ca_location_id
             sealed_bin_nums << "#{bin.bin_number}".to_s
+            all_bins << "#{bin.bin_number}".to_s
           else
-            bin_nums << "#{bin.bin_number}".to_s
+            non_sealed_bin_nums << "#{bin.bin_number}".to_s
+            all_bins << "#{bin.bin_number}".to_s
           end
-        end
-      else
-        if bin.sealed_ca_location_id
-          sealed_bin_nums << "#{bin.bin_number}".to_s
-        else
-          bin_nums << "#{bin.bin_number}".to_s
-        end
-      end
-
     end
-    return {"bin_nums" => bin_nums, "sealed_bin_nums" => sealed_bin_nums}
+    return {"non_sealed_bin_nums" => non_sealed_bin_nums, "sealed_bin_nums" => sealed_bin_nums, "all_bins" => all_bins}
   end
 
-  def update_bins(new_status_code, bin_numbers,status_changed_date_time, new_rmt_product_id=nil)
+  def update_bins(new_status_code, bin_numbers, status_changed_date_time, new_rmt_product_id=nil)
     coldstore_type="CA"
     set_map = {}
     sealed_bins_set_map = {}
@@ -188,7 +180,6 @@ class Location < ActiveRecord::Base
 
     if  new_rmt_product_id
       set_map = {:rmt_product_id => "'#{new_rmt_product_id}'"}
-      #sealed_bins_set_map = {:rmt_product_id => "'#{new_rmt_product_id}'"}
     end
 
     sealed_ca_date_time=Time.now.to_formatted_s(:db)
@@ -196,13 +187,13 @@ class Location < ActiveRecord::Base
       set_map.store("sealed_ca_location_id", self.id)
       set_map.store("sealed_ca_date_time", "'#{sealed_ca_date_time}'")
       set_map.store("coldstore_type", "'#{coldstore_type}'")
-      #sealed_bins_set_map.store("coldstore_type", "'#{coldstore_type}'")
     elsif  new_status_code.upcase.include?("OPEN")
       set_map.store("sealed_ca_open_date_time", "'#{status_changed_date_time}'")
-      sealed_bins_set_map.store("sealed_ca_open_date_time", "'#{status_changed_date_time}'")
+      #sealed_bins_set_map.store("sealed_ca_open_date_time", "'#{status_changed_date_time}'")
     end
-    Bin.bulk_update(set_map, 'bin_number', bin_numbers['bin_nums'], nil) if !bin_numbers['bin_nums'].empty? && !set_map.empty?
-    Bin.bulk_update(sealed_bins_set_map, 'bin_number', bin_numbers['sealed_bin_nums'], nil) if !bin_numbers['sealed_bin_nums'].empty? && !sealed_bins_set_map.empty?
+    Bin.bulk_update(set_map, 'bin_number', bin_numbers['all_bins'], nil) if !bin_numbers['all_bins'].empty? && !set_map.empty?
+    # Bin.bulk_update(set_map, 'bin_number', bin_numbers['non_sealed_bin_nums'], nil) if !bin_numbers['non_sealed_bin_nums'].empty? && !set_map.empty?
+    # Bin.bulk_update(sealed_bins_set_map, 'bin_number', bin_numbers['sealed_bin_nums'], nil) if !bin_numbers['sealed_bin_nums'].empty? && !sealed_bins_set_map.empty?
   end
 
   def change_status(bins, rebins, rmt_products, new_status_code, user, status_changed_date_time)
@@ -210,17 +201,19 @@ class Location < ActiveRecord::Base
       ActiveRecord::Base.transaction do
 
         if rmt_products !=nil
-          for rmt_product in rmt_products
-            bin_numbers =extract_bin_numbers(bins, rmt_product['id'])
+          rmt_products.each do |rmt_product|
+            rmt_product_bins=bins.find_all{|u|u['rmt_product_id'].to_i==rmt_product['id'].to_i}
+            bin_numbers =extract_bin_numbers(rmt_product_bins)
+            #bin_numbers =extract_bin_numbers(bins, rmt_product['id'])
             if  rmt_product['new_rmt_product_id']!=nil && (rmt_product['new_rmt_product_id']!= rmt_product['id'])
-              update_bins(new_status_code, bin_numbers,status_changed_date_time, rmt_product['new_rmt_product_id'])
+              update_bins(new_status_code, bin_numbers, status_changed_date_time, rmt_product['new_rmt_product_id'])
             else
-              update_bins(new_status_code, bin_numbers,status_changed_date_time)
+              update_bins(new_status_code, bin_numbers, status_changed_date_time)
             end
           end
         else
           bin_numbers =extract_bin_numbers(bins)
-          update_bins(new_status_code, bin_numbers,status_changed_date_time)
+          update_bins(new_status_code, bin_numbers, status_changed_date_time)
         end
         StatusMan.set_status(new_status_code, self.location_type_code, self, user.user_name)
         return nil

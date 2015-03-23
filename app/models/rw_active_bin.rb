@@ -7,9 +7,21 @@ class RwActiveBin < ActiveRecord::Base
     attr_accessor :bin_time_search,:farm_code,:production_schedule_name,:input_variety,:trans_date_from,:trans_date_to,:line_code,:pc_code,
                   :track_slms_indicator_code ,:track_indicator_code1 ,:track_indicator_code2,:track_indicator_code3, :track_indicator_code4,
                   :track_indicator_code5,:delivery_number,:rmt_product_code ,:production_run_rebin_code
-     def hello
 
-   end
+
+
+
+     def set_child_weights
+       return if self.weight <= 0
+       bin = Bin.find_by_bin_number(self.bin.bin_number)
+       bin.ps_mix_lots.each do |child|
+         child.weight = child.weight_proportion * self.weight
+         child.update
+       end
+
+
+     end
+
 
     def RwActiveBin.scrap(bins,reason,user)
        ActiveRecord::Base.transaction do

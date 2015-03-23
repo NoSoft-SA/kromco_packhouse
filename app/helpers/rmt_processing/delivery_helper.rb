@@ -129,7 +129,7 @@ module RmtProcessing::DeliveryHelper
     rmt_product_codes = ["select a value from commodity_code and rmt_variety_code and rmt_product_type_code"]
 
     #MM102014 - add orchard id
-    orchard_id = ["select a value from farm_code and commodity_code and rmt_variety_code"]
+    orchards = ["select a value from farm_code and commodity_code and rmt_variety_code"]
 
     # orchard_id = Orchard.find_by_sql("select orchards.id,orchards.orchard_code,orchards.orchard_description from orchards inner join rmt_varieties on orchards.orchard_rmt_variety_id = rmt_varieties.id inner join commodities on rmt_varieties.commodity_id = commodities.id where rmt_varieties.commodity_code = '#{session[:delivery_form][:commodity_code_combo_selection]}' and rmt_varieties.rmt_variety_code = '#{session[:delivery_form][:rmt_variety_code_combo_selection]}'").map{|g|["#{g.orchard_code} - #{g.orchard_description}", g.id]} # farm_code = '#{session[:delivery_form][:farm_code_combo_selection]}' and puc_code = '#{session[:delivery_form][:puc_code]}' and
     # orchard_id.unshift(delivery.orchard_id)
@@ -142,6 +142,13 @@ module RmtProcessing::DeliveryHelper
       session[:delivery_form][:commodity_code_combo_selection] = delivery.commodity_code
       rmt_variety_codes = RmtVariety.find_by_sql("select distinct rmt_variety_code from rmt_varieties where commodity_code = '#{session[:delivery_form][:commodity_code_combo_selection]}' ORDER BY rmt_variety_code ASC").map{|g|[g.rmt_variety_code]}
       rmt_variety_codes.unshift(delivery.rmt_variety_code)
+
+      orchards = Orchard.find_by_sql("select distinct orchards.id,orchards.orchard_code,orchards.orchard_description from orchards
+                                      inner join rmt_varieties on orchards.orchard_rmt_variety_id = rmt_varieties.id
+                                      inner join commodities on rmt_varieties.commodity_id = commodities.id
+                                      inner join farms on orchards.farm_id = farms.id
+                                      where farm_code = '#{delivery.farm_code}' and rmt_varieties.commodity_code = '#{delivery.commodity_code}' and rmt_varieties.rmt_variety_code = '#{delivery.rmt_variety_code}'").map{|g|["#{g.orchard_code} - #{g.orchard_description}", g.id]}
+
 
       #MM102014 - add orchard id
       # orchard_id = Orchard.find_by_sql("select orchards.id,orchards.orchard_code,orchards.orchard_description from orchards inner join rmt_varieties on orchards.orchard_rmt_variety_id = rmt_varieties.id inner join commodities on rmt_varieties.commodity_id = commodities.id where rmt_varieties.commodity_code = '#{session[:delivery_form][:commodity_code_combo_selection]}'").map{|g|["#{g.orchard_code} - #{g.orchard_description}", g.id]} # farm_code = '#{session[:delivery_form][:farm_code_combo_selection]}' and puc_code = '#{session[:delivery_form][:puc_code]}' and and rmt_varieties.rmt_variety_code = '#{session[:delivery_form][:rmt_variety_code_combo_selection]}'
@@ -210,7 +217,7 @@ module RmtProcessing::DeliveryHelper
       #MM102014 - add orchard id
       field_configs[field_configs.length()] = {:field_type => 'DropDownField',
                                                :field_name => 'orchard_id',
-                                               :settings   =>{:list=>orchard_id},
+                                               :settings   =>{:list=>orchards},
                                                :observer   =>orchard_id_observer}
 
       field_configs[field_configs.length()] = {:field_type => 'LabelField',
