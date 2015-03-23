@@ -807,19 +807,61 @@ class ProductionRun < ActiveRecord::Base
 
   def ProductionRun.get_active_runs_for_line(line_id)
 
-    query = "SELECT public.production_runs.*
+    query = "SELECT public.production_runs.*,product_classes.product_class_code,track_indicators.track_indicator_code,treatments.treatment_code,
+            rank,sizes.size_code
             FROM
             public.production_runs
             INNER JOIN public.lines ON (public.production_runs.line_id = public.lines.id)
+            left join product_classes on product_classes.id = production_runs.product_class_id
+            left join treatments on treatments.id = production_runs.treatment_id
+            left join track_indicators on track_indicators.id = production_runs.track_indicator_id
+            left join sizes on sizes.id = production_runs.size_id
+
             WHERE
             (((public.production_runs.production_run_status = 'active') OR
             (public.production_runs.production_run_status = 'reconfiguring')) AND
             (public.lines.id = '#{line_id}') AND
             (public.production_runs.id is not null ))ORDER BY
-            production_runs.id"
+            production_runs.production_run_stage"
 
     return runs = ProductionRun.find_by_sql(query)
 
+  end
+
+  def ProductionRun.get_editing_runs_for_line(line_id)
+
+
+    #get active run on line and use its schedule to filter editing runs
+    active_run_schedule_rec = ProductionRun.connection.select_one("select production_schedule_id from production_runs
+                                           INNER JOIN public.lines ON (public.production_runs.line_id = public.lines.id)
+                                           WHERE public.lines.id = '#{line_id}' AND (upper(production_run_stage) like '%TIP%' or
+                                          upper(production_run_stage) like '%CARTON%') order by production_runs.id DESC LIMIT 1")
+
+
+    if active_run_schedule_rec && active_run_schedule_id = active_run_schedule_rec['production_schedule_id']
+
+
+      query = "SELECT public.production_runs.*,product_classes.product_class_code,track_indicators.track_indicator_code,treatments.treatment_code,
+              rank,sizes.size_code
+              FROM
+              public.production_runs
+              INNER JOIN public.lines ON (public.production_runs.line_id = public.lines.id)
+              left join product_classes on product_classes.id = production_runs.product_class_id
+              left join treatments on treatments.id = production_runs.treatment_id
+              left join track_indicators on track_indicators.id = production_runs.track_indicator_id
+              left join sizes on sizes.id = production_runs.size_id
+
+              WHERE
+              ((public.production_runs.production_run_status = 'configuring') AND
+               (production_schedule_id = #{active_run_schedule_id}) AND
+              (public.lines.id = '#{line_id}') AND
+              (public.production_runs.id is not null ))ORDER BY
+              production_runs.rank asc"
+
+      return runs = ProductionRun.find_by_sql(query)
+    else
+      return nil
+    end
   end
 
   def get_bins

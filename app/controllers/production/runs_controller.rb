@@ -1624,6 +1624,8 @@ class Production::RunsController < ApplicationController
     packhouse = Facility.active_pack_house.facility_code
     @line_id = Line.get_line_for_packhouse_and_line_code(packhouse, @selected_line_code).id
     @runs_on_line = ProductionRun.get_active_runs_for_line(@line_id)
+    @editing_runs_on_line = ProductionRun.get_editing_runs_for_line(@line_id)
+
     recent_run_ids=get_recent_rebinning_run_on_line(@runs_on_line)
     puts "n runs on line: " + @runs_on_line.length.to_s
   end
