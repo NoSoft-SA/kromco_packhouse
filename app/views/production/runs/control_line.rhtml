@@ -1,7 +1,7 @@
 
   <%= stylesheet_link_tag "line_control" %>
 
-  <script src = "/javascripts/context_menu.js"></script>
+  <script src="/javascripts/context_menu.js" xmlns="http://www.w3.org/1999/html"></script>
 
 
   <% @content_header_caption = "'control line'" %>
@@ -12,6 +12,7 @@
     <td class="run_line">line <%= @selected_line_code%>:</td>
     <td class="run_step">bin tipping</td>
     <td class = "run_step">carton labeling</td>
+    <td class = "run_step">run data</td>
     <td class = "run_step">palletizing</td>
     <td class = "run_step">rebinning</td>
   </tr>
@@ -38,6 +39,29 @@
    CARTON_LABELING: bintipping_plus,carton_labeling_plus
    REBINNING: all stages
   ----------------------------------------------------------------------------------->
+  <% @runs_on_line.unshift(*@editing_runs_on_line) if @editing_runs_on_line
+     @runs_on_line.each do |r|
+       r.production_run_stage = "NOT STARTED" if !r.production_run_stage
+       end
+
+     #move active run to first element of array
+     active_run  = @runs_on_line.find{|r|r.production_run_stage.index('tip')||r.production_run_stage.index('carton')}
+     if active_run
+         @runs_on_line.delete(active_run)
+         @runs_on_line. unshift(active_run)
+     end
+
+     #move 2nd active run to first element of array
+     if active_run
+         active_run2  = @runs_on_line.find{|r|(r.production_run_stage.index('tip')||r.production_run_stage.index('carton')) && r.id != active_run.id}
+         if active_run2 && active_run2.id != active_run.id
+           @runs_on_line.delete(active_run2)
+           @runs_on_line. unshift(active_run2)
+         end
+     end
+
+  %>
+
   <% if @runs_on_line.length == 0
         flash[:notice] = "THERE ARE NO RUNS ACTIVE ON THIS LINE"
         @freeze_flash = true
@@ -64,19 +88,27 @@
       menu3.add_command("execute_next_run","/production/runs/execute_next_run_from_ctl_line")
       menu3.add_command("view_next_run","/production/runs/view_next_run")
 
+      menu4 = ApplicationHelper::ContextMenu.new("configuring","control_line")
+      menu4.add_command("execute run","/production/runs/execute_run_from_ctl_line")
+      menu4.add_command("edit run","/production/runs/edit_production_run")
+      menu4.add_command("clone run","/production/runs/clone_production_run")
+      menu4.add_command("set schedule","/production/runs/set_current_schedule")
+      menu4.add_command("view_next_run","/production/runs/view_next_run")
+
   %>
 
   <script>
     <%= menu1.render %>
     <%= menu2.render%>
     <%= menu3.render%>
+    <%= menu4.render%>
       build_context_menus();
 
   </script>
 
   <% @runs_on_line.each do |run|%>
 
-    <%run.sync_run_stat%>
+    <%run.sync_run_stat if run.production_run_status != 'configuring'%>
     <tr>
 
     <!--  IMAGES NEEDED BY ALL ACTION LINKS -->
@@ -164,25 +196,30 @@
      end
     %>
    <% pack = 0
-    pack = run.production_run_stat.cartons_weight/run.production_run_stat.bins_tipped_weight if run.production_run_stat.cartons_weight > 0 && run.production_run_stat.bins_tipped_weight > 0
-    pack = pack * 100
-    pack = Float.round_float(2,pack) if pack > 0.0
+    if run.production_run_stage != 'NOT STARTED'
+        pack = run.production_run_stat.cartons_weight/run.production_run_stat.bins_tipped_weight if run.production_run_stat.cartons_weight > 0 && run.production_run_stat.bins_tipped_weight > 0
+        pack = pack * 100
+        pack = Float.round_float(2,pack) if pack > 0.0
+      end
     %>
 
     <% weight_color = 'darkgreen'
       weight_color = 'lightgreen' if bintipping_class == "run_stage_complete"
     %>
 
+   <% if run.production_run_stage != 'NOT STARTED' %>
+       <td class = <%= bintipping_class %> ><%= run.production_run_stat.bins_tipped   %><font color = '<%= weight_color %>'>(weight: <%= run.production_run_stat.bins_tipped_weight  %> pack : <strong><%= pack %>%)</strong></font><%= bintipping_complete_link %><%= loading_image %></td>
 
-   <td class = <%= bintipping_class %> ><%= run.production_run_stat.bins_tipped %><font color = '<%= weight_color %>'>(weight: <%= run.production_run_stat.bins_tipped_weight %> pack : <strong><%= pack %>%)</strong></font><%= bintipping_complete_link %><%= loading_image %></td>
-
-   <!--CARTON LABELING CELL -->
-    <% carton_labeling_class = case run.production_run_stage
-      when "bintipping_plus","carton_labeling_plus" then "run_stage_active"
-      when "rebinning" then "run_stage_complete"
-      else "run_stage_inactive"
-     end
-    %>
+       <!--CARTON LABELING CELL -->
+        <% carton_labeling_class = case run.production_run_stage
+          when "bintipping_plus","carton_labeling_plus" then "run_stage_active"
+          when "rebinning" then "run_stage_complete"
+          else "run_stage_inactive"
+         end
+        %>
+     <% else %>
+       <td class = 'inactive_run_stage_bt'> <%=run.production_schedule_name  %></td>
+     <%end %>
 
      <% carton_labeling_complete_link = ""
      if run.production_run_stage == "carton_labeling_plus"
@@ -193,9 +230,43 @@
       weight_color = 'lightgreen' if carton_labeling_class == "run_stage_complete"
     %>
 
-    <td class = <%= carton_labeling_class %> ><%= run.production_run_stat.cartons_printed%><font color = '<%= weight_color%>'>(weight: <%= run.production_run_stat.cartons_weight%>)</font><%= carton_labeling_complete_link%><%= loading_image %></td>
+     <% if run.production_run_stage != 'NOT STARTED' %>
+        <td class = <%= carton_labeling_class %> ><%= run.production_run_stat.cartons_printed %><font color = '<%= weight_color%>'>(weight: <%= run.production_run_stat.cartons_weight %>)</font><%= carton_labeling_complete_link%><%= loading_image %></td>
+     <% else%>
+         <td class = 'inactive_run_stage_lbl'><%= run.rank.to_s  %></td>
+      <%end%>
+
+
+
+      <!--RUN DATACELL -->
+     <td class = 'run_data'>
+       <% if run.production_run_status == 'configuring' %>
+
+           ti: <span class="run_data_value"><%=run.track_indicator_code.to_s %> </span>
+           cls: <span class="run_data_value"> <%=run.product_class_code.to_s %> </span>
+           sze: <span class="run_data_value"> <%=run.size_code.to_s %> </span>
+           col: <span class="run_data_value"> <%=run.treatment_code.to_s %> </span>
+
+       <% elsif run.production_run_stage != 'rebinning'   %>
+           ti: <span class="run_data_value_ac"><%=run.track_indicator_code.to_s %> </span>
+           cls: <span class="run_data_value_ac"> <%=run.product_class_code.to_s %> </span>
+           sze: <span class="run_data_value_ac"> <%=run.size_code.to_s %> </span>
+           col: <span class="run_data_value_ac"> <%=run.treatment_code.to_s %> </span>
+       <%else %>
+           ti: <span class="run_data_value_na"><%=run.track_indicator_code.to_s %> </span>
+           cls: <span class="run_data_value_na"> <%=run.product_class_code.to_s %> </span>
+           sze: <span class="run_data_value_na"> <%=run.size_code.to_s %> </span>
+           col: <span class="run_data_value_na"> <%=run.treatment_code.to_s %> </span>
+
+     <%end %>
+     </td>
+
     <!--PALLETIZING CELL -->
-    <td class = <%= carton_labeling_class %> ><%= run.production_run_stat.pallets_completed%></td>
+     <% if run.production_run_stage != 'NOT STARTED' %>
+        <td class = <%= carton_labeling_class %> ><%= run.production_run_stat.pallets_completed %></td>
+     <%else%>
+       <td class = 'inactive_run_stage'></td>
+     <%end%>
 
     <!--REBINNING CELL -->
      <% rebinning_complete_link = ""
@@ -204,8 +275,11 @@
      end
     %>
 
-
-    <td class = 'run_stage_active' ><%= run.production_run_stat.rebins_printed%><font color = 'darkgreen'>(weight: <%= run.production_run_stat.rebins_weight%>)</font><%= rebinning_complete_link%><%= loading_image %></td>
+   <% if run.production_run_stage != 'NOT STARTED' %>
+    <td class = 'run_stage_active' ><%= run.production_run_stat.rebins_printed  if run.production_run_stage != 'NOT STARTED'%><font color = 'darkgreen'>(weight: <%= run.production_run_stat.rebins_weight %>)</font><%= rebinning_complete_link%><%= loading_image %></td>
+   <%else%>
+      <td class = 'inactive_run_stage'></td>
+   <%end%>
 
    <!-- CELL DENOTING THE CURRENT RUN STAGE-->
   <td class = 'run_stage'>(<%= run.production_run_stage + "<font color='black'> " + related_run + "</font>"%>)</td>

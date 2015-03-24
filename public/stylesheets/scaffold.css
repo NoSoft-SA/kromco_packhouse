@@ -772,6 +772,96 @@ input.password {
 
 }
 
+.run_data {
+
+    font-family: Arial;
+    color: dimgray;
+    background-color: white;
+    font-size: 12px;
+    border-top: dotted 1px gray;
+    border-top: dotted 1px gray;
+    border-bottom: dotted 1px gray;
+    border-right: dotted 1px gray;
+    border-left: dotted 1px gray;
+
+}
+
+.inactive_run_stage{
+
+    font-family: Arial;
+    color: darkseagreen;
+    background-color: whitesmoke;
+    font-size: 12px;
+    border-top: dotted 1px gray;
+    border-top: dotted 1px gray;
+    border-bottom: dotted 1px gray;
+    border-right: dotted 1px gray;
+    border-left: dotted 1px gray;
+
+}
+
+.inactive_run_stage_bt{
+
+    font-family: Arial;
+    color: darkseagreen;
+    background-color: whitesmoke;
+    font-size: 12px;
+    border-top: dotted 1px gray;
+    border-top: dotted 1px gray;
+    border-bottom: dotted 1px gray;
+    border-right: dotted 1px gray;
+    border-left: dotted 1px gray;
+
+}
+
+.inactive_run_stage_lbl{
+
+    font-family: Arial;
+    font-weight: bold;
+    color: blue;
+    background-color: whitesmoke;
+    font-size: 20px;
+    border-top: dotted 1px gray;
+    border-top: dotted 1px gray;
+    border-bottom: dotted 1px gray;
+    border-right: dotted 1px gray;
+    border-left: dotted 1px gray;
+
+}
+
+
+.run_data_value {
+    color: blue;
+    font-weight: bold;
+    background-color: white;
+    font-size: 14px;
+
+}
+
+.run_data_value_ac {
+    color: green;
+    font-weight: normal;
+    background-color: white;
+    font-size: 12px;
+
+}
+
+.run_data_value_na {
+    color: darkseagreen;
+
+    background-color: white;
+    font-size: 10px;
+
+}
+
+.run_data_label {
+    color: green;
+    font-family: Arial;
+    background-color: white;
+    font-size: 10px;
+
+}
+
 .run_stage_inactive {
     color: blue;
     font-family: Arial;
