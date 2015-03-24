@@ -28,13 +28,18 @@ class PrintTripsheet < PDTTransaction
    
  def print_tripsheet_submit
    @vehicle_job_no = self.pdt_screen_def.get_input_control_value("vehicle_job_no")
-   @printer = self.pdt_screen_def.get_input_control_value("printer")
+   printer_friendly_name = self.pdt_screen_def.get_input_control_value("printer")
+   if(!(@printer = Printer.find_by_friendly_name(printer_friendly_name)))
+     printer_error_screen = PDTTransaction.build_msg_screen_definition(nil, nil, nil, ["Printer[#{printer_friendly_name}] not found"])
+     return printer_error_screen
+   end
+
    vehicle_job = VehicleJob.find_by_vehicle_job_number(@vehicle_job_no)
    if vehicle_job
       out_file_type = "PDF"
       out_file_name = "interwarehouse_tripsheet_#{Time.now.strftime("%m_%d_%Y_%H_%M_%S")}"
       out_file_path = Globals.jasper_reports_pdf_downloads + "/#{out_file_name}"
-      err = JasperReports.generate_report('interwarehouse_tripsheet',self.pdt_screen_def.user,{:vehicle_job_number=>vehicle_job.vehicle_job_number,:printer=>@printer,:MODE=>"PRINT",:OUT_FILE_NAME=>out_file_path,:OUT_FILE_TYPE=>out_file_type})
+      err = JasperReports.generate_report('interwarehouse_tripsheet',self.pdt_screen_def.user,{:vehicle_job_number=>vehicle_job.vehicle_job_number,:printer=>@printer.system_name,:MODE=>"PRINT",:OUT_FILE_NAME=>out_file_path,:OUT_FILE_TYPE=>out_file_type})
 
       if(!err)
         ActiveRecord::Base.transaction do
