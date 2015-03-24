@@ -8,20 +8,56 @@ module Production::RmtSetupHelper
 #	 Define fields to build form from
 #	---------------------------------
     action = nil if is_view
-    
+
+
+
 	 field_configs = Array.new
 	field_configs[field_configs.length()] = {:field_type => 'CheckBox',
 						:field_name => 'farm_code'}
 
-	field_configs[field_configs.length()] = {:field_type => 'CheckBox',
-						:field_name => 'treatment_code'}
-
-	field_configs[field_configs.length()] = {:field_type => 'CheckBox',
-						:field_name => 'commodity_code'}
+    field_configs[field_configs.length()] = {:field_type => 'LabelField',
+                                             :field_name => 'commodity_code'}
 
 
+    field_configs[field_configs.length()] =  {:field_type => 'LabelField',
+                                              :field_name => 'variety_code'}
+
+
+  if bintip_criteria_setup.is_a?(RunBintipCriterium) && bintip_criteria_setup.production_run.is_dp_run?
+      field_configs[field_configs.length()] = {:field_type => 'LabelField',
+                                               :field_name => 'treatment_code'}
+
+      field_configs[field_configs.length()] = {:field_type => 'LabelField',
+                                               :field_name => 'track_indicator_code'}
+
+      field_configs[field_configs.length()] =  {:field_type => 'LabelField',
+                                                :field_name => 'size_code'}
+
+      field_configs[field_configs.length()] = {:field_type => 'LabelField',
+                                               :field_name => 'class_code'}
+
+  else
+
+    field_configs[field_configs.length()] = {:field_type => 'CheckBox',
+              :field_name => 'treatment_code'}
+
+    field_configs[field_configs.length()] = {:field_type => 'CheckBox',
+                                               :field_name => 'track_indicator_code'}
+
+      field_configs[field_configs.length()] =  {:field_type => 'CheckBox',
+                                                :field_name => 'size_code'}
+
+      field_configs[field_configs.length()] = {:field_type => 'CheckBox',
+                                               :field_name => 'class_code'}
+
+
+   end
   field_configs[field_configs.length()] =  {:field_type => 'CheckBox',
-                          :field_name => 'variety_code'}
+                                              :field_name => 'rmt_product_type_code'}
+
+
+
+
 
 	field_configs[field_configs.length()] = {:field_type => 'CheckBox',
 						:field_name => 'class_code'}
@@ -29,21 +65,17 @@ module Production::RmtSetupHelper
 	field_configs[field_configs.length()] = {:field_type => 'CheckBox',
 						:field_name => 'pc_code'}
 
-	field_configs[field_configs.length()] = {:field_type => 'CheckBox',
-						:field_name => 'track_indicator_code'}
+
 
 	field_configs[field_configs.length()] = {:field_type => 'CheckBox',
 						:field_name => 'cold_store_code'}
 
-#	----------------------------------------------------------------------------------------------------
-#	Combo field to represent foreign key (production_schedule_id) on related table: production_schedules
-#	-----------------------------------------------------------------------------------------------------
+
 	field_configs[field_configs.length()] =  {:field_type => 'CheckBox',
 						:field_name => 'season_code'}
 
     
-    field_configs[field_configs.length()] =  {:field_type => 'CheckBox',
-						:field_name => 'size_code'}
+
 
     field_configs[field_configs.length()] =  {:field_type => 'CheckBox',
                          :field_name => 'rmt_product_type_code'}

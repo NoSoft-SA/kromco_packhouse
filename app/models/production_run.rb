@@ -82,12 +82,15 @@ class ProductionRun < ActiveRecord::Base
     run_stats.create
 
 
+    run_bintip_criterium = RunBintipCriterium.new
+    raise "No bintip criteria defined for schedule!" if !self.production_schedule.bintip_criterium
+    self.production_schedule.bintip_criterium.export_attributes(run_bintip_criterium)
+    run_bintip_criterium.production_run = self
+    run_bintip_criterium.create
+
+
     if !self.is_cloning
-      run_bintip_criterium = RunBintipCriterium.new
-      raise "No bintip criteria defined for schedule!" if !self.production_schedule.bintip_criterium
-      self.production_schedule.bintip_criterium.export_attributes(run_bintip_criterium)
-      run_bintip_criterium.production_run = self
-      run_bintip_criterium.create
+
 
       create_pack_groups
 
@@ -828,6 +831,12 @@ class ProductionRun < ActiveRecord::Base
 
   end
 
+
+
+  def is_dp_run?
+    return  self.line_code.to_i > 40 && self.line_code.to_i < 49
+  end
+
   def ProductionRun.get_editing_runs_for_line(line_id)
 
 
@@ -868,6 +877,8 @@ class ProductionRun < ActiveRecord::Base
 
     #BinManager.new(self).get_bins
   end
+
+
 
 
   def restore_reworks_devices(rebin_links)

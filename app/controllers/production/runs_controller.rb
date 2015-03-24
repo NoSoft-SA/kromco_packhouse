@@ -2352,15 +2352,9 @@ class Production::RunsController < ApplicationController
   def edit_bintip_criteria
 
     can_edit = authorise('runs', 'production_run_bintip_criteria_setup', session[:user_id].user_name)
+
     @bintip_criteria_setup = session[:current_production_run].run_bintip_criterium
-    @bintip_criteria_setup.treatment_code=true
-    @bintip_criteria_setup.commodity_code=true
-    @bintip_criteria_setup.variety_code=true
-    @bintip_criteria_setup.class_code=true
-    @bintip_criteria_setup.pc_code=false
-    @bintip_criteria_setup.track_indicator_code=true
-    @bintip_criteria_setup.size_code=true
-    @bintip_criteria_setup.ripe_point_code=false
+
     render_edit_bintip_criterium !can_edit
   end
 
