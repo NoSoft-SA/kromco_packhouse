@@ -24,7 +24,8 @@ def list_shifts
 	list_query = "@shift_pages = Paginator.new self, Shift.count, 500,@current_page
 	 @shifts = Shift.find(:all,
 				 :limit => @shift_pages.items_per_page,
-				 :offset => @shift_pages.current.offset)"
+				 :offset => @shift_pages.current.offset,
+          :order => 'start_date_time ASC')"
 	session[:query] = list_query
 	render_list_shifts
 end
@@ -87,7 +88,7 @@ def render_shift_search_form(is_flat_search = nil)
 end
  
 def submit_shifts_search
-	@shifts = dynamic_search(params[:shift] ,'shifts','Shift',true,nil,nil, 3)
+	@shifts = dynamic_search(params[:shift] ,'shifts','Shift',true,nil,nil, 100)
 	if @shifts.length == 0
 			flash[:notice] = 'no records were found for the query'
 			@is_flat_search = session[:is_flat_search].to_s

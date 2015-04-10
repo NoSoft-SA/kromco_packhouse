@@ -40,7 +40,7 @@ class UnitTempCapture < PDTTransaction
       unit_temperature.temperature_celsius = Float(self.pdt_screen_def.get_input_control_value("temperature"))
       unit_temperature.unit_type_code = self.pdt_screen_def.get_input_control_value("unit_type")
       unit_temperature.unit_type_id = UnitType.find_by_unit_type_code(self.pdt_screen_def.get_input_control_value("unit_type")).id
-      unit_temperature.unit_number = self.pdt_screen_def.get_input_control_value("unit_id").to_i
+      unit_temperature.unit_number = self.pdt_screen_def.get_input_control_value("unit_id")
       unit_temperature.temperature_device_type_code = self.pdt_screen_def.get_input_control_value("device_type")
       unit_temperature.temperature_device_type_id = TemperatureDeviceType.find_by_temperature_device_type_code(self.pdt_screen_def.get_input_control_value("device_type")).id
       unit_temperature.user_name = self.pdt_screen_def.user

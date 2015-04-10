@@ -48,7 +48,7 @@ class Line < ActiveRecord::Base
    
     
     line = Line.find_by_sql(query)[0]
-   
+     return line
    
    end
    

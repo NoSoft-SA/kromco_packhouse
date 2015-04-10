@@ -6,7 +6,7 @@ class Production::RunsController < ApplicationController
 
   require "shift" #for some reason the new rails version(1.2.3) cannot cope well with the nested Shiftdetails class when
   require "shift_details.rb" #storing the shift object in session state. Workaround:
-                  #So requiring it here, soemwhow helps the issue
+  #So requiring it here, soemwhow helps the issue
 
   def program_name?
     "runs"
@@ -19,11 +19,11 @@ class Production::RunsController < ApplicationController
   def view_next_run
     return if authorise_for_web(program_name?, 'production_run_control')==false
     begin
-    @production_run = ProductionRun.new
-    @next_production_run = nil
+      @production_run = ProductionRun.new
+      @next_production_run = nil
 
-    id = params[:id]
-    if id  &&          @production_run=ProductionRun.find_by_sql("
+      id = params[:id]
+      if id && @production_run=ProductionRun.find_by_sql("
       select
       production_runs.*,pc_codes.pc_name as pc_code, treatments.treatment_code,sizes.size_code,ripe_points.ripe_point_code,track_indicators.track_indicator_code,product_classes.product_class_code
       from production_runs
@@ -34,27 +34,27 @@ class Production::RunsController < ApplicationController
       left join  track_indicators on  track_indicators.id = production_runs.track_indicator_id
       left join  product_classes  on  product_classes.id= production_runs.product_class_id
       where production_runs.id=#{id} ")[0]
-      warn_msg = nil
-      session[:current_closed_schedule] = @production_run.production_schedule
-      session[:current_production_run] = @production_run
-      @next_production_run=get_next_run(@production_run)
-      if !@next_production_run
-        flash[:error] = "Next run not set  "
-        control_line @production_run.line_code and return
+        warn_msg = nil
+        session[:current_closed_schedule] = @production_run.production_schedule
+        session[:current_production_run] = @production_run
+        @next_production_run=get_next_run(@production_run)
+        if !@next_production_run
+          flash[:error] = "Next run not set  "
+          control_line @production_run.line_code and return
+        else
+          render :template => "production/runs/view_runs", :layout => "content"
+
+        end
       else
-        render :template => "production/runs/view_runs", :layout => "content"
 
       end
-    else
-
-    end
     rescue
       handle_error("Production run could not be executed")
-  end
+    end
 
   end
 
-  def  get_next_run(production_run)
+  def get_next_run(production_run)
     current_closed_schedule = production_run.production_schedule
     current_run_rank= production_run.rank
     current_run_rank=0 if !current_run_rank
@@ -71,7 +71,7 @@ class Production::RunsController < ApplicationController
       where production_runs.production_schedule_id=#{current_closed_schedule.id.to_s} and production_runs.rank is not null ")
     next_run=nil
     if !current_closed_schedule_runs.empty?
-      ranks=current_closed_schedule_runs.sort! { |a,b| a.rank <=> b.rank }
+      ranks=current_closed_schedule_runs.sort! { |a, b| a.rank <=> b.rank }
       runs = ranks.select do |e|
         e.rank.to_i > current_run_rank.to_i
       end
@@ -79,8 +79,6 @@ class Production::RunsController < ApplicationController
     end
     return next_run
   end
-
-
 
 
   def render_build_mini_production_run_view
@@ -94,29 +92,24 @@ class Production::RunsController < ApplicationController
   end
 
 
-
-
-
-
-
   def update_ranked_runs
     return if authorise_for_web(program_name?, 'production_run_setup')==false
-      params[:run].each do |k,v|
-        k = k.split('_')
-        key = k.shift
+    params[:run].each do |k, v|
+      k = k.split('_')
+      key = k.shift
 
-        ActiveRecord::Base.transaction do
-            ActiveRecord::Base.connection.execute("update production_runs set rank=#{v} where id = #{key.to_i}") if v!=""
-            ActiveRecord::Base.connection.execute("update production_runs set rank=null where id = #{key.to_i}") if v==""
-        end
+      ActiveRecord::Base.transaction do
+        ActiveRecord::Base.connection.execute("update production_runs set rank=#{v} where id = #{key.to_i}") if v!=""
+        ActiveRecord::Base.connection.execute("update production_runs set rank=null where id = #{key.to_i}") if v==""
       end
+    end
     editing_runs
   end
 
 
   def production_line_code_changed
     line=Line.find_by_line_code(get_selected_combo_value(params))
-    @farm_codes = FarmGroup.find_by_farm_group_code(session[:current_closed_schedule].farm_group_code).farms.map{|f|f.farm_code}
+    @farm_codes = FarmGroup.find_by_farm_group_code(session[:current_closed_schedule].farm_group_code).farms.map { |f| f.farm_code }
     if line && line.is_dedicated
       @farm_codes.unshift("OP")
     else
@@ -137,7 +130,7 @@ class Production::RunsController < ApplicationController
                                    join varieties on rmt_products.variety_id=varieties.id
                                    join rmt_varieties on   varieties.rmt_variety_id=rmt_varieties.id
                                     where rmt_varieties.id=#{rmt_variety_id}
-                                   order by treatment_code").map{|p|[p.treatment_code,p.id]}
+                                   order by treatment_code").map { |p| [p.treatment_code, p.id] }
     @treatment_codes.unshift("<empty>") if !@treatment_codes.empty?
     @size_codes=Size.find_by_sql(" select  distinct sizes.id,sizes.size_code
                                    from sizes
@@ -145,7 +138,7 @@ class Production::RunsController < ApplicationController
                                    join varieties on rmt_products.variety_id=varieties.id
                                    join rmt_varieties on   varieties.rmt_variety_id=rmt_varieties.id
                                    where rmt_varieties.id=#{rmt_variety_id}
-                                   order by size_code").map{|p|[p.size_code,p.id]}
+                                   order by size_code").map { |p| [p.size_code, p.id] }
     @size_codes.unshift("<empty>") if !@size_codes.empty?
     @ripe_point_codes=RipePoint.find_by_sql("select distinct ripe_points.id,ripe_points.ripe_point_code
                                    from  ripe_points
@@ -153,12 +146,12 @@ class Production::RunsController < ApplicationController
                                    join varieties on rmt_products.variety_id=varieties.id
                                    join rmt_varieties on   varieties.rmt_variety_id=rmt_varieties.id
                                    where rmt_varieties.id=#{rmt_variety_id}
-                                  order by ripe_points.ripe_point_code").map{|p|[p.ripe_point_code,p.id]}
+                                  order by ripe_points.ripe_point_code").map { |p| [p.ripe_point_code, p.id] }
     @track_indicator_codes=TrackIndicator.find_by_sql("select  track_indicators.id,track_indicators.track_indicator_code
                                                               from track_indicators
                                                               join commodities on track_indicators.commodity_code=commodities.commodity_code
                                                               join rmt_varieties on track_indicators.rmt_variety_id=rmt_varieties.id
-                                where rmt_varieties.id=#{rmt_variety_id} and commodities.id=#{session[:comodity_id]} order by track_indicators.track_indicator_code").map{|g|[g.track_indicator_code,g.id]}
+                                where rmt_varieties.id=#{rmt_variety_id} and commodities.id=#{session[:comodity_id]} order by track_indicators.track_indicator_code").map { |g| [g.track_indicator_code, g.id] }
     @track_indicator_codes.unshift("<empty>") if !@track_indicator_codes.empty?
     @ripe_point_codes.unshift("<empty>") if !@ripe_point_codes.empty?
     render :inline => %{
@@ -193,7 +186,7 @@ class Production::RunsController < ApplicationController
     ripe_point_id=get_selected_combo_value(params)
     ripe_point_id = nil if ripe_point_id=="empty"
     if ripe_point_id
-    @pc_codes =PcCode.find_by_sql("select pc_codes.pc_name ,pc_codes.id from pc_codes join ripe_points on ripe_points.pc_code_id=pc_codes.id where ripe_points.id=#{ripe_point_id} ").map{|p|[p.pc_name,p.id]}
+      @pc_codes =PcCode.find_by_sql("select pc_codes.pc_name ,pc_codes.id from pc_codes join ripe_points on ripe_points.pc_code_id=pc_codes.id where ripe_points.id=#{ripe_point_id} ").map { |p| [p.pc_name, p.id] }
     else
       @pc_codes=[]
     end
@@ -346,7 +339,7 @@ class Production::RunsController < ApplicationController
 
     inspection_carton = nil
     inspection_cartons = carton.get_inspection_cartons
-    if inspection_carton = inspection_cartons.find{|c| c.to_i == carton.carton_number.to_i}
+    if inspection_carton = inspection_cartons.find { |c| c.to_i == carton.carton_number.to_i }
 
       session[:inspection_ctn]= inspection_carton
     end
@@ -362,17 +355,15 @@ class Production::RunsController < ApplicationController
     end
 
     new_inspection_ctn = 0
-    new_inspection_ctn = 1 if  ! inspection_carton
+    new_inspection_ctn = 1 if  !inspection_carton
 
-    if inspection_cartons.length() + new_inspection_ctn  > 1
+    if inspection_cartons.length() + new_inspection_ctn > 1
       msg += "<BR> All inspection carton(s) for this pallet: " + inspection_cartons.join(",")
     end
 
 
-
     flash[:notice] = msg
     session[:to_be_inspection_ctn] = carton
-
 
 
     if inspection_cartons.length() + new_inspection_ctn > 2
@@ -380,7 +371,7 @@ class Production::RunsController < ApplicationController
       return
     end
 
-    if ! is_inspection_ctn
+    if !is_inspection_ctn
       flash[:notice] += "<BR> Should this(carton number you entered) be an inspection carton? (check checkbox if 'yes')"
 
       render :inline => %{
@@ -395,9 +386,7 @@ class Production::RunsController < ApplicationController
     end
 
 
-
   end
-
 
 
   def remove_xtra_insp_ctns(msg)
@@ -420,31 +409,28 @@ class Production::RunsController < ApplicationController
     carton = Carton.find_by_carton_number(carton_num)
 
     if !carton
-      redirect_to_index("Carton #{params[:carton_number][:inspection_ctn_to_remove]} not found!",nil, true,true)
+      redirect_to_index("Carton #{params[:carton_number][:inspection_ctn_to_remove]} not found!", nil, true, true)
       return
     end
 
 
     inspection_cartons = carton.get_inspection_cartons
 
-    if !inspection_cartons.find{|c|c.to_i == carton_num}
-      redirect_to_index("You must specify one of the inspection cartons",nil, true,true)
+    if !inspection_cartons.find { |c| c.to_i == carton_num }
+      redirect_to_index("You must specify one of the inspection cartons", nil, true, true)
 
     else
-       carton = Carton.find_by_carton_number(carton_num)
-       carton.is_inspection_carton = nil
-       carton.pallet.qc_status_code = "UNINSPECTED"
-       carton.update
-       redirect_to_index("Carton: #{carton_num} is no longer an inspection carton")
+      carton = Carton.find_by_carton_number(carton_num)
+      carton.is_inspection_carton = nil
+      carton.pallet.qc_status_code = "UNINSPECTED"
+      carton.update
+      redirect_to_index("Carton: #{carton_num} is no longer an inspection carton")
 
 
     end
 
 
-
   end
-
-
 
 
   def set_inspection_carton_submit_2
@@ -484,7 +470,7 @@ class Production::RunsController < ApplicationController
         #-----------------------------
         if must_be_inspection_ctn
           carton.is_inspection_carton = true
-         # carton.pallet.qc_status_code = "INSPECTING"
+          # carton.pallet.qc_status_code = "INSPECTING"
 
         end
 
@@ -715,25 +701,25 @@ class Production::RunsController < ApplicationController
   end
 
 
-  def validate_production_run_details_params(line_code,production_run_details_params,new_record=nil)
+  def validate_production_run_details_params(line_code, production_run_details_params, new_record=nil)
     error=[]
     line=Line.find_by_line_code(line_code)
     if line.is_dedicated
-     if  production_run_details_params['treatment_id']=="" || production_run_details_params['treatment_id']==nil   || production_run_details_params['treatment_id']=="<empty>"  || production_run_details_params['treatment_id']=="empty"
-       error << "treatment_code is empty"
-     end
-     if  production_run_details_params['size_id']=="" || production_run_details_params['size_id']==nil   || production_run_details_params['size_id']=="<empty>"   || production_run_details_params['size_id']=="empty"
-       error << "size_code is empty"
-     end
-     if  production_run_details_params['ripe_point_id']=="" || production_run_details_params['ripe_point_id']==nil   || production_run_details_params['ripe_point_id_id']=="<empty>"  || production_run_details_params['ripe_point_id_id']=="empty"
-       error << "ripe_point_code is empty"
-     end
-     if  production_run_details_params['product_class_id']=="" || production_run_details_params['product_class_id']==nil   || production_run_details_params['product_class_id']=="<empty>"    || production_run_details_params['product_class_id']=="empty"
-       error << "product_class_code is empty"
-     end
-     if  production_run_details_params['track_indicator_id']=="" || production_run_details_params['track_indicator_id']==nil   || production_run_details_params['track_indicator_id']=="<empty>"   || production_run_details_params['track_indicator_id']=="empty"
-       error << "track_indicator_code is empty"
-     end
+      if  production_run_details_params['treatment_id']=="" || production_run_details_params['treatment_id']==nil || production_run_details_params['treatment_id']=="<empty>" || production_run_details_params['treatment_id']=="empty"
+        error << "treatment_code is empty"
+      end
+      if  production_run_details_params['size_id']=="" || production_run_details_params['size_id']==nil || production_run_details_params['size_id']=="<empty>" || production_run_details_params['size_id']=="empty"
+        error << "size_code is empty"
+      end
+      if  production_run_details_params['ripe_point_id']=="" || production_run_details_params['ripe_point_id']==nil || production_run_details_params['ripe_point_id_id']=="<empty>" || production_run_details_params['ripe_point_id_id']=="empty"
+        error << "ripe_point_code is empty"
+      end
+      if  production_run_details_params['product_class_id']=="" || production_run_details_params['product_class_id']==nil || production_run_details_params['product_class_id']=="<empty>" || production_run_details_params['product_class_id']=="empty"
+        error << "product_class_code is empty"
+      end
+      if  production_run_details_params['track_indicator_id']=="" || production_run_details_params['track_indicator_id']==nil || production_run_details_params['track_indicator_id']=="<empty>" || production_run_details_params['track_indicator_id']=="empty"
+        error << "track_indicator_code is empty"
+      end
     end
     return error
   end
@@ -742,12 +728,11 @@ class Production::RunsController < ApplicationController
   def update_run_details
     @production_run = ProductionRun.find(session[:current_production_run].id)
 
-    error =validate_production_run_details_params(@production_run.line_code,params['production_run'])
+    error =validate_production_run_details_params(@production_run.line_code, params['production_run'])
     if !error.empty?
       flash[:error] = "record cannot be saved: <BR> #{error.join("<BR>")}"
-      edit_run_details  and return
+      edit_run_details and return
     end
-
 
 
     #params['production_run'][:rmt_product_type_id]=RmtProductType.find_by_rmt_product_type_code(@production_run.production_schedule.rmt_setup.rmt_product.rmt_product_type_code).id
@@ -755,7 +740,7 @@ class Production::RunsController < ApplicationController
     #params['production_run'][:variety_id]=  RmtVariety.find_by_rmt_variety_code(@production_run.production_schedule.rmt_setup.variety_code).id
     @production_run.transaction do
       if params['production_run']['ripe_point_id'] == nil || params['production_run']['ripe_point_id'] == ""
-        else
+      else
         params['production_run'][:pc_code_id]= PcCode.find_by_sql("select pc_codes.id from pc_codes join ripe_points on ripe_points.pc_code_id=pc_codes.id where ripe_points.id=#{params['production_run']['ripe_point_id']} ")[0].id
       end
       @production_run.update_attributes(params['production_run'])
@@ -1195,7 +1180,7 @@ class Production::RunsController < ApplicationController
 
     session[:query]="ActiveRecord::Base.connection.select_all(\"#{list_query}\")"
 
-   session[:current_schedule_completed_runs_query]= session[:query]
+    session[:current_schedule_completed_runs_query]= session[:query]
 
     render_list_active_runs true
     # rescue
@@ -1269,7 +1254,7 @@ class Production::RunsController < ApplicationController
       end
 
       list_query =
-      "select
+          "select
       production_runs.*,pc_codes.pc_name , treatments.treatment_code,sizes.size_code,ripe_points.ripe_point_code,track_indicators.track_indicator_code,product_classes.product_class_code
       from production_runs
       left join ripe_points on ripe_points.id=production_runs.ripe_point_id
@@ -1585,7 +1570,7 @@ class Production::RunsController < ApplicationController
     return if authorise_for_web(program_name?, 'production_run_control')==false
 
     #show select line form if not shown already
-    if params[:line_selection]== nil && line_code == nil
+    if params[:line_selection]== nil && line_code == nil && params[:id] == nil
       render :inline => %{
 		<% @content_header_caption = "'select line'"%>
 
@@ -1595,14 +1580,21 @@ class Production::RunsController < ApplicationController
       return
     else
 
-      @selected_line_code = line_code||params[:line_selection][:line]
-      session[:selected_line_to_control]= @selected_line_code
+      if params[:id] && !params[:line_selection] && !line_code
+        @selected_line_code = params[:id]
+      else
 
-      if @selected_line_code == nil
-        redirect_to_index("no line selected")
-        return
+        @selected_line_code = line_code||params[:line_selection][:line]
+        session[:selected_line_to_control]= @selected_line_code
+
+        if @selected_line_code == nil
+          redirect_to_index("no line selected")
+          return
+        end
       end
+
     end
+
 
     #---------------------------------------------------------------------------------------
     #The 'line control' console needs various pieces of information that should be prepared
@@ -1631,10 +1623,9 @@ class Production::RunsController < ApplicationController
   end
 
   def get_recent_rebinning_run_on_line(runs_on_line)
-      run_ids=runs_on_line.map{|p|p.id}.sort
-      @recent_run_id = run_ids.last
- end
-
+    run_ids=runs_on_line.map { |p| p.id }.sort
+    @recent_run_id = run_ids.last
+  end
 
 
   def execute_run_from_ctl_line
@@ -1673,7 +1664,7 @@ class Production::RunsController < ApplicationController
 #     elsif @production_run.rebin_links.length == 0
 #      warn_msg = "You have not yet linked any rmt products to binfill stations"
 
-           #validate that active carton links does not exist in active devices
+#validate that active carton links does not exist in active devices
         elsif clashing_pack_stations = @production_run.running_carton_links?
           warn_msg = "Another active run already uses following barcodes: <br> " + clashing_pack_stations.slice(0..300)
         elsif other_child = @production_run.get_active_child_runs()
@@ -2100,10 +2091,10 @@ class Production::RunsController < ApplicationController
   def create_production_run
 
     @production_run = ProductionRun.new(params[:production_run])
-    error =validate_production_run_details_params(@production_run.line_code,params['production_run'])
+    error =validate_production_run_details_params(@production_run.line_code, params['production_run'])
     if !error.empty?
       flash[:error] = "record cannot be saved: <BR> #{error.join("<BR>")}"
-      edit_run_details  and return
+      edit_run_details and return
     end
     #begin
     session[:commodity_id]=nil
@@ -2117,7 +2108,7 @@ class Production::RunsController < ApplicationController
       ProductionRun.transaction do
         params['production_run'][:rmt_product_type_id]=RmtProductType.find_by_rmt_product_type_code(session[:current_closed_schedule].rmt_setup.rmt_product.rmt_product_type_code).id
         params['production_run'][:commodity_id]= Commodity.find_by_commodity_code(session[:current_closed_schedule].rmt_setup.commodity_code).id
-        params['production_run'][:variety_id]=  RmtVariety.find_by_rmt_variety_code(session[:current_closed_schedule].rmt_setup.variety_code).id
+        params['production_run'][:variety_id]= RmtVariety.find_by_rmt_variety_code(session[:current_closed_schedule].rmt_setup.variety_code).id
         if params['production_run']['ripe_point_id'] == nil || params['production_run']['ripe_point_id'] == ""
         else
           params['production_run'][:pc_code_id]= PcCode.find_by_sql("select pc_codes.id from pc_codes join ripe_points on ripe_points.pc_code_id=pc_codes.id where ripe_points.id=#{params['production_run']['ripe_point_id']} ")[0].id

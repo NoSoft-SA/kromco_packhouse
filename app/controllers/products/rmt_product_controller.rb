@@ -179,6 +179,9 @@ def create_rmt_product
    begin
 	 @rmt_product = RmtProduct.new(params[:rmt_product])
 	 @rmt_product.rmt_product_type_code = session[:rmt_product_type]
+	 if session[:rmt_product_type]== "rebin"||session[:rmt_product_type]== "presort"
+	    @rmt_product.size_id = Size.find_by_size_code(params[:rmt_product][:size_code]).id	
+         end	 
 	 RAILS_DEFAULT_LOGGER.info ("@rmt_product.rmt_product_type_code: " + @rmt_product.rmt_product_type_code )   	 
 	 if @rmt_product.save
 	#update in-memory list- if it exists

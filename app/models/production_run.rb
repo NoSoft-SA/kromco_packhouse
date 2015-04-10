@@ -423,15 +423,6 @@ class ProductionRun < ActiveRecord::Base
 
       end
 
-      #----------------------
-      #Clone bintip criteria
-      #----------------------
-      if self.run_bintip_criterium
-        bintip_crit_clone = RunBintipCriterium.new
-        self.run_bintip_criterium.export_attributes(bintip_crit_clone)
-        bintip_crit_clone.production_run = cloned_run
-        bintip_crit_clone.create
-      end
 
       self.run_palletizing_criteria.each do |palletize_crit|
         palletize_clone = RunPalletizingCriterium.new

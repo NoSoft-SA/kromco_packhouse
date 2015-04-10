@@ -33,7 +33,7 @@ class RmtProduct < ActiveRecord::Base
         if '200' == response.code
           res = response.body.split('resultset>').last.split('</res').first
           if((results = Marshal.load(Base64.decode64(res))).length > 0)
-             return
+            return
           end
         else
           err = response.body.split('</message>').first.split('<message>').last
@@ -124,8 +124,12 @@ def validate
       else
         self.treatment_type_code = "PACKHOUSE"
       end
- 
-     self.size_code = "UNS" if !self.size_code
+
+           #self.size_code = "UNS" if !self.size_code
+      if !self.size_code
+          self.size_code = "UNS" 
+	  self.size_id = Size.find_by_size_code(self.size_code).id		  
+      end
  
 	 is_valid = true
 	 if is_valid
@@ -212,6 +216,7 @@ end
       rmt_product.variety_code = variety_code
       rmt_product.rmt_product_type_code = type_code
       rmt_product.size_code = size_code
+      rmt_product.size_id = Size.find_by_size_code(size_code).id		      
       rmt_product.product_class_code = class_code
       rmt_product.ripe_point_code = ripe_point_code
       rmt_product.treatment_code = treatment_code
