@@ -2,7 +2,7 @@ class MesscadaCluster < ActiveRecord::Base
 
   #MM122014 - messcada changes
   belongs_to :messcada_server
-  has_many :messcada_modules #, :dependent => :destroy
+  has_many :messcada_modules , :dependent => :destroy
 
   validates_presence_of :code, :desc_short
 
@@ -20,9 +20,9 @@ class MesscadaCluster < ActiveRecord::Base
   end
 
   def before_save
-    server = MesscadaServer.find(self.server_id)
+    server = MesscadaServer.find(self.messcada_server_id)
     self.server_code = server.code
-    facility_id = server.facility_id
+    facility_id = server.messcada_facility_id
 
     facility = MesscadaFacility.find(facility_id)
     self.facility_code = facility.code

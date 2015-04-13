@@ -19,7 +19,7 @@ class MesscadaPeripheralPrinter < ActiveRecord::Base
   # end
 
   def before_save
-    peripheral = MesscadaPeripheral.find(self.peripheral_id)
+    peripheral = MesscadaPeripheral.find(self.messcada_peripheral_id)
     self.peripheral_code = peripheral.code
 
   end

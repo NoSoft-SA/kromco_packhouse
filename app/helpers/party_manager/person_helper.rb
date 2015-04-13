@@ -86,6 +86,7 @@ end
 #	--------------------------------------------------------------------------------------------------
 	session[:person_search_form]= Hash.new 
 	#generate javascript for the on_complete ajax event for each combo
+	#MM112014 - messcada changes
 	search_combos_js = gen_combos_clear_js_for_combos(["person_first_name","person_last_name","person_industry_number"])
 	#Observers for search combos
 	first_name_observer  = {:updated_field_id => "last_name_cell",

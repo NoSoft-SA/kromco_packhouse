@@ -2,7 +2,7 @@ class MesscadaServer < ActiveRecord::Base
 
   #MM122014- messcada changes
   belongs_to :messcada_facility
-  has_many :messcada_clusters #, :dependent => :destroy
+  has_many :messcada_clusters , :dependent => :destroy
 
   # attr_accessor :facility_code
 
@@ -23,7 +23,7 @@ class MesscadaServer < ActiveRecord::Base
 
   def before_save
 
-    # facility = MesscadaFacility.find(self.facility_id)
+    # facility = MesscadaFacility.find(self.messcada_facility_id)
     # self.facility_code = facility.code
 
   end
@@ -34,7 +34,7 @@ class MesscadaServer < ActiveRecord::Base
 
   def run_before_save
 
-    facility = MesscadaFacility.find(self.facility_id)
+    facility = MesscadaFacility.find(self.messcada_facility_id)
     self.facility_code = facility.code
 
   end
@@ -58,8 +58,8 @@ class MesscadaServer < ActiveRecord::Base
         # messcada_server.created_at = server.created_at
         # messcada_server.updated_at = server.updated_at
 
-        messcada_server.facility_id=facility_id if server.facility_id !=nil
-        messcada_server.run_before_save if server.facility_id !=nil
+        messcada_server.messcada_facility_id=facility_id if server.messcada_facility_id !=nil
+        messcada_server.run_before_save if server.messcada_facility_id !=nil
 
         messcada_server.save
 

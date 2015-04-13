@@ -3,7 +3,7 @@ class MesscadaPeripheral < ActiveRecord::Base
   #MM122014 - messcada changes
   belongs_to :messcada_module
 
-  has_many :messcada_peripheral_printers #, :dependent => :destroy
+  has_many :messcada_peripheral_printers , :dependent => :destroy
 
   validates_presence_of :code,:peripheral_type_code,:peripheral_group_code,:comms_type_code,:ip,:port,:baud,
                         :databooleans,:stopboolean,:flow_control,:button_tooltip,:input_buffer_length,:output_buffer_length,
@@ -25,17 +25,17 @@ class MesscadaPeripheral < ActiveRecord::Base
 
   def before_save
 
-    # modules = MesscadaModule.find(self.module_id)
+    # modules = MesscadaModule.find(self.messcada_module_id)
     # self.module_code = modules.code
-    # cluster_id = modules.cluster_id
+    # cluster_id = modules.messcada_cluster_id
     #
     # cluster = MesscadaCluster.find(cluster_id)
     # self.cluster_code = cluster.code
-    # server_id = cluster.server_id
+    # server_id = cluster.messcada_server_id
     #
     # server = MesscadaServer.find(server_id)
     # self.server_code = server.code
-    # facility_id = server.facility_id
+    # facility_id = server.messcada_facility_id
     #
     # facility = MesscadaFacility.find(facility_id)
     # self.facility_code = facility.code
@@ -48,24 +48,24 @@ class MesscadaPeripheral < ActiveRecord::Base
 
   def run_before_save
 
-    modules = MesscadaModule.find(self.module_id)
+    modules = MesscadaModule.find(self.messcada_module_id)
     self.module_code = modules.code
-    cluster_id = modules.cluster_id
+    cluster_id = modules.messcada_cluster_id
 
     cluster = MesscadaCluster.find(cluster_id)
-    self.cluster_id = cluster.id
+    self.messcada_cluster_id = cluster.id
     self.cluster_code = cluster.code
-    server_id = cluster.server_id
+    server_id = cluster.messcada_server_id
 
     server = MesscadaServer.find(server_id)
-    self.server_id = server.id
+    self.messcada_server_id = server.id
     self.server_code = server.code
 
-    save_messcada_facility(server) if server.facility_id !=nil
-    # facility_id = server.facility_id
+    save_messcada_facility(server) if server.messcada_facility_id !=nil
+    # facility_id = server.messcada_facility_id
     #
     # facility = MesscadaFacility.find(facility_id)
-    # self.facility_id = facility.id
+    # self.messcada_facility_id = facility.id
     # self.facility_code = facility.code
 
   end
@@ -75,30 +75,30 @@ class MesscadaPeripheral < ActiveRecord::Base
 
     case field_name
       when "module_id"
-        self.module_id = field_value
+        self.messcada_module_id = field_value
         run_before_save
       when "cluster_code"
         cluster = MesscadaCluster.find_by_code(field_value)
-        self.cluster_id = cluster.id
+        self.messcada_cluster_id = cluster.id
         self.cluster_code = cluster.code
-        server_id = cluster.server_id
+        server_id = cluster.messcada_server_id
 
         server = MesscadaServer.find(server_id)
-        self.server_id = server.id
+        self.messcada_server_id = server.id
         self.server_code = server.code
 
-        save_messcada_facility(server) if server.facility_id !=nil
+        save_messcada_facility(server) if server.messcada_facility_id !=nil
 
       when "server_code"
         server = MesscadaServer.find_by_code(field_value)
-        self.server_id = server.id
+        self.messcada_server_id = server.id
         self.server_code = server.code
 
-        save_messcada_facility(server) if server.facility_id !=nil
+        save_messcada_facility(server) if server.messcada_facility_id !=nil
 
       when "facility_code"
         facility = MesscadaFacility.find_by_code(field_value)
-        self.facility_id = facility.id
+        self.messcada_facility_id = facility.id
         self.facility_code = facility.code
     end
 
@@ -106,9 +106,9 @@ class MesscadaPeripheral < ActiveRecord::Base
   end
 
   def save_messcada_facility(server)
-    facility_id = server.facility_id
+    facility_id = server.messcada_facility_id
     facility = MesscadaFacility.find(facility_id)
-    self.facility_id = facility.id
+    self.messcada_facility_id = facility.id
     self.facility_code = facility.code
   end
 

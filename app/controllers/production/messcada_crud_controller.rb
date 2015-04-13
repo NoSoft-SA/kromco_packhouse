@@ -167,7 +167,7 @@ class Production::MesscadaCrudController < ApplicationController
     begin
       id = params[:id]
       if id && facility = MesscadaFacility.find(id)
-        facility.destroy_servers
+        # facility.destroy_servers
         facility.destroy
         render :inline => %{
                             <script>
@@ -215,7 +215,7 @@ class Production::MesscadaCrudController < ApplicationController
       @server = MesscadaServer.new(params[:server])
 
       if session[:belongs_to_facility]
-        @server.facility_id = session[:facility_id]
+        @server.messcada_facility_id = session[:facility_id]
         @server.facility_code = session[:facility_code]
         @server.run_before_save
       end
@@ -239,7 +239,7 @@ class Production::MesscadaCrudController < ApplicationController
       query = "select * from  messcada_servers MS order by MS.code"
     else
       query = "select * from  messcada_servers MS
-              where MS.facility_id = #{params[:id]}
+              where MS.messcada_facility_id = #{params[:id]}
               order by MS.code"
       session[:is_edit] = true
     end
@@ -328,7 +328,7 @@ class Production::MesscadaCrudController < ApplicationController
     begin
       id = params[:id]
       if id && server = MesscadaServer.find(id)
-        server.destroy_clusters
+        # server.destroy_clusters
         server.destroy
         render :inline => %{
                             <script>
@@ -354,11 +354,11 @@ class Production::MesscadaCrudController < ApplicationController
     @is_select = true
     session[:belongs_to_facility] = true
     query = "select * from  messcada_servers MS
-            where (MS.facility_id IS NULL or MS.facility_id != #{session[:facility_id]})
+            where (MS.messcada_facility_id IS NULL or MS.messcada_facility_id != #{session[:facility_id]})
             and MS.code NOT IN
             (
               select MS.code from  messcada_servers MS
-              where  MS.facility_id = #{session[:facility_id]}
+              where  MS.messcada_facility_id = #{session[:facility_id]}
             )
             order by MS.code"
     @servers = MesscadaServer.find_by_sql(query)
@@ -391,11 +391,14 @@ class Production::MesscadaCrudController < ApplicationController
   def create_cluster
     begin
       @cluster = MesscadaCluster.new(params[:cluster])
-      @cluster.server_id = session[:server_id]
+      @cluster.messcada_server_id = session[:server_id]
       @cluster.server_code = session[:server_code]
       if @cluster.save
-        server_code = @cluster.server_code
-        main_page("link_to_server_code",server_code)
+        id = @cluster.id
+        # server_code = @cluster.server_code
+        # main_page("link_to_server_code",server_code)
+        update_page("edit_cluster",id)
+        # update_main_page("edit_cluster",id)
       else
         @is_create_retry = true
         render_new_cluster
@@ -411,7 +414,7 @@ class Production::MesscadaCrudController < ApplicationController
       query = "select * from  messcada_clusters MC order by MC.code"
     else
       query = "select * from  messcada_clusters MC
-              where MC.server_id = #{params[:id]}
+              where MC.messcada_server_id = #{params[:id]}
               order by MC.code"
       session[:is_edit] = true
     end
@@ -499,7 +502,7 @@ class Production::MesscadaCrudController < ApplicationController
     begin
       id = params[:id]
       if id && cluster = MesscadaCluster.find(id)
-        cluster.destroy_modules
+        # cluster.destroy_modules
         cluster.destroy
         render :inline => %{
                             <script>
@@ -539,11 +542,13 @@ class Production::MesscadaCrudController < ApplicationController
   def create_module
     begin
       @modules = MesscadaModule.new(params[:modules])
-      @modules.cluster_id = session[:cluster_id]
+      @modules.messcada_cluster_id = session[:cluster_id]
       @modules.cluster_code = session[:cluster_code]
       if @modules.save
-         cluster_code = @modules.cluster_code
-         main_page("link_to_cluster_code",cluster_code)
+         id = @modules.id
+         # cluster_code = @modules.cluster_code
+         # main_page("link_to_cluster_code",cluster_code)
+         update_page("edit_module",id)
       else
         @is_create_retry = true
         render_new_module
@@ -559,7 +564,7 @@ class Production::MesscadaCrudController < ApplicationController
       query = "select * from  messcada_modules MM order by MM.code"
     else
       query = "select * from  messcada_modules MM
-              where MM.cluster_id = #{params[:id]}
+              where MM.messcada_cluster_id = #{params[:id]}
               order by MM.code"
       session[:is_edit] = true
     end
@@ -597,7 +602,7 @@ class Production::MesscadaCrudController < ApplicationController
     if id && @modules = MesscadaModule.find(id)
       session[:module_id] = @modules.id
       session[:module_code] = @modules.code
-      session[:field_name] = "module_id"
+      session[:field_name] = "messcada_module_id"
       session[:field_value] = session[:module_id]
       render_active_edit_module
     end
@@ -610,7 +615,7 @@ class Production::MesscadaCrudController < ApplicationController
     if id && @modules = MesscadaModule.find(id)
       session[:module_id] = @modules.id
       session[:module_code] = @modules.code
-      session[:field_name] = "module_id"
+      session[:field_name] = "messcada_module_id"
       session[:field_value] = session[:module_id]
     end
     if session[:is_edit]
@@ -654,7 +659,7 @@ class Production::MesscadaCrudController < ApplicationController
     begin
       id = params[:id]
       if id && modules = MesscadaModule.find(id)
-        modules.destroy_peripherals
+        # modules.destroy_peripherals
         modules.destroy
         render :inline => %{
                             <script>
@@ -702,14 +707,16 @@ class Production::MesscadaCrudController < ApplicationController
       @peripheral = MesscadaPeripheral.new(params[:peripheral])
 
       if session[:belongs_to_module]
-        @peripheral.module_id = session[:module_id]
+        @peripheral.messcada_module_id = session[:module_id]
         @peripheral.module_code = session[:module_code]
         @peripheral.run_before_save
       end
 
       if @peripheral.save
-        module_code = @peripheral.module_code
-        main_page("link_to_module_code",module_code)
+        id = @peripheral.id
+        # module_code = @peripheral.module_code
+        # main_page("link_to_module_code",module_code)
+        update_page("edit_peripheral",id)
       else
         @is_create_retry = true
         render_new_peripheral
@@ -813,7 +820,7 @@ class Production::MesscadaCrudController < ApplicationController
     begin
       id = params[:id]
       if id && peripherals = MesscadaPeripheral.find(id)
-        peripherals.destroy_peripheral_printers
+        # peripherals.destroy_peripheral_printers
         peripherals.destroy
         render :inline => %{
                             <script>
@@ -856,7 +863,7 @@ class Production::MesscadaCrudController < ApplicationController
     messcada_peripherals = session[:messcada_peripherals]
     selected_messcada_peripherals = selected_records?(messcada_peripherals,nil,nil)
     MesscadaPeripheral.save_selected_messcada_peripherals(selected_messcada_peripherals,session[:field_name],session[:field_value])
-    if session[:field_name].to_s == "module_id"
+    if session[:field_name].to_s == "messcada_module_id"
       reload_main_page("link_to_module_code",session[:module_code])
     else
       reload_main_page("link_to_" + session[:field_name].to_s + "",session[:field_value])
@@ -881,11 +888,13 @@ class Production::MesscadaCrudController < ApplicationController
   def create_peripheral_printer
     begin
       @peripheral_printer = MesscadaPeripheralPrinter.new(params[:peripheral_printer])
-      @peripheral_printer.peripheral_id = session[:peripheral_id]
+      @peripheral_printer.messcada_peripheral_id = session[:peripheral_id]
       @peripheral_printer.peripheral_code = session[:peripheral_code]
       if @peripheral_printer.save
-        peripheral_code = @peripheral_printer.peripheral_code
-        main_page("link_to_peripheral_code",peripheral_code)
+        id = @peripheral_printer.id
+        # peripheral_code = @peripheral_printer.peripheral_code
+        # main_page("link_to_peripheral_code",peripheral_code)
+        update_page("edit_peripheral_printer",id)
       else
         @is_create_retry = true
         render_new_peripheral_printer
@@ -899,12 +908,12 @@ class Production::MesscadaCrudController < ApplicationController
     session[:is_edit] = false
     if params[:id] == "" or params[:id] == nil
       query = "select MPP.*,MP.module_code,MP.cluster_code,MP.server_code,MP.facility_code from  messcada_peripheral_printers MPP
-              inner join messcada_peripherals MP on MPP.peripheral_id = MP.id
+              inner join messcada_peripherals MP on MPP.messcada_peripheral_id = MP.id
               order by MPP.id"
     else
       query = "select MPP.*,MP.module_code,MP.cluster_code,MP.server_code,MP.facility_code from  messcada_peripheral_printers MPP
-              inner join messcada_peripherals MP on MPP.peripheral_id = MP.id
-              where MPP.peripheral_id = #{params[:id]}
+              inner join messcada_peripherals MP on MPP.messcada_peripheral_id = MP.id
+              where MPP.messcada_peripheral_id = #{params[:id]}
               order by MPP.id"
       session[:is_edit] = true
     end
