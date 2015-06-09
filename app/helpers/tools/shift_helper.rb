@@ -17,7 +17,9 @@ module Tools::ShiftHelper
     session[:shift_form][:shift_type_code_observer] = shift_type_code_observer
 
 
-    shift_type_codes = Shift.get_all_shift_type_codes
+    #shift_type_codes = Shift.get_all_shift_type_codes
+    shift_type_codes = ShiftType.find_by_sql("select shift_type_code from shift_types where shift_type_code <> 'C'").map{|s| [s.shift_type_code] }
+    
 	  if shift == nil||is_create_retry
 	    start_times = ["Select a value from shift_type_code"]
         end_times = ["Select a value from start time"]
@@ -70,9 +72,10 @@ module Tools::ShiftHelper
                         :settings=>{:list => users} }
 
     field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'people_working_on_shift'}
-    field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'machine_hours'}
-    field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'clocked_hours'}
-    field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'people_absent'}
+    field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'machine_minutes'}
+    field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'clocked_minutes'}
+    field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'overtime'}
+  field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'people_absent'}
     field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'people_off_sick'}
     field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'people_on_leave'}
     
@@ -92,6 +95,8 @@ module Tools::ShiftHelper
     field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'bak_man'}
     field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'sakkie_man'}
     field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'carton_scanner'}
+    
+  
     
     
     
@@ -162,8 +167,12 @@ end
 	column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'user'}
 
   column_configs[column_configs.length()] =  {:field_type => 'text',:field_name => 'people_working_on_shift'}
-  column_configs[column_configs.length()] =  {:field_type => 'text',:field_name => 'machine_hours'}
-  column_configs[column_configs.length()] =  {:field_type => 'text',:field_name => 'clocked_hours'}
+  column_configs[column_configs.length()] =  {:field_type => 'text',:field_name => 'machine_minutes'}
+  column_configs[column_configs.length()] =  {:field_type => 'text',:field_name => 'clocked_minutes'}
+  column_configs[column_configs.length()] =  {:field_type => 'text',:field_name => 'overtime'}
+  
+  column_configs << {:field_type => 'link_window', :field_name => 'cartons_packed',:settings =>{:link_text=>'cartons_packed',:target_action => 'cartons_packed_report', :id_column => 'id'},:col_width=>75}
+  
   column_configs[column_configs.length()] =  {:field_type => 'text',:field_name => 'people_absent'}
   column_configs[column_configs.length()] =  {:field_type => 'text',:field_name => 'people_off_sick'}
   column_configs[column_configs.length()] =  {:field_type => 'text',:field_name => 'people_on_leave'}
@@ -234,9 +243,11 @@ end
                                                           :settings=>{:list => users} }
 
     field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'people_working_on_shift'}
-    field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'machine_hours'}
-    field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'clocked_hours'}
-    field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'people_absent'}
+    field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'machine_minutes'}
+    field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'clocked_minutes'}
+  
+  field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'overtime'}
+  field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'people_absent'}
     field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'people_off_sick'}
     field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'people_on_leave'}
     
@@ -258,7 +269,8 @@ end
     field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'sakkie_man'}
     field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'carton_scanner'}
     
-
+  
+  
 
     build_form(shift,field_configs,action,'shift',caption,is_edit)
   end

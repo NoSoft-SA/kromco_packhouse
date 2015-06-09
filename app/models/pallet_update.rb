@@ -224,7 +224,8 @@ class PalletUpdate
          end
          
          begin
-           raise " Group " + run_code + " has zero cartons. Every group must have at least one carton" if req_amount == 0
+           #raise " Group " + run_code + " has zero cartons. Every group must have at least one carton" if req_amount == 0
+           req_amount = 1 if req_amount == 0
            num_series = RwRun.get_object_nums("CARTON",req_amount)
          rescue
            raise "New carton numbers could not be obtained. The following exception was reported: " + $!
