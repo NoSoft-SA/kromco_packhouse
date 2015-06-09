@@ -22,6 +22,7 @@ class StandardSizeCount < ActiveRecord::Base
 	validates_numericality_of :actual_count
 	validates_numericality_of :diameter_mm
 	validates_numericality_of :standard_size_count_value
+	validates_numericality_of :average_weight_gm
 #	=====================
 #	 Complex validations:
 #	=====================

@@ -299,6 +299,9 @@ end
 	field_configs[6] =  {:field_type => 'DropDownField',
 						:field_name => 'basic_pack_code',
 						:settings => {:list => basic_pack_codes}}
+	#NAE 2015-04-17 add new field average_weight_gm
+	field_configs[7] = {:field_type => 'TextField',
+						:field_name => 'average_weight_gm'}
  
 	build_form(standard_size_count,field_configs,action,'standard_size_count',caption,is_edit)
 
@@ -391,6 +394,7 @@ end
 	column_configs[4] = {:field_type => 'text',:field_name => 'basic_pack_code'}
 	column_configs[5] = {:field_type => 'text',:field_name => 'standard_size_count_value'}
 	column_configs[6] = {:field_type => 'text',:field_name => 'actual_count'}
+	column_configs[7] = {:field_type => 'text',:field_name => 'average_weight_gm'}	
 #	----------------------
 #	define action columns
 #	----------------------
