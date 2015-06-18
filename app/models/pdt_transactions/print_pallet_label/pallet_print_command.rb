@@ -167,6 +167,11 @@ class PalletPrintCommand < LabelPrintCommand
     gtin = carton_record.get_gtin(mark.brand_code.to_s)
     puts "GTIN :: " + gtin.to_s
     set_print_field(37, "(01)" + gtin.to_s + "(10)" + production_run.batch_code.to_s)
+
+    set_print_field(38,Time.now.strftime("%Y-%m-%d %H:%M"))
+
+
+
   end
 
 
