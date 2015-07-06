@@ -11,10 +11,10 @@ class ScanLoadPallet < PDTTransactionState
 
     field_configs = Array.new
     key_in_pallet_number = authorise_scan("1.6.2",'key_in_pallet_number',ActiveRequest.get_active_request.user)
-    if key_in_pallet_number    
+    if key_in_pallet_number
 	field_configs[field_configs.length()] = {:type=>"text_box", :name=>"pallet_number", :is_required=>"true", :scan_only=>"false"}
     else
-	field_configs[field_configs.length()] = {:type=>"text_box", :name=>"pallet_number", :is_required=>"true", :scan_only=>"true"}	    
+	field_configs[field_configs.length()] = {:type=>"text_box", :name=>"pallet_number", :is_required=>"true", :scan_only=>"true"}
     end
     field_configs[field_configs.length] = {:type=>"static_text", :name=>"load_number", :value=>@parent.load_number}
     field_configs[field_configs.length] = {:type=>"static_text", :name=>"load_order_id", :value=>@parent.load_order_id.to_s}
@@ -41,6 +41,7 @@ class ScanLoadPallet < PDTTransactionState
      end
 
     pallet = Pallet.find_by_pallet_number(pallet_num)
+    stock_item =StockItem.find_by_inventory_reference(@pallet.pallet_number.to_s)
 
     #--------Load-Truck:  If the status is FAILED when the truck is loaded, the system must give the error message and not allow the user to proceed with the load.
     if !pallet.is_depot_pallet
@@ -76,6 +77,16 @@ class ScanLoadPallet < PDTTransactionState
     else
       return PDTTransaction.build_msg_screen_definition("scanned pallet does not belong to order load ", nil, nil, nil)
     end
+
+    if pallet.target_market_code=="P9"
+      return PDTTransaction.build_msg_screen_definition("target_market_code is P9 ", nil, nil, nil)
+    end
+
+    if   stock_item.location_code.upcase.index("PART_PALLETS")
+      return PDTTransaction.build_msg_screen_definition("location_code has  PART_PALLETS", nil, nil, nil)
+    end
+
+
   end
 
   def show_loaded_pallets
@@ -88,7 +99,7 @@ class ScanLoadPallet < PDTTransactionState
     build_default_screen
   end
 
-  
+
   def previous_pallet()
     if (on_first?)
       buttons['B1Enable'] = false

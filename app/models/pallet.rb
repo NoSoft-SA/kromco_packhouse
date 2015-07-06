@@ -19,18 +19,18 @@ class Pallet < ActiveRecord::Base
 
   #def after_update
 #Gerrit Fouche add to poplate prod datawarehouse 03/sep/2013
- 
+
  #ActiveRecord::Base.connection.execute("delete from carton_summary where pallet_id is not null and pallet_id =#{self.id}")
  #ActiveRecord::Base.connection.execute("INSERT INTO carton_summary( shift_id,account_code,exit_date_time,farm_code,inventory_id,is_depot_carton,iso_week_code,pc_code,puc,season_code,target_market_id,extended_fg_id,pallet_id,production_run_id,sum_carton_fruit_nett_mass,sum_quantity,load_date,track_indicator_code,order_number,packer_number) select shift_id,c.account_code,exit_date_time,c.farm_code,i.id,is_depot_carton,c.iso_week_code,c.pc_code,puc,c.season_code,t.id,extended_fgs.id,pallet_id,c.production_run_id,sum(carton_fruit_nett_mass),sum(quantity),current_timestamp,c.track_indicator_code,c.order_number,case length(c.packer_number) when 5 then c.packer_number when 10 then substring(c.packer_number,3,5) else c.packer_number end from cartons c join extended_fgs on c.extended_fg_code = extended_fgs.extended_fg_code join pallets p on pallet_id=p.id left JOIN public.inventory_codes i ON (c.inventory_code = i.inventory_code||'_'||i.inventory_name) left JOIN public.target_markets t ON (c.target_market_code = t.target_market_code) where p.id =#{self.id}  group by shift_id,c.account_code,exit_date_time,c.farm_code,i.id,is_depot_carton,c.iso_week_code,c.pc_code,puc,c.season_code,t.id,extended_fgs.id,pallet_id,c.production_run_id,c.track_indicator_code,c.order_number,c.packer_number")
-  	  
+
  # end
 
  # def after_create
 #Gerrit Fouche add to poplate prod datawarehouse 03/sep/2013
- 
+
  #ActiveRecord::Base.connection.execute("delete from carton_summary where pallet_id =#{self.id}")
  # ActiveRecord::Base.connection.execute("INSERT INTO carton_summary( shift_id,account_code,exit_date_time,farm_code,inventory_id,is_depot_carton,iso_week_code,pc_code,puc,season_code,target_market_id,extended_fg_id,pallet_id,production_run_id,sum_carton_fruit_nett_mass,sum_quantity,load_date,track_indicator_code,order_number,packer_number) select shift_id,c.account_code,exit_date_time,c.farm_code,i.id,is_depot_carton,c.iso_week_code,c.pc_code,puc,c.season_code,t.id,extended_fgs.id,pallet_id,c.production_run_id,sum(carton_fruit_nett_mass),sum(quantity),current_timestamp,c.track_indicator_code,c.order_number,case length(c.packer_number) when 5 then c.packer_number when 10 then substring(c.packer_number,3,5) else c.packer_number end from cartons c join extended_fgs on c.extended_fg_code = extended_fgs.extended_fg_code join pallets p on pallet_id=p.id left JOIN public.inventory_codes i ON (c.inventory_code = i.inventory_code||'_'||i.inventory_name) left JOIN public.target_markets t ON (c.target_market_code = t.target_market_code) where p.id =#{self.id}  group by shift_id,c.account_code,exit_date_time,c.farm_code,i.id,is_depot_carton,c.iso_week_code,c.pc_code,puc,c.season_code,t.id,extended_fgs.id,pallet_id,c.production_run_id,c.track_indicator_code,c.order_number,c.packer_number")
-  	  
+
  # end
 
 
@@ -49,7 +49,8 @@ class Pallet < ActiveRecord::Base
     order_type =OrderType.find(order.order_type_id).order_type_code
     if order_type.strip=="MO" || order_type.strip=="MQ"
       for pallet_number in pallet_numbers
-        @pallet= Pallet.find_by_pallet_number(pallet_number.strip)
+        @pallet= Pallet.find_by_(pallet_number.strip)
+        stock_item =StockItem.find_by_inventory_reference(@pallet.pallet_number.to_s)
         if !@pallet
           if pallet_number.length > 18
             failed_pallets.push(pallet_number + "(lines should end with semi-colon)")
@@ -66,7 +67,13 @@ class Pallet < ActiveRecord::Base
         if   @pallet.load_detail_id
           failed_pallets.push(pallet_number + "(pallet is on load)".to_s)
         end
+        if   stock_item.location_code.upcase.index("PART_PALLETS")
+          failed_pallets.push(pallet_number + "(location_code has PART_PALLETS)".to_s)
+        end
 
+        if @pallet.target_market_code=="P9"
+          failed_pallets.push(pallet_number + "(target_market_code is P9)".to_s)
+        end
 
 
 
@@ -74,6 +81,8 @@ class Pallet < ActiveRecord::Base
     else
       for pallet_number in pallet_numbers
         @pallet= Pallet.find_by_pallet_number(pallet_number.strip)
+        stock_item =StockItem.find_by_inventory_reference(@pallet.pallet_number.to_s)
+
         if !@pallet
           if pallet_number.length > 18
             failed_pallets.push(pallet_number + "(lines should end with semi-colon)")
@@ -107,6 +116,13 @@ class Pallet < ActiveRecord::Base
               failed_pallets.push(pallet_number + "(qc result status must be passed)".to_s)
             end
           end
+        end
+        if   stock_item.location_code.upcase.index("PART_PALLETS")
+          failed_pallets.push(pallet_number + "(location_code has PART_PALLETS)".to_s)
+        end
+
+        if @pallet.target_market_code=="P9"
+          failed_pallets.push(pallet_number + "(target_market_code is P9)".to_s)
         end
       end
     end
@@ -149,11 +165,11 @@ class Pallet < ActiveRecord::Base
 
     self.holdover = nil
     self.load_detail_id = nil
-    self.remarks1 = nil    
-    self.remarks2= nil    
-    self.remarks3 = nil    
-    self.remarks4 = nil    
-    self.remarks5 = nil    
+    self.remarks1 = nil
+    self.remarks2= nil
+    self.remarks3 = nil
+    self.remarks4 = nil
+    self.remarks5 = nil
     self.update
 
   end
@@ -639,6 +655,5 @@ class Pallet < ActiveRecord::Base
   end
 
 end
- 
- 
- 
+
+
