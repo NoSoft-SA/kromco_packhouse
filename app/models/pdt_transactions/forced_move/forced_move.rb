@@ -132,7 +132,14 @@
         forcelocation_rules = search_force_location_rule(Location.find_by_location_code(force_from),force_to) #new
         @scratch_pad["force_locations_rules"] = forcelocation_rules
         if(forcelocation_rules != nil)
-          return  force_move_trans
+          #pallet on load rule
+          pallet = Pallet.find_by_pallet_number(@scratch_pad["pallet_number"])
+          if pallet.load_detail_id && location.location_code.upcase.index("PART_PALLETS")
+            result_screen = PDTTransaction.build_msg_screen_definition(nil,nil,nil,['Pallet is on a load.Move to PART_PALLET not allowed'])
+            return result_screen
+          else
+           return  force_move_trans
+          end
         else
           additonal_lines_array = [" MSG : FORCE XFER FROM[#{force_from}] TO[#{force_to}] NOT ALLOWED " ]
           result_screen = PDTTransaction.build_msg_screen_definition(nil,nil,nil,additonal_lines_array)

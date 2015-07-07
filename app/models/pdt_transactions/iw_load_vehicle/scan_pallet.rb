@@ -128,6 +128,8 @@ class ScanPallet < PDTTransactionState
         error = "Pallet not found!"
       elsif error = un_palletized_pallet?(pallet)
         return error
+      elsif error = invalid_destination_for_pallet_on_load?
+        return error
       else
         if pallet.get_carton_count != pallet.carton_quantity_actual
           error = "carton qty mismatch(ctns: " + pallet.get_carton_count.to_s + " vs plt: " + pallet.carton_quantity_actual.to_s
@@ -279,6 +281,22 @@ class ScanPallet < PDTTransactionState
     end
     return validate_msg
   end
+
+
+  def invalid_destination_for_pallet_on_load?
+    validate_msg = nil
+    pallet_number = self.parent.get_temp_record("scanned_pallet_number")
+    pallet = Pallet.find_by_pallet_number(pallet_number)
+    if pallet.load_detail_id
+      if @parent.destination.to_s.upcase.index("PART_PALLETS")
+        validate_msg = "Pallet is on a load. Cannot be moved to a 'PART_PALLETS' destination"
+      end
+    end
+
+   return validate_msg
+  end
+
+
 
   def valid_destination_for_internal_qc_result?
     validate_msg = nil

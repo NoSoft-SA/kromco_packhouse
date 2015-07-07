@@ -2260,6 +2260,15 @@ class Production::ReworksController < ApplicationController
       return
     end
 
+
+    if StockItem.find_by_inventory_reference(pallet.pallet_number).location_code.upcase.index("REWORKS")
+      @freeze_flash = true
+      flash[:notice]= "You cannot perform an alt pack on a pallet with location 'reworks'"
+      rw_pallets
+      return
+
+    end
+
     #TODO uncomment
     #stock_item = StockItem.find_by_inventory_reference(pallet.pallet_number)
     #if stock_item && !(stock_item.location_code.upcase == "PACKHSE" ||stock_item.location_code.upcase == "REWORKS"||stock_item.location_code.upcase == "BAGGING"||stock_item.location_code.upcase == "BAGGING_REWORKS"||stock_item.location_code.upcase == "PART_PALLETS")
@@ -2334,21 +2343,30 @@ class Production::ReworksController < ApplicationController
   def repack_pallet_submit
 
     #--------------------------------------------------------------
-    #Validations: make sure user selected a carton from first group
+    #Validations: make sure user selected a carton from all groups
     #--------------------------------------------------------------
     repr_carton = nil
-    is_valid = false
+    all_groups_has_repr_ctn = true
+    has_fg_carton = false
     pallet_update = session[:current_pallet_repack]
     pallet_update.puc_groups.each do |run_code, group|
       if group[:group_num]== 1 && group[:representative_carton]
         repr_carton = group[:representative_carton]
-        is_valid = true
-        break
+        has_fg_carton = true
+      elsif !group[:representative_carton]
+        all_groups_has_repr_ctn =false
+
       end
     end
 
-    if !is_valid
-      flash[:error] = "You must select a representative carton from the first group"
+
+
+    if !has_fg_carton
+      flash[:error] = "You must select a representative carton from the FIRST group"
+      render_repack_pallet session[:current_pallet_repack]
+      return
+    elsif !all_groups_has_repr_ctn
+      flash[:error] = "You must select a representative carton from EVERY group"
       render_repack_pallet session[:current_pallet_repack]
       return
     end

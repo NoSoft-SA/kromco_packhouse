@@ -53,6 +53,9 @@ class PutAwayPallet < PDTTransaction
       mark = Mark.find_by_mark_code(fg_mark.tu_mark_code)
       assignment = 'STORAGE'
       assignment = 'RECOOL' if pallet.store_type_code = "cold_store"
+
+      load_pallet_condition = ""
+      load_pallet_condition = " and (locations.locaction_code NOT like '%PART_PALLETS%')" if pallet.load_detail_id
       
       query = " SELECT DISTINCT location_setups.priority,location_setups.location_code
                 from location_setups
@@ -75,6 +78,7 @@ class PutAwayPallet < PDTTransaction
                 and (location_setups.pallet_format_product_code='ALL' or location_setups.pallet_format_product_code='#{pallet.pallet_format_product_code}')
                  and (locations.unavailable= false or locations.unavailable is null)
                 and (locations.units_in_location <  locations.location_maximum_units)
+                 #{load_pallet_condition}
                 and (locations.current_job_reference_id is null) and location_setups.assignment = '#{assignment}'
                 )
                 order by location_setups.priority DESC
