@@ -12,9 +12,9 @@ class PdtScreenDefinition
   attr_accessor :input_xml,:menu_item,:mode,:user,:ip,:controls,:buttons,:screen_attributes
 
     MENUSELECT   = 0;                    # Menu select/reconfig mode
-    ENTERDATA    = 1;                    # Submit button mode
-    IDLE         = 2;                    # Enter button
-    ENTER        = 3;                    # Normal transaction button
+    ENTERDATA    = 1;                    # Submit Auto mode
+            IDLE         = 2;                    # Enter button
+            ENTER        = 3;                    # Normal transaction button
     BUTTON1      = 4;                    # Yes button clicked mode
     BUTTON2      = 5;                    # No button clicked mode
     BUTTON3      = 6;                    # Cancel button mode
@@ -23,7 +23,7 @@ class PdtScreenDefinition
     UNDO         = 9;                    # Undo special command mode
     SAVE_PROCESS = 12;
     LOAD_PROCESS = 11;
-    CHOICE       = 10;
+              CHOICE       = 10;
     REDO         = 13
     EXIT_PROCESS = 14;
     CONTROL_VALUE_REPLACE = 15
@@ -54,13 +54,50 @@ class PdtScreenDefinition
     @root = nil
   end
 
+
+  def gen_controls_list_html_configs(web_pdt_css_styles,observers,request)
+    field_configs = []
+    @controls.each do |config|
+      field_configs << PdtScreenDefinition.gen_control_html_config(config,web_pdt_css_styles,observers[config['name']],request)
+    end
+    return field_configs
+  end
+
+  def self.build_error_screen(error_msg,error_fields=[])
+    error_screen_definition = "<error> <controls>"
+    error_fields.each do |field|
+      error_screen_definition += "<control name='#{field}'></control>"
+    end
+    error_screen_definition += "</controls>"
+    error_screen_definition += "<message>#{error_msg}</message></error>"
+  end
   #******************************************************
   # Returns the input control whose name matches the
   # parameter from the controls list of this object
   #******************************************************
-  def get_input_control(name)
+  def get_control(name)
     for control in @controls
       if control["name"] == name
+        return control
+      end
+    end
+    return nil
+  end
+
+  #***************************************************************
+  # Returns the value of the input control whose name matches the
+  # parameter from the controls list of this object
+  #***************************************************************
+  def get_control_value(name)
+    control = get_control(name)
+    if control != nil
+      return control["value"]
+    end
+  end
+
+  def get_input_control(name)
+    for control in @controls
+      if control["name"] == name  #&& control["type"] != 'static_text' && control["type"] != 'text_line'
         return control
       end
     end
@@ -89,10 +126,12 @@ class PdtScreenDefinition
     end
   end
 
+
+
   #***************************************************************
   # Returns the value of the output control whose name matches the
   # parameter from the controls list of this object
-  #***************************************************************
+  #***************************************************************get_control_value
   def get_control_value(name)
     return get_input_control_value(name)
   end
@@ -122,9 +161,27 @@ class PdtScreenDefinition
               attr_value = attr_value.to_s.gsub!("!","\'") if attr_value.include?("!")
               attr_value = attr_value.to_s.gsub!("$","\"") if attr_value.include?("$")
               if(attr_name=='value' && control.attributes.include?('strip') && control.attributes['strip'] == 'false')
-                field_configs.store(attr_name, attr_value.to_s.gsub("=","^")) 
+                field_configs.store(attr_name, attr_value.to_s.gsub("=","^"))
               else
                 field_configs.store(attr_name, attr_value.to_s.strip.gsub("=","^"))
+              end
+            end
+
+            #childre - build cascades array/hash and put in field_configs.store(:cascades, it)
+            if(control.children.length > 0)
+              for control_child in control.children
+                if(control_child.name=='cascades')
+                  for cascade in control_child.children
+                    puts
+                    settings = {}
+                    cascade.attributes.each do |atr_name, atr_value|
+                      atr_value = atr_value.to_s.gsub!("!","\'") if atr_value.include?("!")
+                      atr_value = atr_value.to_s.gsub!("$","\"") if atr_value.include?("$")
+                      settings.store(atr_name, atr_value.to_s.strip.gsub("=","^"))
+                    end
+                    field_configs['cascades'] = {:type=>cascade.name,:settings=>settings}
+                  end
+                end
               end
             end
             @controls.push(field_configs)
@@ -244,23 +301,6 @@ class PdtScreenDefinition
 
     for control in field_configs
       returnStr += self.gen_control_xml(control)
-###      returnStr += "<control "
-###      #returnStr += "\n\t\t<control "
-###      cascades = nil
-###      if control.keys != nil
-###        control.keys.each do |key|
-###          if key.to_s != "cascades"
-###            returnStr += key.to_s + "='" + control[key].to_s.strip.gsub("=","^") + "' "
-###          else
-###            cascades = control[key]
-###          end
-###        end
-###      end
-###      if cascades != nil
-###        returnStr = returnStr.strip! + ">" + PdtScreenDefinition.cascades(cascades) + "</control>"
-###      else
-###        returnStr = returnStr.strip! + "/>"
-###      end
     end
     returnStr += "</controls>"
 
@@ -300,12 +340,133 @@ class PdtScreenDefinition
     end
  end
 
- def self.gen_controls_list_xml(*field_configs)
+ def self.gen_controls_list_xml(field_configs)
+   if(!field_configs.is_a?(Array))
+     field_configs = [field_configs]
+   end
+
    result_xml = "<controls>"
    field_configs.each do |configs|
      result_xml += PdtScreenDefinition.gen_control_xml(configs)
    end
    result_xml += "</controls>"
+ end
+
+  def PdtScreenDefinition.get_pdt_error_screen(exception,pdt_method,client_type,mode)
+    if (exception.is_a?(PdtException))
+
+      result_screen = PDTTransaction.build_msg_screen_definition(exception.pdt_errors, nil, nil, nil)
+      return render_result(result_screen)
+    end
+
+    exception = exception.to_s
+    remove_special_chars = exception.gsub("<", "[").gsub(">", "]").gsub("\\", "|").gsub("/", "|")
+    lcd1 = "SYSTEM ERROR :"
+    lcd2 = pdt_method.program_name.to_s + "(" + pdt_method.method_name.to_s + ")" if (pdt_method)
+    lcd3 = "DESCRIPTION :"
+    error_description = Array.new
+
+    if(client_type=='web') && Globals.suppress_pdt_web_errors
+      error_description = ["see diagnostics pdt_errors"]
+    else
+      while (error_description.length < 10 && remove_special_chars.length > 0 && remove_special_chars.length > 60)
+        puts "remove_special_chars.length = " + remove_special_chars.length.to_s
+        lcd = remove_special_chars.slice!(0, 60)
+        error_description.push(lcd)
+      end
+      error_description.push(remove_special_chars) if (remove_special_chars.length > 0)
+    end
+
+    output_lines = [lcd1, lcd2, lcd3] + error_description
+
+    screen_caption = "Server Exception"
+    if (mode == PdtScreenDefinition.const_get("CONTROL_VALUE_REPLACE").to_s)
+      error_screen_definition = "<error>" + exception + "</error>"
+    else
+      error_screen_definition = send_screen(output_lines, screen_caption, nil)
+    end
+    return error_screen_definition
+  end
+
+  #-----------------------------------------------------------------------
+  # This method to build output/display error screens.It takes messages to be be
+  # displayed in the output lines of the screen and returns a xml screen
+  # definition.
+  #-----------------------------------------------------------------------
+  def PdtScreenDefinition.send_screen(output_lines=[], screen_caption=nil, plugins=nil)
+
+    field_configs = Array.new
+    for output_line in output_lines
+      field_configs[field_configs.length] = {:type=>"text_line", :name=>"output", :value=>output_line.to_s}
+    end
+    screen_attributes = {:auto_submit=>"false", :content_header_caption=>screen_caption.to_s}
+    buttons = {"B3Label"=>"Clear", "B2Label"=>"Cancel", "B1Label"=>"Submit", "B1Enable"=>"false", "B2Enable"=>"false", "B3Enable"=>"false"}
+    screen_def = PdtScreenDefinition.gen_screen_xml(field_configs, buttons, screen_attributes, plugins)
+
+    return screen_def
+  end
+
+
+  def PdtScreenDefinition.log_pdt_error(exception,user,ip,mode,input_xml,menu_item)
+    pdt_error = PdtError.new
+    pdt_error.user_name = user
+    pdt_error.created_on = Time.now
+    pdt_error.error_description = exception.to_s
+    pdt_error.stack_trace = exception.backtrace.join("\n").to_s
+    pdt_error.ip = ip
+    pdt_error.mode = mode.to_i
+    pdt_error.input_xml = input_xml
+    pdt_error.menu_item = menu_item
+    pdt_error.error_type = "PdtControllerError"
+    pdt_error.save
+  end
+
+
+  def PdtScreenDefinition.gen_control_html_config(config,web_pdt_css_styles,observer,request)
+   web_pdt_css_styles = {} if(!web_pdt_css_styles)
+   type = config['type']
+   case type
+     when 'drop_down'
+       if(config['list'])
+         # list = config['list'].split(',').map{|item| item.split('|')}
+         list = config['list'].split(',').map{|item| [item.split('|')[0],item]}
+       elsif(config['get_list'])
+         params = {'request'=>request}
+         remote_list = eval("PdtRemoteList.#{config['get_list']}(params)")
+         list = remote_list.empty? ? [] : (remote_list[0].is_a?(Hash) ? remote_list.map{|l| l[config['list_field']]} : remote_list.map{|l| l.attributes[config['list_field']]})
+       else
+         list = []
+       end
+       # list.unshift(config['value']) if(config['value'])
+       settings = {:field_type => 'DropDownField',:field_name => config['name'],
+        :settings=>{:list=>list, :no_empty=>false,:css_class=>web_pdt_css_styles[:pdt_drop_down]}}
+        # :settings=>{:list=>list, :no_empty=>false,:css_class=>web_pdt_css_styles[:pdt_drop_down],:html_opts => {:onchange=>"#{observer ? observer[:on_load_js] : nil}"}}}
+       settings[:observer] = observer if(observer)
+     when 'text_box'
+       settings = {:field_type => 'TextField',:field_name => config['name'],
+        :settings => {:css_class=>web_pdt_css_styles[:pdt_text_text_box]}}
+        settings[:observer] = observer if(observer)
+       #:html_opts => {:onchange=>"next_text_box.onfocus",:onfocus=>"this.focus();"}
+     when 'text_area'
+       settings = {:field_type => 'TextArea',:field_name => config['name'],
+        :settings => {:css_class=>web_pdt_css_styles[:pdt_text_area]}}
+     when 'date'
+       settings = {:field_type => 'PopupDateTimeSelector',:field_name => config['name'],
+                   :settings => {:css_class=>web_pdt_css_styles[:pdt_date_field]}}
+     when 'check_box'
+       settings = {:field_type => 'CheckBox',:field_name => config['name'],:settings =>{:css_class=>web_pdt_css_styles[:pdt_check_box]}}
+     when 'text_line'
+       settings = {:field_type => 'LabelField',:field_name => config['name'],
+        :settings=>{:static_value=>config['value'],:css_class=>web_pdt_css_styles[:pdt_text_line]}}
+     when 'static_text'
+       # settings = {:field_type => 'LabelField',:field_name => config['name'],
+       #  :settings=>{:show_label=>true,:static_value=>config['value'],:css_class=>web_pdt_css_styles[:pdt_static_text]}}
+       settings = {:field_type => 'TextField',:field_name => config['name'],
+                   :settings => {:css_class=>web_pdt_css_styles[:pdt_static_text],:readonly=>true}}
+   end
+
+   settings[:settings][:label_caption] = config['label'] if(config['label'])
+   return settings
  end
 
  def self.gen_ajax_error_xml(error)
@@ -350,4 +511,3 @@ class PdtScreenDefinition
  end
 
 end
- 

@@ -1,0 +1,36 @@
+<!--
+ ! Excerpted from "Agile Web Development with Rails"
+ ! We make no guarantees that this code is fit for any purpose. 
+ ! Visit http://www.pragmaticprogrammer.com for more book information.
+-->
+<%= stylesheet_link_tag "scaffold","web_pdt"%>
+
+<% form_tag({:action=> "pdt_login"}, { :onSubmit => "show_element('ident_spinner');" }) do %>
+
+<table class="<%=session[:pdt_field_css_class]%>">
+	<% @page_title = "Please log in" %>
+  <div style="border: 2px solid red;font-weight: bold;background-color: whitesmoke;font-size: x-small;padding: 10px;" class="<%=session[:pdt_field_css_class]%>">
+    <label><%= @web_pdt_notice %></label>
+  </div>
+  <tr>
+    <td>
+      <label>User name:</label>
+    </td>
+    <td><%= text_field("user", "user_name",:class => "username") %></td>
+  </tr>
+  <tr>
+    <td>
+      <label>Password:</label>
+    </td>
+    <td><%= password_field("user", "password", :class => "password") %></td>
+  </tr>
+
+  <tr>
+    <td></td>
+    <td><input type="submit" value=" LOGIN " />
+    <%= image_tag("spinner.gif", :align => 'absmiddle', :border=> 0, :id=>"ident_spinner", :style=>"display: none;" ) %>
+    </td>
+  </tr>
+</table>
+
+<% end %>

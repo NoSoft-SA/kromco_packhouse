@@ -32,10 +32,9 @@ class Globals
     end
   end
 
-def Globals.jasper_reports_pdf_downloads
-     Dir.getwd + "/public/downloads/pdf"
-end
-
+  def Globals.path_to_java
+    "java"
+  end
 
   @@domain = nil
   def Globals.get_domain
@@ -44,9 +43,9 @@ end
 
   def Globals.get_column_captions
 
-       {"remarks1"=>"remarks_1",
-        "remarks2" =>"remarks_2" ,
-        "remarks3" => "remarks_3" ,
+       {"remarks1"=>"holdover",
+        "remarks2" =>"carton_quantity" ,
+        "remarks3" => "extended_fg" ,
         "remarks4" =>  "remarks_4",
         "remarks5" => "remarks_5"}
 
@@ -58,11 +57,12 @@ end
 
 
   def Globals.reworks_printer_name
+
     "PRN-01"
   end
 
   def Globals.get_jasper_server_report_server_ip
-    "http://172.16.16.1:8080"
+    "http://172.16.16.44"
   end
 
   def Globals.get_jasper_server
@@ -124,9 +124,6 @@ end
     @@domain =  domain
   end
 
-    def Globals.pdf417_max_size
-     1400
-   end
 
 
    def Globals.get_column_data_width
@@ -138,57 +135,35 @@ end
    end
 
    def Globals.get_mesware_ip
-    "172.16.16.1"
+    "192.168.10.8"
     end
 
     def Globals.reworks_ip
-    "172.16.35.7"
+    "192.168.10.179"
     end
 
     def Globals.se_excel_export_limit
-     150000
-   end
-
-    def Globals.security_configs
-    "public/security_configs/"
-  end
-
-
-    def Globals.currency(env, value)
-      env.number_to_currency(value, :unit => "R", :separator => ",", :delimiter => "")
+     5000
     end
 
-
-
-
-
-
-
-
-
-  def Globals.get_jasper_server
-    "/jasperserver/flow.html?_flowId=viewReportFlow&"
-  end
-
-  def Globals.get_jasperserver_username_password
-    "j_username=jasperadmin&j_password=jasperadmin&"
-   end
-
-
-
-
-
-
-
-
-
+    #=====================
+    # Happymore
+    #=====================
 
     def Globals.mrl_printer_ip
-      "172.16.16.14"
+      "192.168.10.179"
+    end
+
+    def Globals.mrl_label_printer_name
+      "PRN-01"
+    end
+
+    def Globals.mrl_label_print_format
+      "E2"
     end
 
     def Globals.bin_ticket_printing_ip
-      "172.16.16.1"
+      "172.16.16.2"
     end
 
     def Globals.get_pdt_simulator_config
@@ -199,10 +174,19 @@ end
       "reports"
     end
 
-     def Globals.search_engine_max_rows
-      2000
+    def Globals.currency(env, value)
+      env.number_to_currency(value, :unit => "R", :separator => ",", :delimiter => "")
     end
 
+     def Globals.search_engine_max_rows
+      4000
+    end
+
+     # Returns an Integer - the maximum number of rows that a webquery can return
+     # for use in Excel.
+     def Globals.webquery_max_rows
+      10000
+    end
     def Globals.get_crystal_reports_server_ip
       "172.16.16.14"
     end
@@ -216,8 +200,9 @@ end
     end
 
     def Globals.get_label_printing_server_url
-      "172.16.16.1"
+      "192.168.10.179"
     end
+
 
     def Globals.get_label_printing_server_port
       2080
@@ -231,17 +216,17 @@ end
     # Luks
     #=====================
     def Globals.pdt_server_url
-      "http://172.16.16.14:3000"
+      "http://192.168.10.7:3000"
     end
     def Globals.pdt_simulator_client_server
-      "http://172.16.16.14:8080"
+      "http://192.168.50.17:3000"
     end
     #=====================
     # Luks
     #=====================
 
   def Globals.get_legacy_db_conn_string
-  # {:adapter => "sqlserver", :host => "172.16.16.14",  :database => "KromcoData", :username => "sa"}
+  # {:adapter => "sqlserver", :host => "172.16.16.14",  :database => "KromcoData",dbc_legacy_personnell_db_conn_string :username => "sa"}
    host = "172.16.16.14"
    database = "KromcoData"
    username = "sa"
@@ -259,12 +244,16 @@ end
    #password = ""
    #Password=#{password};
    #return "DBI:ADO:Provider=SQLOLEDB;Data Source=#{host};Initial Catalog=#{database};User Id=#{username};Password = ''"
-   return "DBI:ODBC:KromcoData"
+   return "DBI:ODBC:kromco_sql"
   end
 
    def Globals.get_odbc_legacy_personnell_db_conn_string
-    return "DBI:ODBC:kromco_personnell_sql"
+    return "DBI:ODBC:kromco_intrack"
   end
+
+   def Globals.get_odbc_intrack_db_conn_string
+     "DBI:ODBC:kromco_sql"
+   end
 
   def Globals.get_legacy_personnell_db_conn_string
       host = "172.16.16.14"
@@ -275,15 +264,6 @@ end
    return "DBI:ADO:Provider=SQLOLEDB;Data Source=#{host};Initial Catalog=#{database};User Id=#{username};Password = ''"
 
   end
-
-def Globals.get_odbc_intrack_db_conn_string
-        "DBI:ODBC:intrack_sql"
-end
-
-#  def Globals.get_mes_conn_params
-#   return {:adapter => "postgresql", :host => "172.16.16.15",  :database => "kromco_mes", :username => "ruby_scripts",:password => "ruby_scripts",:port => 5432}
-#
-#  end
 
   # Get the db connection parameters from the app's database.yml file
   def Globals.get_mes_conn_params(env='edi')
@@ -297,16 +277,29 @@ end
 
   end
 
+  # Get the db connection parameters from the app's database.yml file
+  # Format for use in DBI connection. <tt>conn = DBI.connect(*Globals.get_mes_conn_params_for_dbi)</tt>
+  def Globals.get_mes_conn_params_for_dbi(env='edi')
+    config = YAML.load(File.read('config/database.yml'))[env]
+    adapter = config['adapter'] == 'postgresql' ? 'Pg' : config['adapter']
+    port = config['port'] ? ":#{config['port']}" : nil
+    return "dbi:#{adapter}:#{config['database']}:#{config['host']}#{port}", config['username'], config['password']
+  end
+
   def Globals.get_mes2_conn_params
-   return {:adapter => "postgresql", :host => "172.16.16.15",  :database => "kromco_mes", :username => "reworks_complete",:password => "reworks_complete",:port => 5432}
+   return {:adapter => "postgresql", :host => "192.168.10.179",  :database => "kromco_mes_live", :username => "postgres",:password => "postgres",:port => 5432}
 
   end
 
+  def Globals.security_configs
+    "public/security_configs/"
+  end
 
-def Globals.models_to_exclude_from_scripts
+  def Globals.models_to_exclude_from_scripts
      ["mrl_label_printing.rb","carton_label_printing.rb", "process_outbox.rb","outbox_processor.rb",
        "mf_account.rb","mf_account_farm.rb","mf_farm.rb","mf_product_code.rb","mf_product_code_target_market.rb","pallet_label_printing.rb",
-       "carton_label_printing.rb","bin_ticket_printing.rb","mrl_label_printing.rb","send_edi_script.rb"]
+       "carton_label_printing.rb","bin_ticket_printing.rb","mrl_label_printing.rb","send_edi_script.rb"
+     ]
   end
 
   def Globals.is_scriptable_model?(model_name)
@@ -316,44 +309,37 @@ def Globals.models_to_exclude_from_scripts
     return true
   end
 
-  #def Globals.get_bin_weighing_application_server
-   # "http://172.16.16.44"
-  #end
+  def Globals.get_bin_weighing_application_server
+    "http://localhost"
+  end
 
   def Globals.get_bin_weighing_application_name
     "SampleBinWeighingApp"
   end
 
   def Globals.get_bin_weighing_application_port
-    ""
-  end
-  def Globals.create_grouped_assets_script_input_data
-    "farm_bins.csv"
+    "8080"
   end
 
-  def Globals.create_grouped_assets_script_params
-   return {:adapter=>"postgresql",
-           :username=>"postgres",
-           :password=>"postgres",
-           :database=>"kromco_mes",
-           :host=>"172.16.16.15",
-           :port => 5432}
-
-end
-
-def Globals.jasper_reports_conn_params
+  def Globals.jasper_reports_conn_params
    return {:adapter=>"jdbc:postgresql",
            :username=>"postgres",
            :password=>"postgres",
-           :database=>"kromco_mes",
-           :host=>"172.16.16.15",
+           :database=>"kromco_local",
+           :host=>"localhost",
            :port => 5432}
-
   end
-  #_________________________
-  #No need to change this i.e. the reporting server comes with this project
+
   def Globals.jasper_reports_printing_component
      Dir.getwd + "/jmt_reporting_server"
+  end
+
+  def Globals.signed_intake_docs
+    Dir.getwd + "/public/downloads/signed_intake_docs/"
+  end
+
+  def Globals.jasper_reports_pdf_downloads
+       Dir.getwd + "/public/downloads/pdf"
   end
 
   def Globals.jasper_reports_printer_name
@@ -366,6 +352,10 @@ def Globals.jasper_reports_conn_params
     Dir.getwd + "/jasper_resources"
   end
 
+  def self.sub_report_dir
+    Dir.getwd + "/jasper_resources/"
+  end
+
    def Globals.intake_sub_report_dir
      #Path to intake_subreport1.jasper
      Dir.getwd + "/jasper_resources/"
@@ -376,31 +366,48 @@ def Globals.jasper_reports_conn_params
     Dir.getwd + "/jasper_xml/"
   end
 
-  #def Globals.pdf417_max_size
-	#  200
-  #end
-  def Globals.bin_ticket_printer_name
-      "PRN-06"
+  def Globals.pdf417_max_size
+	  200
   end
 
-# Remove extraneous "and (true)" phrases from an SQL statement.
+  def Globals.get_alerts_server_port
+    "80"
+  end
+
+
+  def Globals.get_alerts_server
+    "exporter"
+  end
+
+
+  # Remove extraneous "and (true)" phrases from an SQL statement.
   def self.cleanup_where(statement)
-       statement.gsub(/and\s+\(true\)/, '')
-  end
-  #_________________________
-
-# Returns an Integer - the maximum number of rows that a webquery can return
-# for use in Excel.
-  def Globals.webquery_max_rows
-       65000
+    statement.gsub(/and\s+\(true\)/i, '')
   end
 
-  def Globals.fta_reports_path
-     Dir.getwd + "/public/fta_reports"
-   end
+  # Takes two values and checks if both are blank or both are filled-in.
+  # Options hash has messages to return for either condition:
+  #
+  # * :both_blank_msg
+  # * :both_filled_in_msg
+  def self.validate_either_or_choice(choice1, choice2, options)
+    return options[:both_blank_msg]     if choice1.blank? && choice2.blank?
+    return options[:both_filled_in_msg] if !choice1.blank? && !choice2.blank?
+    nil
+  end
 
-  def Globals.sub_report_dir
-     Dir.getwd + "/jasper_resources/"
+  # Calls validate_either_or_choice after first checking if any choices are nil.
+  # Options hash includes a message to return in the case of one nil choice and
+  # the other choice blank:
+  #
+  # * only_one_and_blank_msg
+  def self.validate_either_or_choice_with_optional_value(choice1, choice2, options)
+    if choice1.nil? || choice2.nil?
+      return nil if options[:only_one_and_blank_msg].nil? || (choice1.nil? && choice2.nil?)
+      return options[:only_one_and_blank_msg] if choice1.nil? && choice2.blank? || choice1.blank? && choice2.nil?
+      return nil
+    end
+    validate_either_or_choice(choice1, choice2, options)
   end
 
   def Globals.pdt_device_menus_path
@@ -415,64 +422,35 @@ def Globals.jasper_reports_conn_params
     "lmatoti@gmail.com"
   end
 
- def Globals.path_to_java
-    "/home/jre1.6.0_25/bin/java"
+  def Globals.bin_ticket_printer_name
+    "PRN-01"
   end
 
- def Globals.signed_intake_docs
-    Dir.getwd + "/public/downloads/signed_intake_docs/"
-  end
-
- def Globals.currency(env, value)
-      env.number_to_currency(value, :unit => "", :separator => ",", :delimiter => "")
- end
-
-    def Globals.ms_sql_presort_server_port
-    #database:
-    #adapter: mssql
-    #url: jdbc:jtds:sqlserver://192.168.10.28/PRESORT
-    #username: sa
-    #password: cmsadmin.
-
-    8081
-  end
-
-  def Globals.ms_sql_integration_server_port
-    #database:
-    #adapter: mssql
-    #url: jdbc:jtds:sqlserver://192.168.10.28/APPORT_INTEGRATION
-    #username: sa
-    #password: cmsadmin.
-
-    8082
-  end
-
-  def Globals.ms_sql_server_host
-    '172.16.16.1'
-  end
-
-    def Globals.bin_created_mssql_presort_server_port
-    8085
+  def Globals.bin_created_mssql_presort_server_port
+    8080
   end
 
   def Globals.bin_tipped_mssql_integration_server_port
-    8084
+    3002
   end
 
   def Globals.bin_scanned_mssql_integration_server_port
-    8084
+    3002
   end
 
   def Globals.bin_created_mssql_server_host
-    '172.16.16.1'
+    '192.168.50.17'
   end
 
   def Globals.bin_tipped_mssql_server_host
-    '172.16.16.1'
+    '192.168.50.17'
   end
 
   def Globals.bin_scanned_mssql_server_host
-    '172.16.16.1'
+    '192.168.50.17'
   end
 
+  def Globals.suppress_pdt_web_errors
+
+  end
 end

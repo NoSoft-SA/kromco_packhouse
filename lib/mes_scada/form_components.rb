@@ -106,11 +106,21 @@ module MesScada
           # observer = @env.observe_field(@active_record_var_name + "_" + @field_name,
           #                               :update => @observer[:updated_field_id],
           #                               :url => {:action => @observer[:remote_method]}, :complete => @observer[:on_completed_js], :loading => "show_element('img_" + @active_record_var_name + "_" + @field_name + "');")
+          if(@observer[:extra_params])
+            extra_static_params = "+'#{@observer[:extra_params].map{|k,v| "&#{k}=#{v}"}.join}'"
+          end
+          if(@observer[:on_load_js])
+            on_load_js = ""
+            @observer[:on_load_js].each do |observed_field|
+              on_load_js += "+'&#{observed_field[0]}='+encodeURIComponent($('#{observed_field[1]}').value)"
+            end
+
+          end
           observer = @env.observe_field(@active_record_var_name + "_" + @field_name,
                                         :update   => @observer[:updated_field_id],
                                         :url      => {:action => @observer[:remote_method]},
                                         :complete => @observer[:on_completed_js],
-                                        :with     => "encodeURIComponent(value)+'=x'",
+                                        :with     => "encodeURIComponent(value)+'=x'#{extra_static_params}#{on_load_js}",
                                         :loading  => "show_element('img_" + @active_record_var_name + "_" + @field_name + "');")
         end
         if observer != ""
@@ -385,6 +395,7 @@ module MesScada
 
       css_class = "action_link"
       css_class << " popupjs" if @settings[:dialog_popup]
+      css_class << " link-as-button" if @settings[:as_button]
 
       if @form.plugin
         user_css_class = @form.plugin.get_field_css_class(@field_name, @active_record)
@@ -442,12 +453,22 @@ module MesScada
   class PopupDateRangeSelector < FormField
     def build_control
 
+      @settings ||= {}
+
+      if @settings[:html_opts]
+        cls  = @settings[:html_opts].delete(:class)
+        opts = @settings[:html_opts].map {|k,v| "#{k}=\"#{v}\"" }.join(' ')
+      else
+        cls  = ''
+        opts = ''
+      end
+
       initialdate = "";
 
       %Q|<label class='date_range_from'>From:</label>
-         <input id="#{@field_name}_date2from" size="20" name="#{@active_record_var_name}[#{@field_name}_date2from]" value="#{initialdate}" class="datepicker_from" />
+         <input id="#{@field_name}_date2from" size="20" name="#{@active_record_var_name}[#{@field_name}_date2from]" value="#{initialdate}" #{opts} class="datepicker_from #{cls}" />
         </br><label class='date_range_to'>To:</label>
-         <input id="#{@field_name}_date2to" size="20" name="#{@active_record_var_name}[#{@field_name}_date2to]" value="#{initialdate}" class="datepicker_to" /> |
+         <input id="#{@field_name}_date2to" size="20" name="#{@active_record_var_name}[#{@field_name}_date2to]" value="#{initialdate}" #{opts} class="datepicker_to #{cls}" /> |
 
     end
   end
@@ -459,11 +480,19 @@ module MesScada
       @settings ||= {}
       @settings[:date_textfield_id] = @field_name if !@settings[:date_textfield_id]
 
+      if @settings[:html_opts]
+        cls  = @settings[:html_opts].delete(:class)
+        opts = @settings[:html_opts].map {|k,v| "#{k}=\"#{v}\"" }.join(' ')
+      else
+        cls  = ''
+        opts = ''
+      end
+
       initialdate = "";
       initialdate = @active_record.send(@field_name) unless @active_record.nil?
       initialdate = initialdate.strftime("%Y-%m-%d") if (initialdate.to_s.length > 0)
 
-      %Q|<input id="#{@settings[:date_textfield_id]}" size="20" name="#{@active_record_var_name}[#{@settings[:date_textfield_id]}]" value="#{initialdate}" class="datepicker" />|
+      %Q|<input id="#{@settings[:date_textfield_id]}" size="20" name="#{@active_record_var_name}[#{@settings[:date_textfield_id]}]" value="#{initialdate}" #{opts} class="datepicker #{cls}" />|
     end
   end
 
@@ -473,12 +502,20 @@ module MesScada
       @settings ||= {}
       @settings[:date_textfield_id] = @field_name if !@settings[:date_textfield_id]
 
+      if @settings[:html_opts]
+        cls  = @settings[:html_opts].delete(:class)
+        opts = @settings[:html_opts].map {|k,v| "#{k}=\"#{v}\"" }.join(' ')
+      else
+        cls  = ''
+        opts = ''
+      end
+
       initialdate = "";
       initialdate = @active_record.send(@field_name) unless @active_record.nil?
       #initialdate = initialdate.strftime("%Y-%m-%d %H:%M:%S") if (initialdate.to_s.length > 0)
       initialdate = initialdate.strftime("%Y-%m-%d %H:%M:%S") if (initialdate.to_s.length > 0)
 
-      %Q|<input id="#{@settings[:date_textfield_id]}" size="20" name="#{@active_record_var_name}[#{@settings[:date_textfield_id]}]" value="#{initialdate}" class="datetimepicker" />|
+      %Q|<input id="#{@settings[:date_textfield_id]}" size="20" name="#{@active_record_var_name}[#{@settings[:date_textfield_id]}]" value="#{initialdate}" #{opts} class="datetimepicker #{cls}" />|
     end
   end
 
@@ -599,7 +636,9 @@ module MesScada
 
     def build_control
 
-      @env.text_area(@active_record_var_name, @field_name, {:cols => @cols, :rows => @rows})
+      html_opts = {:cols => @cols, :rows => @rows}
+      html_opts.merge!(@settings[:html_opts]) if @settings && @settings[:html_opts]
+      @env.text_area(@active_record_var_name, @field_name, html_opts)
     end
 
 
