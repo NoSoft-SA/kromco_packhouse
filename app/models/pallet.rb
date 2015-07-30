@@ -49,7 +49,7 @@ class Pallet < ActiveRecord::Base
     order_type =OrderType.find(order.order_type_id).order_type_code
     if order_type.strip=="MO" || order_type.strip=="MQ"
       for pallet_number in pallet_numbers
-        @pallet= Pallet.find_by_sql(pallet_number.strip)
+        @pallet= Pallet.find_by_pallet_number(pallet_number.strip)
         stock_item =StockItem.find_by_inventory_reference(@pallet.pallet_number.to_s)
         if !@pallet
           if pallet_number.length > 18
