@@ -71,8 +71,8 @@ class Pallet < ActiveRecord::Base
           failed_pallets.push(pallet_number + "(location_code has PART_PALLETS)".to_s)
         end
 
-        if @pallet.target_market_code=="P9"
-          failed_pallets.push(pallet_number + "(target_market_code is P9)".to_s)
+        if @pallet.target_market_code=="P9_PART PALLETS"
+          failed_pallets.push(pallet_number + "(target_market_code is P9_PART PALLETS)".to_s)
         end
 
 
@@ -121,8 +121,8 @@ class Pallet < ActiveRecord::Base
           failed_pallets.push(pallet_number + "(location_code has PART_PALLETS)".to_s)
         end
 
-        if @pallet.target_market_code=="P9"
-          failed_pallets.push(pallet_number + "(target_market_code is P9)".to_s)
+        if @pallet.target_market_code=="P9_PART PALLETS"
+          failed_pallets.push(pallet_number + "(target_market_code is P9_PART PALLETS)".to_s)
         end
       end
     end

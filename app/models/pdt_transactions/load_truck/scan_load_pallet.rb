@@ -78,8 +78,8 @@ class ScanLoadPallet < PDTTransactionState
       return PDTTransaction.build_msg_screen_definition("scanned pallet does not belong to order load ", nil, nil, nil)
     end
 
-    if pallet.target_market_code=="P9"
-      return PDTTransaction.build_msg_screen_definition("target_market_code is P9 ", nil, nil, nil)
+    if pallet.target_market_code=="P9_PART PALLETS"
+      return PDTTransaction.build_msg_screen_definition("target_market_code is P9_PART PALLETS ", nil, nil, nil)
     end
 
     if   stock_item.location_code.upcase.index("PART_PALLETS")

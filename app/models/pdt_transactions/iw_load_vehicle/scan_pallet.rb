@@ -27,7 +27,7 @@ class ScanPallet < PDTTransactionState
      field_configs = Array.new
      qty_pallets_required = @parent.qty_pallets_required.to_s
      output_value = "scanned pallets: " + @parent.qty_pallets_scanned.to_s + " of " + qty_pallets_required
-     field_configs[field_configs.length] = {:type=>"text_line",:name=>"qty_pallets to load",:value=>output_value}
+     field_configs[field_configs.length] = {:type=>"text_line",:name=>"qty_pallets_to_load",:value=>output_value}
      field_configs[field_configs.length] = {:type=>"text_box",:name=>"pallet_number",:is_required=>"true"}
      field_configs[field_configs.length] = {:type=>"text_box",:name=>"carton_number",:is_required=>"true"}
      field_configs[field_configs.length] = {:type=>"text_box",:name=>"qc_barcode",:scan_only=>"false"}
