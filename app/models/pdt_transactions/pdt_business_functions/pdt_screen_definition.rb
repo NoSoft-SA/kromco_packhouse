@@ -281,11 +281,11 @@ class PdtScreenDefinition
     screen_attributes = Hash.new  if screen_attributes == nil
     plugins = Array.new if plugins == nil
 
-    returnStr = "<PDTRF Status='true' Msg='' "
+    returnStr = "<PDTRF Status=\"true\" Msg=\"\" "
     #if buttons == nil ... should I set default button attributes e.g. 'yes'/'no'/'cancel' all set to invisible?
     if buttons.keys != nil
       buttons.keys.each do |key|
-        returnStr += key.to_s + "='" + buttons[key].to_s.strip.gsub("=","^") + "' "
+        returnStr += key.to_s + "=\"" + buttons[key].to_s.strip.gsub("=","^") + "\" "
       end
     end
     returnStr = returnStr.strip! + ">"
@@ -294,7 +294,7 @@ class PdtScreenDefinition
     #returnStr += "\n\t<controls "
     if screen_attributes.keys != nil
       screen_attributes.keys.each do |key|
-        returnStr += key.to_s + "='" + screen_attributes[key].to_s.strip.gsub("=","^") + "' "
+        returnStr += key.to_s + "=\"" + screen_attributes[key].to_s.strip.gsub("=","^") + "\" "
       end
     end
     returnStr = returnStr.strip! + ">"
@@ -308,7 +308,7 @@ class PdtScreenDefinition
       returnStr += "<plugin "
       if plugin.keys != nil
         plugin.keys.each do |key|
-          returnStr += key.to_s + "='" + plugin[key].to_s.strip.gsub("=","^") + "' "
+          returnStr += key.to_s + "=\"" + plugin[key].to_s.strip.gsub("=","^") + "\" "
         end
       end
       returnStr = returnStr.strip! + "/>"
@@ -327,7 +327,7 @@ class PdtScreenDefinition
           attr_val = field_configs[key].to_s
           attr_val.gsub!("'","")
           attr_val.gsub!("\"","")
-          returnStr += key.to_s + "='" + attr_val.strip.gsub("=","^") + "' "
+          returnStr += key.to_s + "=\"" + attr_val.strip.gsub("=","^") + "\" "
         else
           cascades = field_configs[key]
         end

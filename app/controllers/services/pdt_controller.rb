@@ -1023,7 +1023,7 @@ class Services::PdtController < ApplicationController
         @prev_pdt_screen_def.controls[replacement_index] = new_cntrl
       end
 
-      @xml_definition = @prev_pdt_screen_def.get_output_xml
+      @xml_definition = @prev_pdt_screen_def.get_output_xml.to_s.gsub("\"","\\\"")
 
 # NB if targ_field id label/cell : must reconstruct cascades
 
@@ -1085,6 +1085,7 @@ class Services::PdtController < ApplicationController
       @required_fields_js = "['web_pdt_screen_#{required_fields.map{|f| f['name']}.join("' ,'web_pdt_screen_")}']" if(required_fields.length > 0)
 
       @is_unexpected_error_screen = false
+      @result = @result.to_s.gsub("\"","\\\"")
       render :inline => %{
         <script>
             var messages = parent.document.getElementById('messages');
