@@ -5,6 +5,10 @@ require(File.join(File.dirname(__FILE__), 'config', 'boot'))
 
 require 'rake'
 require 'rake/testtask'
-require 'rake/rdoctask'
+if Rake::VERSION.split('.').first.to_i < 10
+  require 'rake/rdoctask'
+else
+  require 'rdoc/task'
+end
 
 require 'tasks/rails'

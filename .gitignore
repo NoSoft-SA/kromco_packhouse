@@ -1,3 +1,4 @@
+.ruby-version
 log/*.log
 tmp/*
 hold/*
@@ -19,4 +20,5 @@ public/downloads/*
 r2check.rb
 jmt_reporting_server/*.sh
 jmt_reporting_server/*.bat
+jmt_reporting_server/lib/*.*
 jasper_xml/*
