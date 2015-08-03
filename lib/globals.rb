@@ -62,11 +62,11 @@ class Globals
   end
 
   def Globals.get_jasper_server_report_server_ip
-    "http://172.16.16.1:8080"
+    "http://172.16.16.40"
   end
 
   def Globals.get_jasper_server
-    "/jasperserver/flow.html?_flowId=viewReportFlow&"
+    "/jasperserver-pro/flow.html?_flowId=viewReportFlow&"
   end
 
   def Globals.get_jasperserver_username_password
@@ -153,28 +153,26 @@ class Globals
     "public/security_configs/"
   end
 
+    def self.currency(env, value)
+      env.number_to_currency(value, :unit => "R", :separator => ",", :delimiter => "")
+    end
 
-  def Globals.currency(env, value)
-    env.number_to_currency(value, :unit => "R", :separator => ",", :delimiter => "")
-  end
+    # Commas as thousands separators for currency. Can be called from models or controllers.
+    def self.delimited_currency(value, unit='R', delimiter=',', no_decimals=2)
+      val      = value.blank? ? 0.0 : value
+      parts    = sprintf("#{unit}%.#{no_decimals}f", val).split('.')
+      parts[0] = parts.first.reverse.gsub(%r{([0-9]{3}(?=([0-9])))}, "\\1#{delimiter}").reverse
+      parts.join('.')
+    end
 
-
-
-
-
-  def Globals.get_jasper_server
-    "/jasperserver/flow.html?_flowId=viewReportFlow&"
-  end
-
-  def Globals.get_jasperserver_username_password
-    "j_username=jasperadmin&j_password=jasperadmin&"
-  end
-
-
-
-
-
-
+    # Takes a Numeric and returns a string without trailing zeroes.
+    # 6.03 => "6.03".
+    # 6.0  => "6".
+    def self.format_without_trailing_zeroes(numeric_value)
+      s    = sprintf('%f', numeric_value)
+      i, f = s.to_i, s.to_f
+      i == f ? i.to_s : f.to_s
+    end
 
   def Globals.mrl_printer_ip
     "172.16.16.14"
@@ -189,7 +187,7 @@ class Globals
   end
 
   def Globals.get_reports_location
-    "reports"
+      "reports_yml"
   end
 
   def Globals.search_engine_max_rows
@@ -227,15 +225,8 @@ class Globals
     "http://172.16.16.14:3000"
   end
   def Globals.pdt_simulator_client_server
-    "http://localhost:3000"
+      "http://172.16.16.17:3000"
   end
-
-  def Globals.suppress_pdt_web_errors
-    false
-  end
-  #=====================
-  # Luks
-  #=====================
 
   def Globals.jasper_reports_conn_params
     config = YAML.load(File.read('config/database.yml'))[ENV['RAILS_ENV']]
@@ -251,6 +242,10 @@ class Globals
     File.join(Dir.getwd, 'jmt_reporting_server')
   end
 
+  def Globals.get_bin_weighing_application_port
+    ""
+  end
+
   def Globals.create_grouped_assets_script_input_data
     "farm_bins.csv"
   end
@@ -264,8 +259,20 @@ class Globals
             :port => 5432}
   end
 
-  def Globals.jasper_reports_pdf_downloads
-     Dir.getwd + "/public/downloads/pdf"
+  def Globals.jasper_reports_conn_params
+    config = YAML.load(File.read('config/database.yml'))[ENV['RAILS_ENV']]
+    {:adapter  => "jdbc:postgresql",
+     :username => "postgres",
+     :password => "postgres",
+     :database => config['database'],
+     :host     => config['host'],
+     :port     => config['port']}
+  end
+
+  #_________________________
+  #No need to change this i.e. the reporting server comes with this project
+  def Globals.jasper_reports_printing_component
+    File.join(Dir.getwd, 'jmt_reporting_server')
   end
 
   def Globals.jasper_reports_printer_name
@@ -288,9 +295,6 @@ class Globals
     Dir.getwd + "/jasper_xml/"
   end
 
-  #def Globals.pdf417_max_size
-  #  200
-  #end
   def Globals.bin_ticket_printer_name
     "PRN-06"
   end
@@ -304,7 +308,7 @@ class Globals
 # Returns an Integer - the maximum number of rows that a webquery can return
 # for use in Excel.
   def Globals.webquery_max_rows
-    65000
+       1048576
   end
 
   def Globals.fta_reports_path
@@ -328,15 +332,11 @@ class Globals
   end
 
   def Globals.path_to_java
-    "/home/jre1.6.0_25/bin/java"
+    "/usr/bin/java"
   end
 
   def Globals.signed_intake_docs
     Dir.getwd + "/public/downloads/signed_intake_docs/"
-  end
-
-  def Globals.currency(env, value)
-    env.number_to_currency(value, :unit => "", :separator => ",", :delimiter => "")
   end
 
   def Globals.ms_sql_presort_server_port
@@ -364,15 +364,15 @@ class Globals
   end
 
   def Globals.bin_created_mssql_presort_server_port
-    8085
+    8087
   end
 
   def Globals.bin_tipped_mssql_integration_server_port
-    8084
+    8086
   end
 
   def Globals.bin_scanned_mssql_integration_server_port
-    8084
+    8086
   end
 
   def Globals.bin_created_mssql_server_host

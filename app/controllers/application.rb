@@ -98,10 +98,10 @@ class ApplicationController < ActionController::Base
         lock.destroy if lock
       end
     end
-    store_request_info(true) #clear active request
+    store_request_info(true)#clear active request
   end
 
-  def delete(dir, controller)
+  def delete(dir,controller)
     @msg = "Are you sure you want to delete?  "
 
 
@@ -377,7 +377,7 @@ class ApplicationController < ActionController::Base
 
   # Set the notice if a parameter is given, then redirect back
   # to the current controller's +index+ action
-  def redirect_to_index(msg = nil, caption = nil, freeze = nil, err = nil)
+  def redirect_to_index(msg = nil, caption = nil, freeze = nil,err = nil)
     if flash[:notice]
       flash[:notice] += msg if msg
     else
@@ -662,7 +662,7 @@ class ApplicationController < ActionController::Base
 
   def store_request_info(clear_info = nil)
     if !clear_info
-      ActiveRequest.set_active_request(session[:user_id].user_name, params[:controller], params[:action], "web")
+      ActiveRequest.set_active_request(session[:user_id].user_name, params[:controller], params[:action],"web")
     else
       ActiveRequest.clear_active_request
     end
@@ -1231,7 +1231,7 @@ class ApplicationController < ActionController::Base
         end
       else
         begin
-          pdt_running_program.update_attributes(:program => program, :parent_class_name => parent_class_name)
+          pdt_running_program.update_attributes(:program=>program, :parent_class_name=>parent_class_name)
         rescue
           raise "pdt_running_program could bot be updated : " + $!
         end
