@@ -174,8 +174,25 @@ class Globals
       "reports"
     end
 
-    def Globals.currency(env, value)
+    def self.currency(env, value)
       env.number_to_currency(value, :unit => "R", :separator => ",", :delimiter => "")
+    end
+
+    # Commas as thousands separators for currency. Can be called from models or controllers.
+    def self.delimited_currency(value, unit='R', delimiter=',', no_decimals=2)
+      val      = value.blank? ? 0.0 : value
+      parts    = sprintf("#{unit}%.#{no_decimals}f", val).split('.')
+      parts[0] = parts.first.reverse.gsub(%r{([0-9]{3}(?=([0-9])))}, "\\1#{delimiter}").reverse
+      parts.join('.')
+    end
+
+    # Takes a Numeric and returns a string without trailing zeroes.
+    # 6.03 => "6.03".
+    # 6.0  => "6".
+    def self.format_without_trailing_zeroes(numeric_value)
+      s    = sprintf('%f', numeric_value)
+      i, f = s.to_i, s.to_f
+      i == f ? i.to_s : f.to_s
     end
 
      def Globals.search_engine_max_rows
@@ -187,6 +204,7 @@ class Globals
      def Globals.webquery_max_rows
       10000
     end
+
     def Globals.get_crystal_reports_server_ip
       "172.16.16.14"
     end
@@ -208,13 +226,7 @@ class Globals
       2080
     end
 
-    #=====================
-    # Happymore
-    #=====================
 
-    #=====================
-    # Luks
-    #=====================
     def Globals.pdt_server_url
       "http://192.168.10.7:3000"
     end
@@ -322,16 +334,17 @@ class Globals
   end
 
   def Globals.jasper_reports_conn_params
-   return {:adapter=>"jdbc:postgresql",
-           :username=>"postgres",
-           :password=>"postgres",
-           :database=>"kromco_local",
-           :host=>"localhost",
-           :port => 5432}
+    config = YAML.load(File.read('config/database.yml'))[ENV['RAILS_ENV']]
+    {:adapter  => "jdbc:postgresql",
+     :username => "postgres",
+     :password => "postgres",
+     :database => config['database'],
+     :host     => config['host'],
+     :port     => config['port']}
   end
 
   def Globals.jasper_reports_printing_component
-     Dir.getwd + "/jmt_reporting_server"
+    File.join(Dir.getwd, 'jmt_reporting_server')
   end
 
   def Globals.signed_intake_docs
@@ -339,7 +352,7 @@ class Globals
   end
 
   def Globals.jasper_reports_pdf_downloads
-       Dir.getwd + "/public/downloads/pdf"
+     Dir.getwd + "/public/downloads/pdf"
   end
 
   def Globals.jasper_reports_printer_name
@@ -453,4 +466,91 @@ class Globals
   def Globals.suppress_pdt_web_errors
 
   end
+
+  # Returns the next Friday from a given date.
+  # If the given date is a Friday, that date is returned, not the following one.
+  def self.this_or_next_friday(dt=Date.today)
+    (dt..(dt+6)).find {|d| d.cwday == 5 }
+  end
+
+  # Translate characters that cause problems in filenames to '-'
+  # (Note this is quite strict - it uses Windows restrictions. For Linux, '/' is the main problem
+  def self.safe_name_for_file(fname)
+    fname.gsub(/[\/:*?"\\<>\|\r\n]/i, '-')
+  end
+
+  # Create a string representation of a table with tabs between columns.
+  # keys is an array of Symbols and recs is an Array of hashes
+  # indexed by String representations of the Symbols.
+  # e.g. Globals.make_test_table([:name, :age], [{'name => 'John', 'age' => 21}, {'name' => 'Jack', 'age' => 22}])
+  # gives:
+  #   Name Age
+  #   ---- ---
+  #   John  21
+  # Albert  22
+  #
+  # NB. Make sure the keys are sensible -- they will be used as the column headers
+  def self.make_text_table(keys, recs)
+    rowdef = Struct.new(*keys) do
+      def check_max(max)
+        values.each_with_index do |val, index|
+          max[index] = val.to_s.length if val.to_s.length > max[index]
+        end
+      end
+    end
+
+    header     = rowdef.members.map {|m| m.to_s.gsub('_', ' ').capitalize }
+    maxlengths = header.map {|m| m.length+2 }
+    underline  = header.map {|m| '-'*m.length }
+
+    rows       = []
+    recs.each do |rec|
+      vals = keys.map {|k| rec[k.to_s] || rec[k] } # Try to index with a String. If that returns nil, try the Symbol.
+      row  = rowdef.new(*vals)
+      row.check_max(maxlengths)
+      rows << row
+    end
+
+    format = maxlengths.map {|m| "%#{m}s" }.join("\t") << "\n"
+    s = ''
+    s << sprintf(format, *header)
+    s << sprintf(format, *underline)
+    rows.each do |row|
+      s << sprintf(format, *row.values)
+    end
+    s
+  end
+
+  # Simple wrapper for sending an email for calling from script/runner. e.g.
+  # cron job: cd ~/kromco_packhouse && script/runner -e production 'Globals.send_an_email( "TEST", "eg@eg.com", "Something happened")'
+  def self.send_an_email(subject, recipients, body)
+    GenericMailer.deliver_vanilla_mail(:subject    => subject,
+                                       :recipients => recipients,
+                                       :text       => body)
+  end
+
+  # Get the column names from an SQL statement.
+  def self.list_of_cols_from_stat(stat)
+    # Grab everything between SELECT and the last FROM. NB. This will fail if there is a subquery in the WHERE clause or in a JOIN.
+    # Regex is modified by m for multiline and i for case insensitive.
+    match = stat.match(/\A\s*select\s?(.+)(\sfrom\s)/mi)
+    # Need to strip FUNCTION(field,1,2) out, but NOT COUNT(id)
+    # If there is a match, replace any functions that may include commas, then split columns by commas and return an array of the last word in each column.
+    # Function regex:
+    # \w+        Start with words (SUBSTR)
+    # \s?        Might be a space or tab or two between the function name and parenthesis
+    # \(         Match an open parenthesis
+    # [^\)]+?    The ( can be followed by 1 or more of any character except ")"
+    # ,{1}       There must be exactly one ","
+    # .+?        ...followed by one or more of any character
+    # \)         ...and ending with a closing parenthesis
+    match.nil? ? nil : match[1].gsub(/\w+\s?\([^\)]+?,{1}.+?\)/, 'HIDEFUNC').split(',').map {|c| c.split('.').last.split(' ').last }
+  end
+
+  # Escapes single quotes in a string for passing to a db.
+  # e.g. sql_quotes("One o'clock') => "One o''clock".
+  def self.sql_quotes(s)
+    s.gsub(/\\/, '\&\&').gsub(/'/, "''")
+  end
+
 end

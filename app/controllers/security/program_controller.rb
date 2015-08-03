@@ -278,11 +278,10 @@ class Security::ProgramController < ApplicationController
     uname = params[:username]
     pword = params[:password]
 
-    puts host.to_s
-    puts db.to_s
+
 
     rec_id = session[:program_id].fetch("record_id")
-    puts rec_id
+
 
     if host=="" || db=="" ||uname=="" ||pword==""
 
@@ -340,7 +339,7 @@ class Security::ProgramController < ApplicationController
   end
 
   def load_program_submit
-
+    begin
       file_name = Globals.security_configs + "program_settings/" + params[:program][:program_settings_file].to_s + ".yml"
       File.open(file_name, "r+") do |infile|
         settings = YAML.load(infile)
@@ -357,6 +356,31 @@ class Security::ProgramController < ApplicationController
         end
       end
       redirect_to_index("'program [#{params[:program][:program_settings_file].to_s}] imported successfully'", "'import successful'")
-
+    rescue
+      redirect_to_index("'program could not be imported #{$!.to_s}'", "'imxport unsuccessful'")
+    end
   end
+
+  def reorder_program_functions
+    @program = Program.find(params[:id])
+    @program_functions = @program.program_functions.find(:all, :order => 'position')
+    render :template=>'/security/program/reorder_program_functions.rhtml', :layout=>'content'
+  end
+
+  def apply_program_function_order
+    @program = Program.find(params[:id])
+    new_order = nil
+    unless params[:re_ordered_list].blank?
+      new_order = params[:re_ordered_list].split(',').map {|a| a.sub('id_','').to_i }
+    end
+
+    if new_order
+      @program.re_order_funcs( new_order )
+      flash[:notice]                 = 'Program functions have been reordered'
+    else
+      flash[:error] = 'Nothing to do: you did not re-order any program functions'
+    end
+    list_programs
+  end
+
 end

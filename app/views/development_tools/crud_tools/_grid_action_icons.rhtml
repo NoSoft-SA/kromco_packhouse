@@ -1,0 +1,9 @@
+<table class="thinbordertable">
+<% @icons.in_groups_of(5).each do |icon_set| %>
+  <tr class="hover-row">
+    <% icon_set.each do |icon, bg_img| %>
+      <td><div style="width:16px;background-repeat: no-repeat; <%= bg_img %>">&nbsp;</div></td><td><%= icon %></td>
+    <% end %>
+  </tr>
+<% end %>
+</table>

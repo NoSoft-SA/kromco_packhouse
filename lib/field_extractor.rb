@@ -24,7 +24,7 @@ class FieldExtractor
 
       m                = YAML::load(File.read(@yamlfile))
       @fields          = m['fields']
-      @query           = m['query']
+      @query           = m['query'].gsub("\n", ' ')
       @query_statement = @query.clone
       @grid_configs    = m['grid_configs']
       @main_table_name = m['main_table_name'] || m['main_table']
@@ -58,6 +58,7 @@ class FieldExtractor
                               #caption = p
                               caption = f[:caption] #if f.has_key?("caption")
                               field_type = nil
+                              sorted = f[:sorted] || false
                               list = nil
                               if type == "lookup_link"
                                 @form_fields.push({:field_name=>p, :field_type=>"LookUpField", :caption=>caption,:lookup_search_file=>f[:lookup_search_file],:select_column_name=>f[:select_column_name],:lookup_search_uri=>f[:lookup_search_uri],:send_fields=>f[:send_fields],:submit_to=>f[:submit_to]})
@@ -65,7 +66,7 @@ class FieldExtractor
                                   field_type = "DropDownField"
                                   list = f[:list]
                                   #model = f.fetch(:model)
-                                  @form_fields.push({:field_name=>p, :field_type=>field_type, :list=>list, :caption=>caption})
+                                  @form_fields.push({:field_name=>p, :field_type=>field_type, :list=>list, :caption=>caption, :sorted => sorted})
                               elsif type == "date"
                                   field_type ="DateField"
                                   @form_fields.push({:field_name=>p, :field_type=>field_type, :caption=>caption})
@@ -117,7 +118,7 @@ class FieldExtractor
                 #@model = fields_hash["model"]
               @caption = fields_hash["field_name"]
               @caption = fields_hash["caption"] if fields_hash.has_key?("caption")
-              @fields_array.push({:field_name=>@field_name, :field_type=>@field_type, :list=>@list_sql, :caption=>@caption})
+              @fields_array.push({:field_name=>@field_name, :field_type=>@field_type, :list=>@list_sql, :caption=>@caption, :sorted => fields_hash['sorted']})
           elsif fields_hash.has_value?("action")
               @field_name = fields_hash["field_name"]
               @field_type = fields_hash["field_type"]
@@ -189,30 +190,29 @@ class FieldExtractor
   end
 
   def get_columns_list
-     if @query_statement.upcase.index("JOIN ") != nil
-        cols_list = FieldExtractor.get_join_query_columns(@query_statement)
-        cols_list.each do |col|
-          @columns_list.push(col.split(".").last.strip)
-        end
-     else
-       column_pattern = /select.+(?= from )/i
-       col_phrase = @query_statement.slice(column_pattern)
-       #col_phrase = col_phrase.strip
-       col_phrase = col_phrase.slice(7..(col_phrase.size()-1))
-       if col_phrase.strip.length > 1
-         if col_phrase.index(",")!= nil
-           col_phrase.split(",").each do |col|
-             if col.strip.include?(' ')
-               col = col.split(' ').last
-             end
 
-             @columns_list.push(col)
-           end
-         else
-           @columns_list.push(col_phrase)
-         end
-       end
-     end
+    # Scan the query statement, discarding anything between parentheses... as they cannot be columns
+    # NB. This does mean that all subqueries must return named columns...
+    s = StringScanner.new(@query_statement)
+    newstr  = ''
+    discard = false
+    index   = 0
+    until s.eos?
+      if s.scan(/\(/)
+        index += 1
+        discard = true
+      elsif s.scan(/\)/)
+        index -= 1
+        discard = false if index == 0
+      else
+        chr = s.scan(/./)
+        newstr << chr unless discard
+      end
+    end
+    select_portion= newstr
+
+    match          = select_portion.match(/\A\s*select\s?(.+)(\sfrom\s)/mi)
+    @columns_list  = match.nil? ? [] : match[1].gsub(/\w+\s?\([^\)]+?,{1}.+?\)/, 'HIDEFUNC').split(',').map {|c| c.split('.').last.split(' ').last }
   end
 
   def FieldExtractor.get_statement_between_select_and_from(stat)

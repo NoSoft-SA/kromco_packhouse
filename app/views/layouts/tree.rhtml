@@ -1,18 +1,17 @@
 
 <html>
   <head>
-  
+
     <style> body, html {margin:0px; padding: 0px;} </style>
     <link href= "/stylesheets/tree.css" media="screen" rel="Stylesheet" type="text/css" />
     <link href= "/stylesheets/scaffold.css" media="screen" rel="Stylesheet" type="text/css" />
     <script src = "/javascripts/tree_view.js"></script>
     <script src = "/javascripts/resizing.js"></script>
-    <script src = "/javascripts/popupwindow.js"></script> 
-    <script src = "/javascripts/search_form.js"></script>
-    
+    <script src = "/javascripts/popupwindow.js"></script>
+
     <script language="JavaScript">
 
-    function send_fields_to_popup_window(link,send_fields) {
+      function send_fields_to_popup_window(link,send_fields) {
         var split_send_fields = send_fields.split(",");
         var send_fields_params = "";
         for(j=0; j < split_send_fields.length; j++) {
@@ -35,101 +34,93 @@
         }
         var url = link.id + send_fields_params;
         open_window_link(url);
-    }
+      }
 
-                	function call_open_window(id)
-	{ 
-	open_window_link(id.id);
-	}
-        <% if session[:alert] != nil %>
-            alert("<%= session[:alert] %>");
-            <% session[:alert]= nil %>
-        <%end%>
-            
-    	function show_element(id)
-  		{
-    		elt = document.getElementById(id);
-    		elt.style.display = "inline";
-  
-  		}
-  		
-  		function add_sizing()
-  		{
-  		    add_sizing_cell("tree_container_cell",false);
-  		    add_sizing_cell("tree_content_frame_cell",true);
-  		}
-  		
-  		
-  		function show_action_image(clicked_cell)
-  		{
-  			
-  			var action_images = clicked_cell.parentNode.getElementsByTagName("img");
-  			if (action_images != null && action_images.length > 0)
-  			{
-  			 
-  			  action_images[0].style.visibility = "visible";
-  			}
-  		}
-  
-  <%if ! flash[:error]%>		
-  		window.parent.set_content_header_caption( <%= @content_header_caption %> );
-  		<%end%>
-  		var Context_Menu_definitions;
-  		
-  	  function create_tree()
-  	  {  
-  	     Initialise();
-  	     
-  	     Context_Menu_definitions = new Array;
-  	     <%= @tree_script %>
-  	     
-  	     
-  	     build_context_menus();
-  	  }
-  	
-  	</script>
-  	
+      function call_open_window(id)
+      {
+        open_window_link(id.id);
+      }
+
+      <% if session[:alert] != nil %>
+        alert("<%= session[:alert] %>");
+        <% session[:alert]= nil %>
+      <%end%>
+
+      function show_element(id)
+      {
+        elt = document.getElementById(id);
+        elt.style.display = "inline";
+
+      }
+
+      function add_sizing()
+      {
+          add_sizing_cell("tree_container_cell",false);
+          add_sizing_cell("tree_content_frame_cell",true);
+      }
+
+
+      function show_action_image(clicked_cell)
+      {
+
+        var action_images = clicked_cell.parentNode.getElementsByTagName("img");
+        if (action_images != null && action_images.length > 0)
+        {
+
+          action_images[0].style.visibility = "visible";
+        }
+      }
+
+      <%if !flash[:error]%>
+        <% @content_header_caption = '' if @content_header_caption.nil? %>
+        window.parent.set_content_header_caption( '<%= @content_header_caption.gsub(/"|'/,'') %>' );
+      <%end%>
+
+      var Context_Menu_definitions;
+
+      function create_tree()
+      {
+         Initialise();
+
+         Context_Menu_definitions = new Array;
+         <%= @tree_script %>
+
+         build_context_menus();
+      }
+
+    </script>
+
     <title>Admin</title>
-    <%#= stylesheet_link_tag "scaffold", "depot", "admin" %>
     <%= stylesheet_link_tag "depot", "admin" %>
-   
-	
+
   </head>
   <body  onload ="if(window.parent.contentFrame_loaded) {window.parent.contentFrame_loaded(); } create_tree();add_sizing()">
-    <!--<div id="banner">
+  <!--<div id="banner">
       <%= @page_title  %>
-    </div>  -->    
-     
-    <div id="maine" style = "vertical-align: top;horisontal-align: left" > 
-        
-        <% if flash[:notice] -%>
-          <div id="notice"><%= flash[:notice] %></div>
-        <% end -%>
-        
-        <table width = '100%' height = '100%'>
-            <tr>
-                <td width = '20%' valign = 'top' id = "tree_container_cell">
-	               <div id = "tree_container" >
-		              <%= @content_for_layout %>
-		          </div>
-		        </td>
-		        <td width = '80%' id = "tree_content_frame_cell">
-		          <iframe  name = "tree_content_frame" 
-       		               width = "100%" height = "100%" frameborder = "0" 
-       		           scrolling = "auto" >
-                  </iframe> 
-                </td>
-            </tr>
-        </table>
-   </div>       
-   
+    </div>  -->
+
+  <div id="maine" style = "vertical-align: top;horisontal-align: left" >
+
+    <% if flash[:notice] -%>
+      <div id="notice"><%= flash[:notice] %></div>
+    <% end -%>
+
+    <table width = '100%' height = '100%'>
+      <tr>
+        <td width = '20%' valign = 'top' id = "tree_container_cell">
+          <div id = "tree_container" >
+            <%= @content_for_layout %>
+          </div>
+        </td>
+        <td width = '80%' id = "tree_content_frame_cell">
+          <iframe  name = "tree_content_frame"
+            width = "100%" height = "100%" frameborder = "0"
+            scrolling = "auto" >
+          </iframe>
+        </td>
+      </tr>
+    </table>
+  </div>
+
   </body>
 </html>
-
-
-
-
-
-
-
-

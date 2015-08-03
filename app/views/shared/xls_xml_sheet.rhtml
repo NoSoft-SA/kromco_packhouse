@@ -1,0 +1,78 @@
+<?xml version="1.0"?>
+<ss:Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+  xmlns:o="urn:schemas-microsoft-com:office:office"
+  xmlns:x="urn:schemas-microsoft-com:office:excel"
+  xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+  xmlns:html="http://www.w3.org/TR/REC-html40">
+<Styles>
+    <Style ss:ID="Default" ss:Name="Normal">
+      <Alignment ss:Vertical="Bottom" />
+      <Borders />
+      <Font />
+      <Interior />
+      <NumberFormat />
+      <Protection />
+    </Style>
+    <%= @xls_xml_config.styles %>
+  </Styles>
+<% @xl_data.keys.sort.each do |sheet_name| -%>
+  <ss:Worksheet ss:Name="<%=sheet_name.gsub('"', "'").gsub('&', '&amp;').slice(0,30) %>">
+    <ss:Table ss:DefaultColumnWidth="60">
+    <% if @xls_xml_config.has_widths? -%>
+      <% @xls_xml_config.columns.each_with_index do |column,i| -%>
+        <% if column.has_width? -%>
+<%= xls_column_width(column, i) %>
+        <% end -%>
+      <% end -%>
+    <% end -%>
+      <% if @xls_xml_config.header_for_each_sheet -%>
+<%= xls_header_for_each_sheet(@xls_xml_config) %>
+      <% end -%>
+      <% if @xls_xml_config.show_sheet_name -%>
+<%= xls_sheet_name_row(@xls_xml_config, sheet_name) %>
+      <% end -%>
+      <ss:Row<%= @xls_xml_config.style_id_for(:heading) %>>
+      <% @xls_xml_config.columns.each do |column| -%>
+        <ss:Cell><ss:Data ss:Type="String"><%= column.caption %></ss:Data></ss:Cell>
+      <% end -%>
+      </ss:Row>
+      <% @xl_data[sheet_name].each do |rec| -%>
+      <ss:Row>
+      <% @xls_xml_config.columns.each do |column| -%>
+        <%= xls_build_column(column, rec[column.key]) %>
+      <% end -%>
+      </ss:Row>
+    <% end -%>
+    <% if @xls_xml_config.has_totals? -%>
+      <%= build_total_line(@xls_xml_config, @xl_data[sheet_name].length) %>
+    <% end -%>
+    </ss:Table>
+    <% if @xls_xml_config.frozen_rows > 0 -%>
+    <x:WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+     <x:Selected/>
+     <x:FreezePanes/>
+     <x:FrozenNoSplit/>
+     <x:SplitHorizontal><%= @xls_xml_config.frozen_rows %></x:SplitHorizontal>
+     <x:TopRowBottomPane><%= @xls_xml_config.frozen_rows %></x:TopRowBottomPane>
+     <x:ActivePane>2</x:ActivePane>
+     <x:Panes>
+      <x:Pane>
+       <x:Number>3</x:Number>
+      </x:Pane>
+      <x:Pane>
+       <x:Number>2</x:Number>
+      </x:Pane>
+     </x:Panes>
+     <x:ProtectContents>False</x:ProtectContents>
+     <x:ProtectObjects>False</x:ProtectObjects>
+     <x:ProtectScenarios>False</x:ProtectScenarios>
+    </x:WorksheetOptions>
+    <% end -%>
+    <% if @xls_xml_config.apply_autofilter -%>
+    <x:AutoFilter x:Range="<%=@xls_xml_config.autofilter_as_r1c1 %>">
+    </x:AutoFilter>
+    <% end -%>
+    </ss:Worksheet>
+  <% end -%>
+</ss:Workbook>
+

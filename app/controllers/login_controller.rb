@@ -11,17 +11,7 @@ class LoginController < ApplicationController
   	
   end
   
-  def progress_test
-    
-    for i in 1..10000
-     
-     puts "hello hans eks nou by nommer " + i.to_s
-    
-    end
-    
-    redirect_to_index("server test task completed")
-  
-  end
+
   
   
 
@@ -41,11 +31,11 @@ class LoginController < ApplicationController
     end
     
     if request.get?
-      puts "login try"
+
       reset_session
-      puts "session reset"
+
       session[:user_id] = nil
-      puts session[:user_id].to_s
+
       @user = User.new
       flash[:notice] = "Please log in"
        
@@ -55,7 +45,7 @@ class LoginController < ApplicationController
       logged_in_user = @user.try_to_login
     
       if logged_in_user
-          puts "logged in: " + logged_in_user.to_s
+
         session[:user_id] = logged_in_user
         
        # TasksThread.Process_tasks_queue #start the tasks processing thread
@@ -63,7 +53,7 @@ class LoginController < ApplicationController
       	redirect_to(:action => "logged_in")
       	
       else
-        puts "invalid user"
+
         flash[:notice] = "Invalid user/password combination"
       end
     end
@@ -73,8 +63,10 @@ class LoginController < ApplicationController
   
   def denied
   	
-  	puts "in denied"
-  	flash[:notice] = "You don't have permission to perform this action"
+    extra_message = flash[:extra_message]
+    extra_message.insert(0,'<br>') if extra_message
+
+    flash[:notice] = "You don't have permission to perform this action #{extra_message}"
   	
   	#@page_title = "Access Denied!"
   	render :template => "login/denied",:layout => "content"
@@ -136,9 +128,9 @@ class LoginController < ApplicationController
         lock.destroy if lock
       end
      reset_session
-     puts "session reset"
+
      session[:user_id] = nil
-    puts "logged out"
+
     #flash[:notice] = "Logged out"
     redirect_to(:action => "login")
   end

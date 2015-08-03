@@ -31,7 +31,7 @@ function show_column_detail(row_col_id)
    recordDiv.style.width = "445px";
    recordDiv.style.height = "250px";
    recordDiv.style.paddingLeft = "7px";
-   var innHtml = "<div id=\"record_caption\" style=\"height:20px; width:100%; background-color:#D8D6D4;\"><table border=\"0\" width=\"100%\" style=\"font-size:12pt; font-weight:bold;\"><tr><td style=\"text-align:right; height:15px;\"><img id=\"read_msg_img\" alt=\"close\" src=\"/images/form_close.png\" onclick=\"hide_div();\" /></td></tr></table></div><br />";
+   var innHtml = "<div id=\"record_caption\" style=\"height:20px; width:100%; background-color:#D8D6D4;\"><table border=\"0\" width=\"100%\" style=\"font-size:12pt; font-weight:bold;\"><tr><td style=\"text-align:right; height:15px;\"><img id=\"read_msg_img\" alt=\"close\" src=\"/images/form_close.PNG\" onclick=\"hide_div();\" /></td></tr></table></div><br />";
    innHtml += "<textarea id=\"record_field\" readonly=\"readonly\" style=\"width:435; height:200px;\" wrap=\"virtual\"></textarea>";
    
    recordDiv.innerHTML = innHtml;

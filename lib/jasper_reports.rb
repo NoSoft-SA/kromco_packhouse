@@ -1,41 +1,51 @@
 class JasperReports
-  def JasperReports.generate_report(report_name,user,params)
 
-    params.store(:SUBREPORT_DIR,Globals.sub_report_dir + report_name + "/")
+  # Generate a Jasper report.
+  # Note special optional parameters:
+  # - :keep_file - if this is present, the script used to run the report will not be deleted. Useful while debugging.
+  # - :top_level_dir - When set, this string will become part of the report dir before the report name.
+  #                    This allows for storing two versions of a report and deciding at runtime which to execute.
+  #                    e.g. between jasper_reports/otion1/the_report/the_report.jasper
+  #                         and     jasper_reports/otion2/the_report/the_report.jasper
+  #                    params[:top_level_dir] = 'option2'
+  #
+  def self.generate_report(report_name, user, params)
 
-    report_parameters = ""
-    params.map{|key,value| (report_parameters = report_parameters + " \"#{key}=#{value}\" ") if(key != :printer)}
-    connection_string = "#{Globals.jasper_reports_conn_params[:adapter]}://#{Globals.jasper_reports_conn_params[:host]}:#{Globals.jasper_reports_conn_params[:port]}/#{Globals.jasper_reports_conn_params[:database]}?user=#{Globals.jasper_reports_conn_params[:username]}&password=#{Globals.jasper_reports_conn_params[:password]}"
+    keep_file              = params.delete(:keep_file)
+    top_level_dir          = params.delete(:top_level_dir) || ''
+    params[:SUBREPORT_DIR] = "#{File.join(Globals.sub_report_dir, top_level_dir, report_name)}/"
+    report_parameters      = params.reject{|k,v| :printer == k}.map {|k,v| "\"#{k}=#{v}\""}.join(' ')
 
-    if !RUBY_PLATFORM.index('linux')
-      print_command_file_name = Globals.jasper_reports_printing_component + "/" + report_name + "_" + user + "_" + Time.now.strftime("%m_%d_%Y_%H_%M_%S") + ".bat"
-      file = File.new(print_command_file_name, "w")
-      file.puts "cd #{Globals.jasper_reports_printing_component.gsub("/","\\")}"
-      file.puts "java -jar JasperReportPrinter.jar \"#{Globals.jasper_source_reports_path}/#{report_name}\" #{report_name} \"#{params[:printer]}\" \"#{connection_string}\" #{report_parameters}"
-      file.close
+    conn_params        = Globals.jasper_reports_conn_params
+    connection_string  = "#{conn_params[:adapter]}://"
+    connection_string << "#{conn_params[:host]}:"
+    connection_string << "#{conn_params[:port]}/"
+    connection_string << "#{conn_params[:database]}?"
+    connection_string << "user=#{conn_params[:username]}&"
+    connection_string << "password=#{conn_params[:password]}"
 
-      result = eval "\`\"#{print_command_file_name}\"\"`"
-      puts "WINDOWS PRINTING RESULT: " + result.to_s
-      File.delete(print_command_file_name)
-      if(result.to_s.include?("JMT Jasper error:") && (errors=result.split("JMT Jasper error:")).length > 0)
-        return "JMT Jasper error: <BR>" + errors[1]
-      end
+    script_ext              = RUBY_PLATFORM.index('linux') ? '.sh' : '.bat'
+    print_command_file_name = File.join(Globals.jasper_reports_printing_component,
+                                        "#{report_name}_#{user}_#{Time.now.strftime("%m_%d_%Y_%H_%M_%S")}#{script_ext}")
+
+    report_dir = "#{Globals.jasper_source_reports_path}/#{top_level_dir.blank? ? '' : top_level_dir + '/'}#{report_name}"
+
+    File.open(print_command_file_name, "w") do |f|
+      f.puts "cd #{Globals.jasper_reports_printing_component}"
+      f.puts "java -jar JasperReportPrinter.jar \"#{report_dir}\" #{report_name} \"#{params[:printer]}\"" <<
+             " \"#{connection_string}\" #{report_parameters}"
+    end
+
+    if RUBY_PLATFORM.index('linux')
+      result = eval "\` sh #{print_command_file_name}\`"
     else
+      result = eval "\`\"#{print_command_file_name}\"\"`"
+    end
 
-      print_command_file_name = Globals.jasper_reports_printing_component + "/" + report_name + "_" + user + "_" + Time.now.strftime("%m_%d_%Y_%H_%M_%S") + ".sh"
-      file = File.new(print_command_file_name, "w")
-      file.puts "cd #{Globals.jasper_reports_printing_component.gsub("\\","/")}"
-      file.puts "#{Globals.path_to_java} -jar JasperReportPrinter.jar \"#{Globals.jasper_source_reports_path}/#{report_name}\" #{report_name} \"#{params[:printer]}\" \"#{connection_string}\" #{report_parameters}"
-      file.close
+    File.delete(print_command_file_name) unless keep_file
 
-      result = eval "\` sh " + print_command_file_name + "\`"
-      puts "LINUX PRINTING RESULT: " + result.to_s
-      result_array = result.split("\n")
-      error = result_array.pop
-      File.delete(print_command_file_name)
-      if(result.to_s.include?("JMT Jasper error:") && (errors=result.split("JMT Jasper error:")).length > 0)
-        return "JMT Jasper error: <BR>" + errors[1]
-      end
+    if(result.to_s.include?("JMT Jasper error:") && (errors=result.split("JMT Jasper error:")).length > 0)
+      return "JMT Jasper error: <BR>" + errors[1]
     end
   end
 

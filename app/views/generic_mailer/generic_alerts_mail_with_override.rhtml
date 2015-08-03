@@ -1,0 +1,5 @@
+Process name: <%=@transaction_status.status_type_code%>
+Status      : <%= @transaction_status.status_code %>
+
+<%= @override_message || @process_alert_definition.email_message %>
+

@@ -1,0 +1,68 @@
+<h1>YAML reports</h1>
+
+<p>These <tt>.yml</tt> files are kept in the <tt>reports</tt> dir or one of its subdirectories.<br />
+They can be created from the "<tt>create yml report</tt>" menu of the "<tt>dev tools</tt>" menu.<br />
+The report created by this process needs to be tweaked quite a bit, as the system makes quite a few "best-guesses" which can never be 100% suitable.</p>
+    
+<h2>Sections.</h2>
+<ul>
+  <li>query <span class="info_column">The SQL to be run.</span></li>
+  <li>main_table_name <span class="info_column">The main table used in the query. Required for drill-down from a row.</span></li>
+  <li>default_report_index_group_name <span class="info_column"><br />A name to be used for grouping reports in the Report Index page.</span><br />&nbsp;</li>
+  <li>grid_configs <span class="info_column">Attributes for columns (caption, data type, width, format)</span></li>
+  <li>fields <span class="info_column">Parameter fields and how they are presented.</span></li>
+</ul>
+
+<h2>query</h2>
+<p>
+This is the SQL to be run.<br />
+The query can have subqueries. These start with <em>(SUBQSTART </em> and end with <em> SUBQEND)</em><br />
+The WHERE clause requires all possible parameters to be expressed as <strong>field_name={field_name}</strong>. This must match one of the <em>fields</em> entries for <em>field_name</em>.
+<br />
+Note that the order of the fields in the WHERE clause is the order that the parameters are displayed to the user.
+</p>
+<h2>main_table_name</h2>
+<p>
+Name of the main table in the query. This is the table for which a row can be expanded.
+</p>
+<h2>default_report_index_group_name</h2>
+<p>
+Used in the Report Index page. Reports are grouped together by this value. Most reports used for searching within the system should have the group "System" so that they do not clutter up the user's report groupings.
+</p>
+<h2>grid_configs</h2>
+<p>These entries are all optional, but are available to improve the user experience.</p>
+<ul>
+  <li>caption <span class="info_column"> The caption to be shown in the grid heading.</span></li>
+  <li>column_widths <span class="info_column"> Provide a width for each column in pixels. e.g. <em>customer: 200</em></span></li>
+  <li>data_types <span class="info_column"> Provide a data type for each column. Valid types are <strong>date, boolean</strong> and <strong>integer</strong>. e.g. <em>is_paid: boolean</em></span></li>
+  <li>column_captions <span class="info_column"> Provide a caption for each column. e.g. <em>customer: Customer Name</em></span></li>
+  <li>formats <span class="info_column"> Provide a format for each column. Valid formats are <strong>delimited_1000, delimited_1000_4, default_currency, default_currency_4</strong> e.g. <em>amount: delimited_1000</em></span></li>
+  <li>hidden <span class="info_column"> List which fields are to be included in the SQL query, but hidden from the display. e.g. <em>id: true</em></span></li>
+  <li>groupable_fields <span class="info_column"> Array of columns that the user can group by. e.g. <em>- customer</em> This gives the user an option in the grid UI to change the grouping dynamically with any set of these columns.</span></li>
+  <li>group_fields_to_sum <span class="info_column"> Array of columns that should be summed per group. e.g. <em>- amount</em></span></li>
+  <li>group_fields_to_avg <span class="info_column"> Array of columns that should be averaged per group. e.g. <em>- amount</em></span></li>
+  <li>group_fields_to_min <span class="info_column"> Array of columns that should have the minimum calculated per group. e.g. <em>- amount</em></span></li>
+  <li>group_fields_to_max <span class="info_column"> Array of columns that should have the maximum calculated per group. e.g. <em>- amount</em></span></li>
+  <li>group_fields <span class="info_column"> Array of columns that the report will be grouped by. e.g. <em>- customer</em></span></li>
+  <li>grouped <span class="info_column"> Boolean. If true, the report will be grouped on initialisation (using the fields under <em>group_fields</em>. Defaults to false.</span></li>
+</ul>
+<h2>fields</h2>
+<p>Format:<br />
+<pre>
+fields:
+  field1:
+    field_name:        col_name
+    caption:           Column Name
+    field_type:        lookup
+    list:              SELECT code FROM table
+    sorted:            true
+    lookup_search_uri: diagnostics/alerts/lookup_consignment_record
+</pre>
+<ul>
+  <li>field_name <span class="info_column">Required. Must match the name in the query's where clause exactly. e.g. <em>customers.party_name</em></span></li>
+  <li>caption <span class="info_column">Required. Any text</span></li>
+  <li>field_type <span class="info_column">Required. <strong>lookup</strong> for an array of values, <strong>text</strong> for an edit box, <strong>checkbox</strong> for a checkbox, <strong>daterange</strong> for a from and to date, <strong>lookup_link</strong> for a link that returns the value.</span></li>
+  <li>list <span class="info_column">Required for field_type == lookup only. Can be SQL or a hard-coded Array. SQL with two columns (first shown to user, second returned to application e.g. <em>SELECT description, id from cost_groups order by description</em> Single column SQL e.g. <em>SELECT description from cost_groups order by description</em> Array e.g. <em>['E', 'L']</em></span><br />&nbsp;</li>
+  <li>sorted <span class="info_column">Optional. Set to true if you want your list to be displayed in the given order. Otherwise the system will sort it before displaying the dropdown.</span></li>
+  <li>lookup_search_uri <span class="info_column">Required if field_type == lookup_link only. Set to the path that will present the user with a choice.</span></li>
+</ul>

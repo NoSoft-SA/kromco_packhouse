@@ -1,3 +1,20 @@
+  // Show/Hide child form
+  function showHideChildForm(elem) {
+    var img   = jQuery(elem);
+    var panel = img.parents('div').siblings('.ChildPanel');
+
+    // Minimize the containing table cell height so it only shows this image when the panel is hidden.
+    jQuery(img.parents('td')[0]).height(16);
+
+    // Toggle visibility of the panel and change the image appropriately.
+    panel.toggle();
+    if (panel.is(':hidden')) {
+      img.attr('src', '/images/collapsed.png');
+    }
+    else {
+      img.attr('src', '/images/collapse_groups.png');
+    }
+  }
 
   // Reload the contents of a frame.
   // subFrameId is the id of the subframe of "contentFrame" to target.
@@ -68,6 +85,12 @@
     });
   };
 
+  // Replace the value of a text element.
+  replace_text_value = function(new_value, selectId) {
+    var sel = jQuery('#'+selectId);
+    sel.val(new_value);
+  };
+
   // Product Setup: Display ItemPackProduct and FgProduct codes.
   show_item_pack_and_fg = function(item_pack_product_code, fg_product_code) {
     jQuery('#item_pack_product_code').text(item_pack_product_code);
@@ -110,6 +133,23 @@
       target.remove();
       reCalculateListSequence();
     });
+
+    // Custom Autocompletion widget
+    // ----------------------------
+    // Will insert a heading if the item objects include a "category" attribute.
+    jQuery.widget( "custom.catcomplete", jQuery.ui.autocomplete, {
+      _renderMenu: function( ul, items ) {
+        var self = this, currentCategory = "";
+        jQuery.each( items, function( index, item ) {
+          if ( item.category && item.category != currentCategory ) {
+            ul.append( "<li class='ui-autocomplete-category'>" + item.category + "</li>" );
+            currentCategory = item.category;
+          }
+          self._renderItem( ul, item );
+        });
+      }
+    });
+
 
     // Datepickers
     // ------------------------------------------------------------------------
@@ -174,6 +214,7 @@
     //
     jQuery('form').on('change', '.select_observable', function(e) {
       var target = jQuery(e.target);
+      if(target.attr('data-url') === undefined) { return false; } // This can happen with chosen-select when the user searches.
       var url = target.attr('data-url') + '?id=' + target.val();
       var params, mod_url = '';
       if(target.attr('data-params')) {

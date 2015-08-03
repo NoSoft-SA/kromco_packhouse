@@ -9,7 +9,7 @@ class Validations
     
     combos.each do |combo|
        combo.each do |field,value|
-          puts value.to_s.upcase
+###          puts value.to_s.upcase
           if value == nil||value.to_s == "<empty>"||value.to_s.strip() == ""||value.to_s.upcase.index("SELECT")!= nil||(no_zero && value == 0)||(value.to_s == '0' && field.to_s.index("_id"))
              
              eval "model." + field.to_s + " = nil"

@@ -1,0 +1,108 @@
+<h1 id="grid-column-controls">Grid Column controls</h1>
+<h2 id="list-of-column-types">List of column types</h2>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Class</th>
+<th align="left">field type</th>
+<th align="left">Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">GridTextColumn</td>
+<td align="left">text</td>
+<td align="left">Displays value of the given field.</td>
+</tr>
+<tr class="even">
+<td align="left">GridActionColumn</td>
+<td align="left">action</td>
+<td align="left">Displays a link to load in place of the grid.</td>
+</tr>
+<tr class="odd">
+<td align="left">LinkPopUpWindow</td>
+<td align="left">link_window</td>
+<td align="left">Displays a link to open in a popup window.</td>
+</tr>
+<tr class="even">
+<td align="left">GridActionCollectionColumn</td>
+<td align="left">action_collection</td>
+<td align="left">Array of actions displayed in a context menu.</td>
+</tr>
+<tr class="odd">
+<td align="left">GridSubMenuColumn</td>
+<td align="left">sub_menu</td>
+<td align="left">Array of actions displayed as sub-menu of a context menu.</td>
+</tr>
+</tbody>
+</table>
+<br />
+Note that you can also supply a <strong>grid_command</strong> - a button that appears in the header of the grid.<br />
+The grid command is implemented by the Form control <strong>LinkWindowField</strong>.<br />
+Of special note is the <pre style="padding:0;display:inline;">hide_if_no_grid_data</pre> setting. If true and there are no rows in the grid, the button will not display. Defaults to false.
+
+<h2>List of non-settings attributes (column_configs)</h2>
+<ul>
+<li>:field_name <span class="info_column">(Required. Ususally maps to an attribute of an ActiveRecord model)</span></li>
+<li>:field_type/<br />:column_type <span class="info_column">(Required. Must be one of the config key names or their alternatives listed in the table above)</span></li>
+<li>:column_caption <span class="info_column">(Optional. If not provided the <code>field_name</code> is used or &quot;Actions&quot; for an <strong>action_collection</strong>.)</span></li>
+<li>:col_width/<br />:column_width <span class="info_column">(Optional. Width in pixels for the column.)</span></li>
+<li>:data_type <span class="info_column">(Optional. Valid values are  <strong>integer</strong>, <strong>number</strong>, <strong>date</strong>
+and <strong>boolean</strong>. For a <strong>boolean</strong>, the grid displays a checked or unchecked image.)</span></li>
+<li>:hide <span class="info_column">(Optional. If <strong>true</strong>, the column will be in the data array in the page but will not display in the grid. Useful to e.g. hide an <code>id</code> column.)</span></li>
+<li>:use_outer_join <span class="info_column">(Optional. For ActiveRecord access, if a relation does not exist will show blank for its attribute.)</span>
+<p>Optional, but essential if the association instance may not exist.<br />
+e.g. <code>User belongs_to :parent</code>. We want to display <code>user.parent.name</code> in the grid. If the <code>user</code> is a <code>parent</code>
+then <code>user.parent</code> will return nil and <code>user.parent.name</code> will raise an exception. This setting uses the
+equivalent of an <code>SQL LEFT OUTER JOIN</code> on the joined association so that no exception is raised.
+</p></li>
+<li>:truncate <span class="info_column">(Optional, text only. Set to true if the field value should be trimmed to the value of <strong>Globals.get_column_data_width</strong>)</span></li>
+<li>:format <span class="info_column">(Optional, text only. Can be &quot;<strong>default_currency</strong>&quot;, &quot;<strong>default_currency_4</strong>&quot; or &quot;<strong>delimited_1000</strong>&quot;, &quot;<strong>delimited_1000_4</strong>&quot;<br>&nbsp; to format as R12,123.12, R12,123.1234 or 12,123.12, 12,123.1234)</span><br>&nbsp;</li>
+<li>:settings <span class="info_column">(Optional hash of settings. See notes below for settings per field_type)</span></li>
+</ul>
+<h2 id="settings-attributes-per-column-type">Settings attributes per column type</h2>
+<h3 id="gridtextcolumn">GridTextColumn</h3>
+<ul>
+<li>Has no settings.</li>
+</ul>
+<h3 id="gridactioncolumn">GridActionColumn</h3>
+<ul>
+<li>link_text <span class="info_column">(Static text to be used for the link. Ignored if an image is provided.)</span></li>
+<li>image <span class="info_column">(Name of an image to use instead of text for the link.)</span></li>
+<li>dynamic_link_text <span class="info_column">(If true, use the value of the field as the link text. Defaults to true if no link_text provided.)</span></li>
+<li>controller <span class="info_column">(Controller part of url. If not provided, the currently active controller is used.)</span></li>
+<li>target_action <span class="info_column">(Action to be called.)</span></li>
+<li>id_column <span class="info_column">(Name of field to use to get the value for the id parameter.)</span></li>
+<li>name_id_as_key <span class="info_column">(Boolean. If true, the value in the id column will be returned in a parameter named <em>key</em> instead of <em>id</em>. Useful if Rails routing bombs because the id parameter contains a ".".)</span></li>
+<li>id_value <span class="info_column">(Fixed value to use as the id_value parameter.)</span></li>
+<li>html_options <span class="info_column">(A hash of HTML options to be passed to the tag - e.g. :class =&gt; 'something' - to add an extra class, :prompt =&gt; 'Are you sure?')</span></li>
+<li>null_test <span class="info_column">(String to be evaluated. If the result is true the link will not be shown.)</span></li>
+<li>can_be_empty <span class="info_column">(If true, the grid will operate even if this field does not exist.)</span></li>
+</ul>
+<h3 id="linkpopupwindow">LinkPopupWindow</h3>
+<ul>
+<li>link_text <span class="info_column">(Static text to be used for the link. Ignored if an image is provided. Uses field value if neither this nor image provided.)</span></li>
+<li>image <span class="info_column">(Name of an image to use instead of text for the link.)</span></li>
+<li>controller <span class="info_column">(Controller part of url. If not provided, the currently active controller is used.)</span></li>
+<li>target_action <span class="info_column">(Action to be called.)</span></li>
+<li>id_column <span class="info_column">(Name of field to use to get the value for the id parameter.)</span></li>
+<li>id_value <span class="info_column">(Fixed value to use as the id parameter.)</span></li>
+<li>host_and_port <span class="info_column">(Optional. e.g. &quot;localhost:3000&quot;)</span></li>
+<li>window_height <span class="info_column">(Optional. Popup window height in pixels.)</span></li>
+<li>window_width <span class="info_column">(Optional. Popup window width in pixels.)</span></li>
+<li>null_test <span class="info_column">(String to be evaluated. If the result is true the link will not be shown.)</span></li>
+</ul>
+<h3 id="gridactioncollectioncolumn">GridActionCollectionColumn</h3>
+<ul>
+  <li>An array of actions of any of the following <strong>field_type</strong>s</li>
+  <li>text <span class="info_column">(Same settings as per GridTextColumn.)</span></li>
+  <li>action <span class="info_column">(Same settings as per GridActionColumn.)</span></li>
+  <li>link_window <span class="info_column">(Same settings as per LinkPopUpWindow.)</span></li>
+  <li>separator <span class="info_column">(No settings, only attribute is field_type.)</span></li>
+  <li>sub_menu <span class="info_column">(An array of any of these actions - including sub_menus.)</span></li>
+</ul>
+<h3 id="gridsubmenucolumn">GridSubMenuColumn</h3>
+<ul>
+  <li>An array of actions as per <strong>GridActionCollectionColumn</strong></li>
+</ul>
+

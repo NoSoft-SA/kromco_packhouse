@@ -1,6 +1,6 @@
 # Be sure to restart your web server when you modify this file.
 
-# Uncomment below to force Rails into production mode when 
+# Uncomment below to force Rails into production mode when
 # you don't control web/app server and can't set it the proper way
 # ENV['RAILS_ENV'] ||= 'production'
 
@@ -39,13 +39,13 @@ Rails::Initializer.run do |config|
   # Add additional load paths for your own custom dirs
   # config.load_paths += %W( #{RAILS_ROOT}/extras )
 
-  # Force all environments to use the same logger level 
+  # Force all environments to use the same logger level
   # (by default production uses :info, the others :debug)
   # config.log_level = :debug
 
   # Use the database for sessions instead of the file system
   # (create the session table with 'rake create_sessions_table')
- # config.action_controller.session_store = :active_record_store
+  # config.action_controller.session_store = :active_record_store
 
   # Enable page/fragment caching by setting a file-based store
   # (remember to create the caching directory and make it readable to the application)
@@ -64,7 +64,7 @@ Rails::Initializer.run do |config|
   # See Rails::Configuration for more options
 end
 
-# Add new inflection rules using the following format 
+# Add new inflection rules using the following format
 # (all these examples are active by default):
 Inflector.inflections do |inflect|
 #   inflect.plural /^(ox)$/i, '\1en'
@@ -123,15 +123,86 @@ module ActionView
           else
             option_tags
           end
-        end      
+        end
     end
+
     module FormOptionsHelper
+
+      # -----------> Start of changes to selects
+
+      # Code in following 3 methods  ripped from Rails 2.3 to allow disabled options in dropdown.
+      def extract_selected_and_disabled(selected)
+        if selected.is_a?(Hash)
+          [selected[:selected], selected[:disabled]]
+        else
+          [selected, nil]
+        end
+      end
+
+      def option_value_selected?(value, selected)
+        if selected.respond_to?(:include?) && !selected.is_a?(String)
+          selected.include? value
+        else
+          value == selected
+        end
+      end
+
+      def option_text_and_value(option)
+        # Options are [text, value] pairs or strings used for both.
+        if !option.is_a?(String) and option.respond_to?(:first) and option.respond_to?(:last)
+          [option.first, option.last]
+        else
+          [option, option]
+        end
+      end
+
+      # Redefined to_select_tag so that disabled options are handled.
+      InstanceTag.class_eval do
+        def to_select_tag(choices, options, html_options)
+          html_options = html_options.stringify_keys
+          add_default_name_and_id(html_options)
+          value = value(object)
+          selected_value = options.has_key?(:selected) ? options[:selected] : value
+          #content_tag("select", add_options(options_for_select(choices, selected_value), options, selected_value), html_options)
+          content_tag("select", add_options(options_for_select(choices, :selected => selected_value, :disabled => options[:disabled]), options, selected_value), html_options)
+        end
+      end
+
+      # This redefines Rails 1.2.3's options_for_select by incorporating Rails 2.3's code for disabling options.
+      # It is not elegant/efficient, it just works...
+      def options_for_select(container, selected = nil)
+        container = container.to_a if Hash === container
+
+        selected, disabled = extract_selected_and_disabled(selected)
+
+        options_for_select = container.inject([]) do |options, element|
+          text, value = option_text_and_value(element)
+          disabled_attribute = ' disabled="disabled"' if disabled && option_value_selected?(value, disabled)
+
+          if !element.is_a?(String) and element.respond_to?(:first) and element.respond_to?(:last)
+            is_selected = ( (selected.respond_to?(:include?) && !selected.is_a?(String) ? selected.include?(element.last) : element.last == selected) )
+            if is_selected
+              options << "<option value=\"#{html_escape(element.last.to_s)}\" selected=\"selected\"#{disabled_attribute}>#{html_escape(element.first.to_s)}</option>"
+            else
+              options << "<option value=\"#{html_escape(element.last.to_s)}\"#{disabled_attribute}>#{html_escape(element.first.to_s)}</option>"
+            end
+          else
+            is_selected = ( (selected.respond_to?(:include?) && !selected.is_a?(String) ? selected.include?(element) : element == selected) )
+            options << ((is_selected) ? "<option value=\"#{html_escape(element.to_s)}\" selected=\"selected\"#{disabled_attribute}>#{html_escape(element.to_s)}</option>" : "<option value=\"#{html_escape(element.to_s)}\"#{disabled_attribute}>#{html_escape(element.to_s)}</option>")
+          end
+        end
+
+        options_for_select.join("\n")
+      end
+
+      # -----------> End of changes to selects
+
       def select(object, method, choices, options = {}, html_options = {})
         empty = choices.find { |c| c == "<empty>" || c.class == Array && c[0] == '<empty>' }
         if empty
           choices.delete(empty)
           options[:prompt] = '&lt;empty&gt;'
-                end
+        end
         unless options[:sorted]
           choices.sort! do |x, y|
             if x.class.to_s == "Array" && y.class.to_s == "Array"
@@ -155,5 +226,37 @@ module ActionView
     end
   end
 end
-
 # Include your application configuration below
+
+# Bring in object.try from Rails 2.3.2.
+# This allows you to get nil from a method called on a nil object (rather than a NoMethodError)
+#
+# e.g. IF department was optional for a User and you just wanted the department name if it existed, you could write:
+# > user_with_dept.department.try(:department_name)
+# => "IT"
+# > user_without_dept.department.try(:department_name)
+# => nil
+#
+# > user_without_dept.department.department_name
+# => NoMethodError: You have a nil object when you didn't expect it!
+#    The error occurred while evaluating nil.department_name
+#
+class Object
+  # File activesupport/lib/active_support/core_ext/object/try.rb
+  def try(*a, &b)
+    if a.empty? && block_given?
+      yield self
+    else
+      #public_send(*a, &b) if respond_to?(a.first) # public_send introduced with Ruby 1.9
+      send(*a, &b) if respond_to?(a.first)
+    end
+  end
+end
+
+class NilClass
+  # File activesupport/lib/active_support/core_ext/object/try.rb
+  def try(*args)
+    nil
+  end
+end
+

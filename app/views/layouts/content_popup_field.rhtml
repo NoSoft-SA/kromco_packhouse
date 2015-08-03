@@ -82,7 +82,8 @@
   			    
   		}
   		
-  		window.parent.set_content_header_caption( <%= @content_header_caption %> );
+      <% @content_header_caption = '' if @content_header_caption.nil? %>
+  		window.parent.set_content_header_caption( '<%= @content_header_caption.gsub(/"|'/,'') %>' );
   		
   	</script>
   	

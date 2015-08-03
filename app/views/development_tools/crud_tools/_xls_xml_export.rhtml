@@ -1,0 +1,103 @@
+<h1 id="xls-export">Excel files exported using rich XML format</h1>
+<h2 id="xls-intro">Introdution</h2>
+This allows you to export data in XML that Excel can interpret - rather than in an unstyled csv file. It uses the <strong>xls_xml_exporter</strong> gem. Features:
+<ul><li>Styles - bold, font size, numeric formatting, background colour.</li>
+  <li>Multiple worksheets in one spreadsheet</li>
+  <li>Sum a column using Excel formula</li>
+  <li>Autofilter on the row of headings</li>
+  <li>Include a title</li>
+  <li>Show blank when null</li>
+  <li>Include formulas in each row</li>
+</ul>
+<h2>Example controller code</h2>
+This code should work as-is if copied into a controller action - it creates an excel file of users with a sheet for each department.
+<div class="CodeRay">
+<pre>
+<span class="line-numbers"> <a href="#n1" name="n1">1</a></span><span style="color:#777"># Create an array of column-definition hashes.</span>
+<span class="line-numbers"> <a href="#n2" name="n2">2</a></span>cols = [{<span style="color:#A60">:key</span> =&gt; <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">'</span><span style="color:#D20">first_name</span><span style="color:#710">'</span></span>, <span style="color:#A60">:caption</span> =&gt; <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">'</span><span style="color:#D20">Name</span><span style="color:#710">'</span></span>},
+<span class="line-numbers"> <a href="#n3" name="n3">3</a></span>        {<span style="color:#A60">:key</span> =&gt; <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">'</span><span style="color:#D20">last_name</span><span style="color:#710">'</span></span>, <span style="color:#A60">:caption</span> =&gt; <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">'</span><span style="color:#D20">Surname</span><span style="color:#710">'</span></span>, <span style="color:#A60">:width</span> =&gt; <span style="color:#00D">150</span>},
+<span class="line-numbers"> <a href="#n4" name="n4">4</a></span>        {<span style="color:#A60">:key</span> =&gt; <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">'</span><span style="color:#D20">arbitrary_numeric</span><span style="color:#710">'</span></span>, <span style="color:#A60">:caption</span> =&gt; <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">'</span><span style="color:#D20">Test</span><span style="color:#710">'</span></span>, <span style="color:#A60">:total</span> =&gt; <span style="color:#069">true</span>, <span style="color:#A60">:type</span> =&gt; <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">'</span><span style="color:#D20">Number</span><span style="color:#710">'</span></span>, <span style="color:#A60">:style</span> =&gt; [<span style="color:#A60">:bold</span>, <span style="color:#A60">:decimal2</span>]},
+<span class="line-numbers"> <a href="#n5" name="n5">5</a></span>        {<span style="color:#A60">:key</span> =&gt; <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">'</span><span style="color:#D20">arbitrary_numeric</span><span style="color:#710">'</span></span>, <span style="color:#A60">:caption</span> =&gt; <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">'</span><span style="color:#D20">With blank</span><span style="color:#710">'</span></span>, <span style="color:#A60">:blank_when_null</span> =&gt; <span style="color:#069">true</span>, <span style="color:#A60">:total</span> =&gt; <span style="color:#069">true</span>, <span style="color:#A60">:type</span> =&gt; <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">'</span><span style="color:#D20">Number</span><span style="color:#710">'</span></span>},
+<span class="line-numbers"> <a href="#n6" name="n6">6</a></span>        {<span style="color:#A60">:key</span> =&gt; <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">'</span><span style="color:#D20">created_at</span><span style="color:#710">'</span></span>, <span style="color:#A60">:caption</span> =&gt; <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">'</span><span style="color:#D20">Created</span><span style="color:#710">'</span></span>, <span style="color:#A60">:type</span> =&gt; <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">'</span><span style="color:#D20">Date</span><span style="color:#710">'</span></span>, <span style="color:#A60">:style</span> =&gt; <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">'</span><span style="color:#D20">#DDDDDD</span><span style="color:#710">'</span></span>}]
+<span class="line-numbers"> <a href="#n7" name="n7">7</a></span><span style="color:#777"># Prepare the XLS exporter:</span>
+<span class="line-numbers"> <a href="#n8" name="n8">8</a></span>xls = <span style="color:#036;font-weight:bold">XlsXmlExporter</span>::<span style="color:#036;font-weight:bold">Exporter</span>.new(cols,
+<span class="line-numbers"> <a href="#n9" name="n9">9</a></span>                  <span style="color:#A60">:header_for_each_sheet</span> =&gt; <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">'</span><span style="color:#D20">J and J Test user list</span><span style="color:#710">'</span></span>,
+<span class="line-numbers"><strong><a href="#n10" name="n10">10</a></strong></span>                  <span style="color:#A60">:show_sheet_name</span>       =&gt; <span style="color:#069">true</span>,
+<span class="line-numbers"><a href="#n11" name="n11">11</a></span>                  <span style="color:#A60">:frozen_rows</span>           =&gt; <span style="color:#00D">3</span>,
+<span class="line-numbers"><a href="#n12" name="n12">12</a></span>                  <span style="color:#A60">:total_style</span>           =&gt; [<span style="color:#A60">:bold</span>, <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">'</span><span style="color:#D20">#DDEBF8</span><span style="color:#710">'</span></span>],
+<span class="line-numbers"><a href="#n13" name="n13">13</a></span>                  <span style="color:#A60">:heading_style</span>         =&gt; [<span style="color:#A60">:bold</span>, <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">'</span><span style="color:#D20">#DDEBF8</span><span style="color:#710">'</span></span>],
+<span class="line-numbers"><a href="#n14" name="n14">14</a></span>                  <span style="color:#A60">:title_style</span>           =&gt; [<span style="color:#A60">:bold</span>, <span style="color:#A60">:size_18</span>],
+<span class="line-numbers"><a href="#n15" name="n15">15</a></span>                  <span style="color:#A60">:apply_autofilter</span>      =&gt; <span style="color:#069">true</span>)
+<span class="line-numbers"><a href="#n16" name="n16">16</a></span><span style="color:#777"># Prepare the data (as a Hash):</span>
+<span class="line-numbers"><a href="#n17" name="n17">17</a></span>recs = <span style="color:#036;font-weight:bold">ActiveRecord</span>::<span style="color:#036;font-weight:bold">Base</span>.connection.select_all(<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&lt;&lt;-EOQ</span></span>).group_by {|r| r[<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">'</span><span style="color:#D20">department_name</span><span style="color:#710">'</span></span>] }<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20"></span></span>
+<span class="line-numbers"><a href="#n18" name="n18">18</a></span><span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">SELECT department_name, first_name, last_name, created_at,</span></span>
+<span class="line-numbers"><a href="#n19" name="n19">19</a></span><span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">    (SELECT SUM(udr.report_id * 0.65)</span></span>
+<span class="line-numbers"><strong><a href="#n20" name="n20">20</a></strong></span><span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">    FROM user_defined_reports_users udru</span></span>
+<span class="line-numbers"><a href="#n21" name="n21">21</a></span><span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">    JOIN user_defined_reports udr ON udr.id = udru.user_defined_report_id</span></span>
+<span class="line-numbers"><a href="#n22" name="n22">22</a></span><span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">    WHERE udru.user_id = users.id) AS arbitrary_numeric</span></span>
+<span class="line-numbers"><a href="#n23" name="n23">23</a></span><span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">FROM users</span></span>
+<span class="line-numbers"><a href="#n24" name="n24">24</a></span><span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">ORDER BY department_name, last_name, first_name</span><span style="color:#710"></span></span>
+<span class="line-numbers"><a href="#n25" name="n25">25</a></span><span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710"> EOQ</span></span>
+<span class="line-numbers"><a href="#n26" name="n26">26</a></span><span style="color:#777"># Transform into XML:</span>
+<span class="line-numbers"><a href="#n27" name="n27">27</a></span>data = xls.export_for(recs)
+<span class="line-numbers"><a href="#n28" name="n28">28</a></span><span style="color:#777"># Return the spreadsheet:</span>
+<span class="line-numbers"><a href="#n29" name="n29">29</a></span>send_data data, <span style="color:#A60">:filename</span> =&gt; <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">'</span><span style="color:#D20">user_list.xls</span><span style="color:#710">'</span></span>, <span style="color:#A60">:type</span> =&gt; <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">'</span><span style="color:#D20">application/vnd.ms-excel</span><span style="color:#710">'</span></span>
+</pre>
+</div>
+
+<h2>List of column attributes</h2>
+<ul>
+<li>:key <span class="info_column">(Required. The String name of the field.)</span></li>
+<li>:caption <span class="info_column">(Optional. Used as the heading for the column. If it is not present, the value of <strong>:key</strong> will be used.)</span></li>
+<li>:type <span class="info_column">(Optional. Defaults to String. Other possible types are: Number, DateTime, Boolean.)</span></li>
+<li>:show_total <span class="info_column">(Optional. Defaults to false. If present, the column will be summed.)</span></li>
+<li>:blank_when_null <span class="info_column">(Optional. Defaults to false. If the value is null, the cell will be empty (rather than e.g. "0" for a Numeric type).)</span></li>
+<li>:styles <span class="info_column">(Optional. A single value or an Array of styles. See below for style information.)</span></li>
+<li>:width <span class="info_column">(Optional. Defaults to 60.)</span></li>
+<li>:formula <span class="info_column">(Optional. If present it must be specified using R1C1 notation: <a href="http://www.numbergrinder.com/2008/11/r1c1-the-unused-excel-cell-reference-system/">www.numbergrinder.com/2008/11/r1c1-the-unused-excel-cell-reference-system</a>.<br/> Do not start the formula with "=". An example: "<strong>RC[-2]+RC[-1]</strong>" - Sum the 2 columns to the left of this one on this row.)</span></li>
+</ul>
+
+<h2>List of styles</h2>
+<ul>
+  <li>:bold <span class="info_column">Format text as bold.</span></li>
+  <li>:italic <span class="info_column">Format text as italic.</span></li>
+  <li>:decimal2 <span class="info_column">Format number with 2 decimals</span></li>
+  <li>:decimal4 <span class="info_column">Format number with 4 decimals</span></li>
+  <li>:size_nn <span class="info_column">Use size nn font. e.g. :size_14 or :size_18.</span></li>
+  <li>'#CCDDEE' <span class="info_column">Specify the background colour using css hex rgb notation.</span></li>
+</ul>
+
+<h2>Options for XlsXmlExporter::Exporter</h2>
+<ul>
+  <li>:header_for_each_sheet <span class="info_column">Optional. Whatever value is given will appear in the top row in the <em>:title_style</em></span></li>
+  <li>:show_sheet_name <span class="info_column">Optional. Default false. If true, the name of the sheet will appear in the row below the header (if present, else in the top row). Uses <em>:title_style</em>.</span></li>
+  <li>:frozen_rows <span class="info_column">Optional. Default none. Number of rows from the top of the sheet to freeze.</span></li>
+  <li>:title_style <span class="info_column">Optional. The style for the title lines.</span></li>
+  <li>:heading_style <span class="info_column">Optional. The style for the column headings.</span></li>
+  <li>:total_style <span class="info_column">Optional. The style for the row of totals. There is no total row if none of the columns have<em>:show_total</em> set.</span></li>
+  <li>:apply_autofilter <span class="info_column">Optional. Default false. If true, the column headings will have autofilter applied.</span></li>
+</ul>
+
+<h2>Building data rows</h2>
+The data is built up as a Hash of Arrays in the format:
+<div class="CodeRay">
+<pre>
+{<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">'</span><span style="color:#D20">sheet_1_name</span><span style="color:#710">'</span></span> =&gt; [rows], <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">'</span><span style="color:#D20">sheet_2_name</span><span style="color:#710">'</span></span> =&gt; [rows]}
+</pre>
+</div>
+
+To create a single sheet spreadsheet, you'll need to wrap the Array in a Hash something like this:
+<div class="CodeRay">
+<pre>
+recs = {<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">'</span><span style="color:#D20">Users</span><span style="color:#710">'</span></span> =&gt; <span style="color:#036;font-weight:bold">User</span>.find(<span style="color:#A60">:all</span>)}
+</pre>
+</div>
+
+To create a multi-sheet spreadsheet, the easiest way will be to use <em>group_by</em>:
+<br />Note that the sheets will appear in alphabetical order of the group_by (Hash key), so if you want different sorting, you might want to build the key up to start with a number.
+<div class="CodeRay">
+<pre>
+recs = <span style="color:#036;font-weight:bold">User</span>.find(<span style="color:#A60">:all</span>).group_by {|r| r[<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">'</span><span style="color:#D20">department_name</span><span style="color:#710">'</span></span>] }
+</pre>
+</div>
+

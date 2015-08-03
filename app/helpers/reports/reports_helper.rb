@@ -33,21 +33,23 @@ module Reports::ReportsHelper
                          :field_name => key.to_s }
     end
 
-    column_configs << {:field_type   => 'action',
-                       :field_name   => 'view_details',
-                       :column_width => 120,
-                       :settings     => {:link_text     => 'view details',
-                                         :target_action => 'view_details',
-                                         :id_column     => 'id' }
-                      }
+    if keys.include?( 'id') && recordset[0]['id'].is_numeric? && !recordset[0]['id'].include?('_')
+      column_configs << {:field_type   => 'action',
+                         :field_name   => 'view_details',
+                         :column_width => 120,
+                         :settings     => {:link_text     => 'view details',
+                                           :target_action => 'view_details',
+                                           :id_column     => 'id' }
+                        }
+    end
 
-    return get_data_grid(recordset, column_configs, nil, true)
+    get_data_grid(recordset, column_configs, nil, true)
   end
 
 
   def build_summary_grid(recordset)
 
-    require File.dirname(__FILE__) + "/../../../app/helpers/reports/search_engine_plugins.rb"
+    #require File.dirname(__FILE__) + "/../../../app/helpers/reports/search_engine_plugins.rb"
 
     column_configs = []
     keys           = recordset[0].keys
@@ -71,9 +73,14 @@ module Reports::ReportsHelper
       column_configs << {:field_type => 'text', :field_name => key.to_s}
     end
 
-    column_configs << {:field_type => 'text', :field_name => 'show_records'}
+    #column_configs << {:field_type => 'text', :field_name => 'show_records'}
+    column_configs << {:field_type => 'link_window', :field_name => 'show_records',
+      :settings =>
+    {:link_text => 'show_records',
+      :target_action => 'show_recs_dummy',
+      :id_value => 'id'}}
 
-    return get_data_grid(recordset, column_configs, SearchEnginePlugins::SearchEngineGridPlugin.new(self, request), true)
+    get_data_grid(recordset, column_configs, MesScada::GridPlugins::SearchEngine::SearchEngineGridPlugin.new(self, request), true)
 
   end
 
@@ -187,18 +194,31 @@ module Reports::ReportsHelper
       :settings =>
     {:link_text => 'view',
       :target_action => 'launch_my_view',
-      :id_column => 'id'}}
-    column_configs << {:field_type => 'link_window',:field_name => 'spreadsheet',
+      :id_column => 'id',
+      :null_test => "webquery_only"}}
+    column_configs << {:field_type => 'link_window',:field_name => 'spreadsheet', :col_width => 80,
       :settings =>
     {:link_text => 'download',
       :target_action => 'download_my_view',
-      :id_column => 'id'}}
+      :id_column => 'id',
+      :null_test => "show_parameters"}}
+
+    # column_configs << {:field_type => 'action', :field_name => 'webquery',
+    #   :settings =>
+    # {:link_text => 'copy',
+    #  :host_and_port => request.host_with_port,
+    #  :controller    => '' ,
+    #   #:controller => 'application',
+    #   :target_action => 'webquery',
+    #   :id_column => 'id'},
+    # :html_options => {:class => 'copy_webquery_link'}}
 
     column_configs << {:field_type => 'action', :field_name => 'webquery',
       :settings =>
     {:link_text => 'copy',
       :target_action => 'launch_my_view',
       :id_column => 'id'}}
+
     column_configs << {:field_type=>'text', :field_name=>'fieldlist'}
     column_configs << {:field_type=>'text', :field_name=>'ranking'}
     column_configs << {:field_type=>'text', :field_name=>'updated_at'}
@@ -219,7 +239,8 @@ module Reports::ReportsHelper
         :settings =>
       {:link_text => 'edit',
         :target_action => 'edit_my_view',
-        :id_column => 'id'}}
+        :id_column => 'id',
+        :null_test => "author_id.to_s != active_record.current_user_id.to_s"}}
     end
 
     if can_delete
@@ -227,15 +248,18 @@ module Reports::ReportsHelper
         :settings =>
       {:link_text => 'delete',
         :target_action => 'delete_my_view',
-        :id_column => 'id'}}
+        :id_column => 'id',
+        :null_test => "author_id.to_s != active_record.current_user_id.to_s || active_record.users.count > 1"}}
     end
 
     # group_headers = [{:start_column_name => 'report_name', :number_of_columns => 3, :title_text => 'Report'},
     #                  {:start_column_name => 'fieldlist', :number_of_columns => 2, :title_text => 'Arbitrary'}]
 
-    # get_data_grid(data_set,column_configs, Reports::ReportsPlugins::ListMyViewsGridPlugin.new( @request ), nil, nil, {:group_headers => group_headers,
-    # :caption => 'A BLOODY different CAPTION'})
-    get_data_grid(data_set,column_configs, Reports::ReportsPlugins::ListMyViewsGridPlugin.new( @request ))
+    # Setting grid attributes from a helper: 
+    # get_data_grid(data_set,column_configs, MesScada::GridPlugins::Reports::ListMyViews.new( @request ), nil, nil, {:group_headers => group_headers,
+    # :caption => 'Try a different CAPTION'})
+
+    get_data_grid(data_set,column_configs, MesScada::GridPlugins::Reports::ListMyViews.new( @request ))
   end
 
   #================================================

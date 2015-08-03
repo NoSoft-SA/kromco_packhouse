@@ -1,0 +1,294 @@
+/* SLICK GRID
+ * ==========
+ */
+.jmt_slick_container {
+  border: thin solid #999;
+  margin-bottom: 30px;
+}
+.jmt_slick_caption {
+  width: 100%;
+  max-height: 38px;
+}
+.jmt_slick_caption label {
+  margin-left: 10px;
+}
+.jmt_slick_grid div {
+  font-size: 11px;
+}
+
+.slk_fullpage {
+  position: absolute;
+  top: 40px;
+  left: 3px;
+  right: 5px;
+  bottom: 10px;
+}
+
+.slick-columnpicker, .slick-columnpicker li {
+  font-size: 11px;
+}
+
+.slk_cell_right_align {
+  text-align: right;
+  padding-right: 4px;
+}
+.slk_cell_centre_align {
+  text-align: center;
+}
+.slick-row.selected {
+  z-index: 10;
+  background: #DFE8F6;
+}
+/*
+.slick-cell.active {
+  border-color: #999;
+  border-style: solid;
+}
+*/
+.slick-row.odd {
+  background: #fafafa;
+}
+
+.slick-row.active .slick-cell {
+  background: #F5F7D7;
+}
+
+.slick-cell.selected, .slick-row.active .slick-cell.selected {
+/*  background-color: beige;*/
+  background: #9bdede;
+}
+
+.slick-row.ui-state-active {
+  background: #F5F7D7;
+}
+
+/* GROUPING */
+.slick-group-title[level='0'] {
+  font-weight: bold;
+}
+
+.slick-group-title[level='1'] {
+  text-decoration: underline;
+}
+
+.slick-group-title[level='2'] {
+  font-style: italic;
+}
+
+.slick-group {
+  border-bottom: 2px solid silver;
+}
+
+.slick-group-toggle {
+  width: 9px;
+  height: 9px;
+  margin-right: 5px;
+}
+
+.slick-group-toggle.expanded {
+  background: url(/images/grid_icons/collapse.gif) no-repeat center center;
+}
+
+.slick-group-toggle.collapsed {
+  background: url(/images/grid_icons/expand.gif) no-repeat center center;
+}
+
+.slick-group-totals {
+  color: gray;
+  background: white;
+}
+
+/* ROW COLOURING */
+
+.slick-row div.jqgrid-rownum       { color: black; }
+/* Row colour classes for slick grid formatting. */
+.slick_row_black .slick-cell       , .slick_row_black .slick-view-cell       { color: black; }
+.slick_row_blue .slick-cell        , .slick_row_blue .slick-view-cell        { color: blue; }
+.slick_row_brown .slick-cell       , .slick_row_brown .slick-view-cell       { color: brown; }
+.slick_row_green .slick-cell       , .slick_row_green .slick-view-cell       { color: green; }
+.slick_row_gray .slick-cell        , .slick_row_gray .slick-view-cell        { color: gray; }
+.slick_row_maroon .slick-cell      , .slick_row_maroon .slick-view-cell      { color: maroon; }
+.slick_row_orange .slick-cell      , .slick_row_orange .slick-view-cell      { color: orange; }
+.slick_row_purple .slick-cell      , .slick_row_purple .slick-view-cell      { color: purple; }
+.slick_row_red .slick-cell         , .slick_row_red .slick-view-cell         { color: red; }
+.slick_row_light_green .slick-cell , .slick_row_light_green .slick-view-cell { color: lightgreen; }
+.slick_row_dark_green .slick-cell  , .slick_row_dark_green .slick-view-cell  { color: darkgreen; }
+
+/* CELL COLOURING & FORMATTING */
+.slick-cell span.slick_cell_fmt_bold        , .slick-view-cell span.slick_cell_fmt_bold        { font-weight: bold; }
+.slick-cell span.slick_cell_fmt_italic      , .slick-view-cell span.slick_cell_fmt_italic      { font-style: italic; }
+.slick-cell span.slick_cell_fmt_underline   , .slick-view-cell span.slick_cell_fmt_underline   { text-decoration: underline; }
+
+.slick-cell span.slick_cell_fmt_black       , .slick-view-cell span.slick_cell_fmt_black       { color: black; }
+.slick-cell span.slick_cell_fmt_blue        , .slick-view-cell span.slick_cell_fmt_blue        { color: blue; }
+.slick-cell span.slick_cell_fmt_brown       , .slick-view-cell span.slick_cell_fmt_brown       { color: brown; }
+.slick-cell span.slick_cell_fmt_gray        , .slick-view-cell span.slick_cell_fmt_gray        { color: gray; }
+.slick-cell span.slick_cell_fmt_green       , .slick-view-cell span.slick_cell_fmt_green       { color: green; }
+.slick-cell span.slick_cell_fmt_maroon      , .slick-view-cell span.slick_cell_fmt_maroon      { color: maroon; }
+.slick-cell span.slick_cell_fmt_orange      , .slick-view-cell span.slick_cell_fmt_orange      { color: orange; }
+.slick-cell span.slick_cell_fmt_purple      , .slick-view-cell span.slick_cell_fmt_purple      { color: purple; }
+.slick-cell span.slick_cell_fmt_red         , .slick-view-cell span.slick_cell_fmt_red         { color: red; }
+.slick-cell span.slick_cell_fmt_light_green , .slick-view-cell span.slick_cell_fmt_light_green { color: lightgreen; }
+.slick-cell span.slick_cell_fmt_dark_green  , .slick-view-cell span.slick_cell_fmt_dark_green  { color: darkgreen; }
+
+/*.slick-viewport .slick-row .active {
+  border-bottom-color: rgb(250, 212, 46);
+  border-bottom-style: solid;
+  border-bottom-width: 1px;
+  border-collapse: separate;
+  border-right-color: rgb(250, 212, 46);
+  border-right-style: solid;
+  border-right-width: 1px;
+  color: rgb(54, 54, 54);
+  background-color: rgb(251, 236, 136);
+}*/
+
+/*
+ * GRID ICONS
+ *
+ * Used in ActionCollection: settings[:icon]
+ * - specify the word after ".context-menu-item.icon-" as the icon value.
+ *   (e.g. "add", "new")
+ */
+.context-menu-item.icon-add              { background-image: url(/images/grid_icons/add.png); }
+.context-menu-item.icon-apply            { background-image: url(/images/grid_icons/wand.png); }
+.context-menu-item.icon-approve          { background-image: url(/images/grid_icons/tick.png); }
+.context-menu-item.icon-anchor           { background-image: url(/images/grid_icons/anchor.png); }
+.context-menu-item.icon-cancel           { background-image: url(/images/grid_icons/cross.png); }
+.context-menu-item.icon-changegrp        { background-image: url(/images/grid_icons/change_group.png); }
+.context-menu-item.icon-changes          { background-image: url(/images/grid_icons/changes.png); }
+.context-menu-item.icon-check            { background-image: url(/images/grid_icons/check_on.png); }
+.context-menu-item.icon-clone            { background-image: url(/images/grid_icons/copy.png); }
+.context-menu-item.icon-cog              { background-image: url(/images/grid_icons/cog.png); }
+.context-menu-item.icon-collapse         { background-image: url(/images/grid_icons/collapse.gif); }
+.context-menu-item.icon-columns          { background-image: url(/images/grid_icons/application_tile_horizontal.png); }
+.context-menu-item.icon-comment          { background-image: url(/images/grid_icons/comment.png); }
+.context-menu-item.icon-complete         { background-image: url(/images/grid_icons/complete.png); }
+.context-menu-item.icon-containers       { background-image: url(/images/grid_icons/containers.png); }
+.context-menu-item.icon-copy             { background-image: url(/images/grid_icons/copy.png); }
+.context-menu-item.icon-csv              { background-image: url(/images/grid_icons/csv_text.png); }
+.context-menu-item.icon-date             { background-image: url(/images/grid_icons/date.png); }
+.context-menu-item.icon-delete           { background-image: url(/images/grid_icons/delete.png); }
+.context-menu-item.icon-edit             { background-image: url(/images/grid_icons/edit.png); }
+.context-menu-item.icon-emails           { background-image: url(/images/grid_icons/emails.png); }
+.context-menu-item.icon-excel            { background-image: url(/images/grid_icons/excel.png); }
+.context-menu-item.icon-exec1            { background-image: url(/images/grid_icons/exec1.png); }
+.context-menu-item.icon-exec2            { background-image: url(/images/grid_icons/exec2.png); }
+.context-menu-item.icon-expand           { background-image: url(/images/grid_icons/expand.gif); }
+.context-menu-item.icon-filter           { background-image: url(/images/grid_icons/filter_large.png); }
+.context-menu-item.icon-flag_green       { background-image: url(/images/grid_icons/flag_green.png); }
+.context-menu-item.icon-flag_red         { background-image: url(/images/grid_icons/flag_red.png); }
+.context-menu-item.icon-folder_open      { background-image: url(/images/grid_icons/folder_open.png); }
+.context-menu-item.icon-info             { background-image: url(/images/grid_icons/information.png); }
+.context-menu-item.icon-key              { background-image: url(/images/grid_icons/key.png); }
+.context-menu-item.icon-label            { background-image: url(/images/grid_icons/label.png); }
+.context-menu-item.icon-lightning        { background-image: url(/images/grid_icons/lightning.png); }
+.context-menu-item.icon-message          { background-image: url(/images/grid_icons/message.png); }
+.context-menu-item.icon-money_dollar     { background-image: url(/images/grid_icons/money_dollar.png); }
+.context-menu-item.icon-new              { background-image: url(/images/grid_icons/add.png); }
+.context-menu-item.icon-pallets          { background-image: url(/images/grid_icons/pallets.png); }
+.context-menu-item.icon-pause            { background-image: url(/images/grid_icons/pause.png); }
+.context-menu-item.icon-print            { background-image: url(/images/grid_icons/printer.png); }
+.context-menu-item.icon-printer          { background-image: url(/images/grid_icons/printer.png); }
+.context-menu-item.icon-report           { background-image: url(/images/grid_icons/report.png); }
+.context-menu-item.icon-refresh          { background-image: url(/images/grid_icons/arrow_refresh.png); }
+.context-menu-item.icon-reprocess        { background-image: url(/images/grid_icons/reprocess.png); }
+.context-menu-item.icon-reverse          { background-image: url(/images/grid_icons/reverse.png); }
+.context-menu-item.icon-reworks          { background-image: url(/images/grid_icons/reworks.png); }
+.context-menu-item.icon-run              { background-image: url(/images/grid_icons/run.png); }
+.context-menu-item.icon-save             { background-image: url(/images/grid_icons/disk.png); }
+.context-menu-item.icon-snapshot         { background-image: url(/images/grid_icons/camera_add.png); }
+.context-menu-item.icon-scrapped_pallets { background-image: url(/images/grid_icons/scrapped_pallets.png); }
+.context-menu-item.icon-search           { background-image: url(/images/grid_icons/search.png); }
+.context-menu-item.icon-ship             { background-image: url(/images/grid_icons/ship.png); }
+.context-menu-item.icon-sort_incr        { background-image: url(/images/grid_icons/sort_incr.png); }
+.context-menu-item.icon-tick             { background-image: url(/images/grid_icons/tick.png); }
+.context-menu-item.icon-uncheck          { background-image: url(/images/grid_icons/check_off.png); }
+.context-menu-item.icon-unlock           { background-image: url(/images/grid_icons/unlock.png); }
+.context-menu-item.icon-user             { background-image: url(/images/grid_icons/user_suit.png); }
+.context-menu-item.icon-view             { background-image: url(/images/grid_icons/view.png); }
+.context-menu-item.icon-warning          { background-image: url(/images/grid_icons/warning.png); }
+
+.slick-top-panel button, .slick-top-panel input {
+  margin-right:2px;
+  border-radius:6px;
+}
+.slick-top-panel button {
+  background: #eee;
+}
+.slick-top-panel button:hover { background: #fbec88; /*#c0d8c0; */ }
+
+.sgrdhead {
+  display: inline-block;
+  vertical-align: middle;
+  padding-right: 10px;
+  padding-left: 10px;
+  border-radius:6px;
+  /* border: thin solid #bae391; */
+  border: 1px solid #4297d7;
+  margin-left:10px;
+  /*background-color: #61BD7E;*/
+  background: #2191c0 url(/images/grid_icons/grid_search_bar.png) 50% 50% repeat-x;
+}
+
+.sgrdhead button, .sgrdhead input {
+  margin-right:2px;
+  border-radius:6px;
+}
+.sgrdhead button {
+  background: #eee;
+}
+.sgrdhead button:hover { background: #fbec88; /*#c0d8c0; */ }
+.sgrheadlbl {
+  font-weight: normal;
+  line-height:26px;
+  width:200px;
+  display:inline-block;
+  vertical-align:text-bottom;
+}
+
+/* GRID HEADER SHORTCUTS POPUP
+ * ===========================
+ */
+.btnpopup {
+  position: absolute;
+  left: 15px;
+  display: none; /* keeps the popup hidden if no JS available */
+  width: 100px;
+  color: purple;
+}
+.sgrBubble {
+  font-weight: normal;
+  line-height:26px;
+  display:inline-block;
+  vertical-align:text-bottom;
+}
+span.sgrBubble:hover span.btnpopup {
+  z-index:25;
+  display: block;
+}
+
+span.sgrBubble span.btnpopup {
+  position: absolute;
+  left: initial;
+  display: none; /* keeps the popup hidden if no JS available */
+  width: 200px;
+  cursor: default;
+  background: #2191c0 url(/images/grid_icons/grid_search_bar.png) 50% 50% repeat-x;
+  border-radius: 6px;
+}
+span.btnpopup button {
+  cursor: pointer;
+}
+
+/* JQUERY UI TAB
+ * =============
+ */
+.jmt-tabclose-btn {
+  cursor: pointer;
+  margin: 4px;
+  border-radius: 3px;
+}
+.jmt-tabclose-btn:hover {
+  background-color: #EB661C; /*#7ad37a;*/
+}

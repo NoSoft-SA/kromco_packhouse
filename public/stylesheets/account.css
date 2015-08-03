@@ -19,7 +19,6 @@ div.denied, div.logout {
 	border-color: #0a0;
 	border-style: solid;
 	border-width: 1px 1px 1px 1px;
-
 }
 div.main {
 	width: 30em;
@@ -28,7 +27,6 @@ div.main {
 	color : #000;
 	border : 1px solid #bbb; 
 	padding : 1em;
-
 }
 div.main h1 {
 	color: #990033; 

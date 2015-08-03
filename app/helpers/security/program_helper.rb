@@ -1,6 +1,6 @@
 module Security::ProgramHelper
- 
- 
+
+
  def build_program_form(program,action,caption,is_edit = nil,is_create_retry = nil)
 #	--------------------------------------------------------------------------------------------------
 #	Define a set of observers for each composite foreign key- in effect an observer per combo involved
@@ -23,13 +23,13 @@ module Security::ProgramHelper
 						:field_name => 'functional_area_name',
 						:settings => {:list => functional_area_names}}
 
- 
+
 	field_configs[field_configs.length] = {:field_type => 'TextField',
 						:field_name => 'display_name'}
 
     field_configs << {:field_type => 'TextField',
 						:field_name => 'url_component'}
-						
+
 	field_configs[field_configs.length] = {:field_type => 'TextField',
 						:field_name => 'func_area_url_component'}
 
@@ -44,20 +44,20 @@ module Security::ProgramHelper
 
      field_configs[field_configs.length] = {:field_type => 'CheckBox',
 						:field_name => 'disabled'}
-						
+
      field_configs[field_configs.length] = {:field_type => 'CheckBox',
-						:field_name => 'is_leaf'}						
+						:field_name => 'is_leaf'}
 
 	build_form(program,field_configs,action,'program',caption,is_edit)
 
 end
- 
- 
+
+
  def build_program_search_form(program,action,caption,is_flat_search = nil)
 #	--------------------------------------------------------------------------------------------------
 #	Define an observer for each index field
 #	--------------------------------------------------------------------------------------------------
-	session[:program_search_form]= Hash.new 
+	session[:program_search_form]= Hash.new
 	#generate javascript for the on_complete ajax event for each combo
 	search_combos_js = gen_combos_clear_js_for_combos(["program_program_name","program_functional_area_name"])
 	#Observers for search combos
@@ -67,7 +67,7 @@ end
 
 	session[:program_search_form][:program_name_observer] = program_name_observer
 
- 
+
 	program_names = Program.find_by_sql('select distinct program_name from programs').map{|g|[g.program_name]}
 	program_names.unshift("<empty>")
 	if is_flat_search
@@ -82,17 +82,17 @@ end
 #	----------------------------------------
 	 field_configs = Array.new
 #	----------------------------------------------------------------------------------------------
-#	Define search Combo fields to represent the unique index on this table 
+#	Define search Combo fields to represent the unique index on this table
 #	----------------------------------------------------------------------------------------------
 	field_configs[0] =  {:field_type => 'DropDownField',
 						:field_name => 'program_name',
 						:settings => {:list => program_names},
 						:observer => program_name_observer}
- 
+
 	field_configs[1] =  {:field_type => 'DropDownField',
 						:field_name => 'functional_area_name',
 						:settings => {:list => functional_area_names}}
- 
+
 	build_form(program,field_configs,action,'program',caption,false)
 
 end
@@ -101,42 +101,65 @@ end
 
  def build_program_grid(data_set,can_edit,can_delete)
 
-	column_configs = Array.new
-	column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'program_name'}
-	column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'functional_area_name'}
-	column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'display_name'}
-    column_configs <<  {:field_type => 'text',:field_name => 'url_component'}
-    column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'class_name'}
-#	----------------------
-#	define action columns
-#	----------------------
-	if can_edit
-		column_configs[column_configs.length()] = {:field_type => 'action',:field_name => 'edit program',
-			:settings => 
-				 {:link_text => 'edit',
-				:target_action => 'edit_program',
-				:id_column => 'id'}}
-	end
+  column_configs = []
+  action_configs = []
+#  ----------------------
+#  define action columns
+#  ----------------------
+  if can_edit
+    action_configs << {:field_type => 'action',:field_name => 'edit program',
+      :column_caption => 'Edit',
+      :settings =>
+         {:link_text => 'edit',
+        :link_icon => 'edit',
+        :target_action => 'edit_program',
+        :id_column => 'id'}}
+  end
 
-	if can_delete
-		column_configs[column_configs.length()] = {:field_type => 'action',:field_name => 'delete program',
-			:settings => 
-				 {:link_text => 'delete',
-				:target_action => 'delete_program',
-				:id_column => 'id'}}
-	end
-	
-	column_configs[column_configs.length()] = {:field_type => 'action',:field_name => 'export to remote db',
-			:settings => 
+  if can_delete
+    action_configs << {:field_type => 'action',:field_name => 'delete program',
+      :column_caption => 'Delete',
+      :settings =>
+         {:link_text => 'delete',
+        :link_icon => 'delete',
+        :target_action => 'delete_program',
+        :id_column => 'id'}}
+  end
+
+  action_configs << {:field_type => 'separator'} if can_edit || can_delete
+
+	action_configs << {:field_type => 'action',:field_name => 'export to remote db',
+			:settings =>
 				 {:link_text => 'export program',
-#				:target_action => 'export_to_remote_connection',
+        :link_icon => 'exec1',
         :target_action => 'export_program',
 				:id_column => 'id'}}
-	
-   
-   data_set = [] if !data_set
 
- return get_data_grid(data_set,column_configs)
+  if can_edit
+    action_configs << {:field_type => 'action',:field_name => 'reorder_prog_funcs',
+        :settings =>
+           {:link_text => 'Re-order program functions',
+          :link_icon => 'refresh',
+          :target_action => 'reorder_program_functions',
+          :id_column => 'id'}}
+  end
+
+
+  column_configs << {:field_type => 'action_collection', :field_name => 'actions', :settings => {:actions => action_configs}} unless action_configs.empty?
+
+  column_configs << {:field_type => 'text', :field_name => 'program_name', :column_caption => 'Program name', :column_width => 150}
+  column_configs << {:field_type => 'text', :field_name => 'functional_area_name', :column_caption => 'Functional area name', :column_width => 150}
+  column_configs << {:field_type => 'text', :field_name => 'display_name', :column_caption => 'Display name', :column_width => 150}
+  column_configs << {:field_type => 'text', :field_name => 'description', :column_caption => 'Description'}
+  column_configs << {:field_type => 'text', :field_name => 'technology', :column_caption => 'Technology'}
+  column_configs << {:field_type => 'text', :field_name => 'is_non_web_program', :data_type => 'boolean', :column_caption => 'Is non web program'}
+  column_configs << {:field_type => 'text', :field_name => 'class_name', :column_caption => 'Class name'}
+  column_configs << {:field_type => 'text', :field_name => 'disabled', :data_type => 'boolean', :column_caption => 'Disabled'}
+  column_configs << {:field_type => 'text', :field_name => 'is_leaf', :data_type => 'boolean', :column_caption => 'Is leaf'}
+  column_configs << {:field_type => 'text', :field_name => 'url_component', :column_caption => 'Url component'}
+  column_configs << {:field_type => 'text', :field_name => 'func_area_url_component', :column_caption => 'Func area url component'}
+
+  get_data_grid(data_set,column_configs)
 end
 
  def build_load_program_form(program,action,caption)

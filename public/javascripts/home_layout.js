@@ -4,6 +4,32 @@
 // Block use of $ for jQuery to avoid conflict with Prototype.
 jQuery.noConflict();
 
+function send_fields_to_popup_window(link,send_fields) {
+  var split_send_fields = send_fields.split(",");
+  var send_fields_params = "";
+
+  for(j=0; j < split_send_fields.length; j++) {
+    var form_send_field = null;
+    if(window.parent.frames[1] !== undefined) {
+      form_send_field = window.parent.frames[1].document.getElementById(split_send_fields[j]);
+    }
+
+    if(form_send_field === null) {
+      form_send_field = document.getElementById(split_send_fields[j]);
+    }
+
+    if(form_send_field === null) {
+      form_send_field = window.parent.document.getElementById(split_send_fields[j]);
+    }
+
+    if(form_send_field !== null) {
+      send_fields_params += "&" + split_send_fields[j] + "=" + form_send_field.value;
+    }
+  }
+  var url = link.id + send_fields_params;
+  open_window_link(url);
+}
+
 function call_open_window(id)
 {
   open_window_link(id.id);

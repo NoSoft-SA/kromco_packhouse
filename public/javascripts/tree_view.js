@@ -30,7 +30,7 @@
 //                      frame to stop the 'spinning gif' inside the menu.
 //------------------------------------------------------------------------------------------------
 
- document.captureEvents(Event.MOUSEDOWN);
+// document.captureEvents(Event.MOUSEDOWN);
  document.onmousedown = MouseDown;
 
   var X = 0;
@@ -42,10 +42,14 @@
   
   function MouseDown(e)
   {
-      X = e.clientX + document.body.scrollLeft; //e.clientX;
+      //X = e.clientX + document.body.scrollLeft; //e.clientX;
+      //X = e.clientX + document.documentElement.scrollLeft; //e.clientX;
+      X = e.clientX + ((document.body.scrollLeft) ?  document.body.scrollLeft : document.documentElement.scrollLeft); //e.clientX;
       pX = e.pageX;
       pY = e.pageY;
-      Y = e.clientY + document.body.scrollTop;//e.clientY;
+      //Y = e.clientY + document.body.scrollTop;//e.clientY;
+      //Y = e.clientY + document.documentElement.scrollTop;//e.clientY;
+      Y = e.clientY + ((document.body.scrollTop) ?  document.body.scrollTop : document.documentElement.scrollTop);//e.clientY;
       
     }
   

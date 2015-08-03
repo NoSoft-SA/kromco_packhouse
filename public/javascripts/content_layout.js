@@ -4,6 +4,17 @@
 // Block use of $ for jQuery to avoid conflict with Prototype.
 jQuery.noConflict();
 
+// Are we in a sub-frame of contentframe?
+function inSubFrame() {
+  var isSub = ('contentFrame' !== self.name && '' !== self.name);
+  if (top.frames.length === 1) {
+    return false;
+  }
+  else {
+    return isSub;
+  }
+}
+
 // Called on click of jqgridminimize div. Zooms the page back to normal.
 function jqGridMinimize() {
   var cf = jQuery('#contentFrame', top.document);
@@ -17,6 +28,7 @@ function jqGridMinimize() {
 
 // If this subframe has been zoomed out make sure the minimise button is available.
 function jqGridMinButtonRequired() {
+  if(self.name == '') { return false; }
   if(top.frames.length > 1) {
     var sf;
     if('contentFrame' == self.name) {
@@ -25,9 +37,9 @@ function jqGridMinButtonRequired() {
     else {
       sf = jQuery('#'+self.name, top.frames[1].document);
     }
-		if(!jQuery('#contentFrame').fullScreen()) {
-			if('0px' == sf.css('top')) {document.getElementById("jqgridminimize").style.visibility = "visible";}
-		}
+    if(!jQuery('#contentFrame').fullScreen()) {
+      if('0px' == sf.css('top')) {document.getElementById("jqgridminimize").style.visibility = "visible";}
+    }
   }
 }
 
@@ -44,6 +56,7 @@ jQuery(document).ready(function() {
   jQuery('#jqgridminimize').button({ icons: { primary: "ui-icon-zoomin" } });
   jqGridMinButtonRequired();
   jQuery(".multiselect").multiselect();
+  jQuery(".chosen-select").chosen({disable_search_threshold: 10, allow_single_deselect: true, search_contains: true});
 });
 
 function send_fields_to_popup_window(link,send_fields) {
@@ -100,10 +113,10 @@ function is_outer_form()
 
 function clear_info()
 {
-  //	       info_img = document.getElementById("info_img");
-  //	       info_text = document.getElementById("info_body");
-  //	       info_img.style.visibility = "hidden";
-  //	       info_text.innerHTML = "";
+  //         info_img = document.getElementById("info_img");
+  //         info_text = document.getElementById("info_body");
+  //         info_img.style.visibility = "hidden";
+  //         info_text.innerHTML = "";
 
 }
 

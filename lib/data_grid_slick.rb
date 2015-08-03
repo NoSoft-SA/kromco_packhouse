@@ -267,10 +267,21 @@ EOS
       end
       buttons << "<input type='text' id='#{@grid_id}search' placeholder='Search...' style='width:100px;margin-left:5px;margin-right:5px;vertical-align:top;' />" unless @empty
 
+      # Shortcut buttons for grid header
+      popup = "<span class='btnpopup'>"
+      popup << "<button title='Export csv' onClick=\"downloadSlickGrid('#{@grid_id}','#{@caption.gsub('&nbsp;','grid_contents').gsub(/[\/:*?"\\<>\|\r\n]/i, '-')}');\"><img src='/images/grid_icons/csv_text.png' width='16' height='16' /></button>"
+      popup << "<button title='Save filter settings' onClick=\"saveLocSlickGrid('#{@grid_id}','#{@caption}');\"><img src='/images/grid_icons/filter_large.png' width='16' height='16' /></button>"
+      popup << "<button title='Apply filter settings' onClick=\"getLocSlickGrid('#{@grid_id}','#{@caption}');\"><img src='/images/grid_icons/wand.png' width='16' height='16' /></button>"
+      popup << "<button title='Save column settings' onClick=\"saveLocSlickGridCols('#{@grid_id}');\"><img src='/images/grid_icons/application_tile_horizontal.png' width='16' height='16' /></button>"
+      popup << "<button title='Apply column settings' onClick=\"getLocSlickGridCols('#{@grid_id}');\"><img src='/images/grid_icons/wand.png' width='16' height='16' /></button>"
+      if @multi_select
+        popup << "<button id='#{@grid_id}savemulti' title='Save selection' onClick=\"returnMultiSelectIdsFromGrid('#{@grid_id}','#{@multi_select_action}');\"><img src='/images/grid_icons/disk.png' width='16' height='16' /></button>"
+      end
+      popup << "</span>"
       if 0 == @totcount
         head2 = "<div class='sgrdhead'>#{buttons} <span id='#{@grid_id}status-label' class='sgrheadlbl'>There are no rows to display</span></div>"
       else
-        head2 = "<div class='sgrdhead'>#{buttons} <span id='#{@grid_id}status-label' class='sgrheadlbl'>Showing all rows (#{@totcount})</span></div>"
+        head2 = "<div class='sgrdhead'>#{buttons} <span class='sgrBubble'>#{popup}<span id='#{@grid_id}status-label' class='sgrheadlbl'>Showing all rows (#{@totcount})</span></span></div>"
       end
 
       if @show_caption
@@ -587,7 +598,7 @@ EOS
 
     mygrid = new Slick.Grid("##{@grid_id}", dataView, columns, options);
 
-    #{if @grouped
+    #{if @grouped || !@groupable_fields.empty?
     "// register the group item metadata provider to add expand/collapse group handlers
     mygrid.registerPlugin(groupItemMetadataProvider);"
     end}
@@ -791,7 +802,7 @@ EOS
 
   protected
 
-    # Create a popup_link (ApplicationHelper::LinkWindowField) from settings in +sepcial_commands+.
+    # Create a popup_link (ApplicationHelper::LinkWindowField) from settings in +special_commands+.
     def generate_popup_link(special_commands)
       settings = nil
       if special_commands[:settings]
@@ -904,7 +915,7 @@ EOS
           col['cssClass']   = 'slk_cell_centre_align'
           col['unfiltered'] = true
           col['sortable']   = false
-          col['dynlink']    = true if col_config[:settings] && col_config[:settings][:dynamic_link_text].nil? && col_config[:settings][:image].blank?
+          col['dynlink']    = true if col_config[:settings] && !col_config[:settings][:dynamic_link_text].nil? && col_config[:settings][:image].blank?
         end
         if 'link_window' == col_config[:field_type]
           col['formatter']  = 'link_window'
@@ -994,10 +1005,14 @@ EOS
           end
         end
         if @multi_select
-          # row['cm'] = sel_rows.include?(active_record.id) ? 1 : 0
-          @pre_selected_ids << active_record.id if sel_rows.include?(active_record.id) ||  sel_rows.include?(active_record.id.to_i)
+          this_id = active_record['id']
+          @pre_selected_ids << this_id if sel_rows.include?(this_id)      ||
+                                          sel_rows.include?(this_id.to_i) ||
+                                          sel_rows.include?(this_id.to_s)
           unless @non_selectable_ids.empty?
-            row['not_multiselectable'] = @non_selectable_ids.any? {|a| a == active_record.id || a == active_record.id.to_i } ? 'Y' : 'N'
+            row['not_multiselectable'] = @non_selectable_ids.any? {|a| a == this_id      ||
+                                                                       a == this_id.to_i ||
+                                                                       a == this_id.to_s } ? 'Y' : 'N'
           end
         end
 
@@ -1258,8 +1273,8 @@ EOS
       # Automatic confirmation prompt for delete/remove links
       #unless @settings[:html_options] && @settings[:html_options][:prompt]
       if prompt.nil?
-        if (@settings[:link_text] && (@settings[:link_text] =~ /delete|remove/)) ||
-          (@settings[:image]     && (@settings[:image]     =~ /delete|remove/))
+        if (@settings[:link_text] && (@settings[:link_text] =~ /delete|remove/i)) ||
+          (@settings[:image]     && (@settings[:image]     =~ /delete|remove/i))
           prompt = "Are you sure you want to delete/remove this record?"
         end
       end
@@ -1284,10 +1299,18 @@ EOS
 
       row_index = row_nr - 1
       options = {:controller => controller, :action => @settings[:target_action]}
-      if @grid.key_based_access
-        options.store(:id, eval("active_record['#{@settings[:id_column]}']"))
+      if @settings[:name_id_as_key]
+        if @grid.key_based_access
+          options.store(:key, eval("active_record['#{@settings[:id_column]}']"))
+        else
+          options.store(:key, active_record.send(@settings[:id_column]))
+        end
       else
-        options.store(:id, active_record.send(@settings[:id_column]))
+        if @grid.key_based_access
+          options.store(:id, eval("active_record['#{@settings[:id_column]}']"))
+        else
+          options.store(:id, active_record.send(@settings[:id_column]))
+        end
       end
       options.store(:id_value, @settings[:id_value]) if @settings[:id_value]
 
@@ -1490,7 +1513,7 @@ EOS
           s << "{\"type\": \"#{ra['type']}\",\"body\":#{ra['body']}},"
         end
       end
-      s[0..-2] << ']'
+      s == '[' ? '' : s[0..-2] << ']'
     end
 
   end

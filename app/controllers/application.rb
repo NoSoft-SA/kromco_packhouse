@@ -24,6 +24,13 @@ class ApplicationController < ActionController::Base
   include Kromco::ReworksServices
   include Kromco::EdiServices
 
+  MY_PAGINATION_OPTIONS = {
+    :name                 => :page,
+    :window_size          => 2,
+    :always_show_anchors  => true,
+    :link_to_current_page => false,
+    :params               => {}
+  }
 
   @@page_size = 500
 
@@ -91,10 +98,10 @@ class ApplicationController < ActionController::Base
         lock.destroy if lock
       end
     end
-    store_request_info(true) #clear active request
+    store_request_info(true)#clear active request
   end
 
-  def delete(dir, controller)
+  def delete(dir,controller)
     @msg = "Are you sure you want to delete?  "
 
 
@@ -340,8 +347,8 @@ class ApplicationController < ActionController::Base
       if lock
         lock_url = lock.url
       else
-        lock = RequestLock.new
-        lock.url = request.path
+        lock         = RequestLock.new
+        lock.url     = request.path
         lock.user_id = session[:user_id].user_name
         lock.create
         @mylock = true
@@ -370,7 +377,7 @@ class ApplicationController < ActionController::Base
 
   # Set the notice if a parameter is given, then redirect back
   # to the current controller's +index+ action
-  def redirect_to_index(msg = nil, caption = nil, freeze = nil, err = nil)
+  def redirect_to_index(msg = nil, caption = nil, freeze = nil,err = nil)
     if flash[:notice]
       flash[:notice] += msg if msg
     else
@@ -388,7 +395,8 @@ class ApplicationController < ActionController::Base
   end
 
   def selected_rows?
-    list = eval params['selection']['list']
+    #list = eval params['selection']['list']
+    list = ids_from_multi_select_grid_params
     if list.length > 0
       return list
     else
@@ -425,14 +433,14 @@ class ApplicationController < ActionController::Base
   #     render :update |page| do
   #       controller.close_ajax_popup_window( page, 'Something to say in an alert' )
   #     end
-  def close_ajax_popup_window(page, msg=nil, reload_content_frame=true)
+  def close_ajax_popup_window( page, msg=nil, reload_content_frame=true )
     page.call 'alert', msg if msg
     page.call 'close'
     page << 'window.opener.frames[1].location.reload(true);' if reload_content_frame
   end
 
-  def rescue_action_in_public(exception)
-    puts "hello exc"
+  def rescue_action_in_public(exception) # Public: request came from another ip, not localhost.
+
     handle_error("An unexpected exception occurred")
 
   end
@@ -443,15 +451,13 @@ class ApplicationController < ActionController::Base
   if ENV['RAILS_ENV'] == 'development'
     def rescue_action_with_clear_lock(exception)
       clear_lock
-      rescue_action_locally_orig(exception)
+      rescue_action_locally_orig( exception )
     end
-
     alias_method :rescue_action_locally_orig, :rescue_action_locally
     alias_method :rescue_action_locally, :rescue_action_with_clear_lock
   else
-    def rescue_action_locally(exception)
+    def rescue_action_locally(exception) # Locally: request originated from localhost.
       handle_error("An unexpected exception occurred")
-
     end
   end
 
@@ -465,22 +471,22 @@ class ApplicationController < ActionController::Base
       show_stack_trace = true
 
       if $!.is_a? MesScada::InfoError
-        error = $!.message
+        error            = $!.message
         show_stack_trace = false
-        err_type = 'error'
-      elsif $!.is_a?(ActiveRecord::StatementInvalid) && $!.message.include?('violates foreign key constraint')
+        err_type         = 'error'
+      elsif $!.is_a?( ActiveRecord::StatementInvalid ) && $!.message.include?('violates foreign key constraint')
         show_stack_trace = false
-        err_type = 'error'
-        err_arr = err_text.split('table').map { |r| r.strip.split('"')[1] }
-        err_text = "The #{Inflector.humanize(Inflector.singularize(err_arr[1]))} record is required by a #{Inflector.humanize(Inflector.singularize(err_arr.last))} record."
+        err_type         = 'error'
+        err_arr          = err_text.split( 'table' ).map {|r| r.strip.split('"')[1] }
+        err_text         = "The #{Inflector.humanize(Inflector.singularize(err_arr[1]))} record is required by a #{Inflector.humanize(Inflector.singularize(err_arr.last))} record."
 
         #       RuntimeError: ERROR	C23503	Mupdate or delete on table "commodities" violates foreign key constraint "fk_counts_to_commodities" on table "standard_counts"	DKey (id)=(6) is still referenced from table "standard_counts". Fri_triggers.c	L3580	Rri_ReportViolation: DELETE FROM commodities WHERE "id" = 6
       end
 
       if ENV['RAILS_ENV'] == 'development'
-        send_mail = false
+        send_mail  = false
       else
-        send_mail = false
+        send_mail  = false
       end
       error_detail = ''
       error_detail << "<br><font size = '2px' color = 'black'>The system reported the following #{err_type}.</font> <br> " + err_text.gsub('<', '&lt;').gsub('>', '&gt;') if $! != nil
@@ -498,9 +504,9 @@ class ApplicationController < ActionController::Base
       #      puts "ERROR: " + err_entry.description + " STACK: " + err_entry.stack_trace
       err_entry.logged_on_user = session[:user_id].user_name if  session[:user_id]
       err_entry.person = session[:user_id].person.last_name + "," + session[:user_id].person.first_name if  session[:user_id]
-      err_entry.error_type = error_type
+      err_entry.error_type      = error_type
       err_entry.controller_name = params[:controller]
-      err_entry.action_name = params[:action]
+      err_entry.action_name     = params[:action]
       err_entry.create
 
       #-----------
@@ -508,7 +514,7 @@ class ApplicationController < ActionController::Base
       #-----------
       if send_mail && $! && error
         err_entry.html_stacktrace = $!.backtrace.join("<br>").to_s
-        email = RailsErrorMail.create_set_error_details(err_entry)
+        email                     = RailsErrorMail.create_set_error_details(err_entry)
         email.set_content_type("text/html")
         RailsErrorMail.deliver(email)
       end
@@ -542,8 +548,8 @@ class ApplicationController < ActionController::Base
     begin
 
       show_stack_trace = false
-      send_mail = false
-      error_detail = ""
+      send_mail        = false
+      error_detail     = ""
       error_detail = ".<br><font size = '2px' color = 'black'>The system reported the following exception.</font> <br> " + $! if $! != nil
 
       error_detail += "<br><br><font size = '2px'>stack trace: <BR></font><font color = 'red' size = 'smaller'>" + $!.backtrace.to_s + "</font>" if $! != nil && show_stack_trace == true
@@ -554,11 +560,11 @@ class ApplicationController < ActionController::Base
       err_entry = RailsError.new
       err_entry.description = error + error_detail if error
       err_entry.stack_trace = $!.backtrace.join("\n").to_s if $!
-      err_entry.logged_on_user = "system"
-      err_entry.person = "system"
-      err_entry.error_type = "rails back-end service"
+      err_entry.logged_on_user  = "system"
+      err_entry.person          = "system"
+      err_entry.error_type      = "rails back-end service"
       err_entry.controller_name = params[:controller]
-      err_entry.action_name = params[:action]
+      err_entry.action_name     = params[:action]
       err_entry.create
 
       #-----------
@@ -566,7 +572,7 @@ class ApplicationController < ActionController::Base
       #-----------
       if send_mail && $!
         err_entry.html_stacktrace = $!.backtrace.join("<br>").to_s
-        email = RailsErrorMail.create_set_error_details(err_entry)
+        email                     = RailsErrorMail.create_set_error_details(err_entry)
         email.set_content_type("text/html")
         RailsErrorMail.deliver(email)
       end
@@ -619,13 +625,26 @@ class ApplicationController < ActionController::Base
 
         if params[:action]== "logged_in"
           store_request_info(true)
-          puts("logged in")
+
           build_menus_for_user
           @user_name = session[:user_id].user_name
 
           render(:template => "login/logged_in")
         else
-          lock = request.xhr? ? nil : get_lock
+          # lock = request.xhr? ? nil : get_lock
+          # NB. This could be simplified to just: if request.xhr? || request.get?
+          #     - but then all GET links that change data will need to be altered to use :method => :post..
+          if request.xhr? || (request.request_parameters["action"]                    &&
+                              request.get?                                            &&
+                             (request.request_parameters["action"].include?('list')   ||
+                              request.request_parameters["action"].include?('search') ||
+                              request.request_parameters["action"].include?('view')))
+            lock = nil
+            # logger.debug ">>> NOLOCK: #{request.request_parameters["action"]}"
+          else
+            lock = get_lock
+            # logger.debug ">>>   LOCK: #{request.request_parameters["action"]}"
+          end
           if lock && params[:action]!= "list_request_locks" && params[:action]!= "delete_request_lock"
             redirect_to_index("Transaction with url: " + lock + " is still busy")
             return
@@ -643,7 +662,7 @@ class ApplicationController < ActionController::Base
 
   def store_request_info(clear_info = nil)
     if !clear_info
-      ActiveRequest.set_active_request(session[:user_id].user_name, params[:controller], params[:action], "web")
+      ActiveRequest.set_active_request(session[:user_id].user_name, params[:controller], params[:action],"web")
     else
       ActiveRequest.clear_active_request
     end
@@ -675,8 +694,8 @@ class ApplicationController < ActionController::Base
   def generic_authorise
     return if bypass_generic_security? == true
     exceptions = admin_exceptions?
-    program = program_name?
-    match = false
+    program    = program_name?
+    match      = false
     if exceptions != nil
       match = exceptions.find { |exc| exc == params[:action] }
     end
@@ -684,7 +703,7 @@ class ApplicationController < ActionController::Base
     if  match == false || exceptions == nil
 
       if program != nil
-        puts "gen auth"
+
         authorise_for_web program, "admin"
       end
     end
@@ -707,59 +726,55 @@ class ApplicationController < ActionController::Base
     all_programs = Program.find(:all, :include => "program_functions", :order => "programs.id,program_functions.position,program_functions.id")
 
     #base_dir =  File.dirname(__FILE__)+ '../../../public'
-    base_dir = 'public'
+    base_dir     = 'public'
 
-    menus_js = "var menu_structure = new MenuStructure();"
-    func_areas = menu_data.keys
+    menus_js     = "var menu_structure = new MenuStructure();"
+    func_areas   = menu_data.keys
 
     func_areas.each do |func_area_item|
 
       #add outer tab as functional area
-
-      func_area_caption = func_area_item
-      func_area_caption = func_area_item.split(",")[1] if func_area_item.index(",") != nil
-      func_area = func_area_item
-      func_area = func_area_item.split(",")[0] if func_area_item.index(",") != nil
-      func_area_image = func_area.gsub(" ", "_")
-      outer_image = "/images/menu/" + func_area_image + "/" + func_area_image + ".png"
-      outer_image = "/images/menu/transparent.png" if not File.exists?(base_dir + outer_image)
+      func_area, func_area_caption = func_area_item.split(',')
+      func_area_caption          ||= func_area
+      func_area_image              = func_area.gsub(" ", "_")
+      outer_image                  = "/images/menu/#{func_area_image}/#{func_area_image}.png"
+      outer_image                  = "/images/menu/transparent.png" if not File.exists?(base_dir + outer_image)
 
 
-      menus_js += " menu_structure.AddTab('" + func_area_caption + "',' ','" + outer_image + "');"
+
+      menus_js   += " menu_structure.AddTab('#{func_area_caption}',' ','#{outer_image}');"
       #add inner tabs as programs for the functional area
       prog_items = menu_data[func_area_item]
 
-      prog_items.each do |prog|
-        prog_caption = prog
-        prog_caption = prog.split(",")[1] if prog.index(",") != nil
-        prog = prog.split(",")[0] if prog.index(",") != nil
-        prog_image = prog.gsub(" ", "_")
-        inner_image = "/images/menu/" + func_area_image + "/" + prog_image + "/" + prog_image + ".png"
+      prog_items.each do |prog_item|
+
+        prog, prog_caption = prog_item.split(',')
+        prog_caption ||= prog
+        prog_image  = prog.gsub(" ", "_")
+        inner_image = "/images/menu/#{func_area_image}/#{prog_image}/#{prog_image}.png"
         inner_image = "/images/menu/transparent.png" if not File.exists?(base_dir + inner_image)
 
-        menus_js += " menu_structure.OuterTabs['" + func_area_caption + "'].AddTab('" + prog_caption + "',' ','" + inner_image + "');"
+        menus_js       += " menu_structure.OuterTabs['#{func_area_caption}'].AddTab('#{prog_caption}',' ','#{inner_image}');"
         #now add the third level menus
-        program_rec = program_rec = all_programs.find { |p| p.program_name == prog }
+        program_rec    = all_programs.find { |p| p.program_name == prog }
         prog_functions = program_rec.program_functions
 
         prog_functions.each do |function|
           display_name = function.display_name
-          if display_name == nil||display_name.strip == ""
-            display_name = function.name.gsub("_", " ")
-          end
+          display_name = function.name.gsub("_", " ") if display_name.blank?
           display_name_image = display_name.gsub(" ", "_")
-          l3_image = "/images/menu/" + func_area_image + "/" + prog_image + "/" + display_name_image + ".png"
+          l3_image           = "/images/menu/#{func_area_image}/#{prog_image}/#{display_name_image}.png"
           l3_image = "/images/menu/transparent.png" if not File.exists?(base_dir + l3_image)
 
-          prog = program_rec.url_component||prog
-          func_area_val = program_rec.func_area_url_component||func_area
+          func_prog     = program_rec.url_component || prog
+          func_area_val = program_rec.func_area_url_component || func_area
           func_area_val = function.func_area_url_component if function.func_area_url_component
 
-          prog = function.prog_url_component if function.prog_url_component
+          func_prog = function.prog_url_component if function.prog_url_component
 
-          url = @@domain + func_area_val + "/" + prog + "/" + function.name
+          url  = "#{@@domain}#{func_area_val}/#{func_prog}/#{function.name}"
           url << "/" << function.url_param if function.url_param
-          menus_js += " menu_structure.OuterTabs['" + func_area_caption + "'].Tabs['" + prog_caption + "'].AddTab('" + display_name + "','" + url +"','" + l3_image + "');"
+          menus_js += " menu_structure.OuterTabs['#{func_area_caption}'].Tabs['#{prog_caption}'].AddTab('#{display_name}','#{url}','#{l3_image}');"
         end
 
       end
@@ -774,7 +789,7 @@ class ApplicationController < ActionController::Base
   def build_menus_for_user
 
     menus = Hash.new
-    user = session[:user_id]
+    user  = session[:user_id]
 
     if not user.nil?
       if user.menus_js == nil
@@ -807,7 +822,7 @@ class ApplicationController < ActionController::Base
           end
         end
 
-        @menus_js = convert_menus_to_js(menus)
+        @menus_js     = convert_menus_to_js(menus)
         user.menus_js = @menus_js
       else
         @menus_js = user.menus_js
@@ -836,30 +851,30 @@ class ApplicationController < ActionController::Base
   #--------------------------------------------------------------------------------
 
 
+  # Check authorisation. Program parameter can be a String or an array of Strings if the permission can be in any one of the programs.
   def authorise(program, permission, user)
-    begin
-      user = User.find_by_user_name(user) if user.class.to_s == "String"
+    programs = Array(program)
+    user     = User.find_by_user_name(user) if user.is_a? String
 
-      query = "SELECT
-               public.security_permissions.id
-               FROM
-               public.security_groups_security_permissions
-               INNER JOIN public.security_groups ON (public.security_groups_security_permissions.security_group_id = public.security_groups.id)
-                INNER JOIN public.security_permissions ON (public.security_groups_security_permissions.security_permission_id = public.security_permissions.id)
-                INNER JOIN public.program_users ON (public.security_groups.id = public.program_users.security_group_id)
-                INNER JOIN public.programs ON (public.program_users.program_id = public.programs.id)
-                WHERE
-                (public.program_users.user_id = #{user.id}) AND
-                (public.security_permissions.security_permission = '#{permission}') AND
-                (public.programs.program_name = '#{program}')"
+    query = "SELECT
+             public.security_permissions.id
+             FROM
+             public.security_groups_security_permissions
+             INNER JOIN public.security_groups ON (public.security_groups_security_permissions.security_group_id = public.security_groups.id)
+              INNER JOIN public.security_permissions ON (public.security_groups_security_permissions.security_permission_id = public.security_permissions.id)
+              INNER JOIN public.program_users ON (public.security_groups.id = public.program_users.security_group_id)
+              INNER JOIN public.programs ON (public.program_users.program_id = public.programs.id)
+              WHERE
+              (public.program_users.user_id = #{user.id}) AND
+              (public.security_permissions.security_permission = '#{permission}') AND
+              (public.programs.program_name IN ( '#{programs.join("','")}') )"
 
-      @val = User.connection.select_one(query)
+    val  = User.connection.select_one(query)
 
-      return @val != nil
-    rescue
-      puts "Authorisation exception: " + $!.to_s
-      return false
-    end
+    !val.nil?
+
+  rescue
+    false
   end
 
   #-----------------------------------------------------------
@@ -875,18 +890,18 @@ class ApplicationController < ActionController::Base
 
       return record != nil
     rescue
-      puts "Basic Authorisation exception: " + $!.to_s
+
       return false
     end
   end
 
 
   def authorise_for_web(program, permission)
-    puts "in auth for web"
+
     user = session[:user_id]
 
-    puts user.to_s
     authorised = authorise(program, permission, user)
+
     redirect_to :action => "denied", :controller => "/login" unless authorised
     authorised
   end
@@ -897,6 +912,20 @@ class ApplicationController < ActionController::Base
     user = session[:user_id]
 
     authorise(program, permission, user)
+  end
+
+  # The logged-in User must belong to one of the given departments.
+  def authorise_by_department(*department_names)
+    dept = session[:user_id].department.department_name.upcase
+
+    if department_names.map {|a| a.upcase}.include?(dept)
+      true
+    else
+      s = department_names.to_sentence(:connector => 'or')
+      flash[:extra_message] = "This action can only be performed by someone in the #{s} department."
+      redirect_to :action => "denied", :controller => "/login"
+      false
+    end
   end
 
   #utility methods needed by all controllers for request parameter processing
@@ -937,16 +966,16 @@ class ApplicationController < ActionController::Base
   def dynamic_search(request_paramz, table_name, model_name, paginate = true, includes = nil, order = nil, page_size = nil)
     request_params = request_paramz.clone # Luks change
     begin
-      main_table = table_name
-      from_tables = table_name
+      main_table      = table_name
+      from_tables     = table_name
       fk_field_tables = Hash.new
 
       if includes
-        from_tables += ", "
-        fk_tables = includes.gsub("'", "")
+        from_tables       += ", "
+        fk_tables         = includes.gsub("'", "")
         pluralized_tables = fk_tables.split(",")
         #remove the list of fields from each table
-        tables_only_list = Array.new
+        tables_only_list  = Array.new
         pluralized_tables.each do |p|
           table_parts = p.split("(")
           tables_only_list.push(table_parts[0])
@@ -958,13 +987,13 @@ class ApplicationController < ActionController::Base
           end
 
         end
-        fk_tables = tables_only_list.map { |p| p.pluralize() }.join(",")
+        fk_tables   = tables_only_list.map { |p| p.pluralize() }.join(",")
         from_tables += fk_tables
-        includes = "[" + tables_only_list.map { |m| "\'" + m + "\'" }.join(",") + "]"
+        includes    = "[" + tables_only_list.map { |m| "\'" + m + "\'" }.join(",") + "]"
       end
 
 
-      puts "FROM: " + from_tables
+
 
       if page_size
         session[:active_page_size]= page_size
@@ -974,10 +1003,10 @@ class ApplicationController < ActionController::Base
 
       return if request_params == nil
 
-      all_empty = true
+      all_empty               = true
 
       popupdate_search_string =""
-      added_date = false
+      added_date              = false
       request_params.each do |date_key, date_value|
         if fk_field_tables
           if fk_field_tables.has_key?(date_key + "date2from")
@@ -1007,13 +1036,13 @@ class ApplicationController < ActionController::Base
       end
       table_name = main_table
 
-      params = ""
-      var = Inflector.singularize(table_name)
+      params     = ""
+      var        = Inflector.singularize(table_name)
       if added_date
         popupdate_search_string = popupdate_search_string.reverse.slice(popupdate_search_string.reverse.index("dna")+3, popupdate_search_string.length()).reverse+" and "
 
       end
-      code = "@" + table_name + " = " + model_name + ".find(:all,:conditions => \""+popupdate_search_string
+      code  = "@" + table_name + " = " + model_name + ".find(:all,:conditions => \""+popupdate_search_string
       count = "@count = " + model_name + ".count_by_sql(\"select count(*) from " + from_tables + " where(" + popupdate_search_string
 
 
@@ -1025,9 +1054,9 @@ class ApplicationController < ActionController::Base
         end
 
         if not (value == nil ||value.to_s.strip()==""||value.to_s == "" || value.to_s.upcase().index("SELECT A VALUE")!= nil)
-          code += table_name + "." + key + " = '\#{" + key.to_s + "}' and "
-          count += table_name + "." + key + " = '\#{" + key.to_s + "}' and "
-          params += key + " = '" + request_params[key].to_s + "'\n"
+          code      += table_name + "." + key + " = '\#{" + key.to_s + "}' and "
+          count     += table_name + "." + key + " = '\#{" + key.to_s + "}' and "
+          params    += key + " = '" + request_params[key].to_s + "'\n"
           all_empty = false
         end
       end
@@ -1036,7 +1065,7 @@ class ApplicationController < ActionController::Base
       if all_empty
 
 
-        code = "@" + table_name + " = " + model_name + ".find(:all"
+        code  = "@" + table_name + " = " + model_name + ".find(:all"
         count = ""
         count = "@count = " + model_name + ".count" if paginate
         if paginate
@@ -1058,7 +1087,7 @@ class ApplicationController < ActionController::Base
       else
 
 
-        code = code.slice(0, code.length()-5) + "\""
+        code  = code.slice(0, code.length()-5) + "\""
 
         count = count.slice(0, count.length()-5) + ")\")"
 
@@ -1089,7 +1118,7 @@ class ApplicationController < ActionController::Base
       pager += "@count, session[:active_page_size],@current_page\n"
       #puts "pager: " + pager
       eval pager if paginate
-      puts "query code: " + code
+
 
       eval code
 
@@ -1099,7 +1128,7 @@ class ApplicationController < ActionController::Base
       return eval("@" + table_name)
 
     rescue
-      puts "dynamic query error: " + $!
+
       raise $!
 
     end
@@ -1171,10 +1200,10 @@ class ApplicationController < ActionController::Base
     #------------------------------------------------------------------------------------------------------
     pdt_running_program = PdtRunningProgram.find_by_user_and_pdt_client_ip(@user, @ip)
     if @jsession_store.get_session != nil && @jsession_store.get_session[:active_transaction] != nil && @jsession_store.get_session[:active_transaction].pdt_method != nil
-      program = Inflector.underscore(@jsession_store.get_session[:active_transaction].pdt_method.class_name)
+      program           = Inflector.underscore(@jsession_store.get_session[:active_transaction].pdt_method.class_name)
       parent_class_name = Inflector.underscore(@jsession_store.get_session[:active_transaction].pdt_method.parent_class_name)
     else
-      program = nil
+      program           = nil
       parent_class_name = nil
     end
     #------------------------------------------------------------------------------------------------------
@@ -1189,11 +1218,11 @@ class ApplicationController < ActionController::Base
     #------------------------------------------------------------------------------------------------------
     if @jsession_store.get_session != nil && @jsession_store.get_session[:active_transaction] != nil
       if pdt_running_program == nil
-        pdt_running_program = PdtRunningProgram.new
-        pdt_running_program.user = @user
-        pdt_running_program.program = program
+        pdt_running_program                   = PdtRunningProgram.new
+        pdt_running_program.user              = @user
+        pdt_running_program.program           = program
         pdt_running_program.parent_class_name = parent_class_name
-        pdt_running_program.pdt_client_ip = @ip
+        pdt_running_program.pdt_client_ip     = @ip
 
         begin
           pdt_running_program.save
@@ -1202,7 +1231,7 @@ class ApplicationController < ActionController::Base
         end
       else
         begin
-          pdt_running_program.update_attributes(:program => program, :parent_class_name => parent_class_name)
+          pdt_running_program.update_attributes(:program=>program, :parent_class_name=>parent_class_name)
         rescue
           raise "pdt_running_program could bot be updated : " + $!
         end
@@ -1251,8 +1280,8 @@ class ApplicationController < ActionController::Base
   #   START OF HAPPYMORE'S CODE
   #================================
   def test_permission(program, permission)
-    puts "in test perm"
-    user = session[:user_id]
+
+    user       = session[:user_id]
 
     authorised = authorise(program, permission, user)
 
@@ -1516,8 +1545,19 @@ class ApplicationController < ActionController::Base
 
   # Returns an array of Integer ids by manipulating the params returned
   # from a multiselect grid.
-  def ids_from_multi_select_grid_params
-    params[:selection][:list].gsub(/\[|\]/, '').split(',').map { |r| r.to_i }
+  def ids_from_multi_select_grid_params( format=:integers )
+    if :strings == format
+      params[:selection][:list].gsub(/\[|\]/, '').split(',').map {|r| r }
+    else
+      params[:selection][:list].gsub(/\[|\]/, '').split(',').map {|r| r.to_i }
+    end
+  end
+
+  # Sets the @grid_selected_rows for a multi_select grid.
+  # Pass an array of ids (String or Integer)
+  def pre_select_ids_for_multi_select_grid( ids )
+    row_identifier      = Struct.new(:id)
+    @grid_selected_rows = ids.map {|i| row_identifier.new(i.to_i) }
   end
 
   def show_or_hide_person_org_names(party_type, model_name)
@@ -1527,4 +1567,59 @@ class ApplicationController < ActionController::Base
       render :text => "jQuery('##{model_name}_organisation_name').hide();jQuery('.org_type').hide();jQuery('##{model_name}_first_name').show();jQuery('##{model_name}_last_name').show();jQuery('.person_type').show();", :layout => false
     end
   end
+
+  # Save the current URL. Call this before listing a grid.
+  def store_last_grid_url
+    session[:last_grid_url] = request.request_parameters
+  end
+
+  # Return the last_grid_url.
+  def last_grid_url
+    url_for( session[:last_grid_url] )
+  end
+
+  # Store any url for listing a grid. With no parameters will default to list_ action for the current controller.
+  # If the option :unless_already_set is true, it will only set the session var if the existing url is for a different controller.
+  def store_list_as_grid_url(options={})
+    url_parts  = request.request_uri.split('/')
+    url_parts.pop if url_parts.last.is_numeric? # remove optional id
+    url_parts.pop                               # remove action
+    url_parts.shift if url_parts.first.blank?   # remove blank element representing leading '/'
+    controller = options[:controller] || url_parts.join('/')
+    action     = options[:action]     || "list_#{url_parts.last.pluralize}"
+
+    return if options[:unless_already_set] && session[:last_grid_url] && session[:last_grid_url]['controller'] == controller
+
+    session[:last_grid_url] = {'action' => action, 'controller' => controller}
+  end
+
+  # Redirect to the saved URL. Call this typically after an update to return to the grid that provided the edit link.
+  def redirect_to_last_grid
+    # Ensure flash notice is not discarded by the check_login action.
+    flash[:keep_flash_on_redirect] = true unless flash[:notice].nil?
+
+    if session[:last_grid_url].nil?
+      redirect_to_index
+    else
+      redirect_to session[:last_grid_url]
+    end
+  end
+
+  # Action that a form can post to to return to a grid.
+  def return_to_grid
+    redirect_to_last_grid
+  end
+
+  # Action clicked in child form. Load new page in Content frame.
+  def render_content_from_frame(href)
+    render :inline=>%{
+      <%= close_popup_window( nil, :new_href => '#{href}', :has_no_popup => true ) %>
+    }, :layout => 'content'
+  end
+
+  # Implement a version of escape_javascript to have it available in controllers.
+  def make_str_javascript(str)
+    str.gsub('\\','\0\0').gsub(/\r\n|\n|\r/, "\\n").gsub(/["']/) { |m| "\\#{m}" }
+  end
+
 end

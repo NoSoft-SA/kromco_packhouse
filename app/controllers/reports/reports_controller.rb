@@ -43,7 +43,6 @@ class Reports::ReportsController < ApplicationController
       <% grid.caption             = 'Reports' %>
       <% grid.group_fields        = ['group_name'] %>
       <% grid.grouped             = true %>
-      <% grid.group_summary_depth = 0 %>
       <% @header_content          = grid.build_grid_data %>
 
       <%= grid.render_html %>
@@ -160,7 +159,7 @@ class Reports::ReportsController < ApplicationController
     return if authorise_for_web('reports', 'edit')==false
     id = params[:id]
     if id && @tag = MyTag.find(id)
-      puts "ENTERED...."
+
       render_edit_tag
     end
   end
@@ -260,7 +259,7 @@ class Reports::ReportsController < ApplicationController
       report_state = prepare_dumped_object
 
       test_uniqueness_of_defined_report_name = UserDefinedReport.validate_uniqueness_of_user_defined_report_name(report_name, user_name, user_defined_report_name)
-      puts "TEST VALUE : " + test_uniqueness_of_defined_report_name.to_s
+
       if test_uniqueness_of_defined_report_name == true
         session[:user_defined_report_params] = nil if session[:user_defined_report_params] != nil
         session[:user_defined_report_params] = Hash.new
@@ -918,6 +917,7 @@ order by users.last_name, users.first_name").map {|u| ["#{u.first_name} #{u.last
         <%= grid.render_grid %>
       }, :layout=>'content'
   end
+
   def reorder_data_miner_report_columns
     return if authorise_for_web('reports', 'edit')==false
     @data_miner_report = DataMinerReport.find(params[:id])

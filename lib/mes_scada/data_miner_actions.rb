@@ -39,7 +39,7 @@ module MesScada
         }
       end
 
-      puts "dm_session[#{params[:lookup_search_file]}_static_values] : " + dm_session["#{params[:lookup_search_file]}_static_values"].map{|key,value| "[" + key.to_s + "=>" + value.to_s + "],"}.to_s + "}"
+      ###puts "dm_session[#{params[:lookup_search_file]}_static_values] : " + dm_session["#{params[:lookup_search_file]}_static_values"].map{|key,value| "[" + key.to_s + "=>" + value.to_s + "],"}.to_s + "}"
       #    session[:dm_lookup_instance] = true
       session[:current_dm_lookup_instance] = true
       @select_column_name                  = params[:select_column_name]
@@ -101,7 +101,8 @@ module MesScada
       session[:current_dm_lookup_instance] = false
       session[:dm_lookup_instance] = false
       id_value = params[:id_value].split("&")
-      @submission = params[:id]
+      #@submission = params[:id]
+      @submission = params[:key].gsub("\"","\\\"")
       @looked_up_field = id_value[0]
       if(id_value.length > 1)
         @redirect_submit_to = "#{id_value[1].split("=")[1]}?id=#{@submission}"
@@ -289,7 +290,7 @@ module MesScada
 
       if @fields.length == 0
         statement = FieldParser.new(query_stat,nil).query
-        puts statement
+        ###puts statement
         if statement.index("=")==nil
           if statement.index("(")!=nil
             statement = statement.gsub!("(","");
@@ -426,8 +427,9 @@ module MesScada
     end
 
     def send_parameter_fields
+
       session[:dm_lookup_instance]    = true if(params['parameter_field'][:looked_up_field])
-      if dm_session[:parameter_query].hash.to_s != params[:parameter_field][:hash_check]
+      if Digest::SHA1.hexdigest(dm_session[:parameter_query]) != params[:parameter_field][:hash_check]
         raise MesScada::InfoError, "You have launched a different lookup or report before completing this one. Please start again."
       end
 
@@ -503,7 +505,7 @@ module MesScada
       #  end applying calculations
       #---------------------------------------
 
-      puts statement.to_s
+      ###puts statement.to_s
 
       #--------------------------------------------------
       # Inserting the limit clause if not defined
@@ -528,8 +530,8 @@ module MesScada
       else
         statement = statement << " LIMIT " << max_limit.to_s
       end
-      puts "AFTER LIMIT ADDED " + statement
-      puts statement
+      ###puts "AFTER LIMIT ADDED " + statement
+      ###puts statement
 
       #--------------------------------------------------
       # end Inserting the limit clause if not defined
@@ -551,12 +553,12 @@ module MesScada
         end
       end
 
-      puts "WHERE CLAUSE : #{where_clause}  %%%"
+      ###puts "WHERE CLAUSE : #{where_clause}  %%%"
       dm_session[:search_engine_where_clause] = nil if dm_session[:search_engine_where_clause] != nil
       dm_session[:search_engine_where_clause] = where_clause
 
       #executing the query
-      puts "FINAL SEARCH ENGINE QUERY : #{statement}"
+      ###puts "FINAL SEARCH ENGINE QUERY : #{statement}"
       conn = User.connection
       #@results = conn.select_all(statement)
       dm_session[:resultset]                      = nil if dm_session[:resultset] != nil
@@ -573,9 +575,9 @@ module MesScada
       # Set the url to be called.
       if dm_session[:redirect] == true
         @url_base = "http://#{request.host_with_port}/#{params[:controller]}/#{@redirect_method}"
-        puts "REDIRECT METHOD : " + @redirect_method.to_s
+        ###puts "REDIRECT METHOD : " + @redirect_method.to_s
       else
-        puts params[:controller].to_s + "/" + params[:action].to_s
+        ###puts params[:controller].to_s + "/" + params[:action].to_s
         if @excel_only
           @url_base = "http://#{request.host_with_port}/development_tools/data/export_se_grid_to_csv"
         else
@@ -604,9 +606,9 @@ module MesScada
       #logger.info ">>> PARMS: #{parms.inspect}"
       func_hidden_value     = parms['apply_functions_hidden_field'].to_s
       group_by_hidden_value = parms['group_by_hidden_field'].to_s
-      puts"&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"
-      puts func_hidden_value.to_s + "    "  + group_by_hidden_value.to_s
-      puts"&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"
+      ###puts"&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"
+      ###puts func_hidden_value.to_s + "    "  + group_by_hidden_value.to_s
+      ###puts"&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"
       # logger.info ">>> &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"
       # logger.info ">>> #{func_hidden_value}    #{group_by_hidden_value}"
       # logger.info ">>> &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"
@@ -617,7 +619,7 @@ module MesScada
       # end
 
       stat = add_functions(stat, func_hidden_value.to_s)
-      puts "FUNCTIONS APPLIED : " + stat
+      ###puts "FUNCTIONS APPLIED : " + stat
       #logger.info ">>> FUNCTIONS APPLIED : #{stat}"
 
 
@@ -802,7 +804,7 @@ module MesScada
             select_index = stat.upcase.index("SELECT")
             from_index = stat.upcase.index("FROM ")
             cols_phrase = stat[select_index + 6, from_index -(select_index + 6)]
-            puts "AYO BAYO: " + cols_phrase
+            ###puts "AYO BAYO: " + cols_phrase
             #logger.info ">>> AYO BAYO: #{cols_phrase}"
             left_stat = stat[0, select_index + 6]
             right_stat = stat[from_index, stat.size - from_index]
@@ -843,7 +845,7 @@ module MesScada
         end
       end
 
-      puts "QUERY STATEMENT AFTER ORDER BY: " + stat
+      ###puts "QUERY STATEMENT AFTER ORDER BY: " + stat
       #logger.info ">>> QUERY STATEMENT AFTER ORDER BY: #{stat}"
 
       #=======================================================
@@ -894,7 +896,7 @@ module MesScada
       # if group by is present and no function : add the id field before the from clause and also in group by clause
       stat = add_id_column_if_no_function(stat)
 
-      puts stat
+      ###puts stat
       #logger.info ">>> #{stat}"
 
       dm_session[:final_statement] = stat
@@ -1094,10 +1096,12 @@ module MesScada
         left             = stat[0, select_index + 6]
         right            = stat[from_index, stat.to_s.size - from_index]
         if required_section.to_s.index("*") == nil
-          if required_section.to_s.gsub(/\s/,"").size > 0
-            required_section += "," + "id "
-          else
-            required_section += " id "
+          unless list_of_cols_from_stat(stat).include?('id') # Check if there is a column named "id"...
+            if required_section.to_s.gsub(/\s/,"").size > 0
+              required_section += "," + "id "
+            else
+              required_section += " id "
+            end
           end
           stat = left + " " + required_section + " " + right
           dm_session[:columns_list].push("id") if ! dm_session[:columns_list].find{|c|c == "id"}
@@ -1108,7 +1112,7 @@ module MesScada
     end
 
     def operator_sign_changed
-      puts params.to_s
+      ###puts params.to_s
       @sign_combo = ""
       params.keys.each do |key|
         if key.to_s.index("-sign")!= nil
@@ -1117,7 +1121,7 @@ module MesScada
       end
       @combo_name = @sign_combo.to_s.split("-")[0]
       hiddenField = "hidden=" + @combo_name.to_s
-      puts dm_session[hiddenField].length.to_s
+      ###puts dm_session[hiddenField].length.to_s
       if (params[@sign_combo] == "like" || params[@sign_combo]=="text")
         render :inline=>%{
          <%= text_field('parameter_field',@combo_name) %>
@@ -1160,7 +1164,7 @@ module MesScada
           }
         end
       end
-      puts params.to_s
+      ###puts params.to_s
     end
 
     def extract_where_clause(query_statement)
@@ -1174,7 +1178,7 @@ module MesScada
         end_brace_index   = right_part.to_s.index(")")
         where_part        = right_part.to_s[first_brace_index +1, end_brace_index - first_brace_index-1]
         ret_string        += where_part
-        puts "# " + where_part + " #"
+        ###puts "# " + where_part + " #"
       end
       return ret_string
     end
@@ -1278,7 +1282,7 @@ module MesScada
 
     def clear_search_form
       dm_session[:parameter_fields_values] = nil
-      puts "PUCA : #{dm_session[:report_name]}"
+      ###puts "PUCA : #{dm_session[:report_name]}"
       dm_session[dm_session[:report_name] + "_default_values"] = nil if(dm_session[:report_name])
       #dm_session[dm_session[:report_name] + "_static_values"] = nil if(dm_session[:report_name]) # NO, No, Not static values!!!!
       dm_session[:redirect]        = true
@@ -1286,12 +1290,12 @@ module MesScada
       relaunch_search_form
     end
 
-  	def relaunch_search_form(user_defined_report_name=nil)
-  	  dm_session[:parameter_query]      = dm_session[:full_parameter_query]
-  	  dm_session[:full_parameter_query] = dm_session[:full_parameter_query].clone
-  	  @report_file_name                 = dm_session[:report_name]
-  	  build_parameter_fields_form(dm_session[:search_fields], user_defined_report_name)
-  	end
+    def relaunch_search_form(user_defined_report_name=nil)
+      dm_session[:parameter_query]      = dm_session[:full_parameter_query]
+      dm_session[:full_parameter_query] = dm_session[:full_parameter_query].clone
+      @report_file_name                 = dm_session[:report_name]
+      build_parameter_fields_form(dm_session[:search_fields], user_defined_report_name)
+    end
 
     def build_parameter_fields_form(fields, user_defined_report_name=nil)
 
@@ -1303,9 +1307,10 @@ module MesScada
           field_type    = f.fetch(:field_type)
           field_name    = f.fetch(:field_name)
           field_caption = f.fetch(:caption)
+          list_sorted   = f.fetch(:sorted, false)
           if list.class == Array
             dropdown_list = list
-            field_configs[config_index] = {:field_type => field_type, :field_name => field_name, :list => dropdown_list, :caption => field_caption}
+            field_configs[config_index] = {:field_type => field_type, :field_name => field_name, :list => dropdown_list, :caption => field_caption, :sorted => list_sorted}
           else
           dropdown_list = []
           if list.index('*') || list.count(',') > 1
@@ -1331,7 +1336,7 @@ module MesScada
               end
             end
 
-            field_configs[config_index] = {:field_type => field_type, :field_name => field_name, :list => dropdown_list, :caption => field_caption}
+            field_configs[config_index] = {:field_type => field_type, :field_name => field_name, :list => dropdown_list, :caption => field_caption, :sorted => list_sorted}
             end
           end
         else
@@ -1355,7 +1360,7 @@ module MesScada
           end
           if (dm_session[@report_file_name + "_static_values"].has_key?(field_name.to_s))
             field_configs[config_index][:static_value] = dm_session[@report_file_name + "_static_values"][field_name]
-            puts "STATIC VALUE FOUND  === " + field_configs[config_index][:static_value].to_s
+            ###puts "STATIC VALUE FOUND  === " + field_configs[config_index][:static_value].to_s
           end
         end
 
@@ -1366,7 +1371,7 @@ module MesScada
 
           if (dm_session[@report_file_name + "_default_values"].has_key?(field_name.to_s))
             field_configs[config_index][:field_value] = dm_session[@report_file_name + "_default_values"][field_name]
-            puts "DEFAULT VALUE FOUND  === " + field_configs[config_index][:field_value].to_s
+            ###puts "DEFAULT VALUE FOUND  === " + field_configs[config_index][:field_value].to_s
             dm_session[:parameter_fields_values] = Array.new if !dm_session[:parameter_fields_values] ||dm_session[:parameter_fields_values].length() == 0
             dm_session[:parameter_fields_values].push(field_configs[config_index])
           end
@@ -1401,16 +1406,12 @@ module MesScada
       @record  = nil
       @caption = "view details of " + @table_name.to_s + " record"
       begin
-        #eval "class " + Inflector.camelize(Inflector.singularize(@table_name)) + "< ActiveRecord::Base \n end"
-        eval "@record = " + Inflector.camelize(Inflector.singularize(@table_name)) + ".find(:first, :conditions=>['id=?', '#{record_id}'])"
-      rescue
-        if $!.class.to_s == "NameError"
-          begin
-            #eval "class " + Inflector.camelize(@table_name) + "< ActiveRecord::Base \n end"
-            eval "@record = " + Inflector.camelize(@table_name) + ".find(:first, :conditions=>['id=?', '#{record_id}'])"
-          rescue
-            raise "Model not known!"
-          end
+        @record = Inflector.camelize(Inflector.singularize(@table_name)).constantize.find(:first, :conditions=>['id=?', record_id])
+      rescue NameError
+        begin
+          @record = Inflector.camelize(@table_name).constantize.find(:first, :conditions=>['id=?', record_id])
+        rescue
+          raise "Model \n#{@table_name}\n not known!"
         end
       end
       if @record.nil?
@@ -1434,18 +1435,13 @@ module MesScada
       @table_name = dm_session[:child_table]
       @record     = nil
       @caption    = "view details of " + @table_name.to_s + " record"
-      #sFile = "/models/" + Inflector.camelize(Inflector.singularize(@table_name)).to_s
       begin
-        eval "class " + Inflector.camelize(Inflector.singularize(@table_name)) + "< ActiveRecord::Base \n end"
-        eval "@record = " + Inflector.camelize(Inflector.singularize(@table_name)) + ".find(:first, :conditions=>['id=?', '#{record_id}'])"
-      rescue
-        if $!.class.to_s == "NameError"
-          begin
-            eval "class " + Inflector.camelize(@table_name) + "< ActiveRecord::Base \n end"
-            eval "@record = " + Inflector.camelize(@table_name) + ".find(:first, :conditions=>['id=?', '#{record_id}'])"
-          rescue
-            raise "Model not known!"
-          end
+        @record = Inflector.camelize(Inflector.singularize(@table_name)).constantize.find(:first, :conditions=>['id=?', record_id])
+      rescue NameError
+        begin
+          @record = Inflector.camelize(@table_name).constantize.find(:first, :conditions=>['id=?', record_id])
+        rescue
+          raise "Model \n#{@table_name}\n not known!"
         end
       end
       if @record.nil?
@@ -1466,7 +1462,7 @@ module MesScada
 
     def show_records
       id          = params[:id]
-      puts id.to_s + " THIS IS ID FROM SHOW RECORDS"
+      ###puts id.to_s + " THIS IS ID FROM SHOW RECORDS"
       test_conn   = User.connection
       @table_name = dm_session[:table_name]
 
@@ -1524,12 +1520,12 @@ module MesScada
       else
         my_query += "select * from " + @table_name + " where" + where_clause_string
       end
-      puts my_query
+      ###puts my_query
       # if my_query.to_s.upcase.index("LIMIT ") == nil
       #   my_query += " LIMIT 1000"
       # end
       my_query << " LIMIT #{Globals.search_engine_max_rows || 1000}"
-      puts my_query
+      ###puts my_query
 
       dm_session[:show_records_query_definition] = nil if dm_session[:show_records_query_definition] != nil
       dm_session[:show_records_query_definition] = my_query
@@ -1561,8 +1557,7 @@ module MesScada
           @caption = "view details of " + @model_name.to_s + " record"
         end
         begin
-          eval "class " + Inflector.camelize(Inflector.singularize(@model_name)) + "< ActiveRecord::Base \n end"
-          eval "@record_instance = " + Inflector.camelize(Inflector.singularize(@model_name)) + ".find(:first, :conditions=>['id=?', '#{@record_id}'])"
+          @record_instance = Inflector.camelize(Inflector.singularize(@model_name)).constantize.find(:first, :conditions=>['id=?', @record_id])
         rescue ActiveRecord::StatementInvalid
           @record_instance = nil
         end
@@ -1592,8 +1587,17 @@ module MesScada
            @parent_id = "variety_id"
          end
        end
-       eval "class " + Inflector.camelize(@model_name) + "< ActiveRecord::Base \n end"
-       eval "@child_records = " + Inflector.camelize(@model_name) + ".find(:all, :conditions=>['#{@parent_id}=?', '#{@record_id}'])"
+
+       begin
+         @child_records = Inflector.camelize(Inflector.singularize(@model_name)).constantize.find(:all, :conditions=>["#{@parent_id}=?", @record_id])
+       rescue StandardError => e
+         # Check if this is a HABTM relationship.
+         if e.message.include?(' does not exist') # Might be a HABTM relationship if the xyz_id column is not on the table.
+           @child_records = Inflector.camelize(Inflector.singularize(@previous_model_name)).constantize.find(:first, :conditions=>["id=?", @record_id]).send(@model_name)
+         else
+           raise
+         end
+       end
 
        @caption = "list of " + @model_name.to_s + " records belonging to " + @previous_model_name.to_s + " record"
        if @child_records.length()==0
@@ -1714,19 +1718,25 @@ module MesScada
         }
       end
     end
+    # Read a dataminer yml file and return its query and grid configs.
+    def retrieve_search_engine_query_with_configs(report_name)
+      report_file_name = report_name.sub(".yml", "")
+      report_file      = Globals.get_reports_location + "/" + report_name
+      yml              = YAML::load(File.read(report_file))
+      stat             = yml['query'].gsub("\n", ' ')
+      grid_configs     = yml['grid_configs']
+      columns_list     = list_of_cols_from_stat(stat)
+      return stat, grid_configs, columns_list
+    end
 
     # Read a dataminer yml file and return its query.
     # Usually you'll want to set the dataminer session variables for the grid.
     # If not, make +set_grid_configs+ false.
     def retrieve_search_engine_query(report_name, set_grid_configs=true)
-      report_file_name = report_name.sub(".yml", "")
-      report_file      = Globals.get_reports_location + "/" + report_name
-
-      yml = YAML::load(File.read(report_file))
-      stat = yml['query']
+      stat, grid_configs, columns_list = retrieve_search_engine_query_with_configs(report_name)
       if set_grid_configs
-        dm_session[:grid_configs] = yml['grid_configs']
-        dm_session[:columns_list] = list_of_cols_from_stat(stat)
+        dm_session[:grid_configs] = grid_configs
+        dm_session[:columns_list] = columns_list
       end
       stat
     end
@@ -1754,6 +1764,15 @@ module MesScada
       # .+?        ...followed by one or more of any character
       # \)         ...and ending with a closing parenthesis
       match.nil? ? nil : match[1].gsub(/\w+\s?\([^\)]+?,{1}.+?\)/, 'HIDEFUNC').split(',').map {|c| c.split('.').last.split(' ').last }
+    end
+
+    # ------------
+    # Excel export
+    # ------------
+    # See notes in dev tools | show_reference action for more information.
+    def render_excel_in_sheets(filename)
+      s = render_to_string('shared/xls_xml_sheet')
+      send_data s, :filename => filename, :type => 'application/vnd.ms-excel'
     end
 
   end # DataMinerActions

@@ -33,22 +33,22 @@ class DevelopmentTools::CrudToolsController < ApplicationController
     Rebin.transaction do
 
       rebins.each do |rebin|
-        puts "before"
+
         rebin.rmt_product_code = rebin.rebin.rmt_product_code
         rebin.update
-        puts "RECeipt updated"
+
       end
 
 
       r_rebins = RwReclassedRebin.find(:all)
       r_rebins.each do |rebin|
-        puts "before 2"
+
         bin = Rebin.find_by_rebin_number(rebin.rebin_number)
         if bin == nil
-          puts "NO rebin for: " + rebin.rebin_number.to_s
+
           wrongs += 1
         else
-          puts "UPDATED"
+
           rebin.rmt_product_code = bin.rmt_product_code
           rebin.update
           rights += 1
@@ -63,12 +63,12 @@ class DevelopmentTools::CrudToolsController < ApplicationController
 
 
   def correct_reworks_rmt_codes
-    puts "DROLLLL"
+
 #     rebins = RwReceiptRebin.find(:all)
 #     wrongs = 0
 #      rights = 0
 #     Rebin.transaction do
-#      
+#
 #      rebins.each do |rebin|
 #       puts "before"
 #         rebin.rmt_product_code = rebin.rebin.rmt_product_code
@@ -129,7 +129,7 @@ class DevelopmentTools::CrudToolsController < ApplicationController
     render :inline => %{
       <% @content_header_caption = \"'export table data to remote database'\" %>
       <%= create_table_export_form %>
-   
+
     }, :layout => "content"
   end
 
@@ -209,13 +209,13 @@ class DevelopmentTools::CrudToolsController < ApplicationController
       @model_name = settings.model_name
       flash[:notice] = msg if msg != nil
       render :inline => %{
-     
+
      <% @content_header_caption = "'generated ruby code for view helper'" %>
      <%= @code %>
-     
+
      }, :layout => "content"
     else
-      puts "freeze: " + @freeze_flash.to_s
+
       redirect_to_index(msg)
     end
   end
@@ -331,13 +331,13 @@ class DevelopmentTools::CrudToolsController < ApplicationController
       @model_name = settings.model_name
       flash[:notice] = msg if msg != nil
       render :inline => %{
-     
+
      <% @content_header_caption = "'generated ruby code for model:" + @model_name + "'" %>
      <%= @code %>
-     
+
      }, :layout => "content"
     else
-      puts "freeze: " + @freeze_flash.to_s
+
       redirect_to_index(msg)
     end
   end
@@ -378,13 +378,13 @@ class DevelopmentTools::CrudToolsController < ApplicationController
       @model_name = settings.model_name
       flash[:notice] = msg if msg != nil
       render :inline => %{
-     
+
      <% @content_header_caption = "'generated ruby code for model:" + @model_name + "'" %>
      <%= @code %>
-     
+
      }, :layout => "content"
     else
-      puts "freeze: " + @freeze_flash.to_s
+
       redirect_to_index(msg)
     end
   end
@@ -397,16 +397,18 @@ class DevelopmentTools::CrudToolsController < ApplicationController
 
     msg = nil
     model = Inflector.classify(params[:table_name])
+    use_model = true
     begin
       x = model.constantize
     rescue
-      flash[:notice] = "#{model} is not a valid model."
-      render :inline => %{
-      }, :layout => "content"
-      return
+      use_model = false
     end
 
-    @code = AppFactory::YamlMaker.make_yml_report_string( model, params[:group_name])
+    if use_model
+      @code = AppFactory::YamlMaker.make_yml_report_string( model, params[:group_name])
+    else
+      @code = AppFactory::YamlMaker.make_yml_report_without_model(params[:table_name], params[:group_name])
+    end
 
     if params[:save_file]
       File.open("reports/xxxsearch_#{params[:table_name]}.yml", 'w') do |f|
@@ -426,6 +428,44 @@ class DevelopmentTools::CrudToolsController < ApplicationController
       <div class='CodeRay'><pre><%= @code %></pre></div>
     }, :layout => "content"
 
+  end
+
+  def show_reference
+    @icons = []
+    File.foreach('public/stylesheets/grid_icons_n_colours.css') do |l|
+      if l =~ /\A.context-menu-item\.icon-/
+        s = l.split(' ')[0].sub(/\A\./,'')
+        s2 = l.split('{')[1].split('}').first.strip
+        @icons << [s.split('icon-').last, s2]
+      end
+    end
+    @icons.sort!
+
+  end
+
+  def db_structure
+    @dbstruct = DbStructure::Output.new
+    render :inline => %{
+      <%= @dbstruct.generate %>
+    }, :layout => false
+  end
+
+  def state_changes
+    render :inline => <<-EOF, :layout => 'content'
+      <% @content_header_caption = "'Show state changes for model instance'" %>
+      <form action="/development_tools/crud_tools/show_state_changes" method="post" onSubmit="show_element('ident_spinner');">
+      <table>
+      <tr><td>Model class:</td><td><%= text_field_tag :model_class %></td><td style="font-size: smaller; color: #777;">Use CamelCase - "LoadInstruction" (To get a pallet from a pallet_sequence_id, use "PalletSeq")</td></tr>
+      <tr><td align="right">Id:</td><td><%= text_field_tag :id %></td><td></td></tr>
+      <tr><td colspan="3"><%= submit_tag %></td></tr>
+      </table>
+      </form>
+    EOF
+
+  end
+
+  def show_state_changes
+    redirect_to :controller => 'tools/processes', :action => 'show_object_transactions', :model => "#{params[:model_class]}/#{params[:id]}"
   end
 
 end

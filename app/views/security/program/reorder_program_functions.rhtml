@@ -1,0 +1,23 @@
+<h1><%= @program.display_name || @program.program_name %></h1>
+
+<% @content_header_caption = "'Re-order program functions'" %>
+
+  <p>
+    Drag and drop program function names up and down the list to re-order them.<br />
+    Once you have the sequence you want press the button below to save your changes.
+  </p>
+
+    <% form_tag "/security/program/apply_program_function_order/#{@program.id}" do -%>
+
+    <%= hidden_field_tag :re_ordered_list %>
+
+      <ol id="list_to_re_order">
+        <% @program_functions.each_with_index do |progfunc, index| %>
+          <li data_field_id="id_<%= progfunc.id %>" class="ui-state-default draggable">
+          <%= progfunc.display_name || progfunc.name %></li>
+        <% end -%>
+      </ol>
+
+    <%= submit_tag 'Re-order columns' %>
+  <% end %>
+

@@ -325,9 +325,9 @@ function hidden_program_list_level3_button_clicked()
     }
 
     // hidden_program_list_level3_button_clicked
-    status = document.getElementById("hidden_program_list_level3_div").style.visibility;
+    vstatus = document.getElementById("hidden_program_list_level3_div").style.visibility;
     // test if any of the other divisions are visible if so they wil be closed
-    if(status == "hidden")
+    if(vstatus == "hidden")
     {
        
         window.parent.document.getElementById("hidden_program_list_level3_div").style.visibility = "visible";
@@ -380,9 +380,9 @@ function program_button_clicked_l2 (button)
     }
       
   
-    status = document.getElementById("hidden_program_list_level2_div").style.visibility;
+    vstatus = document.getElementById("hidden_program_list_level2_div").style.visibility;
      
-    if(status == "hidden")
+    if(vstatus == "hidden")
     {
         slide_down("hidden_program_list_level2_div");
     //   uncommnent the line below if you want to remove sliding effect and comment the line abbove
@@ -394,6 +394,8 @@ function program_button_clicked_l2 (button)
     //   uncommnent the line below if you want to remove sliding effect and comment the line abbove
     //    window.parent.document.getElementById("hidden_program_list_level2_div").style.visibility = "hidden";
     }
+
+    //FIXME: HERE BE DRAGONS - if statements that assign values to the variables they check. Not sure what effect will be if this is fixed!
     status_foreighn = document.getElementById("hidden_program_list_div");
     if(status_foreighn ="vissible ")
     {
@@ -511,9 +513,9 @@ function program_button_clicked ()
         document.getElementById("hidden_program_list_level2_button").style.visibility = "hidden";
     }
     
-    status = document.getElementById("hidden_program_list_div").style.visibility;
+    vstatus = document.getElementById("hidden_program_list_div").style.visibility;
      
-    if (status== "hidden")
+    if (vstatus== "hidden")
     {
         slide_down("hidden_program_list_div");
     //   uncommnent the line below if you want to remove sliding effect and comment the line abbove
@@ -814,7 +816,7 @@ function contentFrame_loaded()
       //cell.style.backgroundColor = level3_tab_selected_color
       active_l3_menu_image.parentNode.style.backgroundColor = level3_tab_selected_color;
     }
-    //If the status variable is not empty, set the caption of the
+    //If the vstatus variable is not empty, set the caption of the
     //content_header frame to the caption
     if (window.frames.length > 1)
     {
@@ -893,10 +895,10 @@ function menu_styling(cell,selected,clicked)
  
 }
 // (Henry) Will change the positions  of the elements(outer and innertab and the level3 menu tab  ) when the header is hidden
-function  adjust_menu(status)
+function  adjust_menu(vstatus)
 {
 
-    if(status == "hidden")
+    if(vstatus == "hidden")
     {
         document.getElementById("tableOuter").style.top = "8.2%";
         document.getElementById("hidden_program_list_button").style.top = "8.0%";
@@ -2178,10 +2180,10 @@ function level3_bad_programs_clicked(a,progname)
 // Checks if the div is visible if it is it will be hidden
 function change_l3_div_visibility()
 {
-    var status = document.getElementById("hidden_program_list_level3_div").style.visibility;
-    if(status == "visible")
+    var vstatus = document.getElementById("hidden_program_list_level3_div").style.visibility;
+    if(vstatus == "visible")
     {
-        status = document.getElementById("hidden_program_list_level3_div").style.visibility = "hidden";
+        vstatus = document.getElementById("hidden_program_list_level3_div").style.visibility = "hidden";
         document.getElementById("level3_bad_programslist").innerHTML = "<img  src ='/images/bullet_arrow_up_level3.png'</img>";
     }
 }

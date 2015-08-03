@@ -1,0 +1,158 @@
+<h1>Grid plugin development</h1>
+<h2>Overview</h2>
+<ul>
+<li>Plugins all inherit from <code>MesScada::GridPlugin</code> (<code>lib/mes_scada/grid_plugin.rb</code>).</li>
+<li>Plugins live in sub_folders of <code>lib/mes_scada/grid_plugins</code>.</li>
+<li>Plugins are auto-loaded if naming conventions are followed.</li>
+<li>The plugin has a method to alter a row's text colour.</li>
+<li>The plugin has a method to alter a cell's content.</li>
+</ul>
+<h2>Plugin naming</h2>
+<p>Given functional area <code>shipping</code> and a plugin for voyages grids, create a file named: <code>lib/mes_scada/grid_plugins/shipping/voyage_grid_plugin.rb</code> with structure like this:</p>
+<div class="CodeRay">
+<pre>
+<span class="line-numbers"><a href="#n1" name="n1">1</a></span><span style="color:#080;font-weight:bold">module</span> <span style="color:#B06;font-weight:bold">MesScada::GridPlugins</span>                      <span style="color:#777"># lib/mes_scada/grid_plugins</span>
+<span class="line-numbers"><a href="#n2" name="n2">2</a></span>  <span style="color:#080;font-weight:bold">module</span> <span style="color:#B06;font-weight:bold">Shipping</span>                                 <span style="color:#777"># shipping</span>
+<span class="line-numbers"><a href="#n3" name="n3">3</a></span>    <span style="color:#080;font-weight:bold">class</span> <span style="color:#B06;font-weight:bold">VoyageGridPlugin</span> &lt; <span style="color:#036;font-weight:bold">MesScada</span>::<span style="color:#036;font-weight:bold">GridPlugin</span> <span style="color:#777"># voyage_grid_plugin</span>
+<span class="line-numbers"><a href="#n4" name="n4">4</a></span>    <span style="color:#777">#...</span>
+<span class="line-numbers"><a href="#n5" name="n5">5</a></span>    <span style="color:#080;font-weight:bold">end</span>
+<span class="line-numbers"><a href="#n6" name="n6">6</a></span>  <span style="color:#080;font-weight:bold">end</span>
+<span class="line-numbers"><a href="#n7" name="n7">7</a></span><span style="color:#080;font-weight:bold">end</span>
+</pre>
+</div>
+
+<p>Copy any initialization code from the old plugin to the new.</p>
+
+<h2>Row colour</h2>
+<p>Method <code>row_cell_colouring(record)</code> implements colouring of a row. Examine the record and return an appropriate colour symbol or nil (for no change). Some valid colours are:</p>
+<div class="CodeRay">
+<pre>
+<span class="line-numbers"><a href="#n1" name="n1">1</a></span>  <span style="color:#A60">:black</span> <span style="color:#A60">:blue</span> <span style="color:#A60">:brown</span> <span style="color:#A60">:green</span> <span style="color:#A60">:gray</span> <span style="color:#A60">:maroon</span> <span style="color:#A60">:orange</span>
+<span class="line-numbers"><a href="#n2" name="n2">2</a></span>  <span style="color:#A60">:purple</span> <span style="color:#A60">:red</span> <span style="color:#A60">:light_green</span> <span style="color:#A60">:dark_green</span>
+<span class="line-numbers"><a href="#n3" name="n3">3</a></span>  <span style="color:#777"># Note that returning :black is redundant as it is equivalent to returning nil.</span>
+</pre>
+</div>
+<p>Example:</p>
+<div class="CodeRay">
+<pre>
+<span class="line-numbers"> <a href="#n1" name="n1">1</a></span>  <span style="color:#080;font-weight:bold">def</span> <span style="color:#06B;font-weight:bold">row_cell_colouring</span>(record)
+<span class="line-numbers"> <a href="#n2" name="n2">2</a></span>    colour = <span style="color:#069">nil</span>
+<span class="line-numbers"> <a href="#n3" name="n3">3</a></span>    <span style="color:#080;font-weight:bold">if</span> record[<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">'</span><span style="color:#D20">voyage_port_type_code</span><span style="color:#710">'</span></span>]
+<span class="line-numbers"> <a href="#n4" name="n4">4</a></span>      <span style="color:#080;font-weight:bold">if</span> record[<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">'</span><span style="color:#D20">voyage_port_type_code</span><span style="color:#710">'</span></span>].upcase ==<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">'</span><span style="color:#D20">POD</span><span style="color:#710">'</span></span>
+<span class="line-numbers"> <a href="#n5" name="n5">5</a></span>        <span style="color:#080;font-weight:bold">return</span> <span style="color:#A60">:green</span>
+<span class="line-numbers"> <a href="#n6" name="n6">6</a></span>      <span style="color:#080;font-weight:bold">elsif</span>   record[<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">'</span><span style="color:#D20">voyage_port_type_code</span><span style="color:#710">'</span></span>].upcase ==<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">'</span><span style="color:#D20">POL</span><span style="color:#710">'</span></span>
+<span class="line-numbers"> <a href="#n7" name="n7">7</a></span>        <span style="color:#080;font-weight:bold">return</span> <span style="color:#A60">:blue</span>
+<span class="line-numbers"> <a href="#n8" name="n8">8</a></span>      <span style="color:#080;font-weight:bold">else</span>
+<span class="line-numbers"> <a href="#n9" name="n9">9</a></span>        <span style="color:#080;font-weight:bold">return</span> <span style="color:#A60">:maroon</span>
+<span class="line-numbers"><strong><a href="#n10" name="n10">10</a></strong></span>      <span style="color:#080;font-weight:bold">end</span>
+<span class="line-numbers"><a href="#n11" name="n11">11</a></span>    <span style="color:#080;font-weight:bold">end</span>
+<span class="line-numbers"><a href="#n12" name="n12">12</a></span>    <span style="color:#080;font-weight:bold">if</span> true_check(record[<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">'</span><span style="color:#D20">missing_stock_data</span><span style="color:#710">'</span></span>])
+<span class="line-numbers"><a href="#n13" name="n13">13</a></span>      <span style="color:#080;font-weight:bold">return</span> <span style="color:#A60">:red</span>
+<span class="line-numbers"><a href="#n14" name="n14">14</a></span>    <span style="color:#080;font-weight:bold">end</span>
+<span class="line-numbers"><a href="#n15" name="n15">15</a></span>    <span style="color:#777">#...</span>
+<span class="line-numbers"><a href="#n16" name="n16">16</a></span>    colour <span style="color:#777"># Return default value if unchanged.</span>
+<span class="line-numbers"><a href="#n17" name="n17">17</a></span>  <span style="color:#080;font-weight:bold">end</span>
+</pre>
+</div>
+
+<h2>Cell content</h2>
+<p>Method <code>render_cell(column_name, cell_value, record)</code> implements overriding a cell value.<br /><code>column_name</code> is the field name, <code>cell_value</code> is the <strong>rendered</strong> cell value and <code>record</code> is the current record.</p>
+<p>This method <strong>must</strong> return a value (the old plugin did not have to) even if you did not change it.</p>
+<p>Example:</p>
+
+<div class="CodeRay">
+<pre>
+<span class="line-numbers"> <a href="#n1" name="n1">1</a></span>  <span style="color:#080;font-weight:bold">def</span> <span style="color:#06B;font-weight:bold">render_cell</span>(column_name, cell_value, record)
+<span class="line-numbers"> <a href="#n2" name="n2">2</a></span>    <span style="color:#080;font-weight:bold">if</span> column_name==<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">cancel_voyage</span><span style="color:#710">&quot;</span></span>
+<span class="line-numbers"> <a href="#n3" name="n3">3</a></span>      link_url = make_action(<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">http://</span><span style="background-color:hsla(0,0%,0%,0.07);color:black"><span style="font-weight:bold;color:#666">#{</span><span style="color:#33B">@request</span>.host_with_port<span style="font-weight:bold;color:#666">}</span></span><span style="color:#710">&quot;</span></span>+
+<span class="line-numbers"> <a href="#n4" name="n4">4</a></span>                             <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">/shipping/voyage/cancel_voyage/</span><span style="background-color:hsla(0,0%,0%,0.07);color:black"><span style="font-weight:bold;color:#666">#{</span>record[<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">'</span><span style="color:#D20">voyage_id</span><span style="color:#710">'</span></span>]<span style="font-weight:bold;color:#666">}</span></span><span style="color:#710">&quot;</span></span>,
+<span class="line-numbers"> <a href="#n5" name="n5">5</a></span>                             <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">cancel</span><span style="color:#710">&quot;</span></span>, <span style="color:#A60">:prompt</span> =&gt; <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">'</span><span style="color:#D20">Are you sure you want to cancel?</span><span style="color:#710">'</span></span>)
+<span class="line-numbers"> <a href="#n6" name="n6">6</a></span>      <span style="color:#080;font-weight:bold">return</span> link_url
+<span class="line-numbers"> <a href="#n7" name="n7">7</a></span>    <span style="color:#080;font-weight:bold">end</span>
+<span class="line-numbers"> <a href="#n8" name="n8">8</a></span>    <span style="color:#080;font-weight:bold">if</span> column_name== <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">v_shipping_week</span><span style="color:#710">&quot;</span></span>
+<span class="line-numbers"> <a href="#n9" name="n9">9</a></span>      shipping_weeks=<span style="color:#33B">@shipping_weeks</span>.find_all { |k|
+<span class="line-numbers"><strong><a href="#n10" name="n10">10</a></strong></span>                            k.voyage_id.to_i==<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="background-color:hsla(0,0%,0%,0.07);color:black"><span style="font-weight:bold;color:#666">#{</span>record.voyage_id<span style="font-weight:bold;color:#666">}</span></span><span style="color:#710">&quot;</span></span>.to_i
+<span class="line-numbers"><a href="#n11" name="n11">11</a></span>                            }
+<span class="line-numbers"><a href="#n12" name="n12">12</a></span>      <span style="color:#080;font-weight:bold">if</span> shipping_weeks.empty?
+<span class="line-numbers"><a href="#n13" name="n13">13</a></span>        <span style="color:#080;font-weight:bold">return</span> <span style="color:#069">nil</span>
+<span class="line-numbers"><a href="#n14" name="n14">14</a></span>      <span style="color:#080;font-weight:bold">else</span>
+<span class="line-numbers"><a href="#n15" name="n15">15</a></span>        shipping_week=shipping_weeks[<span style="color:#00D">0</span>].shipping_week
+<span class="line-numbers"><a href="#n16" name="n16">16</a></span>        <span style="color:#080;font-weight:bold">return</span> shipping_week
+<span class="line-numbers"><a href="#n17" name="n17">17</a></span>      <span style="color:#080;font-weight:bold">end</span>
+<span class="line-numbers"><a href="#n18" name="n18">18</a></span>    <span style="color:#080;font-weight:bold">end</span>
+<span class="line-numbers"><a href="#n19" name="n19">19</a></span>    <span style="color:#777">#...</span>
+<span class="line-numbers"><strong><a href="#n20" name="n20">20</a></strong></span>    cell_value <span style="color:#777"># Return default value if unchanged.</span>
+<span class="line-numbers"><a href="#n21" name="n21">21</a></span>  <span style="color:#080;font-weight:bold">end</span>
+</pre>
+</div>
+
+<h2>Helper methods</h2>
+<p>There are a few helper methods defined in <code>MesScada::GridPlugin</code>:</p>
+<ul>
+<li><p><code>true_check(val)</code> Returns true if the given value is not nil and is <code>true</code> or <code>'t'</code>.<br /> Example:</p>
+<div class="CodeRay">
+  <pre>
+<span style="color:#080;font-weight:bold">return</span> <span style="color:#A60">:red</span> <span style="color:#080;font-weight:bold">if</span> true_check(record[<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">'</span><span style="color:#D20">missing_stock_data</span><span style="color:#710">'</span></span>])
+</pre>
+</div>
+</li>  
+<li><p><code>blank_check(val)</code> Returns true if the given value is nil or an empty string.<br /> Example:</p>
+<div class="CodeRay">
+  <pre>
+<span style="color:#080;font-weight:bold">return</span> <span style="color:#069">nil</span> <span style="color:#080;font-weight:bold">if</span> blank_check(record[<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">'</span><span style="color:#D20">missing_stock_data</span><span style="color:#710">'</span></span>])
+</pre>
+</div>
+</li>  
+<li><p><code>non_blank_check(val)</code> Returns true if the given value is not nil and is not an empty string.<br /> Example:</p>
+<div class="CodeRay">
+  <pre>
+  <span style="color:#080;font-weight:bold">return</span> <span style="color:#A60">:red</span> <span style="color:#080;font-weight:bold">if</span> non_blank_check(record[<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">'</span><span style="color:#D20">missing_stock_data</span><span style="color:#710">'</span></span>])
+</pre>
+</div>
+</li>  
+<li><p><code>any_upper_fields_match(record, fields, test_value)</code> Does case-insensitive string compare of test_value String to the array of fields. <br /> Example:</p>
+<div class="CodeRay">
+  <pre>
+  <span style="color:#080;font-weight:bold">return</span> <span style="color:#A60">:brown</span> <span style="color:#080;font-weight:bold">if</span> any_upper_fields_match(record, [<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">'</span><span style="color:#D20">ambient_age_rule</span><span style="color:#710">'</span></span>,
+                                                 <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">'</span><span style="color:#D20">inspection_age_rule</span><span style="color:#710">'</span></span>,
+                                                 <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">'</span><span style="color:#D20">day28_rule</span><span style="color:#710">'</span></span>],
+                                                 <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">'</span><span style="color:#D20">FAILED</span><span style="color:#710">'</span></span>)
+</pre>
+</div>
+</li>  
+<li><p><code>any_upper_values_match(record, field, test_values)</code> Does case-insensitive string compare of test_values array to the value of the field. <br /> Example:</p>
+<div class="CodeRay">
+  <pre>
+  <span style="color:#080;font-weight:bold">return</span> <span style="color:#A60">:red</span> <span style="color:#080;font-weight:bold">if</span> any_upper_values_match(record, <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">'</span><span style="color:#D20">status</span><span style="color:#710">'</span></span>,
+                                              [<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">'</span><span style="color:#D20">CONTAINER_DISCREP</span><span style="color:#710">'</span></span>,
+                                               <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">'</span><span style="color:#D20">MISSING_MF_SENT_TO_DEPOT</span><span style="color:#710">'</span></span>,
+                                               <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">'</span><span style="color:#D20">MISSING_MF</span><span style="color:#710">'</span></span>,
+                                               <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">'</span><span style="color:#D20">RW_DISCREP_LOAD_INSTRUCTION_MATES</span><span style="color:#710">'</span></span>,
+                                               <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">'</span><span style="color:#D20">RW_DISCREP_AUTO</span><span style="color:#710">'</span></span>,
+                                               <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">'</span><span style="color:#D20">STOCK_DISCREP</span><span style="color:#710">'</span></span>])
+
+</pre>
+</div>
+</li>  
+<li><p><code>make_action(href, link_text, options={})</code> Returns an action link for the grid. <br /> Example:</p>
+<div class="CodeRay">
+  <pre>
+      make_action(<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">http://</span><span style="background-color:hsla(0,0%,0%,0.07);color:black"><span style="font-weight:bold;color:#666">#{</span><span style="color:#33B">@request</span>.host_with_port<span style="font-weight:bold;color:#666">}</span></span><span style="color:#710">&quot;</span></span>+
+                  <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">/shipping/voyage/cancel_voyage/</span><span style="background-color:hsla(0,0%,0%,0.07);color:black"><span style="font-weight:bold;color:#666">#{</span>record[<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">'</span><span style="color:#D20">voyage_id</span><span style="color:#710">'</span></span>]<span style="font-weight:bold;color:#666">}</span></span><span style="color:#710">&quot;</span></span>,
+                              <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">cancel</span><span style="color:#710">&quot;</span></span>,
+                                          <span style="color:#A60">:prompt</span> =&gt; <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">'</span><span style="color:#D20">Are you sure you want to cancel?</span><span style="color:#710">'</span></span>)
+</pre>
+</div>
+</li>  
+<li><p><code>make_link_window(href, link_text, icon_name='')</code> Returns a popup window link for the grid. <br /> Example:</p>
+<div class="CodeRay">
+  <pre>
+  make_link_window(<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="background-color:hsla(0,0%,0%,0.07);color:black"><span style="font-weight:bold;color:#666">#{</span><span style="color:#33B">@request</span>.host_with_port<span style="font-weight:bold;color:#666">}</span></span><span style="color:#D20">/</span><span style="color:#710">&quot;</span></span>+
+                 <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="background-color:hsla(0,0%,0%,0.07);color:black"><span style="font-weight:bold;color:#666">#{</span><span style="color:#33B">@request</span>.path_parameters[<span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">'</span><span style="color:#D20">controller</span><span style="color:#710">'</span></span>]<span style="font-weight:bold;color:#666">}</span></span><span style="color:#D20">/get_values/</span><span style="background-color:hsla(0,0%,0%,0.07);color:black"><span style="font-weight:bold;color:#666">#{</span>id_string<span style="font-weight:bold;color:#666">}</span></span><span style="color:#710">&quot;</span></span>,
+                 <span style="color:#069">nil</span>,
+                 <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">'</span><span style="color:#D20">pallets</span><span style="color:#710">'</span></span>)
+</pre>
+</div>
+</li>  
+</ul>
+

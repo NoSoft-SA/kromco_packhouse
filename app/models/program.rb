@@ -94,5 +94,10 @@ end
 #	===========================
 
 
+  def re_order_funcs( new_order )
+    new_order.each_with_index do |id, index|
+      ActiveRecord::Base.connection.execute("UPDATE program_functions SET \"position\" = #{index} WHERE id = #{id}")
+    end
+  end
 
 end

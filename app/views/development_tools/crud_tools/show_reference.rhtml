@@ -1,0 +1,51 @@
+<% content_for :head_extras do -%>
+  <script type="text/javascript">
+    jQuery(function() {
+        jQuery("#edi_collapse").collapse();
+    });
+  </script>
+<% end -%>
+
+<% @header_content = '' -%>
+<h2>MesScada development reference notes</h2>
+
+<%= expand_and_collapse_all_collapses %>
+
+<div id="edi_collapse" class="collapse_set_no_pad">
+
+  <h3>Form development</h3>
+  <div style="width:100%">
+    <%= render :partial => 'form_dev' %>
+  </div>
+
+  <h3>Grid development</h3>
+  <div style="width:100%">
+    <%= render :partial => 'grid_dev' %>
+  </div>
+
+  <h3>Grid columns</h3>
+  <div style="width:100%">
+    <%= render :partial => 'grid_col' %>
+  </div>
+
+  <h3>Grid plugins</h3>
+  <div style="width:100%">
+    <%= render :partial => 'grid_plugins' %>
+  </div>
+
+  <h3>Grid action icons</h3>
+  <div style="width:100%">
+    <%= render :partial => 'grid_action_icons' %>
+  </div>
+
+  <h3>YAML Reports</h3>
+  <div style="width:100%">
+    <%= render :partial => 'yaml_reports' %>
+  </div>
+
+  <h3>Excel files exported using rich XML format</h3>
+  <div style="width:100%">
+    <%= render :partial => 'xls_xml_export' %>
+  </div>
+
+</div>

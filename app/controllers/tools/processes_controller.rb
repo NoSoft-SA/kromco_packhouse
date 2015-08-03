@@ -1,4 +1,6 @@
 class Tools::ProcessesController < ApplicationController
+  layout 'content'
+
   def program_name?
 	"processes"
   end
@@ -464,7 +466,7 @@ where transaction_statuses.id=#{params[:id]}")[0]
   end
 
   def new_process_alert
-    puts "session[:status] = #{params[:id]}"
+
     session[:status] = params[:id]
     return if authorise_for_web(program_name?,'create')== false
 		render_new_process_alert_def
@@ -565,4 +567,41 @@ where transaction_statuses.id=#{params[:id]}")[0]
     build_remote_search_engine_form("search_pallet_system_status_histories.yml", "view_object_history")
     dm_session[:dm_instance] = false
   end
+
+  def show_object_transactions_from_parent
+    model, id = params[:model].split(/\//)
+    tran = TransactionStatus.find(id)
+    redirect_to :action => 'show_object_transactions', :model => "#{model}/#{tran['object_id']}"
+  end
+
+  def show_object_transactions
+    model, id = params[:model].split(/\//)
+    if 'PalletSeq' == model # ps to get Pallet
+      pseq = PalletSequence.find(:first, :select => 'pallet_id', :conditions => ['id = ?', id])
+      model = 'Pallet'
+      id    = pseq.pallet_id
+    end
+    klass = model.constantize
+
+    begin
+      @model = klass.find(id)
+    rescue
+      @model = nil # Model may have been deleted...
+    end
+
+    @rows = TransactionStatus.model_rows(klass, id)
+  end
+
+  def show_child_transactions
+    id = params[:id]
+    @rows = TransactionStatus.child_rows(id)
+    raise MesScada::InfoError, 'This process currently only handles Pallets as child transactions' if @rows.any? {|r| 'Pallet' != r.this_class_name }
+  end
+
+  def view_transaction_status_object_from_parent
+    id, model = params[:id].split('|')
+    tran = TransactionStatus.find(id)
+    redirect_to :action => 'view_transaction_status_object', :id => "#{tran['object_id']}|#{model}"
+  end
+
 end

@@ -1,11 +1,37 @@
 # Methods added to this helper will be available to all templates in the application.
 require "lib/globals.rb"
+
 module ApplicationHelper
   include MesScada::FormComponents
 
   #@@crystal_report_url = "http://luxolo:8080/CrystalReportsServer/index.jsp?"
   @@crystal_report_url = Globals.get_crystal_reports_server_ip + ":" + Globals.get_crystal_reports_server_port.to_s + Globals.get_crystal_reports_server
 
+  def authorise(program, permission, user)
+    begin
+      user = User.find_by_user_name(user) if user.class.to_s == "String"
+
+      query = "SELECT
+               public.security_permissions.id
+               FROM
+               public.security_groups_security_permissions
+               INNER JOIN public.security_groups ON (public.security_groups_security_permissions.security_group_id = public.security_groups.id)
+                INNER JOIN public.security_permissions ON (public.security_groups_security_permissions.security_permission_id = public.security_permissions.id)
+                INNER JOIN public.program_users ON (public.security_groups.id = public.program_users.security_group_id)
+                INNER JOIN public.programs ON (public.program_users.program_id = public.programs.id)
+                WHERE
+                (public.program_users.user_id = #{user.id}) AND
+                (public.security_permissions.security_permission = '#{permission}') AND
+                (public.programs.program_name = '#{program}')"
+
+      @val  = User.connection.select_one(query)
+
+      return @val != nil
+    rescue
+
+      return false
+    end
+  end
   #  if !Globals.enable_logging
   #    def puts(val)
   #    end
@@ -13,14 +39,13 @@ module ApplicationHelper
   #  end
 
 
-
-    MY_PAGINATION_OPTIONS = {
-          :name => :page,
-          :window_size => 2,
-          :always_show_anchors => true,
-          :link_to_current_page => false,
-          :params => {}
-  }
+  #   MY_PAGINATION_OPTIONS = {
+  #         :name => :page,
+  #         :window_size => 2,
+  #         :always_show_anchors => true,
+  #         :link_to_current_page => false,
+  #         :params => {}
+  # }
     # Replace a combo's observer after the combo has been recreated.
 
 def refresh_combo_observer(observed_field, update_cell, action)
@@ -45,6 +70,7 @@ end
   s
 
 end
+
   def dm_session
     session[:dm_lookup_session] = {} if !session[:dm_lookup_session]
 
@@ -56,18 +82,16 @@ end
     end
   end
 
-
   def pagination_links(paginator, options={}, html_options={})
-    name = options[:name] || MY_PAGINATION_OPTIONS[:name]
-    params = (options[:params] || MY_PAGINATION_OPTIONS[:params]).clone
+    name = options[:name] || ApplicationController::MY_PAGINATION_OPTIONS[:name]
+    params = (options[:params] || ApplicationController::MY_PAGINATION_OPTIONS[:params]).clone
     params[:action] =@pagination_server if @pagination_server
 
+    html_options[:style] ||= ''
+    html_options[:style] << 'text-decoration:underline;font-size:inherit;'
     pagination_links_each(paginator, options) do |n|
       params[name] = n
-
       link_to(n.to_s, params, html_options)
-
-
     end
   end
 
@@ -113,7 +137,6 @@ end
     return new_configs
   end
 
-
   def refresh_window(levels_down, frame_id, message = nil, close_popup = nil)
     if !message
       message = "null"
@@ -130,8 +153,6 @@ end
     js =  " <script>refresh_window(#{levels_down},'#{frame_id}',#{message},#{close_popup});</script>"
     return js
   end
-
-
 
   def is_popup
     # puts "IS POPUP VAL: " + session[:is_popup].to_s
@@ -279,31 +300,27 @@ end
 
   def grid_min_width
     if @grid_min_width
-        @grid_min_width
+      @grid_min_width
     else
-    "780"
+      "780"
     end
-    
   end
 
   def set_grid_min_height(val)
      @grid_min_height = val.to_s
-
   end
-  
+
   def grid_min_height
     if @grid_min_height
-         @grid_min_height
+      @grid_min_height
     else
       "350"
     end
   end
 
-
   def hide_grid_client_controls
     warn "[DEPRECATION] 'hide_grid_client_controls' is deprecated. It does not need to be called at all."
   end
-
 
   #-----------------------------------------------------------------------------------------------------------------
   #description: This helper method builds a form from a set of configuration parameters. It's purpose
@@ -329,8 +346,8 @@ end
   #-------------------------------------------------------------------------------------------------------------------
 
 
-  def build_form(active_record, field_configs, target_action, active_record_var_name, submit_caption, send_id = nil, hidden_field_data = nil, hide_spinner = nil, non_db_form = nil, plugin = nil)
-
+  def build_form(active_record, field_configs, target_action, active_record_var_name, submit_caption,
+                 send_id = nil, hidden_field_data = nil, hide_spinner = nil, non_db_form = nil, plugin = nil, javascript_inject=nil)
 
     if send_id
       field_configs.push({:field_type => "HiddenField", :field_name => "id"})
@@ -340,13 +357,25 @@ end
     end
 
 
-    Form.new(self, active_record, field_configs, target_action, active_record_var_name, submit_caption, non_db_form, hide_spinner, plugin).build_form
+    Form.new(self, active_record, field_configs, target_action, active_record_var_name, submit_caption,
+             non_db_form, hide_spinner, plugin, javascript_inject).build_form
 
   end
 
-  # Return a DataGridJquery::DataGrid for displaying a jQuery grid.
+  # Alias for build_form. Wraps a call to build_form. Uses options hash for optional parameters
+  def construct_form(active_record, field_configs, target_action, active_record_var_name, submit_caption, send_id, options={})
+
+    build_form(active_record, field_configs, target_action, active_record_var_name, submit_caption, send_id,
+               options[:hidden_field_data],
+               options[:hide_spinner],
+               options[:non_db_form],
+               options[:plugin],
+               options[:javascript_inject])
+  end
+
+  # Return a DataGridSlick::DataGrid for displaying a SlickGrid grid.
   def get_data_grid(data_set, column_configs, plugin = nil, key_based_access = nil, special_commands = nil, options = {})
-    DataGridJquery::DataGrid.new(self, data_set, column_configs, plugin, key_based_access, special_commands, options)
+    DataGridSlick::DataGrid.new(self, data_set, column_configs, plugin, key_based_access, special_commands, options)
   end
 
   #-----------------------------------------------
@@ -368,36 +397,37 @@ end
           field_configs[config_index] = {:field_type => 'lookup', :field_name => field_caption,
                                          :settings   => {:list => dropdown_list}}
         else
-        dropdown_list       = []
-        dropdown_field_name = nil
-        if list.index('*') || list.count(',') > 1
-  	      raise("The form could not be built because a lookup field returns more than two columns. <BR> Re-define the file")
-        else
-          conn                = User.connection
-          results             = conn.select_all(list)
+          dropdown_list       = []
+          dropdown_field_name = nil
 
-          # Get the list of fields (between SELECT [DISTINCT] and FROM)...
-          fieldlist           = list.sub(/select\s+(?:distinct)?\s*/i, '').sub(/\sfrom.*/i, '')
-
-          # Get the column names of each field...
-          fields              = fieldlist.split(',').map {|a| a.strip.split(' ').last.split('.').last }
-          dropdown_field_name = fields.last
-
-          if results.nil?
-            dropdown_list << "<empty>"
+          if list.index('*') || list.count(',') > 1
+            raise("The form could not be built because a lookup field returns more than two columns. <BR> Re-define the file")
           else
-            results.each do |record|
-              if fields.size == 2
-                dropdown_list << [record[fields[0]], record[fields[1]]]
-          else
-                dropdown_list << record[fields[0]]
-              end 
-          end
-          end
+            conn                = User.connection
+            results             = conn.select_all(list)
 
-          field_configs[config_index] = {:field_type => field_type, :field_name => dropdown_field_name,
-                                         :settings   => {:list => dropdown_list}}
-        end
+            # Get the list of fields (between SELECT [DISTINCT] and FROM)...
+            fieldlist           = list.sub(/select\s+(?:distinct)?\s*/i, '').sub(/\sfrom.*/i, '')
+
+            # Get the column names of each field...
+            fields              = fieldlist.split(',').map {|a| a.strip.split(' ').last.split('.').last }
+            dropdown_field_name = fields.last
+
+            if results.nil?
+              dropdown_list << "<empty>"
+            else
+              results.each do |record|
+                if fields.size == 2
+                  dropdown_list << [record[fields[0]], record[fields[1]]]
+                else
+                  dropdown_list << record[fields[0]]
+                end 
+              end
+            end
+
+            field_configs[config_index] = {:field_type => field_type, :field_name => dropdown_field_name,
+                                           :settings   => {:list => dropdown_list}}
+          end
         end
       else
         field_type = f.fetch(:field_type)
@@ -419,7 +449,6 @@ end
     dm_session[:parameter_fields] = field_configs
 
     build_form(nil, field_configs, action, 'search_form', caption, nil, nil, nil, nil, nil)
-
 
   end
 
@@ -534,7 +563,6 @@ end
     def after_cell_render_styling(column_name, cell_value, record)
       ""
 
-
     end
 
 
@@ -644,7 +672,8 @@ end
     end
 
 
-    def initialize(environment, active_record, field_configs, target_action, active_record_var_name, submit_caption, non_db_form = false, hide_spinner = nil, plugin = nil)
+    def initialize(environment, active_record, field_configs, target_action, active_record_var_name, submit_caption,
+                   non_db_form = false, hide_spinner = nil, plugin = nil, javascript_inject=nil)
 
       @layout = environment.form_layout
       @end_at_position = environment.end_at_position
@@ -685,8 +714,7 @@ end
       @submit_caption = submit_caption
       @env = environment #this is to have an access point to the application helper
       @trace = ""
-
-
+      @js_inject = javascript_inject
     end
 
     def build_form
@@ -781,8 +809,9 @@ end
         header = ""
         @trace += "\n method: 'build_header' entered."
         @trace += "\n      active_record_var_name is: " + @active_record_var_name
-        #if @non_db_field
+        header = @js_inject if @js_inject
 
+        #if @non_db_field
         errs = nil
         if @active_record.respond_to?("errors")
           errs = @env.error_messages_for @active_record_var_name
@@ -832,35 +861,42 @@ end
 
         end
         footer += "</td></tr></table>" + sep_script + '</form>' #@env.end_form_tag
-      end
+
+    end
 
 
   end
 
+  # Close the popup window, alert a message (if not nil) and reload the content frame.
+  # Called from within a subframe.
   def close_popup_reload_main_window(msg)
-    #"<script>window.close();alert(\"#{msg}\");this.window.opener.location.reload(true);</script>"
-    "<script>alert(\"#{msg}\");window.close();this.window.opener.location.reload(true);</script>"
+    close_popup_window( msg, :reload => true, :opener => true )
   end
 
+  # Close the popup window, alert a message (if not nil) and reload the content frame.
+  # Called from within contentFrame.
   def close_popup_reload_content_frame(msg)
-    #"<script>alert(\"#{msg}\");window.close();this.window.opener.frames[1].location.reload(true);</script>"
-    #"<script>alert(\"#{msg}\");window.close();reloadFrame();</script>"
     close_popup_window( msg, :reload => true )
   end
 
   # Close a popup window. If msg is provided an alert will be shown before the window closes.
   # options:
+  # has_no_popup:: If true, will not call <tt>window.close()</tt>.
+  #                Although somewhat illogical given the name of the method, this allows it to be used in more situations.
   # reload:: If true, will reload a frame.
-  # new_href:: If set, will load the url in a frame.
+  # opener:: If true, will reload the window opener (only if sub_frame_id is not provided).
+  # new_href:: If set, will load this url in a frame.
   # sub_frame_id:: If set will reload or load a subframe of +contentFrame+ with matching id.
   #                If not set, will reload or load +contentFrame+.
   def close_popup_window(msg=nil, options={})
     stmts = []
     stmts << "alert('#{msg}');" unless msg.nil?
-    stmts << 'window.close();'
+    stmts << 'window.close();' unless options[:has_no_popup]
     if options[:reload] && options[:reload] == true
       if options[:sub_frame_id]
         stmts << "reloadFrame('#{options[:sub_frame_id]}');"
+      elsif options[:opener]
+        stmts << 'window.opener.location.reload(true);'
       else
         stmts << 'reloadFrame();'
       end
@@ -873,6 +909,7 @@ end
     end
     "<script>#{stmts.join}</script>"
   end
+
   #-----------------------------------
   #  This method is used to close the popup window
   #  when there are inner iframe(s) in content area frame.
@@ -910,8 +947,6 @@ end
    # "<script>alert(\"#{msg}\"); window.close(); reloadFrame('#{frame_id}')</script>"
     close_popup_window( msg, :reload => true, :sub_frame_id => frame_id )
   end
-
-
 
 
 
@@ -1774,7 +1809,6 @@ end
 
 
 
-
   # ------------
   # LUKS CODE --
   # ------------
@@ -1884,7 +1918,7 @@ end
           if(parent_model_name=parent_model_names[key])
             text = "view " + key.to_s.gsub("_id","") + "_record"
             id = "parent-" + model_name.to_s + "-" + parent_model_name + "-" + val.to_s
-        else
+          else
             text = "view " + key.to_s.gsub("_id","") + "_record"
             id = "parent-" + model_name.to_s + "-" + key.to_s.gsub("_id","") + "-" + val.to_s
           end
@@ -1908,7 +1942,7 @@ end
           text = "view " + Inflector.singularize(relationship[:table])
         else
           child = relationship[:table]
-        text = "view " + child.to_s
+          text = "view " + child.to_s
         end
         foreign_key = "-" + relationship[:foreign_key] if(relationship[:foreign_key])
         id = "child-" + model_name.to_s + "-" + child.to_s + "-" + parent_id.to_s + "#{foreign_key}"
@@ -1923,6 +1957,9 @@ end
 
 
   def build_generic_grid(recordset, stat, columns_list=nil, se_grid_action_columns=nil, multi_sel=nil, grid_configs=nil)
+    if columns_list && columns_list.length - columns_list.uniq.length > 4
+      columns_list = columns_list.uniq # JS workaround for UNION queries...
+    end
     if grid_configs && grid_configs['column_widths']
       column_widths = grid_configs['column_widths']
     else
@@ -1938,6 +1975,17 @@ end
     else
       data_types = {}
     end
+    if grid_configs && grid_configs['formats']
+      formats = grid_configs['formats']
+    else
+      formats = {}
+    end
+    if grid_configs && grid_configs['hidden']
+      hidden = grid_configs['hidden']
+    else
+      hidden = {}
+    end
+
     column_configs = Array.new
     keys = recordset[0].keys
     column_index = 0
@@ -1951,24 +1999,62 @@ end
         column_configs[column_index][:column_width]   = column_widths[col.to_s.strip] if column_widths[col.to_s.strip]
         column_configs[column_index][:data_type]      = data_types[col.to_s.strip] if data_types[col.to_s.strip]
         column_configs[column_index][:column_caption] = column_captions[col.to_s.strip] if column_captions[col.to_s.strip]
+        column_configs[column_index][:format]         = formats[col.to_s.strip] if formats[col.to_s.strip]
+        column_configs[column_index][:hide]           = true if hidden[col.to_s.strip]
         column_index += 1
       end
     else
-      keys.each do |key|
-        column_configs[column_index] = {:field_type=>'text', :field_name=>key.to_s}
-        column_configs[column_index][:column_width]   = column_widths[key.to_s] if column_widths[key.to_s]
-        column_configs[column_index][:data_type]      = data_types[key.to_s] if data_types[key.to_s]
-        column_configs[column_index][:column_caption] = column_captions[key.to_s] if column_captions[key.to_s]
-        column_index += 1
+      if columns_list.nil?
+        keys.each do |key|
+          column_configs << {:field_type => 'text', :field_name => key.to_s}
+          column_configs.last[:column_width]   = column_widths[key.to_s] if column_widths[key.to_s]
+          column_configs.last[:data_type]      = data_types[key.to_s] if data_types[key.to_s]
+          column_configs.last[:column_caption] = column_captions[key.to_s] if column_captions[key.to_s]
+          column_configs.last[:format]         = formats[key.to_s] if formats[key.to_s]
+          column_configs.last[:hide]           = true if hidden[key.to_s]
+        end
+      else
+        # Try to manage aggregate queries and non-active record datasets in a reasonable manner
+        temp   = (0..columns_list.length-1).map {|n| nil}
+        fields = keys
+        columns_list.each_with_index do |col, index|
+          if fields.delete(col).nil?  # The column might not match exactly in the dataset - e.g. Count(id)
+            col = col.split(' ').last # FieldExtractor can sometimes munge column names for joined queries. Should ideally fix at source.
+            next if fields.delete(col).nil?
+          end
+          temp[index] = {:field_type => 'text', :field_name => col.to_s.strip}
+          bare_col = col.split('.').last.strip.split(' ').last
+          temp[index][:column_width]   = column_widths[bare_col]   if column_widths[bare_col]
+          temp[index][:data_type]      = data_types[bare_col]      if data_types[bare_col]
+          temp[index][:column_caption] = column_captions[bare_col] if column_captions[bare_col]
+          temp[index][:format]         = formats[bare_col]         if formats[bare_col]
+          temp[index][:hide]           = true                      if hidden[bare_col]
+        end
+        # Go through all the fields in the dataset that were not matched in the columns list and place them
+        # in the array in a first-come-first-served manner.
+        fields.each do |key|
+          index = temp.index( nil )
+          temp[index] = {:field_type => 'text', :field_name => key.to_s}
+          temp[index][:column_width]   = column_widths[key.to_s] if column_widths[key.to_s]
+          temp[index][:data_type]      = data_types[key.to_s] if data_types[key.to_s]
+          temp[index][:column_caption] = column_captions[key.to_s] if column_captions[key.to_s]
+          temp[index][:format]         = formats[key.to_s] if formats[key.to_s]
+          temp[index][:hide]           = true if hidden[key.to_s]
+        end
+        # Update the column_configs with the (hopefully) correctly-sequenced columns.
+        temp.each {|t| column_configs << t }
       end
     end
 
     if dm_session[:full_parameter_query] &&  (dm_session[:functions] == nil || dm_session[:functions] == "")  #dm_session[:full_parameter_query].upcase.index(" GROUP BY ")
-      column_configs[column_configs.length()] = {:field_type=>'action', :field_name=>'view_details', :column_width => 120,
-                                               :settings=>{:link_text=>'view details',
-                                                           :target_action=>'view_details',
-                                                           :id_column=>'id'}}
+      if (columns_list && columns_list.include?( 'id') && recordset[0]['id'].is_numeric? && !recordset[0]['id'].include?('_'))
+        column_configs[column_configs.length()] = {:field_type=>'action', :field_name=>'view_details', :column_width => 120,
+          :settings=>{:link_text=>'view details',
+            :target_action=>'view_details',
+            :id_column=>'id'}}
+      end
     end
+
 
     if se_grid_action_columns != nil && se_grid_action_columns.length > 0
       se_grid_action_columns.each do |action_column|
@@ -1978,22 +2064,22 @@ end
         id_column = action_column[:id_column]
         if action_column[:link_text] != nil
           column_configs[column_configs.length()] = {:field_type=>'action', :field_name=>field_name,
-                                                     :settings=>{:link_text=>action_column[:link_text].to_s,
-                                                                 :target_action=>target_action.to_s,
-                                                                 :id_column=>id_column.to_s
-                                                     }}
+            :settings=>{:link_text=>action_column[:link_text].to_s,
+              :target_action=>target_action.to_s,
+              :id_column=>id_column.to_s
+          }}
         elsif action_column[:image] != nil
           column_configs[column_configs.length()] = {:field_type=>'action', :field_name=>field_name,
-                                                     :settings=>{:image=>action_column[:image],
-                                                                 :target_action=>target_action,
-                                                                 :id_column=>id_column
-                                                     }}
+            :settings=>{:image=>action_column[:image],
+              :target_action=>target_action,
+              :id_column=>id_column
+          }}
         else
           column_configs[column_configs.length()] = {:field_type=>'action', :field_name=>field_name,
-                                                     :settings=>{
-                                                             :target_action=>target_action,
-                                                             :id_column=>id_column
-                                                     }}
+            :settings=>{
+            :target_action=>target_action,
+            :id_column=>id_column
+          }}
         end
       end
     end
@@ -2009,21 +2095,22 @@ end
     opts = {}
     if grid_configs
       opts[:caption]               = grid_configs['caption']               if grid_configs['caption']
-      opts[:no_of_frozen_cols]     = grid_configs['no_of_frozen_cols']     if grid_configs['no_of_frozen_cols']
-      opts[:group_summary_depth]   = grid_configs['group_summary_depth']   if grid_configs['group_summary_depth']
+#      opts[:no_of_frozen_cols]     = grid_configs['no_of_frozen_cols']     if grid_configs['no_of_frozen_cols']
+#      opts[:group_summary_depth]   = grid_configs['group_summary_depth']   if grid_configs['group_summary_depth']
       opts[:groupable_fields]      = grid_configs['groupable_fields']      || []
       opts[:group_fields_to_sum]   = grid_configs['group_fields_to_sum']   || []
       opts[:group_fields_to_count] = grid_configs['group_fields_to_count'] || []
       opts[:group_fields_to_avg]   = grid_configs['group_fields_to_avg']   || []
       opts[:group_fields_to_max]   = grid_configs['group_fields_to_max']   || []
       opts[:group_fields_to_min]   = grid_configs['group_fields_to_min']   || []
-      opts[:group_headers]         = grid_configs['group_headers']         || []
-      opts[:group_headers_colspan] = grid_configs['group_headers_colspan'] || false
+#      opts[:group_headers]         = grid_configs['group_headers']         || []
+#      opts[:group_headers_colspan] = grid_configs['group_headers_colspan'] || false
       opts[:group_fields]          = grid_configs['group_fields']          || []
       opts[:grouped]               = grid_configs['grouped']               || false
     end
     opts
   end
+
 
   # Add columns to column_configs based on a column list or the keys of the dataset.
   # Applies grid_configs such as column width, data type and caption.
@@ -2045,6 +2132,16 @@ end
     else
       data_types = {}
     end
+    if grid_configs && grid_configs['formats']
+      formats = grid_configs['formats']
+    else
+      formats = {}
+    end
+    if grid_configs && grid_configs['hidden']
+      hidden = grid_configs['hidden']
+    else
+      hidden = {}
+    end
 
     if (columns_list != nil && columns_list.length > 0) &&
       (stat.to_s.upcase().index("SUM(")   == nil &&
@@ -2058,6 +2155,8 @@ end
         column_configs.last[:column_width]   = column_widths[bare_col]   if column_widths[bare_col]
         column_configs.last[:data_type]      = data_types[bare_col]      if data_types[bare_col]
         column_configs.last[:column_caption] = column_captions[bare_col] if column_captions[bare_col]
+        column_configs.last[:format]         = formats[bare_col]         if formats[bare_col]
+        column_configs.last[:hide]           = true                      if hidden[bare_col]
       end
     else
       if columns_list.nil?
@@ -2066,30 +2165,40 @@ end
           column_configs.last[:column_width]   = column_widths[key.to_s] if column_widths[key.to_s]
           column_configs.last[:data_type]      = data_types[key.to_s] if data_types[key.to_s]
           column_configs.last[:column_caption] = column_captions[key.to_s] if column_captions[key.to_s]
+          column_configs.last[:format]         = formats[key.to_s] if formats[key.to_s]
+          column_configs.last[:hide]           = true if hidden[key.to_s]
         end
       else
         # Try to manage aggregate queries and non-active record datasets in a reasonable manner
         temp   = (0..columns_list.length-1).map {|n| nil}
-        fields = data_set[0].keys
-        columns_list.each_with_index do |col, index|
-          if fields.delete(col).nil?  # The column might not match exactly in the dataset - e.g. Count(id)
-            col = col.split(' ').last # FieldExtractor can sometimes munge column names for joined queries. Should ideally fix at source.
-            next if fields.delete(col).nil?
+        if data_set.empty?
+          temp = columns_list.map {|c| c }
+        else
+          fields = data_set[0].keys
+          columns_list.each_with_index do |col, index|
+            if fields.delete(col).nil?  # The column might not match exactly in the dataset - e.g. Count(id)
+              col = col.split(' ').last # FieldExtractor can sometimes munge column names for joined queries. Should ideally fix at source.
+              next if fields.delete(col).nil?
+            end
+            temp[index] = {:field_type => 'text', :field_name => col.to_s.strip}
+            bare_col = col.split('.').last.strip.split(' ').last
+            temp[index][:column_width]   = column_widths[bare_col]   if column_widths[bare_col]
+            temp[index][:data_type]      = data_types[bare_col]      if data_types[bare_col]
+            temp[index][:column_caption] = column_captions[bare_col] if column_captions[bare_col]
+            temp[index][:format]         = formats[bare_col]         if formats[bare_col]
+            temp[index][:hide]           = true                      if hidden[bare_col]
           end
-          temp[index] = {:field_type => 'text', :field_name => col.to_s.strip}
-          bare_col = col.split('.').last.strip.split(' ').last
-          temp[index][:column_width]   = column_widths[bare_col]   if column_widths[bare_col]
-          temp[index][:data_type]      = data_types[bare_col]      if data_types[bare_col]
-          temp[index][:column_caption] = column_captions[bare_col] if column_captions[bare_col]
-        end
-        # Go through all the fields in the dataset that were not matched in the columns list and place them
-        # in the array in a first-come-first-served manner.
-        fields.each do |key|
-          index = temp.index( nil )
-          temp[index] = {:field_type => 'text', :field_name => key.to_s}
-          temp[index][:column_width]   = column_widths[key.to_s] if column_widths[key.to_s]
-          temp[index][:data_type]      = data_types[key.to_s] if data_types[key.to_s]
-          temp[index][:column_caption] = column_captions[key.to_s] if column_captions[key.to_s]
+          # Go through all the fields in the dataset that were not matched in the columns list and place them
+          # in the array in a first-come-first-served manner.
+          fields.each do |key|
+            index = temp.index( nil )
+            temp[index] = {:field_type => 'text', :field_name => key.to_s}
+            temp[index][:column_width]   = column_widths[key.to_s] if column_widths[key.to_s]
+            temp[index][:data_type]      = data_types[key.to_s] if data_types[key.to_s]
+            temp[index][:column_caption] = column_captions[key.to_s] if column_captions[key.to_s]
+            temp[index][:format]         = formats[key.to_s] if formats[key.to_s]
+            temp[index][:hide]           = true if hidden[key.to_s]
+          end
         end
         # Update the column_configs with the (hopefully) correctly-sequenced columns.
         temp.each {|t| column_configs << t }
@@ -2099,6 +2208,29 @@ end
   end
 
 
+    # Display a dataminer grid without any actions. Actions can be included if they have been placed in the session.
+    # Pass a grid plugin class to instantiate that plugin for the grid.
+    def build_standard_dm_grid(data_set, stat, columns_list, can_edit, can_delete, grid_configs, grid_plugin_class=nil)
+
+      grid_plugin = grid_plugin_class.nil? ? nil : grid_plugin_class.new
+
+      column_configs = []
+
+      if session[:std_grid_actions]
+        column_configs << {:field_type => 'action_collection',
+                           :field_name => 'actions',
+                           :settings   => {:actions => session[:std_grid_actions]}}
+        session[:std_grid_actions] = nil
+      end
+
+      # Build all other columns from the dataminer yml file.
+      build_generic_column_configs(data_set, column_configs, stat, columns_list, grid_configs)
+
+      # Get any other datagrid options from the grid_configs...
+      opts = build_grid_options_from_grid_configs(grid_configs)
+
+      get_data_grid(data_set, column_configs, grid_plugin, true, nil, opts)
+    end
 
 
   def build_lookups_grid(recordset,select_column_name,looked_up_field,submit_to=nil)
@@ -2111,6 +2243,7 @@ end
 				 {:link_text => 'select',
 				:target_action => 'submit_looked_up_selection',
 				:id_column => select_column_name,
+				:name_id_as_key => true,
         :id_value=>looked_up_field}}
 
     keys.each do |key|
@@ -2157,7 +2290,8 @@ end
     column_configs[column_configs.length()] = {:field_type => 'text',:field_name => key.to_s}
     end
 
-    return get_data_grid(email_logs, column_configs,IntakeHeaderPlugins::IntakesEmailLogsGridPlugin.new(self,request),true)
+    #return get_data_grid(email_logs, column_configs,IntakeHeaderPlugins::IntakesEmailLogsGridPlugin.new(self,request),true)
+    return get_data_grid(email_logs, column_configs,nil,true)
   end
 
   def build_missing_mf_records_grid(records)
@@ -2198,6 +2332,7 @@ end
     @multi_select = @action if(@is_select_missing_mf)
 
     return get_data_grid(missing_mfs, column_configs,IntakeHeaderPlugins::MissingMasterFilesGridPlugin.new,true)
+# TOBECOME:    get_data_grid(missing_mfs, column_configs,MesScada::GridPlugins::Logistics::LogisticsGridPlugin.new,true)
   end
 
   def build_email_report_to_depot_form(process_alert_def,action,caption)
@@ -2264,27 +2399,20 @@ end
 
   def expand_and_collapse_all_collapses
     "<div class='collapseAlls'>
-      #{content_tag(:p, link_to('expand all', '#', :class => 'expand_all_collapses'))}
-      #{content_tag(:p, link_to('collapse all', '#', :class => 'collapse_all_collapses'))}
+      #{content_tag(:p, link_to('expand all', '#', :class => 'stdlink expand_all_collapses'))}
+      #{content_tag(:p, link_to('collapse all', '#', :class => 'stdlink collapse_all_collapses'))}
     </div>"
   end
 
   # Helper for forms that need to fill in either org or person.
-  def org_or_person_for_form(model, show_hide_url, is_edit, is_create_retry)
-    party_types    = [[Party::ORGANIZATION],['PERSON']]
+  def org_or_person_for_form(model, show_hide_url, is_edit, is_create_retry, autocomplete_url=nil)
+    party_types    = [[Party::ORGANIZATION],[Party::PERSON]]
     default_is_org = true
+
     if model && model.parties_role_id
-      parties_role = PartiesRole.find(model.parties_role_id)
-      party_types  = [parties_role.party_type_name]
+      parties_role   = model.populate_virtual_attrs
+      party_types    = [parties_role.party_type_name]
       default_is_org = party_types.first == Party::ORGANIZATION
-      model.party_type_name = party_types.first
-      if default_is_org
-        model.organisation_name = parties_role.party_name
-      else
-        person = Person.find_by_party_id(parties_role.party_id)
-        model.first_name = person.first_name
-        model.last_name   = person.last_name
-      end
     elsif is_create_retry
       default_is_org = model.party_type_name == Party::ORGANIZATION
     end
@@ -2312,7 +2440,7 @@ end
       if default_is_org
         field_configs << {:field_type => 'TextField',
           :field_name => 'organisation_name',
-          :settings => { :label_css_class => 'org_type'}}
+          :settings => { :label_css_class => 'org_type', :autocomplete_url => autocomplete_url}}
 
         field_configs << {:field_type => 'TextField',
           :field_name => 'first_name',
@@ -2337,6 +2465,14 @@ end
     end
 
     field_configs
- end
+  end
+
+  def show_boolean(val)
+    if val
+      '<span class="bool_check"></span>'
+    else
+      '<span class="bool_uncheck"></span>'
+    end
+  end
 
 end

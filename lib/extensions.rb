@@ -105,6 +105,14 @@ class String
     end
   end
 
+  # Convert a string containing a float value and return an Integer representing the same amount in cents.
+  # '8' => 800; '.1' => 10; '8.21212' => 821; '-21.34' => -2134; 'R200.5' => raises ArgumentError!
+  # NB Calling code should trap ArgumentError - raised if the String is not a valid number.
+  def convert_rands_to_cents
+    check_price = (Float(self) * 100).to_i          # Check that we have a valid number (Sadly this is not accurate enough to use as is)
+    ar = self.split('.')                            # Split the string on decimal place.
+    (ar[0] + (ar[1] || '').ljust(2, '0')[0,2]).to_i # Munge the string to cents (without using the imprecise Float).
+  end
 
   def occurrence_of(search_char)
     # Same as: self.scan(/./).select {|c| c == search_char}.count
@@ -314,20 +322,20 @@ class ActiveRecord::Base
 
   def  log_changes
     if self.new_record?
-      else
+    else
       if Globals.tables_to_be_logged_in_changed_logs.include?(self.class.to_s.tableize)
-          record_before = {}
-          record_after  = {}
-          changed_fields=self.changed_fields?
-          if !changed_fields.empty?
-            changed_fields.each do |key,val|
-              record_before[key]=val[0]
-              record_after[key]=val[1]
-            end
-          end
-          ChangeLog.create_log(record_before,record_after,self,options = {})
+        record_before = {}
+        record_after  = {}
+        changed_fields=self.changed_fields?
+        if !changed_fields.empty?
+          changed_fields.each do |key,val|
+          record_before[key]=val[0]
+          record_after[key]=val[1]
         end
       end
+      ChangeLog.create_log(record_before,record_after,self,options = {})
+    end
+  end
 
   end
 
@@ -512,9 +520,19 @@ class ActiveRecord::Base
   end
 
 
+  #when needed,override this method in a model, specifying specific field names that should not be trimmed
+  #(by default, all field values will be trimmed)
+  def fields_not_to_trim
+
+    []
+
+  end
+
+
   def trim_attribute_values
     self.attributes.each do |key, value|
-      eval "self." + key + ".to_s.strip!"
+      # eval "self." + key + ".to_s.strip!"  if !fields_not_to_trim.find{|f|f == key}
+      self.send(key).to_s.strip!  unless fields_not_to_trim.include?( key )
     end
   end
 
@@ -558,7 +576,8 @@ class ActiveRecord::Base
     end
 
     changed_field_names = Array.new
-    old_state = eval self.class.to_s + ".find(" + self.id.to_s + ")"
+    #old_state = eval self.class.to_s + ".find(" + self.id.to_s + ")"
+    old_state = self.class.find(self.id)
     list = Hash.new
     self.attributes.each do |name, value|
       if !(old_state.has_attribute?(name)== nil && old_state.attributes[name]== nil)
@@ -601,7 +620,7 @@ class ActiveRecord::Base
       ignore = false
       if ignore_fields != nil
         ignore = ignore_fields.find { |field| field.to_s.upcase == key.to_s.upcase }
-        puts "ignore"
+### JS        puts "ignore"
       end
       if ignore == false
         if value.to_s.upcase.index("SELECT ")!= nil||value.to_s == "<empty>"||value.to_s.strip == ""
@@ -662,36 +681,19 @@ class ActiveRecord::Base
 
   end
 
+  # Copy attribute values from an activerecord instance to a target_record.
+  # If +copy_ids+ is false, no values ending in "_id" will be copied over.
+  # +ignore_fields+ can be an array of field names. Any field names in the
+  # array will not have the matching attribute's values copied over.
   def export_attributes(target_record, copy_ids = nil, ignore_fields = nil)
+    ignore_fields = Array(ignore_fields) << 'id'
 
     self.attributes.each do |name, attr|
+      next if ignore_fields.include?(name)
+      next if !copy_ids && name.ends_with?( '_id' )
 
-      if ignore_fields
-        if ignore_fields.find { |f| f == name }
-          next
-        end
-      end
-
-      if !((name.index("_id")&& !copy_ids)|| name == "id")
-        if target_record.has_attribute?(name)
-          if attr == nil
-
-            eval "target_record." + name + " = nil"
-          else
-#            if attr.class.to_s == "String"
-#              attr.gsub!("'","\'")
-#              attr.gsub!("\"","\'")
-#
-#            end
-
-            target_record.send(name + "=", attr)
-            #eval "target_record." + name + " = \"#{attr}\""
-
-          end
-        end
-      end
+      target_record.send("#{name}=", attr) if target_record.has_attribute?(name)
     end
-
   end
 
 end
@@ -714,29 +716,6 @@ class Hash
   end
 
 
-  def export_attributes(target_record, copy_ids = nil, ignore_fields = nil)
 
-    self.each do |name, attr|
-
-      if ignore_fields
-        if ignore_fields.find { |f| f == name }
-          next
-        end
-      end
-
-      if !((name.index("_id")&& !copy_ids)|| name == "id")
-        if target_record.has_attribute?(name)
-          if attr == nil
-
-            eval "target_record." + name + " = nil"
-          else
-
-            target_record.send(name + "=", attr)
-          end
-        end
-      end
-    end
-
-  end
 
 end

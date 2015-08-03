@@ -1,0 +1,308 @@
+<h1 id="form-controls">Form controls</h1>
+<h2 id="list-of-types">List of types</h2>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Class</th>
+<th align="left">Config key name</th>
+<th align="left">Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">CheckBox</td>
+<td align="left">CheckBox</td>
+<td align="left">no settings</td>
+</tr>
+<tr class="even">
+<td align="left"><del>DateField</del></td>
+<td align="left"><del>DateField</del></td>
+<td align="left">no settings <em>Don't use this control. Rather use PopupDateSelector.</em></td>
+</tr>
+<tr class="odd">
+<td align="left"><del>DateTimeField</del></td>
+<td align="left"><del>DateTimeField</del></td>
+<td align="left">no settings <em>Don't use this control. Rather use PopupDateTimeSelector.</em></td>
+</tr>
+<tr class="even">
+<td align="left">DropDownField</td>
+<td align="left">DropDownField</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">HiddenField</td>
+<td align="left">HiddenField</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">LinkField</td>
+<td align="left">LinkField</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">LinkWindowField</td>
+<td align="left">LinkWindowField</td>
+<td align="left">Also link_window_field; LinkField_PopupWindow and <em>grid_command</em> for grids.</td>
+</tr>
+<tr class="odd">
+<td align="left">PasswordField</td>
+<td align="left">PasswordField</td>
+<td align="left">no settings</td>
+</tr>
+<tr class="even">
+<td align="left">PopupDateRangeSelector</td>
+<td align="left">PopupDateRangeSelector</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">PopupDateSelector</td>
+<td align="left">PopupDateSelector</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">PopupDateTimeSelector</td>
+<td align="left">PopupDateTimeSelector</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">Screen</td>
+<td align="left">Screen</td>
+<td align="left">Also ChildForm</td>
+</tr>
+<tr class="even">
+<td align="left">StaticField</td>
+<td align="left"><strong>LabelField</strong></td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">TextArea</td>
+<td align="left">TextArea</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">TextField</td>
+<td align="left">TextField</td>
+<td align="left"></td>
+</tr>
+</tbody>
+</table>
+<p>There is also a PopupLink control, but it is built up in a different way.</p>
+<h2>List of non-settings attributes</h2>
+<ul>
+<li>:field_name <span class="info_column">(Required. Ususally maps to an attribute of an ActiveRecord model)</span></li>
+<li>:field_type <span class="info_column">(Required. Must be one of the config key names or their alternatives listed in the table above)</span></li>
+<li>:settings <span class="info_column">(Optional hash of settings. See notes below for settings per field_type)</span></li>
+<li>:non_db_field <span class="info_column">(Optional. Set to true if the field_name does not represent an attribute of the model)</span></li>
+<li>:observer <span class="info_column">(Optional. Observer for a field)</span></li>
+</ul>
+<h2 id="settings-attributes-per-control">Settings attributes per control</h2>
+<h3 id="formfield-applies-to-all-form-controls">FormField (applies to all form controls)</h3>
+<ul>
+<li>css_class <span class="info_column">(Override the class of the td surrounding the input)</span></li>
+<li>hide_label <span class="info_column">(If true, leave the label area blank)</span></li>
+<li>label_caption <span class="info_column">(Provide text to use for the label instead of the field_name)</span></li>
+<li>label_css_class <span class="info_column">(Override the class of the label)</span></li>
+</ul>
+<h3 id="dropdownfield">DropDownField</h3>
+<ul>
+<li>list <span class="info_column">(Required array or hash of SELECT options)</span></li>
+<li>searchable <span class="info_column">(If true, the dropdown options can be searched)</span></li>
+<li>html_opts <span class="info_column">(A hash of HTML options to be passed to the tag - e.g. 'data-url' =&gt; 'url_path')</span></li>
+<li>no_empty <span class="info_column">(If true, do not show an "empty" prompt)</span></li>
+<li>prompt <span class="info_column">(Text to display as the prompt instead of "empty")</span></li>
+<li>is_clearable <span class="info_column">(If true, in edit form the dropdown will include a blank option)</span></li>
+<li>sorted <span class="info_column">Already sorted. (If true, the list will not be automatically sorted again. Useful e.g. for a list of month names or a list in descending order.)</span></li>
+<li>disabled <span class="info_column">An array of values to display as disabled options. Choose either this or <em>disabled_list</em>, not both.</span></li>
+<li>disabled_list <span class="info_column">An array of SELECT options to display as disabled options. An item in this list will only appear in the drop down if it is the current value of the control. <br>This is useful if an option is no longer appropriate to select, but there is historical data with inappropriate values.</span><br>&nbsp;</li>
+<li>An illustration of the different disabling options:
+<table class="thinbordertable">
+<tr><td>:list => [['one',1],['two',2],['three',3]]</td><td>These options appear in the dropdown as 'one', 'two' and 'three'.</td></tr>
+<tr><td>:disabled => [2,3]</td><td>This always shows the second and third options as disabled.</td></tr>
+<tr><td>:disabled_list => [['four',4],['five',5]]</td><td>If the value was "4", this would add 'four' as the last option and disable it.<br> If the value was "2", none of these elements would appear as options.</td></tr>
+</table>
+</li></ul>
+<h3 id="hiddenfield">HiddenField</h3>
+<ul>
+<li>hidden_field_data <span class="info_column">(Set the value of the hidden field. Otherwise a data-bound field will use the value of the model's attribute.)</span></li>
+</ul>
+<h3 id="linkfield">LinkField</h3>
+<ul>
+<li>link_text <span class="info_column">(Static text to be used for the link. Ignored if an image is provided.)</span></li>
+<li>image <span class="info_column">(Name of an image to use instead of text for the link.)</span></li>
+<li>dynamic_link_text <span class="info_column">(If true, use the value of the field as the link text. Defaults to true if no link_text provided.)</span></li>
+<li>controller <span class="info_column">(Controller part of url. If not provided, the currently active controller is used.)</span></li>
+<li>target_action <span class="info_column">(Action to be called.)</span></li>
+<li>id_column <span class="info_column">(Name of field to use to get the value for the id parameter.)</span></li>
+<li>id_value <span class="info_column">(Fixed value to use as the id parameter.)</span></li>
+<li>prompt <span class="info_column">(String message to prompt user. Link is opened if user choose OK. If cancel is chosen, nothing happens)</span></li>
+<li>dialog_popup <span class="info_column">(If true, open the link in a JQuery dialog)</span></li>
+<li>as_button <span class="info_column">(If true, make the link appear like a button)</span></li>
+<li>html_options <span class="info_column">(A hash of HTML options to be passed to the tag - e.g. :class =&gt; 'something' - to add an extra class)</span></li>
+</ul>
+<h3 id="linkwindowfield">LinkWindowField</h3>
+<ul>
+<li>link_text <span class="info_column">(Static text to be used for the link. Ignored if an image is provided.)</span></li>
+<li>image <span class="info_column">(Name of an image to use instead of text for the link.)</span></li>
+<li>link_type</li>
+<li>host_and_port</li>
+<li>controller <span class="info_column">(Controller part of url. If not provided, the currently active controller is used.)</span></li>
+<li>target_action <span class="info_column">(Action to be called.)</span></li>
+<li>id_column <span class="info_column">(Name of field to use to get the value for the id parameter.)</span></li>
+<li>id_value <span class="info_column">(Fixed value to use as the id parameter.)</span></li>
+<li>frame_id</li>
+<li>window_height</li>
+<li>window_width</li>
+<li>extra_styling</li>
+<li>as_button <span class="info_column">(If true, make the link appear like a button)</span></li>
+<li>hide_if_no_grid_data <span class="info_column">(If true, the link will not appear in a grid if there are no rows in the grid)</span></li>
+</ul>
+<h3 id="popuplink">PopupLink</h3>
+<ul>
+<li>link_text <span class="info_column">(Static text to be used for the link. Ignored if an image is provided.)</span></li>
+<li>image <span class="info_column">(Name of an image to use instead of text for the link.)</span></li>
+<li>dynamic_link_text <span class="info_column">(If true, use the value of the field as the link text. Defaults to true if no link_text provided.)</span></li>
+<li>menu_name</li>
+<li>link_value</li>
+<li>css_class <span class="info_column">(Override for CSS class - which defaults to 'action_link'. If special value 'none' is provided, no CSS class will be used at all.)</span></li>
+</ul>
+<h3 id="popupdateselector">PopupDateRangeSelector</h3>
+<ul>
+<li>html_opts <span class="info_column">(A hash of HTML options to be passed to the tag - e.g. 'data-url' =&gt; 'url_path')</span></li>
+</ul>
+<h3 id="popupdateselector">PopupDateSelector</h3>
+<ul>
+<li>date_textfield_id <span class="info_column">(Override the HTML tag id)</span></li>
+<li>html_opts <span class="info_column">(A hash of HTML options to be passed to the tag - e.g. 'data-url' =&gt; 'url_path')</span></li>
+</ul>
+<h3 id="popupdatetimeselector">PopupDateTimeSelector</h3>
+<ul>
+<li>date_textfield_id <span class="info_column">(Override the HTML tag id)</span></li>
+<li>html_opts <span class="info_column">(A hash of HTML options to be passed to the tag - e.g. 'data-url' =&gt; 'url_path')</span></li>
+</ul>
+<h3 id="screen">Screen</h3>
+<ul>
+<li>host_with_port</li>
+<li>controller <span class="info_column">(Controller part of url. If not provided, the currently active controller is used.)</span></li>
+<li>target_action <span class="info_column">(Action to be called.)</span></li>
+<li>id_value <span class="info_column">(Fixed value to use as the id parameter.)</span></li>
+<li>css_class</li>
+<li>border</li>
+<li>height <span class="info_column">(Height passed to the control's containing <strong>td</strong> element. Also applied to the div surrounding the frame itself.)</span></li>
+<li>width <span class="info_column">(Width passed to the control's containing <strong>td</strong> element.)</span></li>
+<li>no_scroll</li>
+<li>request</li>
+<li>show_content_header_caption_order</li>
+</ul>
+<h3 id="staticfield-labelfield">StaticField (LabelField)</h3>
+<ul>
+<li>show_label <span class="info_column">(If false (or if this setting is not provided), the label area will be blank.)</span></li>
+<li>static_value <span class="info_column">(String value to display instead of the value of the databound field's value.)</span></li>
+<li>is_separator <span class="info_column">(If true - AND static_value is set - , displays a minus/plus image allowing collapse/show of the rest of the form when clicked.)</span></li>
+<li>replace <span class="info_column">(Array of from and to strings for replacing value. e.g. ["\n", '&lt;br /&gt;'] - to change newlines to HTML linebreaks.)</span></li>
+</ul>
+<h3 id="textarea">TextArea</h3>
+<ul>
+<li>cols <span class="info_column">(Number of columns for the textarea.)</span></li>
+<li>rows <span class="info_column">(Number of rows for the textarea.)</span></li>
+<li>html_opts <span class="info_column">(Any HTML to be passed to the tag - e.g. 'data-url' =&gt; 'url_path'.)</span></li>
+</ul>
+<h3 id="textfield">TextField</h3>
+<ul>
+<li>size <span class="info_column">(The width in characters of the field.)</span></li>
+<li>readonly <span class="info_column">(Render a text field that cannot be edited.)</span></li>
+<li>html_opts <span class="info_column">(Any HTML to be passed to the tag - e.g. 'data-url' =&gt; 'url_path'.)</span></li>
+<li>lookup <span class="info_column">(If true, build a link to lookup the field's value from a popup window.)</span><ul>
+<li>lookup_search_uri</li>
+<li>lookup_search_file</li>
+<li>select_column_name</li>
+<li>send_fields</li>
+<li>default_values</li>
+<li>submit_to</li></ul></li>
+<li>autocomplete_url <span class="info_column">(A url that points to an action that returns a JSON array of strings or objects)</span></li>
+</ul>
+<h3 id="textfield">EXAMPLE: Autocomplete</h3>
+<ul>
+  <li>Applies to <strong>TextField</strong></li>
+  <li>Place a url in <pre style="padding:0;display:inline;">settings[:autocomplete_url]</pre> to have the field's value prompted by autocomplete as the user types.</li>
+  <li>As the user types, the current text value of the field will be sent to the url in <pre style="padding:0;display:inline;">params[:term]</pre>.</li>
+  <li>The url points to an action that returns a JSON array of strings or objects e.g.<span class="CodeRay"><span class="string"><span class="delimiter">&quot;</span><span class="content">http://</span><span class="inline"><span class="inline-delimiter">#{</span>request.host_with_port<span class="inline-delimiter">}</span></span><span class="content">/party_manager/customer/autocomplete</span><span class="delimiter">&quot;</span></span></span>
+<h4>Autocomplete action examples</h4>
+<div class="CodeRay">
+<pre>
+  <span class="comment"># Render an array of strings as: &quot;render :json =&gt; str_arr.to_json&quot;</span>
+  <span class="keyword">def</span> <span class="function">autocomplete_array_of_strings</span>
+    term    = params[<span class="symbol">:term</span>].strip
+    parties = <span class="constant">PartiesRole</span>.find(<span class="symbol">:all</span>,
+                             <span class="symbol">:select</span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">DISTINCT party_name</span><span class="delimiter">'</span></span>,
+                             <span class="symbol">:order</span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">party_name</span><span class="delimiter">'</span></span>,
+                             <span class="symbol">:conditions</span> =&gt; <span class="string"><span class="delimiter">&quot;</span><span class="content">UPPER(party_name) LIKE 'GRE%' AND party_type_name = 'ORGANISATION'</span><span class="delimiter">&quot;</span></span>).map {|r| r.party_name }
+    render <span class="symbol">:json</span> =&gt; parties.to_json
+  <span class="keyword">end</span>
+
+  <span class="comment"># For an array of objects: label is what user selects and value is what is placed in text box.</span>
+  <span class="comment"># Note how the label can differ from the value.</span>
+  <span class="comment"># Needs funky munging of json output in Rails 1.</span>
+  <span class="keyword">def</span> <span class="function">autocomplete_objects</span>
+    term    = params[<span class="symbol">:term</span>].strip
+    parties = <span class="constant">PartiesRole</span>.find(<span class="symbol">:all</span>,
+                             <span class="symbol">:select</span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">DISTINCT party_name</span><span class="delimiter">'</span></span>,
+                             <span class="symbol">:order</span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">party_name</span><span class="delimiter">'</span></span>,
+                             <span class="symbol">:conditions</span> =&gt; <span class="string"><span class="delimiter">&quot;</span><span class="content">UPPER(party_name) LIKE 'GRE%' AND party_type_name = 'ORGANISATION'</span><span class="delimiter">&quot;</span></span>).map {|r| r.party_name }
+    ret_vals = []
+    parties.each {|p| ret_vals &lt;&lt; { <span class="string"><span class="delimiter">'</span><span class="content">label</span><span class="delimiter">'</span></span> =&gt; <span class="string"><span class="delimiter">&quot;</span><span class="content">Party: </span><span class="delimiter">&quot;</span></span>, <span class="string"><span class="delimiter">'</span><span class="content">value</span><span class="delimiter">'</span></span> =&gt; p} }
+    render <span class="symbol">:json</span> =&gt; ret_vals.inspect.gsub(<span class="string"><span class="delimiter">'</span><span class="content">=&gt;</span><span class="delimiter">'</span></span>, <span class="string"><span class="delimiter">'</span><span class="content">: </span><span class="delimiter">'</span></span>) <span class="comment"># This is important: to get around a glitch in old Rails &quot;to_json&quot; (otherwise keys don't become strings).</span>
+  <span class="keyword">end</span>
+
+  <span class="comment"># For an array of objects that need to be grouped in some way: label is what user selects, value is what is placed in text box and category groups items.</span>
+  <span class="comment"># Note that the array must be sorted by category.</span>
+  <span class="comment"># Also needs funky munging of json output in Rails 1.</span>
+  <span class="keyword">def</span> <span class="function">autocomplete_grouped_objects</span>
+    term    = params[<span class="symbol">:term</span>].strip
+    parties = <span class="constant">PartiesRole</span>.find(<span class="symbol">:all</span>,
+                             <span class="symbol">:select</span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">DISTINCT party_name</span><span class="delimiter">'</span></span>,
+                             <span class="symbol">:order</span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">party_name</span><span class="delimiter">'</span></span>,
+                             <span class="symbol">:conditions</span> =&gt; <span class="string"><span class="delimiter">&quot;</span><span class="content">UPPER(party_name) LIKE 'GRE%' AND party_type_name = 'ORGANISATION'</span><span class="delimiter">&quot;</span></span>).map {|r| r.party_name }
+    custs = <span class="constant">PartiesRole</span>.find(<span class="symbol">:all</span>,
+                             <span class="symbol">:select</span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">DISTINCT party_name</span><span class="delimiter">'</span></span>,
+                             <span class="symbol">:order</span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">party_name</span><span class="delimiter">'</span></span>,
+                             <span class="symbol">:conditions</span> =&gt; <span class="string"><span class="delimiter">&quot;</span><span class="content">UPPER(party_name) LIKE 'GRE%' AND party_type_name = 'ORGANISATION' AND role_name = 'CUSTOMER'</span><span class="delimiter">&quot;</span></span>).map {|r| r.party_name }
+    parties -= custs
+    ret_vals = []
+    parties.each {|p| ret_vals &lt;&lt; { <span class="string"><span class="delimiter">'</span><span class="content">label</span><span class="delimiter">'</span></span> =&gt; p, <span class="string"><span class="delimiter">'</span><span class="content">value</span><span class="delimiter">'</span></span> =&gt; p, <span class="string"><span class="delimiter">'</span><span class="content">category</span><span class="delimiter">'</span></span> =&gt; <span class="string"><span class="delimiter">'</span><span class="delimiter">'</span></span>} }
+    custs.each {|c| ret_vals &lt;&lt; { <span class="string"><span class="delimiter">'</span><span class="content">label</span><span class="delimiter">'</span></span> =&gt; c, <span class="string"><span class="delimiter">'</span><span class="content">value</span><span class="delimiter">'</span></span> =&gt; c, <span class="string"><span class="delimiter">'</span><span class="content">category</span><span class="delimiter">'</span></span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">Existing Customers</span><span class="delimiter">'</span></span>} }
+    render <span class="symbol">:json</span> =&gt; ret_vals.inspect.gsub(<span class="string"><span class="delimiter">'</span><span class="content">=&gt;</span><span class="delimiter">'</span></span>, <span class="string"><span class="delimiter">'</span><span class="content">: </span><span class="delimiter">'</span></span>) <span class="comment"># This is important: to get around a glitch in old Rails &quot;to_json&quot; (otherwise keys don't become strings).</span>
+  <span class="keyword">end</span>
+</pre>
+</div>
+</li>
+</ul>
+<h3 id="textfield">EXAMPLE: Observer (jQuery usage)</h3>
+<ul>
+  <li>Applies to <strong>DropDownField</strong>, <strong>TextField</strong>, <strong>PopupDateSelector</strong>, <strong>PopupDateTimeSelector</strong>, <strong>PopupDateRangeSelector</strong></li>
+  <li>Make the following entry in the <pre style="padding:0;display:inline;">settings</pre> hash:
+    <ul>
+      <li><pre style="padding:0;display:inline;">:css_class => 'select_observable'</pre> (This tells jQuery to observe changes)</li>
+    </ul>
+  </li>
+  <li>Make the following entries in the <pre style="padding:0;display:inline;">settings[:html_opts]</pre> hash:
+    <ul>
+      <li><pre style="padding:0;display:inline;">'data-url'    => "http://#{request.host_with_port}/func_area/controller/action"</pre></li>
+      <li><pre style="padding:0;display:inline;">'data-params' => "paramname:form_element_id"</pre> (optional - a comma-separated list of parameters from other form fields that should be returned to the action)</li>
+    </ul>
+  </li>
+  <li>The value of the observed field will be returned to the action in <pre style="padding:0;display:inline;">params[:id]</pre></li>
+  <li>If present, the data-params works as follows: <pre style="padding:0;display:inline;">name:user_name</pre> is returned to the action in <pre style="padding:0;display:inline;">params[:name]</pre> and the value will be the value of the field in the form with <pre style="padding:0;display:inline;">id="user_name"</pre>.</li>
+  <li>Write the action in func_area/controller/action.</li>
+  <li>The action should render javascript in text without a layout. e.g. to replace the value of a text field:
+  <ul>
+  <li><pre style="padding:0;display:inline;">render :text => "replace_text_value('#{str_ref}', 'customer_receipt_cashbook_ref_no');", :layout => false</pre></li>
+  </ul></li>
+  <li>e.g. to replace the options in a drop-down:
+  <ul>
+  <li><pre style="padding:0;display:inline;">render :text => "replace_select_options(#{['one','two','three'].to_json}, 'invoice_customer_payment_term_set_id');", :layout => false</pre></li>
+</ul></li>
+  <li>e.g. to remove a link from the form:
+  <ul>
+  <li><pre style="padding:0;display:inline;">render :text => "jQuery('#choose_pallets_cell a').hide();", :layout => false</pre></li>
+</ul></li>
+</ul>

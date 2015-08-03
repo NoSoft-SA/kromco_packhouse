@@ -15,6 +15,14 @@ class DataMinerReport < ActiveRecord::Base
         DataMinerReport.create(:group_name => grp, :filename => file_name, :report_name => File.basename(file_name, '.yml'))
       end
     end
+
+    # Clear reports that do not exists on disk any more:
+    DataMinerReport.find(:all).each do |report|
+      unless File.exist?(File.join(Globals.get_reports_location, report.filename))
+        logger.info ">>> Removed report from DataMinerReport because the file is no longer on disk: #{report.filename}."
+        report.destroy
+      end
+    end
   end
 
   # Returns an Array of yml filenames including their relative paths.
@@ -40,7 +48,7 @@ class DataMinerReport < ActiveRecord::Base
   # Return an Array of the column names from the query.
   def columns_in_order
     yml   = YAML.load(File.read(File.join(Globals.get_reports_location, self.filename)))
-    sql   = yml['query']
+    sql   = yml['query'].gsub("\n", ' ')
     if sql.include? 'SUBQ'
       raise MesScada::Error, 'Currently cannot re-order a report that includes a subquery.'
     end
@@ -58,7 +66,7 @@ class DataMinerReport < ActiveRecord::Base
   def query_parts
     parts = []
     yml   = YAML.load(File.read(File.join(Globals.get_reports_location, self.filename)))
-    sql   = yml['query']
+    sql   = yml['query'].gsub("\n", ' ')
     match = sql.match(/\A\s*select\s?(.+)(\sfrom\s)/mi)
     unless match.nil?
       sel_part  = match[0].sub(match[1],'').sub(match[2], '')

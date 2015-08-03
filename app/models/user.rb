@@ -56,6 +56,12 @@ class User < ActiveRecord::Base
     User.login(self.user_name, self.password)#||
     #User.find_by_user_name(user_name)
   end
+
+  def initials
+    first = self.first_name.nil? ? '' : self.first_name[0,1].upcase
+    last  = self.last_name.nil?  ? '' : self.last_name[0,1].upcase
+    "#{first}#{last}"
+  end
   
   # When a new User is created, it initially has a
   # plain-text password. We convert this to an SHA1 hash

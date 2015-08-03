@@ -54,9 +54,11 @@ module MesScada
       @field_type = field_type
       @active_record_var_name = active_record_var_name
 
+      @autocomplete_url = nil
 
       @settings = settings
       if @settings != nil
+        @autocomplete_url = @settings[:autocomplete_url]
         @label_css = @settings[:label_css_class]
         if @settings[:label_caption]!= nil
           @label_caption = @settings[:label_caption]
@@ -106,21 +108,11 @@ module MesScada
           # observer = @env.observe_field(@active_record_var_name + "_" + @field_name,
           #                               :update => @observer[:updated_field_id],
           #                               :url => {:action => @observer[:remote_method]}, :complete => @observer[:on_completed_js], :loading => "show_element('img_" + @active_record_var_name + "_" + @field_name + "');")
-          if(@observer[:extra_params])
-            extra_static_params = "+'#{@observer[:extra_params].map{|k,v| "&#{k}=#{v}"}.join}'"
-          end
-          if(@observer[:on_load_js])
-            on_load_js = ""
-            @observer[:on_load_js].each do |observed_field|
-              on_load_js += "+'&#{observed_field[0]}='+encodeURIComponent($('#{observed_field[1]}').value)"
-            end
-
-          end
           observer = @env.observe_field(@active_record_var_name + "_" + @field_name,
                                         :update   => @observer[:updated_field_id],
                                         :url      => {:action => @observer[:remote_method]},
                                         :complete => @observer[:on_completed_js],
-                                        :with     => "encodeURIComponent(value)+'=x'#{extra_static_params}#{on_load_js}",
+                                        :with     => "encodeURIComponent(value)+'=x'",
                                         :loading  => "show_element('img_" + @active_record_var_name + "_" + @field_name + "');")
         end
         if observer != ""
@@ -144,7 +136,16 @@ module MesScada
               width = " width = #{w} height = #{h}"
               #width = " width = #{w} #{h.nil? ? '' : "height = #{h}"}"
           end
-          @output_html = "<td " + css_class + " valign=\"top\" id = '" + @field_name + "_cell'"  " #{width}>" + construct_control + loading_gif + observer + "</td>"
+
+          if @autocomplete_url.nil?
+            extra_js = ''
+          else
+            extra_js =
+              %Q|<script>
+                   jQuery(function() { jQuery( "##{@active_record_var_name}_#{@field_name}" ).catcomplete({ source: "#{@autocomplete_url}", minLength: 2 }); });
+                 </script>|
+          end
+          @output_html = "<td " + css_class + " valign=\"top\" id = '" + @field_name + "_cell'"  " #{width}>" + construct_control + loading_gif + observer + extra_js + "</td>"
         end
       # rescue
       #   raise_error "The control could not be rendered correctly. \n  The exception reported is: " + $!, "build_control"
@@ -731,24 +732,33 @@ module MesScada
 
       #sort the list before binding
 
-      if @settings[:list].class.to_s == "Array" ||@settings[:list].class.to_s == "Hash"
-        @settings[:list].sort! do |x, y|
-          if x.class.to_s == "Array" && y.class.to_s == "Array"
-            x[0] && y[0] ? x[0] <=> y[0] : 0    # Sort on 1st element of array.
-          elsif x.class.to_s == "String" && y.class.to_s == "String"
-            if (x.to_i > 0 && y.to_i > 0)
-              x.to_i <=> y.to_i                 # Sort integers
+      unless @settings[:sorted]
+        if @settings[:list].class.to_s == "Array" ||@settings[:list].class.to_s == "Hash"
+          @settings[:list].sort! do |x, y|
+            if x.class.to_s == "Array" && y.class.to_s == "Array"
+              x[0] && y[0] ? x[0] <=> y[0] : 0    # Sort on 1st element of array.
+            elsif x.class.to_s == "String" && y.class.to_s == "String"
+              if (x.to_i > 0 && y.to_i > 0)
+                x.to_i <=> y.to_i                 # Sort integers
+              else
+                x <=> y                           # Sort strings
+              end
             else
-              x <=> y                           # Sort strings
+              0                                   # Sort as if x & y are equal
             end
-          else
-            0                                   # Sort as if x & y are equal
           end
         end
       end
 
       opt = {:sorted => true}
-      html_opts = {}
+      if @settings && @settings[:searchable]
+        ar  = ['chosen-select']
+        ar << @settings[:html_opts].delete(:class) if @settings && @settings[:html_opts]
+        html_class = ar.compact.join(' ')
+        html_opts = {:class => html_class}
+      else
+        html_opts = {}
+      end
       html_opts.merge!(@settings[:html_opts]) if @settings && @settings[:html_opts]
       # If setting no_empty is not set, prompt with <empty> or with the prompt provided in settings.
       if @settings[:is_clearable] # Display an empty selection for an edit record.
@@ -759,8 +769,27 @@ module MesScada
       else
         opt[:prompt] = @settings[:prompt] || '&lt;empty&gt;' unless @settings[:no_empty]
       end
+      opt[:disabled] = @settings[:disabled] if @settings && @settings[:disabled]
 
-      @env.select(@active_record_var_name, @field_name, @settings[:list], opt, html_opts)
+      list = @settings[:list]
+      # An element in the disabled_list will only show as an option if it is the current value.
+      if @settings && @settings[:disabled_list]
+        unless @active_record.nil?
+          val = @active_record[@field_name]
+          elem = nil
+          if @settings[:disabled_list].first.respond_to?(:first)
+            elem = @settings[:disabled_list].rassoc(val)
+          else
+            elem = @settings[:disabled_list].fetch(val, nil)
+          end
+          unless elem.nil?
+            list << elem
+            opt[:disabled] = elem.respond_to?(:first) ? [elem.last] : [elem]
+          end
+        end
+      end
+
+      @env.select(@active_record_var_name, @field_name, list, opt, html_opts)
 
     rescue
       if $!.to_s === "cannot convert nil into String"
@@ -783,6 +812,12 @@ module MesScada
 
   class LinkWindowField < FormField
 
+    attr_accessor :hide_if_no_grid_data
+
+    def initialize (form, active_record, field_name, field_type, active_record_var_name, settings, non_db_field = false, observer = nil, environment = nil)
+      super(form, active_record, field_name, field_type, active_record_var_name, settings, non_db_field, observer, environment)
+      @hide_if_no_grid_data = settings[:hide_if_no_grid_data] || false
+    end
 
     def build_control
 
@@ -798,12 +833,17 @@ module MesScada
 
 
       extra_styling = "#{@settings[:extra_styling]}" if(@settings[:extra_styling])
+      as_button     = @settings[:as_button]
       link = case @settings[:link_type]
         when nil, "popup"
           # puts "THIS IS FROM LINKFIELD"
           @form.is_popup = true if @form
           #"<a   style='text-decoration:underline;cursor:pointer;padding-bottom:200px' id='"+ host+"/"+controller+"/"+target+"" "' onclick='javascript:parent.call_open_window(this);' >"+link_text+"</a>"
-          "<a style='#{extra_styling}text-decoration:underline;cursor:pointer;padding-bottom:2px' id='"+ host+"/"+controller+"/" + target+ window_size + "' onclick='javascript:parent.call_open_window(this);' >"+link_text+"</a>"
+          if as_button
+            "<a style='#{extra_styling}' class='link-as-button' id='"+ host+"/"+controller+"/" + target+ window_size + "' onclick='javascript:parent.call_open_window(this);' >"+link_text+"</a>"
+          else
+            "<a style='#{extra_styling}text-decoration:underline;cursor:pointer;padding-bottom:2px' id='"+ host+"/"+controller+"/" + target+ window_size + "' onclick='javascript:parent.call_open_window(this);' >"+link_text+"</a>"
+          end
         when "iframe"
 
           val = "<label style='text-decoration: underline;cursor:pointer;' onclick='javascript:top.setFrameSource(&#39;"+ @settings[:frame_id].to_s+"&#39;,&#39;"+host+"/"+controller+"/"+target+"/"+@id.to_s+"&#39;);' >"+link_text+"</label>"
@@ -965,7 +1005,9 @@ module MesScada
           if @settings[:show_content_header_caption_order] == nil || @settings[:show_content_header_caption_order]
             @output_html += " class='child_form_header_caption' "
           end
-          @output_html += "></div><div class = 'ChildPanel' id='child_panel_#{@field_name}'><iframe "
+
+          toggler = "<div class='child_hider'><img src='/images/collapse_groups.png' title='Show/Hide this section' onclick='showHideChildForm(this);'></div>"
+          @output_html += ">#{toggler}</div><div class = 'ChildPanel' id='child_panel_#{@field_name}'><iframe "
 
           if @settings[:css_class]
             @output_html += "class='" + @settings[:css_class] + "' "

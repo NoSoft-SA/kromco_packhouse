@@ -142,6 +142,18 @@
         </tbody>
     </table>
     <br>
+
+                <script type="text/javascript">
+              jQuery(function() {
+              jQuery( ".MainContent" ).resizable({
+              animate: true, animateEasing: 'swing', animateDuration: 500
+              });
+              // This does not work in Firefox.
+              jQuery( "#l3_menus_container_parent" ).resizable({
+                handles: 'e'
+              });
+              });
+              </script>
     <table  border="0" cellpadding="0" id = "l3menus_table"
         cellspacing="0" width="100%" style="position:absolute;top:16%;height:430px;">
         <tbody>     
@@ -163,26 +175,6 @@
                     </td>
 
 
-
-
-
-
-                <script type="text/javascript">
-              jQuery(function() {
-              jQuery( ".MainContent" ).resizable({
-              animate: true, animateEasing: 'swing', animateDuration: 500
-              });
-              // This does not work in Firefox.
-              jQuery( "#l3_menus_container_parent" ).resizable({
-                handles: 'e'
-              });
-              });
-              </script>
-
-
-
-
-
                 <td  id = 'content_container' width = "100%" valign="top" halign = "left" style="height:480px;" class ="MainContent"   >
 
                     <div id='content_header'   style="vertical-align: top;" >&nbsp; </div>
@@ -190,7 +182,7 @@
         				<% if flash[:notice] -%>
         			
         			
-          					<div> &nbsp </div><div id="notice"><%= flash[:notice] %></div>
+          					<div> &nbsp; </div><div id="notice"><%= flash[:notice] %></div>
         				<% end  -%>
 	
 						        <%= @content_for_layout %>
@@ -212,7 +204,7 @@
                 <td  width="20">
                     &nbsp;</td>
                 <td  valign="top" width="560"id="footer_td">
-                    <div class="footer" id="footer_menu's" >
+                    <div class="footer" id="footer_menus" >
                        <img id = "img_menu_hider" src = "/images/home/hide.png" /><a href = "javascript:nothing();" onclick = "hide_l3_menus(this);">hide menus</a> &nbsp;&nbsp;
                        <img id = "img_header_hider" src = "/images/home/hide.png" /><a href = "javascript:nothing();" onclick = "hide_home_header(this);">hide header</a>
                     </div>
@@ -246,9 +238,9 @@
    </div>
    
    <!-- This is the second level div's -->
-   <div id ="hidden_program_list_level2_div" style = "z-index: 1200;border:1px black dotted; position: absolute;right: 15px;overflow:auto;height:0px;width:168px; top: 14.5%;background-color: whitesmoke;visibility:hidden;">
+   <div id ="hidden_program_list_level2_div" style = "z-index: 1200;border:1px black dotted; position: absolute;overflow:auto;height:0px;width:168px; top: 14.5%;background-color: whitesmoke;visibility:hidden;">
    </div>
-   <div id="hidden_program_list_level2_button" style = "z-index: 1200; position: absolute;right: 15px; top: 11.4%;visibility:hidden;">
+   <div id="hidden_program_list_level2_button" style = "z-index: 1200; position: absolute; top: 11.4%;visibility:hidden;">
    </div>
    <!-- This is the end  of the  second level div's -->
 

@@ -103,11 +103,11 @@ function open_window_link(url)
     url_parts =   url.split("!");
     if(url_parts.length > 1)
     {
-        url_parts.each( function(u) {
-          if (u.indexOf(':') > -1) {
-            dimension_parts = u.split(":");
-          }
-        });
+      url_parts.forEach(function(element) { // Will not work in IE8 and earlier!
+        if (element.indexOf(':') > -1) {
+          dimension_parts = element.split(":");
+        }
+      });
     }
 
   url = url_parts[0];
