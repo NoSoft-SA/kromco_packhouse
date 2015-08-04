@@ -68,9 +68,9 @@ class HbsOut < CsvOutTransformer
                                         product_classes.product_class_description AS product_class_code,
                                         rmt_products.commodity_code,bins.exit_reference_date_time,
                                         rmt_products.size_code,
-                                        rmt_varieties.rmt_variety_code||'_'|| substring(rmt_varieties.rmt_variety_description from 1 for 11) AS variety_code,
+                                        rmt_products.variety_code||'_'|| substring(rmt_varieties.rmt_variety_description from 1 for 11) AS variety_code,
                                         track_slms_indicators.track_slms_indicator_code,
-                                        farms.farm_code, farms.farm_group_code",
+                                        farms.farm_code, farms.farm_group_code, track_slms_indicators.track_slms_indicator_code||'_'||rmt_products.rmt_product_code as product_code",
       :joins => 'INNER JOIN bin_orders on bin_orders.id = bin_order_loads.bin_order_id
                  INNER JOIN bin_order_load_details on bin_order_load_details.bin_order_load_id = bin_order_loads.id
                  INNER JOIN bin_loads on bin_loads.id = bin_order_loads.bin_load_id
@@ -101,7 +101,8 @@ class HbsOut < CsvOutTransformer
                 'qty'                       => 1,
                 'season'                    => record.season_code[0,4],
                 'farm_id'                   => record.farm_code,
-                'farmsubgroup'              => record.farm_group_code
+                'farmsubgroup'              => record.farm_group_code,
+                'product_code'              => record.product_code		
                 }, 'HBS')
       rec_set.add_child hbs_rec
     end

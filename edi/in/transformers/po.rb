@@ -23,6 +23,7 @@ class Po   < DocEventHandlers
 
       depot = Depot.new :depot_code        => EdiHelper.edi_in_process_file[2..4],
                         :depot_description => EdiHelper.edi_in_process_file[2..4],
+			:depot_short_code => EdiHelper.edi_in_process_file[2..4],
                         :location          => location,
                         :parties_role      => party_role
       depot.set_location_code_and_party_name

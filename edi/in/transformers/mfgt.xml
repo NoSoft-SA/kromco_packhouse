@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <in-map name="mfgt" identifier_size="0" root_identifier="masterfile">
-  <record name="masterfile" identifier="masterfile" size="531" occurence="1..n">
+  <record name="masterfile" identifier="masterfile" size="700" occurence="1..n">
     <transformer>
       <action type="ruby" name="apply_masterfile_rec"/>
     </transformer>
@@ -39,7 +39,7 @@
       <field name="upc" size="15" required="false" />
       <field name="targ_mkt" size="2" required="false" />
       <field name="pick_typ" size="1" required="false"  />
-      <field name="whitespace" size="336" required="false" />
+      <field name="whitespace" size="505" required="false" />
     </fields>
   </record>
 </in-map>

@@ -1,0 +1,12 @@
+query: select erp_station, erp_pack_point, packer_number, fg_code_old, grade_code, count(*) as ctns_packed from cartons where (pack_date_time={pack_date_time} and fg_code_old={fg_code_old} and pallet_id is not null and exit_ref is null and exit_reference is null) group by  erp_station,erp_pack_point, packer_number, fg_code_old,  public.cartons.grade_code
+main_table_name: cartons
+fields:
+  field1:
+   field_name: pack_date_time
+   caption: from_datetime
+   field_type: daterange
+  field2:
+   field_name: fg_code_old
+   caption: fg_code_old
+   field_type: text
+  

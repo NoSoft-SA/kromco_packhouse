@@ -103,7 +103,7 @@ INNER JOIN rmt_setups ON production_schedules.id = rmt_setups.production_schedul
 INNER JOIN extended_fgs ON (cartons.extended_fg_code = extended_fgs.extended_fg_code)
 INNER JOIN fg_products ON (extended_fgs.fg_code = fg_products.fg_product_code)
 INNER JOIN item_pack_products ON (fg_products.item_pack_product_code = item_pack_products.item_pack_product_code)
-LEFT JOIN order_products ON (item_pack_products.item_pack_product_code = order_products.item_pack_product_code) and order_products.order_id=load_details.order_id
+LEFT JOIN order_products ON (item_pack_products.item_pack_product_code = order_products.item_pack_product_code) and order_products.old_fg_code = extended_fgs.old_fg_code and order_products.order_id=load_details.order_id
 INNER JOIN unit_pack_products ON (fg_products.unit_pack_product_code = unit_pack_products.unit_pack_product_code)
 INNER JOIN carton_pack_products ON (fg_products.carton_pack_product_code = carton_pack_products.carton_pack_product_code)
 INNER JOIN fg_marks ON (extended_fgs.fg_mark_code = fg_marks.fg_mark_code)

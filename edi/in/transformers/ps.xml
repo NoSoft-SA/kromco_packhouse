@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <in-map name="ps" identifier_size="2" root_identifier="BH">
   <sequence>
-    <record name="doc_header" identifier="BH" size="89" occurence="1">
+    <record name="doc_header" identifier="BH" size="90" occurence="1">
       <fields>
         <field name="header" size="2" default="BH" />
         <field name="network_address" size="3" format="ZEROES" />
@@ -11,9 +11,10 @@
         <field name="indicator" size="2" required="false" />
         <field name="system_provider" size="30" required="false" default="JJ Multitier" />
         <field name="system_version" size="30" required="false"  default="Ver.2003.01" />	
+        <field name="cob" size="1" required="false" />	
       </fields>
       <children>
-        <record name="pallet_stock" identifier="PS" size="566" occurence="0..n" >
+        <record name="pallet_stock" identifier="PS" size="608" occurence="0..n" >
           <fields>
             <field name="record_type" size="2" default="PS" />
             <field name="pallet_id" size="9" />
@@ -103,7 +104,11 @@
             <field name="lot_no" size="20" required="false" />
             <field name="traceability_code" size="20" required="false" />
             <field name="season" size="4" required="false" />
-            <field name="Orig_inspec_date" size="8" required="false" format="DATE" />	    
+            <field name="Orig_inspec_date" size="8" required="false" format="DATE" />	  
+            <field name="inner_pack" size="10" required="false" />
+            <field name="inner_cartons" size="5" required="false" format="ZEROES"/>
+            <field name="protocol_exception_indicator" size="2" required="false" />
+            <field name="upn" size="25" required="false" />	    
           </fields>
         </record>
       </children>

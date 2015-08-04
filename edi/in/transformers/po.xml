@@ -53,8 +53,8 @@
                 <field name="tran_date" size="8"   required="false" format="DATE" />
                 <field name="tran_time" size="5"  required="false" format="HM" />
                 <field name="Temperature" size="7"  required="false" format="TEMP" default="99.99" />
-                <field name="new_fields" size="10" required="false"  />
-                <field name="filler_field" size="236" required="false"  />				
+                <field name="ext_saecs_voyage" size="15"  required="false"  />		
+                <field name="filler_field" size="231" required="false"  />				
             </fields>
         </record>
         <record name="truck_location_from" identifier="LF" size="500" occurence="1" >
@@ -148,14 +148,16 @@
                             <field name="container_type" size="1" required="false"/>
                             <field name="perc_vents" size="5" required="false" format="ZEROES" default="0" />
                             <field name="principal" size="2" required="false" />
-                            <field name="ship_name" size="15" required="false"/>
+                            <field name="container_ref" size="15" required="false"/>
                             <field name="container_size" size="2" required="false"/>
                             <field name="seal_no" size="15" required="false"/>
                             <field name="consec_no" size="10" required="false"/>
                             <field name="cto_no" size="10" required="false"/>
                             <field name="ryan_no" size="10" required="false"/>
-                            <field name="new_fields" size="10" required="false"  />
-                            <field name="filler_field" size="220" required="false"  />				    
+                            <field name="ship_name" size="25" required="false"/>\
+                            <field name="voyage_no" size="10" required="false"/>
+                            <field name="ship_call_sign" size="10" required="false"/>			    
+                            <field name="filler_field" size="185" required="false"  />				    
                         </fields>
                     </record>
                     <record name="intake_header" identifier="OC" size="500" occurence="1" >
@@ -212,11 +214,11 @@
                             <field name="principal" size="2" required="false"/>
                             <field name="steri_flag" size="2" required="false"/>
                             <field name="steri_dest" size="2" required="false"/>
-                            <field name="new_fields" size="28" required="false"  />
-                            <field name="filler_field" size="258" required="false"  />				    
+                            <field name="inspector" size="6" required="false"  />
+                            <field name="filler_field" size="280" required="false"  />				    
                         </fields>
                         <child>
-                            <record name="pallet_sequence" identifier="OP" size="619" occurence="1..n" >
+                            <record name="pallet_sequence" identifier="OP" size="669" occurence="1..n" >
                                <transformer>
                                   <action type="ruby" name="map_pallet_sequence"/>
                               </transformer>
@@ -314,8 +316,12 @@
                                     <field name="Lot_no" size="20" required="false"/>
                                     <field name="Traceability_code" size="20" required="false"/>
                                     <field name="season" size="4" required="false" />
-                                    <field name="Orig_inspec_date" size="8" required="false" format="DATE" />				    
-			      <field name="filler_field" size="12" required="false"  />				    	    
+                                    <field name="Orig_inspec_date" size="8" required="false" format="DATE" />
+			      <field name="inner_pack" size="10" required="false" />
+                                    <field name="inner_cartons" size="5" required="false" format="ZEROES"/>
+			      <field name="production_id" size="20" required="false" />				    
+                                    <field name="protocol_exception_indicator" size="2" required="false" />
+                                    <field name="upn" size="25" required="false" />				    	    
                                 </fields>
                             </record>
                         </child>

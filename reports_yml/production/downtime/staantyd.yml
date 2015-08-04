@@ -1,0 +1,39 @@
+query: select * from downtimes WHERE(from_date={from_date} and downtime_category_code={downtime_category_code} and downtime_division_code={downtime_division_code} and downtime_type_code={downtime_type_code} and downtime_sub_type_code={downtime_sub_type_code} and reason={reason} and external_ref={external_ref} and line={line})
+main_table_name: downtimes
+fields:
+  field1:
+   field_name: from_date
+   caption: from_date
+   field_type: daterange
+  field2:
+   field_name: downtime_category_code
+   caption: downtime_category_code
+   field_type: lookup
+   list: select distinct downtime_category_code from downtime_categories
+  field3:
+   field_name: downtime_division_code
+   caption: downtime_division_code
+   field_type: lookup
+   list: select distinct downtime_division_code from downtime_divisions
+  field4:
+   field_name: downtime_type_code
+   caption: downtime_type_code
+   field_type: lookup
+   list: select distinct downtime_type_code from downtime_types
+  field5:
+   field_name: downtime_sub_type_code
+   caption: downtime_sub_type_code
+   field_type: lookup
+   list: select distinct downtime_sub_type_code from downtime_sub_types
+  field6:
+   field_name: reason
+   caption: reason
+   field_type: text
+  field7:
+   field_name: external_ref
+   caption: external_ref
+   field_type: text
+  field8:
+      field_name: line
+      caption: line
+      field_type: text

@@ -1,0 +1,4 @@
+query: select * from intake_headers WHERE(intake_header_number={intake_header_number} and consignment_note_number={consignment_note_number} and intake_type_code={intake_type_code} and puc_code={puc_code} and account_code={account_code} and depot_code={depot_code} and truck_number={truck_number} and order_number={order_number} and supplier_code={supplier_code} and organization_code={organization_code} and qty_pallets={qty_pallets} and location_code={location_code})
+main_table_name: intake_headers
+default_report_index_group_name: System
+

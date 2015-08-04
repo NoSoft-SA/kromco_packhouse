@@ -420,13 +420,19 @@ end
 
     }
     party_name=PartiesRole.find(order.customer_party_role_id).party_name
-    order_pallets =Pallet.find_by_sql("select pallets.*
+    order_tm_pallets =Pallet.find_by_sql("select pallets.*
                                        from pallets
                                        inner join load_details on pallets.load_detail_id=load_details.id
                                        inner join load_orders on load_details.load_order_id=load_orders.id
                                        inner join  orders on load_orders.order_id=orders.id
                                        where orders.id=#{order.id} and pallets.orig_target_market_code is null")
-if (party_name=="KR" || party_name=="KM") && ((order.changed_tm==false || order.changed_tm==nil) && !order_pallets.empty?) ||  (@order.changed_tm==true && !order_pallets.empty?)
+    order_pallets =Pallet.find_by_sql("select pallets.*
+                                       from pallets
+                                       inner join load_details on pallets.load_detail_id=load_details.id
+                                       inner join load_orders on load_details.load_order_id=load_orders.id
+                                       inner join  orders on load_orders.order_id=orders.id
+                                       where orders.id=#{order.id}")
+if (party_name=="KR" || party_name=="KM") && ((order.changed_tm==false || order.changed_tm==nil) && !order_tm_pallets.empty?) ||  (@order.changed_tm==true && !order_tm_pallets.empty?)
 
 field_configs[field_configs.length()] = {:field_type => 'LinkWindowField',
                                              :field_name => '',

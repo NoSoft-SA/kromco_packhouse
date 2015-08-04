@@ -1,0 +1,7 @@
+query: SELECT commodity_code,variety_short_long,SUM(carton_fruit_nett_mass),COUNT(*) FROM cartons WHERE(pack_date_time={pack_date_time}) GROUP BY  commodity_code, variety_short_long
+main_table_name: cartons
+fields:
+  field1:
+   field_name: pack_date_time
+   caption: from_datetime
+   field_type: daterange

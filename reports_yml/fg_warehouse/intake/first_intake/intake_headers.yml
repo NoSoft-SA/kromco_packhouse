@@ -1,0 +1,40 @@
+query: select id, season, intake_header_number, consignment_note_number, account_code, puc_code, recool_required, depot_code, carrier, truck_number, organization_code,  qty_pallets, qty_cartons, inspection_date, location_code, packhouse_code, created_on, created_by from intake_headers WHERE ( season={season} and intake_header_number={intake_header_number} and consignment_note_number={consignment_note_number} and puc_code={puc_code} and truck_number={truck_number} and carrier={carrier} and organization_code={organization_code}  and created_on={created_on})  
+main_table_name: intake_headers
+fields:
+ field1:
+  field_name: season
+  caption: season
+  field_type: lookup
+  list: " select distinct season from seasons order by season" 
+  field2:
+   field_name: intake_header_number
+   caption: intake_header_number
+   field_type: text
+  field3:
+   field_name: consignment_note_number
+   caption: consignment_note_number
+   field_type: text   
+ field4:
+  field_name: puc_code
+  caption: puc
+  field_type: lookup
+  list: " select distinct puc_code from pucs order by puc_code"    
+ field5:
+  field_name: truck_number
+  caption: truck_number
+  field_type: lookup
+  list: " select distinct truck_number from intake_headers order by truck_number"     
+ field6:
+  field_name: carrier
+  caption: carrier
+  field_type: lookup
+  list: " select distinct carrier from intake_headers order by carrier"       
+ field7:
+  field_name: organization_code
+  caption: organization_code
+  field_type: lookup
+  list: " select distinct short_description from organizations order by short_description"         
+ field8:
+   field_name: created_on
+   caption: created_on
+   field_type: daterange

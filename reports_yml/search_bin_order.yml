@@ -1,0 +1,46 @@
+query: select bin_loads.bin_load_number,bin_orders.updated_at,parties_r.party_name AS trading_partner,parties_roles.party_name AS customer_party_name,bin_orders.customer_order_number,bin_orders.remarks_1,bin_orders.remarks_2,bin_orders.user_name,bin_orders.created_on,bin_orders.status AS order_status,bin_orders.bin_order_number,bin_orders.updated_at,bin_orders.id FROM bin_orders INNER JOIN parties_roles parties_r ON (bin_orders.trading_partner_party_role_id = parties_r.id)  INNER JOIN parties_roles ON (bin_orders.customer_party_role_id = parties_roles.id)   INNER JOIN order_types ON (bin_orders.order_type_id = order_types.id)   INNER JOIN public.bin_order_loads ON (bin_orders.id = public.bin_order_loads.bin_order_id)   INNER JOIN public.bin_loads ON (public.bin_order_loads.bin_load_id = public.bin_loads.id) WHERE (bin_orders.bin_order_number={bin_orders.bin_order_number} AND parties_roles.party_name={parties_roles.party_name}AND order_types.order_type_code={order_types.order_type_code} AND bin_orders.status={bin_orders.status} AND bin_orders.created_on={bin_orders.created_on} AND bin_orders.customer_order_number={bin_orders.customer_order_number} and bin_loads.bin_load_number={bin_loads.bin_load_number})ORDER BY bin_orders.id DESC 
+#query:select bin_orders.updated_at,parties_r.party_name AS trading_partner,parties_roles.party_name AS customer_party_name,bin_orders.customer_order_number,bin_orders.remarks_1,bin_orders.remarks_2,bin_orders.user_name,bin_orders.created_on,bin_orders.status AS order_status,bin_orders.bin_order_number,bin_orders.updated_at,bin_orders.id,(SUBQSTART SELECT bin_loads.status FROM public.bin_order_loads,public.bin_loads WHERE (bin_order_loads.bin_load_id = bin_loads.id AND bin_order_loads.bin_order_id = bin_orders.id) limit 1 SUBQEND) as load_status from bin_orders inner join parties_roles AS parties_r on bin_orders.trading_partner_party_role_id=parties_r.id inner join parties_roles on bin_orders.customer_party_role_id=parties_roles.id WHERE (bin_orders.bin_order_number={bin_orders.bin_order_number} AND parties_roles.party_name={parties_roles.party_name}AND order_types.order_type_code={order_types.order_type_code} AND bin_orders.status={bin_orders.status}AND bin_orders.created_on={bin_orders.created_on}AND bin_orders.customer_order_number={bin_orders.customer_order_number} AND bin_loads.status = {bin_loads.status})ORDER BY bin_orders.updated_at DESC limit 100
+main_table_name: bin_orders
+default_report_index_group_name: System
+
+fields:
+  field1:
+   field_name: bin_orders.bin_order_number
+   caption: bin order number
+   field_type: text
+  field2:
+   field_name: order_types.order_type_code
+   caption: order type code
+   field_type: text
+  field3:
+   field_name: bin_orders.created_on
+   caption: order date
+   field_type: daterange
+  field4:
+   field_name: parties_roles.party_name
+   caption: trading partner
+   field_type: lookup
+   list: "select party_name FROM parties_roles WHERE role_name = 'TRADING PARTNER' "
+  field5:
+   field_name: bin_orders.status
+   caption: order status
+   field_type: text
+  field6:
+   field_name: parties_roles.party_name
+   caption: customer name
+   field_type: lookup
+   list: "select party_name FROM parties_roles WHERE role_name = 'CUSTOMER'"
+  field7:
+   field_name:  bin_orders.customer_order_number
+   caption: customer order number
+   field_type: text
+  field8:
+   field_name:  bin_loads.status
+   caption: load_status
+   field_type: text
+  field9:
+   field_name:  bin_loads.bin_load_number
+   caption: bin_load_number
+   field_type: text
+
+#query:select bin_orders.updated_at,parties_r.party_name AS trading_partner,parties_roles.party_name AS customer_party_name,bin_orders.customer_order_number,bin_orders.remarks_1,bin_orders.remarks_2,bin_orders.user_name,bin_orders.created_on,bin_orders.status AS order_status,bin_orders.bin_order_number,bin_orders.updated_at,bin_orders.id,(SUBQSTART SELECT bin_loads.status FROM public.bin_order_loads,public.bin_loads WHERE (bin_order_loads.bin_load_id = bin_loads.id AND bin_order_loads.bin_order_id = bin_orders.id) limit 1 SUBQEND) as load_status from bin_orders inner join parties_roles AS parties_r on bin_orders.trading_partner_party_role_id=parties_r.id inner join parties_roles on bin_orders.customer_party_role_id=parties_roles.id WHERE (bin_orders.bin_order_number={bin_orders.bin_order_number} AND parties_roles.party_name={parties_roles.party_name}AND order_types.order_type_code={order_types.order_type_code} AND bin_orders.status={bin_orders.status}AND bin_orders.created_on={bin_orders.created_on}AND bin_orders.customer_order_number={bin_orders.customer_order_number} AND bin_loads.status = {bin_loads.status})ORDER BY bin_orders.updated_at DESC limit 100

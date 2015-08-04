@@ -1,0 +1,44 @@
+query: select * from  vw_packout_production_run_code where (farm_code={farm_code} and  track_indicator_code={track_indicator_code} and season={season} and production_run_code={production_run_code} and ripe_point_code={ripe_point_code} and farm_group_code={farm_group_code} and cold_store_type_code={cold_store_type_code} and line_code={line_code} and rmt_product_code={rmt_product_code})
+main_table_name: production_runs
+
+fields:
+  field1:
+   field_name: farm_code
+   caption: farm_code
+   field_type: lookup
+   list: "select distinct farm_code from farms order by farm_code asc"     
+  field2:
+   field_name: season
+   caption: season
+   field_type: lookup
+   list: "select distinct season from seasons order by season desc"     
+  field3:
+   field_name: track_indicator_code
+   caption: track_indicator_code
+   field_type: lookup
+   list: "select track_indicator_code from track_indicators "   
+  field4:
+   field_name: ripe_point_code
+   caption: ripe_point_code
+   field_type: lookup
+   list: "select ripe_point_code from ripe_points "   
+  field5:
+   field_name: farm_group_code
+   caption: farm_group_code
+   field_type: lookup
+   list: "select farm_group_code from farm_groups order by farm_group_code asc"     
+  field5:
+   field_name: cold_store_type_code
+   caption: cold_store_type_code
+   field_type: lookup
+   list: "select cold_store_type_code from cold_store_types order by cold_store_type_code asc"        
+  field6:
+   field_name: line_code
+   caption: line_code
+   field_type: lookup
+   list: "select line_code from lines order by line_code asc"     
+  field7:
+   field_name: rmt_product_code
+   caption: rmt_product_code
+   field_type: text
+   

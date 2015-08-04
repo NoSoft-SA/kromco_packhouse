@@ -1,0 +1,33 @@
+query: select season,farm_code,farm_group_code,rmt_variety_code,commodity_code,track_slms_indicator_code, group_1_code,group_2_code,forecast_qty,week_delivered,weekly_num_bins,weekly_bin_weight,cumulative_num_bins,cumulative_bin_weight from vw_deliveries_vs_forecasts WHERE(vw_deliveries_vs_forecasts.season={vw_deliveries_vs_forecasts.season} and vw_deliveries_vs_forecasts.farm_code={vw_deliveries_vs_forecasts.farm_code} and vw_deliveries_vs_forecasts.farm_group_code={vw_deliveries_vs_forecasts.farm_group_code} and vw_deliveries_vs_forecasts.rmt_variety_code={vw_deliveries_vs_forecasts.rmt_variety_code} and vw_deliveries_vs_forecasts.commodity_code={vw_deliveries_vs_forecasts.commodity_code} and vw_deliveries_vs_forecasts.track_slms_indicator_code={vw_deliveries_vs_forecasts.track_slms_indicator_code} and vw_deliveries_vs_forecasts.week_delivered={vw_deliveries_vs_forecasts.week_delivered})
+main_table_name: forecasts
+
+
+fields:
+  field1:
+   field_name: vw_deliveries_vs_forecasts.season
+   caption: season
+   field_type: text
+  field2:
+   field_name: vw_deliveries_vs_forecasts.farm_code
+   caption: farm code
+   field_type: text
+  field3:
+   field_name: vw_deliveries_vs_forecasts.farm_group_code
+   caption: farm group code
+   field_type: text
+  field4:
+   field_name: vw_deliveries_vs_forecasts.rmt_variety_code
+   caption: rmt variety code
+   field_type: text
+  field5:
+   field_name: vw_deliveries_vs_forecasts.commodity_code
+   caption: commodity code
+   field_type: text
+  field6:
+   field_name: vw_deliveries_vs_forecasts.track_slms_indicator_code
+   caption: track slms indicator code
+   field_type: text
+  field7:
+   field_name: vw_deliveries_vs_forecasts.week_delivered
+   caption: week delivered
+   field_type: text

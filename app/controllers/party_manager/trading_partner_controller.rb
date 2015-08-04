@@ -22,12 +22,13 @@ class PartyManager::TradingPartnerController < ApplicationController
       session[:trading_partners_page] = nil
     end
 
-    list_query = "select trading_partners.*,currencies.currency_code,incoterms.incoterm_code,parties_roles.party_type_name as party,parties_roles.party_name as trading_partner_name,target_markets.target_market_code,users.user_name as marketer
+    list_query = "select trading_partners.*,currencies.currency_code,incoterms.incoterm_code,parties_roles.party_type_name as party,parties_roles.party_name as trading_partner_name,target_markets.target_market_code,users.user_name as marketer, dfpt_levy_types.dfpt_levy_type_code
                from trading_partners
                inner join parties_roles on trading_partners.parties_role_id=parties_roles.id
                left join incoterms on trading_partners.incoterm_id=incoterms.id
                left join currencies on trading_partners.currency_id=currencies.id
                left join target_markets on trading_partners.target_market_id=target_markets.id
+		     left join dfpt_levy_types on dfpt_levy_types.id = trading_partners.dfpt_levy_type_id
                left join users on trading_partners.marketer_user_id=users.id
                order by trading_partners.id desc"
 
@@ -135,6 +136,9 @@ class PartyManager::TradingPartnerController < ApplicationController
       if params[:trading_partner][:target_market_id]== ""
         params[:trading_partner][:target_market_id]=nil
       end
+      if params[:trading_partner][:dfpt_levy_type_id]== ""
+        params[:trading_partner][:dfpt_levy_type_id]=nil
+      end
       if params[:trading_partner][:marketer_user_id]== ""
         params[:trading_partner][:marketer_user_id]=nil
       end
@@ -154,6 +158,7 @@ class PartyManager::TradingPartnerController < ApplicationController
         @trading_partner.incoterm_id = params[:trading_partner][:incoterm_id]
         @trading_partner.currency_id = params[:trading_partner][:currency_id]
         @trading_partner.target_market_id = params[:trading_partner][:target_market_id]
+        @trading_partner.dfpt_levy_type_id = params[:trading_partner][:dfpt_levy_type_id]	
         @trading_partner.marketer_user_id = params[:trading_partner][:marketer_user_id]
         @trading_partner.remarks = params[:trading_partner][:remarks]
         @is_create_retry=true
@@ -184,6 +189,7 @@ class PartyManager::TradingPartnerController < ApplicationController
             @trading_partner.incoterm_id = params[:trading_partner][:incoterm_id]
             @trading_partner.currency_id = params[:trading_partner][:currency_id]
             @trading_partner.target_market_id = params[:trading_partner][:target_market_id]
+            @trading_partner.dfpt_levy_type_id = params[:trading_partner][:dfpt_levy_type_id]	    
             @trading_partner.marketer_user_id = params[:trading_partner][:marketer_user_id]
             @trading_partner.remarks = params[:trading_partner][:remarks]
 
@@ -289,6 +295,9 @@ class PartyManager::TradingPartnerController < ApplicationController
       end
       if params[:trading_partner][:target_market_id]== ""
         params[:trading_partner][:target_market_id]=nil
+     end
+      if params[:trading_partner][:dfpt_type_levy_id]== ""
+        params[:trading_partner][:dfpt_type_levy_id]=nil
       end
       if params[:trading_partner][:marketer_user_id]== ""
         params[:trading_partner][:marketer_user_id]=nil

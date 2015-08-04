@@ -1,0 +1,13 @@
+query: SELECT * FROM grower_commitments WHERE(farm_code={farm_code} and season={season})
+main_table_name: grower_commitments
+fields:
+ field1:
+  field_name:  farm_code
+  caption: farm_code
+  field_type: lookup
+  list: "select distinct farm_code from farms order by farm_code asc"
+ field2:
+  field_name:  season
+  caption: season
+  field_type: lookup
+  list: "select distinct season from seasons order by season asc"

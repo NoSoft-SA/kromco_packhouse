@@ -1,0 +1,18 @@
+query: select farms.farm_code, rmt_varieties.rmt_variety_code, orchards.orchard_code, orchards.orchard_description, orchards.id from orchards inner join farms on farms.id =orchards.farm_id inner join rmt_varieties on rmt_varieties.id = orchards.orchard_rmt_variety_id WHERE(farms.farm_code={farms.farm_code} and rmt_varieties.rmt_variety_code={rmt_varieties.rmt_variety_code} and orchards.orchard_code={orchards.orchard_code}) order by farms.farm_code
+main_table_name: orchards
+fields:
+ field1:
+  field_name:  farms.farm_code
+  caption: farm_code
+  field_type: lookup
+  list: "select distinct farm_code from farms order by farm_code asc"
+ field2:
+  field_name:  rmt_varieties.rmt_variety_code
+  caption: rmt_variety_code
+  field_type: lookup
+  list: "select distinct rmt_variety_code from rmt_varieties where commodity_code = 'AP' order by rmt_variety_code asc"
+ field3:
+  field_name:  orchards.orchard_code
+  caption: orchard_code
+  field_type: lookup
+  list: "select distinct orchard_code from orchards order by orchard_code asc"

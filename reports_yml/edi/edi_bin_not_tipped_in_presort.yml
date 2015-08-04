@@ -1,0 +1,2 @@
+query: select * FROM vw_edi_bin_not_tipped_in_presort where (bin_number={bin_number})
+main_table_name: presort_logs

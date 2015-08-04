@@ -5,7 +5,7 @@ PO:
   LT: 500
   OK: 500
   OC: 500
-  OP: 619
+  OP: 669
   BT: 500
 LI:
   BH: 27
@@ -15,23 +15,23 @@ LI:
   DT: 311
   BT: 18
 PS:
-  BH: 89
-  PS: 566
+  BH: 90
+  PS: 608
   BT: 32
 PI:
   BH: 87
   IC: 446
-  IS: 185
-  IP: 573
+  IS: 200
+  IP: 645
   BT: 112
 PM:
   BH: 37
-  PM: 443
+  PM: 542
   BT: 112
 TI:
   BH: 87
   IC: 446
-  IP: 573
+  IP: 645
   BT: 112
 PF:
   BH: 27

@@ -8,25 +8,24 @@ class Orchard < ActiveRecord::Base
 #   Validations
 #===================================
   validates_presence_of :orchard_code
-  validates_uniqueness_of :orchard_code
+  #validates_uniqueness_of :orchard_code
 
   def validate
-      if self.new_record?
-          validate_uniqueness
-      end
+      #if self.new_record?
+      #    validate_uniqueness
+      #end
   end
 
-  def validate_uniqueness
-      exists = Orchard.find_by_farm_id_and_orchard_code(self.farm_id,self.orchard_code)
-      if exists != nil
-          errors.add_to_base("There already exists a record with the combined values of fields: 'orchard_code'")
-      end
-  end
+  #def validate_uniqueness
+  #    exists = Orchard.find_by_farm_id_and_orchard_code(self.farm_id,self.orchard_code)
+  #    if exists != nil
+  #        errors.add_to_base("There already exists a record with the combined values of fields: 'orchard_code'")
+   #   end
+  #end
 
   def after_create
     begin
-      rmt = RmtVariety.find_by_sql("select commodity_code from rmt_varieties where rmt_varieties.id = #{self.orchard_rmt_variety_id}")
-      RAILS_DEFAULT_LOGGER.info ("NAFIESA COMMODITY: " + rmt[0].commodity_code)    
+      rmt = RmtVariety.find_by_sql("select commodity_code from rmt_varieties where rmt_varieties.id = #{self.orchard_rmt_variety_id}")  
       if rmt[0].commodity_code=='AP' 
 	      
       http = Net::HTTP.new(Globals.bin_created_mssql_server_host, Globals.bin_created_mssql_presort_server_port)
@@ -60,7 +59,7 @@ class Orchard < ActiveRecord::Base
       inserts = []
       parcelles.each do |parcelle|
         index_parcelle+=1
-        inserts.push("INSERT INTO [productionv50].[dbo].[Parcelle]([Code_parcelle],[Code_clone],[Code_adherent],[Nom_parcelle],[Surface],[Index_parcelle]) VALUES ('#{parcelle.orchard_code}_#{parcelle.farm_code}_#{parcelle.track_slms_indicator_code}'  ,'#{parcelle.track_slms_indicator_code}'  ,'#{parcelle.farm_code}' ,'#{parcelle.farm_code}_#{parcelle.orchard_code}' ,1,#{index_parcelle});")
+        inserts.push("INSERT INTO [productionv50].[dbo].[Parcelle]([Code_parcelle],[Code_clone],[Code_adherent],[Nom_parcelle],[Surface],[Index_parcelle]) VALUES ('#{parcelle.orchard_code}_#{parcelle.farm_code}_#{parcelle.track_slms_indicator_code}'  ,'#{parcelle.track_slms_indicator_code}'  ,'#{parcelle.farm_code}' ,'#{parcelle.orchard_code}_#{parcelle.farm_code}_#{parcelle.track_slms_indicator_code}' ,1,#{index_parcelle});")
       end
 
       http = Net::HTTP.new(Globals.bin_scanned_mssql_server_host, Globals.bin_created_mssql_presort_server_port)

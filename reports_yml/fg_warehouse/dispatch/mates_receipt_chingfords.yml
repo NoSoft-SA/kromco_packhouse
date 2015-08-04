@@ -1,0 +1,7 @@
+query: select load_number,order_number,export_party_role_name,'ZA' as country_of_origin,'CAPE TOWN' as load_port,port_name,vessel_code,container_code,container_seal_code,booking_reference,haulier_party_name,departure_date,'' as eta,'6002303' ean_company_prefix,'' as pallet_reference,'' as mixed_pallet,pallet_number, stack_type_code,commodity_code,variety,brand_code,old_pack_code,'' AS grape_berry_colour,inventory_code,'' as label,grade_code,carton_fruit_nett_mass,ctn_gross_mass,pack_material_weight,gtin,size_ref,ctn_qty,puc,batch,'' as freight,product_class_code,marking,diameter_range,customer_order_number,dispatch_consignment_number,shipping_line_party_role_name,target_market_code,external_party_product_code,egap,sell_by_code,'' as residue_free,as_ch_marking,external_fruit_per_ru_combined as item_unit_pack_code,external_custom_pack_code2 as custom_pack_code,product_class_description_short as class,id, pc_code, pt_product_characteristics,harvest_date,oldest_pack_date_time,organization_code,pallet_base_code from vw_mates_receipt where (order_number={order_number} and load_number={load_number} and load_order_id={load_order_id} and shipped_date_time={shipped_date_time} and organization_code={organization_code})
+main_table_name: orders
+fields:
+  field1:
+   field_name: shipped_date_time
+   caption: shipped_date_time
+   field_type: daterange

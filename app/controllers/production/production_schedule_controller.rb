@@ -278,6 +278,8 @@ def create_new_schedule_from_template
    template_schedule.rmt_type = params[:production_schedule]['rmt_type']
    template_schedule.bin_type = params[:production_schedule]['bin_type']
 
+   #NAE 2015-05-14 add treatment_code
+   template_schedule.treatment_code = params[:production_schedule]['treatment_code']
    
    session[:template_schedule] = nil
    new_schedule = template_schedule.create_from_template(params[:production_schedule])

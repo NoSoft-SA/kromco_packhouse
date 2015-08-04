@@ -1,0 +1,81 @@
+query: select distinct intake_headers_productions.intake_header_number,intake_headers_productions.intake_type_code,intake_headers_productions.consignment_note_number,intake_headers_productions.organization_code,intake_headers_productions.representative_pallet_number,intake_headers_productions.created_on,intake_headers_productions.revision_number, intake_headers_productions.order_number,intake_headers_productions.location_type_code,intake_headers_productions.location_code,intake_headers_productions.phytowaybill,intake_headers_productions.depot_pallet,intake_headers_productions.header_status,intake_headers_productions.intake_header_edi_status,intake_headers_productions.client_reference, intake_headers_productions.id, intake_headers_productions.representative_carton_number, intake_headers_productions.inspector_number,intake_headers_productions.inspection_point FROM intake_headers_productions LEFT OUTER JOIN pallets ON (pallets.consignment_note_number = intake_headers_productions.consignment_note_number) LEFT OUTER JOIN cartons ON (pallets.id = cartons.pallet_id) AND (intake_headers_productions.representative_carton_number = cartons.carton_number) LEFT OUTER JOIN marks ON (cartons.carton_mark_code = marks.mark_code) WHERE( intake_headers_productions.consignment_note_number={intake_headers_productions.consignment_note_number} and intake_headers_productions.depot_pallet={intake_headers_productions.depot_pallet} and pallets.pallet_number={pallets.pallet_number} and pallets.pallet_format_product_code={pallets.pallet_format_product_code} and pallets.build_status={pallets.build_status} and pallets.qc_result_status={pallets.qc_result_status} and vehicle_jobs.vehicle_job_number={vehicle_jobs.vehicle_job_number} and cartons.organization_code={cartons.organization_code} and cartons.commodity_code={cartons.commodity_code} and cartons.variety_short_long={cartons.variety_short_long} and cartons.target_market_code={cartons.target_market_code} and cartons.grade_code={cartons.grade_code} and cartons.carton_mark_code={cartons.carton_mark_code} and cartons.sell_by_code={cartons.sell_by_code} and cartons.account_code={cartons.account_code} and cartons.puc={cartons.puc} and cartons.gtin={cartons.gtin} and cartons.inventory_code={cartons.inventory_code} and cartons.inspection_type_code={cartons.inspection_type_code} and intake_headers_productions.header_status is not null)
+main_table_name: intake_headers_productions
+default_report_index_group_name: System
+
+fields:
+field1:
+ field_name: intake_headers_productions.consignment_note_number
+ caption: intake_headers_productions.consignment_note_number
+ field_type: text
+field2:
+ field_name: intake_headers_productions.depot_pallet
+ caption: depot pallet
+ field_type: checkbox
+field3:
+ field_name: pallets.pallet_number
+ caption: pallet number
+ field_type: text
+field4:
+ field_name: pallets.pallet_format_product_code
+ caption: pallet format product code
+ field_type: text
+field5:
+ field_name: pallets.build_status
+ caption: build status
+ field_type: text
+field6:
+ field_name: cartons.qc_result_status
+ caption: qc result status
+ field_type: text
+field7:
+ field_name: vehicle_jobs.vehicle_job_number
+ caption: tripsheet number
+ field_type: text
+field8:
+ field_name: cartons.organization_code
+ caption: organization code
+ field_type: text
+field9:
+ field_name: cartons.commodity_code
+ caption: commodity code
+ field_type: text
+field10:
+ field_name: cartons.variety_short_long
+ caption: variety code
+ field_type: text
+field11:
+ field_name: cartons.target_market_code
+ caption: target market code
+ field_type: text
+field12:
+ field_name: cartons.grade_code
+ caption: grade code
+ field_type: text
+field13:
+ field_name: cartons.carton_mark_code
+ caption: mark code
+ field_type: text
+field14:
+ field_name: cartons.sell_by_code
+ caption: sell by
+ field_type: text
+field15:
+ field_name: cartons.account_code
+ caption: account code
+ field_type: text
+field16:
+ field_name: cartons.puc
+ caption: puc
+ field_type: text
+field17:
+ field_name: cartons.gtin
+ caption: gtin
+ field_type: text
+field18:
+ field_name: cartons.inventory_code
+ caption: inventory code
+ field_type: text
+field19:
+ field_name: cartons.inspection_type_code
+ caption: inspection type code
+ field_type: text

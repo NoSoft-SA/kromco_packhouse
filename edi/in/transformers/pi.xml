@@ -93,7 +93,7 @@
             <field name="waybill_no" size="10" required="false" />
           </fields>
           <children>
-            <record name="in_summary" identifier="IS" size="185" occurence="0..n" >
+            <record name="in_summary" identifier="IS" size="200" occurence="0..n" >
               <fields>
                 <field name="record_type" size="2" default="IS" />
                 <field name="load_id" size="10" />
@@ -140,9 +140,10 @@
                 <field name="cartons_residue" size="5" format="ZEROES" default="0" />
                 <field name="pallet_base_type" size="1" />
                 <field name="principal" size="2" required="false" />
+                <field name="orchard" size="15" required="false" />		
               </fields>
               <children>
-                <record name="in_pallet" identifier="IP" size="573" occurence="0..n" >
+                <record name="in_pallet" identifier="IP" size="645" occurence="0..n" >
                   <fields>
                     <field name="record_type" size="2" default="IP" />
                     <field name="load_id" size="10" />
@@ -233,7 +234,13 @@
                     <field name="lot_no" size="20" required="false" />
                     <field name="traceability_code" size="20" required="false" />
                     <field name="season" size="4" required="false" />
-                    <field name="orig_inspec_date" size="8" required="false" format="DATE" />		    
+		<field name="orig_inspec_date" size="8" required="false" format="DATE" />
+		<field name="inner_pack" size="10" required="false" />
+		<field name="inner_cartons" size="5" required="false" format="ZEROES"/>
+		<field name="production_id" size="20" required="false" />		
+		<field name="protocol_exception_indicator" size="2" required="false" />
+		<field name="upn" size="25" required="false" />	
+		<field name="original_document_no" size="10" required="false" />		
                   </fields>
                 </record>
               </children>

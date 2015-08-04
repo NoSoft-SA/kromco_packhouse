@@ -45,7 +45,11 @@ class EdiOutProposal < ActiveRecord::Base
     if edi_out_destinations.empty?
       nil
     else
+	#RAILS_DEFAULT_LOGGER.info("NAE EDI_OUT_PROP edi_out_destinations.length.to_s "+ edi_out_destinations.length.to_s)
       edi_out_destinations.each do |edi_out_destination|
+	#RAILS_DEFAULT_LOGGER.info("NAE EDI_OUT_PROP edi_out_destination.flow_type.downcase.to_s "+ edi_out_destination.flow_type.downcase.to_s)	 	
+	#RAILS_DEFAULT_LOGGER.info("NAE EDI_OUT_PROP edi_out_destination.organization_code.to_s "+ edi_out_destination.organization_code.to_s)	 
+	#RAILS_DEFAULT_LOGGER.info("NAE EDI_OUT_PROP edi_out_destination.hub_address.to_s "+ edi_out_destination.hub_address.to_s)	 	
         # Create the proposal record.
         self.create(:flow_type           => edi_out_destination.flow_type.downcase,
                     :record_map          => attr_hash.to_yaml,
