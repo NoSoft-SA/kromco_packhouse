@@ -8,7 +8,7 @@ def list_functional_areas
 	return if authorise_for_web('functional_area','read') == false
 
   @functional_area_pages = Paginator.new self, FunctionalArea.count, 20,params['page']
-	 @functional_areas = FunctionalArea.find(:all,
+	@functional_areas = FunctionalArea.find(:all,
 			 :limit => @functional_area_pages.items_per_page,
 			 :offset => @functional_area_pages.current.offset)
 	session[:functional_areas] = @functional_areas

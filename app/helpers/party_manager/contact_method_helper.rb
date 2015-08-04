@@ -44,7 +44,8 @@ module PartyManager::ContactMethodHelper
     address1s = nil
     address2s = nil
 
-    postal_address_type_codes = PartiesPostalAddress.get_all_postal_address_type_codes
+    #postal_address_type_codes = PartiesPostalAddress.get_all_postal_address_type_codes
+    postal_address_type_codes = PostalAddressType.find_by_sql('select distinct postal_address_type_code from postal_address_types').map{|g|[g.postal_address_type_code]}
     postal_address_type_codes.unshift("<empty>")
     if parties_postal_address == nil||is_create_retry
       cities = ["Select a value from postal_address_type_code"]
