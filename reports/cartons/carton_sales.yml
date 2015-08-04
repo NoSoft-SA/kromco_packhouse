@@ -1,4 +1,4 @@
-query: select     farm_code,    schedule_track_indicator_code,    variety,    fg_code_old,    inventory_code,    line_type,    actual_size_count_code,    target_market_code,    commodity_code,    old_pack_code,    grade_code,    sell_by_code,    production_run_code,    organization_code,    extended_fg_code,    size_ref,    standard_size_count_value,    unit_pack_product_type_description,    subtype_code,    sum_quantity,    sum_carton_fruit_nett_mass,    sum_eqvalent_cartons,    season_code,    start_date_time, rmt_product_code from vwcartons_sales  WHERE(season_code={season_code} and start_date_time={start_date_time})
+query: select     farm_code,    schedule_track_indicator_code,    variety,    fg_code_old,    inventory_code,    line_type,    actual_size_count_code,    target_market_code,    commodity_code,    old_pack_code,    grade_code,    sell_by_code,    production_run_code,    organization_code,    extended_fg_code,    size_ref,    standard_size_count_value,    unit_pack_product_type_description,    subtype_code,    sum_quantity,    sum_carton_fruit_nett_mass,    sum_eqvalent_cartons,    season_code,    start_date_time, rmt_product_code,     line_code,   farm_group_code,  maf_article_count,  mk4_count,  cultivar,  class,   colour, ripe_point_code, product_class_code, rmt_product_type_code, actual_rmt_product_code from vwcartons_sales  WHERE(season_code={season_code} and start_date_time={start_date_time} and schedule_track_indicator_code={schedule_track_indicator_code} and commodity_code={commodity_code}) 
 main_table_name: cartons
 fields:
  field1:
@@ -6,7 +6,18 @@ fields:
   caption: season_code
   field_type: lookup
   list: " select distinct season from seasons order by season" 
- field15:
+ field2:
   field_name: start_date_time
   caption: shift_calendar_date
   field_type: daterange
+ field3:
+  field_name: schedule_track_indicator_code
+  caption: schedule_track_indicator_code
+  field_type: lookup
+  list: " select distinct track_slms_indicator_code from track_slms_indicators order by track_slms_indicator_code"   
+ field4:
+  field_name: commodity_code
+  caption: commodity_code
+  field_type: lookup
+  list: " select distinct commodity_code from commodities order by commodity_code"   
+  

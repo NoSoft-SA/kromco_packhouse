@@ -1,4 +1,4 @@
-query: select * from cartons WHERE(pallet_number is not  null and pack_date_time={pack_date_time} and commodity_code={commodity_code} and season_code={season_code} and production_run_code={production_run_code} and extended_fg_code={extended_fg_code} and pallet_number={pallet_number} and carton_number={carton_number} )
+query: select * from vwcarton_compact WHERE(pack_date_time={pack_date_time} and commodity_code={commodity_code} and carton_mark_code={carton_mark_code} and target_market_code={target_market_code} and fg_code_old={fg_code_old} and inspection_type_code={inspection_type_code} and order_number={order_number} and actual_size_count_code={actual_size_count_code} and grade_code={grade_code} and old_pack_code={old_pack_code} and qc_status_code={qc_status_code} and pc_code={pc_code} and inventory_code={inventory_code} and farm_code={farm_code} and pick_reference={pick_reference} and line_code={line_code} and organization_code={organization_code} and iso_week_code={iso_week_code} and season_code={season_code} and puc={puc} and exit_reference={exit_reference} and fg_product_code={fg_product_code} and production_run_code={production_run_code} and packer_number={packer_number} and egap={egap} and sell_by_code={sell_by_code} and fg_mark_code={fg_mark_code} and extended_fg_code={extended_fg_code} and unit_pack_product_code={unit_pack_product_code} and qc_result_status={qc_result_status} and pallet_number={pallet_number} and carton_number={carton_number} and dispatch_order_number={dispatch_order_number} and load_number={load_number} and shipped_date_time={shipped_date_time} and dispatch_consignment_number={dispatch_consignment_number} and customer_code={customer_code} and packed_by={packed_by} and  customer_order_number={customer_order_number} and carton_fruit_nett_mass_actual={carton_fruit_nett_mass_actual} and track_indicator_code={track_indicator_code} and container_code={container_code} and vessel_code={vessel_code})
 main_table_name: cartons
 fields:
  field1:
@@ -10,8 +10,67 @@ fields:
   caption: commodity_code
   field_type: lookup
   list: "select commodity_description_short from commodities order by commodity_description_short"
+ field3:
+  field_name: target_market_code
+  caption: target_market_code
+  field_type: lookup
+  list: "select target_market_code from target_markets order by target_market_code"
+ field5:
+  field_name: grade_code
+  caption: grade_code
+  field_type: lookup
+  list: "select grade_code from grades order by grade_code"
+ field6:
+  field_name: old_pack_code
+  caption: old_pack_code
+  field_type: lookup
+  list: "select old_pack_code from old_packs order by  old_pack_code"
+ field7:
+  field_name: qc_status_code
+  caption: qc_status_code
+  field_type: lookup
+  list: "select distinct qc_status_code from qc_status order by qc_status_code" 
+ field8:
+  field_name: inventory_code
+  caption: inventory_code
+  field_type: lookup
+  list: "select inv_code from vw_inv_code order by inv_code" 
+ field9:
+  field_name: farm_code
+  caption: farm_code
+  field_type: lookup
+  list: "select farm_code from farms order by farm_code"
+ field10:
+  field_name: organization_code
+  caption: organization_code
+  field_type: lookup
+  list: "select party_name from parties_roles where role_name ='MARKETER'  order by party_name" 
  field11:
   field_name: season_code
   caption: season_code
   field_type: lookup
-  list: " select distinct season from seasons order by season"  
+  list: " select distinct season from seasons order by season" 
+ field12:
+  field_name: qc_result_status
+  caption: qc_result_status
+  field_type: lookup
+  list: "select distinct qc_result_status from qc_status order by qc_result_status" 
+ field13:
+  field_name: user_name
+  caption: user_name
+  field_type: lookup
+  list: "select user_name from users order by user_name"
+ field16:
+  field_name: shipped_date_time
+  caption: shipped_date_time
+  field_type: daterange
+ field18:
+   field_name: track_indicator_code
+   caption: track_indicator_code
+   field_type: lookup
+   list: "select track_indicator_code from track_indicators order by track_indicator_code asc"  
+ field20:
+   field_name: vessel_code
+   caption: vessel_code
+   field_type: lookup
+   list: "select vessel_code from vessels order by vessel_code"   
