@@ -41,7 +41,7 @@ class ScanLoadPallet < PDTTransactionState
      end
 
     pallet = Pallet.find_by_pallet_number(pallet_num)
-    stock_item =StockItem.find_by_inventory_reference(@pallet.pallet_number.to_s)
+    stock_item =StockItem.find_by_inventory_reference(pallet_num.to_s)
 
     #--------Load-Truck:  If the status is FAILED when the truck is loaded, the system must give the error message and not allow the user to proceed with the load.
     if !pallet.is_depot_pallet
@@ -64,20 +64,6 @@ class ScanLoadPallet < PDTTransactionState
       return PDTTransaction.build_msg_screen_definition("pallet #{pallet_num.to_s} already scanned!!!! ", nil, nil, nil)
     end
 
-    if @parent.pick_list_pallets.include?(pallet_num)
-      @parent.scanned_pallets.push(pallet_num.to_s)
-      if (self.parent.scanned_pallets.length == self.parent.pick_list_pallets.length)
-        self.parent.set_active_state(nil)
-        self.parent.load_truck_trans()
-
-      else
-        @current_scanned_pallet_index+=1
-        build_default_screen
-      end
-    else
-      return PDTTransaction.build_msg_screen_definition("scanned pallet does not belong to order load ", nil, nil, nil)
-    end
-
     if pallet.target_market_code=="P9_PART PALLETS"
       return PDTTransaction.build_msg_screen_definition("target_market_code is P9_PART PALLETS ", nil, nil, nil)
     end
@@ -86,7 +72,18 @@ class ScanLoadPallet < PDTTransactionState
       return PDTTransaction.build_msg_screen_definition("location_code has  PART_PALLETS", nil, nil, nil)
     end
 
-
+    if @parent.pick_list_pallets.include?(pallet_num)
+      @parent.scanned_pallets.push(pallet_num.to_s)
+      if (self.parent.scanned_pallets.length == self.parent.pick_list_pallets.length)
+        self.parent.set_active_state(nil)
+        self.parent.load_truck_trans()
+      else
+        @current_scanned_pallet_index+=1
+        return build_default_screen
+      end
+    else
+      return PDTTransaction.build_msg_screen_definition("scanned pallet does not belong to order load ", nil, nil, nil)
+    end
   end
 
   def show_loaded_pallets
