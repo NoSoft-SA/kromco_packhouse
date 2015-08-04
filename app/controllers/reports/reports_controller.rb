@@ -948,5 +948,150 @@ order by users.last_name, users.first_name").map {|u| ["#{u.first_name} #{u.last
     end
 
   end
+
+
+  def view_archived_report
+    @archived_report_types = []
+    session[:archived_report_lists] = []
+    session[:archived_report_date_modified] = {}
+    session[:method_overrides] = {'submit_lookup_search'=>'reports/reports/lookup_archived_reports'}
+    if !RUBY_PLATFORM.index('linux')
+      root = Globals.archived_reports_root.gsub("/","\\") + "\\"
+    else
+      root = Globals.archived_reports_root.gsub("\\","/") + "/"
+    end
+
+    if(FileTest.exists?(root))
+      Dir.foreach(root) do |report_type|
+       if(File.stat("#{root}#{report_type}").directory? && (report_type!='.' && report_type!='..'))
+         @archived_report_types.push(report_type)
+         report_type_list = PersistedList.new(0,session[:user_id].user_name,report_type,"tmp/persisted_lists/")
+         report_type_list.clear_list if(report_type_list.size > 0)
+         if !RUBY_PLATFORM.index('linux')
+           report_type_dir = "#{root}#{report_type}" + "\\"
+         else
+           report_type_dir = "#{root}#{report_type}" + "/"
+         end
+         archived_reports_stats = {}
+         Dir.foreach(report_type_dir) do |report|
+           if(!(report_stat=File.stat("#{report_type_dir}#{report}")).directory?)
+             report_type_list.push(report)
+             archived_reports_stats.store(report.to_s,report_stat.mtime)
+           end
+         end
+         session[:archived_report_lists].push(report_type_list)
+         session[:archived_report_date_modified].store("#{report_type_list.list_id}_#{report_type_list.list_name}",archived_reports_stats)
+       end
+      end
+    end
+
+    @object_builder = ObjectBuilder.new
+    @hash_object = @object_builder.build_hash_object({:report_type=>"", :report_name=>"select a value from report_type above"})
+    render :inline => %{
+    	      <% @content_header_caption = "'search for archived report and view it'" %>
+    	      <%= build_search_archived_reports_form(@hash_object,@archived_report_types,'display_archived_report','launch_report')%>
+   }, :layout=>'content'
+  end
+
+  def lookup_archived_reports
+    report_type = dm_session[:parameter_fields_values].find{|pfv| pfv[:field_name]=='report_type'}[:field_value]
+    created_on = dm_session[:parameter_fields_values].find{|pfv| pfv[:field_name]=='arrival_date'}[:field_value].split('|')
+    if(report_type.strip.length > 0)
+      persisted_list = session[:archived_report_lists].find{|pl| pl.list_id==session[:user_id].user_name &&pl.list_name==report_type}
+      @report_names = persisted_list.find_all.map{|d| d.get_persisted_object}
+      if !RUBY_PLATFORM.index('linux')
+        root = Globals.archived_reports_root.gsub("/","\\") + "\\" + report_type + "\\"
+      else
+        root = Globals.archived_reports_root.gsub("\\","/") + "/" + report_type + "/"
+      end
+
+      session[:archived_reports_data_set] = []
+      id=0
+      @report_names.each do |rpt|
+        id += 1
+        date_modified = session[:archived_report_date_modified]["#{persisted_list.list_id}_#{persisted_list.list_name}"][rpt]
+        if(created_on.length==0 || (date_modified < Time.parse(created_on[1])) && (date_modified > Time.parse(created_on[0])))
+          session[:archived_reports_data_set].push({'id'=>id.to_s,'report_type'=>report_type,'report_name'=>rpt,'created_on'=>date_modified})
+        end
+      end
+
+      if(session[:method_overrides] && session[:method_overrides]['submit_lookup_search'])
+        session[:method_overrides]['submit_lookup_search'] = nil
+      end
+
+      build_list_archived_reports_grid_form
+    else
+      session[:alert] = "please specify the report type"
+      render :inline => %{
+        <script> window.close(); </script>
+      }, :layout=>'content'
+    end
+  end
+
+  def build_list_archived_reports_grid_form
+    render :inline => %{
+      <% grid = build_list_archived_reports_grid(session[:archived_reports_data_set])%>
+      <% grid.caption    = 'list of archived reports' if grid.caption == DataGridJquery::DataGrid::DEFAULT_CAPTION %>
+      <% grid.fullpage   = true %>
+      <% grid.reload_url = "http://#{request.host_with_port}/reports/reports/reload_archived_reports_grid" %>
+      <% @header_content = grid.build_grid_data %>
+
+      <%= grid.render_html %>
+      <%= grid.render_grid %>
+    }, :layout=>'content'
+  end
+
+  def reload_archived_reports_grid
+    build_list_archived_reports_grid_form
+  end
+
+  def select_archived_report
+    @report = session[:archived_reports_data_set].find{|rpt| rpt['id']==params[:id]}
+
+    render :inline => %{
+    <script>
+     var update_field = window.opener.frames[1].document.getElementById('hash_object_report_name');
+     update_field.value = '<%= @report['report_name'] %>';
+     window.close();
+    </script>
+    }, :layout=>'content'
+  end
+
+  def display_archived_report
+
+      if !RUBY_PLATFORM.index('linux')
+        @archived_report_url = "/downloads/archived_reports/" + params['hash_object']['report_type'] + "/" + params['hash_object']['report_name']
+      else
+        @archived_report_url = "/downloads/archived_reports/" + params['hash_object']['report_type'] + "/" + params['hash_object']['report_type']
+      end
+
+      if((params['hash_object']['report_type'].strip.length == 0) || (params['hash_object']['report_type'].strip == "select a value from report_type above"))
+        @object_builder = ObjectBuilder.new
+        @hash_object = @object_builder.build_hash_object({:report_name=>"select a value from report_type above"})
+        flash[:error] = "report_type: can't be blank <br> report_name: can't be blank"
+        render :inline=> %{
+        }, :layout=>'content'
+      else
+        flash[:notice] = "report launched successfully"
+        render :inline => %{
+          <script>
+            window.open("<%=@archived_report_url%>", "87","width=800,height=400,top=200,left=200,toolbar=yes,menubar=yes,status=yes,scrollbars=yes,resizable=no,dialog=yes" );
+          </script>
+        }
+        return
+      end
+
+    end
+
+    def hash_object_report_type_search_combo_changed
+      render :inline=> %{
+          <script>
+           var update_field = document.getElementById('hash_object_report_type');
+           update_field.value = 'select a value from report_type above';
+           window.close();
+          </script>
+      }, :layout=>'content'
+    end
+
 end
 

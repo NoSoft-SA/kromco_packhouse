@@ -13,7 +13,7 @@ class DevelopmentTools::DataController < ApplicationController
 
       key = params[:id]
       @value = session[:column_details][key]
-      puts @value
+
       render :inline => %{
 
       <%= @value %>
@@ -51,7 +51,7 @@ class DevelopmentTools::DataController < ApplicationController
     export_query = dm_session[:show_records_query_definition].gsub(pattern," limit #{limit}")
 
     recordset = ActiveRecord::Base.connection.select_all(export_query)
-    puts recordset.length.to_s
+
 
     pattern = / from +[(]*[\w]+[,| ]/i
     main_table = export_query.slice(pattern).strip.split(" ")[1].delete(",").delete("(")
@@ -90,7 +90,7 @@ class DevelopmentTools::DataController < ApplicationController
     export_query = dm_session[:search_engine_query_definition].gsub(pattern," limit #{limit}")
 
     recordset = ActiveRecord::Base.connection.select_all(export_query)
-    puts recordset.length.to_s
+
 
 
     pattern = / from +[(]*[\w]+[,| ]/i
@@ -132,9 +132,9 @@ class DevelopmentTools::DataController < ApplicationController
   end
 
   def export_grid_to_csv
-   begin
+  # begin
 
-    if ! session[:query]
+    if !session[:query]
       if !session[:cached_query]
          @freeze_flash = true
          redirect_to_index("This specific grid does not support an export. Ask IT to configure this grid for exporting")
@@ -148,12 +148,18 @@ class DevelopmentTools::DataController < ApplicationController
 #     search_query = session[:query].gsub("limit ","1000")
 #    end
 
-    export_query = session[:query].gsub("@@page_size","1000")
-    export_query = export_query.gsub("session[:active_page_size]","1000")
-    export_query = export_query.gsub("@current_page","0")
-    puts "EXP: " + export_query
-    recordset = eval(export_query)
-    puts recordset.length.to_s
+    # If query starts with "-#-", the string that follows is a method to call to return the recordset.
+    # e.g. "-#-Invoice.cashflow_summary(nil, Date.parse('2013-05-24'))"
+    if session[:query].start_with?('-#-')
+      recordset = eval(session[:query].delete('-#-'))
+    else
+      export_query = session[:query].gsub("@@page_size","1000")
+      export_query = export_query.gsub("session[:active_page_size]","1000")
+      export_query = export_query.gsub("@current_page","0")
+
+      recordset    = eval(export_query)
+
+    end
 
     file_name = recordset[0].class.to_s  +  "_" + Time.now.strftime("%m_%d_%Y_%H_%M_%S") + ".csv"
 
@@ -172,16 +178,20 @@ class DevelopmentTools::DataController < ApplicationController
     #redirect_to_index("data_exported successfully to csv")
     send_file(DataToUserExporter.download_path + file_name)
     #TODO: write script to delete files older than e.g. 10 minutes from downloads directory
-    rescue
-     handle_error("grid could not be exported")
-    end
+  #  rescue
+  #   handle_error("grid could not be exported")
+  #  end
   end
 
   def filter_export_records(recordset)
     filter_method_name=nil
     filtered_recordset=recordset
 
+    if session[:added_enviro]
+      context=request.env['HTTP_REFERER'] + session[:added_enviro]
+    else
     context=request.env['HTTP_REFERER']
+    end
     if active_filter= session[:active_csv_filter]
       if context.index(active_filter[:action_name])
          filter_method_name=active_filter[:filter_method_name]
@@ -190,6 +200,7 @@ class DevelopmentTools::DataController < ApplicationController
     if filter_method_name
       filtered_recordset=eval(filter_method_name + "(filtered_recordset)")
     end
+    session[:added_enviro] =nil
     return filtered_recordset
   end
 

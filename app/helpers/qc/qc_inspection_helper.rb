@@ -166,9 +166,9 @@ module Qc::QcInspectionHelper
 
 
     column_configs = []
-    #  ----------------------
-    #  define action columns
-    #  ----------------------
+    #	----------------------
+    #	define action columns
+    #	----------------------
     if @for_existing_inspections
       column_configs << {:field_type => 'action', :field_name => 'edit',
         :settings =>
@@ -198,14 +198,14 @@ module Qc::QcInspectionHelper
     # Get any other datagrid options from the grid_configs...
     opts = build_grid_options_from_grid_configs(grid_configs)
 
-    get_data_grid(data_set, column_configs, Qc::QcInspectionPlugins::ListBusinessContextGridPlugin.new, true, nil, opts)
+    get_data_grid(data_set, column_configs, nil, true, nil, opts)
   end
  
   def build_qc_inspection_form(qc_inspection,action,caption,is_edit = nil,is_create_retry = nil)
-    #  --------------------------------------------------------------------------------------------------
-    #  Define a set of observers for each composite foreign key- in effect an observer per combo involved
-    #  in a composite foreign key
-    #  --------------------------------------------------------------------------------------------------
+    #	--------------------------------------------------------------------------------------------------
+    #	Define a set of observers for each composite foreign key- in effect an observer per combo involved
+    #	in a composite foreign key
+    #	--------------------------------------------------------------------------------------------------
     session[:qc_inspection_form]= Hash.new
     # qc_inspection_type_codes = QcInspectionType.find_by_sql('select distinct qc_inspection_type_code from qc_inspection_types').map{|g|[g.qc_inspection_type_code]}
     # qc_inspection_type_codes.unshift("<empty>")
@@ -217,13 +217,13 @@ module Qc::QcInspectionHelper
       qc_reports         = []
     end
 
-    #  ---------------------------------
-    #   Define fields to build form from
-    #  ---------------------------------
+    #	---------------------------------
+    #	 Define fields to build form from
+    #	---------------------------------
     field_configs = []
-    #  ----------------------------------------------------------------------------------------------
-    #  Combo fields to represent foreign key (qc_inspection_type_id) on related table: qc_inspection_types
-    #  ----------------------------------------------------------------------------------------------
+    #	----------------------------------------------------------------------------------------------
+    #	Combo fields to represent foreign key (qc_inspection_type_id) on related table: qc_inspection_types
+    #	----------------------------------------------------------------------------------------------
     # field_configs << {:field_type => 'DropDownField',
     #   :field_name => 'qc_inspection_type_code',
     #   :settings => {:list => qc_inspection_type_codes}}
@@ -357,7 +357,7 @@ module Qc::QcInspectionHelper
                         :settings   => {:target_action => 'list_qc_inspection_tests',
                                         :id_value      => qc_inspection.id,
                                         :width         => 900,
-                                        :height        => 180,
+                                        :height        => 200,
                                         :no_scroll     => true}
       }
     #   set_form_layout '2', false, 1, 4
@@ -375,9 +375,9 @@ module Qc::QcInspectionHelper
   def build_qc_inspection_test_grid(data_set,can_edit,can_delete)
 
     column_configs = []
-    #  ----------------------
-    #  define action columns
-    #  ----------------------
+    #	----------------------
+    #	define action columns
+    #	----------------------
     if can_edit
       column_configs << {:field_type => 'link_window',:field_name => 'edit qc_inspection_test', :column_caption => 'Test', :col_width => 40,
         :settings => 
@@ -419,31 +419,31 @@ module Qc::QcInspectionHelper
     column_configs << {:field_type => 'text',:field_name => 'qc_inspection_type_test.qc_test.qc_test_description',
                        :column_caption => 'Test description'}
     column_configs << {:field_type => 'text',:field_name => 'status'}
-    column_configs << {:field_type => 'text',:field_name => 'passed', :col_width => 70}
+    column_configs << {:field_type => 'text',:field_name => 'passed', :col_width => 70, :data_type => 'boolean'}
     column_configs << {:field_type => 'text',:field_name => 'username', :col_width => 70}
     column_configs << {:field_type => 'text',:field_name => 'created_on'}
-    column_configs << {:field_type => 'text',:field_name => 'optional', :col_width => 65}
+    column_configs << {:field_type => 'text',:field_name => 'optional', :col_width => 65, :data_type => 'boolean'}
 
     set_grid_min_height(110)
     hide_grid_client_controls()
 
-    return get_data_grid(data_set, column_configs, Qc::QcInspectionPlugins::ListQcInspectionTestGridPlugin.new)
+    get_data_grid(data_set, column_configs, MesScada::GridPlugins::Qc::ListQcInspectionTest.new)
 
   end
 
   def build_qc_inspection_test_form(qc_inspection_test,action,caption,is_edit = nil,is_create_retry = nil)
-    #  --------------------------------------------------------------------------------------------------
-    #  Define a set of observers for each composite foreign key- in effect an observer per combo involved
-    #  in a composite foreign key
-    #  --------------------------------------------------------------------------------------------------
+    #	--------------------------------------------------------------------------------------------------
+    #	Define a set of observers for each composite foreign key- in effect an observer per combo involved
+    #	in a composite foreign key
+    #	--------------------------------------------------------------------------------------------------
     session[:qc_inspection_test_form]= Hash.new
-    #  ---------------------------------
-    #   Define fields to build form from
-    #  ---------------------------------
+    #	---------------------------------
+    #	 Define fields to build form from
+    #	---------------------------------
     field_configs = []
-    #  ----------------------------------------------------------------------------------------------------
-    #  Combo field to represent foreign key (qc_inspection_id) on related table: qc_inspections
-    #  -----------------------------------------------------------------------------------------------------
+    #	----------------------------------------------------------------------------------------------------
+    #	Combo field to represent foreign key (qc_inspection_id) on related table: qc_inspections
+    #	-----------------------------------------------------------------------------------------------------
 
     field_configs << {:field_type => 'LabelField',
       :field_name => 'inspection_test_number',
@@ -453,21 +453,21 @@ module Qc::QcInspectionHelper
       :field_name => 'screen_layout',
       :settings => {:static_value => 'Use rhtml for this screen', :show_label => true}}
 
-    #  ----------------------------------------------------------------------------------------------------
-    #  Combo field to represent foreign key (qc_inspection_type_test_id) on related table: qc_inspection_type_tests
-    #  -----------------------------------------------------------------------------------------------------
+    #	----------------------------------------------------------------------------------------------------
+    #	Combo field to represent foreign key (qc_inspection_type_test_id) on related table: qc_inspection_type_tests
+    #	-----------------------------------------------------------------------------------------------------
 
 
     build_form(qc_inspection_test,field_configs,action,'qc_inspection_test',caption,is_edit)
 
   end
 
-  def build_list_tests_grid(data_set, stat, columns_list, inspection_type_code)
+  def build_list_tests_grid(data_set, stat, columns_list, inspection_type_code, grid_configs)
 
     column_configs = []
-    #  ----------------------
-    #  define action columns
-    #  ----------------------
+    #	----------------------
+    #	define action columns
+    #	----------------------
     column_configs << {:field_type => 'link_window',:field_name => 'edit qc_inspection_test', :column_caption => 'Test', :col_width => 40,
       :settings => 
     {:link_text => 'test',
@@ -475,22 +475,14 @@ module Qc::QcInspectionHelper
       :controller    => request.path_parameters['controller'].to_s ,
       :target_action => 'edit_qc_inspection_test_from_test_list',
       :id_column     => 'id'}}
-    if (columns_list != nil && columns_list.length > 0) &&
-      (stat.to_s.upcase().index("SUM(")   == nil &&
-       stat.to_s.upcase().index("COUNT(") == nil &&
-       stat.to_s.upcase().index("AVG(")   == nil &&
-       stat.to_s.upcase().index("MAX(")   == nil &&
-       stat.to_s.upcase().index("MIN(")   == nil) #&& stat.to_s.upcase.index("JOIN ") == nil)
-      columns_list.each do |col|
-        column_configs << {:field_type => 'text', :field_name => col.to_s.strip}
-      end
-    else
-      data_set[0].keys.each do |key|
-        column_configs << {:field_type => 'text', :field_name => key.to_s}
-      end
-    end
 
-    return get_data_grid(data_set, column_configs, Qc::QcInspectionPlugins::ListQcInspectionTestGridPlugin.new, true)
+    # Build all other columns from the dataminer yml file.
+    build_generic_column_configs(data_set, column_configs, stat, columns_list, grid_configs)
+
+    # Get any other datagrid options from the grid_configs...
+    opts = build_grid_options_from_grid_configs(grid_configs)
+
+    get_data_grid(data_set, column_configs, MesScada::GridPlugins::Qc::ListQcInspectionTest.new, true, nil, opts)
   end
  
 end

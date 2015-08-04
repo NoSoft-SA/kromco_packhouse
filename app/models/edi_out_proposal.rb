@@ -96,5 +96,62 @@ class EdiOutProposal < ActiveRecord::Base
     edi_out_destinations
   end
 
+  # Is there a queued proposal with matching flow_type and record_id?
+  def self.has_queued_proposal_for(flow_type, id)
+    EdiOutProposal.exists?(['flow_type = ? AND record_id = ?', flow_type.downcase, id])
+  end
+
+  # Run a joiner for an EDI flow type and return the output.
+  def self.run_joiner_for(flow_type)
+    configs = YAML::load(File.read(EdiHelper::APP_ROOT + '/edi/config/config.yml'))
+    cmd = configs['joiner_commands'][flow_type.upcase]
+
+    return "<h2>EDI joiner</h2>\n<h3>Result:</h3>\n<p>There is no joiner defined for \"#{flow_type.upcase}\".</p>" if cmd.nil?
+
+    run_res = `#{cmd}`
+
+    ar        = run_res.split "\n"
+    no_files  = 0
+    combining = []
+    created   = []
+    is_ok     = false
+    no_work   = false
+
+    ar.each do |l|
+      if l =~ /Joining\s(\d+)\sfiles/
+        no_files = $1.to_i # capture group
+      end
+      if l =~ /Combining\s(.+)\.\.\./
+        combining << File.basename($1)
+      end
+      if l =~ /created file\s(.+)\sin/
+        created << File.basename($1)
+      end
+      if l =~ /Joining complete\./
+        is_ok = true
+      end
+      if l =~ /No #{flow_type.upcase} files to process/
+        no_work = true
+      end
+    end
+
+    show_res = %Q|<p><a href="#" onclick="jQuery('#full_res_#{flow_type}').toggle();return false" style="text-decoration: none; color: #333;">Full Output &#10162;</a></p><pre id='full_res_#{flow_type}' style='display:none'>#{run_res.gsub("\n", "<br />")}</pre>|
+
+    s = "<h2>EDI joiner was run</h2>\n<h3>Result:</h3>\n"
+    if is_ok
+      s << "<p>Join complete. #{no_files} file#{no_files == 1 ? ' was' : 's were'} joined.</p><p>Joined file:<ul>"
+      created.each {|f| s << "<li><strong>#{f}</strong></p>" }
+      s << "</ul></p><p>Combined files:<ul>"
+      combining.each {|f| s << "<li>#{f}</p>" }
+      s << "</ul></p>#{show_res}"
+    elsif no_work
+      s << "<p>There are no files to join.</p>#{show_res}"
+    else
+      s << %Q|<p><strong>Join failed. The full output is shown below:</strong></p>\n#{show_res.sub('display:none', '')}|
+    end
+
+    s
+  end
+
 end
 

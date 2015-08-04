@@ -1,5 +1,7 @@
 class  Tools::EdiController < ApplicationController
+
   layout 'content'
+
   def program_name?
     "edi"
   end
@@ -14,7 +16,7 @@ class  Tools::EdiController < ApplicationController
 
   def render_list_edi_org_hubs
     @edi_org_hubs = EdiOrgHub.find(:all, :order => 'organization_code, flow_type')
-	render :inline => %{
+    render :inline => %{
       <% grid            = build_edi_org_hub_grid(@edi_org_hubs,true,true) %>
       <% grid.caption    = "List of all EDI Organisation default hub addresses (Reguired for #{EdiOutDestination::NEED_ORG_HUBS_FOR.join(', ')})" %>
       <% @header_content = grid.build_grid_data %>
@@ -274,7 +276,7 @@ class  Tools::EdiController < ApplicationController
 
   def render_list_edi_org_flows
     @edi_org_flows = EdiOrgFlow.find(:all, :order => 'organization_code, flow_type')
-	render :inline => %{
+    render :inline => %{
       <% grid            = build_edi_org_flow_grid(@edi_org_flows,true,true) %>
       <% grid.caption    = 'list of EDI Organisation/flows (Only the flows that are not required need to be listed)' %>
       <% @header_content = grid.build_grid_data %>
@@ -376,35 +378,17 @@ class  Tools::EdiController < ApplicationController
     @flow_types.unshift 'Choose flow type'
   end
 
-  def display_edi_file
-    if params[:flow_type] == 'Choose flow type'
-      flash[:notice] = 'Choose a flow'
-      view_edi_file
-      render :action => 'view_edi_file'
-      return
-    end
-    if params[:edi_file].blank?
-      flash[:notice] = 'Choose a file'
-      @chosen_flow = params[:flow_type]
-      view_edi_file
-      render :action => 'view_edi_file'
-      return
-    end
+
+  def   display_edi_file_content(file_content,flow_type)
+
     require 'nokogiri'
     require 'edi/lib/edi/edi_helper'
     require 'edi/lib/edi/in/record_padder'
     require 'edi/lib/edi/edi_field_formatter'
     require 'edi/lib/edi/raw_fixed_len_record'
 
-    uploaded_io  = params[:edi_file]
-    flow_type    = params[:flow_type]
-    @fname       = File.basename(uploaded_io.original_filename)
-    #csv_file    = FasterCSV.new(uploaded_io.tempfile, :headers => true) if csv...
-    if uploaded_io.respond_to? :tempfile
-      @content    = File.read(uploaded_io.tempfile)
-    else
-      @content    = uploaded_io.read
-    end
+
+    @content = file_content
 
     fixrec = Struct.new(:rec_type, :colnames, :data)
 
@@ -440,6 +424,72 @@ class  Tools::EdiController < ApplicationController
       this_rec.data << hs
     end
     @records << this_rec.clone unless this_rec.nil?
+    render :action => 'display_edi_file', :layout => 'content'
+
+  end
+
+
+
+  #-----------------------------------------------------------------------------------------------------------
+  #Use this method to provide a friendly display of a system provided,remote edi_file
+  #input: expects an 'id_value'  url param that separates the flow_type and full path to the file via the '!' character
+  #E.g. to configure a link:
+  #  column_configs[column_configs.length()] = {:field_type => 'action',:field_name => 'view_edi_file',
+  #  :settings =>
+  #    {:link_text => 'view',
+  #     :target_action => 'display_server_edi_file',
+  #     :controller => 'tools/edi',
+  #     :id_value => 'PS!../jmt/ftp/FTP-01/transformed/PS016744.0UI'}}
+  #------------------------------------------------------------------------------------------------------------
+  def  display_server_edi_file
+
+
+       url_params = params[:id_value].split("!")
+       flow_type = url_params[0]
+       file_path =   url_params[1]
+
+       content = File.read(file_path)
+
+       return display_edi_file_content(content,flow_type)
+
+
+
+  end
+
+
+
+
+
+  def display_edi_file
+
+
+    if params[:flow_type] == 'Choose flow type'
+      flash[:notice] = 'Choose a flow'
+      view_edi_file
+      render :action => 'view_edi_file'
+      return
+    end
+    if params[:edi_file].blank?
+      flash[:notice] = 'Choose a file'
+      @chosen_flow = params[:flow_type]
+      view_edi_file
+      render :action => 'view_edi_file'
+      return
+    end
+
+
+    uploaded_io  = params[:edi_file]
+    flow_type    = params[:flow_type]
+    @fname       = File.basename(uploaded_io.original_filename)
+    #csv_file    = FasterCSV.new(uploaded_io.tempfile, :headers => true) if csv...
+    if uploaded_io.respond_to? :tempfile
+      @content    = File.read(uploaded_io.tempfile)
+    else
+      @content    = uploaded_io.read
+    end
+
+    return display_edi_file_content(@content,flow_type)
+
 
   end
 

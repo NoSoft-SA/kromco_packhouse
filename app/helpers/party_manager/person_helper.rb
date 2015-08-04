@@ -157,7 +157,37 @@ end
 
  def build_person_grid(data_set,can_edit,can_delete)
 
-	column_configs = Array.new
+	column_configs = []
+  action_configs = []
+
+	if can_edit
+		action_configs << {:field_type => 'action',:field_name => 'edit person',
+			:settings => 
+				 {:link_text => 'edit',
+        :link_icon => 'edit',
+				:target_action => 'edit_person',
+				:id_column => 'id'}}
+
+    action_configs << {:field_type => 'action',:field_name => 'rename party',
+      :column_caption => 'rename',
+      :settings =>
+         {:link_text => 'rename',
+        :link_icon => 'exec2',
+        :controller => 'party_manager/parties_role',
+        :target_action => 'rename_party',
+        :id_column => 'party_id'}}
+	end
+
+	if can_delete
+		action_configs << {:field_type => 'action',:field_name => 'delete person',
+			:settings => 
+				 {:link_text => 'delete',
+      :link_icon => 'delete',
+				:target_action => 'delete_person',
+				:id_column => 'id'}}
+	end
+
+column_configs << {:field_type => 'action_collection', :field_name => 'actions', :settings => {:actions => action_configs}} unless action_configs.empty?
   #MM112014 - messcada changes
   column_configs << {:field_type => 'text',:field_name => 'first_name'}
   column_configs << {:field_type => 'text',:field_name => 'last_name'}
@@ -166,34 +196,12 @@ end
   column_configs << {:field_type => 'text',:field_name => 'maiden_name'}
   column_configs << {:field_type => 'text',:field_name => 'initials'}
   column_configs << {:field_type => 'text',:field_name => 'industry_number'}
-  column_configs << {:field_type => 'text',:field_name => 'messcada_people_view_messcada_rfid_allocation.rfid '}
-  column_configs << {:field_type => 'text',:field_name => 'messcada_people_view_messcada_rfid_allocation.start_date'}
-  column_configs << {:field_type => 'text',:field_name => 'messcada_people_view_messcada_rfid_allocation.end_date'}
+  column_configs << {:field_type => 'text',:field_name => 'messcada_people_view_messcada_rfid_allocation.rfid ', :use_outer_join => true}
+  column_configs << {:field_type => 'text',:field_name => 'messcada_people_view_messcada_rfid_allocation.start_date', :use_outer_join => true}
+  column_configs << {:field_type => 'text',:field_name => 'messcada_people_view_messcada_rfid_allocation.end_date', :use_outer_join => true}
 
-  # column_configs[0] = {:field_type => 'text',:field_name => 'first_name'}
-	# column_configs[1] = {:field_type => 'text',:field_name => 'last_name'}
-	# column_configs[2] = {:field_type => 'text',:field_name => 'title'}
-	# column_configs[3] = {:field_type => 'text',:field_name => 'date_of_birth'}
-	# column_configs[4] = {:field_type => 'text',:field_name => 'maiden_name'}
-#	----------------------
-#	define action columns
-#	----------------------
-	if can_edit
-		column_configs[column_configs.length()] = {:field_type => 'action',:field_name => 'edit person',
-			:settings => 
-				 {:link_text => 'edit',
-				:target_action => 'edit_person',
-				:id_column => 'id'}}
-	end
 
-	if can_delete
-		column_configs[column_configs.length()] = {:field_type => 'action',:field_name => 'delete person',
-			:settings => 
-				 {:link_text => 'delete',
-				:target_action => 'delete_person',
-				:id_column => 'id'}}
-	end
- return get_data_grid(data_set,column_configs)
+  get_data_grid(data_set,column_configs)
 end
 
 end

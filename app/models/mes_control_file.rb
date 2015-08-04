@@ -51,32 +51,55 @@ class MesControlFile < ActiveRecord::Base
 
   end
 
-  def MesControlFile.next_seq_web(object_type,batch_size = nil)
-   query = "SELECT max(sequence_number)as maxval
-           FROM
-           public.mes_control_files where 
-           (object_type = '#{object_type}')"
-           
-   val = connection.select_one(query)
-   seq = MesControlFile.find_by_object_type_and_sequence_number(object_type,val["maxval"])
-   if ! batch_size
-     if seq.sequence_number.nil?
-       seq.sequence_number = 1
-     else
-       seq.sequence_number += 1
-     end
-   else
-     seq.sequence_number += batch_size
-   end
-   
-#   seq.update
-   seq.save
-   
-   if val["maxval"]== nil
-     return 1
-   else
-    return seq.sequence_number
-   end
+
+  def MesControlFile.next_seq_web(object_type,batch_size = nil, sequence_prefix=nil)
+    query =<<-EOQ
+    SELECT cf.sequence_number, ot.mes_control_object_type_description, ot.use_sequence
+    FROM public.mes_control_files cf
+    JOIN public.mes_control_object_types ot ON ot.mes_object_type = cf.object_type
+    WHERE cf.object_type = #{object_type}
+    EOQ
+    val = connection.select_one(query)
+
+    # If the object type uses a sequence, get the value from the sequence, not the table.
+    # == SIDE NOTE ==
+    # NB. to create a sequence in Postgresql, append the value of 'mes_control_object_type_description' to mes_control_count_.
+    # Then create the sequence using this code (e.g. for object 42, "QC_REPORT", with sequence_number at 123):
+    # CREATE SEQUENCE mes_control_count_qc_report START WITH 124;
+    # UPDATE mes_control_object_types SET use_sequence boolean = true WHERE object_type = 42;
+    if val['use_sequence'] == 't'
+      seq_name = val['mes_control_object_type_description'].downcase
+      seq_name << "_#{sequence_prefix.downcase}" unless sequence_prefix.nil?
+      seq      = connection.select_value("SELECT nextval('mes_control_count_#{seq_name}')")
+
+      unless batch_size.nil? || batch_size <= 1
+        num = seq.to_i + batch_size - 1
+        seq = connection.select_value("SELECT setval('mes_control_count_#{seq_name}', #{num})")
+      end
+      connection.execute("UPDATE mes_control_files SET sequence_number = #{seq} WHERE object_type = #{object_type}")
+      return seq
+    end
+
+    # object type does not use a sequence:
+    val = connection.select_one(query)
+    seq = MesControlFile.find_by_object_type_and_sequence_number(object_type,val["sequence_number"])
+    if ! batch_size
+      if seq.sequence_number.nil?
+        seq.sequence_number = 1
+      else
+        seq.sequence_number += 1
+      end
+    else
+      seq.sequence_number += batch_size
+    end
+
+    seq.save
+
+    if val["sequence_number"]== nil
+      return 1
+    else
+      return seq.sequence_number
+    end
   end
 
   def MesControlFile.next_org_seq_web(org_name,role_name)
@@ -171,8 +194,8 @@ class MesControlFile < ActiveRecord::Base
     ActiveRecord::Base.connection.select_all(<<-EOQ).each do |rec|
       SELECT * FROM mes_control_object_types ORDER BY id
       EOQ
-      ar << "INSERT INTO mes_control_object_types (mes_object_type, mes_control_object_type_description--, use_sequence)
-            VALUES ('#{rec['mes_object_type']}','#{n_f rec['mes_control_object_type_description']}'); --,#{t_f rec['use_sequence']});"
+      ar << "INSERT INTO mes_control_object_types (mes_object_type, mes_control_object_type_description, use_sequence)
+            VALUES ('#{rec['mes_object_type']}','#{n_f rec['mes_control_object_type_description']}',#{t_f rec['use_sequence']});"
     end
 
     MesControlFile.find(:all, :order => 'id').each do |f|

@@ -9,6 +9,10 @@ class DevelopmentTools::CrudToolsController < ApplicationController
     ["create_model"]
   end
 
+  def archive_records
+    redirect_to :action => "archive_records", :controller => "development_tools/archiving"
+  end
+
   def correct_rebin_templates
 
     count = 0

@@ -1087,7 +1087,6 @@ module MesScada
     end
 
     def add_id_column_if_no_function(stat)
-
       if stat.to_s.upcase().index("SUM(") == nil && stat.to_s.upcase().index("COUNT(") == nil && stat.to_s.upcase().index("AVG(") == nil && stat.to_s.upcase().index("MAX(") == nil && stat.to_s.upcase().index("MIN(") == nil && stat.to_s.upcase.index("JOIN ") == nil && stat.to_s.upcase.index("GROUP BY") == nil
         # FIRST: add the id column before the from clause first
         select_index     = stat.to_s.upcase.index("SELECT ")

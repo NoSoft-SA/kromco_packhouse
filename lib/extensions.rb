@@ -209,7 +209,7 @@ class Array
       if !@key_based_access
         failed = !(eval "previous_item." + c + " == current_item." + c)
       else
-        failed = !(eval "previous_item['" + c + "'] == current_item['" + c + "']")
+        failed = !(previous_item[c] == current_item[c])
       end
       break if failed
     end

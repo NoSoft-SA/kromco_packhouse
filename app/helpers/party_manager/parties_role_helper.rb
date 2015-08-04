@@ -85,7 +85,7 @@ end
 #	in a composite foreign key
 #	--------------------------------------------------------------------------------------------------
 	session[:parties_role_form]= Hash.new
-	role_names = Role.find_by_sql('select distinct role_name from roles').map{|g|[g.role_name]}
+	role_names = Role.find_by_sql('select distinct role_name from roles').map{|g| g.role_name } - PartiesRole::OWN_CRUD_ROLES
 	role_names.unshift("<empty>")
 	#generate javascript for the on_complete ajax event for each combo for fk table: parties
 	combos_js_for_parties = gen_combos_clear_js_for_combos(["parties_role_party_type_name","parties_role_party_name"])
@@ -104,8 +104,10 @@ end
 	party_type_names = PartiesRole.get_all_party_type_names
 	if parties_role == nil||is_create_retry
 		 party_names = ["Select a value from party_type_name"]
+     contact_info = ''
 	else
 		party_names = PartiesRole.party_names_for_party_type_name(parties_role.party.party_type_name)
+    contact_info = parties_role.party.formatted_contact_info
 	end
 #	---------------------------------
 #	 Define fields to build form from
@@ -114,33 +116,51 @@ end
 #	----------------------------------------------------------------------------------------------
 #	Combo fields to represent foreign key (party_id) on related table: parties
 #	----------------------------------------------------------------------------------------------
-	field_configs[0] =  {:field_type => 'DropDownField',
+	field_configs << {:field_type => 'DropDownField',
 						:field_name => 'party_type_name',
 						:settings => {:list => party_type_names},
 						:observer => party_type_name_observer}
  
-	field_configs[1] =  {:field_type => 'DropDownField',
+	field_configs <<  {:field_type => 'DropDownField',
 						:field_name => 'party_name',
 						:settings => {:list => party_names}}
  
 #	----------------------------------------------------------------------------------------------
 #	Combo fields to represent foreign key (role_id) on related table: roles
 #	----------------------------------------------------------------------------------------------
-	field_configs[2] =  {:field_type => 'DropDownField',
-						:field_name => 'role_name',
-						:settings => {:list => role_names}}
+  if is_edit && PartiesRole::OWN_CRUD_ROLES.include?(parties_role.role_name)
+    field_configs << {:field_type => 'TextField',
+                      :field_name => 'role_name',
+                      :settings   => {:readonly => true}}
+  else
+    field_configs << {:field_type => 'DropDownField',
+              :field_name => 'role_name',
+              :settings => {:list => role_names}}
+  end
+
+   unless is_edit
+     field_configs << {:field_type => 'LabelField',
+        :field_name => 'own_crud_note',
+        :settings => {:static_value => "NB. Roles #{PartiesRole::OWN_CRUD_ROLES.to_sentence} are created separately via their own menu.",
+          :non_dbfield => true, :show_label => false, :css_class => 'unbordered_label_field'}}
+   end
  
-	field_configs[3] = {:field_type => 'DateField',
+	field_configs << {:field_type => 'PopupDateSelector',
 						:field_name => 'from_date'}
 
-	field_configs[4] = {:field_type => 'DateField',
+	field_configs << {:field_type => 'PopupDateSelector',
 						:field_name => 'to_date'}
 
-	field_configs[5] = {:field_type => 'TextField',
+	field_configs << {:field_type => 'TextField',
 						:field_name => 'remarks'}
 
-  field_configs[6] = {:field_type => 'TextField',
+  field_configs << {:field_type => 'TextField',
 						:field_name => 'sequence_number'}
+
+    field_configs << {:field_type => 'LabelField',
+        :field_name => 'contact_info',
+        :settings => {:static_value => contact_info,
+          :non_dbfield => true, :show_label => true, :css_class => 'unbordered_label_field'}}
 
 	build_form(parties_role,field_configs,action,'parties_role',caption,is_edit)
 
@@ -237,5 +257,23 @@ end
 	end
  return get_data_grid(data_set,column_configs)
 end
+
+  def build_rename_party_form(party,action,caption,is_edit = nil,is_create_retry = nil)
+    field_configs = []
+    field_configs << {:field_type => 'LabelField',
+                      :field_name => 'party_name', :label_caption => 'From name'}
+
+    field_configs << {:field_type => 'TextField',
+                      :field_name => 'new_name', :non_db_field => true}
+    if 'PERSON' == party.party_type_name
+      field_configs << {:field_type => 'TextField',
+                        :field_name => 'new_first_name'}
+      field_configs << {:field_type => 'TextField',
+                        :field_name => 'new_last_name'}
+    end
+
+    build_form(party,field_configs,action,'party',caption,is_edit)
+
+  end
 
 end

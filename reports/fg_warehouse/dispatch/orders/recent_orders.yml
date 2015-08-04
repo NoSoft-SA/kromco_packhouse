@@ -1,6 +1,17 @@
-query: select * from vw_recent_orders where (created_at={created_at} and  isoweek={isoweek} and order_number={order_number} and order_type_code={order_type_code} and organization={organization} and trading_partner_code={trading_partner_code} and trading_partner_name={trading_partner_name} and incoterm_code={incoterm_code} and currency_code={currency_code} and load_number={load_number} and order_status={order_status} and dispatch_consignment_number={dispatch_consignment_number} and customer_order_number={customer_order_number} and depot_code={depot_code} and target_market_code={target_market_code} and puc={puc} and marketer={marketer} and  created_by={created_by} and grade_code={grade_code} and commodity_code={commodity_code} and marketing_variety_code={marketing_variety_code} and standard_size_count_value={standard_size_count_value} and load_status={load_status})
+query: |
+  select order_number, order_type_code, not_all_pallets_is_stock, order_date,
+       loading_date, promised_delivery_date, organization, trading_partner_code,
+       trading_partner_name, incoterm_code, currency_code, load_number,
+       load_status, shipped_date_time, dispatch_consignment_number,
+       customer_memo_pad, customer_contact_name, customer_order_number,
+       depot_code, price_per_kg, price_per_carton, extended_fg_code,
+       old_fg_code, item_pack_product_code, target_market_code, puc,
+       required_quantity, marketer, created_by, created_at, grade_code,
+       commodity_code, marketing_variety_code, standard_size_count_value,
+       isoweek, order_status, ROW_NUMBER() OVER() AS id
+  from vw_recent_orders where (created_at={created_at} and  isoweek={isoweek} and order_number={order_number} and order_type_code={order_type_code} and organization={organization} and trading_partner_code={trading_partner_code} and trading_partner_name={trading_partner_name} and incoterm_code={incoterm_code} and currency_code={currency_code} and load_number={load_number} and order_status={order_status} and dispatch_consignment_number={dispatch_consignment_number} and customer_order_number={customer_order_number} and depot_code={depot_code} and target_market_code={target_market_code} and puc={puc} and marketer={marketer} and  created_by={created_by} and grade_code={grade_code} and commodity_code={commodity_code} and marketing_variety_code={marketing_variety_code} and standard_size_count_value={standard_size_count_value} and load_status={load_status})
 main_table_name: orders
-fields:  
+fields:
  field1:
   field_name: created_at
   caption: created_at
@@ -9,105 +20,105 @@ fields:
   field_name:  isoweek
   caption: isoweek
   field_type: lookup
-  list: "select iso_week_code from iso_weeks order by iso_week_code"  
+  list: "select iso_week_code from iso_weeks order by iso_week_code"
   field3:
    field_name: order_number
    caption: order_number
-   field_type: text  
+   field_type: text
  field4:
   field_name:  order_type_code
   caption: order_type_code
   field_type: lookup
-  list: "select order_type_code from order_types order by order_type_code"  
+  list: "select order_type_code from order_types order by order_type_code"
  field5:
   field_name:  organization
   caption: organization
   field_type: lookup
-  list: "select short_description from organizations order by short_description"    
+  list: "select short_description from organizations order by short_description"
  field6:
   field_name:  trading_partner_code
   caption: trading_partner_code
   field_type: lookup
-  list: "SELECT party_name from parties_roles where role_name = 'TRADING PARTNER'"  
+  list: "SELECT party_name from parties_roles where role_name = 'TRADING PARTNER'"
  field7:
   field_name:  trading_partner_name
   caption: trading_partner_name
   field_type: lookup
-  list: "SELECT remarks from parties_roles where role_name = 'TRADING PARTNER'"    
+  list: "SELECT remarks from parties_roles where role_name = 'TRADING PARTNER'"
  field8:
   field_name:  incoterm_code
   caption: incoterm_code
   field_type: lookup
-  list: "select incoterm_code from incoterms order by incoterm_code"    
+  list: "select incoterm_code from incoterms order by incoterm_code"
  field9:
   field_name:  currency_code
   caption: currency_code
   field_type: lookup
-  list: "select currency_code from currencies order by currency_code"   
+  list: "select currency_code from currencies order by currency_code"
  field10:
   field_name: load_number
   caption: load_number
-  field_type: text  
+  field_type: text
  field11:
   field_name: order_status
   caption: order_status
   field_type: lookup
-  list: "select distinct status_code from statuses where status_type_code = 'fg_order' order by status_code"     
+  list: "select distinct status_code from statuses where status_type_code = 'fg_order' order by status_code"
  field12:
   field_name: dispatch_consignment_number
   caption: dispatch_consignment_number
-  field_type: text     
+  field_type: text
  field13:
   field_name: customer_order_number
   caption: customer_order_number
-  field_type: text     
+  field_type: text
  field14:
   field_name:  depot_code
   caption: depot_code
   field_type: lookup
-  list: "select depot_code from depots order by depot_code"    
+  list: "select depot_code from depots order by depot_code"
  field15:
   field_name:  target_market_code
   caption: target_market_code
   field_type: lookup
-  list: "select target_market_code from target_markets order by target_market_code"    
+  list: "select target_market_code from target_markets order by target_market_code"
  field16:
   field_name:  puc
   caption: puc
   field_type: lookup
-  list: "select puc_code from pucs order by puc_code"    
+  list: "select puc_code from pucs order by puc_code"
  field17:
   field_name:  marketer
   caption: marketer
   field_type: lookup
-  list: "select user_name from users where department_name='Marketing' order by user_name "      
+  list: "select user_name from users where department_name='Marketing' order by user_name "
  field18:
   field_name:  created_by
   caption: created_by
   field_type: lookup
-  list: "select user_name from users order by user_name"        
+  list: "select user_name from users order by user_name"
  field19:
   field_name:  grade_code
   caption: grade_code
   field_type: lookup
-  list: "select grade_code from grades order by grade_code"      
+  list: "select grade_code from grades order by grade_code"
  field20:
   field_name:  commodity_code
   caption: commodity_code
   field_type: lookup
-  list: "select commodity_code from commodities order by commodity_code"     
+  list: "select commodity_code from commodities order by commodity_code"
  field21:
   field_name:  marketing_variety_code
   caption: marketing_variety_code
   field_type: lookup
-  list: "select marketing_variety_code from marketing_varieties where commodity_code='AP' or commodity_code='PL' or commodity_code='PR' or commodity_code='PZ' order by marketing_variety_code"      
+  list: "select marketing_variety_code from marketing_varieties where commodity_code='AP' or commodity_code='PL' or commodity_code='PR' or commodity_code='PZ' order by marketing_variety_code"
  field22:
   field_name:  standard_size_count_value
   caption: standard_size_count_value
   field_type: lookup
-  list: "select distinct standard_size_count_value from standard_size_counts order by standard_size_count_value"   
+  list: "select distinct standard_size_count_value from standard_size_counts order by standard_size_count_value"
  field23:
   field_name: load_status
   caption: load_status
   field_type: lookup
-  list: "select distinct status_code from statuses where status_type_code = 'fg_load' order by status_code"    
+  list: "select distinct status_code from statuses where status_type_code = 'fg_load' order by status_code"

@@ -48,10 +48,11 @@ module RmtProcessing::GrowerGradingHelper
         :settings => 
       {:link_text => 'create',
         :target_action => 'create_pool_graded_summary',
-        :id_column => 'production_run_code'}}
+        :id_column => 'production_run_code',
+        :null_test => "['status'] != nil"}}
     end
 
-    return get_data_grid(data_set,column_configs, RmtProcessing::GrowerGradingPlugins::ProductionRunGridPlugin.new, true)
+    get_data_grid(data_set,column_configs, nil, true)
   end
 
   def build_pool_graded_summary_search_form(pool_graded_summary,action,caption,is_flat_search = nil)
@@ -142,16 +143,19 @@ module RmtProcessing::GrowerGradingHelper
         :settings => 
       {:link_text => 'delete',
         :target_action => 'delete_pool_graded_summary',
-        :id_column => 'id'}}
+        :id_column => 'id',
+        :null_test => "status == '#{PoolGradedSummary::STATUS_COMPLETE}'"}}
     end
     if can_edit
       column_configs << {:field_type => 'action',:field_name => 'uncomplete pool_graded_summary',
         :settings => 
       {:link_text => 'uncomplete',
         :target_action => 'uncomplete_pool_graded_summary',
-        :id_column => 'id'}}
+        :id_column => 'id',
+        :null_test => "status != '#{PoolGradedSummary::STATUS_COMPLETE}'"}}
     end
-    return get_data_grid(data_set,column_configs, RmtProcessing::GrowerGradingPlugins::PoolGradedSummaryGridPlugin.new)
+
+    get_data_grid(data_set,column_configs)
   end
 
   def build_pool_graded_summary_form(pool_graded_summary,action,caption,is_edit = nil,is_create_retry = nil)

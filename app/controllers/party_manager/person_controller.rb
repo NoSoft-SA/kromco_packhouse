@@ -10,6 +10,7 @@ class PartyManager::PersonController < ApplicationController
 
   def list_people
     return if authorise_for_web('person', 'read') == false
+    store_last_grid_url
 
     if params[:page]!= nil
 
@@ -24,10 +25,10 @@ class PartyManager::PersonController < ApplicationController
 
     #MM112014 - messcada changes
     list_query = "@person_pages = Paginator.new self, Person.count, @@page_size,@current_page
-	 @people = Person.find(:all,
+   @people = Person.find(:all,
          :limit => @person_pages.items_per_page,
-				 :order => 'first_name',
-			   :offset => @person_pages.current.offset,
+         :order => 'first_name',
+         :offset => @person_pages.current.offset,
          :include => 'messcada_people_view_messcada_rfid_allocation')"
 
     session[:query] = list_query
@@ -60,13 +61,13 @@ class PartyManager::PersonController < ApplicationController
 
   def render_person_search_form(is_flat_search = nil)
     session[:is_flat_search] = @is_flat_search
-#	 render (inline) the search form
+#   render (inline) the search form
     render :inline => %{
-		<% @content_header_caption = "'search  people'"%> 
+    <% @content_header_caption = "'search  people'"%> 
 
-		<%= build_person_search_form(nil,'submit_people_search','submit_people_search',@is_flat_search)%>
+    <%= build_person_search_form(nil,'submit_people_search','submit_people_search',@is_flat_search)%>
 
-		}, :layout => 'content'
+    }, :layout => 'content'
   end
 
   def search_people_hierarchy
@@ -78,16 +79,17 @@ class PartyManager::PersonController < ApplicationController
 
   def render_person_search_form(is_flat_search = nil)
     session[:is_flat_search] = @is_flat_search
-#	 render (inline) the search form
+#   render (inline) the search form
     render :inline => %{
-		<% @content_header_caption = "'search  people'"%> 
+    <% @content_header_caption = "'search  people'"%> 
 
-		<%= build_person_search_form(nil,'submit_people_search','submit_people_search',@is_flat_search)%>
+    <%= build_person_search_form(nil,'submit_people_search','submit_people_search',@is_flat_search)%>
 
-		}, :layout => 'content'
+    }, :layout => 'content'
   end
 
   def submit_people_search
+  store_last_grid_url
     if params['page']
       session[:people_page] =params['page']
     else
@@ -158,13 +160,13 @@ class PartyManager::PersonController < ApplicationController
   end
 
   def render_new_person
-#	 render (inline) the edit template
+#   render (inline) the edit template
     render :inline => %{
-		<% @content_header_caption = "'create new person'"%> 
+    <% @content_header_caption = "'create new person'"%> 
 
-		<%= build_person_form(@person,'create_person','create_person',false,@is_create_retry)%>
+    <%= build_person_form(@person,'create_person','create_person',false,@is_create_retry)%>
 
-		}, :layout => 'content'
+    }, :layout => 'content'
   end
 
   def edit_person
@@ -180,11 +182,11 @@ class PartyManager::PersonController < ApplicationController
   def render_edit_person
     session[:editing_person]=@person
     render :inline => %{
-		<% @content_header_caption = "'edit person'"%> 
+    <% @content_header_caption = "'edit person'"%> 
 
-		<%= build_person_form(@person,'update_person','update_person',true)%>
+    <%= build_person_form(@person,'update_person','update_person',true)%>
 
-		}, :layout => 'content'
+    }, :layout => 'content'
   end
 
   def update_person
@@ -220,43 +222,43 @@ class PartyManager::PersonController < ApplicationController
 
   end
 
-#	--------------------------------------------------------------------------------
-#	 combo_changed event handlers for composite foreign key: party_id
-#	---------------------------------------------------------------------------------
+#  --------------------------------------------------------------------------------
+#   combo_changed event handlers for composite foreign key: party_id
+#  ---------------------------------------------------------------------------------
   def person_party_name_changed
     party_name = get_selected_combo_value(params)
     session[:person_form][:party_name_combo_selection] = party_name
     @party_type_ids = Person.party_type_ids_for_party_name(party_name)
-#	render (inline) the html to replace the contents of the td that contains the dropdown 
+#  render (inline) the html to replace the contents of the td that contains the dropdown 
     render :inline => %{
-		<%= select('person','party_type_id',@party_type_ids)%>
+    <%= select('person','party_type_id',@party_type_ids)%>
 
-		}
+    }
 
   end
 
 
-#	-----------------------------------------------------------------------------------------------------------
-#	 search combo_changed event handlers for the unique index on this table(people)
-#	-----------------------------------------------------------------------------------------------------------
+#  -----------------------------------------------------------------------------------------------------------
+#   search combo_changed event handlers for the unique index on this table(people)
+#  -----------------------------------------------------------------------------------------------------------
   def person_first_name_search_combo_changed
     first_name = get_selected_combo_value(params)
     session[:person_search_form][:first_name_combo_selection] = first_name
     @last_names = Person.find_by_sql("Select distinct last_name from people where first_name = '#{first_name}'").map { |g| [g.last_name] }
     @last_names.unshift("<empty>")
 
-    #	render (inline) the html to replace the contents of the td that contains the dropdown
+    #  render (inline) the html to replace the contents of the td that contains the dropdown
     # render :inline => %{
-    # 	<%= select('person','last_name',@last_names)%>
+    #   <%= select('person','last_name',@last_names)%>
     #
-    # 	}
+    #   }
 
     #MM112014 - messcada changes
     render :inline => %{
-		<%= select('person','last_name',@last_names)%>
-		<img src = '/images/spinner.gif' style = 'display:none;' id = 'img_person_last_name'/>
-		<%= observe_field('person_last_name',:update => 'industry_number_cell',:url => {:action => session[:person_search_form][:last_name_observer][:remote_method]},:loading => "show_element('img_person_last_name');",:complete => session[:person_search_form][:last_name_observer][:on_completed_js])%>
-		}
+    <%= select('person','last_name',@last_names)%>
+    <img src = '/images/spinner.gif' style = 'display:none;' id = 'img_person_last_name'/>
+    <%= observe_field('person_last_name',:update => 'industry_number_cell',:url => {:action => session[:person_search_form][:last_name_observer][:remote_method]},:loading => "show_element('img_person_last_name');",:complete => session[:person_search_form][:last_name_observer][:on_completed_js])%>
+    }
 
   end
 
@@ -267,11 +269,11 @@ class PartyManager::PersonController < ApplicationController
     @industry_numbers = Person.find_by_sql("Select distinct industry_number from people where first_name = '#{session[:person_search_form][:first_name_combo_selection]}' and last_name = '#{last_name}'").map { |g| [g.industry_number] }
     # @industry_numbers.unshift("<empty>")
 
-    #	render (inline) the html to replace the contents of the td that contains the dropdown
+    #  render (inline) the html to replace the contents of the td that contains the dropdown
     render :inline => %{
-		<%= select('person','industry_number',@industry_numbers)%>
+    <%= select('person','industry_number',@industry_numbers)%>
 
-		}
+    }
 
   end
 

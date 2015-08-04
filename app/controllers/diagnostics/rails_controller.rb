@@ -273,7 +273,7 @@ def list_last_hour_errors
 
 	@last_hour = 1.hour.ago.to_formatted_s(:db)
 	
-	puts @last_hour
+
 	
 	@error_type = 'outbox_processor'
 	
@@ -318,8 +318,8 @@ def list_custom_time_search_errors
 		session[:rails_error_page] = nil
 	end
 	
-	puts @from_date.to_s
-	puts @to_date.to_s
+
+
 	
 	@error_type = 'outbox_processor'
 	

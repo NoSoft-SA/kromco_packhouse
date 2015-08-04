@@ -105,7 +105,7 @@ end
     
     @user = User.find(params[:id])
     @message = @user.user_message
-    puts "msg user is: " + @user.id.to_s
+
     session[:message_user]= @user
     render :inline => %{
 		<% @content_header_caption = "'set message for user " + @user.user_name + "'" %> 

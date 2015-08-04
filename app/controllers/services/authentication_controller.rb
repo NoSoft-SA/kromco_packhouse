@@ -39,7 +39,7 @@ end
   
   if err == true
     result += "<error>" + error + "</error>"
-          puts ":::::::::::::::::::::::::: " +result
+
     render_result(result)
     return
   end
@@ -61,7 +61,7 @@ end
     end
   end
    
-   puts result
+
    render_result(result)
   rescue
     err = "An unexpected service exception occured. Reported exception: \n" + $!

@@ -1,6 +1,6 @@
 class Person < ActiveRecord::Base
 
-
+  belongs_to :party
  #	===========================
 # 	Association declarations:
 #	===========================
@@ -42,10 +42,7 @@ def validate_uniqueness
 	 exists = Person.find_by_first_name_and_last_name(self.first_name,self.last_name)
 	 if exists != nil 
 		errors.add_to_base("There already exists a record with the combined values of fields: 'first_name' and 'last_name' ")
-   end
-
-
-
+	end
 end
 #	===========================
 #	 foreign key validations:

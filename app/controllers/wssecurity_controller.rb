@@ -8,7 +8,7 @@ class WssecurityController < ApplicationController
 
   def authorise_access(program,permission,user_name)
     
-    puts " auth user_name: " + user_name.to_s
+
     
   	user = User.find(:first,:conditions => ["user_name = ?",user_name])
   	

@@ -514,7 +514,7 @@ module MesScada
       initialdate = "";
       initialdate = @active_record.send(@field_name) unless @active_record.nil?
       #initialdate = initialdate.strftime("%Y-%m-%d %H:%M:%S") if (initialdate.to_s.length > 0)
-      initialdate = initialdate.strftime("%Y-%m-%d %H:%M:%S") if (initialdate.to_s.length > 0)
+      initialdate = initialdate.strftime("%Y-%m-%d %H:%M") if (initialdate.to_s.length > 0)
 
       %Q|<input id="#{@settings[:date_textfield_id]}" size="20" name="#{@active_record_var_name}[#{@settings[:date_textfield_id]}]" value="#{initialdate}" #{opts} class="datetimepicker #{cls}" />|
     end

@@ -378,16 +378,17 @@ def view_status_history
               <%= link_to('view record', {:controller => request.path_parameters['controller'].to_s , :action => 'view_process_record', :id => @transaction_status['object_id'], :parent_id => @transaction_status['parent_id'],:ar_class_name=>@transaction_status['ar_class_name'],:status_type_code=>@transaction_status['status_type_code']},:popup=>['new_window', 'height=400,width=750,scrollbars=yes'],:style=>'text-decoration:underline;') %>
             </td>
           </tr>
-          </tr>
+          <tr>
             <td>
-              <% grid            = build_view_object_history_grid(@transaction_statuses) %>
-              <% grid.caption    = @content_header_caption %>
-              <% @header_content = grid.build_grid_data %>
+                  <% grid            = build_view_object_history_grid(@transaction_statuses) %>
+                  <% grid.caption    = @content_header_caption %>
+                  <% grid.fullpage=false %>
+                  <% grid.width='1050' %>
+                  <% @header_content = grid.build_grid_data %>
 
-              <%= grid.render_html %>
-              <%= grid.render_grid %>
+                  <%= grid.render_html %>
+                  <%= grid.render_grid %>
             </td>
-          </tr>
           </tr>
         </table>
         },:layout => 'content'
@@ -438,10 +439,11 @@ where transaction_statuses.id=#{params[:id]}")[0]
     status_type_code = params[:id].split('|')[1]
     @child_transaction_statuses = ActiveRecord::Base.connection.select_all("select object_id,status_type_code from transaction_statuses where parent_id=#{id} and status_type_code='#{status_type_code}' group by object_id,status_type_code")
     @content_header_caption = "'list of child processes'"
-    render :inline => %{
+      render :inline => %{
       <% grid            = build_transaction_statuses_grid(@child_transaction_statuses)%>
       <% grid.caption    = @content_header_caption %>
       <% @header_content = grid.build_grid_data %>
+      <% grid.fullpage=false %>
 
       <% @pagination = pagination_links(@edi_intake_header_pages) if @edi_intake_header_pages != nil %>
       <%= grid.render_html %>

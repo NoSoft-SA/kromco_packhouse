@@ -574,9 +574,11 @@ class  Qc::QcInspectionController < ApplicationController
       # @can_edit   = authorise(program_name(session[:qc_inspection_type_code]), 'edit', session[:user_id])
       # @can_delete = authorise(program_name(session[:qc_inspection_type_code]), 'delete', session[:user_id])
       @stat = dm_session[:search_engine_query_definition]
-      @columns_list = session[:columns_list]
+    #  @columns_list = session[:columns_list]
+    @columns_list    = dm_session[:columns_list]
+    @grid_configs    = dm_session[:grid_configs]
       render :inline => %{
-      <% grid            = build_list_tests_grid(@business_data,@stat,@columns_list, session[:qc_inspection_type_code]) %>
+      <% grid            = build_list_tests_grid(@business_data,@stat,@columns_list, session[:qc_inspection_type_code], @grid_configs) %>
       <% grid.caption    = '' %>
       <% @header_content = grid.build_grid_data %>
 

@@ -23,7 +23,7 @@ class DevelopmentTools::RakeController < ApplicationController
   
     #@output = `rake_stats.bat`
     @output = `rake stats`
-    puts @output
+
     render_output
   
   end

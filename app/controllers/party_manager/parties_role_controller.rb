@@ -223,10 +223,11 @@ def list_parties_roles
 		session[:parties_roles_page] = nil
 	end
 
-	list_query = "@parties_role_pages = Paginator.new self, PartiesRole.count, @@page_size,@current_page
-	 @parties_roles = PartiesRole.find(:all,
-				 :limit => @parties_role_pages.items_per_page,
-				 :offset => @parties_role_pages.current.offset)"
+	# list_query = "@parties_role_pages = Paginator.new self, PartiesRole.count, @@page_size,@current_page
+	#  @parties_roles = PartiesRole.find(:all,
+	# 			 :limit => @parties_role_pages.items_per_page,
+	# 			 :offset => @parties_role_pages.current.offset)"
+	list_query = "@parties_roles = PartiesRole.find(:all, :order => 'party_name')"
 	session[:query] = list_query
 	render_list_parties_roles
 end
@@ -243,11 +244,11 @@ def render_list_parties_roles
       <% grid.caption    = 'list of all parties_roles' %>
       <% @header_content = grid.build_grid_data %>
 
-      <% @pagination = pagination_links(@parties_role_pages) if @parties_role_pages != nil %>
+      <%# @pagination = pagination_links(@parties_role_pages) if @parties_role_pages != nil %>
       <%= grid.render_html %>
       <%= grid.render_grid %>
       }, :layout => 'content'
-    end
+end
  
 def search_parties_roles_flat
 	return if authorise_for_web('parties_role','read')== false
@@ -420,7 +421,7 @@ def parties_role_party_type_name_changed
 	render :inline => %{
 
 		<%val = select('parties_role','party_name',@party_names)
-            puts val
+
             return val %>
 		}
 
@@ -461,6 +462,44 @@ def parties_role_party_name_search_combo_changed
 		}
 
 end
+
+  def rename_party
+    @party = Party.find(params[:id])
+    @party.new_name = @party.party_name
+    if 'PERSON' == @party.party_type_name
+      person = Person.find_by_party_id(params[:id])
+      @party.new_first_name = person.first_name
+      @party.new_last_name  = person.last_name
+    end
+    render_rename_party
+  end
+
+  def render_rename_party
+    render :inline => %{
+      <% @content_header_caption = "'rename party'"%>
+
+      <%= build_rename_party_form(@party,'save_new_party_name','save_new_party_name',true)%>
+
+      }, :layout => 'content'
+  end
+
+  def save_new_party_name
+    @party = Party.find(params[:party][:id])
+    if Party.rename_party(@party.party_name, params[:party])
+      @parties = eval(session[:query])
+      if 'PERSON' == @party.party_type_name
+        flash[:notice] = 'Person and party renamed'
+      else
+        flash[:notice] = "Organisation and party renamed. <br>NB. The organisation's medium and long descriptions have not been changed."
+      end
+      redirect_to_last_grid
+#      list_parties
+    else
+      render_rename_party
+    end
+  rescue
+    handle_error('record could not be saved')
+  end
 
 
 
