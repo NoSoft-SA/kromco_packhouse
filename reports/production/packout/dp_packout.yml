@@ -1,0 +1,100 @@
+query: select * from vw_dp_packout WHERE(line_code={line_code} and start_date_time={start_date_time} and production_run_code={production_run_code} and season={season} and kg_forward={kg_forward} and kg_backward={kg_backward} and rebins_weight={rebins_weight} and bins_tipped_weight={bins_tipped_weight} and size_code={size_code} and treatment_code={treatment_code} and ripe_point_code={ripe_point_code} and track_indicator_code={track_indicator_code} and product_class_code={product_class_code} and commodity_code={commodity_code} and farm_code={farm_code} and farm_group_code={farm_group_code}  )
+main_table_name: production_runs
+fields:
+ field1:
+  field_name: start_date_time
+  caption: from_datetime
+  field_type: daterange
+ field2:
+  field_name: commodity_code
+  caption: commodity_code
+  field_type: lookup
+  list: "select commodity_description_short from commodities order by commodity_description_short"
+ field3:
+  field_name: target_market_code
+  caption: target_market_code
+  field_type: lookup
+  list: "select target_market_code from target_markets order by target_market_code"
+ field4:
+  field_name: variety_short_long
+  caption: variety_short_long
+  field_type: lookup
+  list: "select distinct variety_short_long from cartons order by variety_short_long"
+ field5:
+  field_name: grade_code
+  caption: grade_code
+  field_type: lookup
+  list: "select grade_code from grades order by grade_code"
+ field6:
+  field_name: old_pack_code
+  caption: old_pack_code
+  field_type: lookup
+  list: "select old_pack_code from old_packs order by  old_pack_code"
+ field7:
+  field_name: qc_status_code
+  caption: qc_status_code
+  field_type: lookup
+  list: "select distinct qc_status_code from qc_status order by qc_status_code" 
+ field8:
+  field_name: inventory_code
+  caption: inventory_code
+  field_type: lookup
+  list: "select inv_code from vw_inv_code order by inv_code" 
+ field9:
+  field_name: farm_code
+  caption: farm_code
+  field_type: lookup
+  list: "select farm_code from farms order by farm_code"
+ field10:
+  field_name: organization_code
+  caption: organization_code
+  field_type: lookup
+  list: "select party_name from parties_roles where role_name ='MARKETER'  order by party_name" 
+ field11:
+  field_name: season_code
+  caption: season_code
+  field_type: lookup
+  list: " select distinct season from seasons order by season" 
+ field12:
+  field_name: qc_result_status
+  caption: qc_result_status
+  field_type: lookup
+  list: "select distinct qc_result_status from qc_status order by qc_result_status" 
+ field13:
+  field_name: user_name
+  caption: user_name
+  field_type: lookup
+  list: "select user_name from users order by user_name"
+ field14:
+  field_name: shift_type_code
+  caption: shift_type_code
+  field_type: lookup
+  list: "select shift_type_code from shift_types order by shift_type_code"
+ field15:
+  field_name: shift_calendar_date
+  caption: shift_calendar_date
+  field_type: daterange
+ field16:
+  field_name: shipped_date_time
+  caption: shipped_date_time
+  field_type: daterange
+ field17:
+  field_name:  line_type
+  caption: line_type
+  field_type: lookup
+  list: "select distinct status_code from statuses where status_type_code = 'line_type' order by status_code"    
+ field18:
+   field_name: track_indicator_code
+   caption: track_indicator_code
+   field_type: lookup
+   list: "select track_indicator_code from track_indicators order by track_indicator_code asc"  
+ field19:
+   field_name: basic_pack_code
+   caption: basic_pack_code
+   field_type: lookup
+   list: "select basic_pack_code from basic_packs order by basic_pack_code"
+ field20:
+   field_name: vessel_code
+   caption: vessel_code
+   field_type: lookup
+   list: "select vessel_code from vessels order by vessel_code"   
