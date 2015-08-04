@@ -1,2 +1,0 @@
-query: select * from vwproduction_cull_analysis_by_production_run_code_pre2012 WHERE( production_run_code={production_run_code})
-main_table_name: cull_analysis_detail

@@ -1,7 +1,0 @@
-query: select * FROM bin_staging_errors where (created_at={created_at})
-main_table_name: bin_staging_errors
-fields:
- field1:
-  field_name: created_at
-  caption: created_at
-  field_type: daterange

@@ -1,1 +1,0 @@
-query: select * from bin_orders WHERE(bin_order_number={bin_order_number})

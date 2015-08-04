@@ -1,8 +1,0 @@
-query: select * from rw_receipt_bins_histories WHERE (bin_number={bin_number} and orchard_code={orchard_code} and created_on={created_on} and rw_run_name={rw_run_name} and season_code={season_code} and farm_code={farm_code} and rmt_product_code={rmt_product_code} and rmt_product_code={rmt_product_code} and pack_material_product_code={pack_material_product_code} and production_run_rebin_code={production_run_rebin_code} and  production_run_tipped_code={production_run_tipped_code} and  track_indicator_code1={ track_indicator_code1} and track_indicator_code2={track_indicator_code2})
-main_table_name: rw_receipt_bins
-fields:
- field1:
-  field_name:  season_code
-  caption: season_code
-  field_type: lookup
-  list: "select season_code from seasons order by season_code desc"

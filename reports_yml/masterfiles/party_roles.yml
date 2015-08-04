@@ -1,2 +1,0 @@
-query: select * from parties_roles WHERE(party_name={party_name} and role_name={role_name})
-main_table_name: parties_roles

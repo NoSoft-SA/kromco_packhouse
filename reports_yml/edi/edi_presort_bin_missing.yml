@@ -1,2 +1,0 @@
-query: select * FROM vw_edi_presort_bin where (bin_number={bin_number})
-main_table_name: presort_logs

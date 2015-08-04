@@ -1,7 +1,0 @@
-query: select * from program_functions where (is_non_web_program={is_non_web_program} and disabled={disabled} and id={id} and program_id={program_id} and created_on={created_on} and name={name} and description={description} and display_name={display_name} and program_name={program_name} and functional_area_name={functional_area_name} and class_name={class_name}  )
-main_table_name: program_functions
-fields:
-  field1:
-   field_name: name
-   caption: name
-   field_type: text
