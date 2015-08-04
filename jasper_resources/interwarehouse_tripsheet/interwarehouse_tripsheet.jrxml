@@ -1,0 +1,323 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.0.0.final using JasperReports Library version 6.0.0  -->
+<!-- 2015-03-24T11:19:57 -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="dispatch_consignment" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="70e73aff-12a4-45cb-8f1e-bb99e1d9cfff">
+	<property name="ireport.zoom" value="2.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<property name="ireport.jasperserver.reportUnit" value="/reports/MES/FG/interwarehouse_tripsheet"/>
+	<property name="ireport.jasperserver.url" value="http://172.16.16.40/jasperserver-pro/"/>
+	<property name="ireport.jasperserver.user" value="jasperadmin"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/MES/FG/interwarehouse_tripsheet_files/MainJrxml"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Kromcomes_live"/>
+	<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<style name="table">
+		<box>
+			<pen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table_TH" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table_CH" mode="Opaque" backcolor="#FFBFBF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["C:\\Documents and Settings\\gerritf\\My Documents\\Reports\\jasper\\fg\\dispatch\\"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="vehicle_job_number" class="java.lang.String"/>
+	<queryString language="SQL">
+		<![CDATA[SELECT vehicles.vehicle_code, vehicle_jobs.planned_location, vehicle_jobs.vehicle_job_number, 
+ pallets.organization_code, pallets.target_market_code, pallets.pick_reference_code, pallets.pallet_format_product_code, pallets.qc_result_status, 
+ pallets.carton_quantity_actual, marks.brand_code, pallets.old_pack_code, pallets.fg_product_code, cast(vehicle_job_units.unit_reference_id as varchar(20))
+ FROM   vehicle_job_units vehicle_job_units 
+ INNER JOIN vehicle_jobs vehicle_jobs ON vehicle_job_units.vehicle_job_id=vehicle_jobs.id
+  INNER JOIN pallets pallets ON vehicle_job_units.unit_reference_id=pallets.pallet_number 
+  LEFT OUTER JOIN marks marks ON pallets.carton_mark_code=marks.mark_code
+   INNER JOIN vehicles  ON vehicle_jobs.vehicle_id=vehicles.id
+ WHERE  vehicle_jobs.vehicle_job_number= $P{vehicle_job_number} 
+ ORDER BY pallets.organization_code, pallets.target_market_code, pallets.pallet_format_product_code]]>
+	</queryString>
+	<field name="vehicle_code" class="java.lang.String"/>
+	<field name="planned_location" class="java.lang.String"/>
+	<field name="vehicle_job_number" class="java.lang.String"/>
+	<field name="organization_code" class="java.lang.String"/>
+	<field name="target_market_code" class="java.lang.String"/>
+	<field name="pick_reference_code" class="java.lang.String"/>
+	<field name="pallet_format_product_code" class="java.lang.String"/>
+	<field name="qc_result_status" class="java.lang.String"/>
+	<field name="carton_quantity_actual" class="java.lang.Integer"/>
+	<field name="brand_code" class="java.lang.String"/>
+	<field name="old_pack_code" class="java.lang.String"/>
+	<field name="fg_product_code" class="java.lang.String"/>
+	<field name="unit_reference_id" class="java.lang.String"/>
+	<variable name="carton_quantity_actual1" class="java.lang.Integer" resetType="Page" calculation="Sum">
+		<variableExpression><![CDATA[$F{carton_quantity_actual}]]></variableExpression>
+	</variable>
+	<variable name="unit_reference_id1" class="java.lang.Integer" resetType="Page" calculation="DistinctCount">
+		<variableExpression><![CDATA[$F{unit_reference_id}]]></variableExpression>
+	</variable>
+	<group name="org">
+		<groupExpression><![CDATA[$F{organization_code}]]></groupExpression>
+		<groupHeader>
+			<band height="17"/>
+		</groupHeader>
+	</group>
+	<group name="TM">
+		<groupExpression><![CDATA[$F{target_market_code}]]></groupExpression>
+		<groupHeader>
+			<band height="17">
+				<textField>
+					<reportElement x="130" y="1" width="167" height="14" uuid="9d59f12a-57b5-427a-af9e-e90e5e0e2bd5"/>
+					<textElement>
+						<font isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{target_market_code}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="100" y="1" width="30" height="15" uuid="1b284fc1-06dc-4184-96d0-ee60b3feb2fb"/>
+					<textElement>
+						<font isBold="true"/>
+					</textElement>
+					<text><![CDATA[TM:]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="0" y="1" width="30" height="15" uuid="fdf4bdad-3e0e-43f2-bb09-829b5327885f"/>
+					<textElement>
+						<font isBold="true"/>
+					</textElement>
+					<text><![CDATA[Org:]]></text>
+				</staticText>
+				<textField>
+					<reportElement x="30" y="1" width="70" height="15" uuid="7325d5fb-9369-4010-8b69-30e9ddaea51f"/>
+					<textElement>
+						<font isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{organization_code}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="92" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="555" height="26" uuid="ac2b8ca2-a72f-4dad-83cf-09db0e5a0f20"/>
+				<textElement textAlignment="Center">
+					<font size="16" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Inter Warehouse Report]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="481" y="0" width="56" height="20" uuid="5ad2a29c-7011-4443-a5bb-64c585796100"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="537" y="0" width="18" height="20" uuid="d8b63974-3ffa-4404-9ea2-3f58ba6d65c4"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy h:mm a">
+				<reportElement x="450" y="20" width="101" height="13" uuid="2ce47893-f97c-4ace-b58e-638066130b75"/>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="404" y="20" width="46" height="12" isPrintWhenDetailOverflows="true" uuid="2bb2386b-4677-4dd2-b9b1-d8f932b205c0"/>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Print Date:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="50" y="40" width="88" height="18" uuid="d5743556-a8c7-433e-8347-de69ee85998a"/>
+				<textFieldExpression><![CDATA[$F{vehicle_code}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="40" width="50" height="18" uuid="0c99f3a8-2f68-48fd-958a-1f91d489f21f"/>
+				<text><![CDATA[Vehicle ID:]]></text>
+			</staticText>
+			<line>
+				<reportElement x="0" y="33" width="801" height="1" uuid="85f07827-fc80-4e05-9060-eaa80ca86536"/>
+			</line>
+			<line>
+				<reportElement x="-1" y="80" width="799" height="1" uuid="fc7af0bf-6e6c-4d4f-800b-de12da0005ce"/>
+			</line>
+			<staticText>
+				<reportElement x="180" y="40" width="50" height="18" uuid="c8bc470f-be75-4429-be8f-e9aa3c926c02"/>
+				<text><![CDATA[Tripsheet:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="630" y="40" width="60" height="18" uuid="1ba50e99-1433-47c7-81f5-54cd748e6108"/>
+				<text><![CDATA[Destination:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="690" y="40" width="108" height="18" uuid="ba206753-7b6e-49b5-956a-8181ba6abd19"/>
+				<textFieldExpression><![CDATA[$F{planned_location}]]></textFieldExpression>
+			</textField>
+			<componentElement>
+				<reportElement x="230" y="40" width="350" height="40" uuid="83bc9656-05fd-4add-87a5-1c13dd54f7dc"/>
+				<jr:Code39 xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
+					<jr:codeExpression><![CDATA[$F{vehicle_job_number}]]></jr:codeExpression>
+				</jr:Code39>
+			</componentElement>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="17" splitType="Stretch">
+			<property name="local_mesure_unitheight" value="pixel"/>
+			<property name="com.jaspersoft.studio.unit.height" value="px"/>
+			<staticText>
+				<reportElement x="0" y="-1" width="120" height="15" uuid="58b221a5-0998-4811-8d0f-096b64666795"/>
+				<text><![CDATA[Pallet]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="120" y="0" width="40" height="14" uuid="0d59392c-8a18-442c-b9a1-ce6c569d89cc">
+					<property name="local_mesure_unitheight" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<text><![CDATA[Pick Ref]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="160" y="0" width="60" height="14" uuid="92acd848-860f-4303-a1fc-5d9c87941404">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<text><![CDATA[Format]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="220" y="0" width="50" height="14" uuid="10043aa5-51a3-40e0-a467-56bdadb5bc8d"/>
+				<text><![CDATA[Inspect]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="430" y="-1" width="372" height="15" uuid="c035578d-a366-4d6d-b45d-ad6c572b52fe"/>
+				<text><![CDATA[FG Product]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="270" y="0" width="50" height="14" uuid="ea18efe9-9f24-4c02-9856-77f2b6d0fa0b"/>
+				<text><![CDATA[Quantity]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="320" y="0" width="50" height="14" uuid="8880e009-4b54-449e-bf06-050dff7e2e9d"/>
+				<text><![CDATA[Brand]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="370" y="-1" width="50" height="14" uuid="db6cc306-a147-49af-81c9-6d647261384e"/>
+				<text><![CDATA[Pack]]></text>
+			</staticText>
+		</band>
+	</pageHeader>
+	<detail>
+		<band height="17">
+			<textField>
+				<reportElement x="0" y="0" width="120" height="15" uuid="b3b669da-c4fe-4c15-93d6-a4a74c58483d"/>
+				<textFieldExpression><![CDATA[$F{unit_reference_id}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="120" y="0" width="40" height="15" uuid="65ef5b42-2520-4187-a2ea-51b6e6a2aca2"/>
+				<textFieldExpression><![CDATA[$F{pick_reference_code}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="160" y="0" width="60" height="15" uuid="92b0376b-8c26-4329-9932-279a4b7d7c69"/>
+				<textFieldExpression><![CDATA[$F{pallet_format_product_code}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="220" y="0" width="50" height="15" uuid="fcf9cc7e-8ea7-47da-b3a9-e973ae13af15"/>
+				<textFieldExpression><![CDATA[$F{qc_result_status}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="270" y="0" width="40" height="15" uuid="29d24dcc-317d-4816-b428-ed965540f573"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$F{carton_quantity_actual}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="319" y="0" width="52" height="15" uuid="04452b45-0f14-4d44-b2bb-1b6de0b6ca76"/>
+				<textFieldExpression><![CDATA[$F{brand_code}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="371" y="0" width="48" height="15" uuid="92a597f6-c558-4683-878b-963e5521d4a4"/>
+				<textFieldExpression><![CDATA[$F{old_pack_code}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="430" y="0" width="370" height="15" uuid="b4b7c8d3-1231-42f4-86ea-c1b01da8688e"/>
+				<textFieldExpression><![CDATA[$F{fg_product_code}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<lastPageFooter>
+		<band height="35">
+			<line>
+				<reportElement x="2" y="4" width="799" height="1" uuid="fb3ea5cb-be05-4105-8cb5-ed7dc88178da"/>
+			</line>
+			<textField>
+				<reportElement x="120" y="20" width="30" height="15" uuid="8b5cf7f7-be2a-4303-9cfe-3955ed6739ad"/>
+				<textElement textAlignment="Right">
+					<font isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{unit_reference_id1}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="20" width="60" height="15" uuid="ea9c031e-7435-47c8-9349-1f3e58f7a4ee"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Total:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="110" y="4" width="40" height="15" uuid="b28b14ea-db05-42bf-b63a-ec144407c6ca">
+					<property name="local_mesure_unitheight" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right">
+					<font isBold="true" isUnderline="false"/>
+				</textElement>
+				<text><![CDATA[Pallets]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="250" y="4" width="60" height="15" uuid="298c393f-cc59-4bd1-bba2-12fe2393e799">
+					<property name="local_mesure_unitheight" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right">
+					<font isBold="true" isUnderline="false"/>
+				</textElement>
+				<text><![CDATA[Cartons]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="270" y="20" width="40" height="15" uuid="3372f122-f797-4551-9469-05e19e029bb7"/>
+				<textElement textAlignment="Right">
+					<font isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{carton_quantity_actual1}]]></textFieldExpression>
+			</textField>
+		</band>
+	</lastPageFooter>
+	<summary>
+		<band splitType="Stretch"/>
+	</summary>
+</jasperReport>

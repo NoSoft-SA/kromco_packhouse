@@ -1,0 +1,12 @@
+query: select id, short_description, medium_description, long_description, receives_edi from organizations WHERE(short_description={short_description} and receives_edi={receives_edi}) order by short_description asc
+main_table_name: organizations
+fields:
+ field1:
+  field_name: short_description
+  caption: short_description
+  field_type: lookup
+  list: select short_description from organizations order by short_description asc
+ field2:
+  field_name: receives_edi
+  caption: receives_edi
+  field_type: checkbox  

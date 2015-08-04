@@ -1,0 +1,23 @@
+query: select bin_orders.id, bin_orders.created_on, bin_orders.bin_order_number, bin_orders.status, bin_orders.created_by, bin_orders.updated_by, parties_roles.party_name from bin_orders INNER JOIN parties_roles  ON (bin_orders.trading_partner_party_role_id=parties_roles.id) WHERE (created_on={created_on} and bin_order_number={bin_order_number} and status={status} AND party_name={party_name}) 
+main_table_name: bin_orders
+fields:
+ field1:
+  field_name: created_on
+  caption: created_on
+  field_type: daterange
+ field2:
+  field_name:  bin_order_number
+  caption: bin_order_number
+  field_type: lookup
+  list: "select bin_order_number from bin_orders order by bin_order_number"
+ field3:
+  field_name:  status
+  caption: status
+  field_type: lookup
+  list: "select distinct status_code from statuses where status_type_code = 'bin_order' order by status_code"
+ field4:
+  field_name:  party_name
+  caption: party_name
+  field_type: lookup
+  list: "select distinct party_name from parties_roles where role_name = 'TRADING PARTNER' order by party_name"  
+  

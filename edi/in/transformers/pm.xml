@@ -11,7 +11,7 @@
         <field name="version_number" size="10" required="false" />
       </fields>
       <children>
-    <record name="pallet_movement" identifier="PM" size="443" occurence="1..n" >
+    <record name="pallet_movement" identifier="PM" size="542" occurence="1..n" >
       <fields>
         <field name="record_type" size="2" default="PM" />
         <field name="load_id" size="10" required="false" />
@@ -94,6 +94,18 @@
         <field name="tran_time" size="8" format="HMS" required="false" />
         <field name="tran_date" size="6" format="DATE" required="false" />
         <field name="download" size="1" required="false" />
+        <field name="production_id" size="20" required="false" />		
+        <field name="protocol_exception_indicator" size="2" required="false" />
+        <field name="inspector" size="4" required="false" />	
+        <field name="re_inspection_flag" size="1" required="false" />	
+        <field name="re_inspection_date" size="8" required="false" format="DATE" />
+        <field name="re_inspection_time" size="5" required="false" format="HMS" />	
+        <field name="re_inspection_point" size="4" required="false" />	
+        <field name="re_inspection_report" size="10" required="false" />	
+        <field name="re_inspection_target_region" size="5" required="false" />	
+        <field name="re_inspection_country" size="2" required="false" />	
+        <field name="upn" size="25" required="false" />	
+        <field name="orchard" size="15" required="false" />			
         </fields>
     </record>
       </children>

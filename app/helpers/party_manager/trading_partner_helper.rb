@@ -15,6 +15,8 @@ module PartyManager::TradingPartnerHelper
 	target_market_codes.unshift("<empty>")
   marketers=User.find_by_sql("select id,users.user_name from users where department_name='Marketing' order by user_name desc").map{|g|[g.user_name,g.id]}
   marketers.unshift("<empty>")
+  dfpt_levy_type_codes = DfptLevyType.find_by_sql('select distinct id,dfpt_levy_type_code from dfpt_levy_types order by dfpt_levy_type_code desc').map{|g|[g.dfpt_levy_type_code,g.id]}
+  dfpt_levy_type_codes.unshift("<empty>")
   if trading_partner
     if trading_partner.parties_role_id
       parties_role = PartiesRole.find(trading_partner.parties_role_id)
@@ -77,6 +79,10 @@ module PartyManager::TradingPartnerHelper
 	field_configs << {:field_type => 'DropDownField',
 						:field_name => 'target_market_id',
 						:settings => {:list => target_market_codes, :label_caption=>'target market code'}}
+						
+	field_configs << {:field_type => 'DropDownField',
+						:field_name => 'dfpt_levy_type_id',
+						:settings => {:list => dfpt_levy_type_codes, :label_caption=>'dfpt levy type code'}}						
 
     field_configs << {:field_type => 'DropDownField',
     						:field_name => 'marketer_user_id',
@@ -129,6 +135,7 @@ end
   column_configs << {:field_type => 'text',:field_name => 'party'}
   column_configs << {:field_type => 'text',:field_name => 'incoterm_code'}
   column_configs << {:field_type => 'text',:field_name => 'target_market_code'}
+  column_configs << {:field_type => 'text',:field_name => 'dfpt_levy_type_code'}  
   column_configs << {:field_type => 'text',:field_name => 'marketer'}
   column_configs << {:field_type => 'text',:field_name => 'contact_name'}
   column_configs << {:field_type => 'text',:field_name => 'active'}

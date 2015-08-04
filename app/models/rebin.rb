@@ -36,8 +36,15 @@ class Rebin
      #default & for NON DP
      track_slms_indicator_rec = TrackSlmsIndicator.find_by_track_slms_indicator_code(rebin_link.rebin_template.track_indicator_code)
 
+     RAILS_DEFAULT_LOGGER.info("NAE PROBLEM rebin_link.rebin_template.track_indicator_code " + rebin_link.rebin_template.track_indicator_code)
+
      if is_dp_line && run.track_indicator_id
-       track_slms_indicator_rec = TrackSlmsIndicator.find(run.track_indicator_id)
+	run_track_indicator_rec = TrackIndicator.find(run.track_indicator_id)
+	run_track_indicator_code = run_track_indicator_rec.track_indicator_code
+	     
+     RAILS_DEFAULT_LOGGER.info("NAE PROBLEM run_track_indicator_code " + run_track_indicator_code)
+     
+       track_slms_indicator_rec = TrackSlmsIndicator.find_by_track_slms_indicator_code(run_track_indicator_code)
      end
 
      if  track_slms_indicator_rec == nil
@@ -71,12 +78,21 @@ class Rebin
     rebin.rebin_date_time = Time.now()
     pack_material_product = PackMaterialProduct.find_by_pack_material_product_code(rebin_link.rebin_template.product_code_pm_bintype)
     rebin.pack_material_product_id = pack_material_product.id
+
+    #default & for non DP
     rebin.rebin_track_indicator_code =  rebin_link.rebin_template.track_indicator_code
+    rebin.orchard_code = rebin_link.production_run.farm_code + "_" + template.track_indicator_code
+
+    if is_dp_line # NAE 2015-02-17
+       rebin.rebin_track_indicator_code =  run_track_indicator_code
+       rebin.orchard_code = rebin_link.production_run.farm_code + "_" + run_track_indicator_code
+    end
+    
     rebin.season_code = rebin_link.production_run.production_schedule.season_code
     rebin.print_number = unique_num
     rebin.rebin_status = "not printed"
     #run.getFarm_code() + "_" + rebin_template.getTrack_indicator_code ();
-    rebin.orchard_code = rebin_link.production_run.farm_code + "_" + template.track_indicator_code
+
     shift = Shift.current_shift?(rebin_link.line_code)
 
     #if shift == nil

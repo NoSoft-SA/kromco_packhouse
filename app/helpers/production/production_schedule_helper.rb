@@ -110,11 +110,19 @@ module Production::ProductionScheduleHelper
 	 product_class_codes = ProductClass.find_by_sql('select distinct product_class_code from product_classes').map{|g|[g.product_class_code]}
 	 product_class_codes.unshift("<empty>")
 	 
+	 #NAE 2015-05-14 add treatment_codes dropdown
+	 treatment_codes = Treatment.find_by_sql('select distinct treatment_code from treatments').map{|g|[g.treatment_code]}
+	 treatment_codes.unshift("<empty>")
+	 
 	 production_schedule.class_code = production_schedule.rmt_setup.product_class_code
 	 production_schedule.ripe_point_code = production_schedule.rmt_setup.ripe_point_code
 	 production_schedule.size_code = production_schedule.rmt_setup.size_code 
 	 production_schedule.rmt_type = production_schedule.rmt_setup.rmt_product.rmt_product_type_code
 	 production_schedule.source_rmt_product = production_schedule.rmt_setup.rmt_product.rmt_product_code
+	 
+	 #NAE 2015-05-14 add treatment_codes dropdown
+         production_schedule.treatment_code = production_schedule.rmt_setup.rmt_product.treatment_code
+	 
 	 query = "SELECT 
              public.pack_material_products.pack_material_product_code
              FROM
@@ -157,6 +165,10 @@ module Production::ProductionScheduleHelper
 	 field_configs[field_configs.length()] =  {:field_type => 'DropDownField',
 						:field_name => 'bin_type',
 						:settings => {:list => bin_types}}
+	#NAE 2015-05-14 add treatment_codes dropdown
+	 field_configs[field_configs.length()] =  {:field_type => 'DropDownField',
+						:field_name => 'treatment_code',
+						:settings => {:list => treatment_codes}}						
 																
 	end
 	

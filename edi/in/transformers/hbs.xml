@@ -20,6 +20,7 @@
         <field name="season" size="6" default="Season" />
         <field name="farm_id" size="7" default="Farm_ID" />
         <field name="farmsubgroup" size="12" default="FarmSubGroup" />
+        <field name="product_code" size="50" default="Product_Code" />	
       </fields>
     </record>
     <record name="hansa_bin_sales" identifier="HBS" size="0" occurence="1..n">
@@ -41,6 +42,7 @@
         <field name="season" size="6" />
         <field name="farm_id" size="7" />
         <field name="farmsubgroup" size="12" />
+        <field name="product_code" size="50" />	
       </fields>
     </record>
   </sequence>

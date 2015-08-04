@@ -1,0 +1,33 @@
+query: select rmt_products.id,rmt_products.rmt_product_code,count(bins.rmt_product_id) as available_quantity,rmt_products.commodity_code,rmt_products.variety_code,rmt_products.product_class_code,rmt_products.size_code from bins INNER JOIN rmt_products ON bins.rmt_product_id =rmt_products.id INNER JOIN stock_items ON stock_items.inventory_reference =bins.bin_number INNER JOIN farms ON bins.farm_id = farms.id WHERE ((stock_items.destroyed = FALSE OR stock_items.destroyed is null)  AND bins.bin_order_load_detail_id IS NULL AND rmt_products.rmt_product_code={rmt_products.rmt_product_code} AND rmt_products.commodity_code={rmt_products.commodity_code}AND rmt_products.variety_code={rmt_products.variety_code} AND rmt_products.product_class_code={rmt_products.product_class_code} AND rmt_products.size_code={rmt_products.size_code} AND rmt_products.size_code={rmt_products.size_code} AND farms.farm_code={farms.farm_code} AND stock_items.location_code={stock_items.location_code}) GROUP BY bins.rmt_product_id,rmt_products.rmt_product_code,rmt_products.commodity_code,rmt_products.variety_code,rmt_products.product_class_code,rmt_products.size_code,rmt_products.id
+main_table_name: rmt_products
+default_report_index_group_name: System
+
+fields:
+  field1:
+   field_name: rmt_products.rmt_product_code
+   caption: rmt_product_code
+   field_type: text
+  field2:
+   field_name: rmt_products.commodity_code
+   caption: commodity_code
+   field_type: text
+  field3:
+   field_name: rmt_products.variety_code
+   caption: variety_code
+   field_type: text
+  field4:
+   field_name: rmt_products.product_class_code
+   caption: product_class_code
+   field_type: text
+  field5:
+   field_name: rmt_products.size_code
+   caption: size_code
+   field_type: text
+  field6:
+   field_name: farms.farm_code
+   caption: farm_code
+   field_type: text
+  field7:
+   field_name: stock_items.location_code
+   caption: location_code
+   field_type: text

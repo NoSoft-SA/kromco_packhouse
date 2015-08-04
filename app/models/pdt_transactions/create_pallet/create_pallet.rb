@@ -74,13 +74,11 @@ class CreatePallet < PDTTransaction
 
           
           pallet.load_detail_id = source_pallet.load_detail_id
-
-          if pallet.organization_code == "TI"
-            pallet.consignment_note_number = source_pallet.consignment_note_number
-          end
-
+	  pallet.is_depot_pallet = source_pallet.is_depot_pallet
+	  if pallet.organization_code == "TI"||pallet.is_depot_pallet.to_s.upcase == "TRUE"
+             pallet.consignment_note_number = source_pallet.consignment_note_number
+	  end
           pallet.ppecb_inspection_id = source_pallet.ppecb_inspection_id
-          pallet.is_depot_pallet = source_pallet.is_depot_pallet
           pallet.zero_printed_carton_labels = source_pallet.zero_printed_carton_labels
 
           pallet.update
@@ -88,6 +86,8 @@ class CreatePallet < PDTTransaction
 
 
           @carton.update
+
+
 
           stock_item = StockItem.find_by_inventory_reference(source_pallet.pallet_number)
           raise "source pallet not yet on stock" if ! stock_item

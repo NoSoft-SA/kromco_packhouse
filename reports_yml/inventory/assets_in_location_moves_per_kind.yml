@@ -1,0 +1,22 @@
+query: select asset_items.id,asset_items.asset_number, inventory_transactions.location_from, inventory_transactions.location_to, transaction_business_names.transaction_business_name_code, sum(inventory_transactions.transaction_quantity_plus) as qty_plus, sum(inventory_transactions.transaction_quantity_minus) as qty_minus FROM inventory_transactions JOIN inventory_transaction_assets ON inventory_transactions.id = inventory_transaction_assets.inventory_transaction_id JOIN asset_items ON asset_items.id=inventory_transaction_assets.asset_item_id JOIN transaction_business_names ON transaction_business_names.id = inventory_transactions.transaction_business_name_id WHERE  (inventory_transaction_assets.created_on={inventory_transaction_assets.created_on} and (inventory_transactions.location_from={inventory_transactions.location_from} or  inventory_transactions.location_to={inventory_transactions.location_to}) and asset_items.asset_number={asset_items.asset_number}) group by  asset_items.id,asset_items.asset_number, inventory_transactions.location_from, inventory_transactions.location_to, transaction_business_names.transaction_business_name_code ORDER BY asset_items.id,asset_items.asset_number, inventory_transactions.location_from, inventory_transactions.location_to, transaction_business_names.transaction_business_name_code
+main_table_name: inventory_transactions
+fields: 
+ field1:
+  field_name: inventory_transaction_assets.created_on 
+  caption: transaction_date_time
+  field_type: daterange
+ field2:
+  field_name: inventory_transactions.location_from
+  caption: location_from
+  field_type: lookup
+  list: "select location_code from locations order by location_code"    
+ field3:
+  field_name: inventory_transactions.location_to
+  caption: location_to
+  field_type: lookup
+  list: "select location_code from locations order by location_code"     
+ field4:
+  field_name: asset_items.asset_number
+  caption: asset_number
+  field_type: lookup
+  list: "select asset_number from asset_items order by asset_number"       

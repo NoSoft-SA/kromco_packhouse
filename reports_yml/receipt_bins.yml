@@ -1,0 +1,156 @@
+query: select  * from vw_rw_receive_bins WHERE((rebin_status is null OR rebin_status ='printed' )AND  (exit_ref is null OR exit_ref <>'scrapped') and bin_number={bin_number} and  rmt_product_code={rmt_product_code}and delivery_number={delivery_number}and delivery_number_preprinted={delivery_number_preprinted} and tipped_date_time={tipped_date_time}and farm_code={farm_code}and production_run_rebin={production_run_rebin}and bin_receive_date_time={bin_receive_date_time}and rebin_status={rebin_status}and rebin_date_time={rebin_date_time}and user_name={user_name}and print_number={print_number}and exit_reference_date_time={exit_reference_date_time}and pack_material_product_code={pack_material_product_code}and exit_ref={exit_ref}and  rebin_track_indicator_code={rebin_track_indicator_code} and indicator_code1={indicator_code1} and indicator_code2={indicator_code2} and indicator_code3={indicator_code3} and indicator_code4={indicator_code4} and indicator_code5={indicator_code5}and production_run_tipped={production_run_tipped} and rmt_variety_code={rmt_variety_code}and season_code={season_code} and product_class_code={product_class_code}and location_code={location_code} and ripe_point_code={ripe_point_code}and size_code={size_code}and stock_type_code={stock_type_code} and sealed_ca_location_code={sealed_ca_location_code} and cold_store_type_code={cold_store_type_code}and created_on={created_on}and weight={weight} and status_code={status_code})
+main_table_name: bins
+default_report_index_group_name: System
+
+fields:
+  field1:
+   field_name: bin_number
+   caption: bin number
+   field_type: text
+  field2:
+   field_name: tipped_date_time
+   caption: tipped date time
+   field_type: daterange
+  field3:
+   field_name: bin_receive_date_time
+   caption: bin receive date time
+   field_type: daterange
+  field4:
+   field_name: delivery_number
+   caption: delivery number
+   field_type: text
+  field5:
+   field_name: delivery_number_preprinted
+   caption: delivery number preprinted
+   field_type: text
+  field6:
+     field_name: rmt_product_code
+     caption: rmt product code
+     field_type: lookup
+     list: "select rmt_product_code from rmt_products order by rmt_product_code asc"
+  field7:
+     field_name: farm_code
+     caption: farm code
+     field_type: text
+  field8:
+     field_name: production_run_rebin
+     caption: production run rebin
+     field_type: text
+  field9:
+   field_name:  pack_material_product_code
+   caption: pack material product code
+   field_type: lookup
+   list: "select pack_material_product_code FROM pack_material_products order by pack_material_product_code desc "
+  field10:
+   field_name: rebin_status
+   caption: rebin status
+   field_type: text
+  field11:
+   field_name: rebin_date_time
+   caption: rebin date time
+   field_type: daterange
+  field12:
+   field_name: user_name
+   caption: user name
+   field_type: text
+  field13:
+   field_name: print_number
+   caption: print number
+   field_type: text
+  field14:
+   field_name: exit_reference_date_time
+   caption: exit reference date time
+   field_type: daterange
+  field15:
+   field_name: indicator_code1
+   caption: track slms indicator1
+   field_type: lookup
+   list: "select track_slms_indicator_code from track_slms_indicators "
+  field16:
+   field_name: indicator_code2
+   caption: track slms indicator2
+   field_type: lookup
+   list: "select track_slms_indicator_code from track_slms_indicators "
+  field17:
+   field_name: indicator_code3
+   caption: track slms indicator3
+   field_type: lookup
+   list: "select track_slms_indicator_code from track_slms_indicators "
+  field18:
+   field_name: indicator_code4
+   caption: track slms indicator4
+   field_type: lookup
+   list: "select track_slms_indicator_code from track_slms_indicators "
+  field19:
+   field_name: indicator_code5
+   caption: track slms indicator5
+   field_type: lookup
+   list: "select track_slms_indicator_code from track_slms_indicators "
+  field20:
+   field_name: rebin_track_indicator_code
+   caption: rebin track indicator code
+   field_type: text
+  field21:
+   field_name: production_run_tipped
+   caption: production_run_tipped
+   field_type: text
+  field22:
+   field_name: rmt_variety_code
+   caption: variety code
+   field_type: lookup
+   list: "select distinct variety_code from rmt_products order by variety_code asc"
+  field23:
+   field_name: season_code
+   caption: season code
+   field_type: lookup
+   list: "select distinct season_code from seasons order by season_code desc"   
+  field24:
+    field_name: exit_ref
+    caption: exit ref
+    field_type: text
+  field25:
+    field_name: product_class_code
+    caption: product class code
+    field_type: lookup
+    list: "select distinct product_class_code from rmt_products "
+  field26:
+    field_name: location_code
+    caption: location code
+    field_type: text
+  field27:
+    field_name: ripe_point_code
+    caption: ripe point code
+    field_type: lookup
+    list: "select distinct ripe_point_code from rmt_products"
+  field28:
+    field_name: size_code
+    caption: size code
+    field_type: lookup
+    list: "select distinct size_code from rmt_products"
+  field29:
+    field_name: stock_type_code
+    caption: stock type code
+    field_type: lookup
+    list: "select distinct stock_type_code from stock_items"
+  field30:
+    field_name: sealed_ca_location_code
+    caption: sealed ca location code
+    field_type: text
+  field31:
+    field_name: cold_store_type_code
+    caption: cold_store_type_code
+    field_type: lookup
+    list: "select distinct cold_store_type_code from ripe_points"
+  field32:
+    field_name: created_on
+    caption: created on
+    field_type: daterange
+  field33:
+    field_name: weight
+    caption: weight
+    field_type: text
+  field34:
+     field_name: status_code
+     caption: bin tip status
+     field_type: lookup
+     list: "select distinct status_code from statuses where status_type_code = 'bin_tip_status' order by status_code"

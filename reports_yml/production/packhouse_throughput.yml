@@ -1,0 +1,50 @@
+query: select start_date_time,     production_schedule_no,     line_no,     fruit_type_description,     r_m_t_description,     cultivar,     grower_id,     group_id,     class,     bins_tipped_qty,     bins_tipped_weight,     rebins_qty,     rebins_weight,     carton_qty,     carton_weight,     season,     actual_size_count_code,     old_pack_code,     eqv_cartons,     packout,  id from vw_packhouse_throughput WHERE (start_date_time={start_date_time} and production_schedule_no={production_schedule_no} and line_no={line_no} and fruit_type_description={fruit_type_description} and  r_m_t_description={r_m_t_description} and grower_id={grower_id} and group_id={group_id} and class={class} and old_pack_code={old_pack_code}  and season={season} )
+main_table_name: production_runs
+fields:
+ field1:
+  field_name: start_date_time
+  caption: start_date_time
+  field_type: daterange
+ field2:
+  field_name: production_schedule_no
+  caption: production_run_code
+  field_type: text
+ field3:
+   field_name: line_no
+   caption: line_code
+   field_type: lookup   
+   list: "select line_code from lines order by line_code asc"
+ field4:
+   field_name: fruit_type_description
+   caption: commodity
+   field_type: lookup
+   list: "select commodity_description_long from commodities order by commodity_description_long asc"
+ field5:
+   field_name: r_m_t_description
+   caption: track_indicator_description
+   field_type: lookup
+   list: "select description from track_indicators order by description asc"
+ field6:
+   field_name: grower_id
+   caption: farm
+   field_type: lookup
+   list: "select farm_code from farms order by farm_code asc"
+ field7:
+   field_name: group_id
+   caption: farm_group
+   field_type: lookup
+   list: "select farm_group_code from farm_groups order by farm_group_code asc"
+ field8:
+   field_name: class
+   caption: product_class_description
+   field_type: lookup
+   list: "select product_class_description from product_classes order by product_class_description asc"  
+ field9:
+   field_name: old_pack_code
+   caption: old_pack_code
+   field_type: text    
+ field10:
+   field_name: season
+   caption: season
+   field_type: lookup
+   list: "select distinct season from seasons order by season asc"  

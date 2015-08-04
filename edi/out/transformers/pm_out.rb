@@ -82,7 +82,7 @@ class PmOut < TextOutTransformer
                   cartons.puc, cartons.actual_size_count_code, pallets.pick_reference_code, cartons.gtin, cartons.sell_by_code,
                   pallets.pallet_number, cartons.organization_code, cartons.commodity_code, cartons.variety_short_long,
                   cartons.old_pack_code, cartons.grade_code, pallets.pt_product_characteristics, commodities.commodity_group_code,
-                  marketing_varieties.variety_group_code, marks.brand_code, pallet_bases.edi_out_pallet_base, pallets.cpp",
+                  marketing_varieties.variety_group_code, marks.brand_code, pallet_bases.edi_out_pallet_base, pallets.cpp,pallets.pallet_format_product_id",
                  :conditions => ["pallets.id = ?", insp_pallet.id]
                 ).map {|m| [(m.pallet_number.length < 10 ? m.pallet_number : m.pallet_number[-10, 9]), m, m.carton_count.to_i, ((m.carton_count.to_i / m.cpp.to_f) * 100).to_i, 1]}.sort_by {|p| p[0]}
 

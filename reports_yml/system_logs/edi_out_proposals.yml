@@ -1,0 +1,2 @@
+query: select * from edi_out_proposals where (id={id} and process_attempts={process_attempts} and created_on={created_on} and flow_type={flow_type} and record_map={record_map} and out_destination_dir={out_destination_dir} and transfer_mechanism={transfer_mechanism} and organization_code={organization_code} and hub_address={hub_address}  )
+main_table_name: edi_out_proposals

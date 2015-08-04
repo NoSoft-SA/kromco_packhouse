@@ -1,0 +1,7 @@
+query: SELECT intake_headers_productions.consignment_note_number,intake_headers_productions.organization_code,intake_headers_productions.id, intake_headers_productions.created_on FROM intake_headers_productions LEFT JOIN edi_out_process_histories ON (intake_headers_productions.id = edi_out_process_histories.record_id) LEFT OUTER JOIN edi_out_joiner_histories ON (edi_out_process_histories.edi_out_filename = edi_out_joiner_histories.edi_out_filename) where (intake_headers_productions.organization_code={intake_headers_productions.organization_code} and edi_out_process_histories.id IS NULL and intake_headers_productions.consignment_note_number={intake_headers_productions.consignment_note_number} and intake_headers_productions.created_on={intake_headers_productions.created_on} ) 
+main_table_name: edi_out_process_histories
+fields:
+ field1:
+  field_name: intake_headers_productions.created_on
+  caption: intake_headers_productions.created_on
+  field_type: daterange

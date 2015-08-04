@@ -424,7 +424,7 @@ class Fg::OrderProductController < ApplicationController
         render :inline => %{
                           <script>
                                 alert('order product deleted');
-                                window.parent.location.href = '/fg/order/edit_order/<%=  @order_id%>';
+                                parent.location.href = '/fg/order/edit_order/<%=  @order_id%>';
                         </script>}
       end
 

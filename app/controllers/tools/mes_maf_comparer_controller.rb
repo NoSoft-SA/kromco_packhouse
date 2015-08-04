@@ -20,14 +20,22 @@ class Tools::MesMafComparerController < ApplicationController
   end
 
   def pre_sorted_bins_created_mes_vs_maf_submit
+	  
 
-    mes_bins_created = Bin.find_by_sql("select vwbins.bin_number,vwbins.created_on from vwbins where stock_type_code = 'PRESORT' and vwbins.created_on BETWEEN '#{params['bin']['created_on_date2from']}' AND '#{params['bin']['created_on_date2to']}' order by vwbins.created_on ASC")
 
+    mes_bins_created = Bin.find_by_sql("select bin_number,bins.created_on from bins inner join stock_items on stock_items.inventory_reference = bins.bin_number where stock_type_code='PRESORT' and bins.created_on BETWEEN '#{params['bin']['created_on_date2from']}' AND '#{params['bin']['created_on_date2to']}' order by bins.created_on ASC")
+    
+    #mes_bins_created = Bin.find_by_sql("select vwbins.bin_number,vwbins.created_on from vwbins where stock_type_code = 'PRESORT' and vwbins.created_on BETWEEN '#{params['bin']['created_on_date2from']}' AND '#{params['bin']['created_on_date2to']}' order by vwbins.created_on ASC")
+    #nae = "select vwbins.bin_number,vwbins.created_on from vwbins where stock_type_code = 'PRESORT' and vwbins.created_on BETWEEN '#{params['bin']['created_on_date2from']}' AND '#{params['bin']['created_on_date2to']}' order by vwbins.created_on ASC"
+    #RAILS_DEFAULT_LOGGER.info ("NAE nae: " + nae.to_s)		
+    
     http = Net::HTTP.new(Globals.bin_created_mssql_server_host, Globals.bin_created_mssql_presort_server_port)
     request = Net::HTTP::Post.new("/select")
     parameters  = {'method' => 'select', 'statement' => Base64.encode64(" SELECT distinct [Numero_palox],[Finition],[Nom_article],[Palox_poids],[Code_variete] FROM [productionv50].[dbo].[ViewpaloxKromco]
-                  where  [Numero_palox] like '500%' and Presence_etiquette is not null
+                  where  ([Numero_palox] like '50%' or [Numero_palox] like '60%') and Presence_etiquette is not null
                   and Finition BETWEEN '#{params['bin']['created_on_date2from']}' AND '#{params['bin']['created_on_date2to']}'")}
+		  
+  
     no_decode = false
     request.set_form_data(parameters)
     response = http.request(request)

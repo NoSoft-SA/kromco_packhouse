@@ -214,12 +214,12 @@ module RmtProcessing::ForecastHelper
                                                          {:image => 'edit',
                                                           :target_action => 'edit_forecast',
                                                           :id_column => 'id'}}
-
-      column_configs[column_configs.length()] = {:field_type => 'action', :field_name => 'revise', :col_width => 35,
-                                               :settings =>
-                                                       {:image => 'revise',
-                                                        :target_action => 'revise_forecast',
-                                                        :id_column => 'id'}}
+     #NAE - remove revised hyperlink as not being used and according to ABK
+     # column_configs[column_configs.length()] = {:field_type => 'action', :field_name => 'revise', :col_width => 35,
+     #                                          :settings =>
+     #                                                  {:image => 'revise',
+     #                                                   :target_action => 'revise_forecast',
+     #                                                   :id_column => 'id'}}
     
       column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name => 'clone', :col_width => 35,
                                                :settings =>
@@ -282,12 +282,12 @@ module RmtProcessing::ForecastHelper
                                                        {:image => 'view',
                                                         :target_action => 'view_forecast',
                                                         :id_column => 'id'}}
-
-    column_configs[column_configs.length()] = {:field_type => 'action', :field_name => 'revise', :col_width => 35,
-                                               :settings =>
-                                                       {:image => 'revise',
-                                                        :target_action => 'revise_forecast',
-                                                        :id_column => 'id'}}
+     #NAE - remove revised hyperlink as not being used and according to ABK
+    #column_configs[column_configs.length()] = {:field_type => 'action', :field_name => 'revise', :col_width => 35,
+    #                                           :settings =>
+    #                                                   {:image => 'revise',
+    #                                                    :target_action => 'revise_forecast',
+    #                                                    :id_column => 'id'}}
 
     column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name => 'clone', :col_width => 35,
                                                :settings =>

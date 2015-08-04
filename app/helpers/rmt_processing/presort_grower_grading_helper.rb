@@ -164,7 +164,7 @@ module RmtProcessing::PresortGrowerGradingHelper
 
       field_configs[field_configs.length()] = {:field_type => 'LinkWindowField',:field_name => '',
                                              :settings   => {:host_and_port =>request.host_with_port.to_s,:target_action => 'crud_ps_bins',:link_text     => 'crud ps bins',
-                                                             :id_value      => presort_grower_grading.id  , :window_width =>1900,:window_height =>1200 }}
+                                                             :id_value      => presort_grower_grading.id  , :window_width =>1500,:window_height =>1200 }}
     field_configs[field_configs.length()] = {:field_type => 'LabelField', :field_name => 'du', :non_db_field => true, :settings => {:is_separator => false, :static_value => '', :css_class => "borderless_label_field"}}
 
       field_configs[field_configs.length()] = {:field_type => 'LinkWindowField',:field_name => '',

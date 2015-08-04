@@ -1,0 +1,13 @@
+query: select carton_setups.active,carton_setups.carton_setup_code,carton_setups.cloned_inventory_code,carton_setups.cloned_target_market_code,carton_setups.color_percentage,carton_setups.commodity_code,carton_setups.fg_product_code,carton_setups.fruit_sticker_code,carton_setups.grade_code,carton_setups.id,carton_setups.labels_and_templates_created,carton_setups.last_update_date_time,carton_setups.marketing_variety_code,carton_setups.order_number,carton_setups.order_quantity,carton_setups.order_quantity_produced,carton_setups.org,carton_setups.pack_order,carton_setups.product_class_code,carton_setups.production_schedule_code,carton_setups.production_schedule_id,carton_setups.sequence_number,carton_setups.standard_size_count_value,carton_setups.trade_env_code,carton_setups.treatment_code,carton_setups.treatment_type_code,fg_setups.extended_fg_code,fg_setups.fg_code_old,fg_setups.fg_mark_code,fg_setups.fg_product_code,fg_setups.fg_product_id,fg_setups.inventory_code,fg_setups.marketing_org,fg_setups.marking,fg_setups.remarks,fg_setups.retailer_org,fg_setups.retailer_sell_by_code,fg_setups.ri_diameter_range,fg_setups.ri_weight_range,fg_setups.target_market from carton_setups INNER JOIN fg_setups ON (fg_setups.carton_setup_id = carton_setups.id) WHERE (carton_setups.production_schedule_code={carton_setups.production_schedule_code} and carton_setups.active={carton_setups.active})
+main_table_name: carton_setups
+fields:
+  field1:
+   field_name: carton_setups.production_schedule_code.
+   caption: production_schedule_code
+   field_type: text
+  field2:
+     field_name: carton_setups.active
+     caption: active
+     field_type: lookup
+     list: "select distinct status_code from statuses where status_type_code = 'BOOLEAN' order by status_code"
+   

@@ -1,0 +1,33 @@
+query: select id, target_market_code,target_market_country_code,is_supermarket,target_market_name,target_market_region_code,sector_code,target_market_description from target_markets
+ WHERE(target_market_code={target_market_code} and target_market_country_code={target_market_country_code} and is_supermarket={is_supermarket} and target_market_name={target_market_name} and target_market_region_code={target_market_region_code} and sector_code={sector_code})
+main_table_name: target_markets
+fields:
+ field1:
+  field_name: target_market_code
+  caption: target_market_code
+  field_type: lookup
+  list: select target_market_code from target_markets
+ field2:
+  field_name: target_market_country_code
+  caption: target_market_country_code
+  field_type: lookup
+  list: select distinct target_market_country_code from target_markets order by target_market_country_code asc
+ field3:
+  field_name: is_supermarket
+  caption: is_supermarket
+  field_type: checkbox  
+ field4:
+  field_name: target_market_name
+  caption: target_market_name
+  field_type: lookup
+  list: select distinct target_market_name from target_markets order by target_market_name asc
+ field5:
+  field_name: target_market_region_code
+  caption: target_market_region_code
+  field_type: lookup
+  list: select distinct target_market_region_code from target_markets order by target_market_region_code asc
+ field6:
+  field_name: sector_code
+  caption: sector_code
+  field_type: lookup
+  list: select distinct sector_code from target_markets order by sector_code asc  

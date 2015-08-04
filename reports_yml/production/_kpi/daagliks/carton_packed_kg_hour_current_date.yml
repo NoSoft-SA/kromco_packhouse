@@ -1,0 +1,7 @@
+query: select  line_code, calendar_date, shift_hour, ctn_pack_kg_hour_pp, carton_fruit_nett_mass,carton_quantity, people_working_on_shift, machine_hours, clocked_hours, people_absent, people_off_sick, people_on_leave, id from vw_carton_packed_kg_hour_current_date WHERE( line_code={line_code} )
+main_table_name: cartons
+fields:
+ field1:
+  field_name: line_code
+  caption: line_code
+  field_type: text

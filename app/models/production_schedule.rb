@@ -6,7 +6,7 @@ class ProductionSchedule < ActiveRecord::Base
  
     attr_accessor :variety,:has_runs,:ripe_point_code,:class_code,:size_code,:rmt_type,:source_rmt_product,:bin_type,
                   :organization_marketing,:organization_retailer,:mark_retail_unit_description,
-                  :target_market_description
+                  :target_market_description,:treatment_code
 
   attr_writer :pc_code,:track_indicator_code
     
@@ -108,9 +108,9 @@ def create_from_template(new_schedule_data)
     # -> IF not existing, create new one
     # -> overwrite relevant rmt_setup fields
     #------------------------------------------------------------------------------
-    if self.size_code != self.rmt_setup.size_code||self.ripe_point_code != self.rmt_setup.ripe_point_code ||self.class_code != self.rmt_setup.product_class_code||self.rmt_type != self.rmt_setup.rmt_product.rmt_product_type_code
+    if self.size_code != self.rmt_setup.size_code||self.ripe_point_code != self.rmt_setup.ripe_point_code ||self.class_code != self.rmt_setup.product_class_code||self.rmt_type != self.rmt_setup.rmt_product.rmt_product_type_code||self.treatment_code != self.rmt_setup.treatment_code
       
-      rmt_product = RmtProduct.create_if_needed(self.rmt_type,self.rmt_setup.rmt_product.commodity_group_code,self.rmt_setup.commodity_code,self.rmt_setup.variety_code,self.size_code,self.class_code,self.ripe_point_code,self.rmt_setup.treatment_code,self.bin_type)
+      rmt_product = RmtProduct.create_if_needed(self.rmt_type,self.rmt_setup.rmt_product.commodity_group_code,self.rmt_setup.commodity_code,self.rmt_setup.variety_code,self.size_code,self.class_code,self.ripe_point_code,self.treatment_code,self.bin_type)
       rmt_product.export_attributes(new_rmt_setup)
       new_rmt_setup.rmt_product = rmt_product
      

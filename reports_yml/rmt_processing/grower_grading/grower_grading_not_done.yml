@@ -1,0 +1,23 @@
+query: select id,production_run_code,farm_code,commodity_code,track_slms_indicator_code from vwgrowergrading_notdone WHERE(season={season} and track_slms_indicator_code={track_slms_indicator_code} and farm_code={farm_code} and commodity_code={commodity_code})
+main_table_name: production_runs
+fields:
+ field1:
+  field_name:  season
+  caption: season
+  field_type: lookup
+  list: "select distinct season from seasons order by season desc"
+ field2:
+  field_name:  farm_code
+  caption: farm_code
+  field_type: lookup
+  list: "select distinct farm_code from farms order by farm_code asc"
+ field3:
+  field_name:  commodity_code
+  caption: commodity_code
+  field_type: lookup
+  list: "select distinct commodity_code from commodities order by commodity_code asc"  
+ field4:
+  field_name:  track_slms_indicator_code
+  caption: track_slms_indicator_code
+  field_type: lookup
+  list: "select distinct track_slms_indicator_code from track_slms_indicators where track_indicator_type_code='RMI' order by track_slms_indicator_code asc"  

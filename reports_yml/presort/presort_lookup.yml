@@ -1,0 +1,4 @@
+query: select farm_code||'_'||track_slms_indicator_code as lkp,farm_code , presort_staging_run_children.id,track_slms_indicator_code from presort_staging_run_children inner join farms on farms.id = presort_staging_run_children.farm_id inner join presort_staging_runs on presort_staging_runs.id = presort_staging_run_children.presort_staging_run_id inner join track_slms_indicators on track_slms_indicators.id = presort_staging_runs.track_slms_indicator_id where (presort_staging_run_child_code like '2014%') order by farm_code,track_slms_indicator_code asc 
+
+  
+  

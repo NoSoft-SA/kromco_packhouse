@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <in-map name="mffa" identifier_size="0" root_identifier="masterfile">
-  <record name="masterfile" identifier="masterfile" size="531" occurence="1..n">
+  <record name="masterfile" identifier="masterfile" size="700" occurence="1..n">
     <transformer>
       <action type="ruby" name="apply_masterfile_rec"/>
     </transformer>
@@ -24,7 +24,7 @@
       <field name="str2" size="40" required="false" />
       <field name="str3" size="40" required="false" />
       <field name="contact" size="30" required="false" />
-      <field name="orch_flg" size="1" />
+      <field name="orch_flg" size="1" required="false" default="N"/>
       <field name="phone" size="20" required="false" />
       <field name="fax" size="20" required="false" />
       <field name="furn" size="6" required="false" />
@@ -38,7 +38,7 @@
       <field name="depotcd1" size="7" required="false" />
       <field name="depotcd2" size="7" required="false" />
       <field name="fpnt" size="7" required="false" />
-      <field name="whitespace" size="68" required="false" />
+      <field name="whitespace" size="237" required="false" />
     </fields>
   </record>
 </in-map>

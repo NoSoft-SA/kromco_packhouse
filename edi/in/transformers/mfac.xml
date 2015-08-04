@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <in-map name="mfac" identifier_size="0" root_identifier="masterfile">
-  <record name="masterfile" identifier="masterfile" size="531" occurence="1..n">
+  <record name="masterfile" identifier="masterfile" size="700" occurence="1..n">
     <transformer>
       <action type="ruby" name="apply_masterfile_rec"/>
     </transformer>
@@ -35,7 +35,7 @@
       <field name="supno" size="6"  required="false" />
       <field name="title" size="5" required="false" />
       <field name="locn_id" size="3"  required="false" />
-      <field name="whitespace" size="304" required="false" />
+      <field name="whitespace" size="473" required="false" />
     </fields>
   </record>
 </in-map>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <in-map name="mfaf" identifier_size="0" root_identifier="masterfile">
-  <record name="masterfile" identifier="masterfile" size="531" occurence="1..n">
+  <record name="masterfile" identifier="masterfile" size="700" occurence="1..n">
     <transformer>
       <action type="ruby" name="apply_masterfile_rec"/>
     </transformer>
@@ -19,7 +19,7 @@
       <field name="date_strt" size="8" />
       <field name="farm" size="7" />
       <field name="supno" size="6" />
-      <field name="whitespace" size="462" required="false" />
+      <field name="whitespace" size="631" required="false" />
     </fields>
   </record>
 </in-map>

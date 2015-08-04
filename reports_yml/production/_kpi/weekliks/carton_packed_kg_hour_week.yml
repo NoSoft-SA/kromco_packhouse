@@ -1,0 +1,13 @@
+query: SELECT line_code, shift_type_code, year_iso, week_iso,ctn_pack_kg_hour_pp, people_working_on_shift_avg, carton_fruit_nett_mass, carton_quantity, clocked_hours, id FROM vw_carton_packed_kg_hour_week WHERE( line_code={line_code} and shift_type_code={shift_type_code})
+main_table_name: cartons
+fields:
+  field1:
+    field_name: line_code
+    caption: Line Code
+    field_type: lookup
+    list: select line_code from lines order by line_code
+  field2:
+    field_name: shift_type_code
+    caption: Day or Night
+    field_type: lookup
+    list: select shift_type_code from shift_types

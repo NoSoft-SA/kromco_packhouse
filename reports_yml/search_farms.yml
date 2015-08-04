@@ -1,0 +1,30 @@
+query: select farms.*, parties.party_name as farm_owner_code from farms LEFT OUTER JOIN parties_roles ON parties_roles.id=farms.farm_owner LEFT OUTER JOIN parties on parties.id=parties_roles.party_id WHERE(party_type_name={party_type_name} and party_name={party_name} and role_name={role_name} and farm_group_code={farm_group_code} and farm_code={farm_code}) order by farms.farm_code,farms.farm_description ASC
+main_table_name: farms
+default_report_index_group_name: System
+
+fields:
+  field1:
+   field_name: party_type_name
+   caption: party_type_name
+   field_type: lookup
+   list: select distinct party_type_name from farms
+  field2:
+   field_name: party_name
+   caption: party_name
+   field_type: lookup
+   list: select distinct party_name from farms
+  field3:
+   field_name: role_name
+   caption: role_name
+   field_type: lookup
+   list: select distinct role_name from farms
+  field4:
+   field_name: farm_group_code
+   caption: farm_group_code
+   field_type: lookup
+   list: select distinct farm_group_code from farms
+  field5:
+   field_name: farm_code
+   caption: farm_code
+   field_type: lookup
+   list: select distinct farm_code from farms

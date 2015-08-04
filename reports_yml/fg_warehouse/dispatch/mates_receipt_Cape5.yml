@@ -1,0 +1,32 @@
+query: select productgroup,     product,    variety,    count,    inventory,    puc,    packing,    class,    brand,    account,    quantity,    quantity_per_shipment_container,    pallet_number,    container from vw_mates_receipt_Cape5 where (order_number={order_number} and load_number={load_number} and pallet_number={pallet_number} and productgroup={productgroup} and variety={variety} and brand={brand} and packing={packing} and inventory={inventory} )
+main_table_name: orders
+fields:
+ field1:
+  field_name: pallet_number
+  caption: pallet_number
+  field_type: text 
+ field2:
+  field_name: productgroup
+  caption: commodity_code
+  field_type: lookup
+  list: "select commodity_code from commodities order by commodity_code"  
+ field3:
+  field_name: variety
+  caption: variety
+  field_type: lookup
+  list: "select distinct marketing_variety_code from marketing_varieties order by marketing_variety_code"
+ field4:
+  field_name: brand
+  caption: brand_code
+  field_type: lookup
+  list: "select distinct brand_code from marks order by brand_code"
+ field5:
+  field_name: packing
+  caption: old_pack_code
+  field_type: lookup
+  list: "select old_pack_code from old_packs order by  old_pack_code"
+ field6:
+  field_name: inventory
+  caption: inventory_code
+  field_type: lookup
+  list: "select inv_code from vw_inv_code order by inv_code" 

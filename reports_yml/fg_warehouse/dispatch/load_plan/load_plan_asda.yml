@@ -1,0 +1,6 @@
+query: select id,product,external_party_product_code,item_unit_pack_code,load_number,custom_pack_code,old_fg_code,pallet_number,size_ref,inventory_code,puc,egap,carton_quantity_actual,customer_order_number,container_code,vessel_code,diameter_range from vw_load_plan_asda where (vw_load_plan_asda.load_number={vw_load_plan_asda.load_number}) 
+fields:
+ field1:
+  field_name: vw_load_plan_asda.load_number
+  caption: load_number
+  field_type: text 

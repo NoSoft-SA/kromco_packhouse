@@ -1,0 +1,2 @@
+query: select pallets.id, pallets.pallet_number, cartons.carton_number, cartons.extended_fg_code, cartons.production_run_code,cartons.fg_code_old, cartons.season_code, cartons.variety_short_long from pallets inner join cartons on pallets.pallet_number = cartons.pallet_number where (pallets.pallet_number={pallets.pallet_number} and pallets.exit_ref = 'scrapped')
+main_table_name: pallets

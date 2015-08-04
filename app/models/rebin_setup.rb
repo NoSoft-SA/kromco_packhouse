@@ -120,9 +120,14 @@ class RebinSetup < ActiveRecord::Base
   #not exist, create it
   #-----------------------------------------------------------------------
   def set_rmt_product
-    
+    RAILS_DEFAULT_LOGGER.info("NAE PROBLEM self.production_schedule_code " + self.production_schedule_code)
     rmt_setup = RmtSetup.find_by_production_schedule_name(self.production_schedule_code)
+
+    if !rmt_setup
+	        RAILS_DEFAULT_LOGGER.info("NAE PROBLEM !rmt_setup " )    
+    end
     commodity = rmt_setup.commodity_code
+    RAILS_DEFAULT_LOGGER.info("NAE PROBLEM rmt_setup.commodity_code " + rmt_setup.commodity_code)    
     
     rmt_product = RmtProduct.find_by_commodity_code_and_variety_code_and_treatment_code_and_ripe_point_code_and_product_class_code_and_size_code_and_bin_type(commodity,self.variety_output_description,self.treatment_code,self.ripe_point_code,self.product_class_code,self.size,self.product_code_pm_bintype)
     if !rmt_product
