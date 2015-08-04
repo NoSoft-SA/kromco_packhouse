@@ -1,8 +1,0 @@
-query: select * from vwcarton_avg_mass WHERE (line_code={line_code} )
-main_table_name: cartons
-fields:
-  field1:
-   field_name: line_code
-   caption: line_code
-   field_type: text
-  

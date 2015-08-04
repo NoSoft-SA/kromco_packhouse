@@ -1,4 +1,4 @@
-query: select * from  vw_packout_production_run_code where (farm_code={farm_code} and  track_indicator_code={track_indicator_code} and season={season} and production_run_code={production_run_code} and ripe_point_code={ripe_point_code} and farm_group_code={farm_group_code} and cold_store_type_code={cold_store_type_code} )
+query: select * from  vw_packout_production_run_code where (farm_code={farm_code} and  track_indicator_code={track_indicator_code} and season={season} and production_run_code={production_run_code} and ripe_point_code={ripe_point_code} and farm_group_code={farm_group_code} and cold_store_type_code={cold_store_type_code} and line_code={line_code} and rmt_product_code={rmt_product_code})
 main_table_name: production_runs
 
 fields:
@@ -32,4 +32,13 @@ fields:
    caption: cold_store_type_code
    field_type: lookup
    list: "select cold_store_type_code from cold_store_types order by cold_store_type_code asc"        
+  field6:
+   field_name: line_code
+   caption: line_code
+   field_type: lookup
+   list: "select line_code from lines order by line_code asc"     
+  field7:
+   field_name: rmt_product_code
+   caption: rmt_product_code
+   field_type: text
    

@@ -1,4 +1,4 @@
-query: select * from presort_logs where (input_params={input_params} and created_at={created_at}) 
+query: select * from presort_logs where (input_params={input_params} and created_at={created_at} and action={action}) 
 main_table_name: presort_logs
 fields:
  field1:
@@ -9,3 +9,8 @@ fields:
   field_name: created_at
   caption: created_at
   field_type: daterange
+ field3:
+  field_name: action
+  caption: action
+  field_type: lookup
+  list: "select distinct status_code from statuses where status_type_code = 'presort_integration' order by status_code"    

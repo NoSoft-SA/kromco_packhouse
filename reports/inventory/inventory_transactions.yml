@@ -1,4 +1,4 @@
-query: select * from vwinventory_transactions WHERE (stock_type_code={stock_type_code} and inventory_reference={inventory_reference} and transaction_business_name_code={transaction_business_name_code} and location_from={location_from} and location_to={location_to})
+query: select * from vwinventory_transactions WHERE (stock_type_code={stock_type_code} and inventory_reference={inventory_reference} and transaction_business_name_code={transaction_business_name_code} and location_from={location_from} and location_to={location_to} and created_at={created_at})
 main_table_name: inventory_transactions
 fields:
  field1:
@@ -21,3 +21,7 @@ fields:
   caption: location_to
   field_type: lookup
   list: "select location_code from locations order by location_code"    
+ field5:
+  field_name: created_at
+  caption: created_at
+  field_type: daterange
