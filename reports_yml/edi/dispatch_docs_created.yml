@@ -1,2 +1,0 @@
-query: select * from vw_edi_out_process_histories_load_order where (load_number={load_number} and order_number={order_number} and dispatch_consignment_number={dispatch_consignment_number} and order_number={order_number} and organization={organization} and customer={customer} AND flow_type={flow_type} and edi_out_filename={edi_out_filename})order by created_on desc
-main_table_name: edi_out_process_histories

@@ -1,2 +1,0 @@
-query: SELECT * FROM season_order_qties_logs WHERE (customer_order_number={customer_order_number} and pallet_number={pallet_number} and season_code={season_code} and transaction_date_time={transaction_date_time})
-main_table_name: season_order_qties_logs

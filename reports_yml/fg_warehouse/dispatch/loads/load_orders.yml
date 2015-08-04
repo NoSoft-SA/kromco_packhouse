@@ -1,2 +1,0 @@
-query: select * from load_orders where (date_time={date_time} and dispatch_consignment_number={dispatch_consignment_number} and id={id} and load_id={load_id} and operator_code={operator_code} and order_id={order_id} and sequence_number={sequence_number} )
-main_table_name: load_orders

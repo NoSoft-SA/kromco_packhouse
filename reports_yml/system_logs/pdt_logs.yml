@@ -1,7 +1,0 @@
-query: select * from pdt_logs where (created_on={created_on} and ip={ip} and input_xml={input_xml} and output_xml={output_xml} and menu_item={menu_item})
-main_table_name: pdt_logs
-fields:
- field1:
-  field_name: created_on 
-  caption: created_on
-  field_type: daterange

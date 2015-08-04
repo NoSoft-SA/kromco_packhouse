@@ -1,3 +1,0 @@
-query: select p.id, p.flow_type, p.created_on process_created_on, e.created_on error_on, p.process_attempts, p.out_destination_dir, p.transfer_mechanism, p.organization_code, p.hub_address, e.error_code, e.transformer, e.action_type, e.description from edi_out_proposals p left outer join edi_errors e on e.edi_out_proposal_id = p.id where p.process_attempts > 0 order by e.created_on DESC
-
-main_table_name: edi_out_proposals

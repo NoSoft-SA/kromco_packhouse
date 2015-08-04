@@ -1,2 +1,0 @@
-query: select * from ports WHERE(ports.port_code={ports.port_code} and ports.port_name={ports.port_name} and ports.region_code={ports.region_code} and ports.country_code={ports.country_code}  )
-main_table_name: ports

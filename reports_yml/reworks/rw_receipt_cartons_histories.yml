@@ -1,8 +1,0 @@
-query: select * from rw_receipt_cartons_histories WHERE (carton_number={carton_number} and created_on={created_on} and rw_run_id={rw_run_id} and season_code={season_code} and farm_code={farm_code} and production_run_id={production_run_id})
-main_table_name: rw_receipt_bins
-fields:
- field1:
-  field_name:  season_code
-  caption: season_code
-  field_type: lookup
-  list: "select season_code from seasons order by season_code desc"

@@ -1,7 +1,0 @@
-query: select * from rails_errors where (id={id} and description={description} and stack_trace={stack_trace} and created_on={created_on} and logged_on_user={logged_on_user} and person={person} and error_type={error_type} and controller_name={controller_name} and action_name={action_name}  )
-main_table_name: rails_errors
-fields:
-  field1:
-   field_name: created_on
-   caption: created_on
-   field_type: daterange

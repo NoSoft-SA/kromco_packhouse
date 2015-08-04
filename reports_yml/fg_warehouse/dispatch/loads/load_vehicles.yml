@@ -1,2 +1,0 @@
-query: select * from loads where (load_number={load_number} and load_type_id={load_type_id} and current_load_step={current_load_step} and date_time_completed={date_time_completed} and dispatch_consignment_number={dispatch_consignment_number} and remarks={remarks} and load_bay={load_bay} and operator={operator} and required_quantity={required_quantity} and id={id}  )
-main_table_name: loads

@@ -1,2 +1,0 @@
-query: select  location_check_digits.cdigit,location_check_digits.id from location_check_digits full join locations on location_barcode=cdigit where location_barcode is null  order by cdigit
-main_table_name: location_check_digits

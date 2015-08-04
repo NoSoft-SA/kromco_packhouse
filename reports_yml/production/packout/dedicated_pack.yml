@@ -1,9 +1,0 @@
-query: select * from vw_packout_dp where (farm_code={farm_code} and tipped_date_time={tipped_date_time} and season={season} and bin_number={bin_number} and ripe_point_code={ripe_point_code} and commodity_code={commodity_code} and variety_code={variety_code} and treatment_code={treatment_code} and product_class_code={product_class_code} and ripe_point_code={ripe_point_code} and rmt_product_code={rmt_product_code} and treatment_type_code={treatment_type_code})
-main_table_name: bins
-
-fields:
-  field1:
-   field_name: farm_code
-   caption: farm_code
-   field_type: lookup
-   list: "select distinct farm_code from farms order by farm_code asc"  

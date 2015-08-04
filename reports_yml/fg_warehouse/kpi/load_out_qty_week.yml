@@ -1,3 +1,0 @@
-query: select * from vw_load_out_qty_week where (week_shipped={week_shipped} and year_shipped={year_shipped})
-main_table_name: load_vehicles
-fields:
