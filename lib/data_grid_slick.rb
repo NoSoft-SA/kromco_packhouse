@@ -65,6 +65,9 @@ module DataGridSlick
         end
 
         @plugin         = plugin
+        if @plugin && !@plugin.is_a?(MesScada::GridPlugin)
+          raise MesScada::InfoError, "DataGrid: The plugin \"#{@plugin.class.name}\" is not a valid MesScada::GridPlugin."
+        end
         @column_configs = column_configs
         @data_set       = data_set
 
