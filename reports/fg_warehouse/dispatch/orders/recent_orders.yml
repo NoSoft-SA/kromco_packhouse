@@ -8,7 +8,7 @@ query: |
        old_fg_code, item_pack_product_code, target_market_code, puc,
        required_quantity, marketer, created_by, created_at, grade_code,
        commodity_code, marketing_variety_code, standard_size_count_value,
-       isoweek, order_status, ROW_NUMBER() OVER() AS id
+       isoweek, order_status, 'row ' || CAST(ROW_NUMBER() OVER() AS character varying) AS id
   from vw_recent_orders where (created_at={created_at} and  isoweek={isoweek} and order_number={order_number} and order_type_code={order_type_code} and organization={organization} and trading_partner_code={trading_partner_code} and trading_partner_name={trading_partner_name} and incoterm_code={incoterm_code} and currency_code={currency_code} and load_number={load_number} and order_status={order_status} and dispatch_consignment_number={dispatch_consignment_number} and customer_order_number={customer_order_number} and depot_code={depot_code} and target_market_code={target_market_code} and puc={puc} and marketer={marketer} and  created_by={created_by} and grade_code={grade_code} and commodity_code={commodity_code} and marketing_variety_code={marketing_variety_code} and standard_size_count_value={standard_size_count_value} and load_status={load_status})
 main_table_name: orders
 fields:
