@@ -228,18 +228,88 @@ class Globals
       "http://172.16.16.17:3000"
   end
 
-  def Globals.jasper_reports_conn_params
-    config = YAML.load(File.read('config/database.yml'))[ENV['RAILS_ENV']]
-    {:adapter  => "jdbc:postgresql",
-     :username => "postgres",
-     :password => "postgres",
-     :database => config['database'],
-     :host     => config['host'],
-     :port     => config['port']}
+  def Globals.get_legacy_db_conn_string
+    # {:adapter => "sqlserver", :host => "172.16.16.14",  :database => "KromcoData", :username => "sa"}
+    host = "172.16.16.14"
+    database = "KromcoData"
+    username = "sa"
+    password = ""
+    #Password=#{password};
+    return "DBI:ADO:Provider=SQLOLEDB;Data Source=#{host};Initial Catalog=#{database};User Id=#{username};Password = ''"
+    #return "DBI:ODBC:Driver={SQLServer};Server=#{host};Database=#{database};Uid=#{username};Pwd=''"
   end
 
-  def Globals.jasper_reports_printing_component
-    File.join(Dir.getwd, 'jmt_reporting_server')
+  def Globals.get_odbc_legacy_db_conn_string
+    # {:adapter => "sqlserver", :host => "172.16.16.14",  :database => "KromcoData", :username => "sa"}
+    #host = "172.16.16.14"
+    #database = "KromcoData"
+    #username = "sa"
+    #password = ""
+    #Password=#{password};
+    #return "DBI:ADO:Provider=SQLOLEDB;Data Source=#{host};Initial Catalog=#{database};User Id=#{username};Password = ''"
+    return "DBI:ODBC:KromcoData"
+  end
+
+  def Globals.get_odbc_legacy_personnell_db_conn_string
+    return "DBI:ODBC:kromco_personnell_sql"
+  end
+
+  def Globals.get_legacy_personnell_db_conn_string
+    host = "172.16.16.14"
+    database = "KromcoPMS"
+    username = "sa"
+    password = ""
+    #Password=#{password};
+    return "DBI:ADO:Provider=SQLOLEDB;Data Source=#{host};Initial Catalog=#{database};User Id=#{username};Password = ''"
+
+  end
+
+  def Globals.get_odbc_intrack_db_conn_string
+    "DBI:ODBC:intrack_sql"
+  end
+
+#  def Globals.get_mes_conn_params
+#   return {:adapter => "postgresql", :host => "172.16.16.15",  :database => "kromco_mes", :username => "ruby_scripts",:password => "ruby_scripts",:port => 5432}
+#
+#  end
+
+# Get the db connection parameters from the app's database.yml file
+  def Globals.get_mes_conn_params(env='edi')
+    config = YAML.load(File.read('config/database.yml'))[env]
+    return {:adapter => config['adapter'],
+            :host => config['host'],
+     :database => config['database'],
+            :username => config['username'],
+            :password => config['password'],
+     :port     => config['port']}
+
+  end
+
+  def Globals.get_mes2_conn_params
+    return {:adapter => "postgresql", :host => "172.16.16.15",  :database => "kromco_mes", :username => "reworks_complete",:password => "reworks_complete",:port => 5432}
+
+  end
+
+
+  def Globals.models_to_exclude_from_scripts
+    ["mrl_label_printing.rb","carton_label_printing.rb", "process_outbox.rb","outbox_processor.rb",
+     "mf_account.rb","mf_account_farm.rb","mf_farm.rb","mf_product_code.rb","mf_product_code_target_market.rb","pallet_label_printing.rb",
+     "carton_label_printing.rb","bin_ticket_printing.rb","mrl_label_printing.rb","send_edi_script.rb"]
+  end
+
+  def Globals.is_scriptable_model?(model_name)
+    if(Globals.models_to_exclude_from_scripts.include?(model_name))
+      return false
+    end
+    return true
+  end
+
+  #def Globals.get_bin_weighing_application_server
+  # "http://172.16.16.44"
+  #end
+
+  def Globals.get_bin_weighing_application_name
+    "SampleBinWeighingApp"
   end
 
   def Globals.get_bin_weighing_application_port
@@ -478,3 +548,4 @@ class Globals
   end
 
 end
+
