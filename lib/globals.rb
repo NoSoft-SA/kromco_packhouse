@@ -187,7 +187,7 @@ class Globals
   end
 
   def Globals.get_reports_location
-      "reports_yml"
+      "reports"
   end
 
   def Globals.search_engine_max_rows
