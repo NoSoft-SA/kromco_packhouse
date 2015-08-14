@@ -774,8 +774,6 @@ module RmtProcessing::DeliveryHelper
 
     column_configs = Array.new
 
-    require "app/helpers/rmt_processing/delivery_plugins.rb"
-
     #	----------------------
 #	define action columns
 #	----------------------
@@ -852,7 +850,7 @@ module RmtProcessing::DeliveryHelper
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name =>keys[keys.index('residue_free')], :col_width=> 35}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name =>keys[keys.index('mrl_result_type')], :col_width=> 145}
  
-    return get_data_grid(data_set, column_configs, DeliveryPlugins::DeliveriesGridPlugin.new(), true)
+    return get_data_grid(data_set, column_configs, MesScada::GridPlugins::RmtProcessing::DeliveriesGridPlugin.new(), true)
   end
 
 

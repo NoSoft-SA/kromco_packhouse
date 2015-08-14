@@ -8,7 +8,7 @@ module RmtProcessing::PresortStagingRunHelper
     column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name => 'qty_bins_available',:settings =>{:target_action => '', :id_column => 'id'},:col_width=>130}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'age',:column_caption=>'bin_age',:col_width=>125}
     set_grid_min_width(1200)
-    return get_data_grid(data_set,column_configs,RmtProcessingPlugins::BinLocationsPlugin.new(self,request),true)
+    return get_data_grid(data_set,column_configs,MesScada::GridPlugins::RmtProcessing::BinLocationsPlugin.new(self,request),true)
   end
 
   def build_bins_grid(data_set,can_edit,can_delete)
@@ -420,7 +420,7 @@ end
    column_configs << {:field_type => 'link_window', :field_name => 'staged_child_runs',:settings =>{:controller => 'rmt_processing/presort_staging_run_child',:link_text=>'staged_children',:target_action => 'parent_staged_child_runs', :id_column => 'id'},:col_width=>57}
    #column_configs << {:field_type => 'link_window', :field_name => 'child_runs',:settings =>{:target_action => '', :id_column => 'id'},:col_width=>57}
 
-   get_data_grid(data_set,column_configs,RmtProcessingPlugins::PresortStagingRunPlugin.new(self,request),true)
+   get_data_grid(data_set,column_configs,MesScada::GridPlugins::RmtProcessing::PresortStagingRunPlugin.new(self,request),true)
 
  end
 
