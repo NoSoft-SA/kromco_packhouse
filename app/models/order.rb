@@ -9,7 +9,7 @@ class Order < ActiveRecord::Base
                 :discount_percentage,
                 :order_id,
                 :user,
-                :restore_tm
+                :restore_tm ,:orig_tm
 
 #  has_many :order_customer_detail
   has_one :order_customer_detail, :dependent => :destroy

@@ -332,7 +332,7 @@ module Fg::LoadHelper
 #	Define an observer for each index field
 #	--------------------------------------------------------------------------------------------------
     session[:voyage_search_form]= Hash.new
-  
+
     voyage_code = Voyage.find_by_sql('select distinct id,voyage_code from voyages').map { |g| [g.voyage_code, g.id] }
 #      voyage_descriptions = Voyage.find_by_sql('select distinct voyage_description from voyages').map{|g|[g.voyage_description]}
 #	----------------------------------------
@@ -388,7 +388,7 @@ module Fg::LoadHelper
 
     @submit_button_align = "left"
     build_form(load, field_configs, nil, 'load', caption, is_edit)
-    
+
   end
 
 
@@ -406,7 +406,7 @@ module Fg::LoadHelper
                         }
      field_configs[1] = {:field_type => 'TextField',
                         :field_name => 'required_quantity'}
-                      
+
 
     build_form(load, field_configs, action, 'load', caption, is_edit)
 
@@ -479,7 +479,7 @@ module Fg::LoadHelper
                                                   :settings => {
                                                       :image => 'import_pallets',
                                                           :controller    =>'fg/order',
-                                                          :target_action => 'render_import_pallets',
+                                                          :target_action => 'load_import_pallets',
                                                           :id_column => 'id'
                                                           }}
 
@@ -497,7 +497,7 @@ end
                                                      :link_text => '',
                                                          :target_action => 'print_pick_list',
                                                          :id_column => 'id'}}
-                                                    
+
      #else
      #    column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name => 'complete_load',:col_width=>60,
      #                                          :settings => {
@@ -565,7 +565,7 @@ column_configs[column_configs.length()] = {:field_type => 'link_window', :field_
     column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'status_code',:column_caption=>'load_status'}
      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'created_on'}
        return get_data_grid(data_set, column_configs)
-   
+
   end
 
   def build_load_voyage_form(load_voyage, action, caption, is_edit = nil, is_create_retry = nil)

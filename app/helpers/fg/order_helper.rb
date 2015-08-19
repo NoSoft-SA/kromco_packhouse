@@ -36,7 +36,7 @@ module Fg::OrderHelper
   def build_upgrade_order_form(order, action, caption, is_edit=nil, is_create_retry=nil)
       field_configs = Array.new
       combos_js_for_depots = gen_combos_clear_js_for_combos(["order_order_type_id", "order_depot_code"])
-      
+
       order_type_observer = {:updated_field_id => "depot_code_cell",
                            :remote_method =>'order_type_id_changed',
                            :on_completed_js => combos_js_for_depots["order_order_type_id"]
@@ -70,7 +70,7 @@ module Fg::OrderHelper
                            :remote_method =>'trading_partner_changed',
                            :on_completed_js =>  combos_js_for_consignee_party_role_id["order_consignee_party_role_id"]
     }
-    
+
     combos_js_for_depots = gen_combos_clear_js_for_combos(["order_order_type_id", "order_depot_code"])
     order_type_observer = {:updated_field_id => "depot_code_cell",
                            :remote_method =>'order_type_id_changed',
@@ -464,7 +464,7 @@ end
     field_configs[field_configs.length()] = {:field_type => 'LinkWindowField',
                                                    :field_name => '',
                                                    :settings => {
-                                                           :target_action => 'render_main_import_pallets',
+                                                           :target_action => 'create_one_or_more_loads_and_import_pallets',
                                                            :link_text => "load import wizard",
                                                            :id_value => order.id
                                                    }
@@ -473,7 +473,7 @@ end
     field_configs[field_configs.length()] = {:field_type => 'LinkWindowField',
                                                    :field_name => '',
                                                    :settings => {
-                                                           :target_action => 'render_load_import_pallets',
+                                                           :target_action => 'create_load_and_import_pallets',
                                                            :link_text => "import many loads",
                                                            :id_value => order.id
                                                    }

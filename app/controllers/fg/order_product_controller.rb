@@ -257,6 +257,8 @@ class Fg::OrderProductController < ApplicationController
     else
       @view_order=nil
     end
+    order_product_sql="select * from order_products where id in (#{@order_products.map{|p|p.id}.join(",")})"
+    session[:query]="ActiveRecord::Base.connection.select_all(\"#{order_product_sql}\")"
     render :template => "fg/order_products/list_order_products", :layout => "content"
   end
 
@@ -380,6 +382,7 @@ class Fg::OrderProductController < ApplicationController
 
 
   def delete_order_product
+    return if authorise_for_web(program_name?, 'delete')== false
 
     id = params[:id]
     order_product = OrderProduct.find(id)
@@ -388,7 +391,6 @@ class Fg::OrderProductController < ApplicationController
     @order_id  = @order.id
     begin
       Order.transaction do
-        return if authorise_for_web(program_name?, 'delete')== false
         if params[:page]
           session[:order_products_page] = params['page']
           session[:multi_select]=nil
