@@ -8,7 +8,7 @@ class PalletEnquiry < PDTTransaction
 
     field_configs = Array.new
     field_configs[field_configs.length] = {:type=>'text_box', :name=>'carton_or_pallet',
-                                           :label=>'carton or pallet',:is_required=>'true'}
+                                           :label=>'carton_or_pallet',:is_required=>'true'}
     buttons = {:B1Label=>"Submit",:B1Enable=>"false",:B1Submit=>"pallet_enquiry_submit",:B2Label=>"",:B2Enable=>"false",:B2Submit=>"",:B3Label=>"",:B3Enable=>"false",:B3Submit=>""}
     screen_attributes ={:content_header_caption=>"scan carton or pallet",:auto_submit=>"true",:auto_submit_to=>"pallet_enquiry_submit"}
     plugins=nil
@@ -18,7 +18,7 @@ class PalletEnquiry < PDTTransaction
   def pallet_enquiry_submit
     pallet_number = self.pdt_screen_def.get_input_control_value("carton_or_pallet")
     set_temp_record("carton_or_pallet_num", pallet_number)
-    
+
     if (error = validate_input) == nil
       pallet = get_temp_record('pallet')
 
@@ -39,7 +39,7 @@ class PalletEnquiry < PDTTransaction
     def validate_input()
 
     carton_or_pallet = self.pdt_screen_def.get_control_value("carton_or_pallet")
-   
+
     carton = nil
     pallet = nil
 
@@ -68,9 +68,9 @@ class PalletEnquiry < PDTTransaction
     #-------------------------------------------
     #extract carton number if carton was scanned
     #-------------------------------------------
-      RAILS_DEFAULT_LOGGER.info("pallet_enquiry.rb: 74 - carton_or_pallet: " + carton_or_pallet)        
+      RAILS_DEFAULT_LOGGER.info("pallet_enquiry.rb: 74 - carton_or_pallet: " + carton_or_pallet)
       pallet_num = PDTFunctions.extract_pallet_num(carton_or_pallet)
-      RAILS_DEFAULT_LOGGER.info("pallet_enquiry.rb: 74 - pallet_num: " + pallet_num)    
+      RAILS_DEFAULT_LOGGER.info("pallet_enquiry.rb: 74 - pallet_num: " + pallet_num)
 
       if !pallet_num.upcase.include?("INVALID")
         pallet = Pallet.find_by_pallet_number(pallet_num)
@@ -103,7 +103,7 @@ class PalletEnquiry < PDTTransaction
 
 
   def validate_input_old
-    extracted_pallet_num = PDTFunctions.extract_pallet_num(@scratch_pad["pallet_number"])  
+    extracted_pallet_num = PDTFunctions.extract_pallet_num(@scratch_pad["pallet_number"])
     #if extracted_pallet_num.kind_of?(Fixnum) || extracted_pallet_num.kind_of?(Bignum)
     if !extracted_pallet_num.upcase.include?("INVALID")
       @scratch_pad["pallet_number"] = extracted_pallet_num

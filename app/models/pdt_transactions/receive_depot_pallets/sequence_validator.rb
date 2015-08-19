@@ -38,7 +38,7 @@ class SequenceValidator  < PDTTransactionState
     if @sequences.length() == 0
       additonal_lines_array = ["pallet : " + @pallet_no.to_s,"has no sequences"]
       result_screen = PDTTransaction.build_msg_screen_definition(nil,nil,nil,additonal_lines_array)
-   
+
     end
     @main_error_screen = result_screen if result_screen
 
@@ -59,14 +59,14 @@ class SequenceValidator  < PDTTransactionState
     seq_description = @current_sequence[:carton_count].to_s + "/" + tot_cartons.to_s + "(" + tot_cartons.to_s + ")"
 
     field_configs[field_configs.length] = {:type=>"static_text",:name=>"seq",:value=>seq_value}
-    field_configs[field_configs.length] = {:type=>"static_text",:name=>"seq ctns/pallet",:value=>seq_description}
-   
-    
+    field_configs[field_configs.length] = {:type=>"static_text",:name=>"seq_ctns_to_pallet",:value=>seq_description}
+
+
     field_configs[field_configs.length] = {:type=>"static_text",:name=>"count",:value=>@current_sequence[:actual_size_count]}
     field_configs[field_configs.length] = {:type=>"static_text",:name=>"puc",:value=>@current_sequence[:puc]}
     field_configs[field_configs.length] = {:type=>"static_text",:name=>"tmarket",:value=>@current_sequence[:target_market_code]}
-    field_configs[field_configs.length] = {:type=>"static_text",:name=>"pick ref",:value=>@current_sequence[:pick_reference]}
-    field_configs[field_configs.length] = {:type=>"static_text",:name=>"inv code",:value=>@current_sequence[:inventory_code]}
+    field_configs[field_configs.length] = {:type=>"static_text",:name=>"pick_ref",:value=>@current_sequence[:pick_reference]}
+    field_configs[field_configs.length] = {:type=>"static_text",:name=>"inv_code",:value=>@current_sequence[:inventory_code]}
 
     field_configs[field_configs.length] = {:type=>"static_text",:name=>"brand",:value=>@current_sequence[:brand]}
     #    field_configs[field_configs.length] = {:type=>"static_text",:name=>"pallet_sequence_number",:value=>@current_sequence[:pallet_sequence_number]}
@@ -74,14 +74,14 @@ class SequenceValidator  < PDTTransactionState
     field_configs[field_configs.length] = {:type=>"static_text",:name=>"organization",:value=>@current_sequence[:organization_code]}
     field_configs[field_configs.length] = {:type=>"static_text",:name=>"variety",:value=>@current_sequence[:marketing_variety_code]}
     field_configs[field_configs.length] = {:type=>"static_text",:name=>"grade",:value=>@current_sequence[:grade_code]}
-    field_configs[field_configs.length] = {:type=>"static_text",:name=>"pack type",:value=>@current_sequence[:old_pack_code]}
-    field_configs[field_configs.length] = {:type=>"static_text",:name=>"sell by date",:value=>@current_sequence[:sell_by_code]}
+    field_configs[field_configs.length] = {:type=>"static_text",:name=>"pack_type",:value=>@current_sequence[:old_pack_code]}
+    field_configs[field_configs.length] = {:type=>"static_text",:name=>"sell_by_date",:value=>@current_sequence[:sell_by_code]}
 
     field_configs[field_configs.length] = {:type=>"static_text",:name=>"remarks",:value=>@current_sequence[:remarks]}
 
-    field_configs[field_configs.length] = {:type=>"static_text",:name=>"prod char",:value=>self.pt_product_chars}
+    field_configs[field_configs.length] = {:type=>"static_text",:name=>"prod_char",:value=>self.pt_product_chars}
     field_configs[field_configs.length] = {:type=>"check_box",:name=>"valid",:value=>@current_sequence[:validated]}
-    
+
 
     screen_attributes = {:auto_submit=>"false",:content_header_caption=>@pallet_no.to_s }
     if (on_first? && (@sequences.length > 1))
@@ -117,7 +117,7 @@ class SequenceValidator  < PDTTransactionState
                                        :production_run_code => seq.production_run_code,:production_run_id => seq.production_run_id,:erp_cultivar => seq.erp_cultivar
 
                                        }
-    end  
+    end
   end
 
   def prev_seq()
@@ -167,7 +167,7 @@ class SequenceValidator  < PDTTransactionState
   end
 
    def show_not_yet_validated_pallets
-   
+
     if self.parent.all_pallets_validated?
       err = self.parent.receive_load_trans()
        return err if err
@@ -207,5 +207,5 @@ class SequenceValidator  < PDTTransactionState
       return next_state.build_default_screen
     end
   end
-  
+
 end
