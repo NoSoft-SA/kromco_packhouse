@@ -57,13 +57,13 @@ module FgPlugins
                                                    inner join load_details on pallets.load_detail_id=load_details.id
                                                    inner join load_orders on load_details.load_order_id=load_orders.id
                                                    inner join  loads on load_orders.load_id=loads.id
-                                                  where pallets.load_detail_id IS NOT NULL and load_orders.order_id=#{@env.session.data['order_id']} group by loads.id")
+                                                  where pallets.load_detail_id IS NOT NULL and load_orders.order_id=#{@env.session.data[:active_doc]['order']} group by loads.id")
 
       @order_types        =OrderType.find_by_sql("select order_types.order_type_code,load_orders.load_id
                                        from orders
                                        join order_types on orders.order_type_id=order_types.id
                                        join load_orders on load_orders.order_id=orders.id
-                                        where load_orders.order_id=#{@env.session.data['order_id']}")
+                                        where load_orders.order_id=#{@env.session.data[:active_doc]['order']}")
       #@load_pallets = Pallet.find_by_sql("select pallets.*,load_orders.load_id  from pallets
       #                                         join load_details on (pallets.load_detail_id = load_details.id)
       #                                         join loads on (loads.id = load_details.load_id)

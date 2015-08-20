@@ -109,8 +109,9 @@ class Fg::OrderController < ApplicationController
       msg = nil
       if msg = duplicate_pallets?(pallet_numbers)
         flash[:error]= "The following pallet occurs more than once in the list: <BR> #{msg.join("<BR>")} "
-        redirect_to :controller => 'fg/order', :action => 'create_one_or_more_loads_and_import_pallets', :id => @order.id  if !session[:load_id]
+        redirect_to :controller => 'fg/order', :action => 'create_one_or_more_loads_and_import_pallets', :id => @order.id  if !session[:load_id] && !session[:create_load_and_import_pallets]
         redirect_to :controller => 'fg/order', :action => 'load_import_pallets', :id => @id  if session[:load_id]
+        redirect_to :controller => 'fg/order', :action => 'create_load_and_import_pallets', :id => @id  if  session[:create_load_and_import_pallets]
         return
       end
 
@@ -118,7 +119,8 @@ class Fg::OrderController < ApplicationController
       if failed_pallets.length > 0
         flash[:error]= "The following pallets cannot be imported. Reasons are in brackets: <BR> #{failed_pallets.join("<BR>")}"
         redirect_to :controller => 'fg/order', :action => 'load_import_pallets', :id => @id and return   if session[:load_id]
-        redirect_to :controller => 'fg/order', :action => 'create_one_or_more_loads_and_import_pallets', :id => @order.id  if !session[:load_id]
+        redirect_to :controller => 'fg/order', :action => 'create_one_or_more_loads_and_import_pallets', :id => @order.id  if !session[:load_id] && !session[:create_load_and_import_pallets]
+        redirect_to :controller => 'fg/order', :action => 'create_load_and_import_pallets', :id => @id and return   if session[:create_load_and_import_pallets]
         return
       end
     else
@@ -1053,7 +1055,8 @@ end
       session[:current_viewing_order]=nil
       @is_view=nil
       @caption="edit_order"
-      render_edit_order
+      params[:id] = @order.id
+      edit_order
     else
       render :inline => %{<script> alert('no current order'); </script>}, :layout => 'content'
     end
