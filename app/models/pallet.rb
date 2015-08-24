@@ -67,8 +67,10 @@ class Pallet < ActiveRecord::Base
         if   @pallet.load_detail_id
           failed_pallets.push(pallet_number + "(pallet is on load)".to_s)
         end
-        if   stock_item.location_code.upcase.index("PART_PALLETS")
+        if stock_item
+          if   stock_item.location_code.upcase.index("PART_PALLETS")
           failed_pallets.push(pallet_number + "(location_code has PART_PALLETS)".to_s)
+          end
         end
 
         if @pallet.target_market_code=="P9_PART PALLETS"
@@ -117,8 +119,10 @@ class Pallet < ActiveRecord::Base
             end
           end
         end
-        if   stock_item.location_code.upcase.index("PART_PALLETS")
-          failed_pallets.push(pallet_number + "(location_code has PART_PALLETS)".to_s)
+        if stock_item  
+            if   stock_item.location_code.upcase.index("PART_PALLETS")
+              failed_pallets.push(pallet_number + "(location_code has PART_PALLETS)".to_s)
+            end
         end
 
         if @pallet.target_market_code=="P9_PART PALLETS"

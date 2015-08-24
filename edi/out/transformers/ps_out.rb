@@ -200,8 +200,14 @@ class PsOut < TextOutTransformer
         intake_header.consignment_note_number   &&
         intake_header.consignment_note_number.start_with?( 'L031' )
         account_code = '8385'
+	if pallet.puc.start_with?('C')
+	   orig_account_code = 'CFG'
+	else
+	   orig_account_code = account_code
+	end
       else
         account_code = intake_header.account_code
+	orig_account_code = account_code
       end
 
     prod_char = pallet.pt_product_characteristics.nil? ? nil : pallet.pt_product_characteristics[0..2]
@@ -264,7 +270,7 @@ class PsOut < TextOutTransformer
       'sellbycode'       => pallet.sell_by_code,
       'combo_sscc'       => pallet.pallet_number,
       'packh_code'       => phc,
-      'original_account' => account_code,
+      'original_account' => orig_account_code,
       'stack_variance' => stack_variance,
       'season'         => pallet.cart_season
           }
