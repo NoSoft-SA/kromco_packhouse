@@ -4,8 +4,8 @@
 class AssignProbe < PDTTransaction
   def build_default_screen
     field_configs = Array.new
-      field_configs[field_configs.length] = {:name=>'probe',:type=>'text_box',:label=>'scan probe',:is_required=>'true'}
-      field_configs[field_configs.length] = {:name=>'pallet',:type=>'text_box',:label=>'scan pallet',:is_required=>'true'}
+      field_configs[field_configs.length] = {:name=>'probe',:type=>'text_box',:label=>'scan_probe',:is_required=>'true'}
+      field_configs[field_configs.length] = {:name=>'pallet',:type=>'text_box',:label=>'scan_pallet',:is_required=>'true'}
 
     buttons = {:B1Label=>"Submit",:B1Enable=>"false",:B1Submit=>"assign_probe_submit",:B2Label=>"",:B2Enable=>"false",:B2Submit=>"",:B3Label=>"",:B3Enable=>"false",:B3Submit=>""}
     screen_attributes ={:content_header_caption=>"assign probe",:auto_submit=>"true",:auto_submit_to=>"assign_probe_submit"}
@@ -109,13 +109,13 @@ class AssignProbe < PDTTransaction
 
     return nil
   end
-  
+
   def assign_probe_submit
     scanned_pallet = self.pdt_screen_def.get_input_control_value("pallet")
     probe_code = self.pdt_screen_def.get_input_control_value("probe")
     self.set_temp_record(:scanned_pallet, scanned_pallet)
     self.set_temp_record(:probe_code, probe_code)
- 
+
     if(error = validate_input)
       result_screen = PDTTransaction.build_msg_screen_definition(error,nil,nil,nil)
       return result_screen
@@ -152,6 +152,6 @@ class AssignProbe < PDTTransaction
       result_screen = PDTTransaction.build_msg_screen_definition("probe assigned to pallet successfully",nil,nil,nil)
       return result_screen
     end
- 
+
   end
 end

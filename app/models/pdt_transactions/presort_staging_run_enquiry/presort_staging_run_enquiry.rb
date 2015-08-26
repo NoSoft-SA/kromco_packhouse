@@ -47,20 +47,20 @@ class PresortStagingRunEnquiry < PDTTransaction
     end
     field_configs = Array.new
     field_configs[field_configs.length] = {:type => "text_line", :name => "presort_run_code", :value => active_run.presort_run_code.upcase.to_s + ":"}
-    field_configs[field_configs.length] = {:type => "static_text", :name => "season_code:", :value => active_run.season_code}
-    field_configs[field_configs.length] = {:type => "static_text", :name => "rmt_variety_code:", :value => active_run.rmt_variety_code}
-    field_configs[field_configs.length] = {:type => "static_text", :name => "ripe_point_code:", :value => active_run.ripe_point_code}
+    field_configs[field_configs.length] = {:type => "static_text", :name => "season_code", :value => active_run.season_code}
+    field_configs[field_configs.length] = {:type => "static_text", :name => "rmt_variety_code", :value => active_run.rmt_variety_code}
+    field_configs[field_configs.length] = {:type => "static_text", :name => "ripe_point_code", :value => active_run.ripe_point_code}
     field_configs[field_configs.length] = {:type => "static_text", :name => "track_slms_indicator_code", :value => active_run.track_slms_indicator_code}
-    field_configs[field_configs.length] = {:type => "static_text", :name => "farm_group_code: ", :value => active_run.farm_group_code}
-    field_configs[field_configs.length] = {:type => "static_text", :name => "product_class_code: ", :value => active_run.product_class_code}
-    field_configs[field_configs.length] = {:type => "static_text", :name => "treatment_code: ", :value => active_run.treatment_code}
-    field_configs[field_configs.length] = {:type => "static_text", :name => "size_code: ", :value => active_run.size_code}
-    field_configs[field_configs.length] = {:type => "static_text", :name => "active_farm_code: ", :value => active_run.farm_code}
-    field_configs[field_configs.length] = {:type => "static_text", :name => "LOCATIONS: ", :value => "QTY BINS AVAILABLE"}
+    field_configs[field_configs.length] = {:type => "static_text", :name => "farm_group_code", :value => active_run.farm_group_code}
+    field_configs[field_configs.length] = {:type => "static_text", :name => "product_class_code", :value => active_run.product_class_code}
+    field_configs[field_configs.length] = {:type => "static_text", :name => "treatment_code", :value => active_run.treatment_code}
+    field_configs[field_configs.length] = {:type => "static_text", :name => "size_code", :value => active_run.size_code}
+    field_configs[field_configs.length] = {:type => "static_text", :name => "active_farm_code", :value => active_run.farm_code}
+    field_configs[field_configs.length] = {:type => "static_text", :name => "LOCATIONS", :value => "QTY BINS AVAILABLE"}
     locations_available = locations_available.sort_by { |p| "#{p.age}#{p.age}" }
     if !locations_available.empty?
       locations_available.each do |location|
-        field_configs[field_configs.length] = {:type => "static_text", :name => "#{location.location_code}" + "(#{location.farm_code})", :value => location.qty_bins_available.to_s + "    " + "(" + location.age.to_s + ")"}
+        field_configs[field_configs.length] = {:type => "static_text", :name => "#{location.location_code}" + "#{location.farm_code}", :value => location.qty_bins_available.to_s + "    " + "(" + location.age.to_s + ")"}
       end
     end
     screen_attributes = {:auto_submit => "false", :content_header_caption => "active presort_staging_run_enquiry", :current_menu_item => "2.2.7"}
