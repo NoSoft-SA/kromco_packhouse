@@ -166,7 +166,13 @@ class Fg::OrderController < ApplicationController
 
   def  add_order_remarks
     order_customer_detail=OrderCustomerDetail.find_by_order_id(session[:active_doc]['order'])
-    order_customer_detail.update_attributes(:customer_memo_pad=>"SPECIAL TM - REQUIRES RE-INSPECTION")
+    if   order_customer_detail.customer_memo_pad
+      customer_memo_pad = order_customer_detail.customer_memo_pad + " " +  "(SPECIAL TM, REQUIRES RE-INSPECTION)"
+    else
+      customer_memo_pad = "SPECIAL TM - REQUIRES RE-INSPECTION"
+    end
+
+    order_customer_detail.update_attributes(:customer_memo_pad=>customer_memo_pad)
     continue_with_pallet_import
   end
 
