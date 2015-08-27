@@ -226,6 +226,7 @@ class Fg::OrderController < ApplicationController
     session['order_number'] = @order.order_number
     @is_view=true
     @caption="view_order"
+    set_active_doc("order", @order.id)
     render_edit_order
   end
 
@@ -320,6 +321,7 @@ class Fg::OrderController < ApplicationController
   def upgrade_order
     @order=Order.find(params[:id])
     session[:order] = @order
+    set_active_doc("order", @order.id)
     render_upgrade_order
   end
 
@@ -797,7 +799,7 @@ class Fg::OrderController < ApplicationController
           end
           notify_marketer(@order)
           session[:order] = @order
-
+          set_active_doc("order", @order.id)
           @order = Order.find(:first, :conditions => "order_number = '#{@order.order_number}'")
           params[:id] = @order.id
           edit_order
@@ -912,6 +914,7 @@ end
     @order = Order.find(id)
     @order_id = @order.id
     session[:order]=@order
+    set_active_doc("order", @order.id)
     session[:params_order]=params[:order]
     order_pallets =Pallet.find_by_sql("select pallets.*
                                            from pallets
@@ -1034,6 +1037,7 @@ end
         session['order_id'] = id
         session['order_number'] = @order.order_number
         session[:order] = @order
+        set_active_doc("order", @order.id)
         session[:alert] = "record successfuly  updated"
         render :inline => %{
                                 <script>
