@@ -332,7 +332,9 @@ module Fg::DepotReceiptsHelper
 
     set_grid_min_height(325)
     set_grid_min_width(700)
-    return get_data_grid(data_set, column_configs, DepotReceiptsPlugins::PalletSequencePlugin.new(self, request), true, special_commands)
+
+    # return get_data_grid(data_set, column_configs, DepotReceiptsPlugins::PalletSequencePlugin.new(self, request), true, special_commands)
+    get_data_grid(data_set, column_configs, MesScada::GridPlugins::Fg::PalletSequencePlugin.new(self, request), true, special_commands)
 
   end
 
@@ -592,8 +594,8 @@ module Fg::DepotReceiptsHelper
     column_configs[column_configs.length] = {:field_type => 'text', :field_name => 'edi_status',:col_width => 50}
     column_configs[column_configs.length] = {:field_type => 'text', :field_name => 'puc_code',:col_width => 80}
 
-
-    return get_data_grid(data_set, column_configs, DepotReceiptsPlugins::IntakeHeaderGridPlugin.new, true)
+    # return get_data_grid(data_set, column_configs, DepotReceiptsPlugins::IntakeHeaderGridPlugin.new, true)
+    get_data_grid(data_set, column_configs, MesScada::GridPlugins::Fg::IntakeHeaderGridPlugin.new, true)
   end
 
 
@@ -726,11 +728,11 @@ module Fg::DepotReceiptsHelper
     column_configs[column_configs.length] = {:field_type => 'text', :field_name => 'organization',:col_width => 47}
     column_configs[column_configs.length] = {:field_type => 'text', :field_name => 'extended_fg_code',:col_width => 513}
 
-
-
     set_grid_min_height(325)
     set_grid_min_width(700)
-    return get_data_grid(data_set, column_configs, DepotReceiptsPlugins::DepotReceiptPlugin.new(self, request), true)
+
+    # return get_data_grid(data_set, column_configs, DepotReceiptsPlugins::DepotReceiptPlugin.new(self, request), true)
+    get_data_grid(data_set, column_configs, MesScada::GridPlugins::Fg::DepotReceiptPlugin.new(self, request), true)
   end
 
 

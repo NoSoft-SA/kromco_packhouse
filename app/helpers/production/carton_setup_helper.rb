@@ -1583,7 +1583,8 @@ end
     @multi_select = "selected_active_setups"   if multi_select
 
 
-return get_data_grid(data_set,column_configs,CartonSetupPlugins::CartonSetupGridPlugin.new,nil)
+# return get_data_grid(data_set,column_configs,CartonSetupPlugins::CartonSetupGridPlugin.new,nil)
+   get_data_grid(data_set, column_configs, MesScada::GridPlugins::Production::CartonSetupGridPlugin.new,nil)
 end
  
  def build_carton_setup_grid_orig(data_set,can_edit,can_delete)

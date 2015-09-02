@@ -1596,7 +1596,8 @@ def build_production_schedule_grid(data_set,can_create_run)
 				:target_action => 'completed_runs',
 				:id_column => 'id'}}
 
- return get_data_grid(data_set,column_configs,RunSetupPlugins::RunSetupGridPlugin.new)
+ # return get_data_grid(data_set,column_configs,RunSetupPlugins::RunSetupGridPlugin.new)
+  get_data_grid(data_set, column_configs, MesScada::GridPlugins::Production::RunSetupGridPlugin.new)
 end
 
 
@@ -2069,7 +2070,7 @@ def build_set_rmt_product_form_for_sorter(binfill_sort_station,action,caption)
 	field_configs[1] =  {:field_type => 'LabelField',
 						:field_name => 'production_run_number'}
 
-    field_configs[2] =  {:field_type => 'LabelField',
+  field_configs[2] =  {:field_type => 'LabelField',
 						:field_name => 'binfill_sort_station_code'}
 
 	field_configs[3] = {:field_type => 'DropDownField',
@@ -2104,22 +2105,5 @@ end
  return get_data_grid(data_set,column_configs,RunSetupPlugins::BinfillSortStationGridPlugin.new)
 
 end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 end

@@ -371,7 +371,8 @@ end
 				:id_column => 'id'}}
   end
 	
- return get_data_grid(data_set,column_configs,ProccSetupPlugins::ProccSetupGridPlugin.new)
+   # return get_data_grid(data_set,column_configs,ProccSetupPlugins::ProccSetupGridPlugin.new)
+   get_data_grid(data_set, column_configs, MesScada::GridPlugins::Production::ProcessingSetupGridPlugin.new)
 end
 
 end

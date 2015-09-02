@@ -444,12 +444,13 @@ end
 				:id_column => 'id'},:html_options => {:prompt => "This delete will cascade to all data associated with the schedule. Are you sure you want to do this?"}}
 	end
 	
-    column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'farm_group_code',:col_width => 135}
+  column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'farm_group_code',:col_width => 135}
 	column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'iso_week_code',:col_width => 50,:column_caption => '50'}
 	column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'season_code',:col_width => 78}
 	column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'farm_pack',:col_width => 80}
-	
- return get_data_grid(data_set,column_configs,ScheduleSetupPlugins::ScheduleSetupGridPlugin.new)
+
+   get_data_grid(data_set, column_configs, MesScada::GridPlugins::Production::ScheduleSetupGridPlugin.new)
+
 end
 
 end
