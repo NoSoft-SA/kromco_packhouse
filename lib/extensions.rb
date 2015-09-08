@@ -305,10 +305,10 @@ class ActiveRecord::Base
 
   before_validation :clear_combo_prompts
   before_save :trim_attribute_values, :set_request_details
-  before_update :log_changes
+  #before_update :log_changes
   before_create :set_request_details_for_create
   before_update :set_request_details
-  before_destroy :log_changes
+  #before_destroy :log_changes
 
   attr_accessor :unchanged_fields, :changed_fields
 
