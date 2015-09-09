@@ -332,7 +332,7 @@ end
 
  def build_processing_setup_grid(data_set)
  
-   require File.dirname(__FILE__) + "/../../../app/helpers/production/procc_setup_plugin.rb"
+   # require File.dirname(__FILE__) + "/../../../app/helpers/production/procc_setup_plugin.rb"
 
 	column_configs = Array.new
 
@@ -372,7 +372,7 @@ end
   end
 	
    # return get_data_grid(data_set,column_configs,ProccSetupPlugins::ProccSetupGridPlugin.new)
-   get_data_grid(data_set, column_configs, MesScada::GridPlugins::Production::ProcessingSetupGridPlugin.new)
+   get_data_grid(data_set, column_configs, MesScada::GridPlugins::Production::ProcessingSetupGridPlugin.new,true)
 end
 
 end

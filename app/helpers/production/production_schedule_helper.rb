@@ -376,80 +376,80 @@ end
 
 end
 
- def build_production_schedule_grid(data_set,can_edit,can_delete)
+def build_production_schedule_grid(data_set,can_edit,can_delete)
 
-  require File.dirname(__FILE__) + "/../../../app/helpers/production/schedule_setup_plugin.rb"
+   # require File.dirname(__FILE__) + "/../../../app/helpers/production/schedule_setup_plugin.rb"
 
-	column_configs = Array.new
-	#if can_edit
-		column_configs[column_configs.length()] = {:field_type => 'action',:field_name => 'production_schedule_name',:col_width => 207,
-			:settings => 
-				 {:target_action => 'set_active_schedule',
-				:id_column => 'id'}}
-	#else
-	# column_configs[0] = {:field_type => 'text',:field_name => 'production_schedule_name'}
-	#end
-	
-	is_extended_search = data_set[0].has_attribute?('pc_code')
-	column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'planned_start_date',:col_width => 138}
-	if is_extended_search
-	 column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'variety',:col_width => 65}
-	 column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'track_indicator_code',:col_width => 72,:column_caption => 'ti'}
-	 column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'pc_code',:col_width => 65}
-	 column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'product_class_code',:column_caption => 'class_code',:col_width => 50}
-	end
-	column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'production_schedule_status_code',:col_width => 82,:column_caption => 'status'}
+   column_configs = Array.new
+   #if can_edit
+   column_configs[column_configs.length()] = {:field_type => 'action',:field_name => 'production_schedule_name',:col_width => 207,
+                                              :settings =>
+                                                  {:target_action => 'set_active_schedule',
+                                                   :id_column => 'id'}}
+   #else
+   # column_configs[0] = {:field_type => 'text',:field_name => 'production_schedule_name'}
+   #end
+
+   is_extended_search = data_set[0].has_attribute?('pc_code')
+   column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'planned_start_date',:col_width => 138}
+   if is_extended_search
+     column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'variety',:col_width => 65}
+     column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'track_indicator_code',:col_width => 72,:column_caption => 'ti'}
+     column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'pc_code',:col_width => 65}
+     column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'product_class_code',:column_caption => 'class_code',:col_width => 50}
+   end
+   column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'production_schedule_status_code',:col_width => 82,:column_caption => 'status'}
 
 #	----------------------
 #	define action columns
 #	----------------------
-	if can_edit
-		column_configs[column_configs.length()] = {:field_type => 'action',:field_name => 'edit', :col_width => 50,
-			:settings => 
-				 {:image => 'edit',
-				:target_action => 'edit_production_schedule',
-				:id_column => 'id'}}
-				
-		
-		column_configs[column_configs.length()] = {:field_type => 'action',:field_name => 'clone',:col_width => 50,
-			:settings => 
-				 {:image => 'clone_schedule',
-				:target_action => 'clone_schedule',
-				:id_column => 'id'}}
-				
+   if can_edit
+     column_configs[column_configs.length()] = {:field_type => 'action',:field_name => 'edit', :col_width => 50,
+                                                :settings =>
+                                                    {:image => 'edit',
+                                                     :target_action => 'edit_production_schedule',
+                                                     :id_column => 'id'}}
+
+
+     column_configs[column_configs.length()] = {:field_type => 'action',:field_name => 'clone',:col_width => 50,
+                                                :settings =>
+                                                    {:image => 'clone_schedule',
+                                                     :target_action => 'clone_schedule',
+                                                     :id_column => 'id'}}
+
 #		column_configs[column_configs.length()] = {:field_type => 'action',:field_name => 'make template',
-#			:settings => 
+#			:settings =>
 #				 {:image => 'save_as_template',
 #				:target_action => 'save_as_template',
 #				:id_column => 'id'}}
-				
-		column_configs[column_configs.length()] = {:field_type => 'action',:field_name => 're-open',:col_width => 50,
-			:settings => 
-				 {:image => 'folder_open',
-				:target_action => 're_open_production_schedule',
-				:id_column => 'id'}}
-				
-		column_configs[column_configs.length()] = {:field_type => 'action',:field_name => 'complete',:col_width => 50,
-			:settings => 
-				 {:image => 'complete',
-				:target_action => 'complete_production_schedule',
-				:id_column => 'id'},:html_options => {:prompt => "Are you sure you want to complete this schedule?"}}
-	end
 
-	if can_delete
-		column_configs[column_configs.length()] = {:field_type => 'action',:field_name => 'delete',:col_width => 50,
-			:settings => 
-				 {:image => 'delete',
-				:target_action => 'delete_production_schedule',
-				:id_column => 'id'},:html_options => {:prompt => "This delete will cascade to all data associated with the schedule. Are you sure you want to do this?"}}
-	end
-	
-  column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'farm_group_code',:col_width => 135}
-	column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'iso_week_code',:col_width => 50,:column_caption => '50'}
-	column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'season_code',:col_width => 78}
-	column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'farm_pack',:col_width => 80}
+     column_configs[column_configs.length()] = {:field_type => 'action',:field_name => 're-open',:col_width => 50,
+                                                :settings =>
+                                                    {:image => 'folder_open',
+                                                     :target_action => 're_open_production_schedule',
+                                                     :id_column => 'id'}}
 
-   get_data_grid(data_set, column_configs, MesScada::GridPlugins::Production::ScheduleSetupGridPlugin.new)
+     column_configs[column_configs.length()] = {:field_type => 'action',:field_name => 'complete',:col_width => 50,
+                                                :settings =>
+                                                    {:image => 'complete',
+                                                     :target_action => 'complete_production_schedule',
+                                                     :id_column => 'id'},:html_options => {:prompt => "Are you sure you want to complete this schedule?"}}
+   end
+
+   if can_delete
+     column_configs[column_configs.length()] = {:field_type => 'action',:field_name => 'delete',:col_width => 50,
+                                                :settings =>
+                                                    {:image => 'delete',
+                                                     :target_action => 'delete_production_schedule',
+                                                     :id_column => 'id'},:html_options => {:prompt => "This delete will cascade to all data associated with the schedule. Are you sure you want to do this?"}}
+   end
+
+   column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'farm_group_code',:col_width => 135}
+   column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'iso_week_code',:col_width => 50,:column_caption => '50'}
+   column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'season_code',:col_width => 78}
+   column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'farm_pack',:col_width => 80}
+
+   return get_data_grid(data_set, column_configs, MesScada::GridPlugins::Production::ScheduleSetupGridPlugin.new,true)
 
 end
 

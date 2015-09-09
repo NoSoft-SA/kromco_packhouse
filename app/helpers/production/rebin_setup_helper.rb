@@ -235,7 +235,7 @@ end
  def build_rebin_setup_grid(data_set)
 
 	column_configs = Array.new
-	require File.dirname(__FILE__) + "/../../../app/helpers/production/rebin_setup_plugin.rb"
+	# require File.dirname(__FILE__) + "/../../../app/helpers/production/rebin_setup_plugin.rb"
 
 	column_configs[0] = {:field_type => 'text',:field_name => 'label_code',:col_width => 55}
 	column_configs[1] = {:field_type => 'text',:field_name => 'product_class_code',:col_width => 55,:column_caption => 'class'}

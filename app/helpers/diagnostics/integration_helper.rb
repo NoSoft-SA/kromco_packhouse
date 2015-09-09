@@ -355,7 +355,8 @@ def carton_setup_view(carton_setup,action)
 				:id_column => 'id'}}
     end
     
-	build_form(carton_setup,field_configs,action,'view_pallet_template',"back",nil,nil,nil,nil,CartonSetupPlugins::CartonSetupFormPlugin.new)
+	# build_form(carton_setup,field_configs,action,'view_pallet_template',"back",nil,nil,nil,nil,MesScada::GridPlugins::Production::CartonSetupFormPlugin.new)
+   build_form(carton_setup,field_configs,action,'view_pallet_template',"back",nil,nil,nil,nil,CartonSetupPlugins::CartonSetupFormPlugin.new)
 
 end
 #$$$$$$$$$$$$$$$$$

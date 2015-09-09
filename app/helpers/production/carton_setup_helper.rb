@@ -1502,7 +1502,7 @@ end
  def build_carton_setup_grid(data_set,can_edit,can_delete,multi_select = nil)
      
 	column_configs = Array.new
-	require File.dirname(__FILE__) + "/../../../app/helpers/production/carton_setup_plugin.rb"
+	# require File.dirname(__FILE__) + "/../../../app/helpers/production/carton_setup_plugin.rb"
 	
 #	----------------------
 #	define action columns
@@ -1590,7 +1590,7 @@ end
  def build_carton_setup_grid_orig(data_set,can_edit,can_delete)
 
 	column_configs = Array.new
-	require File.dirname(__FILE__) + "/../../../app/helpers/production/carton_setup_plugin.rb"
+	# require File.dirname(__FILE__) + "/../../../app/helpers/production/carton_setup_plugin.rb"
 	column_configs[0] = {:field_type => 'text',:field_name => 'color_percentage'}
 	column_configs[1] = {:field_type => 'text',:field_name => 'grade_code'}
 	column_configs[2] = {:field_type => 'text',:field_name => 'standard_size_count_value'}
@@ -1637,7 +1637,7 @@ end
 				:target_action => 'delete_carton_setup',
 				:id_column => 'id'},:html_options => {:prompt => "This delete will cascade to all data associated with the carton_setup. Are you sure you want to do this?"}}
 	end
- return get_data_grid(data_set,column_configs,CartonSetupPlugins::CartonSetupGridPlugin.new)
+ return get_data_grid(data_set,column_configs,MesScada::GridPlugins::Production::CartonSetupGridPlugin.new)
 end
 
 #---------------------------------------------------------------------------------
