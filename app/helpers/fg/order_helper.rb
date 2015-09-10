@@ -36,7 +36,7 @@ module Fg::OrderHelper
   def build_upgrade_order_form(order, action, caption, is_edit=nil, is_create_retry=nil)
       field_configs = Array.new
       combos_js_for_depots = gen_combos_clear_js_for_combos(["order_order_type_id", "order_depot_code"])
-      
+
       order_type_observer = {:updated_field_id => "depot_code_cell",
                            :remote_method =>'order_type_id_changed',
                            :on_completed_js => combos_js_for_depots["order_order_type_id"]
@@ -70,7 +70,7 @@ module Fg::OrderHelper
                            :remote_method =>'trading_partner_changed',
                            :on_completed_js =>  combos_js_for_consignee_party_role_id["order_consignee_party_role_id"]
     }
-    
+
     combos_js_for_depots = gen_combos_clear_js_for_combos(["order_order_type_id", "order_depot_code"])
     order_type_observer = {:updated_field_id => "depot_code_cell",
                            :remote_method =>'order_type_id_changed',
@@ -652,7 +652,6 @@ end
 
 
   def build_order_grid(data_set, can_edit, can_delete)
-    require File.dirname(__FILE__) + "/../../../app/helpers/fg/order_plugin.rb"
     column_configs = Array.new
     if can_edit
           column_configs[column_configs.length()] = {:field_type => 'action', :field_name => 'edit ',
@@ -715,7 +714,7 @@ end
 
 
     set_grid_min_width(1200)
-    return get_data_grid(data_set, column_configs, FgPlugins::OrderGridPlugin.new(self, request), true)
+    return get_data_grid(data_set, column_configs,  MesScada::GridPlugins::Fg::OrderGridPlugin.new(self, request), true)
 
   end
 

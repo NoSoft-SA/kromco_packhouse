@@ -197,7 +197,6 @@ module RmtProcessing::BinOrderHelper
 
 
   def build_bin_order_grid(data_set, can_edit, can_delete,can_cancel)
-    require File.dirname(__FILE__) + "/../../../app/helpers/rmt_processing/bin_order_plugin.rb"
     column_configs = Array.new
     if can_edit
       column_configs[column_configs.length()] = {:field_type => 'action', :field_name => 'edit', :col_width=>30,
@@ -242,7 +241,7 @@ module RmtProcessing::BinOrderHelper
 
     hide_grid_client_controls()
     set_grid_min_width(1200)
-    return get_data_grid(data_set, column_configs,RmtProcessingPlugins::BinOrderGridPlugin.new, true)
+    return get_data_grid(data_set, column_configs,MesScada::GridPlugins::RmtProcessing::BinOrderGridPlugin.new, true)
 
   end
 

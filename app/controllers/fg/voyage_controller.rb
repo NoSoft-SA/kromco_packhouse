@@ -1,11 +1,19 @@
 class  Fg::VoyageController < ApplicationController
- 
+
 def program_name?
 	"voyage"
 end
 
 def bypass_generic_security?
 	true
+end
+
+def order_edit_voyage
+
+  render :inline => %{<script>
+                                 parent.location.href = '/fg/voyage/edit_voyage/<%=#{params[:id].to_i}%>';
+                                 window.close();
+                                </script>}
 end
 
 def clone_voyage
@@ -126,11 +134,11 @@ def voyage_port_type_changed
       end
 end
 def list_voyages
-	return if authorise_for_web(program_name?,'read') == false 
+	return if authorise_for_web(program_name?,'read') == false
  	if params[:page]!= nil
      		session[:voyages_page] = params['page']
 		 render_list_voyages
-     return 
+     return
 	else
 		session[:voyages_page] = nil
 	end
@@ -169,7 +177,7 @@ def render_list_voyages
       }, :layout => 'content'
 end
 
- 
+
 def search_voyages_flat
   @content_header_caption = "'find voyage'"
       dm_session['se_layout'] = 'content'
@@ -203,13 +211,13 @@ def render_voyage_search_form(is_flat_search = nil)
 	session[:is_flat_search] = @is_flat_search
 #	 render (inline) the search form
 	render :inline => %{
-		<% @content_header_caption = "'search  voyages'"%> 
+		<% @content_header_caption = "'search  voyages'"%>
 
 		<%= build_voyage_search_form(nil,'submit_voyages_search','submit_voyages_search',@is_flat_search)%>
 
 		}, :layout => 'content'
 end
- 
+
 def submit_voyages_search
 	@voyages = dynamic_search(params[:voyage] ,'voyages','Voyage')
 	if @voyages.length == 0
@@ -222,7 +230,7 @@ def submit_voyages_search
 end
 
 
- 
+
 def delete_voyage
 
 	return if authorise_for_web(program_name?,'delete')== false
@@ -239,19 +247,19 @@ def delete_voyage
 	end
 
 end
- 
+
 def new_voyage
 	return if authorise_for_web(program_name?,'create')== false
 	render_new_voyage
 end
- 
+
 def create_voyage
  begin
 	 @voyage = Voyage.new(params[:voyage])
    @voyage.status="active"
 	 if @voyage.save
 
-       voyage_id = @voyage['id']    #store the id in session if in database do as that 
+       voyage_id = @voyage['id']    #store the id in session if in database do as that
        session[:voyage_id] = voyage_id
 
 		 render_edit_voyage
@@ -268,13 +276,13 @@ def render_new_voyage
 #	 render (inline) the edit template
     session[:edit_voyage]==true
 	render :inline => %{
-		<% @content_header_caption = "'create new voyage'"%> 
+		<% @content_header_caption = "'create new voyage'"%>
 
 		<%= build_voyage_form(@voyage,'create_voyage','create_voyage',false,@is_create_retry)%>
 
 		}, :layout => 'content'
 end
- 
+
 def edit_voyage
 	return if authorise_for_web(program_name?,'edit')==false
 	 if @voyage = Voyage.find( params[:id])
@@ -293,13 +301,13 @@ end
 def render_edit_voyage
 #	 render (inline) the edit template
 	render :inline => %{
-		<% @content_header_caption = "'edit voyage'"%> 
+		<% @content_header_caption = "'edit voyage'"%>
 
 		<%= build_voyage_form(@voyage,'update_voyage','update_voyage',true)%>
 
 		}, :layout => 'content'
 end
- 
+
 def update_voyage
  begin
 
@@ -318,7 +326,7 @@ rescue
 	 handle_error('record could not be saved')
 end
  end
- 
+
 def list_voyage_ports
 	return if authorise_for_web(program_name?,'read') == false
 
@@ -564,7 +572,7 @@ end
 
   end
 
-  
+
 
   #=========================
   # load voyage begins here    (2)
@@ -576,7 +584,7 @@ end
 
   def create_load_voyage
     begin
-                
+
       @load_voyage = LoadVoyage.new(params[:load_voyage])
       @load_voyage.voyage_id = session[:voyage_id]
        if @load_voyage.save
@@ -784,7 +792,7 @@ end
     id = params[:id].to_i
    load_voyage_port = LoadVoyagePort.find_by_sql("select * from load_voyage_ports where id = ' #{id}' order by id desc")[0]
    load_voyage_port.destroy
-  
+
        render :inline => %{
                       <script>
                         alert('load voyage removed');
@@ -796,14 +804,14 @@ end
 
   def select_voyage_port
    v_id = params[:id]
-  
+
    load_voyage_id = session[:load_voyage_id]
    load_voyage = LoadVoyage.find(load_voyage_id)
    session[:load_voyage_id] = load_voyage_id
    voyage_port = VoyagePort.find_by_sql("select * from voyage_ports where id = '#{v_id }' order by id desc")[0]
    voyage_port_id = voyage_port.id
    @voyage_port_id = voyage_port_id
-   
+
    @load_voyage_port = LoadVoyagePort.new
    @load_voyage_port.load_voyage_id = load_voyage_id.to_i
    @load_voyage_port.voyage_port_id = v_id.to_i
@@ -818,5 +826,5 @@ end
                             }, :layout => 'content'
 
   end
-                       
+
 end

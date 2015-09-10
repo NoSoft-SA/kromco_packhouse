@@ -378,6 +378,10 @@ class Fg::OrderProductController < ApplicationController
     end
   end
 
+  def get_load_details(order_product_id)
+    load_details =LoadDetail.find_by_sql("select * from load_details where order_product_id=#{order_product_id}")
+  end
+
 
   def delete_order_product
 
@@ -386,6 +390,16 @@ class Fg::OrderProductController < ApplicationController
 
     @order = Order.find(order_product.order_id)
     @order_id  = @order.id
+
+    load_details=get_load_details(id)
+    if !load_details.empty?
+      render :inline => %{
+           <script>
+           alert('order products cannot be deleted,referenced by load_details');
+           parent.frames[0].location.href = '/fg/order_product/render_list_order_products/<%= @order_id.to_s%>';
+           </script>
+              }, :layout => 'content' and return
+    end
     begin
       Order.transaction do
         return if authorise_for_web(program_name?, 'delete')== false

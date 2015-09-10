@@ -114,7 +114,6 @@ module Fg::LoadHelper
     end
 
   def build_pallets_grid(data_set, can_edit, can_delete,multi_select)
-    require File.dirname(__FILE__) + "/../../../app/helpers/fg/load_detail_plugins.rb"
        column_configs = Array.new
     if !session[:current_viewing_order]
        column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name => 'edit',:col_width=> 34,
@@ -146,7 +145,7 @@ module Fg::LoadHelper
       column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'remarks5',:column_caption=> Globals.get_column_captions['remarks5'],:col_width=>170}
       column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'id'}
      @multi_select = "deallocated_pallets" if  @multi_select
-           get_data_grid(data_set,column_configs,FgPlugins::LoadPalletsGridPlugin.new(self,request))
+           get_data_grid(data_set,column_configs,MesScada::GridPlugins::Fg::PalletsGridPlugin.new(self,request))
 
      end
 
@@ -332,7 +331,7 @@ module Fg::LoadHelper
 #	Define an observer for each index field
 #	--------------------------------------------------------------------------------------------------
     session[:voyage_search_form]= Hash.new
-  
+
     voyage_code = Voyage.find_by_sql('select distinct id,voyage_code from voyages').map { |g| [g.voyage_code, g.id] }
 #      voyage_descriptions = Voyage.find_by_sql('select distinct voyage_description from voyages').map{|g|[g.voyage_description]}
 #	----------------------------------------
@@ -388,7 +387,7 @@ module Fg::LoadHelper
 
     @submit_button_align = "left"
     build_form(load, field_configs, nil, 'load', caption, is_edit)
-    
+
   end
 
 
@@ -406,7 +405,7 @@ module Fg::LoadHelper
                         }
      field_configs[1] = {:field_type => 'TextField',
                         :field_name => 'required_quantity'}
-                      
+
 
     build_form(load, field_configs, action, 'load', caption, is_edit)
 
@@ -435,7 +434,6 @@ module Fg::LoadHelper
 
 
   def build_load_grid(data_set, can_edit, can_delete)
-    require File.dirname(__FILE__) + "/../../../app/helpers/fg/load_detail_plugins.rb"
 
     column_configs = Array.new
     grid_command =    {:field_type=>'link_window_field',:field_name =>'create_loads',
@@ -448,24 +446,18 @@ module Fg::LoadHelper
                              :id_value=>'id'
                              }}
 
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'load_number',:column_caption=>'load_num',:col_width=>50}
-    column_configs[column_configs.length()] ={:field_type => 'text',:field_name => 'load_status',:column_caption=>'status',:col_width=>120}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'load_number',:column_caption=>'load_num',:col_width=>80}
+    column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name =>'load_status',:column_caption=>'status',:col_width=>160 ,:settings => {:link_text => '',:target_action => 'load_status',:id_column => 'id'}}
 
-    #column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name => 'signed intake docs',:col_width=>50,:col_width=>180,
-    #                                                       :settings => {
-    #                                                           :link_text => 'list_signed_intake_docs',
-    #                                                               :target_action => 'list_signed_intake_docs',
-    #                                                               :id_column => 'id',:window_width=>500
-    #                                                               }}
+    column_configs[column_configs.length()] ={:field_type => 'link_window',:field_name => 'pallets',:column_caption=>'pallets',:col_width=>60,:settings => {:link_text => '',:target_action => 'load_status',:id_column => 'id'}}
 
-    column_configs[column_configs.length()] ={:field_type => 'text',:field_name => 'pallets',:column_caption=>'pallets',:col_width=>60}
     if !session[:current_viewing_order]
-    column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name => 'delete_load',:col_width=>50,
-                                                           :settings => {
-                                                               :link_text => '',
-                                                                   :target_action => 'delete_load',
-                                                                   :id_column => 'id'
-                                                                   }}
+    column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name => 'delete_load',:column_caption=>'delete',:col_width=>50,
+                                                           :settings => {:link_text => '',:target_action => 'delete_load',:id_column => 'id'}}
+
+
+
+
     end
     column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name => 'reports',:col_width=>50,
                                                        :settings => {
@@ -475,7 +467,7 @@ module Fg::LoadHelper
                                                                :id_column => 'id'
                                                                }}
     if !session[:current_viewing_order]
-    column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name => 'import_pallets',:col_width=>50,
+    column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name => 'import_pallets',:col_width=>150,
                                                   :settings => {
                                                       :image => 'import_pallets',
                                                           :controller    =>'fg/order',
@@ -484,7 +476,6 @@ module Fg::LoadHelper
                                                           }}
 
 end
-    #column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name => 'load_status',:settings =>{:target_action => 'load_status',:id_column => 'id'},:col_width=>100}
     column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name => 'load_details',:col_width=>72,
                                                     :settings => {
                                                         :link_text => 'load_details',
@@ -497,18 +488,8 @@ end
                                                      :link_text => '',
                                                          :target_action => 'print_pick_list',
                                                          :id_column => 'id'}}
-                                                    
-     #else
-     #    column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name => 'complete_load',:col_width=>60,
-     #                                          :settings => {
-     #                                              :link_text => '',
-     #                                                  :target_action => 'complete_load',
-     #                                                  :order_number_column => 'order_number',
-     #                                                  :id_column => 'id'
-     #                                                  }}
-  # end
 
-    column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name => 'edit_container',:col_width=>90,
+        column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name => 'edit_container',:col_width=>90,
                                                :settings => {
                                                    :link_text => '',
                                                        :target_action => 'edit_container',
@@ -531,7 +512,7 @@ column_configs[column_configs.length()] = {:field_type => 'link_window', :field_
                                                                  :id_column => 'id'
                                                                  }}
 
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'voyage_code',:col_width=> 90}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'voyage_code',:col_width=> 150}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'customer_reference', :column_caption=>'customer_ref',:col_width=> 90}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'booking_reference', :column_caption=>'booking_ref',:col_width=> 102}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'exporter_certificate_code',:col_width=> 103}
@@ -542,7 +523,7 @@ column_configs[column_configs.length()] = {:field_type => 'link_window', :field_
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'pol',:col_width=> 80}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'pod',:col_width=> 80}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'memo_pad'}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'pick_list_number',:col_width=> 80}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'pick_list_number',:col_width=> 90}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'id',:col_width=> 80}
 
 
@@ -550,9 +531,9 @@ column_configs[column_configs.length()] = {:field_type => 'link_window', :field_
     set_grid_min_width(900)
     hide_grid_client_controls()
     if !session[:current_viewing_order]
-    return get_data_grid(data_set, column_configs,FgPlugins::LoadDetailGridPlugin.new(self,request),true,grid_command)
+    return get_data_grid(data_set, column_configs,MesScada::GridPlugins::Fg::LoadGridPlugin.new(self,request),true,grid_command)
     else
-      return get_data_grid(data_set, column_configs,FgPlugins::LoadDetailGridPlugin.new(self,request),true)
+      return get_data_grid(data_set, column_configs,MesScada::GridPlugins::Fg::LoadGridPlugin.new(self,request),true)
     end
   end
 
@@ -565,7 +546,7 @@ column_configs[column_configs.length()] = {:field_type => 'link_window', :field_
     column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'status_code',:column_caption=>'load_status'}
      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'created_on'}
        return get_data_grid(data_set, column_configs)
-   
+
   end
 
   def build_load_voyage_form(load_voyage, action, caption, is_edit = nil, is_create_retry = nil)

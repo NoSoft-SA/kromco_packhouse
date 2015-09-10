@@ -1,5 +1,5 @@
 class LoadTruck < PDTTransaction
-  
+
  attr_accessor :vehicle_number,:load_order_id,:scanned_pallets,:load_vehicle_id,:pick_list_pallets ,:current_index,:load_number
 
  def initialize
@@ -18,7 +18,7 @@ class LoadTruck < PDTTransaction
     return result_screen_def
   end
 
- def scan_pick_list
+ def load_truck
    build_default_screen
  end
 
@@ -55,8 +55,8 @@ class LoadTruck < PDTTransaction
   end
 
   def load_truck_trans()
-  
-   
+
+
     ActiveRecord::Base.transaction do
       Inventory.move_stock('fg_load_truck',@load_vehicle_id.to_s,'IN_TRANSIT',self.scanned_pallets)
 
@@ -64,7 +64,7 @@ class LoadTruck < PDTTransaction
       load = Load.find(load_order.load_id)
       load.set_status("TRUCK_LOADED")
 
-     
+
        self.scanned_pallets.each do |pallet_number|
 
           load_vehicle_unit = LoadVehicleUnit.new

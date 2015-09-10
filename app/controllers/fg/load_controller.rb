@@ -1098,7 +1098,7 @@ class Fg::LoadController < ApplicationController
     session[:is_flat_search] = @is_flat_search
 #	 render (inline) the search form
     render :inline => %{
-		<% @content_header_caption = "'search  loads'"%> 
+		<% @content_header_caption = "'search  loads'"%>
 
 		<%= build_load_search_form(nil,'submit_loads_search','submit_loads_search',@is_flat_search)%>
 
@@ -1119,48 +1119,32 @@ class Fg::LoadController < ApplicationController
 
 
   def delete_load
+    return if authorise_for_web(program_name?, 'delete')== false
     load = Load.find(params[:id])
     @load_order = LoadOrder.find_by_load_id(load.id)
+    if get_load_pallets(@load_order.id).to_i > 0
+      render :inline => %{
+           <script>
+           alert('load cannot be deleted, pallets are allocated');
+           window.close();
+           </script>
+              }, :layout => 'content' and return
+    end
     load.destroy
     render :inline => %{<script>
         window.opener.frames[1].location.href = '/fg/order/edit_order/<%= @load_order.order_id.to_s%>';
         window.close();
       </script>}, :layout => "content"
 
-    #begin
-    #  Order.transaction do
-    #    return if authorise_for_web(program_name?, 'delete')== false
-    #    if params[:page]
-    #      session[:loads_page] = params['page']
-    #      render_list_loads
-    #      return
-    #    end
-    #    id = params[:id]
-    #    if id && load = Load.find(id)
-    #
-    #      # delete related load_detail
-    #
-    #      load_order   = LoadOrder.find_by_load_id(load.id)
-    #      load_details = LoadDetail.find_all_by_load_order_id(load_order.id)
-    #      for load_detail in load_details
-    #        load_detail.destroy
-    #      end
-    #      load_order.destroy
-    #      load.destroy
-    #
-    #      session[:alert] = " Record deleted."
-    #
-    #      render :inline => %{<script>
-    #                                            window.opener.frames[1].location.href = '/fg/order/edit_order/<%=@order_id.to_s%>';
-    #                                            window.close();
-    #                                    </script>}, :layout=>"content"
-    #
-    #    end
-    #  end
-    #
-    #rescue
-    #  handle_error('record could not be deleted')
-    #end
+  end
+
+  def get_load_pallets(load_order_id)
+    pallets =Pallet.find_by_sql("select  count(pallets.*) as pallets
+                                     from pallets
+                                     inner join load_details on pallets.load_detail_id=load_details.id
+                                     inner join load_orders on load_details.load_order_id=load_orders.id
+                                     inner join  loads on load_orders.load_id=loads.id
+                                    where pallets.load_detail_id IS NOT NULL and load_details.load_order_id=#{load_order_id} ")[0]['pallets']
   end
 
   def new_load
@@ -1171,7 +1155,7 @@ class Fg::LoadController < ApplicationController
   def render_new_load
 #	 render (inline) the edit template
     render :inline => %{
-		<% @content_header_caption = "'create new load'"%> 
+		<% @content_header_caption = "'create new load'"%>
 
 		<%= build_load_form(@load,'create_load','create_load',false,@is_create_retry)%>
 
