@@ -219,7 +219,7 @@ class Load < ActiveRecord::Base
           #  price_per_carton=latest_shipped_similar_order_product.price_per_carton
           #  subtotal =  price_per_carton * carton_count   if  price_per_carton
           #end
-
+          carton_count = carton_count + order_product['carton_count'].to_i
           order_product.update_attributes(:required_quantity=>carton_count, :carton_count=>carton_count, :available_quantities=> carton_count,:sequence_number=>sequence_number)
 
         end
@@ -293,7 +293,6 @@ class Load < ActiveRecord::Base
                               })
 
       Order.get_and_upgrade_prelim_orders(order_plt_nums)
-
     end
 
   end
