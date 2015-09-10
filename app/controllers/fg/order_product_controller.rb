@@ -354,14 +354,14 @@ class Fg::OrderProductController < ApplicationController
   def pair_order_product_id_to_prices
     order_product_id_to_prices = {}
     order_product_ids=[]
-    params[:order_product].each do |k, v|
+    params[:order_product].each do |k, price|
       k = k.split('_')
-      key = k.shift
-      order_product_ids << key
-      if (!order_product_id_to_prices.keys.include?(key))
-        order_product_id_to_prices.store(key, {k.join('_') => v})
+      order_product_id = k.shift
+      order_product_ids << order_product_id
+      if (!order_product_id_to_prices.keys.include?(order_product_id))
+        order_product_id_to_prices.store(order_product_id, {k.join('_') => price})
       else
-        order_product_id_to_prices[key].store(k.join('_'), v)
+        order_product_id_to_prices[order_product_id].store(k.join('_'), price)
       end
     end
     return order_product_id_to_prices, order_product_ids
