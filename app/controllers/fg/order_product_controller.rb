@@ -211,6 +211,13 @@ class Fg::OrderProductController < ApplicationController
     end
     @current_page = session[:order_products_page]
     @current_page = params['page']||= session[:order_products_page]
+    get_order_products(order_id)
+    order_product_sql="select * from order_products where id in (#{@order_products.map{|p|p.id}.join(",")})"
+    session[:query]="ActiveRecord::Base.connection.select_all(\"#{order_product_sql}\")"
+    render :template => "fg/order_products/list_order_products", :layout => "content"
+  end
+
+  def get_order_products(order_id)
     new_order_products = OrderProduct.find_by_sql("SELECT * FROM order_products WHERE order_id = '#{order_id}'")
     existing_order_products=OrderProduct.find_by_sql("
     select order_products.* from order_products
@@ -224,21 +231,21 @@ class Fg::OrderProductController < ApplicationController
     if !new_order_products.empty?
       for product in new_order_products
         order_products << product if !op.has_key?(product['id'])
-        op[product['id']]=product  if !op.has_key?(product['id'])
+        op[product['id']]=product if !op.has_key?(product['id'])
       end
     end
     if  !existing_order_products.empty?
       for o_product in existing_order_products
-              order_products << o_product if !op.has_key?(o_product['id'])
-              op[o_product['id']]= o_product  if !op.has_key?(o_product['id'])
-            end
+        order_products << o_product if !op.has_key?(o_product['id'])
+        op[o_product['id']]= o_product if !op.has_key?(o_product['id'])
+      end
     end
 
     session[:order_id] = order_id
     @multi_select=session[:multi_select]
     @order_products=[]
     if @multi_select
-      order_product_ids=LoadDetail.find_by_sql("select order_product_id from load_details where order_id=#{order_id}").map{|l|l.order_product_id}
+      order_product_ids=LoadDetail.find_by_sql("select order_product_id from load_details where order_id=#{order_id}").map { |l| l.order_product_id }
       if !order_product_ids.empty?
         for order_product in order_products
           @order_products << order_product if !order_product_ids.include?(order_product.id)
@@ -251,92 +258,33 @@ class Fg::OrderProductController < ApplicationController
       @order_products=order_products
       @caption="Order Products for Order #{@order.order_number}"
     end
-    session[:products] =  @order_products
+    session[:products] = @order_products
     if session[:current_viewing_order]
       @view_order=true
     else
       @view_order=nil
     end
-    order_product_sql="select * from order_products where id in (#{@order_products.map{|p|p.id}.join(",")})"
-    session[:query]="ActiveRecord::Base.connection.select_all(\"#{order_product_sql}\")"
-    render :template => "fg/order_products/list_order_products", :layout => "content"
   end
 
   def update_edited_order_products
     order=Order.find(session[:current_editing_order].id)
-    updates = {}
-    #subtotal=price_per_carton * carton_count
-    #order_product.update_attribute(:subtotal, "#{subtotal}")
-    order_product_ids=[]
-    params[:order_product].each do |k,v|
-      k = k.split('_')
-      key = k.shift
-      order_product_ids << key
-      #if(v.to_s.strip.length > 0)
-        if(!updates.keys.include?(key))
-          updates.store(key,{k.join('_')=>v})
-        else
-          updates[key].store(k.join('_'),v)
-        end
-      #end
-    end
-    prices_per_carton={}
-    old_prices_per_carton=[]
-    if !order_product_ids.empty?
-      order_product_ids=order_product_ids.join(",")
-      ids_prices_per_carton=OrderProduct.find_by_sql("select id,price_per_carton from order_products where id in (#{order_product_ids})")
-      old_prices_per_carton=ids_prices_per_carton.map{|l|l.price_per_carton}
-      for product in ids_prices_per_carton
-        prices_per_carton.store(product['id'],product['price_per_carton'])
-      end
-    end
-    changed_prices=[]
-    for product in prices_per_carton
-      if updates[product[0].to_s ]['price_per_carton'].to_s == product[1].to_s
-        else
-        changed_prices << product[1]
-      end
-
-    end
+    order_product_id_to_prices, order_product_ids = pair_order_product_id_to_prices()
+    changed_prices, old_prices_per_carton = get_old_and_new_prices(order_product_id_to_prices, order_product_ids)
 
     OrderProduct.transaction do
-      updates.each do |update,cond|
-        conditions = cond.map{|k,v|
+      order_product_id_to_prices.each do |update,cond|
+        prices = cond.map{|k,v|
           if(v.to_s.strip.length > 0)
             "#{k}='#{v}'"
           else
             "#{k}=NULL"
           end
         }
-        for member in conditions
-          if member.upcase.index("PRICE_PER_CARTON")
-             price =member.split("=")[1]
-             price  =price.gsub(/'/, '')
-             if price != "NULL"
-               carton_count = OrderProduct.find(update.to_i).carton_count
-               subtotal= carton_count.to_i * price.to_f
-               conditions << "subtotal" + "="  + subtotal.to_s
-             end
-          end
-        end
+        get_prices_array(prices, update)
 
-
-
-        OrderProduct.update_all(ActiveRecord::Base.extend_set_sql_with_request(conditions.join(','),"order_products"),"id = '#{update}'")
+        OrderProduct.update_all(ActiveRecord::Base.extend_set_sql_with_request(prices.join(','),"order_products"),"id = '#{update}'")
       end
-      old_prices_per_carton.delete(nil)
-      changed_prices.delete(nil)
-      if old_prices_per_carton.empty?
-         order.price_check=true
-         order.update
-       else
-         if order.price_check==true
-           if !changed_prices.empty?
-             order.price_check=false
-             order.update
-           end
-         end
-      end
+      update_price_check_on_order(changed_prices, old_prices_per_carton, order)
 
     end
     @order_id=order.id
@@ -349,6 +297,74 @@ class Fg::OrderProductController < ApplicationController
        window.parent.document.getElementById("total_order_amount_cell").innerHTML= '<%= @total%>';
        window.location.href = "render_list_order_products/<%= session[:order].id %>";
       </script>}
+  end
+
+  def update_price_check_on_order(changed_prices, old_prices_per_carton, order)
+    old_prices_per_carton.delete(nil)
+    changed_prices.delete(nil)
+    if old_prices_per_carton.empty?
+      order.price_check=true
+      order.update
+    else
+      if order.price_check==true
+        if !changed_prices.empty?
+          order.price_check=false
+          order.update
+        end
+      end
+    end
+  end
+
+  def get_prices_array(prices, update)
+    for price_o in prices
+      if price_o.upcase.index("PRICE_PER_CARTON")
+        price =price_o.split("=")[1]
+        price =price.gsub(/'/, '')
+        if price != "NULL"
+          carton_count = OrderProduct.find(update.to_i).carton_count
+          subtotal= carton_count.to_i * price.to_f
+          prices << "subtotal" + "=" + subtotal.to_s
+        end
+      end
+    end
+  end
+
+  def get_old_and_new_prices(order_product_id_to_prices, order_product_ids)
+    prices_per_carton={}
+    old_prices_per_carton=[]
+    if !order_product_ids.empty?
+      order_product_ids=order_product_ids.join(",")
+      ids_prices_per_carton=OrderProduct.find_by_sql("select id,price_per_carton from order_products where id in (#{order_product_ids})")
+      old_prices_per_carton=ids_prices_per_carton.map { |l| l.price_per_carton }
+      for product in ids_prices_per_carton
+        prices_per_carton.store(product['id'], product['price_per_carton'])
+      end
+    end
+    changed_prices=[]
+    for product in prices_per_carton
+      if order_product_id_to_prices[product[0].to_s]['price_per_carton'].to_s == product[1].to_s
+      else
+        changed_prices << product[1]
+      end
+
+    end
+    return changed_prices, old_prices_per_carton
+  end
+
+  def pair_order_product_id_to_prices
+    order_product_id_to_prices = {}
+    order_product_ids=[]
+    params[:order_product].each do |k, v|
+      k = k.split('_')
+      key = k.shift
+      order_product_ids << key
+      if (!order_product_id_to_prices.keys.include?(key))
+        order_product_id_to_prices.store(key, {k.join('_') => v})
+      else
+        order_product_id_to_prices[key].store(k.join('_'), v)
+      end
+    end
+    return order_product_id_to_prices, order_product_ids
   end
 
   def search_order_products_flat
