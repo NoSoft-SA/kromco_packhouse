@@ -1622,4 +1622,10 @@ class ApplicationController < ActionController::Base
     str.gsub('\\','\0\0').gsub(/\r\n|\n|\r/, "\\n").gsub(/["']/) { |m| "\\#{m}" }
   end
 
+  # Convert the parameters of saved changes from a grid to an Array of Hashes:
+  # [{:id => 1, :editable_column1 => 'value', :editable_column2 => 'value'}, {:id => ...}]
+  def grid_edited_values_to_array(params)
+    eval params[:grid_values]
+  end
+
 end

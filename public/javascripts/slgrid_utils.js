@@ -299,6 +299,39 @@ function saveArrayToCsv(data, filename) {
     });
   }
 
+  // Submit ids and editable values from grid.
+  function returnChangesFromGrid(gridid, action) {
+    var grid     = jQuery('#'+gridid).data('slickgrid');
+    var dataView = jQuery('#'+gridid).data('slickgridView'),
+        columns = [],
+        res = [];
+    // Map editable column ids
+    jQuery.each(grid.getColumns(), function(i,val) {
+      if(val.editor) { columns.push(val.id); }
+    });
+
+    var i,j,row, colval,rowval;
+    for(i=0;i<dataView.getLength();i++) {
+      row = dataView.getItem(i);
+      rowval = "{:id=>"+row['id'];
+      for(j=0;j<columns.length;j++) {
+        if (!row.__group) {
+          rowval += (',:'+columns[j]+"=>'"+row[columns[j]]+"'");
+        }
+      }
+      res.push(rowval+'}');
+    }
+
+    if(confirm('Are you sure you want to save these changes?')) {
+      var newform = jQuery( document.createElement('form') );
+      newform.attr('method', 'post')
+      .attr('action', action)
+      .append('<input type=\"hidden\" name=\"grid_values\" value=\"['+res.join(',')+']\" />')
+      .appendTo('body') // Required for Firefox to work.
+      .submit();
+    }
+  }
+
   // Submit multiselect choice
   function returnMultiSelectIdsFromGrid(gridid, action) {
     // var grid     = jQuery('#'+gridid).data('slickgrid');

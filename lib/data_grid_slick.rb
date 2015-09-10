@@ -45,10 +45,13 @@ module DataGridSlick
       @non_selectable_ids    = options[:non_selectable_ids]    || []
       @show_caption          = options[:show_caption]          || true
       @show_header           = options[:show_header]           || true
+      @editable              = options[:save_action]           || false
+      @save_action           = options[:save_action]
       @no_id_field           = true
       @totcount              = 0
       @pre_selected_ids      = []
 
+      raise MesScada::InfoError, "DataGrid: You cannot have an editable multi-select grid." if @multi_select && @editable
 
       #validate input data
         @empty    = true
@@ -257,6 +260,10 @@ EOS
           menu << 'multiselect'
           menu << 'savemulti'
         end
+        if @editable
+          menu << 'sep'
+          menu << 'savechanges'
+        end
       end
 
       unless @reload_url.blank?
@@ -279,6 +286,9 @@ EOS
       popup << "<button title='Apply column settings' onClick=\"getLocSlickGridCols('#{@grid_id}');\"><img src='/images/grid_icons/wand.png' width='16' height='16' /></button>"
       if @multi_select
         popup << "<button id='#{@grid_id}savemulti' title='Save selection' onClick=\"returnMultiSelectIdsFromGrid('#{@grid_id}','#{@multi_select_action}');\"><img src='/images/grid_icons/disk.png' width='16' height='16' /></button>"
+      end
+      if @editable
+        popup << "<button id='#{@grid_id}savechanges' title='Save changes' onClick=\"returnChangesFromGrid('#{@grid_id}','#{@save_action}');\"><img src='/images/grid_icons/disk.png' width='16' height='16' /></button>"
       end
       popup << "</span>"
       if 0 == @totcount
@@ -381,6 +391,8 @@ EOS
                'print'
              when 'savemulti'
                'save'
+             when 'savechanges'
+               'save'
              when 'reload'
                'refresh'
              else
@@ -397,6 +409,8 @@ EOS
                'Print grid'
              when 'savemulti'
                'Save selection'
+             when 'savechanges'
+               'Save changes'
              when 'reload'
                'Reload grid'
               else
@@ -442,6 +456,9 @@ EOS
               break;
             case 'savemulti':
               returnMultiSelectIdsFromGrid('#{@grid_id}','#{@multi_select_action}');
+              break;
+            case 'savechanges':
+              returnChangesFromGrid('#{@grid_id}','#{@save_action}');
               break;
             case 'reload':
               window.location.href = '#{@reload_url}';
@@ -503,11 +520,13 @@ EOS
         #{@context_menu}
 
   var options = {
- //   editable: true,
     enableCellNavigation: true,
-    enableTextSelectionOnCells: true,
     explicitInitialization: true,
-    autoEdit: false,
+    #{if @editable
+    'editable: true, autoEdit: true, enableTextSelectionOnCells: false,'
+    else
+    'autoEdit: false, enableTextSelectionOnCells: true,'
+    end}
     multiSelect: #{@multi_select},
     syncColumnCellResize: true,
     enableColumnReorder: true,
@@ -518,6 +537,9 @@ EOS
   var columns = #{@colmodel}
   // Change string-def of formatter to the real thing:
   for(var i = 0; i < columns.length; i++) {
+    if(columns[i].editor === 'text_editor') {
+      columns[i].editor = Slick.Editors.Text;
+    }
     if(columns[i].formatter === 'text') {
       columns[i].formatter = slickTextFormatter;
     }
@@ -902,6 +924,7 @@ EOS
         col['selectable'] = true
         col['cssClass']   = 'slk_cell_right_align' if ['integer', 'number'].include? col_config[:data_type]
         col['width']      = col_width(col_config)
+        col['editor']     = 'text_editor' if col_config[:editable] && :text == col_config[:editable]
 
         col['groupTotalsFormatter'] = 'sumTotalsFormatter' if @group_fields_to_sum.include?(col_config[:field_name])
         col['groupTotalsFormatter'] = 'cntTotalsFormatter' if @group_fields_to_count.include?(col_config[:field_name])
