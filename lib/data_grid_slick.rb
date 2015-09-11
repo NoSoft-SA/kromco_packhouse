@@ -12,6 +12,7 @@ module DataGridSlick
                   :non_selectable_ids
 
     VALID_FIELD_TYPES = %w(text action checkbox frame_link link_window action_collection)
+    VALID_EDITORS     = [:text, :checkbox, :long_text, :date, :integer]
     DEFAULT_CAPTION   = 'The Grid'
 
     def initialize(environment, data_set, column_configs, plugin = nil, key_based_access = nil, special_commands = nil, options={})
@@ -73,6 +74,7 @@ module DataGridSlick
         end
         @column_configs = column_configs
         @data_set       = data_set
+        has_editable_column = false
 
         if data_set.length > 0
           @empty        = false
@@ -92,6 +94,17 @@ module DataGridSlick
 
             unless VALID_FIELD_TYPES.include? column_config[:field_type]
               raise MesScada::InfoError, "DataGrid: The field type: #{column_config[:field_type]} is not valid. \n It must be '#{VALID_FIELD_TYPES.join("' or '")}'."
+            end
+
+            if column_config[:editor]
+              raise MesScada::InfoError, "DataGrid: The field: #{column_config[:field_name]} is editable, but there is no save_action defined." unless @editable
+              has_editable_column = true
+              unless VALID_EDITORS.include? column_config[:editor]
+                raise MesScada::InfoError, "DataGrid: The editor: #{column_config[:editor]} is not valid. \n It must be '#{VALID_EDITORS.join("' or '")}'."
+              end
+              raise MesScada::InfoError, "DataGrid: The field: #{column_config[:field_name]} is date-editable, but the data type is not a Date." if :date == column_config[:editor] && column_config[:data_type] != 'date'
+              raise MesScada::InfoError, "DataGrid: The field: #{column_config[:field_name]} is checkbox-editable, but the data type is not a Boolean." if :checkbox == column_config[:editor] && column_config[:data_type] != 'boolean'
+              raise MesScada::InfoError, "DataGrid: The field: #{column_config[:field_name]} is integer-editable, but the data type is not an Integer." if :integer == column_config[:editor] && column_config[:data_type] != 'integer'
             end
 
             # Make sure that only the last portion of the field name is used if there is a ' ' present (Only applies to data columns):
@@ -124,6 +137,10 @@ module DataGridSlick
               @grid_columns.push grid_column
 
           end
+        end
+
+        if @editable && !has_editable_column
+          @editable = false
         end
 
         @has_popup_link = !@special_commands.nil?
@@ -540,6 +557,18 @@ EOS
     if(columns[i].editor === 'text_editor') {
       columns[i].editor = Slick.Editors.Text;
     }
+    if(columns[i].editor === 'long_text_editor') {
+      columns[i].editor = Slick.Editors.LongText;
+    }
+    if(columns[i].editor === 'checkbox_editor') {
+      columns[i].editor = Slick.Editors.Checkbox;
+    }
+    if(columns[i].editor === 'date_editor') {
+      columns[i].editor = Slick.Editors.Date;
+    }
+    if(columns[i].editor === 'integer_editor') {
+      columns[i].editor = Slick.Editors.Integer;
+    }
     if(columns[i].formatter === 'text') {
       columns[i].formatter = slickTextFormatter;
     }
@@ -631,6 +660,8 @@ EOS
   #{if @multi_select
     "mygrid.setSelectionModel(new Slick.RowSelectionModel({selectActiveRow: false}));
      mygrid.registerPlugin(checkboxSelector);"
+    elsif @editable
+    "mygrid.setSelectionModel(new Slick.CellSelectionModel());"
     else
     "mygrid.setSelectionModel(new Slick.RowSelectionModel());"
     end}
@@ -924,7 +955,12 @@ EOS
         col['selectable'] = true
         col['cssClass']   = 'slk_cell_right_align' if ['integer', 'number'].include? col_config[:data_type]
         col['width']      = col_width(col_config)
-        col['editor']     = 'text_editor' if col_config[:editable] && :text == col_config[:editable]
+
+        col['editor']     = 'text_editor'      if col_config[:editor] && :text      == col_config[:editor]
+        col['editor']     = 'long_text_editor' if col_config[:editor] && :long_text == col_config[:editor]
+        col['editor']     = 'checkbox_editor'  if col_config[:editor] && :checkbox  == col_config[:editor]
+        col['editor']     = 'date_editor'      if col_config[:editor] && :date      == col_config[:editor]
+        col['editor']     = 'integer_editor'   if col_config[:editor] && :integer   == col_config[:editor]
 
         col['groupTotalsFormatter'] = 'sumTotalsFormatter' if @group_fields_to_sum.include?(col_config[:field_name])
         col['groupTotalsFormatter'] = 'cntTotalsFormatter' if @group_fields_to_count.include?(col_config[:field_name])
@@ -1005,12 +1041,13 @@ EOS
 
     # Returns javascript array of data rows.
     def build_rows
-      row_text = "var #{@grid_id}data = "
-      rows     = []
-      row_nr   = 0
-      sel_rows = (@env.grid_selected_rows || []).map { |selected_row| selected_row.id } if @multi_select
-      int_cols = @column_configs.select {|c| c[:data_type] && c[:data_type] == 'integer' }.map {|r| r[:field_name]}
-      num_cols = @column_configs.select {|c| c[:data_type] && c[:data_type] == 'number' }.map {|r| r[:field_name]}
+      row_text  = "var #{@grid_id}data = "
+      rows      = []
+      row_nr    = 0
+      sel_rows  = (@env.grid_selected_rows || []).map { |selected_row| selected_row.id } if @multi_select
+      int_cols  = @column_configs.select {|c| c[:data_type] && c[:data_type] == 'integer' }.map {|r| r[:field_name]}
+      num_cols  = @column_configs.select {|c| c[:data_type] && c[:data_type] == 'number' }.map {|r| r[:field_name]}
+      bool_cols = @column_configs.select {|c| c[:data_type] && c[:data_type] == 'boolean' }.map {|r| r[:field_name]}
 
       cols_to_format = []
       unless @plugin.nil?
@@ -1098,6 +1135,8 @@ EOS
               rescue
                 row[grid_column.field_name] = rendered_cell
               end
+            elsif bool_cols.include?(grid_column.field_name)
+              row[grid_column.field_name] = ['t','true','y','yes','0'].include?(rendered_cell) ? true : false
             else
               row[grid_column.field_name] = rendered_cell
             end

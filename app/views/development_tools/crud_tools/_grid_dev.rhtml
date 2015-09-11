@@ -1,6 +1,6 @@
 <h1>DataGridSlick::DataGrid</h1>
 
-    
+
 <h2>DataGrid for creating javascript slick grid.</h2>
 
 <p>Example (controller):</p>
@@ -97,6 +97,18 @@ Defaults to true.</p>
 <dd>
 <p>String.  If you provide a url the user will have a button to reload the
 grid which will send a request to the given url.</p>
+</dd><dt>save_action
+<dd>
+  <p>String.  The controller action to call when saving the grid. At least one column in the
+    grid must have an inline editor defined.<br><strong>NB.</strong> This attribute must be specified as an option when creating the grid (typically in the helper).<br>
+    The controller action should start with this code:<br>
+    <div class="CodeRay">
+    <pre>
+    grid_edits = grid_edited_values_to_array(params) </pre>
+    </div>
+    This will return <code>grid_edits</code> as an Array of Hashes (one Hash per row in the grid).<br>
+    Each row will have an <code>:id</code> key/value and a symbolized key/value for each editable column. e.g. <code>{:id => 1, :name => "Fred", :amt => nil, :ok => "false", :x => "2"}</code><br>
+    The values will either be nil or a String, except for the <code>:id</code> value, which will be an integer.</p>
 </dd><dt>height
 <dd>
 <p>The desired height of the grid in pixels. You should use this instead of

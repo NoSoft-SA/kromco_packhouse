@@ -1625,7 +1625,13 @@ class ApplicationController < ActionController::Base
   # Convert the parameters of saved changes from a grid to an Array of Hashes:
   # [{:id => 1, :editable_column1 => 'value', :editable_column2 => 'value'}, {:id => ...}]
   def grid_edited_values_to_array(params)
-    eval params[:grid_values]
+    eval(params[:grid_values]).map do |row|
+      row.each do |k,v|
+        if :id != k
+          row[k] = v.nil? ? v : v.gsub('%27', "'").gsub('%22', '"') # JS turned single quotes into %27 and double quotes into %22.
+        end
+      end
+    end
   end
 
 end

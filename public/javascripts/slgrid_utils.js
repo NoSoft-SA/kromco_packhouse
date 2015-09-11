@@ -299,6 +299,20 @@ function saveArrayToCsv(data, filename) {
     });
   }
 
+  function makeColSafeOrNull(val) {
+    if (val === null || val === undefined || val === '') {
+      return 'nil';
+    }
+    else {
+      if (typeof val === 'string') {
+        return "'" +val.replace(/'/g, "%27").replace(/"/g,'%22')+ "'";
+      }
+      else {
+        return "'" +val+ "'";
+      }
+    }
+  }
+
   // Submit ids and editable values from grid.
   function returnChangesFromGrid(gridid, action) {
     var grid     = jQuery('#'+gridid).data('slickgrid');
@@ -316,7 +330,7 @@ function saveArrayToCsv(data, filename) {
       rowval = "{:id=>"+row['id'];
       for(j=0;j<columns.length;j++) {
         if (!row.__group) {
-          rowval += (',:'+columns[j]+"=>'"+row[columns[j]]+"'");
+          rowval += (',:'+columns[j]+"=>"+makeColSafeOrNull(row[columns[j]]));
         }
       }
       res.push(rowval+'}');
