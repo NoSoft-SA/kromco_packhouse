@@ -315,7 +315,7 @@ def render_list_production_schedules(form_caption = nil)
 
 	@production_schedules = make_unique(@production_schedules)
 	session[:query]= session[:schedules_query]if session[:schedules_query]
-	
+
 	@caption = "'list of found production_schedules'"
 	@caption = form_caption if form_caption != nil
     render :inline => %{
@@ -323,10 +323,20 @@ def render_list_production_schedules(form_caption = nil)
       <% grid.caption    = @caption %>
       <% @header_content = grid.build_grid_data %>
 
-      <% @pagination = pagination_links(@production_schedule_pages) if @production_schedule_pages != nil %>
       <%= grid.render_html %>
       <%= grid.render_grid %>
       }, :layout => 'content'
+
+  #
+  # render :inline => %{
+  #     <% grid            = build_production_schedule_grid(@production_schedules,@can_edit,@can_delete) %>
+  #     <% grid.caption    = @caption %>
+  #     <% @header_content = grid.build_grid_data %>
+  #
+  #     <% @pagination = pagination_links(@production_schedule_pages) if @production_schedule_pages != nil %>
+  #     <%= grid.render_html %>
+  #     <%= grid.render_grid %>
+  #     }, :layout => 'content'
 end
  
 def search_production_schedules_flat

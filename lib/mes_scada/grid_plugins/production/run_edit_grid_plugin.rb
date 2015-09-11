@@ -24,13 +24,13 @@ module MesScada::GridPlugins
       def row_cell_colouring(record)
         case record['production_run_status']
           when "reconfiguring"
-            :orange
+            return :orange
           when "restored"
-            :blue
+            return :blue
           when "active"
-            :green
+            return :green
           else
-            :brown
+            return :brown
         end
       end
     end

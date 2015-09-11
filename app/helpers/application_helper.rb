@@ -345,8 +345,13 @@ end
   end
 
   # Return a DataGridJquery::DataGrid for displaying a jQuery grid.
+  # def get_data_grid(data_set, column_configs, plugin = nil, key_based_access = nil, special_commands = nil, options = {})
+  #   DataGridJquery::DataGrid.new(self, data_set, column_configs, plugin, key_based_access, special_commands, options)
+  # end
+
+  # Return a DataGridSlick::DataGrid for displaying a SlickGrid grid.
   def get_data_grid(data_set, column_configs, plugin = nil, key_based_access = nil, special_commands = nil, options = {})
-    DataGridJquery::DataGrid.new(self, data_set, column_configs, plugin, key_based_access, special_commands, options)
+    DataGridSlick::DataGrid.new(self, data_set, column_configs, plugin, key_based_access, special_commands, options)
   end
 
   #-----------------------------------------------

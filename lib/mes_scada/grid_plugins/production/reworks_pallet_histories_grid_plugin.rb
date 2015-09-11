@@ -4,6 +4,11 @@ module MesScada::GridPlugins
 
     class ReworksPalletHistoriesGridPlugin < MesScada::GridPlugin
 
+      def initialize(env = nil, request = nil)
+        @env = env
+        @request = request
+      end
+
       #---------------------------------------------------------------
       #This method allows the grid-client code to cancel the rendering
       #of a given cell
