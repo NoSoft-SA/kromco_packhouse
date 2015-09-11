@@ -1119,7 +1119,7 @@ end
  def build_pack_groups_grid(data_set,can_edit)
 
 	column_configs = Array.new
-	 # require File.dirname(__FILE__) + "/../../../app/helpers/production/run_setup_plugin.rb"
+	 require File.dirname(__FILE__) + "/../../../app/helpers/production/run_setup_plugin.rb"
 
 	column_configs[0] = {:field_type => 'text',:field_name => 'pack_group_number',:column_caption => 'group_num',:col_width => 85}
 	column_configs[1] = {:field_type => 'text',:field_name => 'production_run_number',:column_caption => 'run_num',:col_width => 85}
@@ -1148,7 +1148,7 @@ end
 
 	end
 
- return get_data_grid(data_set,column_configs,MesScada::GridPlugins::Production::PackGroupGridPlugin.new)
+ return get_data_grid(data_set,column_configs,RunSetupPlugins::PackGroupGridPlugin.new)
 
 end
 
@@ -1423,7 +1423,7 @@ end
    #each record is an instance of PackGroupOutlet
 
 	column_configs = Array.new
-	 # require File.dirname(__FILE__) + "/../../../app/helpers/production/run_setup_plugin.rb"
+	 require File.dirname(__FILE__) + "/../../../app/helpers/production/run_setup_plugin.rb"
 
 	#	----------------------
     #	define action columns
@@ -1454,14 +1454,14 @@ end
 	column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'outlet12',:col_width => 60,:column_caption => 'drop_12'}
 
 
- return get_data_grid(data_set,column_configs,MesScada::GridPlugins::Production::CountsDropsGridPlugin.new)
+ return get_data_grid(data_set,column_configs,RunSetupPlugins::CountsDropsGridPlugin.new)
 
 end
 
 def build_production_run_grid(data_set,can_edit,is_active_runs_grid = nil,run_type = nil,editing_runs=nil)
 
 	column_configs = Array.new
-	 # require File.dirname(__FILE__) + "/../../../app/helpers/production/run_setup_plugin.rb"
+	 require File.dirname(__FILE__) + "/../../../app/helpers/production/run_setup_plugin.rb"
 
 
 	column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'production_run_code',:col_width => 162}
@@ -1546,14 +1546,14 @@ def build_production_run_grid(data_set,can_edit,is_active_runs_grid = nil,run_ty
 	  end
 	end
 
- return get_data_grid(data_set,column_configs,MesScada::GridPlugins::Production::RunEditGridPlugin.new(self,request),true)
+ return get_data_grid(data_set,column_configs,RunSetupPlugins::RunEditGridPlugin.new(self,request),true)
 
 end
 
 
 def build_production_schedule_grid(data_set,can_create_run)
 
-    # require File.dirname(__FILE__) + "/../../../app/helpers/production/run_setup_plugin.rb"
+    require File.dirname(__FILE__) + "/../../../app/helpers/production/run_setup_plugin.rb"
 
     column_configs = Array.new
 
@@ -1596,8 +1596,7 @@ def build_production_schedule_grid(data_set,can_create_run)
 				:target_action => 'completed_runs',
 				:id_column => 'id'}}
 
- # return get_data_grid(data_set,column_configs,RunSetupPlugins::RunSetupGridPlugin.new)
-  get_data_grid(data_set, column_configs, MesScada::GridPlugins::Production::RunSetupGridPlugin.new)
+ return get_data_grid(data_set,column_configs,RunSetupPlugins::RunSetupGridPlugin.new)
 end
 
 
@@ -1828,7 +1827,7 @@ end
  def build_pack_stations_grid(data_set,can_edit)
 
 	column_configs = Array.new
-	 # require File.dirname(__FILE__) + "/../../../app/helpers/production/run_setup_plugin.rb"
+	 require File.dirname(__FILE__) + "/../../../app/helpers/production/run_setup_plugin.rb"
 
 	#	----------------------
 #	define action columns
@@ -1884,7 +1883,7 @@ end
 
 
 
- return get_data_grid(data_set,column_configs,MesScada::GridPlugins::Production::PackStationGridPlugin.new)
+ return get_data_grid(data_set,column_configs,RunSetupPlugins::PackStationGridPlugin.new)
 
 end
 
@@ -1995,7 +1994,7 @@ end
  def build_binfill_stations_grid(data_set,can_edit)
 
 	column_configs = Array.new
-	 # require File.dirname(__FILE__) + "/../../../app/helpers/production/run_setup_plugin.rb"
+	 require File.dirname(__FILE__) + "/../../../app/helpers/production/run_setup_plugin.rb"
 
 	 #	----------------------
 #	define action columns
@@ -2035,7 +2034,7 @@ end
 
 	column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'fg_product_code',:col_width => 324}
 
- return get_data_grid(data_set,column_configs,MesScada::GridPlugins::Production::BinfillStationGridPlugin.new)
+ return get_data_grid(data_set,column_configs,RunSetupPlugins::BinfillStationGridPlugin.new)
 
 end
 
@@ -2070,7 +2069,7 @@ def build_set_rmt_product_form_for_sorter(binfill_sort_station,action,caption)
 	field_configs[1] =  {:field_type => 'LabelField',
 						:field_name => 'production_run_number'}
 
-  field_configs[2] =  {:field_type => 'LabelField',
+    field_configs[2] =  {:field_type => 'LabelField',
 						:field_name => 'binfill_sort_station_code'}
 
 	field_configs[3] = {:field_type => 'DropDownField',
@@ -2084,7 +2083,7 @@ end
  def build_binfill_sort_stations_grid(data_set,can_edit)
 
 	column_configs = Array.new
-	 # require File.dirname(__FILE__) + "/../../../app/helpers/production/run_setup_plugin.rb"
+	 require File.dirname(__FILE__) + "/../../../app/helpers/production/run_setup_plugin.rb"
 
 	column_configs[0] = {:field_type => 'text',:field_name => 'binfill_sort_station_code',:col_width => 100}
 
@@ -2102,8 +2101,25 @@ end
 
 	end
 
- return get_data_grid(data_set,column_configs,MesScada::GridPlugins::Production::BinfillSortStationGridPlugin.new)
+ return get_data_grid(data_set,column_configs,RunSetupPlugins::BinfillSortStationGridPlugin.new)
 
 end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 end

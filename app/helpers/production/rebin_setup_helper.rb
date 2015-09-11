@@ -235,7 +235,7 @@ end
  def build_rebin_setup_grid(data_set)
 
 	column_configs = Array.new
-	# require File.dirname(__FILE__) + "/../../../app/helpers/production/rebin_setup_plugin.rb"
+	require File.dirname(__FILE__) + "/../../../app/helpers/production/rebin_setup_plugin.rb"
 
 	column_configs[0] = {:field_type => 'text',:field_name => 'label_code',:col_width => 55}
 	column_configs[1] = {:field_type => 'text',:field_name => 'product_class_code',:col_width => 55,:column_caption => 'class'}
@@ -288,8 +288,8 @@ end
 	 
 	end
 
- # return get_data_grid(data_set,column_configs,RebinSetupPlugins::RebinSetupGridPlugin.new)
-   get_data_grid(data_set, column_configs, MesScada::GridPlugins::Production::RebinSetupGridPlugin.new)
+
+ return get_data_grid(data_set,column_configs,RebinSetupPlugins::RebinSetupGridPlugin.new)
 end
 
 end

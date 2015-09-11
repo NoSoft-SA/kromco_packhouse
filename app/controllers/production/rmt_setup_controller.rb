@@ -279,7 +279,8 @@ def render_list_rmt_products
 	   end
 	   @can_setup = false if session[:current_prod_schedule]== nil
 	end
-
+	
+	
 	render :inline => %{
       <% grid            = build_rmt_product_grid(@rmt_products,false,false,true,@can_setup) %>
       <% grid.caption    = 'list of found rmt_products' %>
