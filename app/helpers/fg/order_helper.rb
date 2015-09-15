@@ -561,7 +561,7 @@ end
                                              :settings =>{
                                                      #:host_and_port => request.host_with_port.to_s,
                                                      :controller => 'fg/order_product',
-                                                     :target_action => 'render_list_order_products',
+                                                     :target_action => 'list_order_products',
                                                      :width => 1200,
                                                      :height => 250,
                                                      :id_value => order.id,

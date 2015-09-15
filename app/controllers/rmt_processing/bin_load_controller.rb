@@ -252,12 +252,12 @@ def build_error_div(validations_error)
 
       @column_configs = []
       @column_configs << {:field_type=>'text', :field_name=>'rmt_product_code',:col_width=>272}
-      @column_configs << {:field_type=>'text', :field_name=>'available_quantity',:column_caption=>'Available', :col_width => 58}
-      @column_configs << {:field_type=>'text', :field_name=>'required_quantity',:column_caption=>'Required', :col_width => 61}
-      @column_configs << {:field_type=>'text', :field_name=>'commodity_code',:column_caption=>'commodity', :col_width => 69}
+      @column_configs << {:field_type=>'text', :field_name=>'available_quantity',:column_caption=>'Available', :col_width => 100}
+      @column_configs << {:field_type=>'text', :field_name=>'required_quantity',:column_caption=>'Required', :col_width => 100}
+      @column_configs << {:field_type=>'text', :field_name=>'commodity_code',:column_caption=>'commodity', :col_width => 100}
       @column_configs << {:field_type=>'text', :field_name=>'variety_code',:column_caption=>'variety', :col_width => 81}
-      @column_configs << {:field_type=>'text', :field_name=>'product_class_code',:column_caption=>'product_class', :col_width => 90}
-      @column_configs << {:field_type=>'text', :field_name=>'size_code',:column_caption=>'size', :col_width => 50}
+      @column_configs << {:field_type=>'text', :field_name=>'product_class_code',:column_caption=>'product_class', :col_width => 110}
+      @column_configs << {:field_type=>'text', :field_name=>'size_code',:column_caption=>'size', :col_width => 75}
       @column_configs << {:field_type=>'text', :field_name=>'farm_code',:column_caption=>'farm', :col_width => 122}
       @column_configs << {:field_type=>'text', :field_name=>'location_code',:column_caption=>'location', :col_width => 138}
       @column_configs << {:field_type=>'text', :field_name=>'id'}
@@ -443,7 +443,7 @@ def build_error_div(validations_error)
         else
 
           @is_create_retry = true
-          render_new_bin_load 
+          render_new_bin_load
 
         end
 

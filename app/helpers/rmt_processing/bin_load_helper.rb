@@ -1,6 +1,6 @@
 module RmtProcessing::BinLoadHelper
- 
- 
+
+
  def build_bin_load_form(bin_load,action,caption,is_edit = nil,is_create_retry = nil)
 #	--------------------------------------------------------------------------------------------------
 #	Define a set of observers for each composite foreign key- in effect an observer per combo involved
@@ -29,7 +29,7 @@ module RmtProcessing::BinLoadHelper
 
     field_configs[field_configs.length()] = {:field_type => 'TextField',
 						:field_name => 'vehicle_license_number'}
-                                                                   
+
 	field_configs[field_configs.length()] = {:field_type => 'DropDownField',
 						:field_name => 'weigh_bridge_location_id',:settings=>{:list=>locations,:label_caption=>'weigh bridge location'}}
 
@@ -158,13 +158,13 @@ module RmtProcessing::BinLoadHelper
 	build_form(bin_load,field_configs,action,'bin_load',caption,is_edit)
 
 end
- 
- 
+
+
  def build_bin_load_search_form(bin_load,action,caption,is_flat_search = nil)
 #	--------------------------------------------------------------------------------------------------
 #	Define an observer for each index field
 #	--------------------------------------------------------------------------------------------------
-	session[:bin_load_search_form]= Hash.new 
+	session[:bin_load_search_form]= Hash.new
 	#generate javascript for the on_complete ajax event for each combo
 	#Observers for search combos
 #	----------------------------------------
@@ -184,7 +184,6 @@ end
 
 
  def  build_order_load_grid(data_set,can_edit,can_delete)
-    require File.dirname(__FILE__) + "/../../../app/helpers/rmt_processing/bin_load_plugins.rb"
 	column_configs = Array.new
 
 
@@ -204,29 +203,21 @@ end
 				:target_action => 'edit_order_load',
 				:id_column => 'id'}}
     end
-      column_configs[column_configs.length()] = {:field_type => 'link_window',:field_name => 'status_history',:col_width=>68,
+      column_configs[column_configs.length()] = {:field_type => 'link_window',:field_name => 'status_history',:col_width=>105,
              :settings =>
                 {:link_text => 'status_history',
                :target_action => 'status_history',
                :id_column => 'id'}}
 
-
-#	if can_delete
-#		column_configs << {:field_type => 'action',:field_name => 'delete bin_load',
-#			:settings =>
-#				 {:link_text => 'delete',
-#				:target_action => 'delete_bin_load',
-#				:id_column => 'id'}}
-#	end
-	column_configs[column_configs.length()]= {:field_type => 'text', :field_name => 'bin_load_num',:col_width=>89}
+	column_configs[column_configs.length()]= {:field_type => 'text', :field_name => 'bin_load_num',:col_width=>120}
     column_configs[column_configs.length()]= {:field_type => 'text', :field_name => 'status',:col_width=>130}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'haulier',:col_width=>208}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'vehicle_license_number',:col_width=>105}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'weigh_bridge_location',:col_width=>104}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'tare_mass_in',:col_width=>92}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'tare_mass_out',:col_width=>98}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'vehicle_empty_mass',:col_width=>129}
-    column_configs[column_configs.length()]= {:field_type => 'text', :field_name => 'vehicle_full_mass',:col_width=>110}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'vehicle_license_number',:col_width=>150}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'weigh_bridge_location',:col_width=>140}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'tare_mass_in',:col_width=>120}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'tare_mass_out',:col_width=>120}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'vehicle_empty_mass',:col_width=>135}
+    column_configs[column_configs.length()]= {:field_type => 'text', :field_name => 'vehicle_full_mass',:col_width=>120}
     column_configs[column_configs.length()]= {:field_type => 'text', :field_name => 'created_on',:col_width=>134}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'load_type',:col_width=>125}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'id'}
@@ -234,7 +225,7 @@ end
 #	define action columns
 #	----------------------
 
- return get_data_grid(data_set,column_configs,RmtProcessingPlugins::BinOrderLoadGridPlugin.new, true,grid_command)
+ return get_data_grid(data_set,column_configs,MesScada::GridPlugins::RmtProcessing::BinOrderLoadGridPlugin.new(self,request), true,grid_command)
 end
 
 end

@@ -86,7 +86,6 @@ end
 
 
  def build_bin_order_load_detail_grid(data_set,can_edit,can_delete)
-   require File.dirname(__FILE__) + "/../../../app/helpers/rmt_processing/bin_order_load_detail_plugins.rb"
 	column_configs = Array.new
 
 
@@ -99,7 +98,7 @@ end
     end
 
 
-  column_configs[column_configs.length()] = {:field_type => 'link_window',:field_name => 'status_history', :col_width=>75,
+  column_configs[column_configs.length()] = {:field_type => 'link_window',:field_name => 'status_history', :col_width=>100,
              :settings =>
                 {:link_text => 'status_history',
                :target_action => 'status_history',
@@ -107,7 +106,7 @@ end
 
 
     column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'status' ,:col_width=>153}
-    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'available_quantity',:column_caption=>'Available',:col_width=>58}
+    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'available_quantity',:column_caption=>'Available',:col_width=>90}
     column_configs[column_configs.length()] = {:field_type=>'link_window', :field_name=>'selected_quantity',:column_caption=>'Selected',:col_width=>58,
                                               :settings =>
                                                  {
@@ -115,10 +114,10 @@ end
                                                 :target_action => 'selected_quantity',
                                                 :id_column => 'id',:null_test => "selected_quantity == 0"}}
 
-    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'required_quantity',:column_caption=>'Required',:col_width=>61}
-    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'commodity_code',:column_caption=>'commodity',:col_width=>72}
-    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'rmt_variety_code',:column_caption=>'rmt_variety',:col_width=>73}
-    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'product_class_code',:column_caption=>'product_class',:col_width=>90}
+    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'required_quantity',:column_caption=>'Required',:col_width=>90}
+    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'commodity_code',:column_caption=>'commodity',:col_width=>105}
+    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'rmt_variety_code',:column_caption=>'rmt_variety',:col_width=>105}
+    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'product_class_code',:column_caption=>'product_class',:col_width=>100}
     column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'size_code',:column_caption=>'size',:col_width=>50}
     column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'farm_code',:column_caption=>'farm',:col_width=>122}
     column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'location_code',:column_caption=>'location',:col_width=>138}
@@ -131,7 +130,7 @@ end
   set_grid_min_height(230)
      set_grid_min_width(900)
      hide_grid_client_controls()
- return get_data_grid(data_set,column_configs,RmtProcessingPlugins::BinOrderLoadDetailGridPlugin.new,nil)
+ return get_data_grid(data_set,column_configs,MesScada::GridPlugins::RmtProcessing::BinOrderLoadDetailGridPlugin.new,nil)
 
 end
 

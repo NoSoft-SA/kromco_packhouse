@@ -211,8 +211,8 @@ module Fg::OrderProductHelper
                                :link_text => 'get_historic_pricing',
                                :id_value=>'id'
                            }}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'price_per_kg',:column_caption=>'price/kg',:format => 'default_currency',:col_width=>90}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'price_per_carton',:column_caption=>'price/carton',:format => 'default_currency',:col_width=>95}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'price_per_kg',  :editor => :text,:column_caption=>'price/kg',:format => 'default_currency',:col_width=>90}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'price_per_carton',:editor => :text,:column_caption=>'price/carton',:format => 'default_currency',:col_width=>95}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'old_fg_code',:col_width=>200}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'extended_fg_code',:col_width=>250}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'item_pack_product_code',:col_width=>250}
@@ -239,7 +239,8 @@ module Fg::OrderProductHelper
      set_grid_min_width(900)
      hide_grid_client_controls()
 
-     return  get_data_grid(data_set,column_configs,MesScada::GridPlugins::Fg::OrderProductGridPlugin.new(self, request),true,grid_command)
+
+     return  get_data_grid(data_set,column_configs,MesScada::GridPlugins::Fg::OrderProductGridPlugin.new(self, request),true,grid_command,  :save_action => '/fg/order_product/update_edited_order_products')
 
   end
 

@@ -12,7 +12,6 @@ module RmtProcessing::PresortStagingRunHelper
   end
 
   def build_bins_grid(data_set,can_edit,can_delete)
-    #require File.dirname(__FILE__) + "/../../../app/helpers/rmt_processing/bin_plugins.rb"
     column_configs = Array.new
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'bin_number',:col_width=>114}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'delivery_number',:col_width=>100}
@@ -370,7 +369,6 @@ field_configs = []
 end
 
  def build_presort_staging_run_grid(data_set,can_edit,can_delete)
-   require File.dirname(__FILE__) + "/../../../app/helpers/rmt_processing/presort_staging_run_plugin.rb"
 	column_configs = []
 #	----------------------
 #	define action columns

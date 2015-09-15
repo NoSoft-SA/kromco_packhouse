@@ -100,19 +100,18 @@ def search_bin_orders_flat
     @content_header_caption = "'search bin orders'"
     build_remote_search_engine_form("search_bin_order.yml","search_bin_orders_grid")
     dm_session[:redirect] = true
-
 end
 
 def remove_duplicate_orders(bin_orders)
    orders=[]
-   bin_orders.group_by { |a| a.order_number }.map { |p| orders << p[1][0] }
+   bin_orders.group_by { |a| a.bin_order_number }.map { |p| orders << p[1][0] }
   return orders
 end
 
 def search_bin_orders_grid
 
   @bin_orders = ActiveRecord::Base.connection.select_all(dm_session[:search_engine_query_definition])
- # @bin_orders=remove_duplicate_orders(bin_orders)
+  @bin_orders=remove_duplicate_orders(@bin_orders)
   @can_edit = authorise(program_name?,'edit',session[:user_id])
   @can_delete = authorise(program_name?,'delete',session[:user_id])
   @can_cancel=  authorise(program_name?,'cancel',session[:user_id])
@@ -343,17 +342,6 @@ def select_order_products
   bin_order_id = session[:bin_order_id]
   @rmt_products = Array.new
   for rmt_product in  rmt_products
-    #       r =  rmt_product['id']
-    #      quantity = Bin.find_by_sql("select count(bins.id) as quantity from bins
-    #            INNER JOIN bin_order_load_details ON bins.bin_order_load_detail_id = bin_order_load_details.id
-    #            INNER JOIN bin_order_loads ON bin_order_load_details.bin_order_load_id =bin_order_loads.id
-    #            INNER JOIN bin_orders ON bin_order_loads.bin_order_id =bin_orders.id
-    #            INNER JOIN bin_order_products ON bin_orders.id =bin_order_products.bin_order_id
-    #            INNER JOIN rmt_products ON rmt_products.rmt_product_code = bin_order_products.rmt_product_code
-    #            WHERE bin_orders.id = #{bin_order_id} AND rmt_products.id = #{rmt_product['id']} ")[0]['quantity']
-    #          if quantity.to_i <= 0
-    #             @rmt_products << rmt_product
-    #         end
     count = BinOrderProduct.find_by_sql("select count(bin_order_products.id) as count from bin_order_products
                                           INNER JOIN rmt_products ON rmt_products.rmt_product_code = bin_order_products.rmt_product_code
                                           WHERE bin_order_products.bin_order_id =#{bin_order_id} AND rmt_products.id = #{rmt_product['id']} ")[0]['count']
@@ -367,10 +355,10 @@ def select_order_products
 
     @column_configs = []
     @column_configs << {:field_type=>'text', :field_name=>'rmt_product_code',:col_width=>272}
-    @column_configs << {:field_type=>'text', :field_name=>'available_quantity',:column_caption=>'Available',:col_width=>58}
-    @column_configs << {:field_type=>'text', :field_name=>'commodity_code',:column_caption=>'commodity',:col_width=>69}
+    @column_configs << {:field_type=>'text', :field_name=>'available_quantity',:column_caption=>'Available',:col_width=>100}
+    @column_configs << {:field_type=>'text', :field_name=>'commodity_code',:column_caption=>'commodity',:col_width=>100}
     @column_configs << {:field_type=>'text', :field_name=>'variety_code',:column_caption=>'variety',:col_width=>81}
-    @column_configs << {:field_type=>'text', :field_name=>'product_class_code',:column_caption=>'product_class',:col_width=>90}
+    @column_configs << {:field_type=>'text', :field_name=>'product_class_code',:column_caption=>'product_class',:col_width=>110}
     @column_configs << {:field_type=>'text', :field_name=>'size_code',:column_caption=>'size',:col_width=>50}
     @column_configs << {:field_type=>'text', :field_name=>'farm_code',:column_caption=>'farm',:col_width=>122}
     @column_configs << {:field_type=>'text', :field_name=>'location_code',:column_caption=>'location',:col_width=>138}
