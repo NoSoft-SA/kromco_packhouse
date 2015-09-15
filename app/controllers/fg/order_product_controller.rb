@@ -283,17 +283,19 @@ class Fg::OrderProductController < ApplicationController
     changed_prices, old_prices_per_carton = get_old_and_new_prices(price_edits, order_product_ids)
 
     OrderProduct.transaction do
-      price_edits.each do |update,cond|
-        prices = cond.map{|k,v|
-          if(v.to_s.strip.length > 0)
-            "#{k}='#{v}'"
-          else
-            "#{k}=NULL"
-          end
+      price_edits.each do |price_edit|
+        order_product_id= price_edit[:id]
+        price_edit.delete_if { |key, value| key == :id }
+        prices = price_edit.map{|price_name,value|
+            if(value.to_s.strip.length > 0)
+              "#{price_name}='#{value}'"
+            else
+              "#{price_name}=NULL"
+            end
         }
-        get_prices_array(prices, update)
+        get_prices_array(prices,order_product_id )
 
-        OrderProduct.update_all(ActiveRecord::Base.extend_set_sql_with_request(prices.join(','),"order_products"),"id = '#{update}'")
+        OrderProduct.update_all(ActiveRecord::Base.extend_set_sql_with_request(prices.join(','),"order_products"),"id = '#{order_product_id}'")
              end
       update_price_check_on_order(changed_prices, old_prices_per_carton, order)
 
@@ -306,7 +308,7 @@ class Fg::OrderProductController < ApplicationController
     render :inline => %{
       <script>
        window.parent.document.getElementById("total_order_amount_cell").innerHTML= '<%= @total%>';
-       window.location.href = "render_list_order_products/<%= session[:order].id %>";
+       window.location.href = "list_order_products/<%= session[:order].id %>";
       </script>}
   end
 
@@ -335,6 +337,8 @@ class Fg::OrderProductController < ApplicationController
           carton_count = OrderProduct.find(update.to_i).carton_count
           subtotal= carton_count.to_i * price.to_f
           prices << "subtotal" + "=" + subtotal.to_s
+        else
+          prices << "subtotal=NULL"
     end
       end
     end

@@ -294,9 +294,9 @@ module Fg::LoadDetailHelper
          end
       end
                column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'pallet_number',:col_width=>140}
-               column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'remarks1',:column_caption=> Globals.get_column_captions['remarks1'],:col_width=>160}
-               column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'remarks2',:column_caption=> Globals.get_column_captions['remarks2'],:col_width=>160}
-               column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'remarks3',:column_caption=> Globals.get_column_captions['remarks3'],:col_width=>160}
+               column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'remarks1',:col_width=>160}
+               column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'remarks2',:col_width=>160}
+               column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'remarks3',:col_width=>160}
                column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'carton_quantity_actual',:column_caption=>'actual_qty',:col_width=>85}
                column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'holdover',:col_width=>90}
                column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'holdover_quantity',:column_caption=>'holdover_qty',:col_width=>120}
@@ -308,13 +308,13 @@ module Fg::LoadDetailHelper
                column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'grade_code',:column_caption=>'grade',:col_width=>60}
                column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'iso_week_code',:col_width=>130}
                column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'season_code',:column_caption=>'season',:col_width=>100}
-               column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'pallet_format_product_code',:col_width=>190}
+               column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'pallet_format_product_code',:col_width=>205}
                column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'pc_code',:col_width=>160}
-               column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'remarks4',:column_caption=> Globals.get_column_captions['remarks4'],:col_width=>160}
-               column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'remarks5',:column_caption=> Globals.get_column_captions['remarks5'],:col_width=>160}
+               column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'remarks4',:col_width=>160}
+               column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'remarks5',:col_width=>160}
                column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'id'}
 
-     get_data_grid(data_set,column_configs,MesScada::GridPlugins::Fg::PalletsGridPlugin.new(self,request))
+     get_data_grid(data_set,column_configs)
 
    end
 

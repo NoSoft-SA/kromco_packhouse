@@ -123,29 +123,29 @@ module Fg::LoadHelper
                                                                    :id_column => 'id'}}
        end
       column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'pallet_number',:col_width=>140}
-      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'carton_quantity_actual',:column_caption=>'actual_qty',:col_width=>60}
-      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'remarks1',:column_caption=> Globals.get_column_captions['remarks1'],:col_width=>160}
-      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'remarks2',:column_caption=> Globals.get_column_captions['remarks2'],:col_width=>160}
-      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'remarks3',:column_caption=> Globals.get_column_captions['remarks3'],:col_width=>160}
+      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'carton_quantity_actual',:column_caption=>'actual_qty',:col_width=>100}
+      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'remarks1',:col_width=>160}
+      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'remarks2',:col_width=>160}
+      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'remarks3',:col_width=>160}
 
 
-      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'holdover',:col_width=>55}
-      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'holdover_quantity',:column_caption=>'holdover_qty',:col_width=>75}
-      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'oldest_pack_date_time',:col_width=>143}
-      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'build_status',:col_width=>73}
-      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'commodity_code',:column_caption=>'commodity',:col_width=>53}
-      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'marketing_variety_code',:col_width=>78}
+      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'holdover',:col_width=>100}
+      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'holdover_quantity',:column_caption=>'holdover_qty',:col_width=>110}
+      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'oldest_pack_date_time',:col_width=>150}
+      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'build_status',:col_width=>110}
+      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'commodity_code',:column_caption=>'commodity',:col_width=>100}
+      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'marketing_variety_code',:col_width=>170}
       column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'target_market_code',:column_caption=>'target_market',:col_width=>215}
-      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'grade_code',:column_caption=>'grade',:col_width=>38}
-      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'iso_week_code',:col_width=>61}
-      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'season_code',:column_caption=>'season',:col_width=>53}
-      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'pallet_format_product_code',:col_width=>98}
+      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'grade_code',:column_caption=>'grade',:col_width=>70}
+      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'iso_week_code',:col_width=>110}
+      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'season_code',:column_caption=>'season',:col_width=>100}
+      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'pallet_format_product_code',:col_width=>170}
       column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'pc_code',:col_width=>160}
-      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'remarks4',:column_caption=> Globals.get_column_captions['remarks4'],:col_width=>170}
-      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'remarks5',:column_caption=> Globals.get_column_captions['remarks5'],:col_width=>170}
+      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'remarks4',:col_width=>170}
+      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'remarks5',:col_width=>170}
       column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'id'}
      @multi_select = "deallocated_pallets" if  @multi_select
-           get_data_grid(data_set,column_configs,MesScada::GridPlugins::Fg::PalletsGridPlugin.new(self,request))
+           get_data_grid(data_set,column_configs)
 
      end
 
