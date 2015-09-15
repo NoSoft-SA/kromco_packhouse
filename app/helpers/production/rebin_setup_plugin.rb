@@ -33,7 +33,6 @@ class RebinSetupGridPlugin < ApplicationHelper::GridPlugin
         '</strong></font>'
       
       end
-      
     
   end
  end

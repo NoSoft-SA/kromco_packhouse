@@ -296,9 +296,7 @@ end
 
 
 def render_list_production_schedules(form_caption = nil)
-    
-    
-   
+
 	@can_edit = authorise(program_name?,'edit',session[:user_id])
 	@can_delete = authorise(program_name?,'delete',session[:user_id])
 	

@@ -35,7 +35,6 @@ class ScheduleSetupGridPlugin < ApplicationHelper::GridPlugin
         '</font>' if column_name != "id"
       
       end
-      
     
   end
  end

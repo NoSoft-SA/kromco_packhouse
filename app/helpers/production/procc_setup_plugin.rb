@@ -1,8 +1,7 @@
 require File.dirname(__FILE__) + '/../../../app/helpers/application_helper.rb'
 module ProccSetupPlugins 
 class ProccSetupGridPlugin < ApplicationHelper::GridPlugin
-      
-    
+
       #---------------------------------------------------------------
       #This method allows a user to customize the styling of a cell
       #The calling method will prepend the cell text with the styling
@@ -26,7 +25,6 @@ class ProccSetupGridPlugin < ApplicationHelper::GridPlugin
         '</font>'
       
       end
-      
-    
+
   end
  end
