@@ -378,7 +378,7 @@ end
 
 def build_production_schedule_grid(data_set,can_edit,can_delete)
 
-   # require File.dirname(__FILE__) + "/../../../app/helpers/production/schedule_setup_plugin.rb"
+   require File.dirname(__FILE__) + "/../../../app/helpers/production/schedule_setup_plugin.rb"
 
    column_configs = Array.new
    #if can_edit
@@ -451,7 +451,7 @@ def build_production_schedule_grid(data_set,can_edit,can_delete)
 
    set_grid_min_height(10325)
    set_grid_min_width(7000)
-   return get_data_grid(data_set, column_configs, MesScada::GridPlugins::Production::ScheduleSetupGridPlugin.new,true)
+   return get_data_grid(data_set, column_configs, ScheduleSetupPlugins::ScheduleSetupGridPlugin.new,true)
 
 end
 

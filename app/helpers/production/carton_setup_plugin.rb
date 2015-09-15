@@ -12,13 +12,10 @@ class CartonSetupGridPlugin < ApplicationHelper::GridPlugin
       def before_cell_render_styling(column_name,cell_value,record)
         if column_name !="id"
           is_done = record.retail_item_setup != nil &&
-                     record.retail_unit_setup != nil &&
-                     record.trade_unit_setup != nil &&
-                     record.fg_setup != nil &&
-                     record.pallet_setup != nil 
-        
-        
-        
+                    record.retail_unit_setup != nil &&
+                    record.trade_unit_setup != nil &&
+                    record.fg_setup != nil &&
+                    record.pallet_setup != nil
 
         if is_done == false
         "<font color = 'red'>"
@@ -57,7 +54,7 @@ class CartonSetupGridPlugin < ApplicationHelper::GridPlugin
 	           return "red_label_field" 
 	         end
 	       
-	        when  "carton_setup_code"
+	       when  "carton_setup_code"
 	          return "blue_border_label_field" 
 	       
 	       when  "retail_unit_setup"
@@ -74,14 +71,14 @@ class CartonSetupGridPlugin < ApplicationHelper::GridPlugin
 	           return "red_label_field" 
 	         end
 	         
-	      when  "fg_setup"
+	       when  "fg_setup"
 	         if record.fg_setup
 	           return "green_label_field" 
 	         else
 	           return "red_label_field" 
 	         end
 	       
-	      when  "pallet_setup"
+	       when  "pallet_setup"
 	         if record.pallet_setup
 	           return "green_label_field" 
 	         else
@@ -98,16 +95,13 @@ class CartonSetupGridPlugin < ApplicationHelper::GridPlugin
 	   end
 	
     end
-    
-    
-     
+
 	 def override_build?
 	   true
 	 end
 	 
 	 def build_control(field_name,active_record,control)
-	   
-	   
+
 	   if field_name == "trade_unit_setup" && !active_record.retail_item_setup
 	     if !active_record.retail_unit_setup
 	      return "dependent on retail item setup and retail unit setup"
@@ -138,7 +132,8 @@ class CartonSetupGridPlugin < ApplicationHelper::GridPlugin
 	   else
 	      return nil
 	   end
-	 end
+   end
+
 end
 
 end
