@@ -23,7 +23,7 @@ module Diagnostics::PdtLogHelper
 	column_configs[5] = {:field_type => 'text',:field_name => 'menu_item'}
 
 
- return get_data_grid(data_set,column_configs,PdtPlugins::PdtLogsPlugin.new(session[:menu_items_friendly_names]))
+ return get_data_grid(data_set,column_configs,MesScada::GridPlugins::Diagnostics::PdtLogsPlugin.new(session[:menu_items_friendly_names]))
 end
 
 def build_rails_grid(data_set, can_edit, can_delete)
@@ -179,7 +179,7 @@ end
     column_configs[6] = {:field_type => 'text',:field_name => 'output_xml'}
     column_configs[5] = {:field_type => 'text',:field_name => 'menu_item'}
 
-    return get_data_grid(data_set,column_configs,PdtPlugins::PdtLastTenLogsPlugin.new(session[:menu_items_friendly_names]))
+    return get_data_grid(data_set,column_configs,MesScada::GridPlugins::Diagnostics::PdtLastTenLogsPlugin.new(session[:menu_items_friendly_names]))
    end
 
 

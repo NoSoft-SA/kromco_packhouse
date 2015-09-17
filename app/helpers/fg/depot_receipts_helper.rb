@@ -532,9 +532,6 @@ module Fg::DepotReceiptsHelper
 
   def build_intake_headers_grid(data_set, can_edit, can_delete)
 
-
-    require File.dirname(__FILE__) + "/../../../app/helpers/fg/depot_receipts_plugins.rb"
-
     column_configs = Array.new
     if can_edit
       column_configs[column_configs.length()] = {:field_type => 'action', :field_name => 'edit',:col_width => 43,
@@ -593,7 +590,7 @@ module Fg::DepotReceiptsHelper
     column_configs[column_configs.length] = {:field_type => 'text', :field_name => 'puc_code',:col_width => 80}
 
 
-    return get_data_grid(data_set, column_configs, DepotReceiptsPlugins::IntakeHeaderGridPlugin.new, true)
+    return get_data_grid(data_set, column_configs, MesScada::GridPlugins::Fg::IntakeHeaderGridPlugin.new, true)
   end
 
 

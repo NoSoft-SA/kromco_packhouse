@@ -298,8 +298,6 @@ module Fg::IntakeHelper
 
   def build_list_intake_headers_production_grid(data_set)
 
-    require File.dirname(__FILE__) + "/../../../app/helpers/fg/intake_plugins.rb"
-
     column_configs = Array.new
     puts "data_set[0]=" + data_set[0].class.to_s
      column_configs[column_configs.length()] = {:field_type => 'action',:field_name => 'change', :col_width => 44,
@@ -384,7 +382,7 @@ module Fg::IntakeHelper
 
 
 
-    return get_data_grid(data_set,column_configs,IntakePlugins::ListIntakeHeaderGridPlugin.new,true)
+    return get_data_grid(data_set,column_configs,MesScada::GridPlugins::Fg::ListIntakeHeaderGridPlugin.new,true)
   end
 
   def build_list_intake_header_pallets_grid(intake_header_pallets,is_view,has_gtin_check_rule=nil)
@@ -414,7 +412,7 @@ module Fg::IntakeHelper
     set_grid_min_height(145)
     set_grid_min_width(900)
     if(has_gtin_check_rule)
-      return get_data_grid(intake_header_pallets,column_configs,IntakePlugins::GtinCheckGridPlugin.new,true)
+      return get_data_grid(intake_header_pallets,column_configs,MesScada::GridPlugins::Fg::GtinCheckGridPlugin.new,true)
     else
       return get_data_grid(intake_header_pallets,column_configs,nil,true)
     end

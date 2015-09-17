@@ -82,7 +82,7 @@ end
        :id_column => 'id'}}
   end
   	
- return get_data_grid(data_set,column_configs,QualityControlPlugins::MrlResultGridPlugin.new)
+ return get_data_grid(data_set,column_configs,MesScada::GridPlugins::Qc::MrlResultGridPlugin.new)
 end
 
 
@@ -573,9 +573,6 @@ end
 end
 
  def build_list_commitment_grid(data_set,can_edit,can_delete,is_view)
-
-   require "app/helpers/quality_control/grower_commitment_plugins.rb"
-
   column_configs = Array.new
 	column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'certificate_number', :col_width=> 99}
 	column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'accreditation_body', :col_width=> 99}
@@ -588,21 +585,25 @@ end
 #	define action columns
 #	----------------------
 	if can_edit && !is_view
-		column_configs[column_configs.length()] = {:field_type => 'action',:field_name => 'edit_commitment', :col_width=> 35,
-			:settings =>
-				 {:image => 'edit',
-				:target_action => 'edit_commitment',
-				:id_column => 'id'}}
-	end
+    column_configs << {:field_type => 'link_window', :field_name => 'edit_commitment',
+                       :settings =>
+                           {:image => 'edit',
+                            :target_action => 'edit_commitment',
+                            :id_column => 'id',
+                            :window_width =>500,
+                            :window_height =>350}}
+  end
 
 	if can_delete && !is_view
-		column_configs[column_configs.length()] = {:field_type => 'action',:field_name => 'remove_commitment', :col_width=> 35,
-			:settings => 
-				 {:image => 'delete',
-				:target_action => 'delete_commitment',
-				:id_column => 'id'}}
+    column_configs << {:field_type => 'link_window', :field_name => 'remove_commitment',
+                       :settings =>
+                           {:image => 'delete',
+                            :target_action => 'delete_commitment',
+                            :id_column => 'id',
+                            :window_width =>500,
+                            :window_height =>350}}
 	end
   set_grid_min_height 130
- return get_data_grid(data_set,column_configs,GrowerCommitmentPlugins::CommitmentGridPlugin.new(self,request))
+ return get_data_grid(data_set,column_configs,MesScada::GridPlugins::Qc::CommitmentGridPlugin.new(self,request))
  end
 end

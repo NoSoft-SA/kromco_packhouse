@@ -195,7 +195,7 @@ end
               column_configs[7] = {:field_type => 'text',:field_name => 'mode'}
               column_configs[8] = {:field_type => 'text',:field_name => 'input_xml'}
               
- return get_data_grid(data_set,column_configs,PdtPlugins::PdtErrorsPlugin.new)
+ return get_data_grid(data_set,column_configs,MesScada::GridPlugins::Diagnostics::PdtErrorsPlugin.new)
 
 end
 
@@ -223,7 +223,7 @@ end
          column_configs[8] = {:field_type => 'text',:field_name => 'input_xml'}
 	     
          
-         return get_data_grid(data_set,column_configs,PdtPlugins::PdtErrorsPlugin.new)
+         return get_data_grid(data_set,column_configs,MesScada::GridPlugins::Diagnostics::PdtErrorsPlugin.new)
    end
 
 
