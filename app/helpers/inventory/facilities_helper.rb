@@ -5,8 +5,8 @@ module Inventory::FacilitiesHelper
     column_configs << {:field_type => 'text', :field_name => 'rmt_product_code',:col_width=>275}
     column_configs << {:field_type => 'text', :field_name => 'new_rmt_product_code',:col_width=>275}
     column_configs << {:field_type => 'text', :field_name => 'product_class_code',:col_width=>200}
-    column_configs << {:field_type => 'text', :field_name => 'ripe_point_code'}
-    column_configs << {:field_type => 'text', :field_name => 'new_ripe_point_code'}
+    column_configs << {:field_type => 'text', :field_name => 'ripe_point_code',:col_width=>160}
+    column_configs << {:field_type => 'text', :field_name => 'new_ripe_point_code',:col_width=>200}
     column_configs << {:field_type => 'text', :field_name => 'variety_code'}
     column_configs << {:field_type => 'text', :field_name => 'bins'}
     column_configs << {:field_type => 'text', :field_name => 'id'}
@@ -129,24 +129,24 @@ module Inventory::FacilitiesHelper
     column_configs                          = Array.new
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'bin_number',:col_width=>114}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'tipped_date_time',:col_width=>126}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'sealed_ca_date_time',:col_width=>126}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'delivery_number',:col_width=>100}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'sealed_ca_date_time',:col_width=>150}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'delivery_number',:col_width=>130}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'rmt_product_code',:col_width=>272}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'farm_code',:column_caption=>'farm',:col_width=>100}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'production_run_code',:col_width=>209}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'pack_material_product_code',:col_width=>113}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'bin_receive_date_time',:col_width=>119}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'pack_material_product_code',:col_width=>160}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'bin_receive_date_time',:col_width=>150}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'rebin_status',:col_width=>100}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'rebin_track_indicator_code',:col_width=>100}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'indicator_code1',:col_width=>104}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'indicator_code2',:col_width=>104}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'indicator_code3',:col_width=>104}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'indicator_code4',:col_width=>104}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'indicator_code5',:col_width=>104}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'rebin_track_indicator_code',:col_width=>160}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'indicator_code1',:col_width=>120}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'indicator_code2',:col_width=>120}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'indicator_code3',:col_width=>120}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'indicator_code4',:col_width=>120}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'indicator_code5',:col_width=>120}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'rebin_date_time',:col_width=>121}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'user_name',:col_width=>105}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'print_number',:column_caption=>'print_num',:col_width=>68}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'exit_reference_date_time',:col_width=>126}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'exit_reference_date_time',:col_width=>150}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'id'}
 
 
@@ -160,18 +160,18 @@ module Inventory::FacilitiesHelper
 
     column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'pallet_number',:col_width=>140}
     column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'oldest_pack_date_time',:col_width=>143}
-    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'carton_quantity_actual ',:column_caption=>'actual_qty',:col_width=>60}
-    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'build_status',:col_width=>73}
-    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'commodity_code',:column_caption=>'commodity',:col_width=>53}
-    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'holdover',:col_width=>55}
-    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'holdover_quantity',:column_caption=>'holdover_qty',:col_width=>75}
-    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'marketing_variety_code',:col_width=>93}
+    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'carton_quantity_actual ',:column_caption=>'actual_qty',:col_width=>100}
+    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'build_status',:col_width=>110}
+    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'commodity_code',:column_caption=>'commodity',:col_width=>100}
+    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'holdover',:col_width=>100}
+    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'holdover_quantity',:column_caption=>'holdover_qty',:col_width=>120}
+    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'marketing_variety_code',:col_width=>120}
     column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'target_market_code',:column_caption=>'target_market',:col_width=>215}
-    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'grade_code',:column_caption=>'grade',:col_width=>38}
+    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'grade_code',:column_caption=>'grade',:col_width=>80}
 
-    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'iso_week_code',:col_width=>61}
-    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'season_code',:column_caption=>'season',:col_width=>53}
-    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'pallet_format_product_code',:col_width=>98}
+    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'iso_week_code',:col_width=>120}
+    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'season_code',:column_caption=>'season',:col_width=>100}
+    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'pallet_format_product_code',:col_width=>130}
     column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'pc_code',:col_width=>160}
     column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'id'}
 
@@ -408,7 +408,6 @@ module Inventory::FacilitiesHelper
   end
 
   def build_locations_grid(data_set, can_edit, can_delete, can_view_locations_storage_rules, can_view_locations_parent_location, can_view_locations_child_locations, can_control_availability)
-    require File.dirname(__FILE__) + "/../../../app/helpers/inventory/facility_plugins.rb"
     column_configs                          = Array.new
 
     column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name => 'bins',:col_width=>34,
@@ -460,7 +459,7 @@ module Inventory::FacilitiesHelper
     end
 
     #if (can_view_locations_storage_rules)
-      column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name => 'bin location setup',:col_width=>73,
+      column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name => 'bin location setup',:col_width=>120,
                                                  :settings   =>
                                                      {:link_text     => 'bin_storage_rules',
                                                       :target_action => 'bin_storage_rules',
@@ -468,7 +467,7 @@ module Inventory::FacilitiesHelper
     #end
 
     if (can_view_locations_parent_location)
-      column_configs[column_configs.length()] = {:field_type => 'action', :field_name => 'parent_location',:col_width=>71,
+      column_configs[column_configs.length()] = {:field_type => 'action', :field_name => 'parent_location',:col_width=>100,
                                                  :settings   =>
                                                      {:link_text     => 'parent location',
                                                       :target_action => 'parent_location',
@@ -476,7 +475,7 @@ module Inventory::FacilitiesHelper
     end
 
    if (can_view_locations_child_locations)
-      column_configs[column_configs.length()] = {:field_type => 'action', :field_name => 'child_locations',:col_width=>71,
+      column_configs[column_configs.length()] = {:field_type => 'action', :field_name => 'child_locations',:col_width=>120,
                                                  :settings   =>
                                                      {:link_text     => 'child locations',
                                                       :target_action => 'child_locations',
@@ -484,20 +483,20 @@ module Inventory::FacilitiesHelper
     end
 
     if (can_control_availability)
-      column_configs[column_configs.length()] = {:field_type => 'action', :field_name => 'unavailable',:col_width=>42,
+      column_configs[column_configs.length()] = {:field_type => 'action', :field_name => 'unavailable',:col_width=>100,
                                                  :settings   =>
                                                      {:target_action => 'control_location_availability',
                                                       :id_column     => 'id'}}
     end
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'location_code',:col_width=>145}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'location_type_code',:col_width=>120}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'bay_code',:col_width=>43}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'location_barcode',:col_width=>57}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'parent_location_code',:col_width=>111}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'units_in_location',:column_caption=>'units/location',:col_width=>62}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'location_type_code',:col_width=>140}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'bay_code',:col_width=>100}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'location_barcode',:col_width=>120}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'parent_location_code',:col_width=>140}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'units_in_location',:column_caption=>'units/location',:col_width=>100}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'location_status',:col_width=>152}
     set_grid_min_width(1200)
-    return get_data_grid(data_set, column_configs, FacilityPlugins::LocationsGridPlugin.new(self, request))
+    return get_data_grid(data_set, column_configs,MesScada::GridPlugins::Facilities::LocationsGridPlugin.new(self, request))
   end
 
 #  def build_locations_iframes(child_form,action,caption,is_edit,das)
@@ -597,15 +596,15 @@ module Inventory::FacilitiesHelper
 
 
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'priority'}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'commodity_code',:column_caption=>'commodity',:col_width=>73}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'rmt_variety_code',:column_caption=>'rmt_variety',:col_width=>73}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'commodity_code',:column_caption=>'commodity',:col_width=>100}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'rmt_variety_code',:column_caption=>'rmt_variety',:col_width=>105}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'season',:col_width=>100}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'rmt_product_code',:column_caption=>'rmt product',:col_width=>100}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'track_slms_indicator_code',:column_caption=>'track slms indicator',:col_width=>115}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'rmt_product_code',:column_caption=>'rmt product',:col_width=>120}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'track_slms_indicator_code',:column_caption=>'track slms indicator',:col_width=>140}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'farm_code',:column_caption=>'farm'}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'rmt_product_type_code',:column_caption=>'rmt product type',:col_width=>55}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'rmt_product_type_code',:column_caption=>'rmt product type',:col_width=>125}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'treatment_code',:column_caption=>'treatment',:col_width=>110}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'product_class_code',:column_caption=>'product class',:col_width=>38}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'product_class_code',:column_caption=>'product class',:col_width=>100}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'ripe_point_code',:column_caption=>'ripe_point'}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'size_code'}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'assignment_code',:col_width=>973}
