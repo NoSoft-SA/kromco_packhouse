@@ -1,7 +1,6 @@
 module RmtProcessing::BinOrderLoadDetailHelper
 
    def build_bins_grid(data_set,can_edit,can_delete)
-     require File.dirname(__FILE__) + "/../../../app/helpers/rmt_processing/bin_plugins.rb"
     column_configs = Array.new
 
      column_configs << {:field_type => 'action',:field_name => 'remove_bin',:col_width=>74,
@@ -11,18 +10,18 @@ module RmtProcessing::BinOrderLoadDetailHelper
 				:id_column => 'id'}}
 
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'bin_number',:col_width=>114}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'exit_ref',:col_width=>62}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'exit_reference_date_time',:col_width=>126}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'destroyed',:col_width=>66}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'exit_ref',:col_width=>80}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'exit_reference_date_time',:col_width=>160}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'destroyed',:col_width=>100}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'tipped_date_time',:col_width=>118}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'delivery_number',:col_width=>100}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'delivery_number',:col_width=>130}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'rmt_product_code',:col_width=>272}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'farm_code',:column_caption=>'farm',:col_width=>100}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'production_run_code',:col_width=>209}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'pack_material_product_code',:col_width=>113}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'pack_material_product_code',:col_width=>150}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'bin_receive_date_time',:col_width=>119}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'rebin_status',:col_width=>100}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'rebin_track_indicator_code',:col_width=>100}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'rebin_track_indicator_code',:col_width=>160}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'indicator_code1',:col_width=>104}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'indicator_code2',:col_width=>104}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'indicator_code3',:col_width=>104}
@@ -31,15 +30,15 @@ module RmtProcessing::BinOrderLoadDetailHelper
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'rebin_date_time',:col_width=>121}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'user_name',:col_width=>105}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'print_number',:column_caption=>'print_num',:col_width=>68}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'bin_order_load_detail_id',:col_width=>141}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'bin_order_load_detail_id',:col_width=>160}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'id',:col_width=>66}
       @multi_select = "remove_bins"
 
 
     set_grid_min_width(1200)
-    return get_data_grid(data_set,column_configs,RmtProcessingPlugins::BinGridPlugin.new,true)
+    return get_data_grid(data_set,column_configs, MesScada::GridPlugins::RmtProcessing::BinGridPlugin.new())
 
-  end
+   end
 
   def  build_required_quantity_form(bin_order_load_detail, action, caption, is_edit = nil, is_create_retry = nil)
 #	--------------------------------------------------------------------------------------------------
