@@ -1,7 +1,6 @@
 module RmtProcessing::PresortStagingRunHelper
 
   def build_locations_grid(data_set,can_edit,can_delete)
-    require File.dirname(__FILE__) + "/../../../app/helpers/rmt_processing/bin_locations_plugin.rb"
     column_configs = Array.new
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'location_code',:col_width=>114}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'farm_code',:col_width=>100}
@@ -14,23 +13,22 @@ module RmtProcessing::PresortStagingRunHelper
   def build_bins_grid(data_set,can_edit,can_delete)
     column_configs = Array.new
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'bin_number',:col_width=>114}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'delivery_number',:col_width=>100}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'delivery_number',:col_width=>120}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'location_code',:col_width=>114}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'farm_code',:column_caption=>'farm',:col_width=>40}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'commodity_code',:column_caption=>'commodity',:col_width=>80}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'farm_code',:column_caption=>'farm',:col_width=>60}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'commodity_code',:column_caption=>'commodity',:col_width=>90}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'rmt_variety_code',:column_caption=>'rmt_variety',:col_width=>90}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'ripe_point_code',:column_caption=>'ripe_point',:col_width=>80}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'product_class_code',:column_caption=>'product_class',:col_width=>80}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'product_class_code',:column_caption=>'product_class',:col_width=>105}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'treatment_code',:column_caption=>'treatment',:col_width=>80}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'size_code',:column_caption=>'size',:col_width=>30}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'size_code',:column_caption=>'size',:col_width=>50}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'is_half_bin',:col_width=>100}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'orchard_code',:column_caption=>'orchard',:col_width=>100}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'production_run_tipped_id',:col_width=>209}
-    #column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'presort_staging_run_child_code',:col_width=>100}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'indicator_code1',:col_width=>104}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'destination_process_var',:col_width=>104}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'destination_process_var',:col_width=>140}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'rebin_status',:col_width=>100}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'sealed_ca_date_time',:col_width=>104}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'sealed_ca_date_time',:col_width=>140}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'created_on',:col_width=>141}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'id',:col_width=>66}
     set_grid_min_width(1200)
@@ -248,19 +246,13 @@ module RmtProcessing::PresortStagingRunHelper
       @submit_button_align = "left"
       set_form_layout "3", nil,1,15
     end
-    #if presort_staging_run.status=='EDITING'
       build_form(presort_staging_run,field_configs,action,'presort_staging_run',caption,is_edit)
-    #else
-    #  build_form(presort_staging_run,field_configs,nil,'presort_staging_run',caption,is_edit)
-    #end
 
   end
 
   def get_statuses(presort_staging_run)
     statuses=[]
     active_run =PresortStagingRun.find_by_status("ACTIVE")
-    #if presort_staging_run.id==active_run.id
-    #  statuses = ['ACTIVE','EDITING','CANCELLED']
     if presort_staging_run.status ==  'EDITING' && active_run
       statuses = ['EDITING','CANCELLED']
     elsif  presort_staging_run.status ==  'EDITING' && !active_run
@@ -395,13 +387,13 @@ end
    end
 	column_configs << {:field_type => 'text', :field_name => 'presort_run_code', :column_caption => 'Pre sort run code',:col_width=>180}
 	column_configs << {:field_type => 'text', :field_name => 'status', :column_caption => 'Status'}
-  column_configs << {:field_type => 'text', :field_name => 'rmt_variety_code'}
-  column_configs << {:field_type => 'text', :field_name => 'ripe_point_code',:col_width=>50}
-  column_configs << {:field_type => 'text', :field_name => 'track_slms_indicator_code'}
-  column_configs << {:field_type => 'text', :field_name => 'farm_group_code'}
+  column_configs << {:field_type => 'text', :field_name => 'rmt_variety_code',:col_width=>150}
+  column_configs << {:field_type => 'text', :field_name => 'ripe_point_code',:col_width=>120}
+  column_configs << {:field_type => 'text', :field_name => 'track_slms_indicator_code',:col_width=>180}
+  column_configs << {:field_type => 'text', :field_name => 'farm_group_code',:col_width=>170}
   column_configs << {:field_type => 'text', :field_name => 'season_code'}
-  column_configs << {:field_type => 'text', :field_name => 'product_class_code'}
-  column_configs << {:field_type => 'text', :field_name => 'treatment_code'}
+  column_configs << {:field_type => 'text', :field_name => 'product_class_code',:col_width=>180}
+  column_configs << {:field_type => 'text', :field_name => 'treatment_code',:col_width=>150}
   column_configs << {:field_type => 'text', :field_name => 'size_code'}
 	column_configs << {:field_type => 'text', :field_name => 'created_on', :data_type => 'date', :column_caption => 'Created on'}
 	column_configs << {:field_type => 'text', :field_name => 'completed_on', :data_type => 'date', :column_caption => 'Completed on'}
@@ -416,7 +408,6 @@ end
    column_configs << {:field_type => 'link_window', :field_name => 'active_child_runs',:settings =>{:controller => 'rmt_processing/presort_staging_run_child',:link_text=>'active_children',:target_action => 'parent_active_child_runs', :id_column => 'id'},:col_width=>57}
    column_configs << {:field_type => 'link_window', :field_name => 'editing_child_runs',:settings =>{:controller => 'rmt_processing/presort_staging_run_child',:link_text=>'editing_children',:target_action => 'parent_editing_child_runs', :id_column => 'id'},:col_width=>57}
    column_configs << {:field_type => 'link_window', :field_name => 'staged_child_runs',:settings =>{:controller => 'rmt_processing/presort_staging_run_child',:link_text=>'staged_children',:target_action => 'parent_staged_child_runs', :id_column => 'id'},:col_width=>57}
-   #column_configs << {:field_type => 'link_window', :field_name => 'child_runs',:settings =>{:target_action => '', :id_column => 'id'},:col_width=>57}
 
    get_data_grid(data_set,column_configs,MesScada::GridPlugins::RmtProcessing::PresortStagingRunPlugin.new(self,request),true)
 

@@ -1,6 +1,6 @@
 module MesScada::GridPlugins
   module RmtProcessing
-    class PresortStagingRunChildPlugin < MesScada::GridPlugin
+    class PresortStagingRunChildGridPlugin < MesScada::GridPlugin
       def initialize(env = nil, request = nil)
         @env = env
         @request = request
