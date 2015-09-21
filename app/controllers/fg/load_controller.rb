@@ -50,6 +50,19 @@ class Fg::LoadController < ApplicationController
   end
 
   def view_load_pallets
+    @load=Load.find(params[:id])
+    set_active_doc("loads",params[:id])
+
+    render :inline => %{
+            <% @content_header_caption = "'#{@caption}'" %>
+            <%= build_view_load_pallets_form(@load)%>
+
+            }, :layout => 'content'
+  end
+
+
+
+  def view_list_load_pallets
     id = params[:id].to_i
     pallets = Pallet.find_by_sql("select pallets.*
                                     from pallets
@@ -76,6 +89,42 @@ class Fg::LoadController < ApplicationController
 
 
     render_view_pallets
+  end
+
+  def  edit_pallets_remarks
+    id = params[:id].to_i
+    pallets = Pallet.find_by_sql("select pallets.*
+                                    from pallets
+                                    inner join load_details on pallets.load_detail_id=load_details.id
+                                    inner join load_orders on load_details.load_order_id=load_orders.id
+                                    inner join  loads on load_orders.load_id=loads.id
+                                    where loads.id=#{id}   ")
+    @pallets =[]
+    oderz ={}
+    if !pallets.empty?
+      for o in pallets
+        @pallets << o if !oderz.has_key?(o['pallet_number'])
+        oderz[o['pallet_number']]=[o['pallet_number']]
+      end
+    end
+    session[:load_pallets]=@pallets
+    session[:query]= @pallets
+    session[:load_id] = id
+    @pagination_server = "list_load_details"
+    @can_edit = authorise(program_name?, 'edit', session[:user_id])
+    @can_delete = authorise(program_name?, 'delete', session[:user_id])
+    @current_page = session[:load_details_page]
+    @current_page = params['page']||= session[:load_details_page]
+    @pallets = eval(session[:query]) if !@pallets
+    render :inline => %{
+      <% grid            = build_edit_pallets_grid(@pallets) %>
+      <% grid.caption    = "'Edit Pallet Remarks'" %>
+      <% @header_content = grid.build_grid_data %>
+
+      <% @pagination = pagination_links(@order_pages) if @order_pages != nil %>
+      <%= grid.render_html %>
+      <%= grid.render_grid %>
+      }, :layout => 'content'
   end
 
   def render_view_pallets
@@ -105,36 +154,35 @@ class Fg::LoadController < ApplicationController
   end
 
   def update_edited_load_pallets
-    updates = {}
-    params[:load_pallet].each do |k,v|
-      k = k.split('_')
-      key = k.shift
-      if(!updates.keys.include?(key))
-        updates.store(key,{k.join('_')=>v})
-      else
-        updates[key].store(k.join('_'),v)
-      end
-    end
+
+    remarks_edits = grid_edited_values_to_array(params)
 
     Pallet.transaction do
-      updates.each do |update,cond|
-        conditions = cond.map{|k,v|
-          if(v.to_s.strip.length > 0)
-            "#{k}='#{v}'"
-          else
-            "#{k}=NULL"
-          end
-        }
-        Pallet.update_all(ActiveRecord::Base.extend_set_sql_with_request(conditions.join(','),"pallets"),"id = '#{update}'")
-      end
-    end
+      remarks_edits.each do |remark_edit|
+          pallet_id= remark_edit[:id]
+          remark_edit.delete_if { |key, value| key == :id }
+          remarks = remark_edit.map{|remark_name,value|
+            if(value.to_s.strip.length > 0)
+              "#{remark_name}='#{value}'"
+            else
+              "#{remark_name}=NULL"
+            end
+          }
+          Pallet.update_all(ActiveRecord::Base.extend_set_sql_with_request(remarks.join(','),"pallets"),"id = '#{pallet_id}'")
+         end
 
-    session[:alert]  = "load pallets edited successfully"
-    render :inline => %{
-      <script>
-        window.close();
-        //window.opener.frames[1].frames[1].location.href = "list_loads/<%= session[:order].id %>";
-      </script>}, :layout => 'content'
+    end
+   @load_id= session[:active_doc]['loads']
+    render :inline => %{<script>
+                                  window.parent.location.href = '/fg/load/view_load_pallets/<%=@load_id%>';
+                                  //window.location.href = '/fg/load/reload_pallets_form/<%=@load_id%>';
+
+                            </script>}
+
+  end
+
+  def reload_pallets_form
+    view_load_pallets
   end
 
   def deallocated_pallets

@@ -647,7 +647,7 @@ end
     column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'party_name', :column_caption=>'trading_partner'}
     column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'role_name', :column_caption=>' party name'}
 
-    return get_data_grid(data_set, column_configs, FgPlugins::SearchOrderGridPlugin.new, true)
+    return get_data_grid(data_set, column_configs, MesScada::GridPlugins::Fg::SearchOrderGridPlugin.new, true)
   end
 
 
@@ -670,21 +670,26 @@ end
                                                               :id_column => 'id'
                                                               }}
 
-    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'order_number',:column_caption=>'order_num',:col_width=>69}
-    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'order_type_code',:col_width=>69}
+    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'order_number',:column_caption=>'order_num',:col_width=>90}
+    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'order_type_code',:col_width=>120}
     column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'customer_contact_name',:column_caption=>'customer',:col_width=>212}
-    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'customer_order_number',:column_caption=>'cust_order_num',:col_width=>100}
-    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'consignee_party_name', :column_caption=>'trading_partner',:col_width=>72}
+    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'customer_order_number',:column_caption=>'cust_order_num',:col_width=>120}
+    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'consignee_party_name', :column_caption=>'trading_partner',:col_width=>120}
     column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'created_by',:column_caption=>'username'}
     column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'booking_reference',:column_caption=>'booking_ref',:col_width=>110}
-    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'depot_code',:col_width=>76}
+    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'depot_code',:col_width=>100}
     column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'customer_party_name', :column_caption=>'party name',:col_width=>79}
     column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'updated_at',:col_width=>124}
     column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'order_status',:col_width=>103}
     column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'load_status',:col_width=>109}
-    column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name => 'test_upgrade',:settings =>{:target_action => '',:id_column => 'id'}}
+    column_configs[column_configs.length()] = {:field_type => 'action', :field_name => 'test_upgrade',:col_width=>100,
+                                               :settings =>
+                                                   {:link_text => '',
+                                                    :target_action => 'test_upgrade',
+                                                    :id_column => 'id'}}
+
     column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name => 'upgrade_order',
-                                                :col_width=>36,
+                                                :col_width=>100,
                                                  :settings =>
                                                          {
                                                           :target_action => 'upgrade_order',

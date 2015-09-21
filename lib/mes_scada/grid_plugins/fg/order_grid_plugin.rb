@@ -7,9 +7,8 @@ module MesScada::GridPlugins
       end
 
       def render_cell(column_name, cell_value, record)
-        cell_value=cell_value
         if column_name=="test_upgrade" && (@env.session.data[:mo_and_mq_orders_not_ready]==true &&(record.order_type_code.strip=="MO" || record.order_type_code.strip=="MQ"))
-          cell_value= make_action("http://#{@request.host_with_port}/"+"fg/order/test_upgrade_prelim_order" + "/" + record['id'].to_s,'test_upgrade')
+          cell_value= make_action("http://#{@request.host_with_port}/"+"fg/order/test_upgrade_prelim_order" + "/" +record['id'].to_s,'test_upgrade')
         end
         if column_name=="upgrade_order"  && (record.order_type_code.strip=="MO" || record.order_type_code.strip=="MQ") && (record['not_all_pallets_is_stock']==nil || record['not_all_pallets_is_stock']==false || record['not_all_pallets_is_stock']=="f")
           cell_value= make_link_window("http://#{@request.host_with_port}/"+"#{@request.path_parameters['controller']}/upgrade_order/#{record['id']}","upgrade_order")
