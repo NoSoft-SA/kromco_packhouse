@@ -1111,7 +1111,7 @@ module Production::ReworksHelper
 
   def build_rw_rebins_grid(data_set)
 
-    require File.dirname(__FILE__) + "/../../../app/helpers/production/reworks_received_items_plugin.rb"
+    #require File.dirname(__FILE__) + "/../../../app/helpers/production/reworks_received_items_plugin.rb"
 
     column_configs = Array.new
     if @bulk_rebin_update_permission||@bulk_rebin_update_permission_ltd
@@ -1154,14 +1154,14 @@ module Production::ReworksHelper
 
 
     set_grid_min_width(1200)
-    return get_data_grid(data_set, column_configs, ReworksPlugins::ReworksReceivedRebinsPlugin.new)
+    return get_data_grid(data_set, column_configs, MesScada::GridPlugins::Production::ReworksReceivedRebinsGridPlugin.new)
 
   end
 
 
   def build_rw_bins_grid(data_set,tip_bins,scrap_bins)
 
-    require File.dirname(__FILE__) + "/../../../app/helpers/production/reworks_received_items_plugin.rb"
+    #require File.dirname(__FILE__) + "/../../../app/helpers/production/reworks_received_items_plugin.rb"
 
     column_configs = Array.new
     if @bulk_bin_update_permission||@bulk_bin_update_permission_ltd
@@ -1252,7 +1252,7 @@ module Production::ReworksHelper
 
     set_grid_min_width(1200)
     if tip_bins==nil && scrap_bins==nil
-     return get_data_grid(data_set, column_configs, ReworksPlugins::ReworksReceivedBinsPlugin.new,true)
+     return get_data_grid(data_set, column_configs, MesScada::GridPlugins::Production::ReworksReceivedBinsGridPlugin.new,true)
     else
      return get_data_grid(data_set, column_configs)
     end
@@ -1305,7 +1305,7 @@ module Production::ReworksHelper
   def build_rw_cartons_grid(data_set, is_pallet_cartons = nil)
 
     column_configs = Array.new
-    require File.dirname(__FILE__) + "/../../../app/helpers/production/reworks_received_items_plugin.rb"
+    #require File.dirname(__FILE__) + "/../../../app/helpers/production/reworks_received_items_plugin.rb"
     if @can_control_run == true
       column_configs[column_configs.length()] = {:field_type => 'action', :field_name => 'reclassify',:col_width =>  35,
                                                  :settings =>
@@ -1811,7 +1811,7 @@ module Production::ReworksHelper
   def build_rw_pallets_grid(data_set)
 
     column_configs = Array.new
-    require File.dirname(__FILE__) + "/../../../app/helpers/production/reworks_received_items_plugin.rb"
+    #require File.dirname(__FILE__) + "/../../../app/helpers/production/reworks_received_items_plugin.rb"
      if @can_do_buildup
       column_configs[column_configs.length()] = {:field_type => 'action', :field_name => 'buildup',:col_width =>  39,
                                                  :settings =>
@@ -1912,7 +1912,7 @@ module Production::ReworksHelper
 
 
 
-    return get_data_grid(data_set, column_configs, ReworksPlugins::ReworksReceivedPalletsPlugin.new)
+    return get_data_grid(data_set, column_configs, MesScada::GridPlugins::Production::ReworksReceivedPalletsGridPlugin.new)
 
   end
 
@@ -3053,7 +3053,7 @@ module Production::ReworksHelper
   def build_rw_tipped_bins_grid(data_set)
 
     column_configs = Array.new
-    require File.dirname(__FILE__) + "/../../../app/helpers/production/reworks_received_items_plugin.rb"
+    #require File.dirname(__FILE__) + "/../../../app/helpers/production/reworks_received_items_plugin.rb"
 
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'bin_id'}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'production_schedule_name'}
@@ -3078,7 +3078,7 @@ module Production::ReworksHelper
                                                           :id_column => 'id'}}
     end
 
-    return get_data_grid(data_set, column_configs, ReworksPlugins::ReworksReceivedTippedBinsPlugin.new)
+    return get_data_grid(data_set, column_configs, MesScada::GridPlugins::Production::ReworksReceivedTippedBinsGridPlugin.new)
 
   end
 
@@ -3225,7 +3225,7 @@ module Production::ReworksHelper
   end
 
   def build_pallet_histories_grid(data_set)
-    require File.dirname(__FILE__) + "/../../../app/helpers/production/reworks_received_items_plugin.rb"
+    #require File.dirname(__FILE__) + "/../../../app/helpers/production/reworks_received_items_plugin.rb"
     column_configs = []
 
     column_configs << {:field_type => 'link_window',:field_name => 'diff',
@@ -3325,11 +3325,11 @@ module Production::ReworksHelper
     column_configs << {:field_type => 'text', :field_name => 'rw_scrap_datetime'}
     column_configs << {:field_type => 'text', :field_name => 'user_name'}
 
-    return get_data_grid(data_set, column_configs, ReworksPlugins::PalletHistoriesPlugin.new, true)
+    return get_data_grid(data_set, column_configs, MesScada::GridPlugins::Production::PalletHistoriesGridPlugin.new, true)
   end
 
   def build_carton_histories_grid(data_set)
-    require File.dirname(__FILE__) + "/../../../app/helpers/production/reworks_received_items_plugin.rb"
+    #require File.dirname(__FILE__) + "/../../../app/helpers/production/reworks_received_items_plugin.rb"
     column_configs = []
 
     column_configs << {:field_type => 'link_window',:field_name => 'diff',
@@ -3455,7 +3455,7 @@ module Production::ReworksHelper
     column_configs << {:field_type => 'text', :field_name => 'id'}
     column_configs << {:field_type => 'text', :field_name => 'actual_size_count_code'}
 
-    return get_data_grid(data_set, column_configs, ReworksPlugins::PalletHistoriesPlugin.new, true)
+    return get_data_grid(data_set, column_configs, MesScada::GridPlugins::Production::ReworksPalletHistoriesGridPlugin.new, true)
   end
 
   def build_bin_histories_grid(data_set)

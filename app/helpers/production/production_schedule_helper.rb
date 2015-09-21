@@ -378,7 +378,7 @@ end
 
  def build_production_schedule_grid(data_set,can_edit,can_delete)
 
-  require File.dirname(__FILE__) + "/../../../app/helpers/production/schedule_setup_plugin.rb"
+  #require File.dirname(__FILE__) + "/../../../app/helpers/production/schedule_setup_plugin.rb"
 
 	column_configs = Array.new
 	#if can_edit
@@ -449,7 +449,7 @@ end
 	column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'season_code',:col_width => 78}
 	column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'farm_pack',:col_width => 80}
 	
- return get_data_grid(data_set,column_configs,ScheduleSetupPlugins::ScheduleSetupGridPlugin.new)
+ return get_data_grid(data_set,column_configs,MesScada::GridPlugins::Production::ScheduleSetupGridPlugin.new)
 
 end
 

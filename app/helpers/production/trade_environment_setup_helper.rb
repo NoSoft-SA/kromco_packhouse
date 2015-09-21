@@ -9,7 +9,7 @@ module Production::TradeEnvironmentSetupHelper
 
     field_configs = Array.new
 #	---------------------------------
-#	 Define fields to build form from
+#	 Define fields to build form fromd
 #	---------------------------------
     field_configs[0] = {:field_type => 'LabelField',
 						:field_name => 'trade_env_code'}
