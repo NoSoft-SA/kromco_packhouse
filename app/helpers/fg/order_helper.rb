@@ -1,7 +1,6 @@
 module Fg::OrderHelper
 
   def build_load_pallets_consignment_note_numbers_grid(consignment_note_numbers)
-      require File.dirname(__FILE__) + "/../../../app/helpers/fg/load_detail_plugins.rb"
 
       column_configs = []
       column_configs << {:field_type => 'text', :field_name => 'consignment_note_number',:col_width=> 180}
@@ -615,7 +614,6 @@ end
 
 
   def build_search_order_grid(data_set, can_edit, can_delete)
-     require File.dirname(__FILE__) + "/../../../app/helpers/fg/search_order_plugin.rb"
     column_configs = Array.new
     if can_edit
       column_configs[column_configs.length()] = {:field_type => 'action', :field_name => 'edit order',
