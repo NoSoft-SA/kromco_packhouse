@@ -75,6 +75,8 @@ class Fg::LoadController < ApplicationController
   def view_load_pallets
     id = params[:id].to_i
     set_active_doc("loads",params[:id])
+    load_status=Load.find(session[:active_doc]['loads']).load_status
+
     pallets = Pallet.find_by_sql("select pallets.*
                                     from pallets
                                     inner join load_details on pallets.load_detail_id=load_details.id
@@ -93,7 +95,12 @@ class Fg::LoadController < ApplicationController
     session[:query]= @pallets
     session[:load_id] = id
     if !session[:current_viewing_order]
+      if ( load_status.upcase =='SHIPPED' ||  load_status.upcase =='COMPLETED' )
+        @multi_select=nil
+
+      else
       @multi_select="deallocated_pallets"
+        end
   else
     @multi_select=nil
   end
@@ -244,6 +251,7 @@ class Fg::LoadController < ApplicationController
 
     @load = @order.create_loads
     if @load.load_status == "LOAD_CREATED"
+      set_active_doc("loads",@load.id)
       render :inline => %{
                         <script>
                         alert('LOAD_CREATED');

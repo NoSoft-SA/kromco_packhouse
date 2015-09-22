@@ -586,7 +586,7 @@ end
     action_configs << {:field_type => 'sub_menu', :field_name => 'sub_menu', :column_caption => 'Show', :settings => {:actions => show_menu}}
     action_configs << {:field_type => 'sub_menu', :field_name => 'sub_menu', :column_caption => 'Action', :settings => {:actions => action_menu}}
     column_configs << {:field_type => 'action_collection', :field_name => 'actions', :settings => {:actions => action_configs}} unless action_configs.empty?
-    column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name =>'load_status',:column_caption=>'status',:col_width=>160 ,:settings => {:link_text => '',:target_action => 'load_status',:id_column => 'id'}}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name =>'load_status',:column_caption=>'status',:col_width=>100}
     column_configs[column_configs.length()] = {:field_type => 'link_window',:field_name => 'pallets',:column_caption=>'pallets',:col_width=>60, :width => 1200,
                                                :height => 1500,:settings => {:link_icon=>'pallets' ,:link_text => '',:target_action => '',:id_column => 'id'}}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'voyage_code',:col_width=> 150}

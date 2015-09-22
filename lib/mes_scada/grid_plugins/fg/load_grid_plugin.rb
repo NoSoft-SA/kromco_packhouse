@@ -66,9 +66,9 @@ module MesScada::GridPlugins
       end
       cell_value= make_link_window("http://#{@request.host_with_port}/"+"#{@request.path_parameters['controller']}/view_load_pallets/#{record['id']}", count.to_s)
     end
-    if column_name=="load_status"
-      cell_value= make_link_window("http://#{@request.host_with_port}/"+"#{@request.path_parameters['controller']}/load_status/#{record['id']}",record["load_status"])
-    end
+    #if column_name=="load_status"
+    #  cell_value= make_link_window("http://#{@request.host_with_port}/"+"#{@request.path_parameters['controller']}/load_status/#{record['id']}",record["load_status"])
+    #end
       cell_value
   end
 
