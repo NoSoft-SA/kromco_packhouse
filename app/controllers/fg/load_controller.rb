@@ -216,8 +216,8 @@ class Fg::LoadController < ApplicationController
     @order_id=order.id
     render :inline => %{<script>
                   alert('pallets deallocated');
-                  window.opener.frames[1].location.href = '/fg/order/edit_order/<%=@order_id.to_s%>';
-                  window.close();
+                  window.parent.opener.frames[1].location.href = '/fg/order/edit_order/<%=@order_id.to_s%>';
+                  window.parent.close();
           </script>}, :layout => "content"
 
 
