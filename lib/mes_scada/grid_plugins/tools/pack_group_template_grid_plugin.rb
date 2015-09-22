@@ -2,7 +2,7 @@ module MesScada::GridPlugins
 
   module Tools
 
-    class CountsDropsTemplateGridPlugin < MesScada::GridPlugin
+    class PackGroupTemplateGridPlugin < MesScada::GridPlugin
 
       def initialize(env = nil, request = nil)
         @env = env

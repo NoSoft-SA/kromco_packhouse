@@ -2,7 +2,7 @@ module MesScada::GridPlugins
 
   module Tools
 
-    class MesMafCompareGridPlugin < MesScada::GridPlugin
+    class MesMafComparerGridPlugin < MesScada::GridPlugin
 
       def initialize(env = nil, request = nil)
         @env = env
