@@ -1,6 +1,6 @@
 module RmtProcessing::BinOrderProductHelper
- 
- 
+
+
  def build_bin_order_product_form(bin_order_product,action,caption,is_edit = nil,is_create_retry = nil)
 #	--------------------------------------------------------------------------------------------------
 #	Define a set of observers for each composite foreign key- in effect an observer per combo involved
@@ -21,7 +21,7 @@ module RmtProcessing::BinOrderProductHelper
 	field_configs[0] =  {:field_type => 'DropDownField',
 						:field_name => 'rmt_product_code',
 						:settings => {:list => rmt_product_codes}}
- 
+
 	field_configs[1] = {:field_type => 'TextField',
 						:field_name => 'order_quantity'}
 
@@ -32,17 +32,17 @@ module RmtProcessing::BinOrderProductHelper
 						:field_name => 'id',
 						:settings => {:list => ids}}
 
- 
+
 	build_form(bin_order_product,field_configs,action,'bin_order_product',caption,is_edit)
 
 end
- 
- 
+
+
  def build_bin_order_product_search_form(bin_order_product,action,caption,is_flat_search = nil)
 #	--------------------------------------------------------------------------------------------------
 #	Define an observer for each index field
 #	--------------------------------------------------------------------------------------------------
-	session[:bin_order_product_search_form]= Hash.new 
+	session[:bin_order_product_search_form]= Hash.new
 	#generate javascript for the on_complete ajax event for each combo
 	#Observers for search combos
 #	----------------------------------------
@@ -62,7 +62,6 @@ end
 
 
  def build_bin_order_product_grid(data_set,can_edit,can_delete)
-   require File.dirname(__FILE__) + "/../../../app/helpers/rmt_processing/bin_order_product_plugins.rb"
    column_configs = Array.new
 
 
@@ -84,7 +83,7 @@ end
    end
 
    column_configs << {:field_type => 'link_window',:field_name => 'status_history',
-     :col_width => 75,
+     :col_width => 105,
      :settings =>
    {:link_text => 'status_history',
      :target_action => 'status_history',
@@ -92,13 +91,13 @@ end
 
 
    column_configs << {:field_type=>'text', :field_name=>'status',             :col_width => 181}
-   column_configs << {:field_type=>'text', :field_name=>'available_quantity', :col_width => 58, :column_caption => 'Available'}
-   column_configs << {:field_type=>'text', :field_name=>'selected_quantity',  :col_width => 58, :column_caption => 'Selected'}
-   column_configs << {:field_type=>'text', :field_name=>'required_quantity',  :col_width => 61, :column_caption => 'Required'}
-   column_configs << {:field_type=>'text', :field_name=>'commodity_code',:column_caption=>'commodity' ,    :col_width => 69}
-   column_configs << {:field_type=>'text', :field_name=>'rmt_variety_code', :column_caption=>'rmt_variety' ,  :col_width => 73}
-   column_configs << {:field_type=>'text', :field_name=>'product_class_code',:column_caption=>'product_class' , :col_width => 90}
-   column_configs << {:field_type=>'text', :field_name=>'size_code',:column_caption=>'size', :col_width => 50 }
+   column_configs << {:field_type=>'text', :field_name=>'available_quantity', :col_width => 90, :column_caption => 'Available'}
+   column_configs << {:field_type=>'text', :field_name=>'selected_quantity',  :col_width => 90, :column_caption => 'Selected'}
+   column_configs << {:field_type=>'text', :field_name=>'required_quantity',  :col_width => 90, :column_caption => 'Required'}
+   column_configs << {:field_type=>'text', :field_name=>'commodity_code',:column_caption=>'commodity' ,    :col_width => 105}
+   column_configs << {:field_type=>'text', :field_name=>'rmt_variety_code', :column_caption=>'rmt_variety' ,  :col_width => 125}
+   column_configs << {:field_type=>'text', :field_name=>'product_class_code',:column_caption=>'product_class' , :col_width => 125}
+   column_configs << {:field_type=>'text', :field_name=>'size_code',:column_caption=>'size', :col_width => 90 }
    column_configs << {:field_type=>'text', :field_name=>'farm_code',:column_caption=>'farm', :col_width => 122 }
    column_configs << {:field_type=>'text', :field_name=>'location_code',:column_caption=>'location', :col_width => 138}
    column_configs << {:field_type=>'text', :field_name=>'rmt_product_code',   :col_width => 272}
@@ -110,7 +109,7 @@ end
    set_grid_min_width(900)
    hide_grid_client_controls()
 
-   get_data_grid(data_set, column_configs,RmtProcessingPlugins::BinOrderProductGridPlugin.new, true)
+   get_data_grid(data_set, column_configs,MesScada::GridPlugins::RmtProcessing::BinOrderProductGridPlugin.new, true)
  end
 
  def  build_required_quantity_form(bin_order_product, action, caption, is_edit = nil, is_create_retry = nil)
@@ -129,6 +128,6 @@ end
 
     build_form(bin_order_product, field_configs, action, 'bin_order_product', caption, is_edit)
 
-  end  
+  end
 
 end

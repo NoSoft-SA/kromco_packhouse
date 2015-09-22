@@ -163,7 +163,7 @@ module Tools::ProcessesHelper
     end
 
   def build_view_object_history_grid(data_set)
-    require File.dirname(__FILE__) + "/../../../app/helpers/tools/process_plugins.rb"
+    #require File.dirname(__FILE__) + "/../../../app/helpers/tools/process_plugins.rb"
 
     ids_where_clause = "where"
     data_set.each do |trans_status|
@@ -206,7 +206,7 @@ module Tools::ProcessesHelper
     set_grid_min_height(300)
     set_grid_min_width(950)
      hide_grid_client_controls()
-    return get_data_grid(data_set,column_configs, ProcessPlugins::TransactionStatusesGridPlugin.new(self, request))
+    return get_data_grid(data_set,column_configs, MesScada::GridPlugins::Tools::TransactionStatusesGridPlugin.new(self, request))
   end
 
   def build_transaction_statuses_grid(data_set)
@@ -233,7 +233,7 @@ module Tools::ProcessesHelper
     set_grid_min_height(300)
     set_grid_min_width(950)
     hide_grid_client_controls()
-    return get_data_grid(data_set,column_configs, ProcessPlugins::ChildTransactionStatusesGridPlugin.new(self, request),true)
+    return get_data_grid(data_set,column_configs, MesScada::GridPlugins::Tools::ChildTransactionStatusesGridPlugin.new(self, request),true)
   end
 
   def build_process_alert_def_form(process_alert_def,action,caption,is_edit = nil,is_create_retry = nil)

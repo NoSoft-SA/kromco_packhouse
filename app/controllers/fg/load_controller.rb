@@ -8,6 +8,16 @@ class Fg::LoadController < ApplicationController
     true
   end
 
+  def voyage
+    load_voyage=LoadVoyage.find_by_load_id(params[:id])
+    if load_voyage
+      edit_voyage
+    else
+      link_to_voyage
+    end
+  end
+
+
 
   def reports_and_edis
     @load=Load.find(params[:id])
@@ -49,8 +59,22 @@ class Fg::LoadController < ApplicationController
 
   end
 
+  def view_load_pallets2
+    @load=Load.find(params[:id])
+    set_active_doc("loads",params[:id])
+
+    render :inline => %{
+            <% @content_header_caption = "'#{@caption}'" %>
+            <%= build_view_load_pallets_form(@load)%>
+
+            }, :layout => 'content'
+  end
+
+
+
   def view_load_pallets
     id = params[:id].to_i
+    set_active_doc("loads",params[:id])
     pallets = Pallet.find_by_sql("select pallets.*
                                     from pallets
                                     inner join load_details on pallets.load_detail_id=load_details.id
@@ -76,6 +100,49 @@ class Fg::LoadController < ApplicationController
 
 
     render_view_pallets
+  end
+
+  def  edit_pallets_remarks
+    id = params[:id].to_i
+    set_active_doc("loads",params[:id])
+
+    pallets = Pallet.find_by_sql("select pallets.*
+                                    from pallets
+                                    inner join load_details on pallets.load_detail_id=load_details.id
+                                    inner join load_orders on load_details.load_order_id=load_orders.id
+                                    inner join  loads on load_orders.load_id=loads.id
+                                    where loads.id=#{id}   ")
+    @pallets =[]
+    oderz ={}
+    if !pallets.empty?
+      for o in pallets
+        @pallets << o if !oderz.has_key?(o['pallet_number'])
+        oderz[o['pallet_number']]=[o['pallet_number']]
+      end
+    end
+    session[:load_pallets]=@pallets
+    session[:query]= @pallets
+    session[:load_id] = id
+    @use_jq_grid = true
+    if @use_jq_grid
+      render :template => "fg/loads/edit_pallet_remarks", :layout => "content"
+    else
+    @pagination_server = "list_load_details"
+    @can_edit = authorise(program_name?, 'edit', session[:user_id])
+    @can_delete = authorise(program_name?, 'delete', session[:user_id])
+    @current_page = session[:load_details_page]
+    @current_page = params['page']||= session[:load_details_page]
+    @pallets = eval(session[:query]) if !@pallets
+    render :inline => %{
+      <% grid            = build_edit_pallets_grid(@pallets) %>
+      <% grid.caption    = "'Edit Pallet Remarks'" %>
+      <% @header_content = grid.build_grid_data %>
+
+      <% @pagination = pagination_links(@order_pages) if @order_pages != nil %>
+      <%= grid.render_html %>
+      <%= grid.render_grid %>
+      }, :layout => 'content'
+      end
   end
 
   def render_view_pallets
@@ -105,36 +172,33 @@ class Fg::LoadController < ApplicationController
   end
 
   def update_edited_load_pallets
-    updates = {}
-    params[:load_pallet].each do |k,v|
-      k = k.split('_')
-      key = k.shift
-      if(!updates.keys.include?(key))
-        updates.store(key,{k.join('_')=>v})
-      else
-        updates[key].store(k.join('_'),v)
-      end
-    end
+
+    remarks_edits = grid_edited_values_to_array(params)
 
     Pallet.transaction do
-      updates.each do |update,cond|
-        conditions = cond.map{|k,v|
-          if(v.to_s.strip.length > 0)
-            "#{k}='#{v}'"
-          else
-            "#{k}=NULL"
-          end
-        }
-        Pallet.update_all(ActiveRecord::Base.extend_set_sql_with_request(conditions.join(','),"pallets"),"id = '#{update}'")
-      end
-    end
+      remarks_edits.each do |remark_edit|
+          pallet_id= remark_edit[:id]
+          remark_edit.delete_if { |key, value| key == :id }
+          remarks = remark_edit.map{|remark_name,value|
+            if(value.to_s.strip.length > 0)
+              "#{remark_name}='#{value}'"
+            else
+              "#{remark_name}=NULL"
+            end
+          }
+          Pallet.update_all(ActiveRecord::Base.extend_set_sql_with_request(remarks.join(','),"pallets"),"id = '#{pallet_id}'")
+         end
 
-    session[:alert]  = "load pallets edited successfully"
-    render :inline => %{
-      <script>
-        window.close();
-        //window.opener.frames[1].frames[1].location.href = "list_loads/<%= session[:order].id %>";
-      </script>}, :layout => 'content'
+    end
+   @load_id= session[:active_doc]['loads']
+    render :inline => %{<script>
+                                  //window.parent.location.href = '/fg/load/edit_pallets_remarks/<%=@load_id%>';
+                                  window.parent.close();
+                            </script>}
+ end
+
+  def reload_pallets_form
+    view_load_pallets
   end
 
   def deallocated_pallets
@@ -168,8 +232,8 @@ class Fg::LoadController < ApplicationController
     @order_id=order.id
     render :inline => %{<script>
                   alert('pallets deallocated');
-                  window.opener.frames[1].location.href = '/fg/order/edit_order/<%=@order_id.to_s%>';
-                  window.close();
+                  window.parent.opener.frames[1].location.href = '/fg/order/edit_order/<%=@order_id.to_s%>';
+                  window.parent.close();
           </script>}, :layout => "content"
 
 
@@ -301,29 +365,6 @@ class Fg::LoadController < ApplicationController
       end
 
       voyage=Voyage.find_by_voyage_code(params[:load_voyage]['voyage_code'].to_s)
-
-      #if load_voyage.pol_voyage_port_id==params[:load_voyage]['pol_voyage_port_id']
-      #else
-      #  if load_voyage.voyage_id.to_i == voyage.id.to_i
-      #    flash[:error]= "select a new voyage first before changing the port"
-      #              redirect_to :controller => 'fg/load', :action => 'edit_voyage', :id => @load_id and return
-      #  else
-      #
-      #  end
-      #
-      #end
-      #if load_voyage.pod_voyage_port_id==params[:load_voyage]['pod_voyage_port_id']
-      #else
-      #  if load_voyage.voyage_id.to_i == voyage.id.to_i
-      #    flash[:error]= "select a new voyage first before changing the port "
-      #              redirect_to :controller => 'fg/load', :action => 'edit_voyage', :id => @load_id and return
-      #  else
-      #
-      #  end
-      #
-      #end
-
-
       if load_voyage.voyage_id.to_i == voyage.id.to_i
         voyage=voyage
       else
@@ -383,7 +424,7 @@ class Fg::LoadController < ApplicationController
 
             render :inline => %{<script>
                   alert('load voyage edited');
-               window.opener.frames[1].frames[1].location.reload(true);
+               window.opener.frames[1].location.reload(true);
                     window.close();
             </script>}
 
@@ -419,6 +460,7 @@ class Fg::LoadController < ApplicationController
 
 
   def create_load_voyage
+
     @load_id =session[:active_load].id
     @order_id=session[:active_order_id]
     if params[:load_voyage]['voyage_code']==nil || params[:load_voyage]['voyage_code']=="" || params[:load_voyage]['shipping_line_party_id']== "" ||params[:load_voyage]['shipping_agent_party_role_id']== "" || params[:load_voyage]['shipper_party_role_id']== "" || params[:load_voyage]['exporter_party_role_id']== "" || params[:load_voyage]['pol_voyage_port_id']== "" || params[:load_voyage]['pod_voyage_port_id']== ""
@@ -457,7 +499,7 @@ class Fg::LoadController < ApplicationController
       if  @load_voyage_port.save
         render :inline => %{<script>
                              alert('load voyage created');
-               window.opener.frames[1].frames[1].location.reload(true);
+                              window.opener.frames[1].location.reload(true);
                               window.close();
                               </script>}
       else
@@ -1098,7 +1140,7 @@ class Fg::LoadController < ApplicationController
     session[:is_flat_search] = @is_flat_search
 #	 render (inline) the search form
     render :inline => %{
-		<% @content_header_caption = "'search  loads'"%> 
+		<% @content_header_caption = "'search  loads'"%>
 
 		<%= build_load_search_form(nil,'submit_loads_search','submit_loads_search',@is_flat_search)%>
 
@@ -1119,48 +1161,32 @@ class Fg::LoadController < ApplicationController
 
 
   def delete_load
+    return if authorise_for_web(program_name?, 'delete')== false
     load = Load.find(params[:id])
     @load_order = LoadOrder.find_by_load_id(load.id)
+    if get_load_pallets(@load_order.id).to_i > 0
+      render :inline => %{
+           <script>
+           alert('load cannot be deleted, pallets are allocated');
+           window.close();
+           </script>
+              }, :layout => 'content' and return
+    end
     load.destroy
     render :inline => %{<script>
-        window.opener.frames[1].location.href = '/fg/order/edit_order/<%= @load_order.order_id.to_s%>';
+        window.opener.location.href = '/fg/order/edit_order/<%= @load_order.order_id.to_s%>';
         window.close();
       </script>}, :layout => "content"
 
-    #begin
-    #  Order.transaction do
-    #    return if authorise_for_web(program_name?, 'delete')== false
-    #    if params[:page]
-    #      session[:loads_page] = params['page']
-    #      render_list_loads
-    #      return
-    #    end
-    #    id = params[:id]
-    #    if id && load = Load.find(id)
-    #
-    #      # delete related load_detail
-    #
-    #      load_order   = LoadOrder.find_by_load_id(load.id)
-    #      load_details = LoadDetail.find_all_by_load_order_id(load_order.id)
-    #      for load_detail in load_details
-    #        load_detail.destroy
-    #      end
-    #      load_order.destroy
-    #      load.destroy
-    #
-    #      session[:alert] = " Record deleted."
-    #
-    #      render :inline => %{<script>
-    #                                            window.opener.frames[1].location.href = '/fg/order/edit_order/<%=@order_id.to_s%>';
-    #                                            window.close();
-    #                                    </script>}, :layout=>"content"
-    #
-    #    end
-    #  end
-    #
-    #rescue
-    #  handle_error('record could not be deleted')
-    #end
+  end
+
+  def get_load_pallets(load_order_id)
+    pallets =Pallet.find_by_sql("select  count(pallets.*) as pallets
+                                     from pallets
+                                     inner join load_details on pallets.load_detail_id=load_details.id
+                                     inner join load_orders on load_details.load_order_id=load_orders.id
+                                     inner join  loads on load_orders.load_id=loads.id
+                                    where pallets.load_detail_id IS NOT NULL and load_details.load_order_id=#{load_order_id} ")[0]['pallets']
   end
 
   def new_load
@@ -1171,7 +1197,7 @@ class Fg::LoadController < ApplicationController
   def render_new_load
 #	 render (inline) the edit template
     render :inline => %{
-		<% @content_header_caption = "'create new load'"%> 
+		<% @content_header_caption = "'create new load'"%>
 
 		<%= build_load_form(@load,'create_load','create_load',false,@is_create_retry)%>
 

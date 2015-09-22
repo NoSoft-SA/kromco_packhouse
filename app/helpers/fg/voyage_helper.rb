@@ -24,8 +24,8 @@ build_form(voyage,field_configs,action,'voyage',caption,is_edit)
 
 
   end
- 
- 
+
+
  def build_voyage_form(voyage,action,caption,is_edit = nil,is_create_retry = nil)
 #	--------------------------------------------------------------------------------------------------
 #	Define a set of observers for each composite foreign key- in effect an observer per combo involved
@@ -35,7 +35,7 @@ build_form(voyage,field_configs,action,'voyage',caption,is_edit)
 	vessel_codes = Vessel.find_by_sql('select distinct vessel_code from vessels').map{|g|[g.vessel_code]}
 	vessel_codes.unshift("<empty>")
 
-   
+
 #	---------------------------------
 #	 Define fields to build form from
 #	---------------------------------
@@ -108,7 +108,6 @@ end
 
 
   def build_voyage_grid(data_set, can_edit, can_delete)
-    require File.dirname(__FILE__) + "/../../../app/helpers/fg/voyage_plugins.rb"
 
    column_configs = Array.new
    column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'voyage_number',:col_width=>118}
@@ -139,18 +138,18 @@ end
                                                           :target_action => 'delete_voyage',
                                                           :id_column => 'id'}}
     end
-    return get_data_grid(data_set, column_configs,ShippingPlugins::VoyageGridPlugin.new(self,request),true)
+    return get_data_grid(data_set, column_configs,MesScada::GridPlugins::Fg::VoyageGridPlugin.new(self,request),true)
   end
 
 
 
 
- 
+
  def build_voyage_search_form(voyage,action,caption,is_flat_search = nil)
 #	--------------------------------------------------------------------------------------------------
 #	Define an observer for each index field
 #	--------------------------------------------------------------------------------------------------
-	session[:voyage_search_form]= Hash.new 
+	session[:voyage_search_form]= Hash.new
 	#generate javascript for the on_complete ajax event for each combo
 	#Observers for search combos
 #	----------------------------------------
@@ -225,7 +224,7 @@ return get_data_grid(data_set,column_configs,nil,nil,nil)
 #	----------------------------------------------------------------_----------------------------------
     session[:load_voyage_form]= Hash.new
 
-    
+
 
 
 #   trading_partners = PartiesRole.find_by_sql("SELECT id, party_name FROM parties_roles WHERE role_name = 'TRADING_PARTNER'").map { |g| [g.party_name, g.id] }
@@ -253,8 +252,8 @@ return get_data_grid(data_set,column_configs,nil,nil,nil)
    if is_edit == true
    field_configs[field_configs.length()] =  {:field_type => 'LabelField',
                                              :field_name => 'load_number'}
-     
-    else   
+
+    else
 
       field_configs[field_configs.length()] =  {:field_type => 'DropDownField',
                                                 :field_name => 'load_id',
@@ -283,7 +282,7 @@ return get_data_grid(data_set,column_configs,nil,nil,nil)
                                               :field_name => 'shipping_agent_party_role_id',
                                               :settings => {:label_caption=>'shipping_agent',:show_label => true,
                                                       :list => shipping_agent_party_role_ids}}
-   
+
     field_configs[field_configs.length()] =  {:field_type => 'DropDownField',
                                               :field_name => 'shipping_line_party_id',
                                               :settings => {:label_caption=>'shipping_line',:show_label=> true,
@@ -360,7 +359,7 @@ end
                                                 :remote_method    =>'voyage_port_type_changed',
                                                 :on_completed_js  =>  combos_js_for_voyage_port_type["voyage_port_voyage_port_type_id"]
        }
-   
+
 
 	field_configs[field_configs.length()] =  {:field_type => 'DropDownField',
 						:field_name => 'port_id',
@@ -399,7 +398,7 @@ end
    build_form(voyage_port,field_configs,action,'voyage_port',caption,is_edit)
 
 end
-   
+
  def build_found_voyages_grid(data_set,can_edit,can_delete=nil)
 
    column_configs = Array.new
@@ -429,7 +428,7 @@ end
    return get_data_grid(data_set,column_configs,nil,true)
 
   end
-        
+
 
 def build_load_voyage_port_grid(data_set,can_edit,can_delete)
    column_configs = Array.new

@@ -4,25 +4,15 @@ module RmtProcessing::GrowerGradingHelper
     #  --------------------------------------------------------------------------------------------------
     #  Define an observer for each index field
     #  --------------------------------------------------------------------------------------------------
-    session[:pool_graded_summary_search_form]= Hash.new 
+    session[:pool_graded_summary_search_form]= Hash.new
     #  ----------------------------------------
     #   Define search fields to build form from
     #  ----------------------------------------
     field_configs = []
-    # farm_codes = Farm.find_by_sql('select distinct farm_code from farms').map{|g|[g.farm_code]}
-    # farm_codes.unshift("<empty>")
-    # track_slms_indicator_codes = TrackSlmsIndicator.find_by_sql('select distinct track_slms_indicator_code from track_slms_indicators').map{|g|[g.track_slms_indicator_code]}
-    # track_slms_indicator_codes.unshift("<empty>")
+
     field_configs << {:field_type => 'TextField',
       :field_name => 'production_run_code',
       :settings => {:label_caption => 'Production run code like'}}
-    # field_configs << {:field_type => 'DropDownField',
-    #   :field_name => 'farm_code',
-    #   :settings => {:list => farm_codes}}
-    # field_configs << {:field_type => 'DropDownField',
-    #   :field_name => 'track_slms_indicator_code',
-    #   :settings => {:list => track_slms_indicator_codes}}
-
     build_form(production_run,field_configs,action,'production_run',caption,false)
 
   end
@@ -45,7 +35,7 @@ module RmtProcessing::GrowerGradingHelper
     #  ----------------------
     if can_edit
       column_configs << {:field_type => 'action',:field_name => 'grower grading',
-        :settings => 
+        :settings =>
       {:link_text => 'create',
         :target_action => 'create_pool_graded_summary',
         :id_column => 'production_run_code',
@@ -56,7 +46,7 @@ module RmtProcessing::GrowerGradingHelper
   end
 
   def build_pool_graded_summary_search_form(pool_graded_summary,action,caption,is_flat_search = nil)
-    session[:pool_graded_summary_search_form]= Hash.new 
+    session[:pool_graded_summary_search_form]= Hash.new
 
     #  --------------------------------------------------------------------------------------------------
     #  Define an observer for each index field
@@ -122,8 +112,8 @@ module RmtProcessing::GrowerGradingHelper
     #  define action columns
     #  ----------------------
     if can_edit
-      column_configs << {:field_type => 'action',:field_name => 'edit pool_graded_summary',
-        :settings => 
+      column_configs << {:field_type => 'action',:field_name => 'edit',  :col_width=>55,
+        :settings =>
       {:link_text => 'edit',
         :target_action => 'edit_pool_graded_summary',
         :id_column => 'id'}}
@@ -134,21 +124,21 @@ module RmtProcessing::GrowerGradingHelper
     # column_configs << {:field_type => 'text',:field_name => 'track_slms_indicator_code'}
     column_configs << {:field_type => 'text',:field_name => 'season_code'}
     column_configs << {:field_type => 'text',:field_name => 'status'}
-    column_configs << {:field_type => 'text',:field_name => 'bin_count'}
+    column_configs << {:field_type => 'text',:field_name => 'bin_count',:col_width=>100}
     column_configs << {:field_type => 'text',:field_name => 'bin_mass'}
     column_configs << {:field_type => 'text',:field_name => 'created_at'}
 
     if can_delete
-      column_configs << {:field_type => 'action',:field_name => 'delete pool_graded_summary',
-        :settings => 
+      column_configs << {:field_type => 'action',:field_name => 'delete', :col_width=>55,
+        :settings =>
       {:link_text => 'delete',
         :target_action => 'delete_pool_graded_summary',
         :id_column => 'id',
         :null_test => "status == '#{PoolGradedSummary::STATUS_COMPLETE}'"}}
     end
     if can_edit
-      column_configs << {:field_type => 'action',:field_name => 'uncomplete pool_graded_summary',
-        :settings => 
+      column_configs << {:field_type => 'action',:field_name => 'uncomplete pool_graded_summary', :col_width=>100,
+        :settings =>
       {:link_text => 'uncomplete',
         :target_action => 'uncomplete_pool_graded_summary',
         :id_column => 'id',
@@ -218,7 +208,7 @@ module RmtProcessing::GrowerGradingHelper
                       :window_height => 600,
                       :link_text     => "Summarise Cartons",
                       :id_value      => pool_graded_summary.id.to_s }}
-# 
+#
 #     field_configs << {:field_type    => 'LinkField',
 #       :field_name => '',
 #         :settings => {:target_action => 'cull_grading',
@@ -253,7 +243,7 @@ module RmtProcessing::GrowerGradingHelper
                         :field_name => "child_form1", #2",
                         :settings   => {:target_action => 'list_pool_graded_farms',
                                         :id_value      => pool_graded_summary.id.to_s,
-                                        :width         => 420,
+                                        :width         => 700,
                                         :height        => 160,
                                         :no_scroll     => true}
                                               }
@@ -270,9 +260,9 @@ module RmtProcessing::GrowerGradingHelper
 
     column_configs = []
     column_configs << {:field_type => 'text',:field_name => 'farm_code'}
-    column_configs << {:field_type => 'text',:field_name => 'track_slms_indicator_code'}
-    column_configs << {:field_type => 'text',:field_name => 'bin_count'}
-    column_configs << {:field_type => 'text',:field_name => 'bin_mass'}
+    column_configs << {:field_type => 'text',:field_name => 'track_slms_indicator_code' ,:col_width=>170}
+    column_configs << {:field_type => 'text',:field_name => 'bin_count',:col_width=>120}
+    column_configs << {:field_type => 'text',:field_name => 'bin_mass',:col_width=>120}
 
     set_grid_min_height(80)
     set_grid_min_width(300)

@@ -26,7 +26,9 @@ class StatusMan
     end
     status =Status.find_by_status_code_and_status_type_code(child[:child_new_status_code], child[:child_status_type])
     if status ==nil
-      raise "A status record is not yet configured for status: " + child[:child_new_status_code] + " and status type " + child[:child_status_type] if !status
+      create_status(child[:child_new_status_code],child[:child_status_type])
+
+      #raise "A status record is not yet configured for status: " + child[:child_new_status_code] + " and status type " + child[:child_status_type] if !status
     end
 #that the child_status_type has a parent status_type matching the passed-in status_type
     child_status_type =StatusType.find_by_status_type_code(child[:child_status_type])
@@ -90,7 +92,9 @@ class StatusMan
 
         status =Status.find_by_status_code_and_status_type_code(new_status_code, status_type)
         if status ==nil
-          raise "A status record is not yet configured for status: " + new_status_code + " and status type " + status_type if !status
+          create_status(new_status_code,status_type)
+
+          #raise "A status record is not yet configured for status: " + new_status_code + " and status type " + status_type if !status
         end
 
         #--------validate object's class----------------------------------------------------------------------
@@ -318,7 +322,25 @@ class StatusMan
         end
       end
 #    end
+  end
+
+
+  def self.create_status(status_code,status_type)
+    current_status=Status.find_by_sql("select * from statuses where status_type_code='#{status_type}' order by id desc limit 1")[0]
+    if  current_status
+      status_preceded_by=current_status.preceded_by
+      status=Status.new
+      status.status_type_code=status_type
+      status.status_code=status_code
+      status.preceded_by=status_preceded_by.gsub(/\r/, "\n").gsub(/\n+/, "\n").chomp.split("\n").map {|r| r.strip }.join(',')
+      status.is_terminal_status=current_status.is_terminal_status
+      status.position=current_status.position
+      status.is_error_status=current_status.is_error_status
+      status.save
+    else
+      raise "A status record is not yet configured for status: " + status_code + " and status type " + status_type
     end
+  end
 
 
   def self.get_current_status(status_type, object)

@@ -1,7 +1,6 @@
 module Fg::OrderHelper
 
   def build_load_pallets_consignment_note_numbers_grid(consignment_note_numbers)
-      require File.dirname(__FILE__) + "/../../../app/helpers/fg/load_detail_plugins.rb"
 
       column_configs = []
       column_configs << {:field_type => 'text', :field_name => 'consignment_note_number',:col_width=> 180}
@@ -36,7 +35,7 @@ module Fg::OrderHelper
   def build_upgrade_order_form(order, action, caption, is_edit=nil, is_create_retry=nil)
       field_configs = Array.new
       combos_js_for_depots = gen_combos_clear_js_for_combos(["order_order_type_id", "order_depot_code"])
-      
+
       order_type_observer = {:updated_field_id => "depot_code_cell",
                            :remote_method =>'order_type_id_changed',
                            :on_completed_js => combos_js_for_depots["order_order_type_id"]
@@ -70,7 +69,7 @@ module Fg::OrderHelper
                            :remote_method =>'trading_partner_changed',
                            :on_completed_js =>  combos_js_for_consignee_party_role_id["order_consignee_party_role_id"]
     }
-    
+
     combos_js_for_depots = gen_combos_clear_js_for_combos(["order_order_type_id", "order_depot_code"])
     order_type_observer = {:updated_field_id => "depot_code_cell",
                            :remote_method =>'order_type_id_changed',
@@ -561,7 +560,7 @@ end
                                              :settings =>{
                                                      #:host_and_port => request.host_with_port.to_s,
                                                      :controller => 'fg/order_product',
-                                                     :target_action => 'render_list_order_products',
+                                                     :target_action => 'list_order_products',
                                                      :width => 1200,
                                                      :height => 250,
                                                      :id_value => order.id,
@@ -615,7 +614,6 @@ end
 
 
   def build_search_order_grid(data_set, can_edit, can_delete)
-     require File.dirname(__FILE__) + "/../../../app/helpers/fg/search_order_plugin.rb"
     column_configs = Array.new
     if can_edit
       column_configs[column_configs.length()] = {:field_type => 'action', :field_name => 'edit order',
@@ -647,12 +645,11 @@ end
     column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'party_name', :column_caption=>'trading_partner'}
     column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'role_name', :column_caption=>' party name'}
 
-    return get_data_grid(data_set, column_configs, FgPlugins::SearchOrderGridPlugin.new, true)
+    return get_data_grid(data_set, column_configs, MesScada::GridPlugins::Fg::SearchOrderGridPlugin.new, true)
   end
 
 
   def build_order_grid(data_set, can_edit, can_delete)
-    require File.dirname(__FILE__) + "/../../../app/helpers/fg/order_plugin.rb"
     column_configs = Array.new
     if can_edit
           column_configs[column_configs.length()] = {:field_type => 'action', :field_name => 'edit ',
@@ -671,21 +668,26 @@ end
                                                               :id_column => 'id'
                                                               }}
 
-    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'order_number',:column_caption=>'order_num',:col_width=>69}
-    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'order_type_code',:col_width=>69}
+    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'order_number',:column_caption=>'order_num',:col_width=>90}
+    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'order_type_code',:col_width=>120}
     column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'customer_contact_name',:column_caption=>'customer',:col_width=>212}
-    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'customer_order_number',:column_caption=>'cust_order_num',:col_width=>100}
-    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'consignee_party_name', :column_caption=>'trading_partner',:col_width=>72}
+    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'customer_order_number',:column_caption=>'cust_order_num',:col_width=>120}
+    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'consignee_party_name', :column_caption=>'trading_partner',:col_width=>120}
     column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'created_by',:column_caption=>'username'}
     column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'booking_reference',:column_caption=>'booking_ref',:col_width=>110}
-    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'depot_code',:col_width=>76}
+    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'depot_code',:col_width=>100}
     column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'customer_party_name', :column_caption=>'party name',:col_width=>79}
     column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'updated_at',:col_width=>124}
     column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'order_status',:col_width=>103}
     column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'load_status',:col_width=>109}
-    column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name => 'test_upgrade',:settings =>{:target_action => '',:id_column => 'id'}}
+    column_configs[column_configs.length()] = {:field_type => 'action', :field_name => 'test_upgrade',:col_width=>100,
+                                               :settings =>
+                                                   {:link_text => '',
+                                                    :target_action => 'test_upgrade',
+                                                    :id_column => 'id'}}
+
     column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name => 'upgrade_order',
-                                                :col_width=>36,
+                                                :col_width=>100,
                                                  :settings =>
                                                          {
                                                           :target_action => 'upgrade_order',
@@ -715,7 +717,7 @@ end
 
 
     set_grid_min_width(1200)
-    return get_data_grid(data_set, column_configs, FgPlugins::OrderGridPlugin.new(self, request), true)
+    return get_data_grid(data_set, column_configs,  MesScada::GridPlugins::Fg::OrderGridPlugin.new(self, request), true)
 
   end
 

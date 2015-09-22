@@ -49,11 +49,6 @@ class  RmtProcessing::PresortStagingRunController < ApplicationController
     presort_staging_run=PresortStagingRun.find(params[:id])
     locations_query=PresortStagingRun.get_available_locations(presort_staging_run)
     @locations=locations_query[0]
-    #@locations.each do |location|
-    #  bin_age =Location.bin_age(location)
-    #  location['bin_age']=bin_age
-    #  location['id']=presort_staging_run.id
-    #end
     @locations = @locations.sort_by {|p| p.age }
     session[:query]="ActiveRecord::Base.connection.select_all(\"#{locations_query[1]}\")"
     @caption="'available locations for #{presort_staging_run.presort_run_code}'"

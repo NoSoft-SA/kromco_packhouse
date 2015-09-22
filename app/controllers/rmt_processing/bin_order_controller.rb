@@ -1,5 +1,5 @@
 class RmtProcessing::BinOrderController < ApplicationController
- 
+
 def program_name?
 	"bin_order"
 end
@@ -37,15 +37,15 @@ end
 
 
 def list_bin_orders
-	return if authorise_for_web(program_name?,'read') == false 
+	return if authorise_for_web(program_name?,'read') == false
 
- 	if params[:page]!= nil 
+ 	if params[:page]!= nil
 
  		session[:bin_orders_page] = params['page']
 
 		 render_list_bin_orders
 
-		 return 
+		 return
 	else
 		session[:bin_orders_page] = nil
 	end
@@ -94,18 +94,24 @@ def render_list_bin_orders
         <%= grid.render_grid %>
     }, :layout => 'content'
 end
- 
+
 def search_bin_orders_flat
 	session['se_layout'] = 'content'
     @content_header_caption = "'search bin orders'"
     build_remote_search_engine_form("search_bin_order.yml","search_bin_orders_grid")
     dm_session[:redirect] = true
+end
 
+def remove_duplicate_orders(bin_orders)
+   orders=[]
+   bin_orders.group_by { |a| a.bin_order_number }.map { |p| orders << p[1][0] }
+  return orders
 end
 
 def search_bin_orders_grid
 
   @bin_orders = ActiveRecord::Base.connection.select_all(dm_session[:search_engine_query_definition])
+  @bin_orders=remove_duplicate_orders(@bin_orders)
   @can_edit = authorise(program_name?,'edit',session[:user_id])
   @can_delete = authorise(program_name?,'delete',session[:user_id])
   @can_cancel=  authorise(program_name?,'cancel',session[:user_id])
@@ -123,7 +129,7 @@ end
 def current_order
     @bin_order =session[:bin_order]
     if (session[:edit_order] == "edit") && @bin_order!=nil
-     
+
    redirect_to :controller => 'rmt_processing/bin_order', :action => 'edit_bin_order', :id => @bin_order.id and return
     else
       render :inline=>%{<script> alert('no current order'); </script>}, :layout=>'content'
@@ -134,14 +140,14 @@ def render_bin_order_search_form(is_flat_search = nil)
 	session[:is_flat_search] = @is_flat_search
 #	 render (inline) the search form
 	render :inline => %{
-		<% @content_header_caption = "'search  bin_orders'"%> 
+		<% @content_header_caption = "'search  bin_orders'"%>
 
 		<%= build_bin_order_search_form(nil,'submit_bin_orders_search','submit_bin_orders_search',@is_flat_search)%>
 
 		}, :layout => 'content'
 end
 
- 
+
 def submit_bin_orders_search
 	@bin_orders = dynamic_search(params[:bin_order] ,'bin_orders','BinOrder')
 	if @bin_orders.length == 0
@@ -202,14 +208,14 @@ def delete_bin_order
       handle_error('record could not be deleted')
     end
   end
- 
 
- 
+
+
 def new_bin_order
 	return if authorise_for_web(program_name?,'create')== false
 		render_new_bin_order
 end
- 
+
 
 
 def render_new_bin_order
@@ -217,7 +223,7 @@ def render_new_bin_order
   @bin_order=BinOrder.new
   @bin_order.match_on_size=true
 	render :inline => %{
-		<% @content_header_caption = "'create new bin_order'"%> 
+		<% @content_header_caption = "'create new bin_order'"%>
 
 		<%= build_bin_order_form(@bin_order,'create_bin_order','create_bin_order',false,@is_create_retry)%>
 
@@ -261,7 +267,7 @@ rescue
 	 handle_error('record could not be created')
 end
 end
- 
+
 def edit_bin_order
 	return if authorise_for_web(program_name?,'edit')==false
      session[:edit_order] = "edit"
@@ -280,13 +286,13 @@ def render_edit_bin_order
 #	 render (inline) the edit template
 
 	render :inline => %{
-		<% @content_header_caption = "'edit bin_order'"%> 
+		<% @content_header_caption = "'edit bin_order'"%>
 
 		<%= build_edit_bin_order_form(@bin_order,'update_bin_order','update_bin_order',true)%>
 
 		}, :layout => 'content'
 end
- 
+
 def update_bin_order
  begin
      ActiveRecord::Base.transaction do
@@ -336,17 +342,6 @@ def select_order_products
   bin_order_id = session[:bin_order_id]
   @rmt_products = Array.new
   for rmt_product in  rmt_products
-    #       r =  rmt_product['id']
-    #      quantity = Bin.find_by_sql("select count(bins.id) as quantity from bins
-    #            INNER JOIN bin_order_load_details ON bins.bin_order_load_detail_id = bin_order_load_details.id
-    #            INNER JOIN bin_order_loads ON bin_order_load_details.bin_order_load_id =bin_order_loads.id
-    #            INNER JOIN bin_orders ON bin_order_loads.bin_order_id =bin_orders.id
-    #            INNER JOIN bin_order_products ON bin_orders.id =bin_order_products.bin_order_id
-    #            INNER JOIN rmt_products ON rmt_products.rmt_product_code = bin_order_products.rmt_product_code
-    #            WHERE bin_orders.id = #{bin_order_id} AND rmt_products.id = #{rmt_product['id']} ")[0]['quantity']
-    #          if quantity.to_i <= 0
-    #             @rmt_products << rmt_product
-    #         end
     count = BinOrderProduct.find_by_sql("select count(bin_order_products.id) as count from bin_order_products
                                           INNER JOIN rmt_products ON rmt_products.rmt_product_code = bin_order_products.rmt_product_code
                                           WHERE bin_order_products.bin_order_id =#{bin_order_id} AND rmt_products.id = #{rmt_product['id']} ")[0]['count']
@@ -360,10 +355,10 @@ def select_order_products
 
     @column_configs = []
     @column_configs << {:field_type=>'text', :field_name=>'rmt_product_code',:col_width=>272}
-    @column_configs << {:field_type=>'text', :field_name=>'available_quantity',:column_caption=>'Available',:col_width=>58}
-    @column_configs << {:field_type=>'text', :field_name=>'commodity_code',:column_caption=>'commodity',:col_width=>69}
+    @column_configs << {:field_type=>'text', :field_name=>'available_quantity',:column_caption=>'Available',:col_width=>100}
+    @column_configs << {:field_type=>'text', :field_name=>'commodity_code',:column_caption=>'commodity',:col_width=>100}
     @column_configs << {:field_type=>'text', :field_name=>'variety_code',:column_caption=>'variety',:col_width=>81}
-    @column_configs << {:field_type=>'text', :field_name=>'product_class_code',:column_caption=>'product_class',:col_width=>90}
+    @column_configs << {:field_type=>'text', :field_name=>'product_class_code',:column_caption=>'product_class',:col_width=>110}
     @column_configs << {:field_type=>'text', :field_name=>'size_code',:column_caption=>'size',:col_width=>50}
     @column_configs << {:field_type=>'text', :field_name=>'farm_code',:column_caption=>'farm',:col_width=>122}
     @column_configs << {:field_type=>'text', :field_name=>'location_code',:column_caption=>'location',:col_width=>138}
@@ -395,6 +390,6 @@ def order_products_selected
 
 end
 
-  
+
 
 end

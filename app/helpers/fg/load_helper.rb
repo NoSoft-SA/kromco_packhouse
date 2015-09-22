@@ -1,5 +1,79 @@
 module Fg::LoadHelper
 
+
+  def build_edit_pallets_grid(data_set)
+    column_configs = Array.new
+    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'pallet_number',:col_width=>140}
+
+    if !session[:current_viewing_order]
+
+      column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name => 'edit',:col_width=> 34,
+                                                 :settings =>
+                                                     {:link_text => 'edit',
+                                                      :target_action => 'edit_pallet',
+                                                      :id_column => 'id'}}
+      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'remarks1',:col_width=>160,  :editor => :text}
+      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'remarks2',:col_width=>160,  :editor => :text}
+      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'remarks3',:col_width=>160,  :editor => :text}
+      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'remarks4',:col_width=>170,  :editor => :text}
+      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'remarks5',:col_width=>170,  :editor => :text}
+    else
+      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'remarks1',:col_width=>160}
+      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'remarks2',:col_width=>160}
+      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'remarks3',:col_width=>160}
+      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'remarks4',:col_width=>170}
+      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'remarks5',:col_width=>170}
+    end
+    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'carton_quantity_actual',:column_caption=>'actual_qty',:col_width=>100}
+
+    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'holdover',:col_width=>100}
+    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'holdover_quantity',:column_caption=>'holdover_qty',:col_width=>110}
+    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'oldest_pack_date_time',:col_width=>150}
+    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'build_status',:col_width=>110}
+    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'commodity_code',:column_caption=>'commodity',:col_width=>100}
+    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'marketing_variety_code',:col_width=>170}
+    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'target_market_code',:column_caption=>'target_market',:col_width=>215}
+    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'grade_code',:column_caption=>'grade',:col_width=>70}
+    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'iso_week_code',:col_width=>110}
+    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'season_code',:column_caption=>'season',:col_width=>100}
+    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'pallet_format_product_code',:col_width=>170}
+    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'pc_code',:col_width=>160}
+
+    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'id'}
+
+    return get_data_grid(data_set,column_configs,nil,true,nil,  :save_action => '/fg/load/update_edited_load_pallets')
+  end
+
+  def build_view_load_pallets_form(load)
+
+    field_configs = Array.new
+    field_configs[field_configs.length()] = {:field_type => 'Screen',
+                                             :field_name => "child_form8",
+                                             :settings =>{
+                                                 :controller => 'fg/load',
+                                                 :target_action => 'view_list_load_pallets',
+                                                 :width => 1200,
+                                                 :height => 250,
+                                                 :id_value => load.id,
+                                                 :no_scroll => true
+                                             }
+    }
+    field_configs[field_configs.length()] = {:field_type => 'Screen',
+                                             :field_name => "child_form9",
+                                             :settings =>{
+                                                 :controller => 'fg/load',
+                                                 :target_action => 'edit_pallets_remarks',
+                                                 :width => 1200,
+                                                 :height => 250,
+                                                 :id_value => load.id,
+                                                 :no_scroll => true
+                                             }
+    }
+
+    build_form(load, field_configs, nil, 'load', "kk", nil)
+
+  end
+
   def build_load_reports_form(load, action, caption, is_edit = nil, is_create_retry = nil)
       field_configs = Array.new
 
@@ -114,39 +188,32 @@ module Fg::LoadHelper
     end
 
   def build_pallets_grid(data_set, can_edit, can_delete,multi_select)
-    require File.dirname(__FILE__) + "/../../../app/helpers/fg/load_detail_plugins.rb"
        column_configs = Array.new
-    if !session[:current_viewing_order]
-       column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name => 'edit',:col_width=> 34,
-                                                         :settings =>
-                                                                 {:link_text => 'edit',
-                                                                  :target_action => 'edit_pallet',
-                                                                   :id_column => 'id'}}
-       end
+
       column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'pallet_number',:col_width=>140}
-      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'carton_quantity_actual',:column_caption=>'actual_qty',:col_width=>60}
-      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'remarks1',:column_caption=> Globals.get_column_captions['remarks1'],:col_width=>160}
-      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'remarks2',:column_caption=> Globals.get_column_captions['remarks2'],:col_width=>160}
-      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'remarks3',:column_caption=> Globals.get_column_captions['remarks3'],:col_width=>160}
+      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'carton_quantity_actual',:column_caption=>'actual_qty',:col_width=>100}
+      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'remarks1',:col_width=>160}
+      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'remarks2',:col_width=>160}
+      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'remarks3',:col_width=>160}
 
 
-      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'holdover',:col_width=>55}
-      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'holdover_quantity',:column_caption=>'holdover_qty',:col_width=>75}
-      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'oldest_pack_date_time',:col_width=>143}
-      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'build_status',:col_width=>73}
-      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'commodity_code',:column_caption=>'commodity',:col_width=>53}
-      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'marketing_variety_code',:col_width=>78}
+      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'holdover',:col_width=>100}
+      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'holdover_quantity',:column_caption=>'holdover_qty',:col_width=>110}
+      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'oldest_pack_date_time',:col_width=>150}
+      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'build_status',:col_width=>110}
+      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'commodity_code',:column_caption=>'commodity',:col_width=>100}
+      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'marketing_variety_code',:col_width=>170}
       column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'target_market_code',:column_caption=>'target_market',:col_width=>215}
-      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'grade_code',:column_caption=>'grade',:col_width=>38}
-      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'iso_week_code',:col_width=>61}
-      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'season_code',:column_caption=>'season',:col_width=>53}
-      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'pallet_format_product_code',:col_width=>98}
+      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'grade_code',:column_caption=>'grade',:col_width=>70}
+      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'iso_week_code',:col_width=>110}
+      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'season_code',:column_caption=>'season',:col_width=>100}
+      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'pallet_format_product_code',:col_width=>170}
       column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'pc_code',:col_width=>160}
-      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'remarks4',:column_caption=> Globals.get_column_captions['remarks4'],:col_width=>170}
-      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'remarks5',:column_caption=> Globals.get_column_captions['remarks5'],:col_width=>170}
+      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'remarks4',:col_width=>170}
+      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'remarks5',:col_width=>170}
       column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'id'}
      @multi_select = "deallocated_pallets" if  @multi_select
-           get_data_grid(data_set,column_configs,FgPlugins::LoadPalletsGridPlugin.new(self,request))
+           get_data_grid(data_set,column_configs)
 
      end
 
@@ -332,7 +399,7 @@ module Fg::LoadHelper
 #	Define an observer for each index field
 #	--------------------------------------------------------------------------------------------------
     session[:voyage_search_form]= Hash.new
-  
+
     voyage_code = Voyage.find_by_sql('select distinct id,voyage_code from voyages').map { |g| [g.voyage_code, g.id] }
 #      voyage_descriptions = Voyage.find_by_sql('select distinct voyage_description from voyages').map{|g|[g.voyage_description]}
 #	----------------------------------------
@@ -379,7 +446,7 @@ module Fg::LoadHelper
                                                      :controller => 'fg/load_detail',
                                                      :target_action => 'list_load_details',
                                                      :width => 1800,
-                                                     :height =>650,
+                                                     :height =>200,
                                                      :id_value =>session[:order_id],
                                                      :no_scroll => true
                                              }
@@ -388,7 +455,7 @@ module Fg::LoadHelper
 
     @submit_button_align = "left"
     build_form(load, field_configs, nil, 'load', caption, is_edit)
-    
+
   end
 
 
@@ -406,7 +473,7 @@ module Fg::LoadHelper
                         }
      field_configs[1] = {:field_type => 'TextField',
                         :field_name => 'required_quantity'}
-                      
+
 
     build_form(load, field_configs, action, 'load', caption, is_edit)
 
@@ -435,9 +502,11 @@ module Fg::LoadHelper
 
 
   def build_load_grid(data_set, can_edit, can_delete)
-    require File.dirname(__FILE__) + "/../../../app/helpers/fg/load_detail_plugins.rb"
 
     column_configs = Array.new
+    action_configs = []
+    show_menu=[]
+    action_menu=[]
     grid_command =    {:field_type=>'link_window_field',:field_name =>'create_loads',
                              :settings =>
                             {
@@ -448,93 +517,82 @@ module Fg::LoadHelper
                              :id_value=>'id'
                              }}
 
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'load_number',:column_caption=>'load_num',:col_width=>50}
-    column_configs[column_configs.length()] ={:field_type => 'text',:field_name => 'load_status',:column_caption=>'status',:col_width=>120}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'load_number',:column_caption=>'load_num',:col_width=>80}
 
-    #column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name => 'signed intake docs',:col_width=>50,:col_width=>180,
-    #                                                       :settings => {
-    #                                                           :link_text => 'list_signed_intake_docs',
-    #                                                               :target_action => 'list_signed_intake_docs',
-    #                                                               :id_column => 'id',:window_width=>500
-    #                                                               }}
 
-    column_configs[column_configs.length()] ={:field_type => 'text',:field_name => 'pallets',:column_caption=>'pallets',:col_width=>60}
+
+    action_menu <<  {:field_type => 'link_window',:field_name => 'edit_pallet_remarks',:column_caption=>'edit_pallet_remarks',:col_width=>60, :width => 1800,
+                                              :height => 1500,:settings => {:width => 1800,
+                                                                            :height => 1500,:link_icon=>'edit' ,:link_text => 'edit_pallets_remarks',:target_action => 'edit_pallets_remarks',:id_column => 'id'}}
+
+
     if !session[:current_viewing_order]
-    column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name => 'delete_load',:col_width=>50,
-                                                           :settings => {
-                                                               :link_text => '',
-                                                                   :target_action => 'delete_load',
-                                                                   :id_column => 'id'
-                                                                   }}
+      action_menu <<  {:field_type => 'link_window', :field_name => 'delete_load',:column_caption=>'delete',:col_width=>50,
+                                                           :settings => {:link_icon => 'delete',:link_text => 'delete',:target_action => 'delete_load',:id_column => 'id'}}
     end
-    column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name => 'reports',:col_width=>50,
+    show_menu <<  {:field_type => 'link_window', :field_name => 'reports',:col_width=>50,
                                                        :settings => {
-                                                           :link_text => '',
+                                                           :link_text => 'reports',:link_icon=>'reports_and_edis',
                                                                :controller    =>'fg/load',
                                                                :target_action => 'reports_and_edis',
                                                                :id_column => 'id'
                                                                }}
     if !session[:current_viewing_order]
-    column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name => 'import_pallets',:col_width=>50,
+      action_menu  <<   {:field_type => 'link_window', :field_name => 'import_pallets',:col_width=>150,
                                                   :settings => {
-                                                      :image => 'import_pallets',
+                                                      :link_icon => 'pallets',:link_text=> 'import_pallets',
                                                           :controller    =>'fg/order',
                                                           :target_action => 'render_import_pallets',
                                                           :id_column => 'id'
                                                           }}
 
 end
-    #column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name => 'load_status',:settings =>{:target_action => 'load_status',:id_column => 'id'},:col_width=>100}
-    column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name => 'load_details',:col_width=>72,
+    show_menu << {:field_type => 'link_window', :field_name => 'load_details',:col_width=>72,
                                                     :settings => {
-                                                        :link_text => 'load_details',
+                                                        :link_text => 'load_details',:link_icon=>'load_details',
                                                             :controller => 'fg/load_detail',
                                                             :target_action => 'list_load_details',
                                                             :id_column => 'id'}}
 
-      column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name => 'print_pick_list',:col_width=>92,
+    action_menu <<   {:field_type => 'link_window', :field_name => 'print_pick_list',:col_width=>92,
                                                  :settings => {
-                                                     :link_text => '',
+                                                     :link_text => 'print_pick_list',:link_icon=>'printer',
                                                          :target_action => 'print_pick_list',
                                                          :id_column => 'id'}}
-                                                    
-     #else
-     #    column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name => 'complete_load',:col_width=>60,
-     #                                          :settings => {
-     #                                              :link_text => '',
-     #                                                  :target_action => 'complete_load',
-     #                                                  :order_number_column => 'order_number',
-     #                                                  :id_column => 'id'
-     #                                                  }}
-  # end
 
-    column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name => 'edit_container',:col_width=>90,
+    action_menu <<   {:field_type => 'link_window', :field_name => 'edit_container',:col_width=>90,
                                                :settings => {
-                                                   :link_text => '',
+                                                   :link_text => 'edit_container', :link_icon=> 'containers',
                                                        :target_action => 'edit_container',
                                                        :order_number_column => 'order_number',
                                                        :id_column => 'id'
                                                        }}
 
-column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name => 'edit_vehicle',:col_width=>79,
+    action_menu <<  {:field_type => 'link_window', :field_name => 'edit_vehicle',:col_width=>79,
                                                :settings => {
-                                                   :link_text => '',
+                                                   :link_text => 'edit_vehicle',:link_icon => 'edit',
                                                        :target_action => 'edit_vehicle',
                                                        :order_number_column => 'order_number',
                                                        :id_column => 'id'
                                                        }}
 
-      column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name => 'link_edit_voyage',:col_width=>150,
+    action_menu <<  {:field_type => 'link_window', :field_name => 'link_edit_voyage',:col_width=>150,
                                                          :settings => {
-                                                             :link_text => '',
-                                                                 :target_action => 'edit_voyage',
+                                                             :link_text => 'link_edit_voyage',:link_icon=>'ship',
+                                                                 :target_action => 'voyage',
                                                                  :id_column => 'id'
                                                                  }}
 
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'voyage_code',:col_width=> 90}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'customer_reference', :column_caption=>'customer_ref',:col_width=> 90}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'booking_reference', :column_caption=>'booking_ref',:col_width=> 102}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'exporter_certificate_code',:col_width=> 103}
+    action_configs << {:field_type => 'sub_menu', :field_name => 'sub_menu', :column_caption => 'Show', :settings => {:actions => show_menu}}
+    action_configs << {:field_type => 'sub_menu', :field_name => 'sub_menu', :column_caption => 'Action', :settings => {:actions => action_menu}}
+    column_configs << {:field_type => 'action_collection', :field_name => 'actions', :settings => {:actions => action_configs}} unless action_configs.empty?
+    column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name =>'load_status',:column_caption=>'status',:col_width=>160 ,:settings => {:link_text => '',:target_action => 'load_status',:id_column => 'id'}}
+    column_configs[column_configs.length()] = {:field_type => 'link_window',:field_name => 'pallets',:column_caption=>'pallets',:col_width=>60, :width => 1200,
+                                               :height => 1500,:settings => {:link_icon=>'pallets' ,:link_text => '',:target_action => '',:id_column => 'id'}}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'voyage_code',:col_width=> 150}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'customer_reference', :column_caption=>'customer_ref',:col_width=> 100}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'booking_reference', :column_caption=>'booking_ref',:col_width=> 135}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'exporter_certificate_code',:col_width=> 160}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'exporter',:col_width=> 103}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'shipper',:col_width=> 103}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'shipping_agent',:col_width=> 103}
@@ -542,7 +600,7 @@ column_configs[column_configs.length()] = {:field_type => 'link_window', :field_
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'pol',:col_width=> 80}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'pod',:col_width=> 80}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'memo_pad'}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'pick_list_number',:col_width=> 80}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'pick_list_number',:col_width=> 100}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'id',:col_width=> 80}
 
 
@@ -550,9 +608,9 @@ column_configs[column_configs.length()] = {:field_type => 'link_window', :field_
     set_grid_min_width(900)
     hide_grid_client_controls()
     if !session[:current_viewing_order]
-    return get_data_grid(data_set, column_configs,FgPlugins::LoadDetailGridPlugin.new(self,request),true,grid_command)
+    return get_data_grid(data_set, column_configs,MesScada::GridPlugins::Fg::LoadGridPlugin.new(self,request),true,grid_command)
     else
-      return get_data_grid(data_set, column_configs,FgPlugins::LoadDetailGridPlugin.new(self,request),true)
+      return get_data_grid(data_set, column_configs,MesScada::GridPlugins::Fg::LoadGridPlugin.new(self,request),true)
     end
   end
 
@@ -565,7 +623,7 @@ column_configs[column_configs.length()] = {:field_type => 'link_window', :field_
     column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'status_code',:column_caption=>'load_status'}
      column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'created_on'}
        return get_data_grid(data_set, column_configs)
-   
+
   end
 
   def build_load_voyage_form(load_voyage, action, caption, is_edit = nil, is_create_retry = nil)

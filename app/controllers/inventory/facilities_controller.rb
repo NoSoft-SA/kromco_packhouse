@@ -29,7 +29,7 @@ class Inventory::FacilitiesController < ApplicationController
 		<% column_configs = []
           column_configs << {:field_type=>'text', :field_name=>'object_id', :column_caption=>'location_id'}
           column_configs << {:field_type=>'text', :field_name=>'status_code', :column_caption=>'status'}
-          column_configs << {:field_type=>'text', :field_name=>'status_type_code'}
+          column_configs << {:field_type=>'text', :field_name=>'status_type_code',:col_width=>160}
           column_configs << {:field_type=>'text', :field_name=>'username'}
           column_configs << {:field_type=>'text', :field_name=>'created_on'}
           column_configs << {:field_type=>'text', :field_name=>'id'}

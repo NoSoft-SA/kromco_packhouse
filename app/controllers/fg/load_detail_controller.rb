@@ -188,27 +188,27 @@ class Fg::LoadDetailController < ApplicationController
     end
 
     render :inline => %{
-             <% 
+             <%
                column_configs = []
                column_configs << {:field_type=>'text', :field_name=>'pallet_number',:col_width=>140}
-               column_configs << {:field_type=>'text', :field_name=>'oldest_pack_date_time',:col_width=>143}
-               column_configs << {:field_type=>'text', :field_name=>'build_status',:col_width=>73}
-               column_configs << {:field_type=>'text', :field_name=>'commodity_code',:column_caption=>'commodity',:col_width=>53}
-               column_configs << {:field_type=>'text', :field_name=>'marketing_variety_code',:col_width=>82}
+               column_configs << {:field_type=>'text', :field_name=>'oldest_pack_date_time',:col_width=>160}
+               column_configs << {:field_type=>'text', :field_name=>'build_status',:col_width=>100}
+               column_configs << {:field_type=>'text', :field_name=>'commodity_code',:column_caption=>'commodity',:col_width=>100}
+               column_configs << {:field_type=>'text', :field_name=>'marketing_variety_code',:col_width=>105}
                column_configs << {:field_type=>'text', :field_name=>'target_market_code',:column_caption=>'target_market',:col_width=>215}
-               column_configs << {:field_type=>'text', :field_name=>'grade_code',:column_caption=>'grade',:col_width=>38}
-               column_configs << {:field_type=>'text', :field_name=>'iso_week_code',:col_width=>61}
-               column_configs << {:field_type=>'text', :field_name=>'season_code',:column_caption=>'season',:col_width=>53}
-               column_configs << {:field_type=>'text', :field_name=>'pallet_format_product_code',:col_width=>98}
+               column_configs << {:field_type=>'text', :field_name=>'grade_code',:column_caption=>'grade',:col_width=>90}
+               column_configs << {:field_type=>'text', :field_name=>'iso_week_code',:col_width=>100}
+               column_configs << {:field_type=>'text', :field_name=>'season_code',:column_caption=>'season',:col_width=>100}
+               column_configs << {:field_type=>'text', :field_name=>'pallet_format_product_code',:col_width=>130}
                column_configs << {:field_type=>'text', :field_name=>'pc_code',:col_width=>160}
                column_configs << {:field_type=>'text', :field_name=>'inventory_code',:column_caption=>'inventory',:col_width=>110}
                column_configs << {:field_type=>'text', :field_name=>'carton_quantity_actual',:column_caption=>'actual_qty',:col_width=>89}
                column_configs << {:field_type=>'text', :field_name=>'puc',:col_width=>50}
-               column_configs << {:field_type=>'text', :field_name=>'inspection_type_code',:column_caption=>'inspection_type',:col_width=>82}
+               column_configs << {:field_type=>'text', :field_name=>'inspection_type_code',:column_caption=>'inspection_type',:col_width=>160}
                column_configs << {:field_type=>'text', :field_name=>'pick_reference',:column_caption=>'pick_ref',:col_width=>98}
                column_configs << {:field_type=>'text', :field_name=>'old_fg_code',:col_width=>188}
-               column_configs << {:field_type=>'text', :field_name=>'actual_count',:col_width=>60}
-               column_configs << {:field_type=>'text', :field_name=>'size_ref',:col_width=>55}
+               column_configs << {:field_type=>'text', :field_name=>'actual_count',:col_width=>100}
+               column_configs << {:field_type=>'text', :field_name=>'size_ref',:col_width=>100}
                column_configs << {:field_type=>'text', :field_name=>'extended_fg_code',:col_width=>590}
                column_configs << {:field_type=>'text', :field_name=>'id'}
                @multi_select = "selected_pallets"             %>
@@ -237,9 +237,10 @@ class Fg::LoadDetailController < ApplicationController
     render :inline => %{<script>
                                 alert('pallets added');
                                 window.opener.location.href = '/fg/load_detail/list_load_details/<%=@load_id%>';
-                                window.opener.opener.frames[1].location.href = '/fg/order/edit_order/<%=@order_id%>';
+                                window.opener.opener.location.href = '/fg/order/edit_order/<%=@order_id%>';
                                 window.close();
                           </script>}
+
   end
 
 
@@ -307,7 +308,7 @@ class Fg::LoadDetailController < ApplicationController
                                <script>
                                  alert('pallet removed and load_detail destroyed');
                                  window.opener.location.href = '/fg/load_detail/re_render_list_load_details/<%=@load_id%>';
-                                 window.opener.opener.frames[1].location.href = '/fg/order/edit_order/<%=@order_id%>';
+                                 window.opener.opener.location.href = '/fg/order/edit_order/<%=@order_id%>';
                                  window.close();
                                </script>
                                  }, :layout => 'content'
@@ -317,7 +318,7 @@ class Fg::LoadDetailController < ApplicationController
                                  alert('pallet removed');
                                  window.location.href = '/fg/load_detail/view_pallets/<%= @load_detail_id.to_s%>';
                                  window.opener.location.href = '/fg/load_detail/re_render_list_load_details/<%=@load_id%>';
-                                 window.opener.opener.frames[1].location.href = '/fg/order/edit_order/<%=@order_id%>';
+                                 window.opener.opener.location.href = '/fg/order/edit_order/<%=@order_id%>';
 
                                </script>
                                  }, :layout => 'content'
@@ -550,7 +551,7 @@ class Fg::LoadDetailController < ApplicationController
   def render_new_load_detail
 #	 render (inline) the edit template
     render :inline => %{
-		<% @content_header_caption = "'create new load_detail'"%> 
+		<% @content_header_caption = "'create new load_detail'"%>
 
 		<%= build_load_detail_form(@load_detail,'create_load_detail','create_load_detail',false,@is_create_retry)%>
 
@@ -570,7 +571,7 @@ class Fg::LoadDetailController < ApplicationController
   def render_edit_load_detail
 #	 render (inline) the edit template
     render :inline => %{
-		<% @content_header_caption = "'edit load_detail'"%> 
+		<% @content_header_caption = "'edit load_detail'"%>
 
 		<%= build_load_detail_form(@load_detail,'update_load_detail','update_load_detail',true)%>
 
@@ -600,7 +601,7 @@ class Fg::LoadDetailController < ApplicationController
     order_number = get_selected_combo_value(params)
     session[:load_detail_form][:order_number_combo_selection] = order_number
     @customer_party_role_ids = LoadDetail.customer_party_role_ids_for_order_number(order_number)
-#	render (inline) the html to replace the contents of the td that contains the dropdown 
+#	render (inline) the html to replace the contents of the td that contains the dropdown
     render :inline => %{
 		<%= select('load_detail','customer_party_role_id',@customer_party_role_ids)%>
 

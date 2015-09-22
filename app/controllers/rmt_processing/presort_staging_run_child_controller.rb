@@ -147,9 +147,7 @@ class  RmtProcessing::PresortStagingRunChildController < ApplicationController
   <%= grid.render_html %>
   <%= grid.render_grid %>
   },:layout => 'content'
-    #<% grid.group_fields     = ['farm_code'] %>
-    #<% grid.groupable_fields = ['farm_code', 'location_code'] %>
-    #<% grid.grouped          = true %>
+
   end
 
   def edit_child_status

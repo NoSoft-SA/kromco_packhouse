@@ -115,7 +115,7 @@ end
 
  def build_pack_groups_counts_config_grid(data_set,can_edit,can_delete)
 
-    require File.dirname(__FILE__) + "/../../../app/helpers/tools/pack_groups_plugin.rb"
+    #require File.dirname(__FILE__) + "/../../../app/helpers/tools/pack_groups_plugin.rb"
 
 	column_configs = Array.new
 	column_configs[0] = {:field_type => 'text',:field_name => 'standard_size_count_value'}
@@ -141,7 +141,7 @@ end
 				:id_column => 'id'}}
 	end
 	#PackGroupsConfigPlugins
- return get_data_grid(data_set,column_configs,PackGroupsConfigPlugins::PackGroupsConfigGridPlugin.new)
+ return get_data_grid(data_set,column_configs,MesScada::GridPlugins::Tools::PackGroupsConfigGridPlugin.new)
 end
 
 end

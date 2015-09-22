@@ -289,7 +289,7 @@ end
 	end
 
 
- return get_data_grid(data_set,column_configs,RebinSetupPlugins::RebinSetupGridPlugin.new)
+ return get_data_grid(data_set,column_configs,MesScada::GridPlugins::Production::RebinSetupGridPlugin.new)
 end
 
 end

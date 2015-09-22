@@ -197,7 +197,7 @@ end
 
  def build_sizer_template_grid(data_set,can_edit,can_delete,apply_template_link = nil,save_to_template_link = nil)
     
-     require File.dirname(__FILE__) + "/../../../app/helpers/tools/sizer_template_plugin.rb"
+     #require File.dirname(__FILE__) + "/../../../app/helpers/tools/sizer_template_plugin.rb"
     
 	column_configs = Array.new
 	column_configs[0] = {:field_type => 'text',:field_name => 'template_name'}
@@ -249,7 +249,7 @@ end
 	end
 	
 	
- return get_data_grid(data_set,column_configs,SizerTemplatePlugins::SizerTemplateGridPlugin.new)
+ return get_data_grid(data_set,column_configs,MesScada::GridPlugins::Tools::SizerTemplateGridPlugin.new)
 end
 
 
@@ -258,7 +258,7 @@ end
  #==========================
 def build_pack_group_template_grid(data_set,can_edit,can_delete)
 
-    require File.dirname(__FILE__) + "/../../../app/helpers/tools/sizer_template_plugin.rb"
+    #require File.dirname(__FILE__) + "/../../../app/helpers/tools/sizer_template_plugin.rb"
     
 	column_configs = Array.new
 	column_configs[0] = {:field_type => 'text',:field_name => 'pack_group_number'}
@@ -285,7 +285,7 @@ def build_pack_group_template_grid(data_set,can_edit,can_delete)
 				:target_action => 'delete_pack_group_template',
 				:id_column => 'id'}}
 	end
- return get_data_grid(data_set,column_configs,SizerTemplatePlugins::PackGroupTemplateGridPlugin.new)
+ return get_data_grid(data_set,column_configs,MesScada::GridPlugins::Tools::PackGroupTemplateGridPlugin.new)
 end
 
 def build_pack_group_template_form(sizer_template,pack_group_template,action,caption,is_edit = nil,is_create_retry = nil)
@@ -490,7 +490,7 @@ end
 
  def build_drops_to_counts_template_grid(data_set,can_edit)
    
-    require File.dirname(__FILE__) + "/../../../app/helpers/tools/sizer_template_plugin.rb"
+    #require File.dirname(__FILE__) + "/../../../app/helpers/tools/sizer_template_plugin.rb"
 	column_configs = Array.new
 	
 	
@@ -523,7 +523,7 @@ end
 	
     
 
- return get_data_grid(data_set,column_configs,SizerTemplatePlugins::CountsDropsTemplateGridPlugin.new)
+ return get_data_grid(data_set,column_configs,MesScada::GridPlugins::Tools::CountsDropsTemplateGridPlugin.new)
  
 end
 

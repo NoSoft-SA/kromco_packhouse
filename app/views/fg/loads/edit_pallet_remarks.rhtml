@@ -1,0 +1,27 @@
+<html>
+<head>
+  <script type="text/javascript">
+      var hook = true;
+      window.onbeforeunload = function() {
+          if (hook) {
+              return "Do you want to update any information? Else the updated inforamtion will be lost.BUT IF YOU HAVE EDITED REMARKS 'leave this page' to submit your update"
+          }
+      }
+  </script>
+</head>
+<body>
+<%= start_form_tag({:action=> "update_edited_load_pallets"}) %>
+
+<% grid            = build_edit_pallets_grid(@pallets) %>
+<% grid.caption    = 'Edit pallet remarks' %>
+<% @header_content = grid.build_grid_data %>
+
+<% @pagination = pagination_links(@load_detail_pages) if @load_detail_pages != nil %>
+<%= grid.render_html %>
+<%= grid.render_grid %>
+<% grid.height      = '800' %>
+<% grid.height      = '1200' %>
+<%= submit_tag "update_edited_load_pallets" %>
+<%= end_form_tag %>
+</body>
+</html>

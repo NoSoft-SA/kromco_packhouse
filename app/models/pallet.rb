@@ -50,7 +50,6 @@ class Pallet < ActiveRecord::Base
     if order_type.strip=="MO" || order_type.strip=="MQ"
       for pallet_number in pallet_numbers
         @pallet= Pallet.find_by_pallet_number(pallet_number.strip)
-        stock_item =StockItem.find_by_inventory_reference(@pallet.pallet_number.to_s)
         if !@pallet
           if pallet_number.length > 18
             failed_pallets.push(pallet_number + "(lines should end with semi-colon)")
@@ -59,6 +58,7 @@ class Pallet < ActiveRecord::Base
           end
           return failed_pallets
         end
+        stock_item =StockItem.find_by_inventory_reference(@pallet.pallet_number.to_s)
 
         if @pallet.exit_ref
           failed_pallets.push(pallet_number + "(exit_ref: #{@pallet.exit_ref})")
@@ -81,7 +81,6 @@ class Pallet < ActiveRecord::Base
     else
       for pallet_number in pallet_numbers
         @pallet= Pallet.find_by_pallet_number(pallet_number.strip)
-        stock_item =StockItem.find_by_inventory_reference(@pallet.pallet_number.to_s)
 
         if !@pallet
           if pallet_number.length > 18
@@ -91,6 +90,8 @@ class Pallet < ActiveRecord::Base
           end
           return failed_pallets
         end
+        stock_item =StockItem.find_by_inventory_reference(@pallet.pallet_number.to_s)
+
         if @pallet.exit_ref
           failed_pallets.push(pallet_number + "(exit_ref: #{@pallet.exit_ref})")
         end

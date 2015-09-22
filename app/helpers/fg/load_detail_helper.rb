@@ -203,7 +203,6 @@ module Fg::LoadDetailHelper
 
 
     column_configs = Array.new
-    require File.dirname(__FILE__) + "/../../../app/helpers/fg/load_detail_plugins.rb"
     if !session[:current_viewing_order]
     grid_command =    {:field_type=>'link_window_field',:field_name =>'create_load_details',
                                  :settings =>
@@ -214,19 +213,19 @@ module Fg::LoadDetailHelper
                                  :link_text => 'create_load_details',
                                  :id_value=>'id'
                                  }}
-    column_configs[column_configs.length] = {:field_type => 'link_window', :field_name => 'select',:col_width=>40,
+    column_configs[column_configs.length] = {:field_type => 'link_window', :field_name => 'select',:col_width=>100,
                                              :settings =>
-                                                     {:link_text => 'select_load_pallets',
+                                                     {:link_text => 'select_pallets',
                                                       :target_action => 'select_load_pallets',
                                                       :id_column => 'id'}}
-  
-    column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name => 'view_pallets',:col_width=>40,
+
+    column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name => 'view_pallets',:col_width=>100,
                                                :settings =>
-                                                       {:link_text => 'view_pallets',
+                                                       {:link_text => 'pallets',
                                                         :target_action => 'view_pallets',
                                                         :id_column => 'id'}}
 
-    column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name => 'set_req_qty',:col_width=>75,
+    column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name => 'set_req_qty',:col_width=>150,
                                                :settings =>
                                                        {:link_text => 'set_required_qty',
                                                         :target_action => 'set_required_quantity',
@@ -239,37 +238,36 @@ module Fg::LoadDetailHelper
                                                         :id_column => 'id'}}
 
     end
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'sequence_number',:column_caption=>'seq_num',:col_width=>60}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'required_quantity',:column_caption=>'Required',:col_width=>70}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'sequence_number',:column_caption=>'seq_num',:col_width=>75}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'required_quantity',:column_caption=>'Required',:col_width=>75}
     #column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'actual_quantity',:column_caption=>'Actual',:col_width=>67}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'available_quantities',:column_caption=>'Available',:col_width=>65}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'holdover_quantity',:column_caption=>'holdover',:col_width=>55}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'available_quantities',:column_caption=>'Available',:col_width=>75}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'holdover_quantity',:column_caption=>'holdover',:col_width=>75}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'sub_total',:col_width=>78}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'price',:col_width=>64}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'commodity_code',:column_caption=>'commodity',:col_width=>50}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'marketing_variety_code',:column_caption=>'marketing_variety',:col_width=>95}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'commodity_code',:column_caption=>'commodity',:col_width=>85}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'marketing_variety_code',:column_caption=>'marketing_variety',:col_width=>120}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'brand_code',:column_caption=>'brand',:col_width=>100}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'old_pack_code',:column_caption=>'old_pack',:col_width=>100}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'size_ref',:column_caption=>'size',:col_width=>50}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'target_market_code',:column_caption=>'target_market',:col_width=>120}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'grade_code',:column_caption=>'grade',:col_width=>36}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'grade_code',:column_caption=>'grade',:col_width=>50}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'inventory_code',:column_caption=>'inventory',:col_width=>110}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'puc',:col_width=>50}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'marketing_org',:col_width=>90}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'marketing_org',:col_width=>110}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'old_fg_code',:col_width=>200}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'pallet_format_product_code',:col_width=>79}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'pc_code',:col_width=>80}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'pallet_format_product_code',:col_width=>125}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'pc_code',:col_width=>150}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'id'}
 
 #    set_grid_min_height(600)
 
     set_grid_min_width(850)
     hide_grid_client_controls()
-     get_data_grid(data_set,column_configs,FgPlugins::LoadDetailGridPlugin.new(self,request),nil,grid_command)
+     get_data_grid(data_set,column_configs,nil,grid_command)
   end
 
    def build_pallets_grid(data_set, can_edit, can_delete)
-     require File.dirname(__FILE__) + "/../../../app/helpers/fg/load_detail_plugins.rb"
 
      column_configs = Array.new
      if !session[:current_viewing_order]
@@ -282,7 +280,7 @@ module Fg::LoadDetailHelper
          end
 
          if can_edit
-           column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name => 'set_holdover', :col_width=>72,
+           column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name => 'set_holdover', :col_width=>110,
                                                       :settings =>
                                                               {:link_text => 'set_holdover',
                                                                :target_action => 'set_holdover',
@@ -296,27 +294,27 @@ module Fg::LoadDetailHelper
          end
       end
                column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'pallet_number',:col_width=>140}
-               column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'remarks1',:column_caption=> Globals.get_column_captions['remarks1'],:col_width=>160}
-               column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'remarks2',:column_caption=> Globals.get_column_captions['remarks2'],:col_width=>160}
-               column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'remarks3',:column_caption=> Globals.get_column_captions['remarks3'],:col_width=>160}
-               column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'carton_quantity_actual',:column_caption=>'actual_qty',:col_width=>60}
-               column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'holdover',:col_width=>55}
-               column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'holdover_quantity',:column_caption=>'holdover_qty',:col_width=>75}
-               column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'oldest_pack_date_time',:col_width=>143}
-               column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'build_status',:col_width=>73}
-               column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'commodity_code',:column_caption=>'commodity',:col_width=>53}
-               column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'marketing_variety_code',:col_width=>78}
+               column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'remarks1',:col_width=>160}
+               column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'remarks2',:col_width=>160}
+               column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'remarks3',:col_width=>160}
+               column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'carton_quantity_actual',:column_caption=>'actual_qty',:col_width=>85}
+               column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'holdover',:col_width=>90}
+               column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'holdover_quantity',:column_caption=>'holdover_qty',:col_width=>120}
+               column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'oldest_pack_date_time',:col_width=>160}
+               column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'build_status',:col_width=>90}
+               column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'commodity_code',:column_caption=>'commodity',:col_width=>90}
+               column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'marketing_variety_code',:col_width=>150}
                column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'target_market_code',:column_caption=>'target_market',:col_width=>215}
-               column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'grade_code',:column_caption=>'grade',:col_width=>38}
-               column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'iso_week_code',:col_width=>61}
-               column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'season_code',:column_caption=>'season',:col_width=>53}
-               column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'pallet_format_product_code',:col_width=>98}
+               column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'grade_code',:column_caption=>'grade',:col_width=>60}
+               column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'iso_week_code',:col_width=>130}
+               column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'season_code',:column_caption=>'season',:col_width=>100}
+               column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'pallet_format_product_code',:col_width=>205}
                column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'pc_code',:col_width=>160}
-               column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'remarks4',:column_caption=> Globals.get_column_captions['remarks4'],:col_width=>160}
-               column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'remarks5',:column_caption=> Globals.get_column_captions['remarks5'],:col_width=>160}
+               column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'remarks4',:col_width=>160}
+               column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'remarks5',:col_width=>160}
                column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'id'}
 
-     get_data_grid(data_set,column_configs,FgPlugins::LoadPalletsGridPlugin.new(self,request))
+     get_data_grid(data_set,column_configs)
 
    end
 
@@ -324,7 +322,7 @@ module Fg::LoadDetailHelper
        @load_detail=LoadDetail.find("#{pallet.load_detail_id}")
 
        field_configs = Array.new
-         holdover_quantity= pallet.holdover_quantity                
+         holdover_quantity= pallet.holdover_quantity
          field_configs[0] = {:field_type => 'CheckBox',
                              :field_name => 'holdover'}
 
@@ -332,7 +330,7 @@ module Fg::LoadDetailHelper
                              :field_name => 'actual_cartons',
                              :settings => {
                                   :show_label => true,
-                                  
+
                                   :is_separator => false,
                                   :static_value => @load_detail.set_actual_carton_count}}
 
@@ -355,7 +353,7 @@ module Fg::LoadDetailHelper
     session[:order_product_form]= Hash.new
 
     field_configs = Array.new
-    
+
       field_configs[field_configs.length()] = {:field_type =>  'LabelField',
                                              :field_name => 'sequence_number'}
 
@@ -371,7 +369,7 @@ module Fg::LoadDetailHelper
      field_configs[field_configs.length()] = {:field_type => 'TextField',
                                              :field_name => 'required_quantity'}
 
-   
+
     build_form(load_detail, field_configs, action, 'load_detail', caption, is_edit)
 
   end

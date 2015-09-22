@@ -567,7 +567,7 @@ class Order < ActiveRecord::Base
     Order.transaction do
       order_id = self.id.to_i
       @load = Load.new
-      @load.load_number = MesControlFile.next_seq_web(9)
+      @load.load_number = 70350 + 1 #MesControlFile.next_seq_web(9)
       @load.load_status = "LOAD_CREATED"
       @load.save
       @load_status_history = LoadStatusHistory.new

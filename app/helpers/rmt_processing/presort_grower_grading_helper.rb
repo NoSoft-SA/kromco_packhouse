@@ -55,7 +55,6 @@ module RmtProcessing::PresortGrowerGradingHelper
   end
 
   def build_pool_graded_summary_grid(data_set,can_edit,can_delete)
-    require File.dirname(__FILE__) + "/../../../app/helpers/rmt_processing/presort_grower_grading_summary_plugins.rb"
 
     column_configs = []
     #  ----------------------
@@ -68,18 +67,18 @@ module RmtProcessing::PresortGrowerGradingHelper
                               :target_action => 'edit_pool_graded_ps_summary',
                               :id_column => 'id'}}
     end
-    column_configs << {:field_type => 'text',:field_name =>'maf_lot_number'}
+    column_configs << {:field_type => 'text',:field_name =>'maf_lot_number',:col_width=>150}
     column_configs << {:field_type => 'text',:field_name => 'season_code'}
     column_configs << {:field_type => 'text',:field_name => 'status'}
     column_configs << {:field_type => 'text',:field_name => 'rmt_bin_count',:column_caption=> "bin_count",:col_width=>100}
-    column_configs << {:field_type => 'text',:field_name => 'rmt_bin_weight',:column_caption=> "bin_weight"}
+    column_configs << {:field_type => 'text',:field_name => 'rmt_bin_weight',:column_caption=> "bin_weight",:col_width=>150}
     column_configs << {:field_type => 'text',:field_name => 'created_at'}
     column_configs << {:field_type => 'text',:field_name => 'id'}
     if can_delete
       column_configs << {:field_type => 'action',:field_name => 'delete',
                          :settings =>
-                             {:link_text => 'delete',
-                              :target_action => 'delete_pool_graded_summary',
+                             {:link_text => '',
+                              :target_action => '',
                               :id_column => 'id'}}
     end
     if can_edit
@@ -89,7 +88,7 @@ module RmtProcessing::PresortGrowerGradingHelper
       #                        :target_action => 'uncomplete_pool_graded_summary',
       #                        :id_column => 'id'}}
     end
-    return get_data_grid(data_set,column_configs,RmtProcessingPlugins::PresortGrowerGradingSummaryPlugin.new ) #
+    return get_data_grid(data_set,column_configs,MesScada::GridPlugins::RmtProcessing::PresortGrowerGradingSummaryPlugin.new(self,request) ) #
   end
 
 
