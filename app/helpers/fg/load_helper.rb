@@ -504,6 +504,9 @@ module Fg::LoadHelper
   def build_load_grid(data_set, can_edit, can_delete)
 
     column_configs = Array.new
+    action_configs = []
+    show_menu=[]
+    action_menu=[]
     grid_command =    {:field_type=>'link_window_field',:field_name =>'create_loads',
                              :settings =>
                             {
@@ -515,76 +518,81 @@ module Fg::LoadHelper
                              }}
 
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'load_number',:column_caption=>'load_num',:col_width=>80}
-    column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name =>'load_status',:column_caption=>'status',:col_width=>160 ,:settings => {:link_text => '',:target_action => 'load_status',:id_column => 'id'}}
 
-    column_configs[column_configs.length()] ={:field_type => 'link_window',:field_name => 'pallets',:column_caption=>'pallets',:col_width=>60, :width => 1200,
-                                              :height => 1500,:settings => {:width => 1500, :height =>1500,:link_text => '',:target_action => '',:id_column => 'id'}}
+
+
+    action_menu <<  {:field_type => 'link_window',:field_name => 'edit_pallet_remarks',:column_caption=>'edit_pallet_remarks',:col_width=>60, :width => 1800,
+                                              :height => 1500,:settings => {:width => 1800,
+                                                                            :height => 1500,:link_icon=>'edit' ,:link_text => 'edit_pallets_remarks',:target_action => 'edit_pallets_remarks',:id_column => 'id'}}
+
 
     if !session[:current_viewing_order]
-    column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name => 'delete_load',:column_caption=>'delete',:col_width=>50,
-                                                           :settings => {:link_text => '',:target_action => 'delete_load',:id_column => 'id'}}
-
-
-
-
+      action_menu <<  {:field_type => 'link_window', :field_name => 'delete_load',:column_caption=>'delete',:col_width=>50,
+                                                           :settings => {:link_icon => 'delete',:link_text => 'delete',:target_action => 'delete_load',:id_column => 'id'}}
     end
-    column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name => 'reports',:col_width=>50,
+    show_menu <<  {:field_type => 'link_window', :field_name => 'reports',:col_width=>50,
                                                        :settings => {
-                                                           :link_text => '',
+                                                           :link_text => 'reports',:link_icon=>'reports_and_edis',
                                                                :controller    =>'fg/load',
                                                                :target_action => 'reports_and_edis',
                                                                :id_column => 'id'
                                                                }}
     if !session[:current_viewing_order]
-    column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name => 'import_pallets',:col_width=>150,
+      action_menu  <<   {:field_type => 'link_window', :field_name => 'import_pallets',:col_width=>150,
                                                   :settings => {
-                                                      :image => 'import_pallets',
+                                                      :link_icon => 'pallets',:link_text=> 'import_pallets',
                                                           :controller    =>'fg/order',
                                                           :target_action => 'render_import_pallets',
                                                           :id_column => 'id'
                                                           }}
 
 end
-    column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name => 'load_details',:col_width=>72,
+    show_menu << {:field_type => 'link_window', :field_name => 'load_details',:col_width=>72,
                                                     :settings => {
-                                                        :link_text => 'load_details',
+                                                        :link_text => 'load_details',:link_icon=>'load_details',
                                                             :controller => 'fg/load_detail',
                                                             :target_action => 'list_load_details',
                                                             :id_column => 'id'}}
 
-      column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name => 'print_pick_list',:col_width=>92,
+    action_menu <<   {:field_type => 'link_window', :field_name => 'print_pick_list',:col_width=>92,
                                                  :settings => {
-                                                     :link_text => '',
+                                                     :link_text => 'print_pick_list',:link_icon=>'printer',
                                                          :target_action => 'print_pick_list',
                                                          :id_column => 'id'}}
 
-        column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name => 'edit_container',:col_width=>90,
+    action_menu <<   {:field_type => 'link_window', :field_name => 'edit_container',:col_width=>90,
                                                :settings => {
-                                                   :link_text => '',
+                                                   :link_text => 'edit_container', :link_icon=> 'containers',
                                                        :target_action => 'edit_container',
                                                        :order_number_column => 'order_number',
                                                        :id_column => 'id'
                                                        }}
 
-column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name => 'edit_vehicle',:col_width=>79,
+    action_menu <<  {:field_type => 'link_window', :field_name => 'edit_vehicle',:col_width=>79,
                                                :settings => {
-                                                   :link_text => '',
+                                                   :link_text => 'edit_vehicle',:link_icon => 'edit',
                                                        :target_action => 'edit_vehicle',
                                                        :order_number_column => 'order_number',
                                                        :id_column => 'id'
                                                        }}
 
-      column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name => 'link_edit_voyage',:col_width=>150,
+    action_menu <<  {:field_type => 'link_window', :field_name => 'link_edit_voyage',:col_width=>150,
                                                          :settings => {
-                                                             :link_text => '',
-                                                                 :target_action => 'edit_voyage',
+                                                             :link_text => 'link_edit_voyage',:link_icon=>'ship',
+                                                                 :target_action => 'voyage',
                                                                  :id_column => 'id'
                                                                  }}
 
+    action_configs << {:field_type => 'sub_menu', :field_name => 'sub_menu', :column_caption => 'Show', :settings => {:actions => show_menu}}
+    action_configs << {:field_type => 'sub_menu', :field_name => 'sub_menu', :column_caption => 'Action', :settings => {:actions => action_menu}}
+    column_configs << {:field_type => 'action_collection', :field_name => 'actions', :settings => {:actions => action_configs}} unless action_configs.empty?
+    column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name =>'load_status',:column_caption=>'status',:col_width=>160 ,:settings => {:link_text => '',:target_action => 'load_status',:id_column => 'id'}}
+    column_configs[column_configs.length()] = {:field_type => 'link_window',:field_name => 'pallets',:column_caption=>'pallets',:col_width=>60, :width => 1200,
+                                               :height => 1500,:settings => {:link_icon=>'pallets' ,:link_text => '',:target_action => '',:id_column => 'id'}}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'voyage_code',:col_width=> 150}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'customer_reference', :column_caption=>'customer_ref',:col_width=> 90}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'booking_reference', :column_caption=>'booking_ref',:col_width=> 102}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'exporter_certificate_code',:col_width=> 103}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'customer_reference', :column_caption=>'customer_ref',:col_width=> 100}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'booking_reference', :column_caption=>'booking_ref',:col_width=> 135}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'exporter_certificate_code',:col_width=> 160}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'exporter',:col_width=> 103}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'shipper',:col_width=> 103}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'shipping_agent',:col_width=> 103}
@@ -592,7 +600,7 @@ column_configs[column_configs.length()] = {:field_type => 'link_window', :field_
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'pol',:col_width=> 80}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'pod',:col_width=> 80}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'memo_pad'}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'pick_list_number',:col_width=> 90}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'pick_list_number',:col_width=> 100}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'id',:col_width=> 80}
 
 

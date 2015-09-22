@@ -8,6 +8,16 @@ class Fg::LoadController < ApplicationController
     true
   end
 
+  def voyage
+    load_voyage=LoadVoyage.find_by_load_id(params[:id])
+    if load_voyage
+      edit_voyage
+    else
+      link_to_voyage
+    end
+  end
+
+
 
   def reports_and_edis
     @load=Load.find(params[:id])
@@ -49,7 +59,7 @@ class Fg::LoadController < ApplicationController
 
   end
 
-  def view_load_pallets
+  def view_load_pallets2
     @load=Load.find(params[:id])
     set_active_doc("loads",params[:id])
 
@@ -62,8 +72,9 @@ class Fg::LoadController < ApplicationController
 
 
 
-  def view_list_load_pallets
+  def view_load_pallets
     id = params[:id].to_i
+    set_active_doc("loads",params[:id])
     pallets = Pallet.find_by_sql("select pallets.*
                                     from pallets
                                     inner join load_details on pallets.load_detail_id=load_details.id
@@ -93,6 +104,8 @@ class Fg::LoadController < ApplicationController
 
   def  edit_pallets_remarks
     id = params[:id].to_i
+    set_active_doc("loads",params[:id])
+
     pallets = Pallet.find_by_sql("select pallets.*
                                     from pallets
                                     inner join load_details on pallets.load_detail_id=load_details.id
@@ -110,6 +123,10 @@ class Fg::LoadController < ApplicationController
     session[:load_pallets]=@pallets
     session[:query]= @pallets
     session[:load_id] = id
+    @use_jq_grid = true
+    if @use_jq_grid
+      render :template => "fg/loads/edit_pallet_remarks", :layout => "content"
+    else
     @pagination_server = "list_load_details"
     @can_edit = authorise(program_name?, 'edit', session[:user_id])
     @can_delete = authorise(program_name?, 'delete', session[:user_id])
@@ -125,6 +142,7 @@ class Fg::LoadController < ApplicationController
       <%= grid.render_html %>
       <%= grid.render_grid %>
       }, :layout => 'content'
+      end
   end
 
   def render_view_pallets
@@ -174,12 +192,10 @@ class Fg::LoadController < ApplicationController
     end
    @load_id= session[:active_doc]['loads']
     render :inline => %{<script>
-                                  window.parent.location.href = '/fg/load/view_load_pallets/<%=@load_id%>';
-                                  //window.location.href = '/fg/load/reload_pallets_form/<%=@load_id%>';
-
+                                  //window.parent.location.href = '/fg/load/edit_pallets_remarks/<%=@load_id%>';
+                                  window.parent.close();
                             </script>}
-
-  end
+ end
 
   def reload_pallets_form
     view_load_pallets
@@ -349,29 +365,6 @@ class Fg::LoadController < ApplicationController
       end
 
       voyage=Voyage.find_by_voyage_code(params[:load_voyage]['voyage_code'].to_s)
-
-      #if load_voyage.pol_voyage_port_id==params[:load_voyage]['pol_voyage_port_id']
-      #else
-      #  if load_voyage.voyage_id.to_i == voyage.id.to_i
-      #    flash[:error]= "select a new voyage first before changing the port"
-      #              redirect_to :controller => 'fg/load', :action => 'edit_voyage', :id => @load_id and return
-      #  else
-      #
-      #  end
-      #
-      #end
-      #if load_voyage.pod_voyage_port_id==params[:load_voyage]['pod_voyage_port_id']
-      #else
-      #  if load_voyage.voyage_id.to_i == voyage.id.to_i
-      #    flash[:error]= "select a new voyage first before changing the port "
-      #              redirect_to :controller => 'fg/load', :action => 'edit_voyage', :id => @load_id and return
-      #  else
-      #
-      #  end
-      #
-      #end
-
-
       if load_voyage.voyage_id.to_i == voyage.id.to_i
         voyage=voyage
       else
@@ -431,7 +424,7 @@ class Fg::LoadController < ApplicationController
 
             render :inline => %{<script>
                   alert('load voyage edited');
-               window.opener.frames[1].frames[1].location.reload(true);
+               window.opener.frames[1].location.reload(true);
                     window.close();
             </script>}
 
@@ -467,6 +460,7 @@ class Fg::LoadController < ApplicationController
 
 
   def create_load_voyage
+
     @load_id =session[:active_load].id
     @order_id=session[:active_order_id]
     if params[:load_voyage]['voyage_code']==nil || params[:load_voyage]['voyage_code']=="" || params[:load_voyage]['shipping_line_party_id']== "" ||params[:load_voyage]['shipping_agent_party_role_id']== "" || params[:load_voyage]['shipper_party_role_id']== "" || params[:load_voyage]['exporter_party_role_id']== "" || params[:load_voyage]['pol_voyage_port_id']== "" || params[:load_voyage]['pod_voyage_port_id']== ""
@@ -505,7 +499,7 @@ class Fg::LoadController < ApplicationController
       if  @load_voyage_port.save
         render :inline => %{<script>
                              alert('load voyage created');
-               window.opener.frames[1].frames[1].location.reload(true);
+                              window.opener.frames[1].location.reload(true);
                               window.close();
                               </script>}
       else
@@ -1180,7 +1174,7 @@ class Fg::LoadController < ApplicationController
     end
     load.destroy
     render :inline => %{<script>
-        window.opener.frames[1].location.href = '/fg/order/edit_order/<%= @load_order.order_id.to_s%>';
+        window.opener.location.href = '/fg/order/edit_order/<%= @load_order.order_id.to_s%>';
         window.close();
       </script>}, :layout => "content"
 
