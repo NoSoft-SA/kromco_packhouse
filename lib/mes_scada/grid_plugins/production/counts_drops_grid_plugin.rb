@@ -17,18 +17,18 @@ module MesScada::GridPlugins
 
       end
 
-      def row_cell_colouring(column_name, cell_value, record)
-        if cell_value.to_s == "n.a"
-          return :black
-        else
-          if column_name == "size_code" && cell_value
-           return :blue
-          elsif column_name == "standard_size_count_value" && cell_value
-           return :green
-          else
-           return :gray
-          end
-        end
+      def row_cell_colouring(record)
+        # if cell_value.to_s == "n.a"
+        #   return :black
+        # else
+        #   if column_name == "size_code" && cell_value
+        #    return :blue
+        #   elsif column_name == "standard_size_count_value" && cell_value
+        #    return :green
+        #   else
+        #    return :gray
+        #   end
+        # end
       end
 
     end

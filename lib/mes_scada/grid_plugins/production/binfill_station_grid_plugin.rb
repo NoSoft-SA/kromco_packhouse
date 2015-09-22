@@ -17,17 +17,22 @@ module MesScada::GridPlugins
 
       end
 
-      def row_cell_colouring(column_name, cell_value, record)
-        case column_name
-          when "drop_code", "binfill_station_code"
-            return :blue
-          when "size", "grade", "marketing_variety"
-            if record.rmt_product_code
-              return :green
-            else
-              return :red
-            end
+      def row_cell_colouring(record)
+        if record.rmt_product_code
+          return :green
+        else
+          return :red
         end
+        # case column_name
+        #   when "drop_code", "binfill_station_code"
+        #     return :blue
+        #   when "size", "grade", "marketing_variety"
+        #     if record.rmt_product_code
+        #       return :green
+        #     else
+        #       return :red
+        #     end
+        # end
       end
 
     end

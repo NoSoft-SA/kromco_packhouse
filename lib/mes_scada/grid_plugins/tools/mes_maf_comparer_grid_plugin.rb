@@ -1,8 +1,8 @@
 module MesScada::GridPlugins
 
-  module Production
+  module Tools
 
-    class ProcessingSetupGridPlugin < MesScada::GridPlugin
+    class MesMafCompareGridPlugin < MesScada::GridPlugin
 
       def initialize(env = nil, request = nil)
         @env = env
@@ -14,15 +14,14 @@ module MesScada::GridPlugins
       end
 
       def cancel_cell_rendering(column_name, cell_value, record)
-
+        if column_name == "view_bin" && !record['mes_bin']
+          return true
+        end
+        return false
       end
 
       def row_cell_colouring(record)
-        if record.handling_product_type_code.upcase == "REBIN"
-            return :blue
-        else
-            return :brown
-        end
+
       end
 
     end

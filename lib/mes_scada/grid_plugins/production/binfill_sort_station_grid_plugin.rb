@@ -17,7 +17,7 @@ module MesScada::GridPlugins
 
       end
 
-      def row_cell_colouring(column_name, cell_value, record)
+      def row_cell_colouring(record)
         if record.rmt_product_code
           return :green
         else

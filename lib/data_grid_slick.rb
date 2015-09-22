@@ -1083,7 +1083,7 @@ EOS
         if @plugin
           # Plugin row colouring:
           begin
-            row_colour = @plugin.row_cell_colouring( active_record )
+            row_colour = @plugin.row_cell_colouring(active_record)
           rescue
             raise MesScada::Error, "DataGrid: A plugin styling method crashed when getting the row colour."
           end

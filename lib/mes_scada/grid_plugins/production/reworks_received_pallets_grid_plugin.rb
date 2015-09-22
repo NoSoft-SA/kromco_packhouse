@@ -17,7 +17,7 @@ module MesScada::GridPlugins
 
       end
 
-      def row_cell_colouring(column_name,cell_value,record)
+      def row_cell_colouring(record)
 
         @strong_on = false
         record.reworks_action = "" if ! record.reworks_action

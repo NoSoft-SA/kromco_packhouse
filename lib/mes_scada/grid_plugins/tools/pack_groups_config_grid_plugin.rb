@@ -1,8 +1,8 @@
 module MesScada::GridPlugins
 
-  module Production
+  module Tools
 
-    class ProcessingSetupGridPlugin < MesScada::GridPlugin
+    class PackGroupsConfigGridPlugin < MesScada::GridPlugin
 
       def initialize(env = nil, request = nil)
         @env = env
@@ -18,10 +18,10 @@ module MesScada::GridPlugins
       end
 
       def row_cell_colouring(record)
-        if record.handling_product_type_code.upcase == "REBIN"
-            return :blue
+        if record.size
+          return :blue
         else
-            return :brown
+          return :green
         end
       end
 
