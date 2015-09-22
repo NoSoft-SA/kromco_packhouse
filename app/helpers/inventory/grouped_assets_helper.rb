@@ -266,11 +266,13 @@ module Inventory::GroupedAssetsHelper
   end
 
   def build_list_transaction_histories_grid(data_set, can_edit, can_delete)
-    require File.dirname(__FILE__) + "/../../../app/helpers/inventory/grouped_assets_plugins.rb"
-
     column_configs = Array.new
 
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'print_report'}
+    column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name => 'print_report', :col_width=> 42,
+                                               :settings =>
+                                                   {:link_text => 'print_report',
+                                                    :target_action => '',
+                                                    :id_column => 'id'}}
 
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'transaction_quantity_minus', :col_width=> 46}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'reference_number', :col_width=> 53}
@@ -292,7 +294,7 @@ module Inventory::GroupedAssetsHelper
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'affected_by_program', :col_width=> 213}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'created_at', :col_width=> 134}
 
-    return get_data_grid(data_set, column_configs, InventoryPlugins::GroupedAssetsGridPlugin.new(self,request), true)
+    return get_data_grid(data_set, column_configs, MesScada::GridPlugins::Inventory::GroupedAssetsGridPlugin.new(self,request), true)
   end
 
   def build_list_asset_location_transaction_histories_grid(data_set, can_edit, can_delete)
