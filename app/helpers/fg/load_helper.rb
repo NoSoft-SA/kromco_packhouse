@@ -532,7 +532,7 @@ module Fg::LoadHelper
     end
     show_menu <<  {:field_type => 'link_window', :field_name => 'reports',:col_width=>50,
                                                        :settings => {
-                                                           :link_text => 'reports',:link_icon=>'reports_and_edis',
+                                                           :link_text => 'reports',:link_icon=>'report',
                                                                :controller    =>'fg/load',
                                                                :target_action => 'reports_and_edis',
                                                                :id_column => 'id'
@@ -549,7 +549,7 @@ module Fg::LoadHelper
 end
     show_menu << {:field_type => 'link_window', :field_name => 'load_details',:col_width=>72,
                                                     :settings => {
-                                                        :link_text => 'load_details',:link_icon=>'load_details',
+                                                        :link_text => 'load_details',:link_icon=>'load_detail',
                                                             :controller => 'fg/load_detail',
                                                             :target_action => 'list_load_details',
                                                             :id_column => 'id'}}
