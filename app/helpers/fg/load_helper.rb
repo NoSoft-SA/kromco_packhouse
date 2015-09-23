@@ -549,7 +549,7 @@ module Fg::LoadHelper
 end
     show_menu << {:field_type => 'link_window', :field_name => 'load_details',:col_width=>72,
                                                     :settings => {
-                                                        :link_text => 'load_details',:link_icon=>'load_detail',
+                                                        :link_text => 'load_details',:link_icon=>'pause',
                                                             :controller => 'fg/load_detail',
                                                             :target_action => 'list_load_details',
                                                             :id_column => 'id'}}

@@ -24,7 +24,7 @@ module Fg::OrderHelper
                                 :link_text => "print_all",
                                 :id_value=>params[:id]}}
 
-      return get_data_grid(consignment_note_numbers, column_configs,FgPlugins::SignedIntakeDocs.new,nil,grid_command)
+      return get_data_grid(consignment_note_numbers, column_configs,MesScada::GridPlugins::Fg::SignedIntakeDocsPlugin.new(self,request),nil,grid_command)   #
     end
   def build_number_loads_form(load, action, caption, is_edit=nil, is_create_retry=nil)
         field_configs = Array.new
