@@ -463,7 +463,7 @@ end
     field_configs[field_configs.length()] = {:field_type => 'LinkWindowField',
                                                    :field_name => '',
                                                    :settings => {
-                                                           :target_action => 'render_main_import_pallets',
+                                                           :target_action => 'create_one_or_more_loads_and_import_pallets',
                                                            :link_text => "load import wizard",
                                                            :id_value => order.id
                                                    }
@@ -472,7 +472,7 @@ end
     field_configs[field_configs.length()] = {:field_type => 'LinkWindowField',
                                                    :field_name => '',
                                                    :settings => {
-                                                           :target_action => 'render_load_import_pallets',
+                                                           :target_action => 'create_load_and_import_pallets',
                                                            :link_text => "import many loads",
                                                            :id_value => order.id
                                                    }
