@@ -245,6 +245,44 @@ module RmtProcessing::BinOrderHelper
 
   end
 
+def build_search_bin_order_grid(data_set, can_edit, can_delete)
+
+     column_configs = Array.new
+     if can_edit
+       column_configs[column_configs.length()] = {:field_type => 'action', :field_name => 'edit', :col_width=>30,
+                                                  :settings =>
+                                                          {:link_text => 'edit',
+                                                           :target_action => 'edit_bin_order',
+                                                           :id_column => 'id'}}
+     end
+
+     if can_delete
+       column_configs[column_configs.length()] = {:field_type => 'action', :field_name => 'edit', :col_width=>30,
+                                                  :settings =>
+                                                          {:link_text => 'delete',
+                                                           :target_action => 'delete_bin_order',
+                                                           :id_column => 'id'}}
+     end
+     column_configs[column_configs.length()]= {:field_type => 'text', :field_name => 'bin_order_number',:column_caption=>'order_num',:col_width=>70}
+     column_configs[column_configs.length()]= {:field_type => 'text', :field_name => 'updated_at'}
+     column_configs[column_configs.length()]= {:field_type => 'text', :field_name => 'order_status',:col_width=>142}
+     column_configs[column_configs.length()]= {:field_type => 'text', :field_name => 'load_status',:col_width=>108}
+     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'order_type_code',:column_caption=>'order_type',:col_width=>68}
+     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'customer_party_name',:column_caption=>'customer',:col_width=>80}
+     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'customer_order_number',:column_caption=>'cust_order_num',:col_width=>105}
+     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'trading_partner',:col_width=>203}
+     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'user_name',:column_caption=>'user',:col_width=>84}
+     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'created_on', :column_caption=>'order_date',:col_width=>118}
+      column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'id'}
+ #	----------------------
+ #	define action columns
+ #	----------------------
+
+     set_grid_min_width(1200)
+     return get_data_grid(data_set, column_configs,nil, true)
+
+   end
+
 
  end
 

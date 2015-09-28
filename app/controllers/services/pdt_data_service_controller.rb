@@ -5,7 +5,7 @@ class  Services::PdtDataServiceController < ApplicationController
 
  def get_production_runs_results
    #-------------------------------- To be filtered client side -----------------------------------------------
-    result_set = PdtRemoteList.get_production_runs_results(params)
+    result_set = ProductionRun.find_by_sql("select distinct line_code,farm_code,account_code from production_runs")
    #-------------------------------- To be filtered client side -----------------------------------------------
     result = package_result_set(result_set)
     send_response(result)
@@ -13,7 +13,7 @@ class  Services::PdtDataServiceController < ApplicationController
  
  def get_production_runs_line_code
    #-------------------------------- To be filtered here -----------------------------------------------
-     result_set = PdtRemoteList.get_production_runs_line_code(params)
+     result_set = ProductionRun.find_by_sql("select distinct line_code from production_runs")
    #-------------------------------- To be filtered here -----------------------------------------------
     result = package_result_set(result_set)
     send_response(result)
@@ -21,7 +21,7 @@ class  Services::PdtDataServiceController < ApplicationController
 
  def get_production_runs_farm_code
      line_code = params["line_code"].to_s
-     result_set = PdtRemoteList.get_production_runs_farm_code(params)
+     result_set = ProductionRun.find_by_sql("select distinct farm_code from production_runs where line_code = '#{line_code}'")
      result = package_result_set(result_set)
      send_response(result)
  end
@@ -29,44 +29,44 @@ class  Services::PdtDataServiceController < ApplicationController
  def get_production_runs_account_code
      line_code = params["line_code"].to_s
      farm_code = params["farm_code"].to_s
-     result_set = PdtRemoteList.get_production_runs_account_code(params)
+     result_set = ProductionRun.find_by_sql("select distinct account_code from production_runs where line_code = '#{line_code}' and farm_code = '#{farm_code}'")
      result = package_result_set(result_set)
      send_response(result)
  end
 
  def get_stored_pdt_processes_user_process_name
      transaction_name = params["transaction_name"].to_s
-     stored_processes = PdtRemoteList.get_stored_pdt_processes_user_process_name(params)
+     stored_processes = StoredPdtProcess.find_by_sql("select transaction_name,user_process_name from stored_pdt_processes where stored_pdt_processes.transaction_name='#{transaction_name}'")
      result = package_result_set(stored_processes)
      send_response(result)
  end
 
  def get_stored_pdt_processes_transaction_name
-   stored_processes = PdtRemoteList.get_stored_pdt_processes_transaction_name(params)
+   stored_processes = StoredPdtProcess.find_by_sql("select distinct transaction_name from stored_pdt_processes") #where stored_pdt_processes.user='#{@user}' and stored_pdt_processes.ip_address='#{@ip}'
    result = package_result_set(stored_processes)
    send_response(result)
  end
 
  def get_temperature_device_type_list
-   temperature_device_type_codes = PdtRemoteList.get_temperature_device_type_list(params)
+   temperature_device_type_codes = TemperatureDeviceType.find_by_sql("select distinct temperature_device_type_code from temperature_device_types").unshift(TemperatureDeviceType.new({:temperature_device_type_code=> ""}))
    result = package_result_set(temperature_device_type_codes)
    send_response(result)
  end
 
  def get_unit_type_list
-   unit_type_codes = PdtRemoteList.get_unit_type_list(params)
+   unit_type_codes = UnitType.find_by_sql("select distinct unit_type_code from unit_types").unshift(UnitType.new({:unit_type_code=> ""}))
    result = package_result_set(unit_type_codes)
    send_response(result)
  end
 
  def get_loading_vehicle_numbers
-   load_vehicles_process_vars = PdtRemoteList.get_loading_vehicle_numbers(params)
+   load_vehicles_process_vars = LoadVehiclesProcessVar.find_by_sql("select vehicle_number from load_vehicles_process_vars").unshift(LoadVehiclesProcessVar.new({:vehicle_number=> ""}))
    result = package_result_set(load_vehicles_process_vars)
    send_response(result)
  end
 
  def get_offload_tripsheets
-   offload_vehicles_process_vars = PdtRemoteList.get_offload_tripsheets(params)
+   offload_vehicles_process_vars = OffloadVehiclesProcessVar.find_by_sql("select tripsheet_number from offload_vehicles_process_vars").unshift(OffloadVehiclesProcessVar.new({:tripsheet_number=> ""}))
    result = package_result_set(offload_vehicles_process_vars)
    send_response(result)
  end
@@ -80,32 +80,32 @@ class  Services::PdtDataServiceController < ApplicationController
 
 
   def list_drench_lines
-    drench_lines = PdtRemoteList.list_drench_lines(params)
+    drench_lines = DrenchLine.find(:all)
     result = package_result_set(drench_lines)    
     send_response(result)
   end
   
   def list_drenches
-    drenches = PdtRemoteList.list_drenches(params)
+    drenches = DrenchStation.find(:all)
     result = package_result_set(drenches)
     
     send_response(result)
   end
   
   def list_drench_concentrates
-    drench_concentrates = PdtRemoteList.list_drench_concentrates(params)
+    drench_concentrates = DrenchConcentrate.find(:all)
     result = package_result_set(drench_concentrates)
     send_response(result)
   end
   
   def list_concentrate_product_types
-    drench_concentrate_products = PdtRemoteList.list_concentrate_product_types(params)
+    drench_concentrate_products = ConcentrateProduct.find(:all)
     result = package_result_set(drench_concentrate_products)
     send_response(result)
   end
   
   def list_forecasts
-    forecasts = PdtRemoteList.list_forecasts(params)
+    forecasts = Forecast.find(:all)
     result = package_result_set(forecasts)
     
     send_response(result)
@@ -131,7 +131,7 @@ class  Services::PdtDataServiceController < ApplicationController
   #  Happy's List methods
   #=============================================
   def get_pallet_format_product_codes
-    pallet_format_products = PdtRemoteList.get_stored_pdt_processes_user_process_name(params)
+    pallet_format_products = PalletFormatProduct.find_by_sql("SELECT distinct pallet_format_product_code from pallet_format_products")
     result = package_result_set(pallet_format_products)
     send_response(result)
   end

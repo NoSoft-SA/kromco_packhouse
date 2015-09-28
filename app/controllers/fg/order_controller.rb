@@ -8,6 +8,188 @@ class Fg::OrderController < ApplicationController
     true
   end
 
+  def continue_with_pallet_import
+    @order=Order.find(session[:active_doc]['order'])
+
+    load=Load.find(session[:active_doc]['load'])  if  session[:active_doc] && session[:active_doc]['load']
+
+    do_create_load_and_process_pallets if session[:create_load_and_import_pallets]
+
+    do_create_one_or_more_loads_and_process_pallets if !session[:create_load_and_import_pallets] && !session[:load_id]
+
+    load.import_pallets(session[:hash_of_pallet_numbers])  if session[:load_id]
+
+
+    @total = @order.calculate_order_amount(@order.order_number)
+
+
+      render :inline => %{<script>
+                                      alert('order_product,load_detail,load and pallets added');
+                                      window.opener.frames[1].location.href = '/fg/order/edit_order/<%=@order.id.to_s%>';
+                                      window.close();
+                              </script>}, :layout => "content"
+
+  end
+
+  def do_create_one_or_more_loads_and_process_pallets
+    number_of_pallets=session[:hash_of_pallet_numbers].length
+    if number_of_pallets < session[:number_of_loads]
+      flash[:error]= "The number of pallets is less than the number of loads start again"
+      redirect_to :controller => 'fg/order', :action => 'create_one_or_more_loads_and_import_pallets', :id => @order.id and return
+    end
+    pallets_per_load=number_of_pallets/session[:number_of_loads]
+    remainder_pallets=number_of_pallets - (pallets_per_load * session[:number_of_loads])
+    if remainder_pallets > 0
+      number_of_loads =session[:number_of_loads].to_i + 1
+    else
+      number_of_loads = session[:number_of_loads].to_i
+    end
+    pallets_ary=[]
+    for item in session[:hash_of_pallet_numbers]
+      pallets_ary << item[0] +"=>" + item[1]
+    end
+
+    maxi=pallets_per_load
+    number_of_loads=number_of_loads.to_i
+    c=1
+    pallet_index=0
+    while c <= number_of_loads
+      load_pallets={}
+      y=1
+      while  y <=maxi
+        element=pallets_ary[pallet_index]
+        element=element.split("=>")
+        load_pallets[element[0]]=element[1]
+        y=y+1
+        pallet_index = pallet_index + 1
+      end
+      load = @order.create_loads
+      load.import_pallets(load_pallets)
+      c=c+1
+    end
+  end
+
+  def do_create_load_and_process_pallets
+    container_groups=session[:container_pallet_numbers].group(['container_number'], nil, true)
+    for group in container_groups
+      load_pallets={}
+      for member in group
+        load_pallets[member['pallet_number'].strip.to_s] = session[:hash_of_pallet_numbers][member['pallet_number'].strip].to_s
+      end
+      load = @order.create_loads
+      load.import_pallets(load_pallets, true)
+    end
+
+  end
+
+
+  def receive_pallets
+    @order = session[:order]
+    @order_id=@order.id
+    @order.set_virtual_atrr
+    @id = session[:load_id] if session[:load_id]
+    load=Load.find(session[:load_id])    if session[:load_id]
+    container_pallet_numbers=[]
+    pallet_nums=params[:order][:pallet_number]
+    if pallet_nums != ""
+      if pallet_nums.index(",")
+        pallet_numberz=pallet_nums.split(";")
+      else
+        pallet_numberz=pallet_nums.split()
+      end
+      pallet_numbers=[]
+      pallet_num_hash={}
+      for numm in pallet_numberz
+        numm=numm.gsub(/'/, '')
+        nums=numm.split(",")
+        pallet_numbers << nums[0]
+        container_pallet_numbers << {"pallet_number"=>nums[0],"container_number"=> nums[1]}   if session[:create_load_and_import_pallets]
+        pallet_num_hash[nums[0].strip]=numm
+      end
+      msg = nil
+      if msg = duplicate_pallets?(pallet_numbers)
+        flash[:error]= "The following pallet occurs more than once in the list: <BR> #{msg.join("<BR>")} "
+        redirect_to :controller => 'fg/order', :action => 'create_one_or_more_loads_and_import_pallets', :id => @order.id  if !session[:load_id] && !session[:create_load_and_import_pallets]
+        redirect_to :controller => 'fg/order', :action => 'load_import_pallets', :id => @id  if session[:load_id]
+        redirect_to :controller => 'fg/order', :action => 'create_load_and_import_pallets', :id => @id  if  session[:create_load_and_import_pallets]
+        return
+      end
+
+      failed_pallets= Pallet.invalid_pallets_for_dispatch_import?(pallet_numbers, @order)
+      if failed_pallets.length > 0
+        flash[:error]= "The following pallets cannot be imported. Reasons are in brackets: <BR> #{failed_pallets.join("<BR>")}"
+        redirect_to :controller => 'fg/order', :action => 'load_import_pallets', :id => @id and return   if session[:load_id]
+        redirect_to :controller => 'fg/order', :action => 'create_one_or_more_loads_and_import_pallets', :id => @order.id  if !session[:load_id] && !session[:create_load_and_import_pallets]
+        redirect_to :controller => 'fg/order', :action => 'create_load_and_import_pallets', :id => @id and return   if session[:create_load_and_import_pallets]
+        return
+      end
+    else
+      flash[:error]= "Pallet numbers required"
+      redirect_to :controller => 'fg/order', :action => 'load_import_pallets', :id => @id and return
+    end
+
+    session[:pallets_imported]=pallet_numbers
+    session[:container_pallet_numbers]=container_pallet_numbers
+    session[:hash_of_pallet_numbers]=pallet_num_hash
+    specific_target_markets_check(format_pallet_number(pallet_numbers))
+  end
+
+  def specific_target_markets_check(pallet_numbers)
+    is_specific_target_markets=TargetMarket.find_by_sql("select tm.target_market_code
+                                                         from target_markets tm   join pallets p on p.target_market_code=tm.target_market_code
+                                                         where p.pallet_number in (#{pallet_numbers.join(',')}) and tm.is_specific = true limit 1")
+    customer_order_detail=get_customer_order_detail
+
+    if !is_specific_target_markets.empty? &&  customer_order_detail.customer_memo_pad != "SPECIAL TM - REQUIRES RE-INSPECTION"
+      prompt_for_remarks
+    else
+      continue_with_pallet_import
+    end
+
+  end
+
+  def prompt_for_remarks
+    @msg = "Special Target Market - Must a Remark be added to the Order?"
+    render :inline => %{
+       <script>
+         if (confirm("<%=@msg%>") == true)
+            {window.location.href = "/fg/order/add_order_remarks";}
+         else
+           {window.location.href = "/fg/order/cancel_adding_remarks";}
+      </script>
+        }
+  end
+
+  def cancel_adding_remarks
+    continue_with_pallet_import
+  end
+
+  def  add_order_remarks
+    order_customer_detail=OrderCustomerDetail.find_by_order_id(session[:active_doc]['order'])
+    if   order_customer_detail.customer_memo_pad
+      customer_memo_pad = order_customer_detail.customer_memo_pad + " " +  "(SPECIAL TM, REQUIRES RE-INSPECTION)"
+    else
+      customer_memo_pad = "SPECIAL TM - REQUIRES RE-INSPECTION"
+    end
+
+    order_customer_detail.update_attributes(:customer_memo_pad=>customer_memo_pad)
+    continue_with_pallet_import
+  end
+
+  def get_customer_order_detail
+    order_customer_detail=OrderCustomerDetail.find_by_order_id(session[:active_doc]['order'])
+    set_active_doc("order_customer_detail", order_customer_detail.id)
+    return order_customer_detail
+  end
+
+  def format_pallet_number(pallet_numbers)
+    pallet_nums=[]
+    for p in pallet_numbers
+      pallet_nums << "'#{p}'"
+    end
+    pallet_nums
+  end
+
   def view_current_order
       @order =session[:order]
       if @order
@@ -44,6 +226,7 @@ class Fg::OrderController < ApplicationController
     session['order_number'] = @order.order_number
     @is_view=true
     @caption="view_order"
+    set_active_doc("order", @order.id)
     render_edit_order
   end
 
@@ -138,6 +321,7 @@ class Fg::OrderController < ApplicationController
   def upgrade_order
     @order=Order.find(params[:id])
     session[:order] = @order
+    set_active_doc("order", @order.id)
     render_upgrade_order
   end
 
@@ -459,36 +643,6 @@ class Fg::OrderController < ApplicationController
       @order_id=order.id
       target_market=session[:target_market]
       msg=order.change_tm(target_market)
-      #if msg
-      #  if msg.length==1
-      #    error="You are changing the tm to #{target_market.target_market_code}. All affected cartons must have a grade of #{msg[0].join(",")}."
-      #    session[:alert]=error
-      #    render :inline => %{
-      #            <script>
-      #              window.close();
-      #            </script>
-      #          }, :layout => 'content' and return
-      #
-      #  elsif msg.length==2
-      #    error="You are changing the tm to #{target_market.target_market_code}. All affected cartons must have a grade of #{msg[1].join(",")}.
-      #            The following cartons does not have such a grade:: <BR> #{msg[0].join("<BR>")}"
-      #    session[:alert]=error
-      #              render :inline => %{
-      #                      <script>
-      #                        window.close();
-      #                      </script>
-      #                    }, :layout => 'content' and return
-      #  else
-      #    error="Target market cannot be changed ,as they are no grades for target_market: #{target_market.target_market_code}. "
-      #    session[:alert]=error
-      #              render :inline => %{
-      #                      <script>
-      #                        window.close();
-      #                      </script>
-      #                    }, :layout => 'content' and return
-      #  end
-      #
-      #end
       session[:alert] ="tm successfully changed"
       render :inline => %{
         <script>
@@ -645,7 +799,7 @@ class Fg::OrderController < ApplicationController
           end
           notify_marketer(@order)
           session[:order] = @order
-
+          set_active_doc("order", @order.id)
           @order = Order.find(:first, :conditions => "order_number = '#{@order.order_number}'")
           params[:id] = @order.id
           edit_order
@@ -742,6 +896,7 @@ end
       session[:current_viewing_order]=nil
       @caption="edit order"
       @is_view=nil
+      set_active_doc("order", @order.id)
       render_edit_order
     end
   end
@@ -759,6 +914,7 @@ end
     @order = Order.find(id)
     @order_id = @order.id
     session[:order]=@order
+    set_active_doc("order", @order.id)
     session[:params_order]=params[:order]
     order_pallets =Pallet.find_by_sql("select pallets.*
                                            from pallets
@@ -828,7 +984,7 @@ end
         params[:order]=session[:params_order]
         depot_code=Depot.find(params[:order][:depot_id].to_i).depot_code
         params[:order][:depot_code]=depot_code
-        @order.update_attributes!({ :depot_code => params[:order][:depot_code],
+        @order.update_attributes({ :depot_code => params[:order][:depot_code],
                                     :is_prelim => params[:order][:is_prelim],
                                    :incoterm_id => params[:order][:incoterm_id],
                                    :currency_id => params[:order][:currency_id],
@@ -841,8 +997,9 @@ end
                                    :consignee_party_role_id => params[:order][:consignee_party_role_id],
                                    :is_export => params[:order][:is_export],
                                    :marketer_user_id => params[:order][:marketer_user_id],
-                                   :loading_date => params[:order][:loading_date]})&&
-            @order_customer_detail.update_attributes!({
+                                   :loading_date => params[:order][:loading_date]})
+
+            @order_customer_detail.update_attributes({
                                                           :discount_percentage => params[:order][:discount_percentage],
                                                           :customer_credit_rating => params[:order][:customer_credit_rating],
                                                           :customer_credit_rating_timestamp => params[:order][:customer_credit_rating_timestamp],
@@ -880,6 +1037,7 @@ end
         session['order_id'] = id
         session['order_number'] = @order.order_number
         session[:order] = @order
+        set_active_doc("order", @order.id)
         session[:alert] = "record successfuly  updated"
         render :inline => %{
                                 <script>
@@ -901,16 +1059,19 @@ end
   end
 
   def current_order
-    @order =session[:order]
+    @order = Order.find(session[:active_doc]['order'])   if session[:active_doc]!=nil
     if (session[:edit_order] == "edit") && @order!= nil
+      set_active_doc("order", @order.id)
       session[:current_viewing_order]=nil
       @is_view=nil
       @caption="edit_order"
-      render_edit_order
+      params[:id] = @order.id
+      edit_order
     else
       render :inline => %{<script> alert('no current order'); </script>}, :layout => 'content'
     end
   end
+
 
   def complete_order
     id =session['order_id']
@@ -1114,10 +1275,10 @@ end
     render_list_orders
   end
 
-
-   def  render_main_import_pallets
+     #words are powerful but the WORD is all powerful
+   def  create_one_or_more_loads_and_import_pallets
      return if authorise_for_web(program_name?, 'create')==false
-         session[:load_import_pallets]=nil
+    session[:create_load_and_import_pallets]=nil
     order_id = params[:id]
     session[:order_id] = order_id
     session[:load_id]=nil
@@ -1132,58 +1293,45 @@ end
   def get_loads
       if params[:load][:number_of_loads]==nil || params[:load][:number_of_loads]=="" || params[:load][:number_of_loads]=="0"
             flash[:error]= "a numerical number is required"
-      redirect_to :controller => 'fg/order', :action => 'render_main_import_pallets', :id => session[:order_id]
+      redirect_to :controller => 'fg/order', :action => 'create_one_or_more_loads_and_import_pallets', :id => session[:order_id]
             return
           end
           if (params[:load][:number_of_loads]).is_numeric?
           else
             flash[:error]= "a numerical number is required"
-      redirect_to :controller => 'fg/order', :action => 'render_main_import_pallets', :id => session[:order_id]
+      redirect_to :controller => 'fg/order', :action => 'render_main_impocreate_one_or_more_loads_and_import_palletsrt_pallets', :id => session[:order_id]
             return
           end
 
           loads= params[:load][:number_of_loads].to_i
           session[:number_of_loads]=loads
-          re_render_import_pallets
+      render_build_import_pallets_form
   end
 
 
-  def render_main_import_pallets_1
-    session[:order_id] = params[:id]
-    session[:load_id]=nil
-    render :inline => %{
-  		<% @content_header_caption = "'Pallets'"%>
 
-  		<%= build_import_pallets_form(@order,'get_pallets','submit_pallets',false,@is_create_retry)%>
 
-  		}, :layout => 'content'
-  end
-
-  def render_load_import_pallets
+  def create_load_and_import_pallets
       return if authorise_for_web(program_name?, 'create')==false
-      session[:load_import_pallets]=true
+      session[:create_load_and_import_pallets]=true
       session[:load_id]=nil
       order_id = params[:id]
        session[:order_id] = order_id
-      re_render_import_pallets
+      render_build_import_pallets_form
     end
 
-  def render_import_pallets
-    session[:load_id]=true
-    session[:load_import_pallets]=nil
-    re_render_import_pallets
+  def load_import_pallets
+    session[:load_id]=params[:id]
+    set_active_doc("load", params[:id])
+    session[:create_load_and_import_pallets]=nil
+    render_build_import_pallets_form
   end
 
-  def re_render_import_pallets
-    if session[:load_id]
-      load_id = params[:id]
-      session[:load_id] = params[:id]
-    end
-
+  def render_build_import_pallets_form
     render :inline => %{
   		<% @content_header_caption = "'Enter pallet numbers'"%>
 
-  		<%= build_import_pallets_form(@order,'get_pallets','submit_pallets',false,@is_create_retry)%>
+  		<%= build_import_pallets_form(@order,'receive_pallets','submit_pallets',false,@is_create_retry)%>
 
   		}, :layout => 'content'
   end
@@ -1206,168 +1354,6 @@ end
     end
   end
 
-  def get_pallets
-    if session[:load_id]
-      @id = session[:load_id]
-      load=Load.find(@id)
-      @order = session[:order]
-      @order_id=@order.id
-      @order.set_virtual_atrr
-      pallet_nums=params[:order][:pallet_number]
-
-      if pallet_nums != ""
-        if pallet_nums.index(",")
-          pallet_numberz=pallet_nums.split(";")
-        else
-          pallet_numberz=pallet_nums.split()
-        end
-        pallet_numbers=[]
-        pallet_num_hash={}
-        for numm in pallet_numberz
-          numm=numm.gsub(/'/, '')
-          nums=numm.split(",")
-          pallet_numbers << nums[0]
-          pallet_num_hash[nums[0].strip]=numm
-
-        end
-        msg = nil
-        if msg = duplicate_pallets?(pallet_numbers)
-          flash[:error]= "The following pallet occurs more than once in the list: <BR> #{msg.join("<BR>")} "
-          redirect_to :controller => 'fg/order', :action => 'render_import_pallets', :id => @id
-          return
-        end
-
-        failed_pallets= Pallet.invalid_pallets_for_dispatch_import?(pallet_numbers, @order)
-        if failed_pallets.length > 0
-          flash[:error]= "The following pallets cannot be imported. Reasons are in brackets: <BR> #{failed_pallets.join("<BR>")}"
-          redirect_to :controller => 'fg/order', :action => 'render_import_pallets', :id => @id and return
-        end
-
-
-        load.import_pallets(pallet_num_hash)
-
-        @total = @order.calculate_order_amount(@order.order_number)
-        render :inline => %{<script>
-                                      alert('order_product,load_detail,load and pallets added');
-                                      window.opener.location.href = '/fg/order/edit_order/<%=@order_id.to_s%>';
-                                      window.close();
-                              </script>}, :layout => "content"
-        #window.opener.frames[1].frames[0].location.reload(true);
-        #                               window.opener.frames[1].frames[1].location.reload(true);
-      else
-        flash[:error]= "Pallet numbers required"
-        redirect_to :controller => 'fg/order', :action => 'render_import_pallets', :id => @id and return
-      end
-
-    else
-      @order = session[:order]
-      @order_id=@order.id
-      @order.set_virtual_atrr
-      container_pallet_numbers=[]
-      pallet_nums=params[:order][:pallet_number]
-      if pallet_nums != ""
-         if pallet_nums.index(",")
-           pallet_numberz=pallet_nums.split(";")
-            else
-           pallet_numberz=pallet_nums.split()
-          end
-         pallet_numbers=[]
-         pallet_num_hash={}
-         for numm in pallet_numberz
-          numm=numm.gsub(/'/, '')
-          nums=numm.split(",")
-          pallet_numbers << nums[0]
-          if session[:load_import_pallets]
-            container_pallet_numbers << {"pallet_number"=>nums[0],"container_number"=> nums[1]}
-          end
-          pallet_num_hash[nums[0].strip]=numm
-         end
-        msg = nil
-        if msg = duplicate_pallets?(pallet_numbers)
-          flash[:error]= "The following pallet occurs more than once in the list: <BR> #{msg.join("<BR>")} "
-          redirect_to :controller => 'fg/order', :action => 'render_main_import_pallets', :id => @order.id
-          return
-        end
-
-        failed_pallets= Pallet.invalid_pallets_for_dispatch_import?(pallet_numbers, @order)
-        if failed_pallets.length > 0
-          flash[:error]= "The following pallets cannot be imported. Reasons are in brackets: <BR> #{failed_pallets.join("<BR>")}"
-          redirect_to :controller => 'fg/order', :action => 'render_main_import_pallets', :id => @order.id and return
-        end
-
-         if session[:load_import_pallets]
-           container_groups=container_pallet_numbers.group(['container_number'], nil, true)
-           for group in container_groups
-             load_pallets={}
-             for member in group
-               load_pallets[member['pallet_number'].strip.to_s] = pallet_num_hash[member['pallet_number'].strip].to_s
-             end
-             load = @order.create_loads
-             load.import_pallets(load_pallets,true)
-           end
-         else
-           number_of_pallets=pallet_num_hash.length
-                   if number_of_pallets < session[:number_of_loads]
-                     flash[:error]= "The number of pallets is less than the number of loads start again"
-                     redirect_to :controller => 'fg/order', :action => 'render_main_import_pallets', :id => @order.id and return
-                   end
-                   pallets_per_load=number_of_pallets/session[:number_of_loads]
-                   remainder_pallets=number_of_pallets - (pallets_per_load * session[:number_of_loads])
-                   if remainder_pallets > 0
-                     number_of_loads =session[:number_of_loads].to_i + 1
-                   else
-                     number_of_loads = session[:number_of_loads].to_i
-                   end
-                   pallets_ary=[]
-                   for item in pallet_num_hash
-                     pallets_ary << item[0]  +"=>" + item[1]
-                   end
-
-                   maxi=pallets_per_load
-                   number_of_loads=number_of_loads.to_i
-                   c=1
-                   pallet_index=0
-                   while c <= number_of_loads
-                     load_pallets={}
-                     y=1
-                     while  y <=maxi
-                       element=pallets_ary[pallet_index]
-                       element=element.split("=>")
-                       load_pallets[element[0]]=element[1]
-                       #for element in pallets_ary[pallet_index]
-                       #  element=element.split("=>")
-                       #  load_pallets[element[0]]=element[1]
-                       #end
-                       y=y+1
-                       pallet_index = pallet_index + 1
-                     end
-                     load = @order.create_loads
-                     puts "********** load #{c} *************************************"
-                     load.import_pallets(load_pallets)
-                     c=c+1
-                   end
-         end
-
-
-
-
-        @order.order_number
-        @total = @order.calculate_order_amount(@order.order_number)
-        render :inline => %{<script>
-                                      alert('order_product,load_detail,load and pallets added');
-                                      window.opener.frames[1].location.href = '/fg/order/edit_order/<%=@order_id.to_s%>';
-                                      window.close();
-                              </script>}, :layout => "content"
-        #window.opener.frames[1].frames[0].location.reload(true);
-        #                               window.opener.frames[1].frames[1].location.reload(true);
-      else
-        flash[:error]= "Pallet numbers required"
-        redirect_to :controller => 'fg/order', :action => 'render_import_pallets', :id => @id and return
-      end
-
-    end
-
-  end
 
 
   def order_from_edi
