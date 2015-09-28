@@ -335,14 +335,16 @@ function saveArrayToCsv(data, filename) {
       }
       res.push(rowval+'}');
     }
-
     if(confirm('Are you sure you want to save these changes?')) {
-      var newform = jQuery( document.createElement('form') );
-      newform.attr('method', 'post')
-      .attr('action', action)
-      .append('<input type=\"hidden\" name=\"grid_values\" value=\"['+res.join(',')+']\" />')
-      .appendTo('body') // Required for Firefox to work.
-      .submit();
+      var isOk = eval(gridid+'ValidateEditedRows').call(null,res);
+      if (isOk) {
+        var newform = jQuery( document.createElement('form') );
+        newform.attr('method', 'post')
+        .attr('action', action)
+        .append('<input type=\"hidden\" name=\"grid_values\" value=\"['+res.join(',')+']\" />')
+        .appendTo('body') // Required for Firefox to work.
+        .submit();
+      }
     }
   }
 

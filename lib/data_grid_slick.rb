@@ -48,6 +48,7 @@ module DataGridSlick
       @show_header           = options[:show_header]           || true
       @editable              = options[:save_action]           || false
       @save_action           = options[:save_action]
+      @validation_for_edit   = options[:validation_for_edit]
       @no_id_field           = true
       @totcount              = 0
       @pre_selected_ids      = []
@@ -525,6 +526,30 @@ EOS
 
       %Q[
         <script type="text/javascript">
+        function #{@grid_id}ValidateEditedRows(rows) {
+          var checkFunc = function(row) {
+            var isOk = true;
+            #{@validation_for_edit}
+            return isOk;
+          }
+          for(var i=0;i<rows.length;i++) {
+            var parts = rows[i].split(/{|}/)[1].split(',:');
+            var row = {}, tmp;
+            for(j=0;j<parts.length;j++) {
+              if(parts[j][0] === ':') {
+                tmp = parts[j].split(':')[1].split('=>')
+              }
+              else {
+                tmp = parts[j].split('=>')
+              }
+              row[tmp[0]] = tmp[1].replace(/'/g,'');
+            }
+            if(!checkFunc(row)) {
+              return false;
+            }
+          }
+          return true;
+        }
         jQuery(document).ready(function () {
         if(!inSubFrame()) {jQuery('##{@grid_id}zoomer').remove(); } // Only display the zoom button in a subframe of the content frame.
         var searchString = '';
@@ -1083,7 +1108,7 @@ EOS
         if @plugin
           # Plugin row colouring:
           begin
-            row_colour = @plugin.row_cell_colouring(active_record)
+            row_colour = @plugin.row_cell_colouring( active_record )
           rescue
             raise MesScada::Error, "DataGrid: A plugin styling method crashed when getting the row colour."
           end

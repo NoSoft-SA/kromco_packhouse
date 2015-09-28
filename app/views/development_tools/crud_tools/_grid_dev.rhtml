@@ -109,6 +109,29 @@ grid which will send a request to the given url.</p>
     This will return <code>grid_edits</code> as an Array of Hashes (one Hash per row in the grid).<br>
     Each row will have an <code>:id</code> key/value and a symbolized key/value for each editable column. e.g. <code>{:id => 1, :name => "Fred", :amt => nil, :ok => "false", :x => "2"}</code><br>
     The values will either be nil or a String, except for the <code>:id</code> value, which will be an integer.</p>
+</dd><dt>validation_for_edit
+<dd>
+  <p>String.  Write javascript to be executed when an editable grid is saved. The code is called once for every row in the grid.<br>
+    Setting isOk to false will block the saving, so you should show an alert message to the user as well.
+    This code has access to 2 variables &mdash; <code>row</code> and <code>isOk</code>.<br>
+    <code>row</code> is a javascript object with a property for every editable column and the <code>id</code> column.<br>
+    <code>isOk</code> is a boolean that is set to true. If you set it to false, processing of the save action will stop.<br>
+    Example usage from a helper:<br>
+<div class="CodeRay">
+  <div class="code"><pre> js_validation = <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&lt;&lt;-EOJ</span></span><span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">
+    if (row.amt === 'nil') {
+      alert('Amount cannot be blank');
+      isOk = false;
+    }
+    if (row.name === 'X' &amp;&amp; row.ok === 'false') {
+      alert('Name cannot be X when not ok!');
+      isOk = false;
+    }</span><span style="color:#710">
+    EOJ</span></span>
+    get_data_grid(data_set,column_configs, <span style="color:#069">nil</span>, <span style="color:#069">nil</span>, <span style="color:#069">nil</span>, <span style="color:#A60">:save_action</span> =&gt; <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">'</span><span style="color:#D20">save_pterms</span><span style="color:#710">'</span></span>, <span style="color:#A60">:validation_for_edit</span> =&gt; js_validation)
+</pre></div>
+</div>
+  </p>
 </dd><dt>height
 <dd>
 <p>The desired height of the grid in pixels. You should use this instead of
