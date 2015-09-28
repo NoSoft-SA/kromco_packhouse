@@ -609,6 +609,7 @@ code # TODO: WHAT IS THIS DOING HERE?
     begin
       @location                        = Location.new
       @location.location_code          = params[:location][:location_code]
+      params[:location][:bay_code]=nil if params[:location][:bay_code]=="<empty>"
       @location.bay_code               = params[:location][:bay_code]
       @location.location_type_code     = params[:location][:location_type_code]
       @location.gln                    = params[:location][:gln]
@@ -734,6 +735,7 @@ code # TODO: WHAT IS THIS DOING HERE?
   def update_location
     @location                        = Location.find(session[:location])
     @location.location_code          = params[:location][:location_code]
+    params[:location][:bay_code]=nil if params[:location][:bay_code]=="<empty>"
     @location.bay_code               = params[:location][:bay_code]
     @location.location_type_code     = params[:location][:location_type_code]
     @location.gln                    = params[:location][:gln]
