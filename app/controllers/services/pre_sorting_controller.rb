@@ -203,6 +203,20 @@ class Services::PreSortingController < ApplicationController
       end
 
       tipped_apport_bin = results[0]
+      
+      #RAILS_DEFAULT_LOGGER.info ("tipped_apport_bin['LotMAF']: " + tipped_apport_bin['LotMAF'].to_s)      
+      #RAILS_DEFAULT_LOGGER.info ("tipped_apport_bin['DateLecture']: " + tipped_apport_bin['DateLecture'].to_s)      
+      #RAILS_DEFAULT_LOGGER.info ("tipped_apport_bin['StatusMAF']: " + tipped_apport_bin['StatusMAF'].to_s)            
+      
+      #NAE 20150827 ensure that bins that have not actually been tipped by MAF does not integrate as tipped to MES
+      #if(tipped_apport_bin['LotMAF']=="null" && tipped_apport_bin['DateLecture']=="null" && tipped_apport_bin['StatusMAF']=="null") 
+      #  raise "Check 1 Bin:#{@tipped_bin} was not tipped by MAF:  Apport Fields LotMAF, DateLecture, and StatusMAF are Null."	      
+      #end
+
+      if(tipped_apport_bin['LotMAF'].to_s == "" && tipped_apport_bin['DateLecture'].to_s == "" && tipped_apport_bin['StatusMAF'].to_s == "") 
+        raise "Bin:#{@tipped_bin} was not tipped by MAF:  Apport Fields LotMAF, DateLecture, and StatusMAF are Null."	      
+      end
+      
       ActiveRecord::Base.transaction do
         if ((num_rows_updated = Bin.update_all(ActiveRecord::Base.extend_set_sql_with_request("tipped_date_time='#{Time.now.to_formatted_s(:db)}',exit_reference_date_time='#{Time.now.to_formatted_s(:db)}',exit_ref='PRESORT_BIN_TIPPED',ps_tipped_lot_no='#{tipped_apport_bin['LotMAF']}'", "bins"), "bin_number = '#{@tipped_bin}'")) == 0)
           raise "Error Tipped Presorted Bin:#{@tipped_bin}: could not be tipped"
