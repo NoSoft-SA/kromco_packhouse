@@ -497,6 +497,18 @@ class PiOut < TextOutTransformer
     else
       phc = intake_headers_production.packhouse_code
     end
+    
+
+    # Special account code used for TI:
+    if @account_code = '8385'
+	    if pallet.puc.start_with?('C')
+	       orig_account_code = 'CFG'
+	    else
+	       orig_account_code = @account_code
+	    end
+    else
+      orig_account_code = @account_code
+    end    
 
     rec = {'load_id'                => intake_headers_production.consignment_note_number,
            'document_number'        => intake_headers_production.consignment_note_number,
@@ -527,7 +539,7 @@ class PiOut < TextOutTransformer
            'transaction_time'       => Time.now,
            'pallet_base_type'       => pallet.edi_out_pallet_base,
            'sscc'                   => pallet.pallet_number,
-           'orig_account'           => @account_code,
+           'orig_account'           => orig_account_code,
            'waybill_no'             => intake_headers_production.phytowaybill,
            'gtin'                   => pallet.gtin,
            'packh_code'             => phc,

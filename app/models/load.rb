@@ -220,6 +220,7 @@ class Load < ActiveRecord::Base
           #  subtotal =  price_per_carton * carton_count   if  price_per_carton
           #end
 
+          carton_count = carton_count + order_product['carton_count'].to_i
           order_product.update_attributes(:required_quantity=>carton_count, :carton_count=>carton_count, :available_quantities=> carton_count,:sequence_number=>sequence_number)
 
         end

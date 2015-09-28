@@ -18,7 +18,7 @@ class LoadTruck < PDTTransaction
     return result_screen_def
   end
 
- def load_truck
+ def scan_pick_list
    build_default_screen
  end
 

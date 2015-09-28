@@ -36,7 +36,7 @@ class PalletSequenceNavigator < PDTTransactionState
     if(@main_error_screen)
       return @main_error_screen
     end
-    build_sequence_screen    
+    build_sequence_screen
   end
 
   def get_real_total_cartons
@@ -48,9 +48,9 @@ class PalletSequenceNavigator < PDTTransactionState
   end
 
   def build_sequence_screen()
-    
+
     field_configs = Array.new
-    seq_value = (@current_sequence_index + 1).to_s + " of " + @sequences.length.to_s 
+    seq_value = (@current_sequence_index + 1).to_s + " of " + @sequences.length.to_s
 #    seq_value = @current_sequence[:pallet_sequence_number] if @current_sequence[:pallet_sequence_number] != nil
 
     pack_date_time = DateTime.parse(@current_sequence[:oldest_pack_date])
@@ -65,14 +65,14 @@ class PalletSequenceNavigator < PDTTransactionState
     seq_description = @current_sequence[:carton_count].to_s + "/" + tot_cartons.to_s + "(" + self.carton_qty_actual.to_s + ")"
 
     field_configs[field_configs.length] = {:type=>"static_text",:name=>"seq",:value=>seq_value}
-    field_configs[field_configs.length] = {:type=>"static_text",:name=>"seq ctns/pallet",:value=>seq_description}
-    field_configs[field_configs.length] = {:type=>"static_text",:name=>"req cartons",:value => @current_sequence[:cpp]}
-    field_configs[field_configs.length] = {:type=>"static_text",:name=>"final state",:value=>self.build_status}
+    field_configs[field_configs.length] = {:type=>"static_text",:name=>"seq_ctns_to_pallet",:value=>seq_description}
+    field_configs[field_configs.length] = {:type=>"static_text",:name=>"req_cartons",:value => @current_sequence[:cpp]}
+    field_configs[field_configs.length] = {:type=>"static_text",:name=>"final_state",:value=>self.build_status}
     field_configs[field_configs.length] = {:type=>"static_text",:name=>"count",:value=>count.to_s}
     field_configs[field_configs.length] = {:type=>"static_text",:name=>"puc",:value=>@current_sequence[:puc]}
     field_configs[field_configs.length] = {:type=>"static_text",:name=>"tmarket",:value=>@current_sequence[:target_market_code]}
-    field_configs[field_configs.length] = {:type=>"static_text",:name=>"pick ref",:value=>@current_sequence[:pick_reference]}
-    field_configs[field_configs.length] = {:type=>"static_text",:name=>"inv code",:value=>@current_sequence[:inventory_code]}
+    field_configs[field_configs.length] = {:type=>"static_text",:name=>"pick_ref",:value=>@current_sequence[:pick_reference]}
+    field_configs[field_configs.length] = {:type=>"static_text",:name=>"inv_code",:value=>@current_sequence[:inventory_code]}
 
     field_configs[field_configs.length] = {:type=>"static_text",:name=>"brand",:value=>@current_sequence[:brand_code]}
     #    field_configs[field_configs.length] = {:type=>"static_text",:name=>"pallet_sequence_number",:value=>@current_sequence[:pallet_sequence_number]}
@@ -80,15 +80,15 @@ class PalletSequenceNavigator < PDTTransactionState
     field_configs[field_configs.length] = {:type=>"static_text",:name=>"organization",:value=>@current_sequence[:organization_code]}
     field_configs[field_configs.length] = {:type=>"static_text",:name=>"variety",:value=>@current_sequence[:variety_short_long]}
     field_configs[field_configs.length] = {:type=>"static_text",:name=>"grade",:value=>@current_sequence[:grade_code]}
-    field_configs[field_configs.length] = {:type=>"static_text",:name=>"pack type",:value=>@current_sequence[:old_pack_code]}
-    field_configs[field_configs.length] = {:type=>"static_text",:name=>"sell by date",:value=>@current_sequence[:sell_by_code]}
+    field_configs[field_configs.length] = {:type=>"static_text",:name=>"pack_type",:value=>@current_sequence[:old_pack_code]}
+    field_configs[field_configs.length] = {:type=>"static_text",:name=>"sell_by_date",:value=>@current_sequence[:sell_by_code]}
 
     field_configs[field_configs.length] = {:type=>"static_text",:name=>"remarks",:value=>@current_sequence[:remarks]}
 
-    field_configs[field_configs.length] = {:type=>"static_text",:name=>"prod char",:value=>self.pt_product_chars}
-    field_configs[field_configs.length] = {:type=>"static_text",:name=>"insp type",:value=>self.inspect_type}
-    field_configs[field_configs.length] = {:type=>"static_text",:name=>"insp state",:value=>self.qc_status}
-    field_configs[field_configs.length] = {:type=>"static_text",:name=>"plt frmt",:value=>self.pfp}
+    field_configs[field_configs.length] = {:type=>"static_text",:name=>"prod_char",:value=>self.pt_product_chars}
+    field_configs[field_configs.length] = {:type=>"static_text",:name=>"insp_type",:value=>self.inspect_type}
+    field_configs[field_configs.length] = {:type=>"static_text",:name=>"insp_state",:value=>self.qc_status}
+    field_configs[field_configs.length] = {:type=>"static_text",:name=>"plt_frmt",:value=>self.pfp}
     field_configs[field_configs.length] = {:type=>"static_text",:name=>"location",:value=>self.current_location.to_s}
 
     screen_attributes = {:auto_submit=>"false",:content_header_caption=>@pallet_no.to_s + "(age =" + age.to_s + "days)"}
@@ -107,11 +107,11 @@ class PalletSequenceNavigator < PDTTransactionState
     result_screen_def = PdtScreenDefinition.gen_screen_xml(field_configs,buttons,screen_attributes,plugins)
 
     return result_screen_def
-   
+
   end
 
   def calc_sequences()
-   
+
     cartons = Carton.find_by_sql("SELECT count(*) as count, pallets.pt_product_characteristics as pt_product_characteristics,
       cartons.fg_code_old,cartons.puc, cartons.pick_reference, cartons.target_market_code, cartons.inventory_code, cartons.pallet_sequence_number,
       cartons.commodity_code, cartons.organization_code, cartons.variety_short_long, cartons.grade_code, cartons.old_pack_code, cartons.sell_by_code,
@@ -128,7 +128,7 @@ class PalletSequenceNavigator < PDTTransactionState
       pallets.build_status ORDER BY count(*) DESC")
     if cartons.length != 0
       cartons.each do |carton|
-       
+
         @sequences[@sequences.length] = {:oldest_pack_date => carton.oldest_pack_date_time,:cpp => carton.cartons_per_pallet, :validated=>false, :carton_count=>carton.count,:fg_code_old=>carton.fg_code_old,:puc=>carton.puc,:pick_reference=>carton.pick_reference,:target_market_code=>carton.target_market_code,:inventory_code=>carton.inventory_code,:pallet_number=>@pallet_no ,:brand_code=>carton.brand_code,:pallet_sequence_number=>carton.pallet_sequence_number,:commodity_code=>carton.commodity_code,:organization_code=>carton.organization_code,:variety_short_long=>carton.variety_short_long,:grade_code=>carton.grade_code,:target_market_code=>carton.target_market_code,:inventory_code=>carton.inventory_code,:pick_reference=>carton.pick_reference,:old_pack_code=>carton.old_pack_code,:puc=>carton.puc,:sell_by_code=>carton.sell_by_code,:pt_product_characteristics=>carton.pt_product_characteristics,:remarks=>carton.remarks}
       end
     end
@@ -166,11 +166,11 @@ class PalletSequenceNavigator < PDTTransactionState
     return false
   end
 
-  def carton_nums_for_sequence(sequence,pallet_num)    
+  def carton_nums_for_sequence(sequence,pallet_num)
     cartons_sql = fetch_seq_cartons_where_clause?(sequence,pallet_num)
     puts " I-SEQUEL = " + "select carton_number from cartons where (" + cartons_sql + ") order by carton_number asc"
     cartons = Carton.find_by_sql("select carton_number from cartons where (" + cartons_sql + ") order by carton_number asc")
-    cartons = cartons.map{|c| c.carton_number}  
+    cartons = cartons.map{|c| c.carton_number}
   end
 
   def fetch_seq_cartons_where_clause?(sequence,pallet_num)

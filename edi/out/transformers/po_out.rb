@@ -427,8 +427,14 @@ class PoOut < TextOutTransformer
         intake_header.consignment_note_number   &&
         intake_header.consignment_note_number.start_with?( 'L031' )
         account_code = '8385'
+	if pallet.puc.start_with?('C')
+	   orig_account_code = 'CFG'
+	else
+	   orig_account_code = account_code
+	end	
       else
         account_code = intake_header.account_code
+	orig_account_code = account_code	
       end
 
       #prod_char = pallet.pt_product_characteristics.nil? ? nil : pallet.pt_product_characteristics[0..2]
@@ -483,7 +489,7 @@ class PoOut < TextOutTransformer
               'temp_device_id'   => temp_device_id,
               'temp_device_type' => temp_device_type,
               'Sscc'             => pallet.pallet_number,
-              'Orig_account'     => account_code,
+              'Orig_account'     => orig_account_code,
               'Waybill_no'       => intake_header.phytowaybill,
               'Gtin'             => pallet.gtin,
               'Packh_code'       => phc,

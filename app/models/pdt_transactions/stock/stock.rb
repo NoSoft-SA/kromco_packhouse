@@ -107,7 +107,7 @@ class Stock < PDTTransaction
     field_configs[field_configs.length] = {:type=>"static_text", :name=>"error_pallets_scanned", :value=>self.qty_error_pallets_scanned?}
     field_configs[field_configs.length] = {:type=>"static_text", :name=>"forced_moves_in_progress", :value=>self.qty_forced_moves_in_progress?}
     field_configs[field_configs.length] = {:type=>"static_text", :name=>"forced_moves_completed", :value=>self.qty_forced_moves_done?}
-    field_configs[field_configs.length] = {:type=>"static_text", :name=>"missing pallets", :value=>missing_pallets}
+    field_configs[field_configs.length] = {:type=>"static_text", :name=>"missing_pallets", :value=>missing_pallets}
     screen_attributes                   = {:auto_submit=>"false", :content_header_caption=>"complete_stock_take"}
     buttons                             = {"B3Label"=>"Clear", "B2Label"=>"yes", "B2Submit"=>"complete_confirmed", "B1Submit"=>"complete_unconfirmed", "B1Label"=>"no", "B1Enable"=>"true", "B2Enable"=>"true", "B3Enable"=>"false"}
     plugins                             = Array.new

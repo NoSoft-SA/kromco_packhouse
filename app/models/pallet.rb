@@ -50,6 +50,7 @@ class Pallet < ActiveRecord::Base
     if order_type.strip=="MO" || order_type.strip=="MQ"
       for pallet_number in pallet_numbers
         @pallet= Pallet.find_by_pallet_number(pallet_number.strip)
+        stock_item =StockItem.find_by_inventory_reference(@pallet.pallet_number.to_s)
         if !@pallet
           if pallet_number.length > 18
             failed_pallets.push(pallet_number + "(lines should end with semi-colon)")
@@ -58,7 +59,6 @@ class Pallet < ActiveRecord::Base
           end
           return failed_pallets
         end
-        stock_item =StockItem.find_by_inventory_reference(@pallet.pallet_number.to_s)
 
         if @pallet.exit_ref
           failed_pallets.push(pallet_number + "(exit_ref: #{@pallet.exit_ref})")
@@ -67,8 +67,10 @@ class Pallet < ActiveRecord::Base
         if   @pallet.load_detail_id
           failed_pallets.push(pallet_number + "(pallet is on load)".to_s)
         end
-        if   stock_item.location_code.upcase.index("PART_PALLETS")
+        if stock_item
+          if   stock_item.location_code.upcase.index("PART_PALLETS")
           failed_pallets.push(pallet_number + "(location_code has PART_PALLETS)".to_s)
+          end
         end
 
         if @pallet.target_market_code=="P9_PART PALLETS"
@@ -81,6 +83,7 @@ class Pallet < ActiveRecord::Base
     else
       for pallet_number in pallet_numbers
         @pallet= Pallet.find_by_pallet_number(pallet_number.strip)
+        stock_item =StockItem.find_by_inventory_reference(@pallet.pallet_number.to_s)
 
         if !@pallet
           if pallet_number.length > 18
@@ -90,8 +93,6 @@ class Pallet < ActiveRecord::Base
           end
           return failed_pallets
         end
-        stock_item =StockItem.find_by_inventory_reference(@pallet.pallet_number.to_s)
-
         if @pallet.exit_ref
           failed_pallets.push(pallet_number + "(exit_ref: #{@pallet.exit_ref})")
         end
@@ -118,8 +119,10 @@ class Pallet < ActiveRecord::Base
             end
           end
         end
-        if   stock_item.location_code.upcase.index("PART_PALLETS")
-          failed_pallets.push(pallet_number + "(location_code has PART_PALLETS)".to_s)
+        if stock_item  
+            if   stock_item.location_code.upcase.index("PART_PALLETS")
+              failed_pallets.push(pallet_number + "(location_code has PART_PALLETS)".to_s)
+            end
         end
 
         if @pallet.target_market_code=="P9_PART PALLETS"
