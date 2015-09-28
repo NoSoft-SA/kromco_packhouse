@@ -25,7 +25,7 @@ class Fg::OrderController < ApplicationController
 
       render :inline => %{<script>
                                       alert('order_product,load_detail,load and pallets added');
-                                      window.opener.frames[1].location.href = '/fg/order/edit_order/<%=@order.id.to_s%>';
+                                      window.opener.location.href = '/fg/order/edit_order/<%=@order.id.to_s%>';
                                       window.close();
                               </script>}, :layout => "content"
 

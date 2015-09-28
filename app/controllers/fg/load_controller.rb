@@ -76,13 +76,13 @@ class Fg::LoadController < ApplicationController
     id = params[:id].to_i
     set_active_doc("loads",params[:id])
     load_status=Load.find(session[:active_doc]['loads']).load_status
-
-    pallets = Pallet.find_by_sql("select pallets.*
+    pallets_query="select pallets.*
                                     from pallets
                                     inner join load_details on pallets.load_detail_id=load_details.id
                                     inner join load_orders on load_details.load_order_id=load_orders.id
                                     inner join  loads on load_orders.load_id=loads.id
-                                    where loads.id=#{id}   ")
+                  where loads.id=#{id}   "
+    pallets = Pallet.find_by_sql(pallets_query)
     @pallets =[]
     oderz ={}
     if !pallets.empty?
@@ -92,7 +92,8 @@ class Fg::LoadController < ApplicationController
       end
     end
     session[:load_pallets]=@pallets
-    session[:query]= @pallets
+    session[:query]=  "ActiveRecord::Base.connection.select_all(\"#{pallets_query}\")"
+
     session[:load_id] = id
     if !session[:current_viewing_order]
       if ( load_status.upcase =='SHIPPED' ||  load_status.upcase =='COMPLETED' )
