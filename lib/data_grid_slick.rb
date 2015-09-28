@@ -529,6 +529,10 @@ EOS
         function #{@grid_id}ValidateEditedRows(rows) {
           var checkFunc = function(row) {
             var isOk = true;
+            var showError = function(msg) {
+              alert(msg);
+              isOk = false;
+            }
             #{@validation_for_edit}
             return isOk;
           }
