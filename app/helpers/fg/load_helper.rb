@@ -542,7 +542,7 @@ module Fg::LoadHelper
                                                   :settings => {
                                                       :link_icon => 'pallets',:link_text=> 'import_pallets',
                                                           :controller    =>'fg/order',
-                                                          :target_action => 'render_import_pallets',
+                                                          :target_action => 'load_import_pallets',
                                                           :id_column => 'id'
                                                           }}
 
