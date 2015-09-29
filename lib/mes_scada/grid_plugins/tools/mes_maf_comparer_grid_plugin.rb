@@ -20,10 +20,6 @@ module MesScada::GridPlugins
         return false
       end
 
-      def row_cell_colouring(record)
-
-      end
-
     end
 
   end
