@@ -172,8 +172,8 @@ module Fg::OrderProductHelper
 
 
   def build_order_product_grid(data_set, can_edit, can_delete,multi_select)
-    js_validation = "if ( !row.price_per_kg === 'nil' && isNaN(row.price_per_kg)) { showError('price_per_kg should be numeric'); }"
-    js_validation = "if ( !row.price_per_carton === 'nil' && isNaN(row.price_per_carton)) { showError('price_per_carton should be numeric'); }"
+    #js_validation = "if ( !row.price_per_kg === 'nil' && isNaN(row.price_per_kg)) { showError('price_per_kg should be numeric'); }"
+    #js_validation = "if ( !row.price_per_carton === 'nil' && isNaN(row.price_per_carton)) { showError('price_per_carton should be numeric'); }"
 
 
     column_configs = Array.new
@@ -241,8 +241,7 @@ module Fg::OrderProductHelper
      hide_grid_client_controls()
 
 
-     return  get_data_grid(data_set,column_configs,MesScada::GridPlugins::Fg::OrderProductGridPlugin.new(self, request),true,grid_command,
-                           :save_action => '/fg/order_product/update_edited_order_products',:validation_for_edit => js_validation)
+     return  get_data_grid(data_set,column_configs,MesScada::GridPlugins::Fg::OrderProductGridPlugin.new(self, request),true,grid_command,:save_action => '/fg/order_product/update_edited_order_products' ) #,:validation_for_edit => js_validation
 
   end
 

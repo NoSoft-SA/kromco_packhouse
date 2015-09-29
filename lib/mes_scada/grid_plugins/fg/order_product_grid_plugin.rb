@@ -4,27 +4,23 @@ module MesScada::GridPlugins
       def initialize(env = nil, request = nil)
         @env = env
         @request = request
+        calc_queries
+      end
+
+      def calc_queries
+        @pallets=Pallet.find_by_sql("select p.id,op.id as order_product_id from pallets p
+                                   join load_details ld on p.load_detail_id=ld.id
+                                   join order_products op on ld.order_product_id=op.id
+                                   where op.order_id=#{@env.session.data[:active_doc]['order']}")
       end
 
 
 
       def render_cell(column_name, cell_value, record)
+
         if column_name=="get_historic_pricing"
           cell_value= make_link_window("http://#{@request.host_with_port}/"+"#{@request.path_parameters['controller']}/get_historic_pricing/#{record['id']}","historic_pricing")
         end
-        #if !@env.session.data[:current_viewing_order]
-        #  if(column_name=="price_per_carton" || column_name=="price_per_kg" || column_name=="fob")
-        #    cell_value= @env.text_field('order_product', "#{record['id']}_#{column_name}", {:size=>5,:value=>record[column_name]})
-        #  end
-        #else
-        #  if column_name=="price_per_carton"
-        #    cell_value=  record['price_per_carton']
-        #  elsif column_name=="price_per_kg"
-        #    cell_value=  record['price_per_kg']
-        #  elsif   column_name=="fob"
-        #    cell_value= record['fob']
-        #  end
-        #end
         if column_name=="price_histories"
           cell_value= make_link_window("http://#{@request.host_with_port}/"+"#{@request.path_parameters['controller']}/price_histories/#{record['id']}","price_histories")
         end
@@ -37,7 +33,10 @@ module MesScada::GridPlugins
           cell_value= subtotal
         end
         if column_name=="delete"
-          cell_value= make_action("http://#{@request.host_with_port}/"+"fg/order_product/delete_order_product" + "/" + record['id'].to_s,'delete')
+          pallets=@pallets.find_all { |p| p.order_product_id.to_i==record.id.to_i }
+
+          cell_value= make_action("http://#{@request.host_with_port}/"+"fg/order_product/delete_order_product" + "/" + record['id'].to_s,'delete')  if pallets.empty?
+          cell_value= nil if !pallets.empty?
         end
         cell_value
       end
