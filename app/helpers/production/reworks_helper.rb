@@ -1267,21 +1267,21 @@ module Production::ReworksHelper
 
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => "attributes['production_run_code']", :column_caption => "run_code", :col_width => 155}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'fg_product_code',:col_width => 280}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => "attributes['farm_code']", :column_caption => "farm_code",:col_width => 48}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => "attributes['farm_code']", :column_caption => "farm_code",:col_width => 100}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'fg_code_old', :col_width => 135}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'carton_quantity_actual',:col_width => 45,:column_caption => 'ctn_qty'}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'organization_code',:col_width => 35}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'grade_code',:col_width => 35}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'carton_quantity_actual',:col_width => 90,:column_caption => 'ctn_qty'}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'organization_code',:col_width => 120}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'grade_code',:col_width => 110}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'inventory_code', :col_width => 125}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'target_market_code',:col_width => 118}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'target_market_code',:col_width => 125}
 
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => "attributes['line_code']", :column_caption => "line_code",:col_width => 40}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => "attributes['line_code']", :column_caption => "line_code",:col_width => 100}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'order_number',:col_width => 110}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'date_time_completed',:col_width => 135}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'date_time_created',:col_width => 135}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'oldest_pack_date_time',:col_width => 135}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'pick_reference_code',:col_width => 68}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'qc_status_code',:col_width => 92}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'pick_reference_code',:col_width => 130}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'qc_status_code',:col_width => 130}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'id'}
 
 
@@ -1305,20 +1305,20 @@ module Production::ReworksHelper
     column_configs = Array.new
     #require File.dirname(__FILE__) + "/../../../app/helpers/production/reworks_received_items_plugin.rb"
     if @can_control_run == true
-      column_configs[column_configs.length()] = {:field_type => 'action', :field_name => 'reclassify',:col_width =>  35,
+      column_configs[column_configs.length()] = {:field_type => 'action', :field_name => 'reclassify',:col_width =>  50,
                                                  :settings =>
                                                          {:image => 'reclassify',
                                                           :target_action => 'reclassify_carton',
                                                           :id_column => 'id'}}
 
-      column_configs[column_configs.length()] = {:field_type => 'action', :field_name => 'print',:col_width =>  35,
+      column_configs[column_configs.length()] = {:field_type => 'action', :field_name => 'print',:col_width => 50,
                                                  :settings =>
                                                          {:image => 'label_print',
                                                           :target_action => 'print_carton_label',
                                                           :id_column => 'id'}}
 
 
-      column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'n_labels_printed',:column_caption => "print_count",:col_width =>  35,}
+      column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'n_labels_printed',:column_caption => "print_count",:col_width => 80,}
 
 
 
@@ -1369,32 +1369,32 @@ module Production::ReworksHelper
     end
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'carton_number',:col_width =>  104,}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'pallet_number',:col_width =>  146,}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'reworks_action',:col_width =>  64,:column_caption => 'rw_action'}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'rw_receipt_unit',:col_width =>  64}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'reworks_action',:col_width =>  130,:column_caption => 'rw_action'}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'rw_receipt_unit',:col_width =>  115}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'rw_pallet_action',:col_width =>  64}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'production_run_code',:col_width =>  160}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'erp_cultivar',:col_width =>  160}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'track_indicator_code', :column_caption => "ti",:col_width =>  40}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'farm_code',:col_width =>  55}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'farm_code',:col_width =>  100}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'puc',:col_width =>  55}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'account_code',:col_width =>  55}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'account_code',:col_width =>  110}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'fg_code_old',:col_width =>  135}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'organization_code',:col_width =>  45}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'grade_code',:col_width =>  42}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'organization_code',:col_width =>  120}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'grade_code',:col_width =>  100}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'inspection_type_code',:col_width =>  55,:column_caption => 'inspect_type'}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'inventory_code',:col_width =>  110}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'target_market_code',:col_width =>  120}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'fg_mark_code',:col_width =>  160}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'extended_fg_code',:col_width =>  529}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'line_code',:col_width =>  37}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'line_code',:col_width =>  100}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'order_number',:col_width =>  136}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'pack_date_time',:col_width =>  142}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'pick_reference',:col_width =>  55}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'pick_reference',:col_width =>  110}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'pc_code',:col_width =>  80}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'is_inspection_carton',:col_width =>  35}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'is_inspection_carton',:col_width =>  180}
 
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'shift_id',:col_width =>  52}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'packer_number',:col_width =>  88}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'shift_id',:col_width =>  100}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'packer_number',:col_width =>  120}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'marking',:col_width =>  94}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'diameter',:col_width =>  94}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'carton_fruit_nett_mass',:col_width =>  63,:column_caption => 'mass'}
@@ -1809,7 +1809,8 @@ module Production::ReworksHelper
   def build_rw_pallets_grid(data_set)
 
     column_configs = Array.new
-    #require File.dirname(__FILE__) + "/../../../app/helpers/production/reworks_received_items_plugin.rb"
+    action_links=[]
+    action_configs=[]
      if @can_do_buildup
       column_configs[column_configs.length()] = {:field_type => 'action', :field_name => 'buildup',:col_width =>  39,
                                                  :settings =>
@@ -1879,25 +1880,27 @@ module Production::ReworksHelper
                                                           :id_column => 'id'}}
 
     end
+    #action_configs << {:field_type => 'sub_menu', :field_name => 'sub_menu', :column_caption => 'Action', :settings => {:actions => action_links}}
+    #column_configs << {:field_type => 'action_collection', :field_name => 'actions', :settings => {:actions => action_configs}} unless action_configs.empty?
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'pallet_number',:col_width =>  146}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'reworks_action',:col_width =>  74}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'build_up_balance',:col_width =>  37}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'account_code',:col_width =>  37}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'build_status',:col_width =>  64}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'reworks_action',:col_width =>  140}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'build_up_balance',:col_width =>  160}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'account_code',:col_width =>  120}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'build_status',:col_width =>  120}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'carton_quantity_actual',:col_width =>  64,:column_caption => 'ctn_qty'}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'production_run.production_run_code',:col_width =>  140,:column_caption => 'run_code'}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'fg_product_code',:col_width =>  305}
 
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'class_code',:col_width =>  40}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'grade_code',:col_width =>  40}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'farm_code',:col_width =>  40}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'class_code',:col_width =>100}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'grade_code',:col_width =>  100}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'farm_code',:col_width => 120}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'inventory_code',:col_width =>  104}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'carton_mark_code',:column_caption => 'mark',:col_width =>  110}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'target_market_code',:col_width =>  100}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'pallet_format_product_code',:col_width =>  75}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'oldest_pack_date_time',:col_width =>  110}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'organization_code',:col_width =>  40}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'inspect_type_code',:col_width =>  45}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'target_market_code',:col_width =>  130}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'pallet_format_product_code',:col_width => 160}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'oldest_pack_date_time',:col_width =>  180}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'organization_code',:col_width =>  150}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'inspect_type_code',:col_width =>  150}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'qc_status_code'}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'date_time_completed'}
     #column_configs[17] = {:field_type => 'text',:field_name => 'rejected'}
@@ -3228,7 +3231,7 @@ module Production::ReworksHelper
 
     column_configs << {:field_type => 'link_window',:field_name => 'diff',
                                       :settings =>
-                                      {:link_text =>'diff',
+                                      {:link_text =>'',
                                        :target_action => 'view_pallet_history_diff',
                                        :id_column => "record_id",
                                        :window_width=>1100,
@@ -3236,33 +3239,33 @@ module Production::ReworksHelper
 
     column_configs << {:field_type => 'link_window',:field_name => 'diff_to_pallet',:column_width=>80,
                                       :settings =>
-                                      {:link_text =>'diff_to_pallet',
+                                      {:link_text =>'',
                                        :target_action => 'view_pallet_history_diff_to_pallet',
                                        :id_column => "record_id",
                                        :window_width=>1100,
                                        :window_height=>800}}
 
-    column_configs << {:field_type => 'text', :field_name => 'tablename',:column_width=>180}
-    column_configs << {:field_type => 'text', :field_name => 'pallet_number',:column_width=>180}
+    column_configs << {:field_type => 'text', :field_name => 'tablename',:column_width=>140}
+    column_configs << {:field_type => 'text', :field_name => 'pallet_number',:column_width=>140}
     column_configs << {:field_type => 'text', :field_name => 'account_code'}
-    column_configs << {:field_type => 'text', :field_name => 'actual_size_count_code'}
-    column_configs << {:field_type => 'text', :field_name => 'affected_by_env'}
-    column_configs << {:field_type => 'text', :field_name => 'affected_by_function'}
-    column_configs << {:field_type => 'text', :field_name => 'affected_by_program'}
+    column_configs << {:field_type => 'text', :field_name => 'actual_size_count_code',:column_width=>160}
+    column_configs << {:field_type => 'text', :field_name => 'affected_by_env',:column_width=>140}
+    column_configs << {:field_type => 'text', :field_name => 'affected_by_function',:column_width=>140}
+    column_configs << {:field_type => 'text', :field_name => 'affected_by_program',:column_width=>140}
     column_configs << {:field_type => 'text', :field_name => 'build_status'}
-    column_configs << {:field_type => 'text', :field_name => 'carton_mark_code'}
-    column_configs << {:field_type => 'text', :field_name => 'carton_quantity_actual'}
-    column_configs << {:field_type => 'text', :field_name => 'carton_setup_id'}
+    column_configs << {:field_type => 'text', :field_name => 'carton_mark_code',:column_width=>140}
+    column_configs << {:field_type => 'text', :field_name => 'carton_quantity_actual',:column_width=>140}
+    column_configs << {:field_type => 'text', :field_name => 'carton_setup_id',:column_width=>140}
     column_configs << {:field_type => 'text', :field_name => 'class_code'}
-    column_configs << {:field_type => 'text', :field_name => 'cold_store_code'}
-    column_configs << {:field_type => 'text', :field_name => 'commodity_code'}
-    column_configs << {:field_type => 'text', :field_name => 'consignment_note_number'}
-    column_configs << {:field_type => 'text', :field_name => 'country_origin_code'}
+    column_configs << {:field_type => 'text', :field_name => 'cold_store_code',:column_width=>140}
+    column_configs << {:field_type => 'text', :field_name => 'commodity_code',:column_width=>140}
+    column_configs << {:field_type => 'text', :field_name => 'consignment_note_number',:column_width=>140}
+    column_configs << {:field_type => 'text', :field_name => 'country_origin_code',:column_width=>140}
     column_configs << {:field_type => 'text', :field_name => 'cpp'}
     column_configs << {:field_type => 'text', :field_name => 'created_at'}
     column_configs << {:field_type => 'text', :field_name => 'created_by'}
-    column_configs << {:field_type => 'text', :field_name => 'date_time_completed'}
-    column_configs << {:field_type => 'text', :field_name => 'date_time_created'}
+    column_configs << {:field_type => 'text', :field_name => 'date_time_completed',:column_width=>140}
+    column_configs << {:field_type => 'text', :field_name => 'date_time_created',:column_width=>140}
     column_configs << {:field_type => 'text', :field_name => 'erp_cultivar'}
     column_configs << {:field_type => 'text', :field_name => 'exit_ref'}
     column_configs << {:field_type => 'text', :field_name => 'farm_code'}
@@ -3270,62 +3273,62 @@ module Production::ReworksHelper
     column_configs << {:field_type => 'text', :field_name => 'fg_product_code'}
     column_configs << {:field_type => 'text', :field_name => 'grade_code'}
     column_configs << {:field_type => 'text', :field_name => 'holdover'}
-    column_configs << {:field_type => 'text', :field_name => 'holdover_quantity'}
+    column_configs << {:field_type => 'text', :field_name => 'holdover_quantity',:column_width=>140}
     column_configs << {:field_type => 'text', :field_name => 'id'}
-    column_configs << {:field_type => 'text', :field_name => 'inspect_type_code'}
+    column_configs << {:field_type => 'text', :field_name => 'inspect_type_code',:column_width=>140}
     column_configs << {:field_type => 'text', :field_name => 'intake_header_id'}
-    column_configs << {:field_type => 'text', :field_name => 'intake_headers_production_id'}
+    column_configs << {:field_type => 'text', :field_name => 'intake_headers_production_id',:column_width=>160}
     column_configs << {:field_type => 'text', :field_name => 'inventory_code'}
     column_configs << {:field_type => 'text', :field_name => 'is_depot_pallet'}
     column_configs << {:field_type => 'text', :field_name => 'is_mapped'}
     column_configs << {:field_type => 'text', :field_name => 'is_new_pallet'}
     column_configs << {:field_type => 'text', :field_name => 'iso_week_code'}
     column_configs << {:field_type => 'text', :field_name => 'load_detail_id'}
-    column_configs << {:field_type => 'text', :field_name => 'marketing_variety_code'}
-    column_configs << {:field_type => 'text', :field_name => 'n_labels_printed'}
+    column_configs << {:field_type => 'text', :field_name => 'marketing_variety_code',:column_width=>160}
+    column_configs << {:field_type => 'text', :field_name => 'n_labels_printed',:column_width=>140}
     column_configs << {:field_type => 'text', :field_name => 'oldest_pack_date_time'}
     column_configs << {:field_type => 'text', :field_name => 'old_pack_code'}
     column_configs << {:field_type => 'text', :field_name => 'order_number'}
-    column_configs << {:field_type => 'text', :field_name => 'organization_code'}
-    column_configs << {:field_type => 'text', :field_name => 'pallet_format_product_code'}
-    column_configs << {:field_type => 'text', :field_name => 'pallet_format_product_id'}
+    column_configs << {:field_type => 'text', :field_name => 'organization_code',:column_width=>140}
+    column_configs << {:field_type => 'text', :field_name => 'pallet_format_product_code',:column_width=>180}
+    column_configs << {:field_type => 'text', :field_name => 'pallet_format_product_id',:column_width=>140}
     column_configs << {:field_type => 'text', :field_name => 'pallet_id'}
-    column_configs << {:field_type => 'text', :field_name => 'pallet_label_code'}
+    column_configs << {:field_type => 'text', :field_name => 'pallet_label_code',:column_width=>140}
     column_configs << {:field_type => 'text', :field_name => 'pallet_reno_ref'}
-    column_configs << {:field_type => 'text', :field_name => 'pallet_template_id'}
-    column_configs << {:field_type => 'text', :field_name => 'pallet_type_code'}
+    column_configs << {:field_type => 'text', :field_name => 'pallet_template_id',:column_width=>140}
+    column_configs << {:field_type => 'text', :field_name => 'pallet_type_code',:column_width=>140}
     column_configs << {:field_type => 'text', :field_name => 'party_name'}
     column_configs << {:field_type => 'text', :field_name => 'pc_code'}
-    column_configs << {:field_type => 'text', :field_name => 'pick_reference_code'}
+    column_configs << {:field_type => 'text', :field_name => 'pick_reference_code',:column_width=>140}
     column_configs << {:field_type => 'text', :field_name => 'ppecb_inspection_id'}
     column_configs << {:field_type => 'text', :field_name => 'process_status'}
-    column_configs << {:field_type => 'text', :field_name => 'production_run_id'}
+    column_configs << {:field_type => 'text', :field_name => 'production_run_id',:column_width=>140}
     column_configs << {:field_type => 'text', :field_name => 'pt_product_characteristics'}
-    column_configs << {:field_type => 'text', :field_name => 'qc_result_status'}
-    column_configs << {:field_type => 'text', :field_name => 'qc_status_code'}
+    column_configs << {:field_type => 'text', :field_name => 'qc_result_status',:column_width=>140}
+    column_configs << {:field_type => 'text', :field_name => 'qc_status_code',:column_width=>140}
     column_configs << {:field_type => 'text', :field_name => 'remark'}
-    column_configs << {:field_type => 'text', :field_name => 'reprint_acknowledged_by'}
-    column_configs << {:field_type => 'text', :field_name => 'reprint_acknowledged_date_time'}
-    column_configs << {:field_type => 'text', :field_name => 'rw_create_datetime'}
-    column_configs << {:field_type => 'text', :field_name => 'rw_receipt_datetime'}
-    column_configs << {:field_type => 'text', :field_name => 'rw_receipt_intake_headers_production_id'}
+    column_configs << {:field_type => 'text', :field_name => 'reprint_acknowledged_by',:column_width=>140}
+    column_configs << {:field_type => 'text', :field_name => 'reprint_acknowledged_date_time',:column_width=>180}
+    column_configs << {:field_type => 'text', :field_name => 'rw_create_datetime',:column_width=>140}
+    column_configs << {:field_type => 'text', :field_name => 'rw_receipt_datetime',:column_width=>140}
+    column_configs << {:field_type => 'text', :field_name => 'rw_receipt_intake_headers_production_id',:column_width=>180}
     column_configs << {:field_type => 'text', :field_name => 'rw_run_id'}
     column_configs << {:field_type => 'text', :field_name => 'season_code'}
     column_configs << {:field_type => 'text', :field_name => 'size_count_code'}
     column_configs << {:field_type => 'text', :field_name => 'store_type_code'}
-    column_configs << {:field_type => 'text', :field_name => 'target_market_code'}
+    column_configs << {:field_type => 'text', :field_name => 'target_market_code',:column_width=>140}
     column_configs << {:field_type => 'text', :field_name => 'updated_at'}
     column_configs << {:field_type => 'text', :field_name => 'updated_by'}
-    column_configs << {:field_type => 'text', :field_name => 'zero_printed_carton_labels'}
+    column_configs << {:field_type => 'text', :field_name => 'zero_printed_carton_labels',:column_width=>180}
     column_configs << {:field_type => 'text', :field_name => 'reworks_action'}
     column_configs << {:field_type => 'text', :field_name => 'person'}
     column_configs << {:field_type => 'text', :field_name => 'rw_reason_id'}
-    column_configs << {:field_type => 'text', :field_name => 'rw_scrap_datetime'}
+    column_configs << {:field_type => 'text', :field_name => 'rw_scrap_datetime',:column_width=>140}
     column_configs << {:field_type => 'text', :field_name => 'user_name'}
     column_configs << {:field_type => 'text', :field_name => 'id'}
 
 
-    return get_data_grid(data_set, column_configs, MesScada::GridPlugins::Production::ReworksPalletHistoriesGridPlugin.new, true)
+    return get_data_grid(data_set, column_configs, MesScada::GridPlugins::Production::ReworksPalletHistoriesGridPlugin.new(self,request), true)
   end
 
   def build_carton_histories_grid(data_set)
@@ -3334,7 +3337,7 @@ module Production::ReworksHelper
 
     column_configs << {:field_type => 'link_window',:field_name => 'diff',
                                   :settings =>
-                                  {:link_text =>'diff',
+                                  {:link_text =>'',
                                    :target_action => 'view_carton_history_diff',
                                    :id_column => "record_id",
                                    :window_width=>1100,
@@ -3342,33 +3345,32 @@ module Production::ReworksHelper
 
     column_configs << {:field_type => 'link_window',:field_name => 'diff_to_carton',:column_width=>80,
                                       :settings =>
-                                      {:link_text =>'diff_to_carton',
+                                      {:link_text =>'',
                                        :target_action => 'view_pallet_history_diff_to_carton',
                                        :id_column => "record_id",
                                        :window_width=>1100,
                                        :window_height=>800}}
 
 
-    column_configs << {:field_type => 'text', :field_name => 'tablename',:column_width=>180}
+    column_configs << {:field_type => 'text', :field_name => 'tablename',:column_width=>140}
     column_configs << {:field_type => 'text', :field_name => 'pallet_number',:column_width=>180}
     column_configs << {:field_type => 'text', :field_name => 'carton_number',:column_width=>180}
-    column_configs << {:field_type => 'text', :field_name => 'rw_reclassed_intake_headers_production_id'}
-    column_configs << {:field_type => 'text', :field_name => 'rw_create_datetime'}
-    column_configs << {:field_type => 'text', :field_name => 'intake_header_id'}
+    column_configs << {:field_type => 'text', :field_name => 'rw_reclassed_intake_headers_production_id',:column_width=>250}
+    column_configs << {:field_type => 'text', :field_name => 'rw_create_datetime',:column_width=>120}
+    column_configs << {:field_type => 'text', :field_name => 'intake_header_id',:column_width=>120}
     column_configs << {:field_type => 'text', :field_name => 'created_at'}
     column_configs << {:field_type => 'text', :field_name => 'exit_date_time'}
-    column_configs << {:field_type => 'text', :field_name => 'pallet_id'}
-    column_configs << {:field_type => 'text', :field_name => 'is_inspection_carton'}
-    column_configs << {:field_type => 'text', :field_name => 'carton_fruit_nett_mass'}
-    column_configs << {:field_type => 'text', :field_name => 'n_labels_printed'}
-    column_configs << {:field_type => 'text', :field_name => 'production_run_code'}
+    column_configs << {:field_type => 'text', :field_name => 'is_inspection_carton',:column_width=>120}
+    column_configs << {:field_type => 'text', :field_name => 'carton_fruit_nett_mass',:column_width=>160}
+    column_configs << {:field_type => 'text', :field_name => 'n_labels_printed',:column_width=>130}
+    column_configs << {:field_type => 'text', :field_name => 'production_run_code',:column_width=>180}
     column_configs << {:field_type => 'text', :field_name => 'rw_run_name'}
     column_configs << {:field_type => 'text', :field_name => 'line_code'}
-    column_configs << {:field_type => 'text', :field_name => 'carton_mark_code'}
+    column_configs << {:field_type => 'text', :field_name => 'carton_mark_code',:column_width=>130}
     column_configs << {:field_type => 'text', :field_name => 'quantity'}
-    column_configs << {:field_type => 'text', :field_name => 'carton_pack_station_code'}
-    column_configs << {:field_type => 'text', :field_name => 'rw_run_end_datetime'}
-    column_configs << {:field_type => 'text', :field_name => 'affected_by_function'}
+    column_configs << {:field_type => 'text', :field_name => 'carton_pack_station_code',:column_width=>220}
+    column_configs << {:field_type => 'text', :field_name => 'rw_run_end_datetime',:column_width=>140}
+    column_configs << {:field_type => 'text', :field_name => 'affected_by_function',:column_width=>140}
     column_configs << {:field_type => 'text', :field_name => 'account_code'}
     column_configs << {:field_type => 'text', :field_name => 'updated_by'}
     column_configs << {:field_type => 'text', :field_name => 'reprint_acknowledged_by'}
@@ -3456,11 +3458,11 @@ module Production::ReworksHelper
     column_configs << {:field_type => 'text', :field_name => 'id'}
 
 
-    return get_data_grid(data_set, column_configs, MesScada::GridPlugins::Production::ReworksPalletHistoriesGridPlugin.new, true)
+    return get_data_grid(data_set, column_configs, MesScada::GridPlugins::Production::ReworksPalletHistoriesGridPlugin.new(self,request), true)
   end
 
   def build_bin_histories_grid(data_set)
-
+                                           #957568
     column_configs = []
 
     column_configs << {:field_type => 'text', :field_name => 'tablename'}
