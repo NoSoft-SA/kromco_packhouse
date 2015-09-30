@@ -3812,7 +3812,7 @@ end
 
 
   def receive_bin
-        return if authorise_for_web(program_name?,'receive_bin') == false
+        #return if authorise_for_web(program_name?,'receive_bin') == false
     render :inline => %{
 		<% @content_header_caption = "'receive reworks items'"%>
 

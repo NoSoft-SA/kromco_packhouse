@@ -937,7 +937,7 @@ module Production::ReworksHelper
                            :remote_method =>'rmt_product_code_changed',
 #                            :on_completed_js => combos_js_for_rmt_product["bin_rmt_product_id"]
                            :on_completed_js => combos_js_for_rmt_product_on_complete_js}
-    
+
     session[:bulk_edit_bins_form][:rmt_product_observer ] = rmt_product_observer
 
     track_indicator_codes =TrackIndicator.find_by_sql("select  track_indicator_code from track_indicators").map { |q| [q.track_indicator_code] }
@@ -965,7 +965,7 @@ module Production::ReworksHelper
                                                   :list => production_run_codes,
                                                   :label_caption => 'production run tipped code'}
                                                }
-     
+
     field_configs[field_configs.length()] = {:field_type => 'DropDownField',
                                             :field_name => 'pack_material_product_id',
 
@@ -1089,7 +1089,7 @@ module Production::ReworksHelper
 
        production_run_codes =ProductionRun.find_by_sql("select production_runs.* from production_runs
         inner join production_schedules on production_runs.production_schedule_id = production_schedules.id
-        inner join rmt_setups on rmt_setups.production_schedule_id = production_schedules.id   
+        inner join rmt_setups on rmt_setups.production_schedule_id = production_schedules.id
         where production_schedules.season_code='#{bin.season_code}' and rmt_setups.commodity_code = '#{commodity_code}' AND  rmt_setups.variety_code = '#{variety_code}'
         order by production_runs.production_run_code desc limit 2000").map { |p| [p.production_run_code,p.id ] }
 
@@ -1098,7 +1098,7 @@ module Production::ReworksHelper
      field_configs[field_configs.length()] = {:field_type=>'HiddenField',:field_name=>'bin_id'}
 
 
-     
+
      field_configs[field_configs.length()] = {:field_type => 'DropDownField',
                                                :field_name => "production_run_tipped_id",
 
@@ -1253,8 +1253,6 @@ module Production::ReworksHelper
     set_grid_min_width(1200)
     if tip_bins==nil && scrap_bins==nil
      return get_data_grid(data_set, column_configs, MesScada::GridPlugins::Production::ReworksReceivedBinsGridPlugin.new,true)
-    else
-     return get_data_grid(data_set, column_configs)
     end
   end
 
@@ -2490,7 +2488,7 @@ module Production::ReworksHelper
 
       default_shift_code = "#{shift.shift_type_code}_#{shift.line_code}_#{user}_#{shift.start_date_time.strftime("%Y/%m/%d")}"
     end
-    
+
     session[:carton_edit_form]= Hash.new
     is_pallet_update = action == 'edit_repr_carton_submit'
 
@@ -3324,8 +3322,10 @@ module Production::ReworksHelper
     column_configs << {:field_type => 'text', :field_name => 'rw_reason_id'}
     column_configs << {:field_type => 'text', :field_name => 'rw_scrap_datetime'}
     column_configs << {:field_type => 'text', :field_name => 'user_name'}
+    column_configs << {:field_type => 'text', :field_name => 'id'}
 
-    return get_data_grid(data_set, column_configs, MesScada::GridPlugins::Production::PalletHistoriesGridPlugin.new, true)
+
+    return get_data_grid(data_set, column_configs, MesScada::GridPlugins::Production::ReworksPalletHistoriesGridPlugin.new, true)
   end
 
   def build_carton_histories_grid(data_set)
@@ -3452,8 +3452,9 @@ module Production::ReworksHelper
     column_configs << {:field_type => 'text', :field_name => 'rw_reason_id'}
     column_configs << {:field_type => 'text', :field_name => 'iso_week_code'}
     column_configs << {:field_type => 'text', :field_name => 'rw_run_start_datetime'}
-    column_configs << {:field_type => 'text', :field_name => 'id'}
     column_configs << {:field_type => 'text', :field_name => 'actual_size_count_code'}
+    column_configs << {:field_type => 'text', :field_name => 'id'}
+
 
     return get_data_grid(data_set, column_configs, MesScada::GridPlugins::Production::ReworksPalletHistoriesGridPlugin.new, true)
   end

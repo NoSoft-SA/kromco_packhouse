@@ -209,7 +209,7 @@ class Array
       if !@key_based_access
         failed = !(eval "previous_item." + c + " == current_item." + c)
       else
-        failed = !(previous_item[c] == current_item[c])
+        failed = !(eval "previous_item['" + c + "'] == current_item['" + c + "']")
       end
       break if failed
     end
@@ -692,8 +692,23 @@ class ActiveRecord::Base
       next if ignore_fields.include?(name)
       next if !copy_ids && name.ends_with?( '_id' )
 
-      target_record.send("#{name}=", attr) if target_record.has_attribute?(name)
+      if ignore_fields
+        if ignore_fields.find { |f| f == name }
+          next
     end
+      end
+
+      if !((name.index("_id")&& !copy_ids)|| name == "id")
+        if target_record.has_attribute?(name)
+          if attr == nil
+            eval "target_record." + name + " = nil"
+          else
+            target_record.send(name + "=", attr)
+          end
+        end
+      end
+    end
+
   end
 
 end
@@ -716,6 +731,29 @@ class Hash
   end
 
 
+  def export_attributes(target_record, copy_ids = nil, ignore_fields = nil)
 
+    self.each do |name, attr|
+
+      if ignore_fields
+        if ignore_fields.find { |f| f == name }
+          next
+        end
+      end
+
+      if !((name.index("_id")&& !copy_ids)|| name == "id")
+        if target_record.has_attribute?(name)
+          if attr == nil
+
+            eval "target_record." + name + " = nil"
+          else
+
+            target_record.send(name + "=", attr)
+          end
+        end
+      end
+    end
+
+  end
 
 end
