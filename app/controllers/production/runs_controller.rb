@@ -94,13 +94,26 @@ class Production::RunsController < ApplicationController
 
   def update_ranked_runs
     return if authorise_for_web(program_name?, 'production_run_setup')==false
-    params[:run].each do |k, v|
-      k = k.split('_')
-      key = k.shift
+    # params[:run].each do |k, v|
+    #   k = k.split('_')
+    #   key = k.shift
+    #
+    #   ActiveRecord::Base.transaction do
+    #     ActiveRecord::Base.connection.execute("update production_runs set rank=#{v} where id = #{key.to_i}") if v!=""
+    #     ActiveRecord::Base.connection.execute("update production_runs set rank=null where id = #{key.to_i}") if v==""
+    #   end
+    # end
 
+    ranked_runs = grid_edited_values_to_array(params)
+    ranked_runs.each do |rank_edit|
+      id= rank_edit[:id]
+      value = rank_edit[:rank]
       ActiveRecord::Base.transaction do
-        ActiveRecord::Base.connection.execute("update production_runs set rank=#{v} where id = #{key.to_i}") if v!=""
-        ActiveRecord::Base.connection.execute("update production_runs set rank=null where id = #{key.to_i}") if v==""
+        if(value.to_s.strip.length > 0)
+          ActiveRecord::Base.connection.execute("update production_runs set rank=#{value} where id = #{id.to_i}")
+        else
+          ActiveRecord::Base.connection.execute("update production_runs set rank=null where id = #{id.to_i}")
+        end
       end
     end
     editing_runs

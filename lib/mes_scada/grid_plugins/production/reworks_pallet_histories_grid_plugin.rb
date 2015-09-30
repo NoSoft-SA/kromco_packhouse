@@ -27,6 +27,7 @@ module MesScada::GridPlugins
       #-------------------------------------------------------------------
       def render_cell(column_name,cell_value,record)
         ""
+        return cell_value
       end
 
     end

@@ -16,9 +16,10 @@ module MesScada::GridPlugins
       end
 
       def render_cell(column_name, cell_value, record)
-        if (column_name=="rank")
-          return @env.text_field('run', "#{record['id']}_#{column_name}", {:size =>2, :value => record[column_name]})
-        end
+        # if (column_name=="rank")
+        #   return @env.text_field('run', "#{record['id']}_#{column_name}", {:size =>2, :value => record[column_name]})
+        # end
+        return cell_value
       end
 
       def row_cell_colouring(record)
