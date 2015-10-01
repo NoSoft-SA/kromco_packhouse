@@ -1159,7 +1159,7 @@ module Production::ReworksHelper
   end
 
 
-  def build_rw_bins_grid(data_set,tip_bins,scrap_bins)
+  def build_rw_bins_grid(data_set,tip_bins=nil,scrap_bins=nil)
 
     #require File.dirname(__FILE__) + "/../../../app/helpers/production/reworks_received_items_plugin.rb"
 
@@ -1208,11 +1208,11 @@ module Production::ReworksHelper
       if tip_bins!=nil
          @multi_select = "receceive_tip_bins"
       elsif scrap_bins!= nil
-         column_configs << {:field_type => 'action',:field_name => 'scrap_bin',  :col_width => 43,
-			:settings =>
-				 {:link_text => '',
-				:target_action => '',
-				:id_column => 'id'}}
+       #  column_configs << {:field_type => 'action',:field_name => 'scrap_bin',  :col_width => 43,
+			#:settings =>
+			#	 {:link_text => '',
+			#	:target_action => '',
+			#	:id_column => 'id'}}
          @multi_select = "receive_scrap_bins"
       end
 
@@ -1251,9 +1251,8 @@ module Production::ReworksHelper
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'id'}
 
     set_grid_min_width(1200)
-    if tip_bins==nil && scrap_bins==nil
      return get_data_grid(data_set, column_configs, MesScada::GridPlugins::Production::ReworksReceivedBinsGridPlugin.new,true)
-    end
+
   end
 
 
