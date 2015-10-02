@@ -1468,7 +1468,7 @@ def build_production_run_grid(data_set,can_edit,is_active_runs_grid = nil,run_ty
   column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'rank',:editor => :text,:col_width =>50}  if editing_runs
   column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'puc_code',:col_width => 70}
   column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'farm_code',:col_width => 60}
-  column_configs[column_configs.length()] = {:field_type => 'text',:field_name =>  'pc_code'}
+  column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'pc_code'}
   column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'treatment_code'}
   column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'size_code',}
   column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'ripe_point_code'}
