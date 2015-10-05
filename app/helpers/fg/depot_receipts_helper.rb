@@ -285,13 +285,13 @@ module Fg::DepotReceiptsHelper
                                                       :id_column     => 'id'}}
     end
 
-    column_configs[column_configs.length()] = {:field_type => 'action', :field_name => 'print_labels',:col_width => 45,
+    column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name => 'print_labels',:col_width=>34, :col_width=> 123,
                                                :settings   =>
                                                    {:image     => 'printer',
                                                     :target_action => 'print_pallet_labels',
                                                     :id_column     => 'id'}}
 
-    column_configs[column_configs.length()] = {:field_type => 'action', :field_name => 'view',:col_width => 45,
+    column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name => 'view',:col_width=>34, :col_width=> 123,
                                                :settings   =>
                                                    {:image     => 'view',
                                                     :target_action => 'view_pallet_sequence',
@@ -332,7 +332,7 @@ module Fg::DepotReceiptsHelper
 
     set_grid_min_height(325)
     set_grid_min_width(700)
-    return get_data_grid(data_set, column_configs, DepotReceiptsPlugins::PalletSequencePlugin.new(self, request), true, special_commands)
+    return get_data_grid(data_set, column_configs, MesScada::GridPlugins::DepotReceipts::PalletSequencePlugin.new(self, request), true, special_commands)
 
   end
 
@@ -691,25 +691,24 @@ module Fg::DepotReceiptsHelper
       else
         record["mapped?"] = "true"
       end
-      record["id"] = record["commodity"].to_s + "!" + record["variety"].to_s + "!" + record["grade"] + "!" + record["count"].to_s + "!" + record["brand"].to_s + "!" + record["pack_type"].to_s + "!" + record["organization"].to_s + "!" + record["mapped?"] + "!" + record["class_code"].to_s
+      record["id"] = record["commodity"].to_s + "|" + record["variety"].to_s + "|" + record["grade"] + "|" + record["count"].to_s + "|" + record["brand"].to_s + "|" + record["pack_type"].to_s + "|" + record["organization"].to_s + "|" + record["mapped?"] + "|" + record["class_code"].to_s
     end
 
 
      if session[:intake_header].header_status != "LOAD_RECEIVED" && session[:intake_header].header_status != "EDI_REQUESTED" && session[:intake_header].header_status != "EDI_SENT"
-      column_configs[column_configs.length()] = {:field_type => 'action', :field_name => 'map',:col_width => 47,
-                                                 :settings   =>
-                                                     {:link_text     => 'map',
-                                                      :target_action => 'map_pallet_sequences',
-                                                      :id_column     => 'id'}}
+
+       column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name => 'map',:col_width=>34, :col_width=> 123,
+                                                  :settings   =>
+                                                      {:link_text     => 'map',
+                                                       :target_action => 'map_pallet_sequences',
+                                                       :id_column     => 'id'}}
     end
 
-
-    column_configs[column_configs.length()] = {:field_type => 'action', :field_name => 'pallets',:col_width => 47,
+    column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name => 'pallets',:col_width=>34, :col_width=> 123,
                                                :settings   =>
                                                    {:link_text     => 'pallets',
                                                     :target_action => 'show_intake_header_pallets',
                                                     :id_column     => 'id'}}
-
 
 
     column_configs[column_configs.length] = {:field_type => 'text', :field_name => 'mapped?',:col_width => 65}
@@ -727,7 +726,7 @@ module Fg::DepotReceiptsHelper
 
     set_grid_min_height(325)
     set_grid_min_width(700)
-    return get_data_grid(data_set, column_configs, DepotReceiptsPlugins::DepotReceiptPlugin.new(self, request), true)
+    return get_data_grid(data_set, column_configs, MesScada::GridPlugins::DepotReceipts::DepotReceiptPlugin.new(self, request), true)
   end
 
 

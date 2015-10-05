@@ -561,7 +561,7 @@ class Fg::DepotReceiptsController < ApplicationController
 
   def map_pallet_sequences
     id = params[:id].to_s
-    ids_array = id.split("!")
+    ids_array = id.split("|")
     commodity = ids_array[0]
     variety = ids_array[1]
     grade = ids_array[2]
@@ -772,7 +772,7 @@ class Fg::DepotReceiptsController < ApplicationController
 
   def show_intake_header_pallets
     id = params[:id].to_s
-    ids_array = id.split("!")
+    ids_array = id.split("|")
     commodity = ids_array[0]
     variety = ids_array[1]
     grade = ids_array[2]
