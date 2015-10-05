@@ -22,3 +22,4 @@ jmt_reporting_server/*.sh
 jmt_reporting_server/*.bat
 jmt_reporting_server/lib/*.*
 jasper_xml/*
+tags
