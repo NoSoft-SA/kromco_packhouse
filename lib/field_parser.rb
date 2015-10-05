@@ -101,7 +101,7 @@ class FieldParser
         if search_eng_or_values.has_key?(field_name)
           or_values = search_eng_or_values[field_name]
           if or_values.include?(",")
-            replacer << or_values.split(",").map {|o| "or #{field_name}='#{or_val}'" }.join(' ') << ')'
+            replacer << or_values.split(",").map {|or_val| " or #{field_name}='#{or_val}'" }.join(' ') << ')'
           else
             replacer << " or #{field_name}='#{or_values}')"
           end
