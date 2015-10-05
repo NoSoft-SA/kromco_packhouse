@@ -4,10 +4,10 @@ module Fg::OrderProductHelper
 
       column_configs = Array.new
       column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'customer' }
-      column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'price_per_kg',:col_width=>120 }
-      column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'price_per_carton',:col_width=>120 }
-      column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'nett_price_per_kg',:col_width=>120 }
-      column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'fob' }
+      column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'price_per_kg',:col_width=>120 ,:format => 'delimited_1000'}
+      column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'price_per_carton',:col_width=>120,:format => 'delimited_1000' }
+      column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'nett_price_per_kg',:col_width=>120,:format => 'delimited_1000' }
+      column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'fob' ,:format => 'delimited_1000'}
       column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'updated_at',:col_width=>120}
       column_configs[column_configs.length()]= {:field_type => 'text', :field_name => 'id' }
 
@@ -212,8 +212,8 @@ module Fg::OrderProductHelper
                                :link_text => 'get_historic_pricing',
                                :id_value=>'id'
                            }}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'price_per_kg',  :editor => :text,:column_caption=>'price/kg',:format => 'default_currency',:col_width=>90}
-    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'price_per_carton',:editor => :text,:column_caption=>'price/carton',:format => 'default_currency',:col_width=>95}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'price_per_kg',  :editor => :text,:column_caption=>'price/kg',:format => 'delimited_1000',:col_width=>90}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'price_per_carton',:editor => :text,:column_caption=>'price/carton',:format => 'delimited_1000',:col_width=>95}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'old_fg_code',:col_width=>200}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'extended_fg_code',:col_width=>250}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'item_pack_product_code',:col_width=>250}
