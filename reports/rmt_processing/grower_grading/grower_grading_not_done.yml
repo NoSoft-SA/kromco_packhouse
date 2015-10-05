@@ -1,4 +1,4 @@
-query: select id,production_run_code,farm_code,commodity_code,track_slms_indicator_code from vwgrowergrading_notdone WHERE(season={season} and track_slms_indicator_code={track_slms_indicator_code} and farm_code={farm_code} and commodity_code={commodity_code})
+query: select production_run_code,farm_code,commodity_code,track_slms_indicator_code, 'row ' || CAST(ROW_NUMBER() OVER() AS character varying) AS id  from vwgrowergrading_notdone WHERE(season={season} and track_slms_indicator_code={track_slms_indicator_code} and farm_code={farm_code} and commodity_code={commodity_code})
 main_table_name: production_runs
 fields:
  field1:

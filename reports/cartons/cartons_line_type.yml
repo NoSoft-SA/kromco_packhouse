@@ -1,4 +1,4 @@
-query: SELECT * from vwpackout_line_type_description where (commodity_code={commodity_code} and farm_code={farm_code} and production_run_code={production_run_code} and track_indicator_code={track_indicator_code})
+query: SELECT pc_code, production_schedule_name, line_code, start_date_time, end_date_time, farm_code, production_run_code, commodity_code, variety_code, product_class_code, ripe_point_code, treatment_code, cold_store_code, ca_cold_room_code, track_indicator_code, rmt_product_code, store_type_code, description, product_class_description, pc_name, party_name, farm_description, "Class1Packout", "Class2Packout",1 as id from vwpackout_line_type_description where (commodity_code={commodity_code} and farm_code={farm_code} and production_run_code={production_run_code} and track_indicator_code={track_indicator_code})
 main_table_name: cartons
 fields:
   field1:

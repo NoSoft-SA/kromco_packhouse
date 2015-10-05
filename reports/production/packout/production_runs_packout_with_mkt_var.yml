@@ -1,4 +1,4 @@
-query: select * from  vw_packout_production_run_code_with_mkt_var where (farm_code={farm_code} and  track_indicator_code={track_indicator_code} and season={season} and production_run_code={production_run_code} and ripe_point_code={ripe_point_code} and farm_group_code={farm_group_code} and cold_store_type_code={cold_store_type_code} )
+query: select season, variety_code, farm_code, track_indicator_code, commodity_code, production_run_code, product_class_code, prim_carton_weight, sec_carton_weight, bins_tipped_weight, rebin_weight, prim_packout, sec_packout, waste, ctn_sec_qty, ctn_prim_qty, bins_tipped_qty, rebin_qty, ripe_point_code, farm_group_code, cold_store_type_code, erp_cultivar, marketing_variety, tipped_date_time, iso_week_tipped, 'row ' || CAST(ROW_NUMBER() OVER() AS character varying) AS id  from  vw_packout_production_run_code_with_mkt_var where (farm_code={farm_code} and  track_indicator_code={track_indicator_code} and season={season} and production_run_code={production_run_code} and ripe_point_code={ripe_point_code} and farm_group_code={farm_group_code} and cold_store_type_code={cold_store_type_code} )
 main_table_name: production_runs
 
 fields:

@@ -1,4 +1,4 @@
-query: select account_code,  commodity_code,   dispatch_consignment_number,  customer_code,  container_code,  season_code,  shift_calendar_date,  sum_carton_fruit_nett_mass,  packed_by,  id  from vwcartons_dfpt WHERE (season_code={season_code} and shift_calendar_date={shift_calendar_date} and packed_by={packed_by})
+query: select account_code,  commodity_code,   dispatch_consignment_number,  customer_code,  container_code,  season_code,  shift_calendar_date,  sum_carton_fruit_nett_mass,  packed_by,  'row ' || CAST(ROW_NUMBER() OVER() AS character varying) AS id from vwcartons_dfpt WHERE (season_code={season_code} and shift_calendar_date={shift_calendar_date} and packed_by={packed_by})
 main_table_name: cartons
 fields:
  field1:

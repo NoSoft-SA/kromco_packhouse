@@ -1,4 +1,4 @@
-query: SELECT * from locations WHERE (location_code={location_code} AND  location_type_code={location_type_code} and parent_location_code={parent_location_code} and location_barcode={location_barcode}) 
+query: SELECT location_code, bay_code,  'row ' || CAST(ROW_NUMBER() OVER() AS character varying) AS id , facility_id, facility_code, location_type_code, location_barcode, location_status, location_maximum_units, storage_type, assignment_type, row_number, column_number, level_number, section_number, gln, unavailable, unavailable_from, unavailable_to, units_in_location, current_job_reference_id, parent_location_code, parent_location_id, status_code from locations WHERE (location_code={location_code} AND  location_type_code={location_type_code} and parent_location_code={parent_location_code} and location_barcode={location_barcode}) 
 main_table_name: locations
 fields:
  field1:

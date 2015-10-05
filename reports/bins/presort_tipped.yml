@@ -1,4 +1,4 @@
-query: select * from vwpresort_tipped WHERE ( season={season} and farm_code={farm_code} and track_slms_indicator_1_code={track_slms_indicator_1_code} and ps_tipped_lot_no={ps_tipped_lot_no}) 
+query: select id, ps_tipped_lot_no, season, farm_code, farm_description, track_slms_indicator_1_code, track_slms_indicator_1_description, rmt_product_code, lot_start_date_time, bin_tipped_weight, bin_tipped_qty, stock_type_code, ps_reworked_lot from vwpresort_tipped WHERE ( season={season} and farm_code={farm_code} and track_slms_indicator_1_code={track_slms_indicator_1_code} and ps_tipped_lot_no={ps_tipped_lot_no}) 
 main_table_name: bins
 fields:
  field1:

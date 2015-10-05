@@ -1,2 +1,3 @@
-query: select * from parties_roles WHERE(party_name={party_name} and role_name={role_name})
+query: select party_id, role_id, from_date, to_date, remarks, id, party_name, 
+       party_type_name, role_name, sequence_number from parties_roles WHERE(party_name={party_name} and role_name={role_name})
 main_table_name: parties_roles

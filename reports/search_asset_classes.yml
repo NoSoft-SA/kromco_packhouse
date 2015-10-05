@@ -1,4 +1,4 @@
-query: select DISTINCT asset_items.* FROM asset_items left outer join asset_locations on asset_locations.asset_item_id = asset_items.id left outer join locations on locations.id = asset_locations.location_id WHERE( locations.location_code={locations.location_code} and asset_items.asset_number={asset_items.asset_number})
+query: select DISTINCT asset_items.id, asset_items. asset_number, asset_items. acquisition_date, asset_items. acquisition_price, asset_items. depreciation_percentage, asset_items. asset_type_id, asset_items. party_name, asset_items. parties_role_id, asset_items. inventory_transaction_id, asset_items. current_status, asset_items. parties_role_name, asset_items. location_code, asset_items. inventory_reference, asset_items. quantity FROM asset_items left outer join asset_locations on asset_locations.asset_item_id = asset_items.id left outer join locations on locations.id = asset_locations.location_id WHERE( locations.location_code={locations.location_code} and asset_items.asset_number={asset_items.asset_number})
 main_table_name: asset_items
 default_report_index_group_name: System
 

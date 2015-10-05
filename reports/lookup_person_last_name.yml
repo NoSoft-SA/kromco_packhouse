@@ -1,4 +1,4 @@
-query: select * from people
+query: select id, first_name, last_name, party_id, title, date_of_birth, maiden_name, industry_number, initials, is_deleted, is_logged_on, logged_onto_module, logged_onoff_time, reader_id, created_at, updated_at, affected_by_env, affected_by_function, affected_by_program, created_by, updated_by from people
 
 
 

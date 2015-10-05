@@ -1,1 +1,1 @@
-query: select * from bin_orders WHERE(bin_order_number={bin_order_number})
+query: select order_type_id, bin_order_number, trading_partner_party_role_id, customer_party_role_id, customer_order_number, remarks_1, remarks_2, user_name, created_on, status, id, updated_at, affected_by_env, affected_by_function, affected_by_program, created_at, created_by, updated_by, match_on_size from bin_orders WHERE(bin_order_number={bin_order_number})

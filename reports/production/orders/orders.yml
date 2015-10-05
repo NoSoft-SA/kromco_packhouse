@@ -1,4 +1,4 @@
-query: SELECT * FROM season_order_quantities WHERE (customer_order_number={customer_order_number} and season_code={season_code})
+query: SELECT id, customer_order_number, quantity_required, quantity_produced, season_code, affected_by_env, affected_by_function, affected_by_program, created_at, created_by, updated_at, updated_by FROM season_order_quantities WHERE (customer_order_number={customer_order_number} and season_code={season_code})
 main_table_name: season_order_quantities
 fields:
  field1:

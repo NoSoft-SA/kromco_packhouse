@@ -1,4 +1,4 @@
-query: select * from vwcull_analysis_pre2012 WHERE(season={season} and farm_code={farm_code} and production_run_code={production_run_code} and commodity_code={commodity_code} and variety_code={variety_code} and cull_code={cull_code})
+query: select season, commodity_code, variety_code, farm_code, production_run_code, total_class2, total_class3, class2_defects, class3_defects, cull_code, id from vwcull_analysis_pre2012 WHERE(season={season} and farm_code={farm_code} and production_run_code={production_run_code} and commodity_code={commodity_code} and variety_code={variety_code} and cull_code={cull_code})
 main_table_name: cull_analysis_detail
 fields:
  field1:

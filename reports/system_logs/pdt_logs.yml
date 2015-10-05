@@ -1,4 +1,4 @@
-query: select * from pdt_logs where (created_on={created_on} and ip={ip} and input_xml={input_xml} and output_xml={output_xml} and menu_item={menu_item})
+query: select id, user_name, created_on, ip, mode, input_xml, output_xml, menu_item from pdt_logs where (created_on={created_on} and ip={ip} and input_xml={input_xml} and output_xml={output_xml} and menu_item={menu_item})
 main_table_name: pdt_logs
 fields:
  field1:

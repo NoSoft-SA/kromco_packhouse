@@ -2008,7 +2008,7 @@ end
         column_index += 1
       end
     else
-      if columns_list.nil?
+      if columns_list.nil? || columns_list.empty?
         keys.each do |key|
           column_configs << {:field_type => 'text', :field_name => key.to_s}
           column_configs.last[:column_width]   = column_widths[key.to_s] if column_widths[key.to_s]

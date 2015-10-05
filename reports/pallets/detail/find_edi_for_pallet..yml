@@ -1,4 +1,4 @@
-query: select * FROM vw_find_edi_for_pallet WHERE (pallet_number={pallet_number} and dispatch_consignment_number={dispatch_consignment_number} and load_number={load_number} and flow_type={flow_type} and edi_out_filename={edi_out_filename}  and out_destination_dir={out_destination_dir}  and order_number={order_number} and organization={organization} and customer={customer} )
+query: select pallet_number, dispatch_consignment_number, load_number, shipped_date_time, flow_type, edi_out_filename, out_destination_dir, created_on, process_started_at, process_completed_at,  'row ' || CAST(ROW_NUMBER() OVER() AS character varying) AS id , order_number, organization, customer FROM vw_find_edi_for_pallet WHERE (pallet_number={pallet_number} and dispatch_consignment_number={dispatch_consignment_number} and load_number={load_number} and flow_type={flow_type} and edi_out_filename={edi_out_filename}  and out_destination_dir={out_destination_dir}  and order_number={order_number} and organization={organization} and customer={customer} )
 main_table_name: pallets
 fields:
  field1:

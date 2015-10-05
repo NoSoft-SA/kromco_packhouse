@@ -1,4 +1,4 @@
-query: select * from vwinventory_transactions WHERE (stock_type_code={stock_type_code} and inventory_reference={inventory_reference} and transaction_business_name_code={transaction_business_name_code} and location_from={location_from} and location_to={location_to} and created_at={created_at})
+query: select inventory_reference, transaction_type_code, transaction_business_name_code, transaction_date_time, location_from, location_to, reference_number, stock_type_code,  'row ' || CAST(ROW_NUMBER() OVER() AS character varying) AS id , created_at, created_by, sourcetable, stock_item_created_on from vwinventory_transactions WHERE (stock_type_code={stock_type_code} and inventory_reference={inventory_reference} and transaction_business_name_code={transaction_business_name_code} and location_from={location_from} and location_to={location_to} and created_at={created_at})
 main_table_name: inventory_transactions
 fields:
  field1:

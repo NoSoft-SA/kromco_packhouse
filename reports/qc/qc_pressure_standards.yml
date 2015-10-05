@@ -1,4 +1,4 @@
-query: SELECT * from rmt_variety_qc_pressure_standards WHERE (season={season} and commodity_code={commodity_code} and rmt_variety_code={rmt_variety_code}) 
+query: SELECT id, season, commodity_code, rmt_variety_code, pc_code, min_value, max_value from rmt_variety_qc_pressure_standards WHERE (season={season} and commodity_code={commodity_code} and rmt_variety_code={rmt_variety_code}) 
 main_table_name: rmt_variety_qc_pressure_standards
 fields:
  field1:

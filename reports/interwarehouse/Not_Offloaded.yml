@@ -1,4 +1,4 @@
-query: SELECT vehicle_jobs.id, vehicle_jobs.planned_location, vehicle_jobs.date_time_loaded, vehicle_jobs.vehicle_job_number, vehicle_job_units.unit_reference_id, vehicles.vehicle_code, vehicles.in_use, vehicle_jobs.operator FROM vehicle_jobs INNER JOIN vehicle_job_units ON (vehicle_jobs.id = vehicle_job_units.vehicle_job_id) INNER JOIN vehicles ON (vehicle_jobs.vehicle_id = vehicles.id) where (vehicle_jobs.date_time_offloaded ISNULL and vehicle_jobs.cancel_boolean ISNULL and vehicle_jobs.operator={vehicle_jobs.operator} ) 
+query: SELECT vehicle_jobs.planned_location, vehicle_jobs.date_time_loaded, vehicle_jobs.vehicle_job_number, vehicle_job_units.unit_reference_id, vehicles.vehicle_code, vehicles.in_use, vehicle_jobs.operator, 'row ' || CAST(ROW_NUMBER() OVER() AS character varying) AS id  FROM vehicle_jobs INNER JOIN vehicle_job_units ON (vehicle_jobs.id = vehicle_job_units.vehicle_job_id) INNER JOIN vehicles ON (vehicle_jobs.vehicle_id = vehicles.id) where (vehicle_jobs.date_time_offloaded ISNULL and vehicle_jobs.cancel_boolean ISNULL and vehicle_jobs.operator={vehicle_jobs.operator} ) 
 main_table_name: vehicle_jobs
 fields:
   field1:

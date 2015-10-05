@@ -1,4 +1,4 @@
-query: select * from vwinventory_status WHERE (stock_type_code={stock_type_code} and inventory_reference={inventory_reference} and previous_location={previous_location} and location_code={location_code} and standing_hours={standing_hours} and stock_status={stock_status})
+query: select inventory_reference, stock_type_code, location_code, created_on, updated_at, previous_location, destroyed, standing_hours, between_move_hours, stock_status,  'row ' || CAST(ROW_NUMBER() OVER() AS character varying) AS id  from vwinventory_status WHERE (stock_type_code={stock_type_code} and inventory_reference={inventory_reference} and previous_location={previous_location} and location_code={location_code} and standing_hours={standing_hours} and stock_status={stock_status})
 main_table_name: stock_items
 fields:
  field1:

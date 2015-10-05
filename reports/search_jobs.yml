@@ -1,4 +1,4 @@
-query: SELECT * FROM jobs WHERE(job_number={job_number}and date_created={date_created}and job_type_code={job_type_code}and current_job_status={current_job_status} )
+query: SELECT id, job_number, date_created, job_type_code, current_job_status FROM jobs WHERE(job_number={job_number}and date_created={date_created}and job_type_code={job_type_code}and current_job_status={current_job_status} )
 main_table_name: jobs
 default_report_index_group_name: System
 

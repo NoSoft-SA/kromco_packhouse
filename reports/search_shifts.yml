@@ -1,5 +1,5 @@
-query: select * from shifts WHERE( shifts.shift_type_code={shifts.shift_type_code} and shifts.line_code={shifts.line_code} and shifts.user={shifts.user} and shifts.start_date_time={shifts.start_date_time})
-main_table_name: asset_items
+query: select id, shift_code, shift_type_code, shift_description, start_date_time, end_date_time, shift_type_id, calendar_date, line_code, start_time, end_time, user_name, "user", people_working_on_shift, machine_minutes, clocked_minutes, people_absent, people_off_sick, people_on_leave, supervisor, sorter, packer, operator_infeed, operator_class2, operator_line, operator_label, operator_rebin, forklift, palletizer, cleaner, sample, strapper, bak_man, sakkie_man, carton_scanner, overtime from shifts WHERE( shifts.shift_type_code={shifts.shift_type_code} and shifts.line_code={shifts.line_code} and shifts.user={shifts.user} and shifts.start_date_time={shifts.start_date_time})
+main_table_name: shifts
 
 fields:
   field1:

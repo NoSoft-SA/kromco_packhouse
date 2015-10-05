@@ -1,4 +1,4 @@
-query: select * from vwcarton_avg_mass WHERE (line_code={line_code} )
+query: select line_code, date_hour, date_minute, carton_fruit_nett_mass_actual_avg, extended_fg_code, unit_pack_product_code, fg_code_old, actual_size_count_code, grade_code, fg_product_code, id, cartons_weighted from vwcarton_avg_mass WHERE (line_code={line_code} )
 main_table_name: cartons
 fields:
   field1:

@@ -1,4 +1,4 @@
-query: SELECT id,     test_type,    transaction_id,   farm,    rmt_product_code,    created_on,    peripheral_type,    mode,    sample_number,    scale_type,    measurement,    temperature,    message,    average_measurement from vw_RFM  WHERE (created_on={created_on} and id={id} and test_type={test_type} AND  transaction_id={transaction_id} AND farm={farm} AND rmt_product_code={rmt_product_code} AND peripheral_type={peripheral_type}) 
+query: SELECT test_type,    transaction_id,   farm,    rmt_product_code,    created_on,    peripheral_type,    mode,    sample_number,    scale_type,    measurement,    temperature,    message,    average_measurement, 'row ' || CAST(ROW_NUMBER() OVER() AS character varying) AS id  from vw_RFM  WHERE (created_on={created_on} and id={id} and test_type={test_type} AND  transaction_id={transaction_id} AND farm={farm} AND rmt_product_code={rmt_product_code} AND peripheral_type={peripheral_type}) 
 main_table_name: instruments_rfm_sessions
 fields:
  field1:

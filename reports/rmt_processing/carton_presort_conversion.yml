@@ -1,4 +1,4 @@
-query: select * from carton_presort_conversions WHERE (commodity_code='AP' and rmt_variety_code={rmt_variety_code} and grade_code={grade_code} and line_type={line_type} and marketing_variety_code={marketing_variety_code}) 
+query: select id, commodity_code, rmt_variety_code, grade_code, line_type, marketing_variety_code, treatment_code, product_class_code from carton_presort_conversions WHERE (commodity_code='AP' and rmt_variety_code={rmt_variety_code} and grade_code={grade_code} and line_type={line_type} and marketing_variety_code={marketing_variety_code}) 
 main_table_name: carton_presort_conversions
 fields:
  field1:

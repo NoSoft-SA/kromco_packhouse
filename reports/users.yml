@@ -1,1 +1,1 @@
-query: select * from users
+query: select id, user_name, hashed_password, person_id, department_id, created_by, updated_by, department_name, first_name, last_name, created_at, updated_at, affected_by_env, affected_by_function, affected_by_program, email_address from users

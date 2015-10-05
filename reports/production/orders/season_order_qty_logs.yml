@@ -1,2 +1,2 @@
-query: SELECT * FROM season_order_qties_logs WHERE (customer_order_number={customer_order_number} and pallet_number={pallet_number} and season_code={season_code} and transaction_date_time={transaction_date_time})
+query: SELECT id, customer_order_number, season_code, last_carton_on_bay, pallet_number, season_order_quantity_id, n_cartons_of_pallet, quantity_added_to_order, quantity_removed_from_order, transaction_date_time, skip_ip, bay_num FROM season_order_qties_logs WHERE (customer_order_number={customer_order_number} and pallet_number={pallet_number} and season_code={season_code} and transaction_date_time={transaction_date_time})
 main_table_name: season_order_qties_logs

@@ -1,4 +1,4 @@
-query: select * FROM program_functions WHERE (is_non_web_program={is_non_web_program} and disabled={disabled})
+query: select id, program_id, name, description, display_name, program_name, functional_area_name, is_non_web_program, disabled, class_name, created_on, url_param, "position", prog_url_component, func_area_url_component FROM program_functions WHERE (is_non_web_program={is_non_web_program} and disabled={disabled})
 main_table_name: program_functions
 fields:
  field1:

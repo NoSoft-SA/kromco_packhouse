@@ -1,4 +1,4 @@
-query: SELECT * FROM transaction_statuses WHERE(transaction_statuses.status_type_code='COLDSTORE' and transaction_statuses.object_id={transaction_statuses.object_id} and created_on={created_on}and transaction_statuses.status_code={transaction_statuses.status_code} )order by transaction_statuses.id desc
+query: SELECT id, status_id, object_id, created_on, object_type_code, status_type_code, status_code, username, parent_id FROM transaction_statuses WHERE(transaction_statuses.status_type_code='COLDSTORE' and transaction_statuses.object_id={transaction_statuses.object_id} and created_on={created_on}and transaction_statuses.status_code={transaction_statuses.status_code} )order by transaction_statuses.id desc
 main_table_name: transaction_statuses
 default_report_index_group_name: System
 
@@ -17,8 +17,6 @@ fields:
    field_type: lookup
    list: "select status_code FROM statuses WHERE status_type_code = 'COLDSTORE'order by status_code asc "
 
-
-# select * from transaction_statuses where (transaction_statuses.object_id = '#{object_id}' and transaction_statuses.status_type_code = '#{status_type_code}' order by transaction_statuses.id desc
 
 
 

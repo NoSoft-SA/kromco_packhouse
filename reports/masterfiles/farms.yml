@@ -1,4 +1,4 @@
-query: select * from vwfarms WHERE(farm_code={farm_code} and puc_code={puc_code} and party_name={party_name} and role_name={role_name} and account_code={account_code} and puc_type_code={puc_type_code})
+query: select puc_code, farm_code, from_date, thru_date, id, farm_id, puc_id, accounts_parties_role_id, party_name, party_type_name, role_name, account_code, puc_type_code, farm_description, farm_area from vwfarms WHERE(farm_code={farm_code} and puc_code={puc_code} and party_name={party_name} and role_name={role_name} and account_code={account_code} and puc_type_code={puc_type_code})
 main_table_name: farm_puc_accounts
 fields:
  field1:

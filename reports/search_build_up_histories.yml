@@ -1,5 +1,5 @@
-query: select distinct build_ups.*,build_up_cartons.to_pallet_number from build_ups join build_up_cartons on build_up_cartons.build_up_id=build_ups.id WHERE( build_ups.buildup_timestamp={build_ups.buildup_timestamp} and build_up_cartons.to_pallet_number={build_up_cartons.to_pallet_number} and build_up_cartons.carton_number={build_up_cartons.carton_number} and build_up_cartons.from_pallet_number={build_up_cartons.from_pallet_number} and build_ups.updated_by={build_ups.updated_by})
-main_table_name: asset_items
+query: SELECT distinct build_ups.id, build_ups.buildup_timestamp, build_ups.carton_quantity, build_ups.from_pallet_numbers, build_ups.to_pallet_id, build_ups.affected_by_env, build_ups.affected_by_function, build_ups.affected_by_program, build_ups.created_at, build_ups.created_by, build_ups.updated_at, build_up_cartons.to_pallet_number from build_ups join build_up_cartons on build_up_cartons.build_up_id=build_ups.id WHERE( build_ups.buildup_timestamp={build_ups.buildup_timestamp} and build_up_cartons.to_pallet_number={build_up_cartons.to_pallet_number} and build_up_cartons.carton_number={build_up_cartons.carton_number} and build_up_cartons.from_pallet_number={build_up_cartons.from_pallet_number} and build_ups.updated_by={build_ups.updated_by})
+main_table_name: build_ups
 
 fields:
   field1:

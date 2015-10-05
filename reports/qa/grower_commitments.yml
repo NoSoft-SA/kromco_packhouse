@@ -1,4 +1,4 @@
-query: SELECT * FROM grower_commitments WHERE(farm_code={farm_code} and season={season})
+query: SELECT id, farm_id, farm_code, season_id, season_code, commitment_document_delivered, transaction_date, variable_1, variable_2, grower_commitment_data_capture_date_time, mrl_data_capture_date_time, spray_program_document_delivered, season FROM grower_commitments WHERE(farm_code={farm_code} and season={season})
 main_table_name: grower_commitments
 fields:
  field1:

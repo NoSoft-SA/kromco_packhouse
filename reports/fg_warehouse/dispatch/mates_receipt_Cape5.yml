@@ -1,4 +1,4 @@
-query: select productgroup,     product,    variety,    count,    inventory,    puc,    packing,    class,    brand,    account,    quantity,    quantity_per_shipment_container,    pallet_number,    container from vw_mates_receipt_Cape5 where (order_number={order_number} and load_number={load_number} and pallet_number={pallet_number} and productgroup={productgroup} and variety={variety} and brand={brand} and packing={packing} and inventory={inventory} )
+query: select productgroup,     product,    variety,    count,    inventory,    puc,    packing,    class,    brand,    account,    quantity,    quantity_per_shipment_container,    pallet_number,    container,'row ' || CAST(ROW_NUMBER() OVER() AS character varying) AS id from vw_mates_receipt_Cape5 where (order_number={order_number} and load_number={load_number} and pallet_number={pallet_number} and productgroup={productgroup} and variety={variety} and brand={brand} and packing={packing} and inventory={inventory} )
 main_table_name: orders
 fields:
  field1:

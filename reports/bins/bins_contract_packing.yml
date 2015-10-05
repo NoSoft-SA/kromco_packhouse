@@ -1,4 +1,4 @@
-query: select * from vw_sum_rebins_per_farm WHERE (season={season} and farm_code={farm_code} and fruit_type={fruit_type} and track_slms_indicator_code={track_slms_indicator_code} and class={class})
+query: select farm_code, fruit_type, track_slms_indicator_code, track_slms_indicator_description, season, class, bin_type, process_weight, process_bin_qty, stock_weight, stock_bin_qty, 'row ' || CAST(ROW_NUMBER() OVER() AS character varying) AS id from vw_sum_rebins_per_farm WHERE (season={season} and farm_code={farm_code} and fruit_type={fruit_type} and track_slms_indicator_code={track_slms_indicator_code} and class={class})
 main_table_name: bins
 fields:
  field1:

@@ -1,4 +1,4 @@
-query: SELECT * FROM extended_fgs
+query: SELECT id, fg_code, fg_mark_code, units_per_carton, tu_gross_mass, tu_nett_mass, ri_diameter_range, ri_weight_range, extended_fg_code, ru_description, old_fg_code, marketing_org_code, grade_code, standard_size_count_value, commodity_code, created_on, updated_on, external_party_product_code, price, affected_by_env, affected_by_function, affected_by_program, created_at, created_by, updated_at, updated_by FROM extended_fgs
 main_table_name: orders
 
 fields:

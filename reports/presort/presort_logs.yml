@@ -1,4 +1,4 @@
-query: select * from presort_logs where (input_params={input_params} and created_at={created_at} and action={action}) 
+query: select id, input_params, output_xml, rails_error_id, created_at, action,  user_ip, user from presort_logs where (input_params={input_params} and created_at={created_at} and action={action}) 
 main_table_name: presort_logs
 fields:
  field1:

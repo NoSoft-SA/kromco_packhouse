@@ -1,4 +1,4 @@
-query: select * from downtimes WHERE(from_date={from_date} and downtime_category_code={downtime_category_code} and downtime_division_code={downtime_division_code} and downtime_type_code={downtime_type_code} and downtime_sub_type_code={downtime_sub_type_code} and reason={reason} and external_ref={external_ref} and line={line})
+query: select id, from_date, from_time, to_date, to_time, downtime_minute, downtime_category_code, downtime_division_code, downtime_type_code, downtime_sub_type_code, downtime_sub_type_id, reason, line, external_ref from downtimes WHERE(from_date={from_date} and downtime_category_code={downtime_category_code} and downtime_division_code={downtime_division_code} and downtime_type_code={downtime_type_code} and downtime_sub_type_code={downtime_sub_type_code} and reason={reason} and external_ref={external_ref} and line={line})
 main_table_name: downtimes
 fields:
   field1:

@@ -302,7 +302,7 @@ class UserDefinedReport < ActiveRecord::Base
   
   def self.validate_user_defined_report_name(user_def_rpt_name)
      if user_def_rpt_name == ""
-        return "field <b>user_defined_report_name</> cannot be blank. "
+        return "field <b>user_defined_report_name</b> cannot be blank. "
      else
        return ""
      end

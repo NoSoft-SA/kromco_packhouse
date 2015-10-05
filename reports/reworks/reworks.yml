@@ -1,4 +1,4 @@
-query: select * from rw_runs WHERE(rw_run_start_datetime={rw_run_start_datetime}  and rw_run_end_datetime={rw_run_end_datetime} and rw_run_status_code={rw_run_status_code} and rw_run_type_code={rw_run_type_code} and remarks={remarks} and username={username} and id={id})
+query: select id, rw_run_start_datetime, rw_run_end_datetime, rw_run_status_code, rw_run_type_code, remarks, rw_run_name, username, carton_printing_ip,  busy from rw_runs WHERE(rw_run_start_datetime={rw_run_start_datetime}  and rw_run_end_datetime={rw_run_end_datetime} and rw_run_status_code={rw_run_status_code} and rw_run_type_code={rw_run_type_code} and remarks={remarks} and username={username} and id={id})
 main_table_name: rw_runs
 fields:
  field1:

@@ -1,4 +1,4 @@
-query: SELECT   * from vw_progressive_defects WHERE (delivery_number={delivery_number} and delivery_number_preprinted={delivery_number_preprinted} and farm_code={farm_code} and season_code={season_code} and rmt_variety_code={rmt_variety_code} and inspection_test_number={inspection_test_number})
+query: SELECT delivery_number, delivery_number_preprinted, farm_code, season_code, rmt_variety_code, qc_inspection_type_code, status, cull_test, inspection_test_number, passed, created_on, qc_measurement_code, measurement, qc_measurement_description, class, further_desc,  'row ' || CAST(ROW_NUMBER() OVER() AS character varying) AS id from vw_progressive_defects WHERE (delivery_number={delivery_number} and delivery_number_preprinted={delivery_number_preprinted} and farm_code={farm_code} and season_code={season_code} and rmt_variety_code={rmt_variety_code} and inspection_test_number={inspection_test_number})
 main_table_name: qc_inspections
 fields:
  field1:

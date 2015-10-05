@@ -1,4 +1,4 @@
-query: select * from edi_errors where (id={id} and error_code={error_code} and created_on={created_on} and stack_trace={stack_trace} and logged_on_user={logged_on_user} and ip={ip} and transformer={transformer} and doc_type={doc_type} and edi_type={edi_type} and action_type={action_type} and description={description}  and edi_out_proposal_id={edi_out_proposal_id})
+query: select id, error_code, created_on, stack_trace, logged_on_user, ip, transformer, edi_type, action_type, description, flow_type, edi_filename, edi_out_proposal_id from edi_errors where (id={id} and error_code={error_code} and created_on={created_on} and stack_trace={stack_trace} and logged_on_user={logged_on_user} and ip={ip} and transformer={transformer} and doc_type={doc_type} and edi_type={edi_type} and action_type={action_type} and description={description}  and edi_out_proposal_id={edi_out_proposal_id})
 main_table_name: edi_errors
 fields:
   field1:

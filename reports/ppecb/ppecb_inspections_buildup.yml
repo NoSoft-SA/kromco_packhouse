@@ -1,0 +1,17 @@
+query:  select ppecb_inspections.id,ppecb_inspections.created_at, ppecb_inspections.inspector_number,cartons.carton_number, ppecb_inspections.inspection_report,pallets.consignment_note_number,ppecb_inspections.pallet_number as inspected_pallet_number ,p.exit_ref, cartons.pallet_number as current_pallet_number from cartons inner join ppecb_inspections on ppecb_inspections.id=cartons.ppecb_inspection_id inner join pallets on pallets.id=ppecb_inspections.pallet_id inner join pallets p on cartons.pallet_id=p.id WHERE(p.exit_ref={p.exit_ref} and cartons.pallet_number={cartons.pallet_number})
+main_table_name: ppecb_inspections
+
+grid_configs:
+  column_captions:
+    cartons.pallet_number:current_palle_number
+    ppecb_inspections.pallet_number:inspected_palle_number
+
+fields:
+  field1:
+   field_name: p.exit_ref
+   caption: exit_ref
+   field_type: text
+  field2:
+   field_name: cartons.pallet_number
+   caption: current_pallet_number
+   field_type: text

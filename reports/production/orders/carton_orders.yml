@@ -1,4 +1,4 @@
-query: SELECT * FROM vwcarton_orders WHERE (commodity_code={commodity_code} and target_market_code={target_market_code} and variety_short_long={variety_short_long} and fg_code_old={fg_code_old} and order_number={order_number} and grade_code={grade_code} and inventory_code={inventory_code} and organization_code={organization_code} and season_code={season_code} and sell_by_code={sell_by_code})
+query: SELECT fg_code_old, grade_code, ctns_packed, order_number, inventory_code,  target_market_code, organization_code, extended_fg_code, quantity_required, quantity_produced,  'row ' || CAST(ROW_NUMBER() OVER() AS character varying) AS id, commodity_code, variety_short_long, season_code, sell_by_code FROM vwcarton_orders WHERE (commodity_code={commodity_code} and target_market_code={target_market_code} and variety_short_long={variety_short_long} and fg_code_old={fg_code_old} and order_number={order_number} and grade_code={grade_code} and inventory_code={inventory_code} and organization_code={organization_code} and season_code={season_code} and sell_by_code={sell_by_code})
 main_table_name: vwcarton_orders
 fields:
  field1:

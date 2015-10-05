@@ -1,4 +1,4 @@
-query: SELECT location_code, location_type_code, asset_number, bin_qty, location_quantity, id, comparison from vw_compare_assets_vs_bin_stock WHERE (location_code={location_code} and location_type_code={location_type_code} and asset_number={asset_number} and comparison={comparison})
+query: SELECT location_code, location_type_code, asset_number, bin_qty, location_quantity,  'row ' || CAST(ROW_NUMBER() OVER() AS character varying) AS id ,comparison from vw_compare_assets_vs_bin_stock WHERE (location_code={location_code} and location_type_code={location_type_code} and asset_number={asset_number} and comparison={comparison})
 main_table_name: asset_locations
 fields:
  field1:
