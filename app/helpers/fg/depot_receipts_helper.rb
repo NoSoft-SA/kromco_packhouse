@@ -289,7 +289,8 @@ module Fg::DepotReceiptsHelper
                                                :settings   =>
                                                    {:image     => 'printer',
                                                     :target_action => 'print_pallet_labels',
-                                                    :id_column     => 'id'}}
+                                                    :id_column     => 'id',
+                                                    :null_test     => "['header_status'] != 'LOAD_RECEIVED'"}}
 
     column_configs[column_configs.length()] = {:field_type => 'link_window', :field_name => 'view',:col_width=>34, :col_width=> 123,
                                                :settings   =>
