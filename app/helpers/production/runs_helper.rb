@@ -1482,6 +1482,7 @@ def build_production_run_grid(data_set,can_edit,is_active_runs_grid = nil,run_ty
 	column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'production_run_stage',:col_width => 83,:column_caption => 'stage'}
 	column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'day_line_batch_code',:batch => 50}
 	column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'batch_code',:col_width => 90}
+  column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'id', :hide => true}
 
 #	----------------------
 #	define action columns

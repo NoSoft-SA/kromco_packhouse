@@ -105,17 +105,21 @@ class Production::RunsController < ApplicationController
     # end
 
     ranked_runs = grid_edited_values_to_array(params)
+    query = ''
     ranked_runs.each do |rank_edit|
       id= rank_edit[:id]
       value = rank_edit[:rank]
-      ActiveRecord::Base.transaction do
+      # ActiveRecord::Base.transaction do
         if(value.to_s.strip.length > 0)
-          ActiveRecord::Base.connection.execute("update production_runs set rank=#{value} where id = #{id.to_i}")
+          query << "update production_runs set rank=#{value} where id = #{id.to_i};"
+          # ActiveRecord::Base.connection.execute("update production_runs set rank=#{value} where id = #{id.to_i}")
         else
-          ActiveRecord::Base.connection.execute("update production_runs set rank=null where id = #{id.to_i}")
+          query << "update production_runs set rank=null where id = #{id.to_i};"
+          # ActiveRecord::Base.connection.execute("update production_runs set rank=null where id = #{id.to_i}")
         end
-      end
+      # end
     end
+    ActiveRecord::Base.connection.execute(query)
     editing_runs
   end
 

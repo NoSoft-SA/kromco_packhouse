@@ -34,7 +34,7 @@ module MesScada::GridPlugins
       #'cancel_cell_rendering' method and return true.
       #-------------------------------------------------------------------
       def render_cell(column_name,cell_value,record)
-        ""
+        # ""
         return cell_value
       end
 
