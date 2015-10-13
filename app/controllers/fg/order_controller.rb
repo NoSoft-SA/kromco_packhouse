@@ -22,12 +22,20 @@ class Fg::OrderController < ApplicationController
 
     @total = @order.calculate_order_amount(@order.order_number)
 
-
-      render :inline => %{<script>
+     if session[:load_id]
+       render :inline => %{<script>
+                                alert('order_product,load_detail,load and pallets added');
+                                window.close();
+                                window.opener.location.href = '/fg/order/edit_order/<%=@order.id.to_s%>';
+                        </script>}, :layout=>"content"
+     else
+         render :inline => %{<script>
                                       alert('order_product,load_detail,load and pallets added');
-                                      window.opener.location.href = '/fg/order/edit_order/<%=@order.id.to_s%>';
+                                       window.opener.frames[1].location.href = '/fg/order/edit_order/<%=@order.id.to_s%>';
                                       window.close();
                               </script>}, :layout => "content"
+       end
+
 
   end
 
@@ -1275,7 +1283,6 @@ end
     render_list_orders
   end
 
-     #words are powerful but the WORD is all powerful
    def  create_one_or_more_loads_and_import_pallets
      return if authorise_for_web(program_name?, 'create')==false
     session[:create_load_and_import_pallets]=nil
