@@ -26,7 +26,7 @@ class StatusMan
     end
     status =Status.find_by_status_code_and_status_type_code(child[:child_new_status_code], child[:child_status_type])
     if status ==nil
-      create_status(child[:child_new_status_code],child[:child_status_type])
+      status= create_status(child[:child_new_status_code],child[:child_status_type])
 
       #raise "A status record is not yet configured for status: " + child[:child_new_status_code] + " and status type " + child[:child_status_type] if !status
     end
@@ -46,7 +46,37 @@ class StatusMan
       raise child[:child_status_type_code].upcase + "REQUIRES A LIST OF  OBJECTS OF TYPE " + child[:child_ar_class_name].upcase
     end
   end
-  def self.set_status(new_status_code, status_type, object, user_name, parent_object = nil, child=nil, parent_already_logged=nil)
+
+  def self.create_status(status_code,status_type)
+    current_status=Status.find_by_sql("select * from statuses where status_type_code='#{status_type}' order by id desc limit 1")[0]
+    if current_status
+    status_preceded_by=current_status.preceded_by
+    status=Status.new
+    status.status_type_code=status_type
+    status.status_code=status_code
+    status.preceded_by=status_preceded_by.gsub(/\r/, "\n").gsub(/\n+/, "\n").chomp.split("\n").map {|r| r.strip }.join(',')
+    status.is_terminal_status=current_status.is_terminal_status
+    status.position=current_status.position
+    status.is_error_status=current_status.is_error_status
+    status.save
+    return status
+    else
+      raise "A status record is not yet configured for status: " + status_code + " and status type " + status_type
+    end
+  end
+
+  # Alias for set_status. Optional arguments are passed via a hash.
+  def self.apply_status(new_status_code, status_type, object, user_name, opts={})
+    set_status(new_status_code, status_type, object, user_name,
+               opts.delete(:parent_object),
+               opts.delete(:child),
+               opts.delete(:parent_already_logged),
+               opts)
+  end
+
+  def self.set_status(new_status_code, status_type, object, user_name, parent_object = nil, child=nil, parent_already_logged=nil, opts={})
+    deleted_instance = opts.delete(:deleted_instance) || false
+
 #    ActiveRecord::Base.transaction do
       if parent_already_logged==true
         if child!=nil  && child[:list].length > 0
@@ -56,7 +86,7 @@ class StatusMan
             status_type=status_type
           end
           validate_child(child, status_type)
-          parent_trans_status=TransactionStatus.find_by_sql("select * from transaction_statuses where status_type_code='#{status_type}' order by created_on desc")[0]
+          parent_trans_status=TransactionStatus.find_by_sql("select * from transaction_statuses where status_type_code='#{status_type}' order by id desc LIMIT 1").first
           table              = child[:child_ar_class_name].tableize
           object_ids_ary     =Array.new
           for id in child[:list]
@@ -92,8 +122,7 @@ class StatusMan
 
         status =Status.find_by_status_code_and_status_type_code(new_status_code, status_type)
         if status ==nil
-          create_status(new_status_code,status_type)
-
+          status = create_status(new_status_code,status_type)
           #raise "A status record is not yet configured for status: " + new_status_code + " and status type " + status_type if !status
         end
 
@@ -162,7 +191,7 @@ class StatusMan
                   transaction_status.save
 
                   #----------------------error_status----------------------------------------------------
-                  if object.attributes.has_key?("error_status")
+                  if object.attributes.has_key?("error_status") && !deleted_instance
                     is_error_status= Status.find_by_status_code(new_status_code).is_error_status
                     if is_error_status==true
                       object.error_status=new_status_code
@@ -173,13 +202,14 @@ class StatusMan
                     end
                   end
 
-
-                  if object.attributes.has_key?("location_status")
-                    object.location_status =new_status_code
-                    object.update
-                  else
-                    object.status =new_status_code
-                    object.update
+                  unless deleted_instance
+                    if object.attributes.has_key?("location_status")
+                      object.location_status =new_status_code
+                      object.update
+                    else
+                      object.status =new_status_code
+                      object.update
+                    end
                   end
                 end
                 if child!=nil && child[:list].length > 0
@@ -216,7 +246,7 @@ class StatusMan
                   transaction_status.parent_id = trans_status.id if trans_status
                   transaction_status.save
 #----------------------error_status----------------------------------------------------
-                  if object.attributes.has_key?("error_status")
+                  if object.attributes.has_key?("error_status") && !deleted_instance
                     is_error_status= Status.find_by_status_code(new_status_code).is_error_status
                     if is_error_status==true
                       object.error_status=new_status_code
@@ -228,12 +258,14 @@ class StatusMan
                   end
 
 
-                  if object.attributes.has_key?("location_status")
-                    object.location_status =new_status_code
-                    object.update
-                  else
-                    object.status =new_status_code
-                    object.update
+                  unless deleted_instance
+                    if object.attributes.has_key?("location_status")
+                      object.location_status =new_status_code
+                      object.update
+                    else
+                      object.status =new_status_code
+                      object.update
+                    end
                   end
                 end
 
@@ -278,7 +310,7 @@ class StatusMan
               transaction_status.save
 
               #----------------------error_status----------------------------------------------------
-              if object.attributes.has_key?("error_status")
+              if object.attributes.has_key?("error_status") && !deleted_instance
                 is_error_status= Status.find_by_status_code(new_status_code).is_error_status
                 if is_error_status==true
                   object.error_status=new_status_code
@@ -289,12 +321,14 @@ class StatusMan
                 end
               end
 
-              if object.attributes.has_key?("location_status")
-                object.location_status =new_status_code
-                object.update
-              else
-                object.status =new_status_code
-                object.update
+              unless deleted_instance
+                if object.attributes.has_key?("location_status")
+                  object.location_status =new_status_code
+                  object.update
+                else
+                  object.status =new_status_code
+                  object.update
+                end
               end
             end
             if child!=nil && child[:list].length > 0
@@ -322,25 +356,7 @@ class StatusMan
         end
       end
 #    end
-  end
-
-
-  def self.create_status(status_code,status_type)
-    current_status=Status.find_by_sql("select * from statuses where status_type_code='#{status_type}' order by id desc limit 1")[0]
-    if  current_status
-      status_preceded_by=current_status.preceded_by
-      status=Status.new
-      status.status_type_code=status_type
-      status.status_code=status_code
-      status.preceded_by=status_preceded_by.gsub(/\r/, "\n").gsub(/\n+/, "\n").chomp.split("\n").map {|r| r.strip }.join(',')
-      status.is_terminal_status=current_status.is_terminal_status
-      status.position=current_status.position
-      status.is_error_status=current_status.is_error_status
-      status.save
-    else
-      raise "A status record is not yet configured for status: " + status_code + " and status type " + status_type
     end
-  end
 
 
   def self.get_current_status(status_type, object)
@@ -418,6 +434,5 @@ class StatusMan
                               :message              =>message, :subject=>subject})
     email_log.save
   end
-
 
 end
