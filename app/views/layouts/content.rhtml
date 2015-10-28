@@ -124,6 +124,11 @@
             //Effect.SwitchOff('notice');
           //  Effect.Fade('notice',{duration: 10});
           jQuery('#notice').delay(10000).fadeOut(1000)
+          jQuery(document).keyup(function(e) {
+            if (e.keyCode == 27) { // Hide message when ESC is pressed.
+                  jQuery('#notice').hide();
+              }
+          });
         <% end %>
         }
   		
