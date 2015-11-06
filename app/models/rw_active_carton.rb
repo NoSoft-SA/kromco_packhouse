@@ -12,7 +12,7 @@ class RwActiveCarton < ActiveRecord::Base
 
   attr_accessor :item_pack_product_code, :carton_pack_product_code,
                 :calculated_mass, :target_market_short,
-                :inventory_code_short, :pc_code_short, :is_fg_carton, :marketing_variety_code, :address_line1, :address_line2 , :run_track_indicator_code
+                :inventory_code_short, :pc_code_short, :is_fg_carton, :marketing_variety_code, :address_line1, :address_line2 , :run_track_indicator_code,:label_data
 
 
   def self.bulk_update(set_map, carton_nums=nil, additional_criteria=nil)
@@ -560,7 +560,15 @@ class RwActiveCarton < ActiveRecord::Base
     data.store("F30", pfp)
     data.store("F31", self.sell_by_code)
 
+    if self.carton.bin
+      if self.carton.bin.orchard_code && self.target_market_code.split("_")[0].upcase == "NI"
+        data.store("F32", "ORCHARD")
+        data.store("F33", self.carton.bin.orchard_code)
+        puts "STORED!!!"
+      end
+    end
 
+    @label_data = data
     return data
 
   end

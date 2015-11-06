@@ -1,6 +1,7 @@
 class Carton < ActiveRecord::Base
 
   belongs_to :pallet
+  belongs_to :bin
 
   attr_accessor :pack_date_from,:pack_date_to,:item_pack_product_code,:carton_pack_product_code,
                 :production_schedule_name,:time_search
