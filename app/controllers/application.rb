@@ -615,6 +615,7 @@ class ApplicationController < ActionController::Base
     Globals.set_domain(@@domain)
 
     flash[:notice]= nil unless flash[:keep_flash_on_redirect]
+    flash[:notice_icon]= nil unless flash[:keep_flash_on_redirect]
     unless session[:user_id]
 
       flash[:notice] = "Please log in"
@@ -729,7 +730,7 @@ class ApplicationController < ActionController::Base
     base_dir     = 'public'
 
     menus_js     = "var menu_structure = new MenuStructure();"
-    func_areas   = menu_data.keys
+    func_areas   = menu_data.keys.sort
 
     func_areas.each do |func_area_item|
 

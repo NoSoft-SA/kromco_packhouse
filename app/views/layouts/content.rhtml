@@ -123,10 +123,18 @@
         <% if flash[:notice] && !(@freeze_flash) %>
             //Effect.SwitchOff('notice');
           //  Effect.Fade('notice',{duration: 10});
-          jQuery('#notice').delay(10000).fadeOut(1000)
+          jQuery('#notice').delay(10000).fadeOut(1000);
           jQuery(document).keyup(function(e) {
             if (e.keyCode == 27) { // Hide message when ESC is pressed.
                   jQuery('#notice').hide();
+              }
+          });
+        <% end %>
+        <% if flash[:notice_icon] && !(@freeze_flash) %>
+          jQuery('#notice-icon').delay(3000).fadeOut(1000)
+          jQuery(document).keyup(function(e) {
+            if (e.keyCode == 27) { // Hide message when ESC is pressed.
+                  jQuery('#notice-icon').hide();
               }
           });
         <% end %>
@@ -189,6 +197,11 @@
 
     <div id="maine" style = "vertical-align: top;" >
 
+      <% if flash[:notice_icon] -%>
+        <div id="notice-icon" style="z-index:22;position:absolute;top:100px;right:100px;min-height:50px;min-width:50px;background-color: cornflowerblue;">
+          <%= image_tag 'notice_ok.png' %>
+        </div>
+      <% end -%>
       <% if flash[:notice] -%>
         <div id="notice" style="z-index:22;position:absolute;min-width:800px;"><%= flash[:notice] %>
           <span class="hoverhigh" style="float:right;"><img onclick="jQuery('#notice').hide()" title="close" src="/images/grid_icons/cross.png" /></span></div>
