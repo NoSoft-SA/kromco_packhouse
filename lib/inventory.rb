@@ -374,7 +374,7 @@ module Inventory
       if location.units_in_location && location.location_maximum_units && location.location_maximum_units < location.units_in_location
         raise "location: " + location.location_code + " cannot have " + location.units_in_location.to_s + " units. It exceeds the maximum allowed units(" + location.location_maximum_units.to_s + ")"
       end
-      location.update
+     # location.update
 
       stock_locations_history.units_in_location_after = location.units_in_location
       stock_locations_history.save!
@@ -444,7 +444,9 @@ module Inventory
       #======== Log stock_locations_history=================================
       stock_locations_history = StockLocationsHistory.new({:inventory_transaction_id => @inventory_transaction.id, :stock_item_id => @stock_item_after.id, :inventory_reference => @stock_item_after.inventory_reference,
                                                            :stock_type => @stock_item_after.stock_type_code, :location_id => location.id, :units_in_location_before => location.units_in_location, :location_code => location.location_code})
-      location.update_attribute("units_in_location", (location.units_in_location - 1))
+      location.units_in_location -= 1
+      #location.update_attribute("units_in_location", (location.units_in_location - 1))
+      #location.update
 
       stock_locations_history.units_in_location_after = location.units_in_location
       stock_locations_history.save!
@@ -542,7 +544,7 @@ module Inventory
       stock_locations_history = StockLocationsHistory.new({:inventory_transaction_id => @inventory_transaction.id, :stock_item_id => @stock_item_before.id, :inventory_reference => @stock_item_before.inventory_reference,
                                                            :stock_type => @stock_item_before.stock_type_code, :location_id => location_from.id, :units_in_location_before => location_from.units_in_location, :location_code => location_from.location_code})
       location_from.units_in_location = location_from.units_in_location.to_i - 1
-      location_from.update
+     # location_from.update
 
       stock_locations_history.units_in_location_after = location_from.units_in_location
       stock_locations_history.save!
@@ -563,7 +565,7 @@ module Inventory
       end
 
 
-      location_to.update
+     # location_to.update
 
       stock_locations_history.units_in_location_after = location_to.units_in_location
       stock_locations_history.save!
@@ -1096,7 +1098,7 @@ module Inventory
       @stock_item_after.destroyed = nil
       @stock_item_after.update
       @stock_item_after.location.units_in_location += 1
-      @stock_item_after.location.update
+      #@stock_item_after.location.update
 
     end
   end
@@ -1156,7 +1158,7 @@ module Inventory
       CreateStock.new(inventory_transaction, stock_item, {:farm_code => farm_code}).process
 
     end
-    Inventory.sync_units_in_location(stock_ids, "CREATE", trans_name, inventory_transaction.id,location_code)
+    #Inventory.sync_units_in_location(stock_ids, "CREATE", trans_name, inventory_transaction.id,location_code)
   end
 
   def self.move_stock(trans_name, trans_id, location_to, stock_ids)
@@ -1196,7 +1198,7 @@ module Inventory
       MoveStock.new(inventory_transaction, stock_item).process
     end
 
-    Inventory.sync_units_in_location(stock_ids, "MOVE", trans_name, inventory_transaction.id, location_to)
+    #Inventory.sync_units_in_location(stock_ids, "MOVE", trans_name, inventory_transaction.id, location_to)
 
   end
 
@@ -1289,7 +1291,7 @@ module Inventory
 
       RemoveStock.new(inventory_transaction, stock_item, {:asset_location_to => asset_location_to}).process
     end
-    Inventory.sync_units_in_location(stock_ids, "REMOVE", trans_name,inventory_transaction.id)           #(stock_ids, trans_type, bus_context, inventory_transaction_id, location_to = nil)
+   # Inventory.sync_units_in_location(stock_ids, "REMOVE", trans_name,inventory_transaction.id)           #(stock_ids, trans_type, bus_context, inventory_transaction_id, location_to = nil)
   end
 
   def self.undo_destroy_stock(stock_ids, transaction_business_name, reference_number)
@@ -1316,7 +1318,7 @@ module Inventory
       stock_item = StockItem.find_by_inventory_reference(stock_item_inventory_reference)
       UndoRemoveStock.new(inventory_transaction, stock_item).process
     end
-    Inventory.sync_units_in_location(stock_ids, "UNDO_REMOVE", transaction_business_name,inventory_transaction.id)
+   # Inventory.sync_units_in_location(stock_ids, "UNDO_REMOVE", transaction_business_name,inventory_transaction.id)
   end
 
 end

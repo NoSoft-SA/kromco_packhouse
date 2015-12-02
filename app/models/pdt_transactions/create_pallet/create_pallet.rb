@@ -58,8 +58,11 @@ class CreatePallet < PDTTransaction
         err = Pallet.set_build_status(fg_product.carton_pack_product_code,pallet)
         pallet.create
         source_pallet_num =   @carton.pallet_number
+
         @carton.pallet_number = pallet.pallet_number
         @carton.pallet_id = pallet.id
+        @carton.update
+
         raise err if err
 
 
@@ -81,11 +84,14 @@ class CreatePallet < PDTTransaction
           pallet.ppecb_inspection_id = source_pallet.ppecb_inspection_id
           pallet.zero_printed_carton_labels = source_pallet.zero_printed_carton_labels
 
+
+
+
           pallet.update
 
 
 
-          @carton.update
+
 
 
 
