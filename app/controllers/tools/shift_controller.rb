@@ -127,9 +127,9 @@ def create_shift
 	 @shift = Shift.new(params[:shift])
 	 if @shift.save
 
-		
+
        @freeze_flash = true
-       redirect_to_index("Created shift:<br> #{@shift.shift_code} ") 
+       redirect_to_index("Created shift:<br> #{@shift.shift_code} ")
 	else
 		@is_create_retry = true
 		render_new_shift

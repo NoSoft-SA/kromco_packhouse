@@ -14,6 +14,19 @@ class Shift < ActiveRecord::Base
   validates_presence_of :shift_type_code, :line_code, :user
 
 
+  validate :calendar_date_time_quarter
+
+  def calendar_date_time_quarter
+    if self.calendar_date.blank? || !self.calendar_date_time_quarter_range.include?(self.calendar_date.strftime("%M"))
+      self.errors.add(:calendar_date, "is blank or not in allowed range")
+    end
+  end
+
+  #the validation
+  def calendar_date_time_quarter_range
+    time_quarters = ["00","15","30","45"]
+    return time_quarters
+  end
 
   def self.current_shift?(line_code)
       query = "select * from shifts where now() between start_date_time and end_date_time and line_code = '#{line_code}'"

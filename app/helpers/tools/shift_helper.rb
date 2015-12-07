@@ -58,10 +58,13 @@ module Tools::ShiftHelper
 
 	field_configs[field_configs.length()] =  {:field_type => 'LabelField',:field_name => 'end_time'}
 					
- 
-	field_configs[field_configs.length()] = {:field_type => 'PopupDateSelector',
-						:field_name => 'calendar_date',
-                        :settings=>{:date_text_field_id=> 'calender_date'}}
+  #MM122015 - change from PopupDateSelector to PopupDateTimeSelector
+  #MM122015 - change date-selector to capture times (currently only days) + validate that selected time is a quarter (00, 15, 30 or 45 )
+	field_configs[field_configs.length()] = {:field_type => 'PopupDateTimeSelector',
+                                           :field_name => 'calendar_date',
+                                           :settings=>{:date_text_field_id=> 'calender_date'
+                                           }
+  }
 
 	field_configs[field_configs.length()] = {:field_type => 'DropDownField',
 						:field_name => 'line_code',
@@ -75,10 +78,10 @@ module Tools::ShiftHelper
     field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'machine_minutes'}
     field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'clocked_minutes'}
     field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'overtime'}
-  field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'people_absent'}
+    field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'people_absent'}
     field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'people_off_sick'}
     field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'people_on_leave'}
-    
+
     field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'supervisor'}
     field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'sorter'}
     field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'packer'}
