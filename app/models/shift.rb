@@ -62,7 +62,6 @@ class Shift < ActiveRecord::Base
       #MM122015 - change from PopupDateSelector to PopupDateTimeSelector
       #MM122015 - change date-selector to capture times (currently only days) + validate that selected time is a quarter (00, 15, 30 or 45 )
       time_quarters_minutes = self.time_quarters.to_i*60
-
       self.start_date_time = self.calendar_date.to_time().at_beginning_of_day + self.start_time.hours + time_quarters_minutes#.mins
       if self.start_time < self.end_time
         self.end_date_time = self.calendar_date.to_time().at_beginning_of_day + self.end_time.hours + time_quarters_minutes#.mins

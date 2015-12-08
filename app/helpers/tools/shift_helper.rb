@@ -80,30 +80,30 @@ module Tools::ShiftHelper
 						:field_name => 'user',
                         :settings=>{:list => users} }
 
-    # field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'people_working_on_shift'}
-    # field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'machine_minutes'}
-    # field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'clocked_minutes'}
-    # field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'overtime'}
-    # field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'people_absent'}
-    # field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'people_off_sick'}
-    # field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'people_on_leave'}
-    #
-    # field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'supervisor'}
-    # field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'sorter'}
-    # field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'packer'}
-    # field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'operator_infeed'}
-    # field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'operator_class2'}
-    # field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'operator_line'}
-    # field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'operator_label'}
-    # field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'operator_rebin'}
-    # field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'forklift'}
-    # field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'palletizer'}
-    # field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'cleaner'}
-    # field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'sample'}
-    # field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'strapper'}
-    # field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'bak_man'}
-    # field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'sakkie_man'}
-    # field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'carton_scanner'}
+    field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'people_working_on_shift'}
+    field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'machine_minutes'}
+    field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'clocked_minutes'}
+    field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'overtime'}
+    field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'people_absent'}
+    field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'people_off_sick'}
+    field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'people_on_leave'}
+
+    field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'supervisor'}
+    field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'sorter'}
+    field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'packer'}
+    field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'operator_infeed'}
+    field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'operator_class2'}
+    field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'operator_line'}
+    field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'operator_label'}
+    field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'operator_rebin'}
+    field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'forklift'}
+    field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'palletizer'}
+    field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'cleaner'}
+    field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'sample'}
+    field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'strapper'}
+    field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'bak_man'}
+    field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'sakkie_man'}
+    field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'carton_scanner'}
     
   
     
