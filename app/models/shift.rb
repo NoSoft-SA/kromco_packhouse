@@ -14,19 +14,21 @@ class Shift < ActiveRecord::Base
   validates_presence_of :shift_type_code, :line_code, :user
 
 
-  validate :calendar_date_time_quarter
+  attr_accessor :time_quarters
 
-  def calendar_date_time_quarter
-    if self.calendar_date.blank? || !self.calendar_date_time_quarter_range.include?(self.calendar_date.strftime("%M"))
-      self.errors.add(:calendar_date, "is blank or not in allowed range")
-    end
-  end
-
-  #the validation
-  def calendar_date_time_quarter_range
-    time_quarters = ["00","15","30","45"]
-    return time_quarters
-  end
+  # validate :calendar_date_time_quarter
+  #
+  # def calendar_date_time_quarter
+  #   if self.calendar_date.blank? || !self.calendar_date_time_quarter_range.include?(self.calendar_date.strftime("%M"))
+  #     self.errors.add(:calendar_date, "is blank or not in allowed range")
+  #   end
+  # end
+  #
+  # #the validation
+  # def calendar_date_time_quarter_range
+  #   time_quarters = ["00","15","30","45"]
+  #   return time_quarters
+  # end
 
   def self.current_shift?(line_code)
       query = "select * from shifts where now() between start_date_time and end_date_time and line_code = '#{line_code}'"
@@ -57,12 +59,15 @@ class Shift < ActiveRecord::Base
     end
 
     if self.new_record? && is_valid
-      self.start_date_time = self.calendar_date.to_time().at_beginning_of_day + self.start_time.hours
+      #MM122015 - change from PopupDateSelector to PopupDateTimeSelector
+      #MM122015 - change date-selector to capture times (currently only days) + validate that selected time is a quarter (00, 15, 30 or 45 )
+      time_quarters_minutes = self.time_quarters.to_i*60
 
+      self.start_date_time = self.calendar_date.to_time().at_beginning_of_day + self.start_time.hours + time_quarters_minutes#.mins
       if self.start_time < self.end_time
-        self.end_date_time = self.calendar_date.to_time().at_beginning_of_day + self.end_time.hours
+        self.end_date_time = self.calendar_date.to_time().at_beginning_of_day + self.end_time.hours + time_quarters_minutes#.mins
       else
-        self.end_date_time = self.calendar_date.to_time().tomorrow.at_beginning_of_day + self.end_time.hours
+        self.end_date_time = self.calendar_date.to_time().tomorrow.at_beginning_of_day + self.end_time.hours + time_quarters_minutes#.mins
 
       end
 
