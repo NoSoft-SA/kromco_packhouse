@@ -62,7 +62,8 @@ module Tools::ShiftHelper
   time_quarters = ["00","15","30","45"]
   field_configs[field_configs.length()] = {:field_type => 'DropDownField',
                                            :field_name => 'time_quarters',
-                                           :settings=>{:list => time_quarters}
+                                           :settings=>{:label_caption => 'time quarters to add',
+                                                       :list => time_quarters}
   }
 
     #MM122015 - change from PopupDateSelector to PopupDateTimeSelector

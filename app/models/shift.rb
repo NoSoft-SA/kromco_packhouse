@@ -67,9 +67,7 @@ class Shift < ActiveRecord::Base
         self.end_date_time = self.calendar_date.to_time().at_beginning_of_day + self.end_time.hours + time_quarters_minutes#.mins
       else
         self.end_date_time = self.calendar_date.to_time().tomorrow.at_beginning_of_day + self.end_time.hours + time_quarters_minutes#.mins
-
       end
-
       #validates uniqueness for this record
       validate_overlap
     end
