@@ -105,7 +105,7 @@ module Tools::ShiftHelper
     field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'bak_man'}
     field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'sakkie_man'}
     field_configs[field_configs.length()] =  {:field_type => 'TextField',:field_name => 'carton_scanner'}
-    
+
   
     
     

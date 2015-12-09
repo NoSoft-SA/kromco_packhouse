@@ -115,7 +115,10 @@ class Shift < ActiveRecord::Base
 
 
   def after_create
-    self.shift_code = self.shift_type_code + ":" + self.line_code + ":" + self.start_date_time.strftime("%d-%b-%Y %Hh00") + " to " + self.end_date_time.strftime("%d-%b-%Y %Hh00")
+    #MM122015 - change from PopupDateSelector to PopupDateTimeSelector
+    #MM122015 - change date-selector to capture times (currently only days) + validate that selected time is a quarter (00, 15, 30 or 45 )
+    # self.shift_code = self.shift_type_code + ":" + self.line_code + ":" + self.start_date_time.strftime("%d-%b-%Y %Hh00") + " to " + self.end_date_time.strftime("%d-%b-%Y %Hh00")
+    self.shift_code = self.shift_type_code + ":" + self.line_code + ":" + self.start_date_time.strftime("%d-%b-%Y %Hh%M") + " to " + self.end_date_time.strftime("%d-%b-%Y %Hh%M")
   end
 
 #	===========================
