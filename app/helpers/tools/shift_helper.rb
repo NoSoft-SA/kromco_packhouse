@@ -61,16 +61,22 @@ module Tools::ShiftHelper
   #MM122015 - change date-selector to capture times (currently only days) + validate that selected time is a quarter (00, 15, 30 or 45 )
   time_quarters = ["00","15","30","45"]
   field_configs[field_configs.length()] = {:field_type => 'DropDownField',
-                                           :field_name => 'time_quarters',
-                                           :settings=>{:label_caption => 'time quarters to add',
+                                           :field_name => 'start_time_quarters',
+                                           :settings=>{:label_caption => 'start time quarters to add',
                                                        :list => time_quarters}
   }
 
-    #MM122015 - change from PopupDateSelector to PopupDateTimeSelector
-    field_configs[field_configs.length()] = {:field_type => 'PopupDateSelector',
-                                         :field_name => 'calendar_date',
-                                         :settings=>{:date_text_field_id=> 'calender_date'
-                                         }
+  field_configs[field_configs.length()] = {:field_type => 'DropDownField',
+                                           :field_name => 'end_time_quarters',
+                                           :settings=>{:label_caption => 'end time quarters to add',
+                                                       :list => time_quarters}
+  }
+
+  #MM122015 - change from PopupDateSelector to PopupDateTimeSelector
+  field_configs[field_configs.length()] = {:field_type => 'PopupDateSelector',
+                                       :field_name => 'calendar_date',
+                                       :settings=>{:date_text_field_id=> 'calender_date'
+                                       }
   }
 
 	field_configs[field_configs.length()] = {:field_type => 'DropDownField',

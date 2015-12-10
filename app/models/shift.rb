@@ -14,7 +14,7 @@ class Shift < ActiveRecord::Base
   validates_presence_of :shift_type_code, :line_code, :user
 
 
-  attr_accessor :time_quarters
+  attr_accessor :start_time_quarters,:end_time_quarters
 
   # validate :calendar_date_time_quarter
   #
@@ -61,12 +61,13 @@ class Shift < ActiveRecord::Base
     if self.new_record? && is_valid
       #MM122015 - change from PopupDateSelector to PopupDateTimeSelector
       #MM122015 - change date-selector to capture times (currently only days) + validate that selected time is a quarter (00, 15, 30 or 45 )
-      time_quarters_minutes = self.time_quarters.to_i*60
-      self.start_date_time = self.calendar_date.to_time().at_beginning_of_day + self.start_time.hours + time_quarters_minutes#.mins
+      start_time_quarters_minutes = self.start_time_quarters.to_i*60
+      end_time_quarters_minutes = self.end_time_quarters.to_i*60
+      self.start_date_time = self.calendar_date.to_time().at_beginning_of_day + self.start_time.hours + start_time_quarters_minutes#.mins
       if self.start_time < self.end_time
-        self.end_date_time = self.calendar_date.to_time().at_beginning_of_day + self.end_time.hours + time_quarters_minutes#.mins
+        self.end_date_time = self.calendar_date.to_time().at_beginning_of_day + self.end_time.hours + end_time_quarters_minutes#.mins
       else
-        self.end_date_time = self.calendar_date.to_time().tomorrow.at_beginning_of_day + self.end_time.hours + time_quarters_minutes#.mins
+        self.end_date_time = self.calendar_date.to_time().tomorrow.at_beginning_of_day + self.end_time.hours + end_time_quarters_minutes#.mins
       end
       #validates uniqueness for this record
       validate_overlap
