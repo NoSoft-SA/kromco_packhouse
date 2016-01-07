@@ -32,13 +32,13 @@ class EdiError < ActiveRecord::Base
   def after_save
     #case self.flow_type
     #  when 'ps'
-        if(self.action_type == 'parse') #recipients :depot,H/O
-          StatusMan.set_status("EDI_PARSE_ERROR_OCCURED", "ps_edi_errors", self, nil, nil, nil)
-        elsif(self.action_type == 'execute')  #recipients :Support(jmt),H/O
-          StatusMan.set_status("EDI_EXECUTE_ERROR_OCCURED", "ps_edi_errors", self, nil, nil, nil)
-        elsif(self.edi_type == 'directory_processing') #recipients :Support(jmt),H/O   ....  #NO error_line_number
-          StatusMan.set_status("EDI_DIRECTORY_PROCESSING_ERROR_OCCURED", "ps_edi_errors", self, nil, nil, nil)
-        end
+    #     if(self.action_type == 'parse') #recipients :depot,H/O
+    #       StatusMan.set_status("EDI_PARSE_ERROR_OCCURED", "ps_edi_errors", self, nil, nil, nil)
+    #     elsif(self.action_type == 'execute')  #recipients :Support(jmt),H/O
+    #       StatusMan.set_status("EDI_EXECUTE_ERROR_OCCURED", "ps_edi_errors", self, nil, nil, nil)
+    #     elsif(self.edi_type == 'directory_processing') #recipients :Support(jmt),H/O   ....  #NO error_line_number
+    #       StatusMan.set_status("EDI_DIRECTORY_PROCESSING_ERROR_OCCURED", "ps_edi_errors", self, nil, nil, nil)
+    #     end
       #when 'mtdp'
       #  if(self.action_type == 'parse') #recipients :depot,H/O
       #    StatusMan.set_status("EDI_PARSE_ERROR_OCCURED", "ps_edi_errors", self, nil, nil, nil)

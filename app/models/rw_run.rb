@@ -35,18 +35,21 @@ class RwRun < ActiveRecord::Base
                                                       :transaction_date_time =>Time.now.to_formatted_s(:db), :reference_number=>bin.rw_run_id,
                                                       :location_to => stock_item.location_code
                                                      })
-    if (transaction_type.transaction_type_code == "add_asset_quantity")
 
+    bin_nr = nil
+    if (transaction_type.transaction_type_code == "add_asset_quantity")
+      bin_nr = bin.bin_number.to_s
       asset_number = PackMaterialProduct.find(bin.pack_material_product_id).pack_material_product_code #Plastic
       inventory_transaction.transaction_quantity_plus = 1
     else
       asset_number = PackMaterialProduct.find(original_bin.pack_material_product_id).pack_material_product_code
-
+      bin_nr = original_bin.bin_number.to_s
       inventory_transaction.transaction_quantity_minus = 1 #if(transaction_type.transaction_type_code == "remove_asset_quantity")
     end
 
 
     asset_item = AssetItem.find_by_asset_number(asset_number)
+    raise " Bin: #{bin_nr} has pack material of: #{asset_number} for which no asset item exists" if ! asset_item
     Inventory::ChangeAssetClassQuantity.new(asset_item, inventory_transaction).process
     # subtract_asset_quantity
   end

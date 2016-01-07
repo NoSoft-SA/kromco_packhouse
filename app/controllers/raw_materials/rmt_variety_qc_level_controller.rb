@@ -7,25 +7,27 @@ end
 def bypass_generic_security?
 	true
 end
+
 def list_rmt_variety_qc_levels
 	return if authorise_for_web(program_name?,'read') == false 
 
- 	if params[:page]!= nil 
+    if params[:page]!= nil
 
- 		session[:rmt_variety_qc_levels_page] = params['page']
+      session[:rmt_variety_qc_levels_page] = params['page']
 
-		 render_list_rmt_variety_qc_levels
+      render_list_rmt_variety_qc_levels
+      
+      return
+    else
+      session[:trading_partners_page] = nil
+    end
 
-		 return 
-	else
-		session[:rmt_variety_qc_levels_page] = nil
-	end
+    list_query = "select season_code, rmt_variety_code, pressure_min, sugar_min, rmt_variety_qc_levels.id  from rmt_variety_qc_levels
+inner join rmt_varieties on rmt_varieties.id = rmt_variety_qc_levels.rmt_variety_id
+inner join seasons on seasons.id = rmt_variety_qc_levels.season_id
+               order by season_code desc, rmt_variety_code asc"
 
-	list_query = "@rmt_variety_qc_level_pages = Paginator.new self, RmtVarietyQcLevel.count, @@page_size,@current_page
-	 @rmt_variety_qc_levels = RmtVarietyQcLevel.find(:all,
-				 :limit => @rmt_variety_qc_level_pages.items_per_page,
-				 :offset => @rmt_variety_qc_level_pages.current.offset)"
-	session[:query] = list_query
+    session[:query]="ActiveRecord::Base.connection.select_all(\"#{list_query}\")"
 	render_list_rmt_variety_qc_levels
 end
 

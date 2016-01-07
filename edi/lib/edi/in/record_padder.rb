@@ -1,9 +1,19 @@
 
 class RecordPadder
 
-  # Reads the record_sizes YAML file to find the required length of a fixed-length record 
+  # Reads the record_sizes YAML file to find the required length of a fixed-length record
+  # Can be overridden by subclasses. Made an instance method, so that Call from pad-record in an instance of a derived class, will reach
+  #the deribed class' implementation
+  def required_record_length(flow_type, record_type, current_length, must_have_size=false)
+    RecordPadder.required_record_length(flow_type, record_type, current_length, must_have_size)
+
+
+  end
+
+
   def self.required_record_length(flow_type, record_type, current_length, must_have_size=false)
     record_sizes = YAML::load(File.read(EdiHelper::APP_ROOT + '/edi/config/record_sizes.yaml'))
+
     if record_sizes[flow_type.upcase] && record_sizes[flow_type.upcase][record_type]
       record_sizes[flow_type.upcase][record_type]
     else
@@ -13,6 +23,26 @@ class RecordPadder
         current_length
       end
     end
+
+
+  end
+
+
+
+  #can be used by sub-classes of master files- since their sizes need only be defined at flow-type level (not record-type level)
+  def  required_record_length_for_mf(flow_type, record_type, current_length, must_have_size=false)
+    record_sizes = YAML::load(File.read(EdiHelper::APP_ROOT + '/edi/config/record_sizes.yaml'))
+
+    if record_sizes[flow_type.upcase] #since all records are of same type for master files
+      record_sizes[flow_type.upcase]
+    else
+      if must_have_size
+        raise EdiValidationError, "No record length for flow type #{flow_type.upcase}, record_type #{record_type}."
+      else
+        current_length
+      end
+    end
+
   end
 
   # Before processing a record, call before_process.
@@ -56,6 +86,8 @@ class RecordPadder
     nil
   end
 
+
+
   # Pad the +text_line+ with spaces up to the width required (specified in required_record_length).
   def pad_record(text_line)
     flow_type   = Inflector.underscore(self.class.to_s).split("_")[0].upcase()
@@ -63,11 +95,11 @@ class RecordPadder
 
 
     #remove x-tra spaces to right, i.e where the passed in text-line > schema required length
-    if text_line.length() > RecordPadder.required_record_length(flow_type, record_type, text_line.length)
-         text_line.slice!(RecordPadder.required_record_length(flow_type, record_type, text_line.length)..text_line.length())
+    if text_line.length() > required_record_length(flow_type, record_type, text_line.length)
+         text_line.slice!(required_record_length(flow_type, record_type, text_line.length)..text_line.length())
          return   text_line
     else
-      text_line.ljust(RecordPadder.required_record_length(flow_type, record_type, text_line.length))
+      text_line.ljust(required_record_length(flow_type, record_type, text_line.length))
 
     end
 

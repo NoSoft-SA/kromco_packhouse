@@ -25,6 +25,31 @@ module Qc::QcInspectionPlugins
     end
 
   end
+  
+  # Plugin for PRETIP form.
+  class FormPluginPretip
+
+    # Add extra field configs to the PRETIP form.
+    def self.customize_configs( field_configs, qc_inspection, options={} )
+        field_configs << {:field_type=>'LinkField',:field_name =>'fta_test_values',
+                       :settings =>
+                      {
+                       :host_and_port => options[:request].host_with_port.to_s,
+                       :controller    => options[:request].path_parameters['controller'].sub('qc_inspection', 'qc_plugin'),
+                       :target_action => 'get_pretip_fta_test_values',
+                       :id_column=>'id',
+                       :link_text => 'import Pressure and Diameter values'}}
+        field_configs << {:field_type=>'LinkField',:field_name =>'rfm_test_values',
+                       :settings =>
+                      {
+                       :host_and_port => options[:request].host_with_port.to_s,
+                       :controller    => options[:request].path_parameters['controller'].sub('qc_inspection', 'qc_plugin'),
+                       :target_action => 'get_pretip_rfm_test_values',
+                       :id_column=>'id',
+                       :link_text => 'import Sugar values'}}
+    end
+
+  end  
 
 end
 

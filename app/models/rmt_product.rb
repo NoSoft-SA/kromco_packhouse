@@ -61,6 +61,7 @@ class RmtProduct < ActiveRecord::Base
     end
   end
 
+
 def after_find
  self.ripe_point_description = self.ripe_point.ripe_point_description if self.ripe_point
 end
@@ -97,12 +98,35 @@ def before_create
 
 end
  
+ #NAE 20151228 add actual and short_rmt-product_codes
 def set_product_code
    
    if self.rmt_product_type_code == "orchard_run"||self.rmt_product_type_code.to_s.upcase == "PRESORT"
     self.rmt_product_code = self.commodity_code + "_" + self.variety_code + "_" + self.treatment_code + "_" + self.product_class_code + "_" + self.ripe_point_code + "_" + self.size_code
+    
+    if self.rmt_product_type_code == "orchard_run"
+       self.actual_rmt_product_code = self.rmt_product_code	
+       self.short_rmt_product_code = self.commodity_code + "_" + self.variety_code + "_" + self.treatment_code + "_" + self.product_class_code + "_" + self.size_code
+	   
+    elsif  self.rmt_product_type_code.to_s.upcase == "PRESORT" 
+	   RAILS_DEFAULT_LOGGER.info("XMAS size_code.length: " + size_code.length.to_s)
+	   RAILS_DEFAULT_LOGGER.info("XMAS self.size_code.slice(0..self.size_code.length()-2): " +self.size_code.slice(0..self.size_code.length()-2))
+	
+	if self.product_class_code != "2L" && self.product_class_code != "3" &&  self.size_code != 'ALL' && (self.size_code.slice(size_code.length-1, size_code.length-1) == "A" || self.size_code.slice(size_code.length-1, size_code.length-1) == "L")
+	   RAILS_DEFAULT_LOGGER.info("XMAS ONE")
+	   self.actual_rmt_product_code = self.commodity_code + "_" + self.variety_code + "_" + self.treatment_code + "_" + self.product_class_code + "_" + self.ripe_point_code + "_" +  self.size_code.slice(0..self.size_code.length()-2)
+	   self.short_rmt_product_code = self.commodity_code + "_" + self.variety_code + "_" + self.treatment_code + "_" + self.product_class_code + "_" +  self.size_code.slice(0..self.size_code.length()-2)
+	else
+	   self.actual_rmt_product_code = self.rmt_product_code
+	   RAILS_DEFAULT_LOGGER.info("XMAS TWO")
+           self.short_rmt_product_code = self.commodity_code + "_" + self.variety_code + "_" + self.treatment_code + "_" + self.product_class_code + "_" + self.size_code			
+	end
+    end
+   
    else
-    self.rmt_product_code = self.commodity_code + "_" + self.variety_code + "_" + self.treatment_code + "_" + self.product_class_code + "_" + self.ripe_point_code + "_" + self.size_code + "_" + self.bin_type
+       self.rmt_product_code = self.commodity_code + "_" + self.variety_code + "_" + self.treatment_code + "_" + self.product_class_code + "_" + self.ripe_point_code + "_" + self.size_code + "_" + self.bin_type
+       self.actual_rmt_product_code = self.commodity_code + "_" + self.variety_code + "_" + self.treatment_code + "_" + self.product_class_code + "_" + self.ripe_point_code + "_" + self.size_code
+       self.short_rmt_product_code = self.commodity_code + "_" + self.variety_code + "_" + self.treatment_code + "_" + self.product_class_code + "_" + self.size_code 
    end
 end
 

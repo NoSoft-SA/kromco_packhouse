@@ -92,6 +92,12 @@ class Fg::DepotReceiptsController < ApplicationController
        @intake_header = IntakeHeader.new(params[:intake_header])
        @intake_header.intake_header_number = MesControlFile.next_seq_web(5)     #"18672722777"
        @intake_header.header_status = "HEADER_CREATED"
+              
+	#NAE 20151231 
+	if params[:intake_header][:depot_code]!=nil
+          @intake_header.depot_id = Depot.find_by_depot_code(params[:intake_header][:depot_code]).id
+       end
+	
     	 if @intake_header.save
              session[:intake_header] =  @intake_header
     		 flash[:notice]= "'intake header record created successfully'"
@@ -149,6 +155,12 @@ class Fg::DepotReceiptsController < ApplicationController
     intake_header.order_number = params[:intake_header][:order_number]
     intake_header.intake_type_code = params[:intake_header][:intake_type_code]
     intake_header.depot_code = params[:intake_header][:depot_code]
+    
+    #NAE 20151231 
+    if params[:intake_header][:depot_code] != nil
+          intake_header.depot_id  = Depot.find_by_depot_code(params[:intake_header][:depot_code]).id
+    end
+  
     intake_header.puc_code = params[:intake_header][:puc_code]
     intake_header.account_code = params[:intake_header][:account_code]
     intake_header.carrier = params[:intake_header][:carrier]

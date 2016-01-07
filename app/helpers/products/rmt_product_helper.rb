@@ -162,26 +162,34 @@ module Products::RmtProductHelper
  
     field_configs[7] =  {:field_type => 'LabelField',
 						:field_name => 'ripe_point_description'}
+						
+    field_configs[8] = {:field_type => 'TextField',
+                        :field_name => 'actual_rmt_product_code'}
+ 
+						
+				
 #	----------------------------------------------------------------------------------------------
 #	Combo fields to represent foreign key (size_id) on related table: sizes
 #	----------------------------------------------------------------------------------------------
 
 	if session[:rmt_product_type]== "rebin"
-	  field_configs[8] =  {:field_type => 'DropDownField',
+	  field_configs[9] =  {:field_type => 'DropDownField',
 						:field_name => 'size_code',
 						:settings => {:list => size_codes}}
 	 
 	 
-	 field_configs[9] =  {:field_type => 'DropDownField',
+	 field_configs[10] =  {:field_type => 'DropDownField',
 						:field_name => 'bin_type',
 						:settings => {:list => bin_types}}
 						
 	elsif session[:rmt_product_type]== "presort"	
-		field_configs[8] =  {:field_type => 'DropDownField',
+		field_configs[9] =  {:field_type => 'DropDownField',
 							:field_name => 'size_code',
 							:settings => {:list => size_codes}}
 	 
-	end
+         end
+ 
+
 	build_form(rmt_product,field_configs,action,'rmt_product',caption,is_edit)
 
 end
@@ -343,6 +351,9 @@ def build_rmt_product_view(rmt_product)
 						
 	field_configs[9] =  {:field_type => 'LabelField',
 						:field_name => 'treatment_code'}
+						
+	field_configs[10] =  {:field_type => 'LabelField',
+						:field_name => 'actual_rmt_product_code'}						
  
 	build_form(rmt_product,field_configs,"view_paging_handler",'rmt_product',"back")
 
@@ -360,6 +371,7 @@ end
 	column_configs[6] = {:field_type => 'text',:field_name => 'ripe_point_code'}
 	column_configs[7] = {:field_type => 'text',:field_name => 'size_code'}
 	column_configs[8] = {:field_type => 'text',:field_name => 'commodity_group_code'}
+	column_configs[9] = {:field_type => 'text',:field_name => 'actual_rmt_product_code'}	
 #	----------------------
 #	define action columns
 #	----------------------
