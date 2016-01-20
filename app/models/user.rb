@@ -136,8 +136,8 @@ class User < ActiveRecord::Base
   private
 
   def self.hash_password(password)
-    Digest::SHA1.hexdigest(password)
-   # Base64.encode64(password)
+   # Digest::SHA1.hexdigest(password)
+    Base64.encode64(password)
   end
 
 end
