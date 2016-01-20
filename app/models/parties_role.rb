@@ -7,10 +7,9 @@ class PartiesRole < ActiveRecord::Base
 
   belongs_to :role
   belongs_to :party
-  has_many :trading_partners
 
   # Roles that are created via their own CRUD functions (not the generic parties role CRUD functions)
-  OWN_CRUD_ROLES = []
+  OWN_CRUD_ROLES = %w|CUSTOMER FIN_SUPPLIER SERVICE_PROVIDER|
 
   #  ============================
   #   Validations declarations:
@@ -118,7 +117,7 @@ class PartiesRole < ActiveRecord::Base
   def self.postal_address_for(parties_role_id)
     qry =<<-EOQ
     SELECT parties_roles.party_name, postal_addresses.address1,
-     postal_addresses.address2,
+     postal_addresses.address2, postal_addresses.address3,
      postal_addresses.city, countries.country_name,
      contact_landline.contact_method_code AS landline,
      contact_fax.contact_method_code AS fax
@@ -134,13 +133,13 @@ class PartiesRole < ActiveRecord::Base
     WHERE parties_roles.id = #{parties_role_id}
     EOQ
     rec = ActiveRecord::Base.connection.select_one(qry)
-    addr = Struct.new(:name, :address1, :address2, :city, :country, :landline, :fax) do
+    addr = Struct.new(:name, :address1, :address2, :address3, :city, :country, :landline, :fax) do
       def address_fields
-        [address1, address2, city, country].compact
+        [address1, address2, address3, city, country].compact
       end
     end
     addr.new(rec['party_name'], rec['address1'],
-             rec['address2'],
+             rec['address2'],   rec['address3'],
              rec['city'],       rec['country_name'],
              rec['landline'] || '',   rec['fax'] || '')
   end
@@ -152,5 +151,30 @@ class PartiesRole < ActiveRecord::Base
                      :order      => 'party_name').map {|r| [r.party_name, r.id] }
   end
 
+  def self.get_employee_party_role_record(party_id,role_id)
+    party_role = PartiesRole.find_by_sql("select id from parties_roles where party_id = #{party_id} and role_id = #{role_id}")
+    if party_role.length > 0
+      party_role_id = party_role[0].id
+    else
+      role_name = Role.find(role_id).role_name
+
+      party = Party.find(party_id)
+      party_name = party.party_name
+      party_type_id = party.party_type_id
+
+      party_type_name = PartyType.find(party_type_id).party_type_name
+
+      party_role = PartiesRole.new
+      party_role.party_id = party_id
+      party_role.role_id = role_id
+      party_role.role_name = role_name
+      party_role.party_name = party_name
+      party_role.party_type_name = party_type_name
+      party_role.save
+
+      party_role_id = party_role.id
+    end
+    return party_role_id
+  end
 
 end

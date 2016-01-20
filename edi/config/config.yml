@@ -20,8 +20,8 @@ edi_out_accumulated:
 # 1 = Less verbose, log significant information only.
 # 2 = Log nothing but errors.
 log_levels:
-  edi_in: 2
-  transformer_in: 2
+  edi_in: 0
+  transformer_in: 0
   edi_out: 2
   transformer_out: 2
 
@@ -30,8 +30,8 @@ log_levels:
 # 1 = Less verbose, log significant information only.
 # 2 = Log nothing but errors.
 console_log_levels:
-  edi_in: 2
-  transformer_in: 2
+  edi_in: 0
+  transformer_in: 0
   edi_out: 2
   transformer_out: 2
 

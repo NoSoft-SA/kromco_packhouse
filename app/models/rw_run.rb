@@ -440,7 +440,7 @@ class RwRun < ActiveRecord::Base
 
         end
 
-
+        deferred_pallet_updates = Array.new #for triggers that depend on carton updates happening first
         self.rw_active_pallets.each do |pallet|
           set_build_status(pallet)
           if pallet.build_up_balance
@@ -484,7 +484,7 @@ class RwRun < ActiveRecord::Base
 
             end
 
-            #outbox_record = NewOutboxRecord.new("pallet_new",new_mes_pallet)
+
             Inventory.create_stock(nil, "PALLET", nil, nil, "REWORKS", self.id.to_s, "REWORKS", [new_mes_pallet.pallet_number])
           elsif (pallet.reworks_action == "ALT_PACKED"||pallet.build_up_balance) && pallet.reworks_action != "reclassified"
             progress_stats.event_pallet_reclassified if pallet.reworks_action == "ALT_PACKED"
@@ -499,12 +499,12 @@ class RwRun < ActiveRecord::Base
             pallet.pallet.build_status = pallet.build_status
             pallet.pallet.update
 
-            #outbox_record = NewOutboxRecord.new("pallet_carton_count_update",pallet.pallet)
+
             if pallet.reworks_action == "ALT_PACKED"
               progress_stats.event_pallet_reclassified
               pallet.export_attributes(pallet.pallet, true)
               pallet.pallet.update
-              #outbox_record = NewOutboxRecord.new("pallet_update",pallet.pallet)
+
             end
           elsif pallet.reworks_action == "reclassified"
             progress_stats.event_pallet_reclassified
@@ -512,7 +512,8 @@ class RwRun < ActiveRecord::Base
             reclassed_pallet = RwReclassedPallet.new
             pallet.export_attributes(reclassed_pallet, true, ['is_depot_pallet', 'consignment_note_number','load_detail_id','exit_ref'])
             reclassed_pallet.create
-            pallet.pallet.update
+            #pallet.pallet.update   deferred:
+            deferred_pallet_updates << pallet
             if pallet.build_up_balance && pallet.build_up_balance != 0
               progress_stats.event_pallet_built_up
             end
@@ -621,6 +622,11 @@ class RwRun < ActiveRecord::Base
         get_all_deleted_cartons().each do |carton|
           progress_stats.event_carton_scrapped
           integrate_scrapped_carton(carton)
+        end
+
+        #update deferred pallet updatres
+        deferred_pallet_updates.each do |deferred_plt|
+          deferred_plt.pallet.update
         end
 
         get_all_deleted_rebins().each do |rebin|

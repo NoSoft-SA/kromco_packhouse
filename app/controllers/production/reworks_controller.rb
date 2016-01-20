@@ -2270,12 +2270,12 @@ class Production::ReworksController < ApplicationController
     end
 
     #TODO uncomment
-    #stock_item = StockItem.find_by_inventory_reference(pallet.pallet_number)
-    #if stock_item && !(stock_item.location_code.upcase == "PACKHSE" ||stock_item.location_code.upcase == "REWORKS"||stock_item.location_code.upcase == "BAGGING"||stock_item.location_code.upcase == "BAGGING_REWORKS"||stock_item.location_code.upcase == "PART_PALLETS")
-    #  flash[:error] = "Pallet is at location: " + stock_item.location_code + ". Only pallets in REWORKS or PACKHSE can be repacked"
-    #  rw_pallets
-    #  return
-    #end
+    stock_item = StockItem.find_by_inventory_reference(pallet.pallet_number)
+    if stock_item && !(stock_item.location_code.upcase == "PACKHSE" ||stock_item.location_code.upcase == "REWORKS"||stock_item.location_code.upcase == "BAGGING"||stock_item.location_code.upcase == "BAGGING_REWORKS"||stock_item.location_code.upcase == "PART_PALLETS")
+    flash[:error] = "Pallet is at location: " + stock_item.location_code + ". Only pallets in REWORKS or PACKHSE can be repacked"
+    rw_pallets
+    return
+    end
 
 
     @pallet_repack = PalletUpdate.new(pallet, true)
