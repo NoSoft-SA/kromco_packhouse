@@ -327,16 +327,18 @@ function saveArrayToCsv(data, filename) {
     var i,j,row, colval,rowval;
     for(i=0;i<dataView.getLength();i++) {
       row = dataView.getItem(i);
-      rowval = "{:id=>"+row['id'];
-      for(j=0;j<columns.length;j++) {
-        if (!row.__group) {
+      if (!row.__group) {
+        rowval = "{:id=>"+row['id'];
+        for(j=0;j<columns.length;j++) {
           rowval += (',:'+columns[j]+"=>"+makeColSafeOrNull(row[columns[j]]));
         }
+        res.push(rowval+'}');
       }
-      res.push(rowval+'}');
     }
     if(confirm('Are you sure you want to save these changes?')) {
-      var isOk = eval(gridid+'ValidateEditedRows').call(null,res);
+      var fn = window[gridid+'ValidateEditedRows'] // Turn the function name string into a callable function ref (avoid using eval).
+      //var isOk = eval(gridid+'ValidateEditedRows').call(null,res);
+      var isOk = fn( res );
       if (isOk) {
         var newform = jQuery( document.createElement('form') );
         newform.attr('method', 'post')
@@ -349,25 +351,21 @@ function saveArrayToCsv(data, filename) {
   }
 
   // Submit multiselect choice
-  function returnMultiSelectIdsFromGrid(gridid, action) {
-    // var grid     = jQuery('#'+gridid).data('slickgrid');
-    // var gridView = jQuery('#'+gridid).data('slickgridView');
+  function returnMultiSelectIdsFromGrid(gridid, action, can_be_cleared) {
     var gridSel  = jQuery('#'+gridid).data('slickgridSelectedIds');
     var ids      = gridSel.ids;
-    // if (gridView.getItems().length !== (gridView.getLength() - gridView.getGroups().length)) {
-    //   alert("Please clear all filters and search text first");
-    //   return;
-    // }
-    // var ids      = [];
-    // // Only return ids for non-grouped rows (id is not undefined)
-    // jQuery.each(gridView.mapRowsToIds(grid.getSelectedRows()), function(i,val) {
-    //   if(val !== undefined) { ids.push(val); }
-    // });
-    if(ids.length === 0) {
+    var msg;
+    if(!can_be_cleared && ids.length === 0) {
       alert("You have not selected any items to submit!");
     }
     else {
-      if(confirm('Are you sure you want to submit this selection?(' + ids.length.toString() + ' items)')) {
+      if(ids.length === 0) {
+        msg = 'Are you sure you want to submit an empty selection?'
+      }
+      else {
+        msg = 'Are you sure you want to submit this selection?(' + ids.length.toString() + ' items)'
+      }
+      if(confirm(msg)) {
         var newform = jQuery( document.createElement('form') );
         newform.attr('method', 'post')
           .attr('action', action)
@@ -969,10 +967,73 @@ jQuery(document).ready(function () {
     }
   });
 
-  // // For a slick grid, highlight the current row when clicked. FIXME: - does not work...
-  // jQuery('div.slick-viewport').on('click', '.slick-row', function() {
-  //  // jQuery(this).siblings('div.ui-state-highlight').removeClass('ui-state-highlight');
-  //   jQuery(this).addClass('ui-state-highlight');
-  // });
-
 });
+
+
+// Select Editor for SlickGrid.
+(function ($) {
+  // register namespace
+  $.extend(true, window, {
+    "Slick": {
+      "Editors": {
+        "Select": SelectEditor
+      }
+    }
+  });
+
+  function SelectEditor(args) {
+    var $select;
+    var defaultValue;
+    var scope = this;
+
+    this.init = function () {
+      var opts = '';
+      for (var i=0;i<args.column.select_vals.length; i++) {
+        if(args.column.select_texts) {
+          opts += "<OPTION value='"+args.column.select_vals[i]+"'>"+args.column.select_texts[i]+"</OPTION>"
+        }
+        else {
+          opts += "<OPTION value='"+args.column.select_vals[i]+"'>"+args.column.select_vals[i]+"</OPTION>"
+        }
+      }
+      $select = $("<SELECT tabIndex='0' class='editor-select'>"+opts+"</SELECT>");
+      $select.appendTo(args.container);
+      $select.focus();
+    };
+
+    this.destroy = function () {
+      $select.remove();
+    };
+
+    this.focus = function () {
+      $select.focus();
+    };
+
+    this.loadValue = function (item) {
+      $select.val((defaultValue = item[args.column.field]));
+      $select.select();
+    };
+
+    this.serializeValue = function () {
+      return ($select.val());
+    };
+
+    this.applyValue = function (item, state) {
+      item[args.column.field] = state;
+    };
+
+    this.isValueChanged = function () {
+      return ($select.val() != defaultValue);
+    };
+
+    this.validate = function () {
+      return {
+        valid: true,
+        msg: null
+      };
+    };
+
+    this.init();
+  }
+
+})(jQuery);

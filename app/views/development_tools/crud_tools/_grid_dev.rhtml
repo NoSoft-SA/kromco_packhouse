@@ -45,7 +45,16 @@ render <span class="symbol">:inline</span> =&gt; <span class="string"><span clas
 </pre>
 </div>
 
-<h2>Options:</h2>
+<h4>Multiselect grids:</h4>
+<p>
+  In order to make a grid multi-selectable, set the instance variable <code class="CodeRay"><span class="instance-variable">@multi_select</span></code> to the name of an action that will handle the submitted grid.<br>
+  In the action, call the method &quot;<code>ids_from_multi_select_grid_params</code>&quot;.
+  This will return an Array of the ids from the selected grid rows.
+<p>
+<p>
+  See the options <em>clear_multi_select</em> and <em>non_selectable_ids</em> below for their effects on multiselect grids:
+</p>
+<h4>Options:</h4>
 <dl><dt>caption
 <dd>
 <p>The grid caption.</p>
@@ -97,6 +106,11 @@ Defaults to true.</p>
 <dd>
 <p>String.  If you provide a url the user will have a button to reload the
 grid which will send a request to the given url.</p>
+</dd><dt>clear_multi_select
+<dd>
+  <p>Boolean.  If true, the user will be able to save a multiselect grid when all rows are unchecked.
+  In this case, the method &quot;<code>ids_from_multi_select_grid_params</code>&quot; will return an empty Array.<br>
+  If this setting is false and no rows are selected, the user will receive an error message when trying to save the selection.</p>
 </dd><dt>save_action
 <dd>
   <p>String.  The controller action to call when saving the grid. At least one column in the
@@ -142,14 +156,12 @@ calling <code>set_grid_min_height</code>.</p>
 Useful when non-selectable rows should be shown alongside selectable ones.</p>
 </dd></dl>
 
-<p>Example (in a helper which calls <code>get_data_grid</code>):</p>
+<h4>Examples</h4>
+<p>(In a helper which calls <code>get_data_grid</code>):</p>
 
 <div class="CodeRay">
 <pre>
-group_headers = [{<span class="symbol">:start_column_name</span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">report_name</span><span class="delimiter">'</span></span>, <span class="symbol">:number_of_columns</span> =&gt; <span class="integer">3</span>, <span class="symbol">:title_text</span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">Report</span><span class="delimiter">'</span></span>},
-                 {<span class="symbol">:start_column_name</span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">fieldlist</span><span class="delimiter">'</span></span>, <span class="symbol">:number_of_columns</span> =&gt; <span class="integer">2</span>, <span class="symbol">:title_text</span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">Technical stuff</span><span class="delimiter">'</span></span>}]
-get_data_grid(data_set, column_configs, <span class="predefined-constant">nil</span>, <span class="predefined-constant">nil</span>, <span class="predefined-constant">nil</span>, {<span class="symbol">:group_headers</span> =&gt; group_headers,
-                                                        <span class="symbol">:caption</span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">Some new grid caption</span><span class="delimiter">'</span></span>,
+get_data_grid(data_set, column_configs, <span class="predefined-constant">nil</span>, <span class="predefined-constant">nil</span>, <span class="predefined-constant">nil</span>, {<span class="symbol">:caption</span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">Some new grid caption</span><span class="delimiter">'</span></span>,
                                                         <span class="symbol">:height</span> =&gt; <span class="integer">350</span>,
                                                         <span class="symbol">:groupable_fields</span> =&gt; [<span class="string"><span class="delimiter">'</span><span class="content">report_name</span><span class="delimiter">'</span></span>, <span class="string"><span class="delimiter">'</span><span class="content">code</span><span class="delimiter">'</span></span>, <span class="string"><span class="delimiter">'</span><span class="content">ranking</span><span class="delimiter">'</span></span>]})
 </pre>
@@ -159,10 +171,7 @@ get_data_grid(data_set, column_configs, <span class="predefined-constant">nil</s
 
 <div class="CodeRay">
 <pre>
-group_headers = [{<span class="symbol">:start_column_name</span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">report_name</span><span class="delimiter">'</span></span>, <span class="symbol">:number_of_columns</span> =&gt; <span class="integer">3</span>, <span class="symbol">:title_text</span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">Report</span><span class="delimiter">'</span></span>},
-                 {<span class="symbol">:start_column_name</span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">fieldlist</span><span class="delimiter">'</span></span>, <span class="symbol">:number_of_columns</span> =&gt; <span class="integer">2</span>, <span class="symbol">:title_text</span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">Technical stuff</span><span class="delimiter">'</span></span>}]
-<span class="constant">DataGridSlick</span>::<span class="constant">DataGrid</span>.new(<span class="predefined-constant">self</span>, data_set, column_configs, plugin, key_based_access, special_commands, {<span class="symbol">:group_headers</span> =&gt; group_headers,
-                                                        <span class="symbol">:caption</span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">Some new grid caption</span><span class="delimiter">'</span></span>,
+<span class="constant">DataGridSlick</span>::<span class="constant">DataGrid</span>.new(<span class="predefined-constant">self</span>, data_set, column_configs, plugin, key_based_access, special_commands, {<span class="symbol">:caption</span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">Some new grid caption</span><span class="delimiter">'</span></span>,
                                                         <span class="symbol">:height</span> =&gt; <span class="integer">350</span>,
                                                         <span class="symbol">:groupable_fields</span> =&gt; [<span class="string"><span class="delimiter">'</span><span class="content">report_name</span><span class="delimiter">'</span></span>, <span class="string"><span class="delimiter">'</span><span class="content">code</span><span class="delimiter">'</span></span>, <span class="string"><span class="delimiter">'</span><span class="content">ranking</span><span class="delimiter">'</span></span>]})
 </pre>
@@ -173,8 +182,6 @@ group_headers = [{<span class="symbol">:start_column_name</span> =&gt; <span cla
 <div class="CodeRay">
 <pre>
 <span class="inline"><span class="inline-delimiter">&lt;%</span> grid                  = build_qc_inspection_type_grid(<span class="instance-variable">@qc_inspection_types</span>,<span class="instance-variable">@can_edit</span>,<span class="instance-variable">@can_delete</span>)<span class="inline-delimiter">%&gt;</span></span>
-<span class="inline"><span class="inline-delimiter">&lt;%</span> grid.group_headers    = [{<span class="symbol">:start_column_name</span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">report_name</span><span class="delimiter">'</span></span>, <span class="symbol">:number_of_columns</span> =&gt; <span class="integer">3</span>, <span class="symbol">:title_text</span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">Report</span><span class="delimiter">'</span></span>},
-                            {<span class="symbol">:start_column_name</span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">fieldlist</span><span class="delimiter">'</span></span>, <span class="symbol">:number_of_columns</span> =&gt; <span class="integer">2</span>, <span class="symbol">:title_text</span> =&gt; <span class="string"><span class="delimiter">'</span><span class="content">Technical stuff</span><span class="delimiter">'</span></span>}] <span class="inline-delimiter">%&gt;</span></span>
 <span class="inline"><span class="inline-delimiter">&lt;%</span> grid.caption          = <span class="string"><span class="delimiter">'</span><span class="content">Some new grid caption</span><span class="delimiter">'</span></span> <span class="inline-delimiter">%&gt;</span></span>
 <span class="inline"><span class="inline-delimiter">&lt;%</span> grid.height           = <span class="integer">350</span> <span class="inline-delimiter">%&gt;</span></span>
 <span class="inline"><span class="inline-delimiter">&lt;%</span> grid.groupable_fields = [<span class="string"><span class="delimiter">'</span><span class="content">report_name</span><span class="delimiter">'</span></span>, <span class="string"><span class="delimiter">'</span><span class="content">code</span><span class="delimiter">'</span></span>, <span class="string"><span class="delimiter">'</span><span class="content">ranking</span><span class="delimiter">'</span></span>] <span class="inline-delimiter">%&gt;</span></span>
@@ -182,7 +189,7 @@ group_headers = [{<span class="symbol">:start_column_name</span> =&gt; <span cla
 </div>
 
 
-<p>Example from a helper:</p>
+<p>Example  of column configs from a helper:</p>
 
 <div class="CodeRay">
 <pre>

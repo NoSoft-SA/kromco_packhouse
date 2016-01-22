@@ -108,11 +108,21 @@ module MesScada
           # observer = @env.observe_field(@active_record_var_name + "_" + @field_name,
           #                               :update => @observer[:updated_field_id],
           #                               :url => {:action => @observer[:remote_method]}, :complete => @observer[:on_completed_js], :loading => "show_element('img_" + @active_record_var_name + "_" + @field_name + "');")
+          if(@observer[:extra_params])
+            extra_static_params = "+'#{@observer[:extra_params].map{|k,v| "&#{k}=#{v}"}.join}'"
+          end
+          if(@observer[:on_load_js])
+            on_load_js = ""
+            @observer[:on_load_js].each do |observed_field|
+              on_load_js += "+'&#{observed_field[0]}='+encodeURIComponent($('#{observed_field[1]}').value)"
+            end
+
+          end
           observer = @env.observe_field(@active_record_var_name + "_" + @field_name,
                                         :update   => @observer[:updated_field_id],
                                         :url      => {:action => @observer[:remote_method]},
                                         :complete => @observer[:on_completed_js],
-                                        :with     => "encodeURIComponent(value)+'=x'",
+                                        :with     => "encodeURIComponent(value)+'=x'#{extra_static_params}#{on_load_js}",
                                         :loading  => "show_element('img_" + @active_record_var_name + "_" + @field_name + "');")
         end
         if observer != ""
@@ -773,7 +783,7 @@ module MesScada
 
       list = @settings[:list]
       # An element in the disabled_list will only show as an option if it is the current value.
-      if @settings && @settings[:disabled_list]
+      if @settings && @settings[:disabled_list] && !@settings[:disabled_list].empty?
         unless @active_record.nil?
           val = @active_record[@field_name]
           elem = nil

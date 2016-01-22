@@ -9,10 +9,10 @@ module DataGridSlick
                   :group_headers_colspan, :no_of_frozen_cols,
                   :group_fields_to_sum, :group_fields_to_count, :group_fields_to_avg,
                   :group_fields_to_max, :group_fields_to_min, :show_caption, :show_header,
-                  :non_selectable_ids
+                  :non_selectable_ids, :clear_multi_select
 
     VALID_FIELD_TYPES = %w(text action checkbox frame_link link_window action_collection)
-    VALID_EDITORS     = [:text, :checkbox, :long_text, :date, :integer]
+    VALID_EDITORS     = [:text, :checkbox, :long_text, :date, :integer, :select]
     DEFAULT_CAPTION   = 'The Grid'
 
     def initialize(environment, data_set, column_configs, plugin = nil, key_based_access = nil, special_commands = nil, options={})
@@ -46,6 +46,7 @@ module DataGridSlick
       @non_selectable_ids    = options[:non_selectable_ids]    || []
       @show_caption          = options[:show_caption]          || true
       @show_header           = options[:show_header]           || true
+      @clear_multi_select    = options[:clear_multi_select]    || false
       @editable              = options[:save_action]           || false
       @save_action           = options[:save_action]
       @validation_for_edit   = options[:validation_for_edit]
@@ -106,6 +107,7 @@ module DataGridSlick
               raise MesScada::InfoError, "DataGrid: The field: #{column_config[:field_name]} is date-editable, but the data type is not a Date." if :date == column_config[:editor] && column_config[:data_type] != 'date'
               raise MesScada::InfoError, "DataGrid: The field: #{column_config[:field_name]} is checkbox-editable, but the data type is not a Boolean." if :checkbox == column_config[:editor] && column_config[:data_type] != 'boolean'
               raise MesScada::InfoError, "DataGrid: The field: #{column_config[:field_name]} is integer-editable, but the data type is not an Integer." if :integer == column_config[:editor] && column_config[:data_type] != 'integer'
+              raise MesScada::InfoError, "DataGrid: The field: #{column_config[:field_name]} is select-editable, but there are no select_options values." if :select == column_config[:editor] && column_config[:select_options].blank?
             end
 
             # Make sure that only the last portion of the field name is used if there is a ' ' present (Only applies to data columns):
@@ -303,7 +305,7 @@ EOS
       popup << "<button title='Save column settings' onClick=\"saveLocSlickGridCols('#{@grid_id}');\"><img src='/images/grid_icons/application_tile_horizontal.png' width='16' height='16' /></button>"
       popup << "<button title='Apply column settings' onClick=\"getLocSlickGridCols('#{@grid_id}');\"><img src='/images/grid_icons/wand.png' width='16' height='16' /></button>"
       if @multi_select
-        popup << "<button id='#{@grid_id}savemulti' title='Save selection' onClick=\"returnMultiSelectIdsFromGrid('#{@grid_id}','#{@multi_select_action}');\"><img src='/images/grid_icons/disk.png' width='16' height='16' /></button>"
+        popup << "<button id='#{@grid_id}savemulti' title='Save selection' onClick=\"returnMultiSelectIdsFromGrid('#{@grid_id}','#{@multi_select_action}',#{@clear_multi_select});\"><img src='/images/grid_icons/disk.png' width='16' height='16' /></button>"
       end
       if @editable
         popup << "<button id='#{@grid_id}savechanges' title='Save changes' onClick=\"returnChangesFromGrid('#{@grid_id}','#{@save_action}');\"><img src='/images/grid_icons/disk.png' width='16' height='16' /></button>"
@@ -473,7 +475,7 @@ EOS
               getLocSlickGridCols('#{@grid_id}');
               break;
             case 'savemulti':
-              returnMultiSelectIdsFromGrid('#{@grid_id}','#{@multi_select_action}');
+              returnMultiSelectIdsFromGrid('#{@grid_id}','#{@multi_select_action}',#{@clear_multi_select});
               break;
             case 'savechanges':
               returnChangesFromGrid('#{@grid_id}','#{@save_action}');
@@ -583,6 +585,9 @@ EOS
   var columns = #{@colmodel}
   // Change string-def of formatter to the real thing:
   for(var i = 0; i < columns.length; i++) {
+    if(columns[i].editor === 'select_editor') {
+      columns[i].editor = Slick.Editors.Select;
+    }
     if(columns[i].editor === 'text_editor') {
       columns[i].editor = Slick.Editors.Text;
     }
@@ -990,6 +995,15 @@ EOS
         col['editor']     = 'checkbox_editor'  if col_config[:editor] && :checkbox  == col_config[:editor]
         col['editor']     = 'date_editor'      if col_config[:editor] && :date      == col_config[:editor]
         col['editor']     = 'integer_editor'   if col_config[:editor] && :integer   == col_config[:editor]
+        if col_config[:editor] && :select    == col_config[:editor]
+          col['editor']     = 'select_editor'
+          if col_config[:select_options].first.kind_of?(Array)
+            col['select_texts']  = col_config[:select_options].map {|a| a[0] }
+            col['select_vals']   = col_config[:select_options].map {|a| a[1] }
+          else
+            col['select_vals']   = col_config[:select_options]
+          end
+        end
 
         col['groupTotalsFormatter'] = 'sumTotalsFormatter' if @group_fields_to_sum.include?(col_config[:field_name])
         col['groupTotalsFormatter'] = 'cntTotalsFormatter' if @group_fields_to_count.include?(col_config[:field_name])

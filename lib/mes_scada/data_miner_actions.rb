@@ -574,7 +574,11 @@ module MesScada
 
       # Set the url to be called.
       if dm_session[:redirect] == true
-        @url_base = "http://#{request.host_with_port}/#{params[:controller]}/#{@redirect_method}"
+        if @excel_only
+          @url_base = "http://#{request.host_with_port}/development_tools/data/export_se_grid_to_csv"
+        else
+          @url_base = "http://#{request.host_with_port}/#{params[:controller]}/#{@redirect_method}"
+        end
         ###puts "REDIRECT METHOD : " + @redirect_method.to_s
       else
         ###puts params[:controller].to_s + "/" + params[:action].to_s
