@@ -3,7 +3,7 @@
 <p>These <tt>.yml</tt> files are kept in the <tt>reports</tt> dir or one of its subdirectories.<br />
 They can be created from the "<tt>create yml report</tt>" menu of the "<tt>dev tools</tt>" menu.<br />
 The report created by this process needs to be tweaked quite a bit, as the system makes quite a few "best-guesses" which can never be 100% suitable.</p>
-    
+
 <h2>Sections.</h2>
 <ul>
   <li>query <span class="info_column">The SQL to be run.</span></li>
@@ -56,6 +56,7 @@ fields:
     field_type:        lookup
     list:              SELECT code FROM table
     sorted:            true
+    searchable:        false
     lookup_search_uri: diagnostics/alerts/lookup_consignment_record
 </pre>
 <ul>
@@ -64,5 +65,6 @@ fields:
   <li>field_type <span class="info_column">Required. <strong>lookup</strong> for an array of values, <strong>text</strong> for an edit box, <strong>checkbox</strong> for a checkbox, <strong>daterange</strong> for a from and to date, <strong>lookup_link</strong> for a link that returns the value.</span></li>
   <li>list <span class="info_column">Required for field_type == lookup only. Can be SQL or a hard-coded Array. SQL with two columns (first shown to user, second returned to application e.g. <em>SELECT description, id from cost_groups order by description</em> Single column SQL e.g. <em>SELECT description from cost_groups order by description</em> Array e.g. <em>['E', 'L']</em></span><br />&nbsp;</li>
   <li>sorted <span class="info_column">Optional. Set to true if you want your list to be displayed in the given order. Otherwise the system will sort it before displaying the dropdown.</span></li>
+  <li>searchable <span class="info_column">Optional. Defaults to true. Set to false if you don't want the dropdown to be searchable using the "chosen" js library. Typically you will only set this to false if the dropdown options are just one or two characters wide (when the scrollbar might interfere with the display).</span><br />&nbsp;</li>
   <li>lookup_search_uri <span class="info_column">Required if field_type == lookup_link only. Set to the path that will present the user with a choice.</span></li>
 </ul>

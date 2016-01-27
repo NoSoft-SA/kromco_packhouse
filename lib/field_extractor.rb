@@ -59,6 +59,7 @@ class FieldExtractor
                               caption = f[:caption] #if f.has_key?("caption")
                               field_type = nil
                               sorted = f[:sorted] || false
+                              searchable = f[:searchable].nil? ? true : f[:searchable]
                               list = nil
                               if type == "lookup_link"
                                 @form_fields.push({:field_name=>p, :field_type=>"LookUpField", :caption=>caption,:lookup_search_file=>f[:lookup_search_file],:select_column_name=>f[:select_column_name],:lookup_search_uri=>f[:lookup_search_uri],:send_fields=>f[:send_fields],:submit_to=>f[:submit_to]})
@@ -66,7 +67,7 @@ class FieldExtractor
                                   field_type = "DropDownField"
                                   list = f[:list]
                                   #model = f.fetch(:model)
-                                  @form_fields.push({:field_name=>p, :field_type=>field_type, :list=>list, :caption=>caption, :sorted => sorted})
+                                  @form_fields.push({:field_name=>p, :field_type=>field_type, :list=>list, :caption=>caption, :sorted => sorted, :searchable => searchable})
                               elsif type == "date"
                                   field_type ="DateField"
                                   @form_fields.push({:field_name=>p, :field_type=>field_type, :caption=>caption})
@@ -118,7 +119,7 @@ class FieldExtractor
                 #@model = fields_hash["model"]
               @caption = fields_hash["field_name"]
               @caption = fields_hash["caption"] if fields_hash.has_key?("caption")
-              @fields_array.push({:field_name=>@field_name, :field_type=>@field_type, :list=>@list_sql, :caption=>@caption, :sorted => fields_hash['sorted']})
+              @fields_array.push({:field_name=>@field_name, :field_type=>@field_type, :list=>@list_sql, :caption=>@caption, :sorted => fields_hash['sorted'], :searchable => fields_hash['searchable'].nil? ? true : fields_hash['searchable']})
           elsif fields_hash.has_value?("action")
               @field_name = fields_hash["field_name"]
               @field_type = fields_hash["field_type"]

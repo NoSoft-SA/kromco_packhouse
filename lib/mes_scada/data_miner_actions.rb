@@ -1306,14 +1306,15 @@ module MesScada
       config_index  = 0
       fields.each do |f|
         if f.has_key?(:list)
-          list          = f.fetch(:list)
-          field_type    = f.fetch(:field_type)
-          field_name    = f.fetch(:field_name)
-          field_caption = f.fetch(:caption)
-          list_sorted   = f.fetch(:sorted, false)
+          list            = f.fetch(:list)
+          field_type      = f.fetch(:field_type)
+          field_name      = f.fetch(:field_name)
+          field_caption   = f.fetch(:caption)
+          list_sorted     = f.fetch(:sorted, false)
+          list_searchable = f[:searchable].nil? ? true : f[:searchable]
           if list.class == Array
             dropdown_list = list
-            field_configs[config_index] = {:field_type => field_type, :field_name => field_name, :list => dropdown_list, :caption => field_caption, :sorted => list_sorted}
+            field_configs[config_index] = {:field_type => field_type, :field_name => field_name, :list => dropdown_list, :caption => field_caption, :sorted => list_sorted, :searchable => list_searchable}
           else
           dropdown_list = []
           if list.index('*') || list.count(',') > 1
@@ -1339,7 +1340,7 @@ module MesScada
               end
             end
 
-            field_configs[config_index] = {:field_type => field_type, :field_name => field_name, :list => dropdown_list, :caption => field_caption, :sorted => list_sorted}
+            field_configs[config_index] = {:field_type => field_type, :field_name => field_name, :list => dropdown_list, :caption => field_caption, :sorted => list_sorted, :searchable => list_searchable}
             end
           end
         else
