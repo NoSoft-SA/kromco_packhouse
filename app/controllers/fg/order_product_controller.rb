@@ -16,12 +16,13 @@ class Fg::OrderProductController < ApplicationController
         price_per_kg=nil
         price_per_carton=nil
         subtotal=0
-        latest_shipped_similar_order_product=OrderProduct.find_by_sql("select op.* from order_products op
+        latest_shipped_similar_order_product=OrderProduct.find_by_sql("
+              select op.* from order_products op
               join orders o on op.order_id=o.id
-              where op.item_pack_product_code='#{order_product.item_pack_product_code}' and op.old_fg_code='#{order_product.old_fg_code}'  and o.consignee_party_role_id=#{order.consignee_party_role_id}
-              and o.order_status='SHIPPED' order by o.id desc ")[0]
+              where op.grade_code='#{order_product.grade_code}' and op.old_fg_code='#{order_product.old_fg_code}'  and  o.customer_party_role_id=#{order.customer_party_role_id} and o.consignee_party_role_id=#{order.consignee_party_role_id}
+              order by o.id desc ")[0]
 
-        if latest_shipped_similar_order_product
+            if latest_shipped_similar_order_product
           price_per_kg=latest_shipped_similar_order_product.price_per_kg
           price_per_carton=latest_shipped_similar_order_product.price_per_carton
           subtotal =  price_per_carton * order_product.carton_count   if  price_per_carton  &&  order_product.carton_count
@@ -213,8 +214,30 @@ class Fg::OrderProductController < ApplicationController
     get_order_products(order_id)
     order_product_sql="select * from order_products where id in (#{@order_products.map{|p|p.id}.join(",")})"
     session[:query]="ActiveRecord::Base.connection.select_all(\"#{order_product_sql}\")"
-    render :template => "fg/order_products/list_order_products", :layout => "content"
+    #render :template => "fg/order_products/list_order_products", :layout => "content"
+    render_list_order_products_grid
   end
+
+  def render_list_order_products_grid
+
+    @pagination_server = "list_orders"
+    @can_edit = authorise(program_name?, 'edit', session[:user_id])
+    @can_delete = authorise(program_name?, 'delete', session[:user_id])
+    @current_page = session[:orders_page]
+    @current_page = params['page']||= session[:orders_page]
+#    @orders = eval(session[:query]) if !@orders
+
+    render :inline => %{
+      <% grid            = build_order_product_grid(@order_products,@can_edit,@can_delete,@multi_select) %>
+      <% grid.caption    = @caption %>
+      <% @header_content = grid.build_grid_data %>
+
+      <% @pagination = pagination_links(@order_pages) if @order_pages != nil %>
+      <%= grid.render_html %>
+      <%= grid.render_grid %>
+      }, :layout => 'content'
+  end
+
 
   def get_order_products(order_id)
     new_order_products = OrderProduct.find_by_sql("SELECT * FROM order_products WHERE order_id = '#{order_id}'")

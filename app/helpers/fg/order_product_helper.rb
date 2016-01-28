@@ -241,7 +241,7 @@ module Fg::OrderProductHelper
      hide_grid_client_controls()
 
 
-     return  get_data_grid(data_set,column_configs,MesScada::GridPlugins::Fg::OrderProductGridPlugin.new(self, request),true,grid_command,:save_action => '/fg/order_product/update_edited_order_products' ) #,:validation_for_edit => js_validation
+     return  get_data_grid(data_set,column_configs,MesScada::GridPlugins::Fg::OrderProductGridPlugin.new(self, request),true,grid_command,:save_action => '/fg/order_product/update_edited_order_products') #,:validation_for_edit => js_validation
 
   end
 
