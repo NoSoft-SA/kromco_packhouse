@@ -308,16 +308,16 @@ class Order < ActiveRecord::Base
     where load_orders.order_id=#{self.id}")
     load_detail_ids=load_details.map { |k| k.id }.join(",") if !load_details.empty?
     ActiveRecord::Base.transaction do
+      ActiveRecord::Base.connection.execute("update cartons set target_market_code=orig_target_market_code where pallet_id in (#{pallet_ids})") if !pallets.empty?
+      ActiveRecord::Base.connection.execute("update cartons set orig_target_market_code=null where pallet_id in (#{pallet_ids})") if !pallets.empty?
+
       if self.restore_tm
         ActiveRecord::Base.connection.execute("update pallets set target_market_code=orig_target_market_code,load_detail_id = null,remarks1=null ,remarks2=null,remarks3=null ,remarks4=null,remarks5=null where id in (#{pallet_ids})") if !pallets.empty?
        else
         ActiveRecord::Base.connection.execute("update pallets set target_market_code=orig_target_market_code where id in (#{pallet_ids})") if !pallets.empty?
       end
-      ActiveRecord::Base.connection.execute("update cartons set target_market_code=orig_target_market_code where pallet_id in (#{pallet_ids})") if !pallets.empty?
-
 
       ActiveRecord::Base.connection.execute("update pallets set orig_target_market_code=null where id in (#{pallet_ids})") if !pallets.empty?
-      ActiveRecord::Base.connection.execute("update cartons set orig_target_market_code=null where pallet_id in (#{pallet_ids})") if !pallets.empty?
 
       ActiveRecord::Base.connection.execute("update order_products set target_market_code=orig_target_market_code where id in (#{order_product_ids})") if !order_products.empty?
       ActiveRecord::Base.connection.execute("update load_details set target_market_code=orig_target_market_code where id in (#{load_detail_ids})") if !load_details.empty?
@@ -326,7 +326,6 @@ class Order < ActiveRecord::Base
       ActiveRecord::Base.connection.execute("update load_details set orig_target_market_code=null where id in (#{load_detail_ids})") if !load_details.empty?
 
       ActiveRecord::Base.connection.execute("update orders set changed_tm=false where id =#{self.id}")
-
 
     end
   end
@@ -341,13 +340,7 @@ class Order < ActiveRecord::Base
                      inner join load_orders on load_details.load_order_id=load_orders.id
                      inner join  orders on load_orders.order_id=orders.id
                      where orders.id=#{self.id} and pallets.orig_target_market_code is null")
-    #pallet_nums=pallets.map { |k|"'#{k.pallet_number}'"  }.join(",") if !pallets.empty?
-    #if !pallets.empty?()
-    #  msg=get_invalid_ctns_for_tm_grade(pallet_nums,target_market)
-    #  if msg
-    #    return msg
-    #  end
-    #end
+
     pallet_ids=pallets.map { |k| k.id }.join(",") if !pallets.empty?
 
     order_products=OrderProduct.find_by_sql("select order_products.* from order_products
@@ -362,12 +355,11 @@ class Order < ActiveRecord::Base
     load_detail_ids=load_details.map { |k| k.id }.join(",") if !load_details.empty?
 
     ActiveRecord::Base.transaction do
+      ActiveRecord::Base.connection.execute("update cartons set orig_target_market_code=cartons.target_market_code where pallet_id in (#{pallet_ids})") if !pallets.empty?
+      ActiveRecord::Base.connection.execute("update cartons set target_market_code='#{target_market.target_market_code}' where pallet_id in (#{pallet_ids})") if !pallets.empty?
 
       ActiveRecord::Base.connection.execute("update pallets set orig_target_market_code=pallets.target_market_code where id in (#{pallet_ids})") if !pallets.empty?
-      ActiveRecord::Base.connection.execute("update cartons set orig_target_market_code=cartons.target_market_code where pallet_id in (#{pallet_ids})") if !pallets.empty?
-
       ActiveRecord::Base.connection.execute("update pallets set target_market_code='#{target_market.target_market_code}' where id in (#{pallet_ids})") if !pallets.empty?
-      ActiveRecord::Base.connection.execute("update cartons set target_market_code='#{target_market.target_market_code}' where pallet_id in (#{pallet_ids})") if !pallets.empty?
 
       ActiveRecord::Base.connection.execute("update order_products set orig_target_market_code=order_products.target_market_code where id in (#{order_product_ids})") if !order_products.empty?
       ActiveRecord::Base.connection.execute("update load_details set orig_target_market_code=load_details.target_market_code where id in (#{load_detail_ids})") if !load_details.empty?
