@@ -671,6 +671,7 @@ end
     column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'order_number',:column_caption=>'order_num',:col_width=>90}
     column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'order_type_code',:col_width=>120}
     column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'customer_contact_name',:column_caption=>'customer',:col_width=>212}
+    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'order_description',:column_caption=>'description',:col_width=>212}
     column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'customer_order_number',:column_caption=>'cust_order_num',:col_width=>120}
     column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'consignee_party_name', :column_caption=>'trading_partner',:col_width=>120}
     column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'created_by',:column_caption=>'username'}
