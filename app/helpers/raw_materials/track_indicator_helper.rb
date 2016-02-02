@@ -644,7 +644,7 @@ end
   field_configs[6] =  {:field_type => 'DropDownField',
 						:field_name => 'group_2_code',
 						:settings => {:list => ['ALTERNATIVE MARKETING','CANNING','FOR PACKING',
-                                  'JUICE','NOT FOR PACKING','PRIVATE STORAGE','SCRAPPED'
+                                  'JUICE','NOT FOR PACKING','PRIVATE STORAGE','SCRAPPED','QUARANTINE'
                           ]}}
 
 

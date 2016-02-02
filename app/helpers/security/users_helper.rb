@@ -272,7 +272,7 @@ module Security::UsersHelper
 
   def build_programs_permissions_settings_list_grid(data_set, can_edit, can_delete=nil, can_cancel=nil,multi_select=nil)
 
-    security_groups = SecurityGroup.find_by_sql("select security_group_name,id from security_groups").map{|g|g.security_group_name}
+    security_groups = SecurityGroup.find_by_sql("select security_group_name,id from security_groups order by security_group_name asc").map{|g|g.security_group_name}
     security_groups.unshift("<empty>") if security_groups.empty?
 
     column_configs = []

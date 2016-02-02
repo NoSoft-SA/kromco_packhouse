@@ -148,7 +148,7 @@ class Security::UsersController < ApplicationController
   def quick_export_permissions
     @user_id = params[:id]
     session[:program_user_id] = params[:id]
-    @usernames = User.find(:all).map{|g| [g.user_name]}
+    @usernames = User.find(:all,:order => "user_name asc").map{|g| [g.user_name]}
     render :template => "security/users/quick_export_permissions",:layout => "tree_node_content"
   end
 
