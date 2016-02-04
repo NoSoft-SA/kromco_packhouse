@@ -48,6 +48,10 @@ module Security::ProgramHelper
      field_configs[field_configs.length] = {:field_type => 'CheckBox',
 						:field_name => 'is_leaf'}
 
+    field_configs[field_configs.length] = {:field_type => 'CheckBox',
+                                           :field_name => 'is_mf'}
+
+
 	build_form(program,field_configs,action,'program',caption,is_edit)
 
 end
@@ -156,6 +160,7 @@ end
   column_configs << {:field_type => 'text', :field_name => 'class_name', :column_caption => 'Class name'}
   column_configs << {:field_type => 'text', :field_name => 'disabled', :data_type => 'boolean', :column_caption => 'Disabled'}
   column_configs << {:field_type => 'text', :field_name => 'is_leaf', :data_type => 'boolean', :column_caption => 'Is leaf'}
+  column_configs << {:field_type => 'text', :field_name => 'is_mf', :data_type => 'boolean', :column_caption => 'Is mf'}
   column_configs << {:field_type => 'text', :field_name => 'url_component', :column_caption => 'Url component'}
   column_configs << {:field_type => 'text', :field_name => 'func_area_url_component', :column_caption => 'Func area url component'}
 

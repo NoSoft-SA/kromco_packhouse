@@ -242,7 +242,7 @@ class PalletUpdate
             # group_repr_carton = RwActiveCarton.find(:all,:conditions => "rw_active_pallet_id = '#{@pallet.id.to_s}' and rw_run_id = '#{@pallet.rw_run_id.to_s}' and production_run_id = '#{puc_group[:run_id].to_s}'")
             
              group_repr_carton = puc_group[:cartons][0]
-             self.fg_carton.export_attributes(new_carton,true,["carton_number","production_run_code","farm_code","puc","track_indicator_code","production_run_id","bin_id","line_code",])
+             self.fg_carton.export_attributes(new_carton,true,["carton_number","production_run_code","farm_code","puc","track_indicator_code","production_run_id","bin_id","line_code"])
              new_carton.production_run_code = group_repr_carton.production_run_code
              new_carton.production_run_id = group_repr_carton.production_run_id
              new_carton.line_code = group_repr_carton.line_code
@@ -335,7 +335,7 @@ class PalletUpdate
    
    def update_group(representative_carton,puc_group)
 
-     fields_not_to_copy = ["ppecb_inspection_id","shift_id","egap","carton_fruit_nett_mass_actual","date_time_created","date_time_erp_xmit","exit_date_time","rw_create_datetime","track_indicator_code","erp_cultivar","carton_number","carton_id","rw_receipt_carton_id","production_run_id","production_run_code","farm_code","line_code","shift_code","carton_label_station_code","erp_station","erp_pack_point","carton_pack_station_code","is_inspection_carton","qc_datetime_out","qc_datetime_in","pick_reference","iso_week_code","pack_date_time","pc_code","qc_status_code","qc_result_status","packer_number","bin_id"]
+     fields_not_to_copy = ["ppecb_inspection_id","shift_id","egap","carton_fruit_nett_mass_actual","date_time_created","date_time_erp_xmit","exit_date_time","rw_create_datetime","track_indicator_code","erp_cultivar","carton_number","carton_id","rw_receipt_carton_id","production_run_id","production_run_code","farm_code","puc","line_code","shift_code","carton_label_station_code","erp_station","erp_pack_point","carton_pack_station_code","is_inspection_carton","qc_datetime_out","qc_datetime_in","pick_reference","iso_week_code","pack_date_time","pc_code","qc_status_code","qc_result_status","packer_number","bin_id"]
      if  representative_carton.changed_fields?.has_key?('pick_reference')||representative_carton.changed_fields?.has_key?('pack_date_time')
        fields_not_to_copy.delete_if{|c|c == 'pack_date_time'|| c == 'pick_reference'}
      end

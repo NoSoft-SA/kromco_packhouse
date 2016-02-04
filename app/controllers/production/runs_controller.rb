@@ -640,6 +640,10 @@ class Production::RunsController < ApplicationController
     elsif carton.is_inspection_carton == nil || carton.is_inspection_carton == false
       redirect_to_index("carton with number: " + carton_num.to_s + " is not an inspection carton")
       return
+    elsif rw_ctn = RwActiveCarton.find_by_carton_number(carton_num)
+      redirect_to_index("This carton(#{carton_num} is in reworks at present. <BR> User is: #{rw_ctn.rw_run.username} <BR> Run is: #{rw_ctn.rw_run.rw_run_name}
+                         <BR> (Reworks may overwrite your inspection result for this carton) ",nil,nil,true)
+     return
     end
 
     @last_inspection = PpecbInspection.most_recent_inspection?(carton_num)
