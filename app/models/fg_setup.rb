@@ -723,6 +723,7 @@ class FgSetup < ActiveRecord::Base
     carton_template.iso_week_code = self.carton_setup.production_schedule.iso_week_code
     carton_template.commodity_code  = self.carton_setup.retail_item_setup.item_pack_product.commodity_code
     carton_template.carton_mark_code = self.carton_setup.trade_unit_setup.mark_code
+    carton_template.cpc_tu_mass = self.carton_setup.trade_unit_setup.carton_pack_product.nett_mass #new field as per feb'16 request
     target_market = TargetMarket.find_by_target_market_name(self.target_market)
     carton_template.target_market_code = target_market.target_market_name + "_" + target_market.target_market_description
     @marketing_variety_description = MarketingVariety.find_by_marketing_variety_code_and_commodity_code(self.carton_setup.marketing_variety_code,@rmt_setup.commodity_code).marketing_variety_description.to_s

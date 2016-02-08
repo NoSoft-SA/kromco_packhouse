@@ -560,13 +560,31 @@ class RwActiveCarton < ActiveRecord::Base
     data.store("F30", pfp)
     data.store("F31", self.sell_by_code)
 
+    orchard_printed = false
+
     if self.carton.bin
       if self.carton.bin.orchard_code && self.target_market_code.split("_")[0].upcase == "NI"
         data.store("F32", "ORCHARD")
         data.store("F33", self.carton.bin.orchard_code)
-        puts "STORED!!!"
+        orchard_printed = true
       end
     end
+
+    if !orchard_printed
+      data.store("F32","")
+      data.store("F33","")
+    end
+
+    if Globals.tms_for_tu_mass_printing.include?(self.target_market_code.split("_")[0])
+      tu_mass = FgProduct.find_by_fg_product_code(self.fg_product_code).carton_pack_product.nett_mass
+      if tu_mass && tu_mass != ""
+       data.store("F34","Nett Mass")
+       data.store("F35",tu_mass.to_s + " kg")
+      end
+
+    end
+
+
 
     @label_data = data
     return data

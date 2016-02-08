@@ -65,7 +65,35 @@ def re_open_production_schedule
   render_list_production_schedules
   
  end
-  
+
+
+def force_update_of_templates_and_labels
+
+
+   production_schedule = ProductionSchedule.find(params[:id].to_i)
+
+   if production_schedule.production_schedule_status_code != "closed"
+     redirect_to_index("Only closed schedules can be refreshed")
+     return
+   end
+
+
+   production_schedule.carton_setups.each do |carton_setup|
+    if carton_setup.fg_setup && carton_setup.fg_setup.fg_product
+     carton_setup.update_time
+    end
+   end
+
+   n_templates_built = production_schedule.update_all_carton_setups_templates_and_labels
+
+
+  msg =  n_templates_built.to_s + " sets of carton templates refreshed </font>"
+
+
+  flash[:notice] = msg
+  render_list_production_schedules
+
+end
 
 def close_schedule
  #begin

@@ -409,7 +409,14 @@ end
 				 {:image => 'edit',
 				:target_action => 'edit_production_schedule',
 				:id_column => 'id'}}
-				
+
+    #force_update_of_templates_and_labels
+    column_configs[column_configs.length()] = {:field_type => 'action',:field_name => 'refresh', :col_width => 50,
+                                               :settings =>
+                                                   {:image => 'refresh',
+                                                    :target_action => 'force_update_of_templates_and_labels',
+                                                    :id_column => 'id'}}
+
 		
 		column_configs[column_configs.length()] = {:field_type => 'action',:field_name => 'clone',:col_width => 50,
 			:settings => 
