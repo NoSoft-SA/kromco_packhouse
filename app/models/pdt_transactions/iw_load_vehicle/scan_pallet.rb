@@ -134,6 +134,14 @@ class ScanPallet < PDTTransactionState
         if pallet.get_carton_count != pallet.carton_quantity_actual
           error = "carton qty mismatch(ctns: " + pallet.get_carton_count.to_s + " vs plt: " + pallet.carton_quantity_actual.to_s
         end
+	
+	stock_item = StockItem.find_by_inventory_reference(pallet.pallet_number)
+        if stock_item 
+		if stock_item.destroyed
+			error = "Pallet is destroyed"
+		end
+        end
+  
       end
     end
     return error

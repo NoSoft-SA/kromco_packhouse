@@ -149,7 +149,7 @@ class IwLoadVehicle < PDTTransaction
      field_configs = Array.new
      field_configs[field_configs.length] = {:type=>"text_box",:name=>"vehicle",:is_required=>"true"}
      field_configs[field_configs.length] = {:type=>"text_box",:name=>"qty_pallets",:is_required=>"true", :required_type=>"number"}
-     field_configs[field_configs.length] = {:type=>"drop_down",:name=>"destination",:is_required=>"true",:list => ", ,PACKHSE,RA_10,RA_1TO5,RA_6AND7,RA_8AND9,REWORKS,BAGGING,PART_PALLETS"}
+     field_configs[field_configs.length] = {:type=>"drop_down",:name=>"destination",:is_required=>"true",:list => ", ,PACKHSE,RA_10,RA_1TO5,RA_6AND7,RA_8AND9,REWORKS,BAGGING,PART_PALLETS,CA_CDE_CA_D_35"}
      
      screen_attributes = {:auto_submit=>"true",:content_header_caption=>"load vehicle"}
      buttons = {"B3Label"=>"Clear" ,"B2Label"=>"Cancel","B1Submit"=>"load_vehicle_submit","B1Label"=>"Submit","B1Enable"=>"true","B2Enable"=>"false","B3Enable"=>"false" }
