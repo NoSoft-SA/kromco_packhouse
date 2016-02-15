@@ -17,17 +17,18 @@ class Fg::OrderProductController < ApplicationController
         price_per_carton=nil
         subtotal=0
         latest_shipped_similar_order_product=OrderProduct.find_by_sql("
-              select op.* from order_products op
+              select op.*  from order_products op
               join orders o on op.order_id=o.id
-              where op.grade_code='#{order_product.grade_code}' and op.old_fg_code='#{order_product.old_fg_code}'  and  o.customer_party_role_id=#{order.customer_party_role_id} and o.consignee_party_role_id=#{order.consignee_party_role_id}
+              where op.grade_code='#{order_product.grade_code}' and op.old_fg_code='#{order_product.old_fg_code}'  and  o.customer_party_role_id=#{order.customer_party_role_id} and
+             o.consignee_party_role_id=#{order.consignee_party_role_id}  and op.price_per_kg is not null
               order by o.id desc ")[0]
 
-            if latest_shipped_similar_order_product
+          if latest_shipped_similar_order_product
           price_per_kg=latest_shipped_similar_order_product.price_per_kg
           price_per_carton=latest_shipped_similar_order_product.price_per_carton
           subtotal =  price_per_carton * order_product.carton_count   if  price_per_carton  &&  order_product.carton_count
         end
-        order_product.update_attributes(:price_per_kg=>price_per_kg ,:price_per_carton=>price_per_carton,:subtotal=> subtotal)
+        order_product.update_attributes(:price_per_kg=>price_per_kg ,:price_per_carton=>price_per_carton,:subtotal=> subtotal)  if subtotal!= 0
       end
     end
 
