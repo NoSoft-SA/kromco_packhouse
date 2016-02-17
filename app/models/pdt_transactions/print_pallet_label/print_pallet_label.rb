@@ -37,7 +37,7 @@ class PrintPalletLabel < PrintPalletLabelBase
     end
 
     pallet.update
-    Inventory.create_stock(nil, "PALLET", nil, nil, "PALLET_LABEL_PRINTING", pallet.pallet_number, 'PACKHSE', pallet.pallet_number)
+    Inventory.create_stock(nil, "PALLET", nil, nil, "PALLET_LABEL_PRINTING", pallet.pallet_number, 'PACKHSE', pallet.pallet_number) if !StockItem.find_by_inventory_reference(pallet.pallet_number)
     Order.get_and_upgrade_prelim_orders([pallet.pallet_number])
    end
 

@@ -24,6 +24,10 @@ class Globals
     return ["orders","voyages","people","messcada_people_view_messcada_rfid_allocations"]
   end
 
+  def Globals.tms_for_tu_mass_printing
+    ["FE","NI"]
+  end
+
   def Globals.properties?
     if !@properties
       File.open("config/appp_factory.yml") do |file|
@@ -62,11 +66,11 @@ class Globals
   end
 
   def Globals.get_jasper_server_report_server_ip
-    "http://172.16.16.40"
+    "http://127.0.0.1:3000"
   end
 
   def Globals.get_jasper_server
-    "/jasperserver-pro/flow.html?_flowId=viewReportFlow&"
+    "/jasperserver/flow.html?_flowId=viewReportFlow&"
   end
 
   def Globals.get_jasperserver_username_password
@@ -225,7 +229,7 @@ class Globals
     "http://172.16.16.14:3000"
   end
   def Globals.pdt_simulator_client_server
-      "http://172.16.16.17:3000"
+      "http://127.0.0.1:3000"
   end
 
   def Globals.get_legacy_db_conn_string
