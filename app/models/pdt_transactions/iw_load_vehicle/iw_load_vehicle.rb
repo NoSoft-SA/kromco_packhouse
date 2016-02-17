@@ -291,7 +291,7 @@ class IwLoadVehicle < PDTTransaction
         end
         
         # do inventory_transaction for each pallet
-#        Inventory.move_stock('LOAD_VEHICLE','LOAD_VEHICLE','IN TRANSIT',@scanned_pallets)
+        Inventory.move_stock('LOAD_VEHICLE',vehicle_job.id.to_s,'IN_TRANSIT_' + self.destination ,@scanned_pallets)
       end
 
       if(repeat)

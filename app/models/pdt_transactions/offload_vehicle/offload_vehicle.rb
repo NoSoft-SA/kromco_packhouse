@@ -401,24 +401,19 @@ class OffloadVehicle < PDTTransaction
         vehicle_job.save!
         # set date_time_offloaded for vehicle_job_units
         vehicle_job_units = VehicleJobUnit.find_by_sql("SELECT * from vehicle_job_units where vehicle_job_id = '#{vehicle_job.id}'")
-        pallets_for_create_stock = Array.new
+
         pallets_for_move_stock = Array.new
 
         for vehicle_job_unit in vehicle_job_units
           vehicle_job_unit.date_time_offloaded = Time.now.to_formatted_s(:db)
           vehicle_job_unit.save!
 
-          if !StockItem.find_by_inventory_reference(vehicle_job_unit.unit_reference_id)
-            pallets_for_create_stock << vehicle_job_unit.unit_reference_id
-          else
-            pallets_for_move_stock << vehicle_job_unit.unit_reference_id
-          end
+          pallets_for_move_stock << vehicle_job_unit.unit_reference_id
 
-          #NewOutboxRecord.new("pallet_completed_1", pallet)
+
         end
 
-        Inventory.create_stock(nil, "PALLET", nil, nil, "OFFLOAD_VEHICLE", vehicle_job.id.to_s, @dest_location_code.to_s, pallets_for_create_stock) if  pallets_for_create_stock.length() > 0
-        Order.get_and_upgrade_prelim_orders(pallets_for_create_stock) if  pallets_for_create_stock.length() > 0
+
         Inventory.move_stock("OFFLOAD_VEHICLE", vehicle_job.id.to_s, @dest_location_code.to_s, pallets_for_move_stock) if pallets_for_move_stock.length() > 0
 
         set_temp_record(:destination,self.destination.to_s)

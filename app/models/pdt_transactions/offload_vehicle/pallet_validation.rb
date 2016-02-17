@@ -71,7 +71,7 @@ class PalletValidation < PalletSequenceNavigator
   def save()
     
     valid = self.pdt_screen_def.get_control_value("valid")
-    if valid.to_s.upcase == "TRUE"
+    if valid.to_s.upcase == "TRUE"||valid.to_s.upcase == "1"
       @sequences[@current_sequence_index][:validated] = true
     else
       @sequences[@current_sequence_index][:validated] = false
