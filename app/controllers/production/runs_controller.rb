@@ -745,33 +745,35 @@ class Production::RunsController < ApplicationController
       end
     end
 
-    if(!cull_analyses_attributes.empty?)
-      cull_analyses_attributes.store('ppecb_inspection_id',session[:ppecb_inspection].id)
-      cull_analyses = PpecbCullAnalysis.new(cull_analyses_attributes)
-      if cull_analyses.save!
-        # redirect_to_index("ppecb inspection details saved")
-      else
-        # @ppecb_inspection = session[:ppecb_inspection]
-        # @content_header_caption = "'set ppecb inspection details'"
-        # render :inline => %{
-        #     <% @content_header_caption = "'set ppecb inspection details'"%>
-        #     <%= build_ppecb_inspection_form(@ppecb_inspection)%>
-        #   }, :layout => 'content'
+    ActiveRecord::Base.transaction do
+      if(!cull_analyses_attributes.empty?)
+        cull_analyses_attributes.store('ppecb_inspection_id',session[:ppecb_inspection].id)
+        cull_analyses = PpecbCullAnalysis.new(cull_analyses_attributes)
+        if cull_analyses.save!
+          # redirect_to_index("ppecb inspection details saved")
+        else
+          # @ppecb_inspection = session[:ppecb_inspection]
+          # @content_header_caption = "'set ppecb inspection details'"
+          # render :inline => %{
+          #     <% @content_header_caption = "'set ppecb inspection details'"%>
+          #     <%= build_ppecb_inspection_form(@ppecb_inspection)%>
+          #   }, :layout => 'content'
+        end
       end
-    end
 
-    if(!additional_info_attributes.empty?)
-      additional_info_attributes.store('ppecb_inspection_id',session[:ppecb_inspection].id)
-      additional_info = PpecbAdditionalInfo.new(additional_info_attributes)
-      if additional_info.save!
-        # redirect_to_index("ppecb inspection details saved")
-      else
-        # @ppecb_inspection = session[:ppecb_inspection]
-        # @content_header_caption = "'set ppecb inspection details'"
-        # render :inline => %{
-        #     <% @content_header_caption = "'set ppecb inspection details'"%>
-        #     <%= build_ppecb_inspection_form(@ppecb_inspection)%>
-        #   }, :layout => 'content'
+      if(!additional_info_attributes.empty?)
+        additional_info_attributes.store('ppecb_inspection_id',session[:ppecb_inspection].id)
+        additional_info = PpecbAdditionalInfo.new(additional_info_attributes)
+        if additional_info.save!
+          # redirect_to_index("ppecb inspection details saved")
+        else
+          # @ppecb_inspection = session[:ppecb_inspection]
+          # @content_header_caption = "'set ppecb inspection details'"
+          # render :inline => %{
+          #     <% @content_header_caption = "'set ppecb inspection details'"%>
+          #     <%= build_ppecb_inspection_form(@ppecb_inspection)%>
+          #   }, :layout => 'content'
+        end
       end
     end
 
