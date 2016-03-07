@@ -1,0 +1,9 @@
+<%= build_ppecb_inspection_form(@ppecb_inspection)%>
+
+
+<% grid            = build_forecast_grid(@forecasts,@can_edit,@can_delete) %>
+<% grid.caption    = 'forecasts' %>
+<% @header_content = grid.build_grid_data %>
+<% @pagination = pagination_links(@forecast_pages) if @forecast_pages != nil %>
+<%= grid.render_html %>
+<%= grid.render_grid %>

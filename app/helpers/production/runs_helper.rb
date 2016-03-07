@@ -1,4 +1,14 @@
 module Production::RunsHelper
+  def build_extra_ppec_info_grid(data_set)
+
+    column_configs = Array.new
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'id', :column_caption=>'info_field', :col_width => 154}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'info_value', :col_width => 350, :editor=>:text}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'info_type', :col_width => 154}
+
+    return get_data_grid(data_set, column_configs, nil, true, nil, :save_action => 'capture_kromco_inspection_results')
+  end
+
   def build_mini_production_run_view(run,action,ignore_pack_groups = nil)
 
   field_configs = Array.new
@@ -227,62 +237,111 @@ def build_ppecb_inspection_form(ppecb_inspection)
 						:settings => {:list => inspection_levels},
 						:observer => level_observer}
 
-	field_configs[field_configs.length()] = {:field_type => 'LabelField',
+  field_configs[field_configs.length()] =  {:field_type => 'LabelField',:settings=>{:css_class => "bold_label_field"},:field_name => 'product_size'}
+
+  field_configs[field_configs.length()] = {:field_type => 'LabelField',
 						:field_name => 'production_run_code'}
+
+  field_configs[field_configs.length()] =  {:field_type => 'LabelField',:settings=>{:css_class => "bold_label_field"},:field_name => 'line_code'}
 
 	field_configs[field_configs.length()] = {:field_type => 'LabelField',
 						:field_name => 'carton_number'}
 
+  field_configs[field_configs.length()] =  {:field_type => 'LabelField',:settings=>{:css_class => "bold_label_field"},:field_name => 'carton_number'}
+
 	field_configs[field_configs.length()] = {:field_type => 'LabelField',
 						:field_name => 'pallet_number'}
+
+  field_configs[field_configs.length()] =  {:field_type => 'LabelField',:settings=>{:css_class => "bold_label_field"},:field_name => 'actual_size_count_code'}
 
 	field_configs[field_configs.length()] = {:field_type => 'TextField',
 						:field_name => 'inspection_point'}
 
+  field_configs[field_configs.length()] =  {:field_type => 'LabelField',:settings=>{:css_class => "bold_label_field"},:field_name => 'season'}
+
 	field_configs[field_configs.length()] = {:field_type => 'TextField',
 						:field_name => 'inspector_number'}
+
+  field_configs[field_configs.length()] =  {:field_type => 'LabelField',:settings=>{:css_class => "bold_label_field"},:field_name => 'puc'}
 
 	field_configs[field_configs.length()] = {:field_type => 'TextField',
 						:field_name => 'inspection_report'}
 
+  field_configs[field_configs.length()] =  {:field_type => 'LabelField',:settings=>{:css_class => "bold_label_field"},:field_name => 'no_bags_insp'}
+
 	field_configs[field_configs.length()] = {:field_type => 'TextField',
 						:field_name => 'sample_carton_label'}
+
+  field_configs[field_configs.length()] =  {:field_type => 'LabelField',:settings=>{:css_class => "bold_label_field"},:field_name => 'grade_code'}
 
 	if !ppecb_inspection.passed
 	  field_configs[field_configs.length()] =  {:field_type => 'DropDownField',
 						:field_name => 'reason',
 						:settings => {:list => reasons}}
-    else
-      #ppecb_inspection.reason = "NO REASON REQUIRED"
-      field_configs[field_configs.length()] = {:field_type => 'LabelField',
-						:field_name => 'reason',
-						:settings => {:css_class => "no_format"}}
-    end
 
-    if ppecb_inspection.inspection_level_code && ppecb_inspection.inspection_level_code.upcase == "DISPENSATION"
+    field_configs[field_configs.length()] =  {:field_type => 'LabelField',:settings=>{:css_class => "bold_label_field"},:field_name => 'target_market_code'}
+  else
+    field_configs[field_configs.length()] = {:field_type => 'LabelField',
+          :field_name => 'reason',
+          :settings => {:css_class => "no_format"}}
 
-      field_configs[field_configs.length()] = {:field_type => 'TextField',
-						:field_name => 'dispensation_body'}
+    field_configs[field_configs.length()] =  {:field_type => 'LabelField',:settings=>{:css_class => "bold_label_field"},:field_name => 'target_market_code'}
+  end
 
-	 field_configs[field_configs.length()] = {:field_type => 'TextField',
-						:field_name => 'dispensation_certificate_number'}
+  if ppecb_inspection.inspection_level_code && ppecb_inspection.inspection_level_code.upcase == "DISPENSATION"
+    field_configs[field_configs.length()] = {:field_type => 'TextField',
+          :field_name => 'dispensation_body'}
 
-      field_configs[field_configs.length()] = {:field_type => 'LabelField',
-						:field_name => 'passed'}
-   else
-     field_configs[field_configs.length()] = {:field_type => 'LabelField',
-						:field_name => 'dispensation_body'}
+    field_configs[field_configs.length()] =  {:field_type => 'LabelField',:settings=>{:css_class => "bold_label_field"},:field_name => 'brand_code'}
 
-	 field_configs[field_configs.length()] = {:field_type => 'LabelField',
-						:field_name => 'dispensation_certificate_number'}
+    field_configs[field_configs.length()] = {:field_type => 'TextField',
+          :field_name => 'dispensation_certificate_number'}
 
-	 field_configs[field_configs.length()] = {:field_type => 'CheckBox',
-						:field_name => 'passed',
-						:observer => passed_observer}
+    field_configs[field_configs.length()] =  {:field_type => 'LabelField',:settings=>{:css_class => "bold_label_field"},:field_name => 'product_weight'}
 
-   end
+    field_configs[field_configs.length()] = {:field_type => 'LabelField',
+          :field_name => 'passed'}
 
+    field_configs[field_configs.length()] =  {:field_type => 'LabelField',:settings=>{:css_class => "bold_label_field"},:field_name => 'commodity_code'}
+  else
+    field_configs[field_configs.length()] = {:field_type => 'LabelField',
+          :field_name => 'dispensation_body'}
 
+    field_configs[field_configs.length()] =  {:field_type => 'LabelField',:settings=>{:css_class => "bold_label_field"},:field_name => 'brand_code'}
+
+    field_configs[field_configs.length()] = {:field_type => 'LabelField',
+          :field_name => 'dispensation_certificate_number'}
+
+    field_configs[field_configs.length()] =  {:field_type => 'LabelField',:settings=>{:css_class => "bold_label_field"},:field_name => 'product_weight'}
+
+    field_configs[field_configs.length()] = {:field_type => 'CheckBox',
+          :field_name => 'passed',
+          :observer => passed_observer}
+
+    field_configs[field_configs.length()] =  {:field_type => 'LabelField',:settings=>{:css_class => "bold_label_field"},:field_name => 'commodity_code'}
+  end
+
+  field_configs[field_configs.length()] = {:field_type => 'LabelField',:settings=>{:css_class => "bold_label_field"}, :field_name => '',:settings  => {:show_label => false, :is_separator => false, :static_value => "", :css_class => "borderless_label_field"}}
+  field_configs[field_configs.length()] =  {:field_type => 'LabelField',:settings=>{:css_class => "bold_label_field"},:field_name => 'variety'}
+  field_configs[field_configs.length()] = {:field_type => 'LabelField',:settings=>{:css_class => "bold_label_field"}, :field_name => '',:settings  => {:show_label => false, :is_separator => false, :static_value => "", :css_class => "borderless_label_field"}}
+  field_configs[field_configs.length()] =  {:field_type => 'LabelField',:settings=>{:css_class => "bold_label_field"},:field_name => 'pick_reference'}
+  field_configs[field_configs.length()] = {:field_type => 'LabelField',:settings=>{:css_class => "bold_label_field"}, :field_name => '',:settings  => {:show_label => false, :is_separator => false, :static_value => "", :css_class => "borderless_label_field"}}
+  field_configs[field_configs.length()] =  {:field_type => 'LabelField',:settings=>{:css_class => "bold_label_field"},:field_name => 'pallet_number'}
+  field_configs[field_configs.length()] = {:field_type => 'LabelField',:settings=>{:css_class => "bold_label_field"}, :field_name => '',:settings  => {:show_label => false, :is_separator => false, :static_value => "", :css_class => "borderless_label_field"}}
+  field_configs[field_configs.length()] =  {:field_type => 'LabelField',:settings=>{:css_class => "bold_label_field"},:field_name => 'batch_code'}
+
+  field_configs[field_configs.length()] = {:field_type => 'Screen',
+                                           :field_name => "extra_ppec_info_grid",
+                                           :settings =>{:controller => 'production/runs',
+                                               :target_action => 'kromco_extra_ppec_info_grid',
+                                               :width => 1200,:height => 230,
+                                               :id_value => ppecb_inspection.id,
+                                               :no_scroll => true
+                                           }
+  }
+
+  set_form_layout "2",nil,1,32
+  set_submit_button_align('left')
 	build_form(ppecb_inspection,field_configs,'set_ppecb_inspection','ppecb_inspection','save')
 
 end
@@ -1119,7 +1178,7 @@ end
  def build_pack_groups_grid(data_set,can_edit)
 
 	column_configs = Array.new
-	 #require File.dirname(__FILE__) + "/../../../app/helpers/production/run_setup_plugin.rb"
+	 require File.dirname(__FILE__) + "/../../../app/helpers/production/run_setup_plugin.rb"
 
 	column_configs[0] = {:field_type => 'text',:field_name => 'pack_group_number',:column_caption => 'group_num',:col_width => 85}
 	column_configs[1] = {:field_type => 'text',:field_name => 'production_run_number',:column_caption => 'run_num',:col_width => 85}
@@ -1148,7 +1207,7 @@ end
 
 	end
 
- return get_data_grid(data_set,column_configs,MesScada::GridPlugins::Production::PackGroupGridPlugin.new)
+ return get_data_grid(data_set,column_configs,RunSetupPlugins::PackGroupGridPlugin.new)
 
 end
 
@@ -1423,7 +1482,7 @@ end
    #each record is an instance of PackGroupOutlet
 
 	column_configs = Array.new
-	 #require File.dirname(__FILE__) + "/../../../app/helpers/production/run_setup_plugin.rb"
+	 require File.dirname(__FILE__) + "/../../../app/helpers/production/run_setup_plugin.rb"
 
 	#	----------------------
     #	define action columns
@@ -1454,21 +1513,21 @@ end
 	column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'outlet12',:col_width => 60,:column_caption => 'drop_12'}
 
 
- return get_data_grid(data_set,column_configs,MesScada::GridPlugins::Production::CountsDropsGridPlugin.new)
+ return get_data_grid(data_set,column_configs,RunSetupPlugins::CountsDropsGridPlugin.new)
 
 end
 
 def build_production_run_grid(data_set,can_edit,is_active_runs_grid = nil,run_type = nil,editing_runs=nil)
 
 	column_configs = Array.new
-	 #require File.dirname(__FILE__) + "/../../../app/helpers/production/run_setup_plugin.rb"
+	 require File.dirname(__FILE__) + "/../../../app/helpers/production/run_setup_plugin.rb"
 
 
 	column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'production_run_code',:col_width => 162}
-  column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'rank',:editor => :text,:col_width =>50}  if editing_runs
+  column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'rank',:col_width =>30}  if editing_runs
   column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'puc_code',:col_width => 70}
   column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'farm_code',:col_width => 60}
-  column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'pc_code'}
+  column_configs[column_configs.length()] = {:field_type => 'text',:field_name =>  'pc_code'}
   column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'treatment_code'}
   column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'size_code',}
   column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'ripe_point_code'}
@@ -1482,7 +1541,6 @@ def build_production_run_grid(data_set,can_edit,is_active_runs_grid = nil,run_ty
 	column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'production_run_stage',:col_width => 83,:column_caption => 'stage'}
 	column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'day_line_batch_code',:batch => 50}
 	column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'batch_code',:col_width => 90}
-  column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'id', :hide => true}
 
 #	----------------------
 #	define action columns
@@ -1547,15 +1605,14 @@ def build_production_run_grid(data_set,can_edit,is_active_runs_grid = nil,run_ty
 	  end
 	end
 
- # return get_data_grid(data_set,column_configs,MesScada::GridPlugins::Production::RunEditGridPlugin.new(self,request),true,nil,:save_action => '/production/runs/update_ranked_runs')
+ return get_data_grid(data_set,column_configs,RunSetupPlugins::RunEditGridPlugin.new(self,request),true)
 
-  return get_data_grid(data_set,column_configs, MesScada::GridPlugins::Production::RunEditGridPlugin.new(self,request), true, nil, :save_action => '/production/runs/update_ranked_runs')
 end
 
 
 def build_production_schedule_grid(data_set,can_create_run)
 
-    #require File.dirname(__FILE__) + "/../../../app/helpers/production/run_setup_plugin.rb"
+    require File.dirname(__FILE__) + "/../../../app/helpers/production/run_setup_plugin.rb"
 
     column_configs = Array.new
 
@@ -1598,7 +1655,7 @@ def build_production_schedule_grid(data_set,can_create_run)
 				:target_action => 'completed_runs',
 				:id_column => 'id'}}
 
- return get_data_grid(data_set,column_configs,MesScada::GridPlugins::Production::RunSetupGridPlugin.new)
+ return get_data_grid(data_set,column_configs,RunSetupPlugins::RunSetupGridPlugin.new)
 end
 
 
@@ -1829,7 +1886,7 @@ end
  def build_pack_stations_grid(data_set,can_edit)
 
 	column_configs = Array.new
-	 #require File.dirname(__FILE__) + "/../../../app/helpers/production/run_setup_plugin.rb"
+	 require File.dirname(__FILE__) + "/../../../app/helpers/production/run_setup_plugin.rb"
 
 	#	----------------------
 #	define action columns
@@ -1885,7 +1942,7 @@ end
 
 
 
- return get_data_grid(data_set,column_configs,MesScada::GridPlugins::Production::PackStationGridPlugin.new)
+ return get_data_grid(data_set,column_configs,RunSetupPlugins::PackStationGridPlugin.new)
 
 end
 
@@ -1996,7 +2053,7 @@ end
  def build_binfill_stations_grid(data_set,can_edit)
 
 	column_configs = Array.new
-	 #require File.dirname(__FILE__) + "/../../../app/helpers/production/run_setup_plugin.rb"
+	 require File.dirname(__FILE__) + "/../../../app/helpers/production/run_setup_plugin.rb"
 
 	 #	----------------------
 #	define action columns
@@ -2036,7 +2093,7 @@ end
 
 	column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'fg_product_code',:col_width => 324}
 
- return get_data_grid(data_set,column_configs,MesScada::GridPlugins::Production::BinfillStationGridPlugin.new)
+ return get_data_grid(data_set,column_configs,RunSetupPlugins::BinfillStationGridPlugin.new)
 
 end
 
@@ -2085,7 +2142,7 @@ end
  def build_binfill_sort_stations_grid(data_set,can_edit)
 
 	column_configs = Array.new
-	 #require File.dirname(__FILE__) + "/../../../app/helpers/production/run_setup_plugin.rb"
+	 require File.dirname(__FILE__) + "/../../../app/helpers/production/run_setup_plugin.rb"
 
 	column_configs[0] = {:field_type => 'text',:field_name => 'binfill_sort_station_code',:col_width => 100}
 
@@ -2103,7 +2160,7 @@ end
 
 	end
 
- return get_data_grid(data_set,column_configs,MesScada::GridPlugins::Production::BinfillSortStationGridPlugin.new)
+ return get_data_grid(data_set,column_configs,RunSetupPlugins::BinfillSortStationGridPlugin.new)
 
 end
 

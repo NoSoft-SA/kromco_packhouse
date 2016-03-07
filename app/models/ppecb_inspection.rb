@@ -8,7 +8,9 @@ class PpecbInspection < ActiveRecord::Base
   belongs_to :carton
   belongs_to :pallet
 
-  attr_accessor :production_run_code,:ignore_cascade_ctn_updates
+  attr_accessor :production_run_code,:ignore_cascade_ctn_updates,
+                :product_size,:line_code,:carton_number,:actual_size_count_code,:season,:puc,:no_bags_insp,:grade_code,:target_market_code,:no_fruit_insp ,:brand_code,:product_weight,:commodity_code,:variety,:pick_reference,:pallet_number,:batch_code
+
 
 #	============================
 #	 Validations declarations:
@@ -49,7 +51,7 @@ class PpecbInspection < ActiveRecord::Base
     self.pallet.ppecb_inspection_id = self.id
     self.pallet.update
 
-    if self.pallet.organization_code == "CA" && self.pallet.qc_result_status == "PASSED"
+    if self.pallet.organization_code == "CA"
 	EdiOutProposal.send_doc(self, 'PM') if self.inspection_level_code.upcase == "RE-INSPECTION"
     end
     

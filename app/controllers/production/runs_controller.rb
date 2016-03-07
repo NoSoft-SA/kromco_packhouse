@@ -94,32 +94,15 @@ class Production::RunsController < ApplicationController
 
   def update_ranked_runs
     return if authorise_for_web(program_name?, 'production_run_setup')==false
-    # params[:run].each do |k, v|
-    #   k = k.split('_')
-    #   key = k.shift
-    #
-    #   ActiveRecord::Base.transaction do
-    #     ActiveRecord::Base.connection.execute("update production_runs set rank=#{v} where id = #{key.to_i}") if v!=""
-    #     ActiveRecord::Base.connection.execute("update production_runs set rank=null where id = #{key.to_i}") if v==""
-    #   end
-    # end
+    params[:run].each do |k, v|
+      k = k.split('_')
+      key = k.shift
 
-    ranked_runs = grid_edited_values_to_array(params)
-    query = ''
-    ranked_runs.each do |rank_edit|
-      id= rank_edit[:id]
-      value = rank_edit[:rank]
-      # ActiveRecord::Base.transaction do
-        if(value.to_s.strip.length > 0)
-          query << "update production_runs set rank=#{value} where id = #{id.to_i};"
-          # ActiveRecord::Base.connection.execute("update production_runs set rank=#{value} where id = #{id.to_i}")
-        else
-          query << "update production_runs set rank=null where id = #{id.to_i};"
-          # ActiveRecord::Base.connection.execute("update production_runs set rank=null where id = #{id.to_i}")
-        end
-      # end
+      ActiveRecord::Base.transaction do
+        ActiveRecord::Base.connection.execute("update production_runs set rank=#{v} where id = #{key.to_i}") if v!=""
+        ActiveRecord::Base.connection.execute("update production_runs set rank=null where id = #{key.to_i}") if v==""
+      end
     end
-    ActiveRecord::Base.connection.execute(query)
     editing_runs
   end
 
@@ -607,12 +590,11 @@ class Production::RunsController < ApplicationController
         else
           puts "error ppecb"
           @ppecb_inspection = session[:ppecb_inspection]
+          @content_header_caption = "'set ppecb inspection details'"
           render :inline => %{
-		<% @content_header_caption = "'set ppecb inspection details'"%>
-
-		<%= build_ppecb_inspection_form(@ppecb_inspection)%>
-
-		}, :layout => 'content'
+            <% @content_header_caption = "'set ppecb inspection details'"%>
+            <%= build_ppecb_inspection_form(@ppecb_inspection)%>
+          }, :layout => 'content'
         end
       end
     rescue
@@ -622,7 +604,6 @@ class Production::RunsController < ApplicationController
 
 
   def submit_ppecb_carton_num
-
     carton_num = params['carton_number']['carton_number'].chop!.to_i
     #validations:---------------------------------------------------------------------------
     #-> make sure carton exists and pallet exists and carton is the scanned-out ppecb carton
@@ -640,10 +621,6 @@ class Production::RunsController < ApplicationController
     elsif carton.is_inspection_carton == nil || carton.is_inspection_carton == false
       redirect_to_index("carton with number: " + carton_num.to_s + " is not an inspection carton")
       return
-    elsif rw_ctn = RwActiveCarton.find_by_carton_number(carton_num)
-      redirect_to_index("This carton(#{carton_num} is in reworks at present. <BR> User is: #{rw_ctn.rw_run.username} <BR> Run is: #{rw_ctn.rw_run.rw_run_name}
-                         <BR> (Reworks may overwrite your inspection result for this carton) ",nil,nil,true)
-     return
     end
 
     @last_inspection = PpecbInspection.most_recent_inspection?(carton_num)
@@ -681,16 +658,127 @@ class Production::RunsController < ApplicationController
       end
     end
 
+    extra_inspection_fields = PpecbInspection.find_by_sql("SELECT cartons.carton_number,cartons.pallet_number,substring(cartons.target_market_code,1,2) as target_market_code
+          ,substring(cartons.variety_short_long,1,3) as variety,cartons.grade_code,cartons.puc,cartons.pick_reference
+          ,cartons.line_code,cartons.actual_size_count_code,production_runs.batch_code
+          ,coalesce(extended_fgs.ri_diameter_range,extended_fgs.ri_weight_range) as product_size
+          ,to_char((cartons.carton_fruit_nett_mass + basic_packs.weight), '999D99')as product_weight
+          ,(select marks.brand_code from marks where marks.mark_code = cartons.carton_mark_code) as brand_code
+          ,cartons.id,cartons.season_code as season,cartons.commodity_code,'Top Layer' as no_bags_insp
+          ,'50' as no_fruit_insp 
+          FROM cartons
+          INNER JOIN production_runs ON (production_runs.id = cartons.production_run_id)
+          INNER JOIN extended_fgs ON (extended_fgs.extended_fg_code=cartons.extended_fg_code)
+          INNER JOIN fg_products ON (fg_products.fg_product_code = extended_fgs.fg_code)
+          INNER JOIN carton_pack_products on (carton_pack_products.id = fg_products.carton_pack_product_id)
+          INNER JOIN basic_packs ON (basic_packs.id = carton_pack_products.basic_pack_id)
+          WHERE cartons.carton_number = '#{carton_num}'
+          ")
+    if(!extra_inspection_fields.empty?)
+      extra_inspection_fields[0].attributes.each do |k,v|
+        if(k != 'id')
+          eval "@ppecb_inspection.#{k}='#{v}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'"
+        end
+      end
+    end
+
+
     session[:ppecb_inspection]= @ppecb_inspection
     render :inline => %{
-		<% @content_header_caption = "'set ppecb inspection details'"%>
-
-		<%= build_ppecb_inspection_form(@ppecb_inspection)%>
-
+      <% @content_header_caption = "'set ppecb inspection details'"%>
+      <%= build_ppecb_inspection_form(@ppecb_inspection)%>
 		}, :layout => 'content'
+  end
 
+  def kromco_extra_ppec_info_grid
+    @data_set = []
+    session[:info_field_types] = {}
+
+    AppFactory::PostgresMetaData.get_column_defs('ppecb_cull_analyses', ActiveRecord::Base.connection).each do |cl|
+      if(cl[:field_name]!='id' && cl[:field_name]!='ppecb_inspection_id' && cl[:field_name]!='created_on')
+        @data_set<<{'id'=>cl[:field_name],'info_value'=>nil,'info_type'=>'ppecb_cull_analyses'}
+        session[:info_field_types].store(cl[:field_name],'ppecb_cull_analyses')
+      end
+    end
+
+    AppFactory::PostgresMetaData.get_column_defs('ppecb_additional_info', ActiveRecord::Base.connection).each do |cl|
+      if(cl[:field_name]!='id' && cl[:field_name]!='ppecb_inspection_id' && cl[:field_name]!='created_on')
+        @data_set<<{'id'=>cl[:field_name],'info_value'=>nil,'info_type'=>'ppecb_additional_info'}
+        session[:info_field_types].store(cl[:field_name],'ppecb_additional_info')
+      end
+    end
+
+    render :inline => %{
+        <% grid            = build_extra_ppec_info_grid(@data_set) %>
+        <% grid.caption    = 'kromco extra ppecb info' %>
+        <% grid.group_fields     = ['info_type'] %>
+        <% grid.grouped          = true %>
+        <% @header_content = grid.build_grid_data %>
+        <%= grid.render_html %>
+        <%= grid.render_grid %>
+      }, :layout => 'content'
 
   end
+
+  def capture_kromco_inspection_results
+    data_set = []
+    submission = eval (params['grid_values'].gsub("id=>","id=>'").gsub(",:info_value","',:info_value"))
+    submission.each do |rec|
+      data_set<<{'type'=>session[:info_field_types][rec[:id]],rec[:id]=>rec[:info_value]} if(rec[:info_value])
+    end
+
+    cull_analyses_attributes = {}
+    additional_info_attributes = {}
+    data_set.group_by{|a| a['type'] }.each do |k,v|
+      if(k=='ppecb_cull_analyses')
+        v.each do |h|
+          h.delete('type')
+          cull_analyses_attributes.store(h.keys[0],h.values[0])
+        end
+      else
+        v.each do |h|
+          h.delete('type')
+          additional_info_attributes.store(h.keys[0],h.values[0])
+        end
+      end
+    end
+
+    if(!cull_analyses_attributes.empty?)
+      cull_analyses_attributes.store('ppecb_inspection_id',session[:ppecb_inspection].id)
+      cull_analyses = PpecbCullAnalysis.new(cull_analyses_attributes)
+      if cull_analyses.save!
+        # redirect_to_index("ppecb inspection details saved")
+      else
+        # @ppecb_inspection = session[:ppecb_inspection]
+        # @content_header_caption = "'set ppecb inspection details'"
+        # render :inline => %{
+        #     <% @content_header_caption = "'set ppecb inspection details'"%>
+        #     <%= build_ppecb_inspection_form(@ppecb_inspection)%>
+        #   }, :layout => 'content'
+      end
+    end
+
+    if(!additional_info_attributes.empty?)
+      additional_info_attributes.store('ppecb_inspection_id',session[:ppecb_inspection].id)
+      additional_info = PpecbAdditionalInfo.new(additional_info_attributes)
+      if additional_info.save!
+        # redirect_to_index("ppecb inspection details saved")
+      else
+        # @ppecb_inspection = session[:ppecb_inspection]
+        # @content_header_caption = "'set ppecb inspection details'"
+        # render :inline => %{
+        #     <% @content_header_caption = "'set ppecb inspection details'"%>
+        #     <%= build_ppecb_inspection_form(@ppecb_inspection)%>
+        #   }, :layout => 'content'
+      end
+    end
+
+    puts
+  end
+
+
 
 #	--------------------------------------------------------------------------------
 #	 combo_changed event handlers for composite foreign key: inspection_type_id
