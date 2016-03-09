@@ -20,7 +20,7 @@ module Qc::QcInspectionHelper
   def make_inspection_measure_field( measurement_rules, result_measurement, annotation_no )
     key_sample   = result_measurement.sample_no
     key_id       = result_measurement.id
-
+#NAE 20160229 ADD ANNOTATIONS 4 AND 5
     case annotation_no
     when 1
       curr_value = result_measurement.annotation_1
@@ -28,6 +28,10 @@ module Qc::QcInspectionHelper
       curr_value = result_measurement.annotation_2
     when 3
       curr_value = result_measurement.annotation_3
+    when 4
+      curr_value = result_measurement.annotation_4
+    when 5
+      curr_value = result_measurement.annotation_5     
     end
 
     s = "<td>#{measurement_rules[:label]}</td>"
@@ -92,18 +96,50 @@ module Qc::QcInspectionHelper
         s << '<td colspan="2">&nbsp;</td>'
       end
     end
+    
+    #NAE 20160229 ADD CODE FOR ANNOTATIONS 4 AND 5
+    
+    if max_cols > 4
+      if measurement_rules[code_key][:annotation_4][:active]
+        if for_view
+          s << "<td>#{measurement_rules[code_key][:annotation_4][:label]}</td>"
+          s << "<td>#{measure_formatted( result_measurement.annotation_4 )}</td>"
+        else
+          s << make_inspection_measure_field( measurement_rules[code_key][:annotation_4], result_measurement, 4 )
+        end
+      else
+        s << '<td colspan="2">&nbsp;</td>'
+      end
+    end
+    if max_cols > 5
+      if measurement_rules[code_key][:annotation_5][:active]
+        if for_view
+          s << "<td>#{measurement_rules[code_key][:annotation_5][:label]}</td>"
+          s << "<td>#{measure_formatted( result_measurement.annotation_5 )}</td>"
+        else
+          s << make_inspection_measure_field( measurement_rules[code_key][:annotation_5], result_measurement, 5)
+        end
+      else
+        s << '<td colspan="2">&nbsp;</td>'
+      end
+    end    
+    
     s
   end
  
   def make_cull_inspection_measure_field( measurement_rules, result_measurement, annotation_no )
     key_sample   = result_measurement.sample_no
     key_id       = result_measurement.id
-
+#NAE 20160229 ADD ANNOTATIONS 4 AND 5
     case annotation_no
     when 2
       curr_value = result_measurement.annotation_2
     when 3
       curr_value = result_measurement.annotation_3
+    when 4
+      curr_value = result_measurement.annotation_4
+    when 5
+      curr_value = result_measurement.annotation_5     
     end
 
     s = "<p>#{measurement_rules[:label]}"
@@ -270,7 +306,7 @@ module Qc::QcInspectionHelper
     # Remark fields
     # - only show remarks that have a defined field_type.
     # - Remarks can be plain text, a checkbox or a drop-down.
-    (1..3).each do |no|
+    (1..15).each do |no|
       remark_type = qc_inspection_type.attributes["remark_#{no}_field_type"]
       case remark_type
       when 'CheckBox', 'TextField', 'TextArea'

@@ -65,6 +65,11 @@ class Services::PreSortingController < ApplicationController
       
       palox_bin_presort_run=get_palox_bin_presort_run(representative_bin)
       aport_bin_rmt_product_code = get_aport_bin_full_rmt_product_code(representative_bin['Nom_article'], palox_bin_presort_run)
+      
+      if (representative_bin['Nom_article'].to_s == "Article 128" )
+        raise "Error:Presorted Bin:#{@created_bin}: Article 128 is not used"	      
+      end
+	      
       if (!(rmt_product=RmtProduct.find_by_rmt_product_code(aport_bin_rmt_product_code)))
         raise "Error:Presorted Bin:#{@created_bin}:nom_article:#{representative_bin['Nom_article'].to_s.strip}:  rmt_product_code:'#{aport_bin_rmt_product_code}' does not exist"
       end
@@ -76,17 +81,17 @@ class Services::PreSortingController < ApplicationController
       RAILS_DEFAULT_LOGGER.info ("POIDS representative_bin['Palox_poids']: " + representative_bin['Palox_poids'].to_s)
 
 
-        if (representative_bin['Nom_article'].to_s == "Article 128" && representative_bin['Palox_poids']!="null")
-          if (representative_bin['Palox_poids']==0.0)
-            raise "Error:Presorted Bin:#{@created_bin}:nom_article:#{representative_bin['Nom_article'].to_s.strip}:Palox_poids:#{representative_bin['Palox_poids'].to_s.strip}' is zero"
-          else
-            pack_material_product = PackMaterialProduct.find_by_pack_material_product_code('KROMC')
-          end
-        else
+        #if (representative_bin['Nom_article'].to_s == "Article 128" && representative_bin['Palox_poids']!="null")
+        #  if (representative_bin['Palox_poids']==0.0)
+        #    raise "Error:Presorted Bin:#{@created_bin}:nom_article:#{representative_bin['Nom_article'].to_s.strip}:Palox_poids:#{representative_bin['Palox_poids'].to_s.strip}' is zero"
+        #  else
+        #    pack_material_product = PackMaterialProduct.find_by_pack_material_product_code('KROMC')
+        #  end
+        #else
           if (!(pack_material_product = PackMaterialProduct.find_by_pack_material_product_code(representative_bin['Code_article_caracteristique'])))
             raise "Error:Presorted Bin:#{@created_bin}:nom_article:#{representative_bin['Nom_article'].to_s.strip}: pack_material_product_code:'#{representative_bin['Code_article_caracteristique'].to_s.strip}' does not exist"
           end
-        end
+        #end
 
 
       if (results.length == 1)
@@ -134,12 +139,20 @@ class Services::PreSortingController < ApplicationController
 	#NAE
 	results.each do |ps_bin|
 		ps_rw_insert = ""
-		if ps_bin['Commentaire'].to_s.strip!=ps_bin['Numero_bon_apport'].to_s.strip then			
-			ps_rw_lot=ActiveRecord::Base.connection.select_all("select * from ps_rework_lots where ps_lot_no = '#{ps_bin['Numero_lot']}'")
-			if ps_rw_lot.empty?
+		if ps_bin['Commentaire'].to_s.strip!=ps_bin['Numero_bon_apport'].to_s.strip then	
+
+			#NAE 29/10/2015 check whether there are any orchard_run bins on the reworked run;  if there are then the run is not really a rework run		
+			ps_rework_run_results=ActiveRecord::Base.connection.select_all("select * from bins where ps_tipped_lot_no = '#{ps_bin['Numero_lot']}' and delivery_id is not null limit 1")			
+			if ps_rework_run_results.empty?
+				
+			    ps_rw_lot=ActiveRecord::Base.connection.select_all("select * from ps_rework_lots where ps_lot_no = '#{ps_bin['Numero_lot']}' limit 1")
+			    if ps_rw_lot.empty?
 				ps_rw_insert= "INSERT INTO public.ps_rework_lots (ps_lot_no) VALUES ('#{ps_bin['Numero_lot']}');\n"
 				created=ActiveRecord::Base.connection.execute(ps_rw_insert)	      
+			    end
+			
 			end
+
 		end
 	end
 	#NAE
@@ -162,7 +175,7 @@ class Services::PreSortingController < ApplicationController
   def bin_created
     @created_bin = params[:bin]
     if (error = bin_created_intergration)
-      if(error.strip == "Bin:#{@created_bin} already exists in Kromco Mes db" )
+      if(error.strip == "Bin:#{@created_bin} already exists in Kromco Mes db"||error.strip ==  "Error:Presorted Bin:#{@created_bin}: Article 128 is not used" )
         clear_bin_presort_integration_retries(@created_bin,'bin_created')
         render_result("<error msg=\"#{error}\" />")
       else
@@ -602,8 +615,11 @@ class Services::PreSortingController < ApplicationController
 
       if(presort_staging_child_run.farm.farm_code.to_s.upcase=='0P')
         code_apporteur = "0P"
-        code_parcelle = "0P"
-        nom_parcelle = "0P"
+	#NAE 20151030
+        #code_parcelle = "0P"
+        #nom_parcelle = "0P"
+        code_parcelle = "0P_#{track_indicator_rec.track_slms_indicator_code}"
+        nom_parcelle = "0P_#{track_indicator_rec.track_slms_indicator_code}"	
       else
         code_apporteur = "#{apport_bin.farm.farm_code}"
         if season.season.to_i == 2014

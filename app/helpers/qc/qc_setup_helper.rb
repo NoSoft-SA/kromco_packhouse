@@ -101,7 +101,162 @@ module Qc::QcSetupHelper
     field_configs << {:field_type => 'TextField',
       :field_name => 'remark_3_possible_values',
       :settings   => {:label_caption => 'values:'}}
+      
+    field_configs << {:field_type => 'TextField',
+      :field_name => 'remark_4_label',
+      :settings   => {:label_caption => 'Remark 4 label:'}}
 
+    field_configs <<  {:field_type => 'DropDownField',
+      :field_name => 'remark_4_field_type',
+      :settings => {:list => field_types,
+                    :label_caption => 'Type:'}}
+
+    field_configs << {:field_type => 'TextField',
+      :field_name => 'remark_4_possible_values',
+      :settings   => {:label_caption => 'values:'}}
+      
+    field_configs << {:field_type => 'TextField',
+      :field_name => 'remark_5_label',
+      :settings   => {:label_caption => 'Remark 5 label:'}}
+
+    field_configs <<  {:field_type => 'DropDownField',
+      :field_name => 'remark_5_field_type',
+      :settings => {:list => field_types,
+                    :label_caption => 'Type:'}}
+
+    field_configs << {:field_type => 'TextField',
+      :field_name => 'remark_5_possible_values',
+      :settings   => {:label_caption => 'values:'}}
+      
+    field_configs << {:field_type => 'TextField',
+      :field_name => 'remark_6_label',
+      :settings   => {:label_caption => 'Remark 6 label:'}}
+
+    field_configs <<  {:field_type => 'DropDownField',
+      :field_name => 'remark_6_field_type',
+      :settings => {:list => field_types,
+                    :label_caption => 'Type:'}}
+
+    field_configs << {:field_type => 'TextField',
+      :field_name => 'remark_6_possible_values',
+      :settings   => {:label_caption => 'values:'}}
+
+    field_configs << {:field_type => 'TextField',
+      :field_name => 'remark_7_label',
+      :settings   => {:label_caption => 'Remark 7 label:'}}
+
+    field_configs <<  {:field_type => 'DropDownField',
+      :field_name => 'remark_7_field_type',
+      :settings => {:list => field_types,
+                    :label_caption => 'Type:'}}
+
+    field_configs << {:field_type => 'TextField',
+      :field_name => 'remark_7_possible_values',
+      :settings   => {:label_caption => 'values:'}}
+      
+    field_configs << {:field_type => 'TextField',
+      :field_name => 'remark_8_label',
+      :settings   => {:label_caption => 'Remark 8 label:'}}
+
+    field_configs <<  {:field_type => 'DropDownField',
+      :field_name => 'remark_8_field_type',
+      :settings => {:list => field_types,
+                    :label_caption => 'Type:'}}
+
+    field_configs << {:field_type => 'TextField',
+      :field_name => 'remark_8_possible_values',
+      :settings   => {:label_caption => 'values:'}}      
+      
+    field_configs << {:field_type => 'TextField',
+      :field_name => 'remark_9_label',
+      :settings   => {:label_caption => 'Remark 9 label:'}}
+
+    field_configs <<  {:field_type => 'DropDownField',
+      :field_name => 'remark_9_field_type',
+      :settings => {:list => field_types,
+                    :label_caption => 'Type:'}}
+
+    field_configs << {:field_type => 'TextField',
+      :field_name => 'remark_9_possible_values',
+      :settings   => {:label_caption => 'values:'}}      
+      
+    field_configs << {:field_type => 'TextField',
+      :field_name => 'remark_10_label',
+      :settings   => {:label_caption => 'Remark 10 label:'}}
+
+    field_configs <<  {:field_type => 'DropDownField',
+      :field_name => 'remark_10_field_type',
+      :settings => {:list => field_types,
+                    :label_caption => 'Type:'}}
+
+    field_configs << {:field_type => 'TextField',
+      :field_name => 'remark_10_possible_values',
+      :settings   => {:label_caption => 'values:'}}      
+      
+    field_configs << {:field_type => 'TextField',
+      :field_name => 'remark_11_label',
+      :settings   => {:label_caption => 'Remark 11 label:'}}
+
+    field_configs <<  {:field_type => 'DropDownField',
+      :field_name => 'remark_11_field_type',
+      :settings => {:list => field_types,
+                    :label_caption => 'Type:'}}
+
+    field_configs << {:field_type => 'TextField',
+      :field_name => 'remark_11_possible_values',
+      :settings   => {:label_caption => 'values:'}}          
+      
+    field_configs << {:field_type => 'TextField',
+      :field_name => 'remark_12_label',
+      :settings   => {:label_caption => 'Remark 12 label:'}}
+
+    field_configs <<  {:field_type => 'DropDownField',
+      :field_name => 'remark_12_field_type',
+      :settings => {:list => field_types,
+                    :label_caption => 'Type:'}}
+
+    field_configs << {:field_type => 'TextField',
+      :field_name => 'remark_12_possible_values',
+      :settings   => {:label_caption => 'values:'}}    
+      
+    field_configs << {:field_type => 'TextField',
+      :field_name => 'remark_13_label',
+      :settings   => {:label_caption => 'Remark 13 label:'}}
+
+    field_configs <<  {:field_type => 'DropDownField',
+      :field_name => 'remark_13_field_type',
+      :settings => {:list => field_types,
+                    :label_caption => 'Type:'}}
+
+    field_configs << {:field_type => 'TextField',
+      :field_name => 'remark_13_possible_values',
+      :settings   => {:label_caption => 'values:'}}      
+
+    field_configs << {:field_type => 'TextField',
+      :field_name => 'remark_14_label',
+      :settings   => {:label_caption => 'Remark 14 label:'}}
+
+    field_configs <<  {:field_type => 'DropDownField',
+      :field_name => 'remark_14_field_type',
+      :settings => {:list => field_types,
+                    :label_caption => 'Type:'}}
+
+    field_configs << {:field_type => 'TextField',
+      :field_name => 'remark_14_possible_values',
+      :settings   => {:label_caption => 'values:'}}    
+      
+    field_configs << {:field_type => 'TextField',
+      :field_name => 'remark_15_label',
+      :settings   => {:label_caption => 'Remark 15 label:'}}
+
+    field_configs <<  {:field_type => 'DropDownField',
+      :field_name => 'remark_15_field_type',
+      :settings => {:list => field_types,
+                    :label_caption => 'Type:'}}
+
+    field_configs << {:field_type => 'TextField',
+      :field_name => 'remark_15_possible_values',
+      :settings   => {:label_caption => 'values:'}}          
 
 #    set_form_layout '2', false, 1, 5
     set_form_layout '3', false, 13
@@ -789,6 +944,33 @@ module Qc::QcSetupHelper
     field_configs << {:field_type => 'TextField',
       :field_name => 'annotation_3_possible_values',
       :settings   => {:label_caption => 'values:'}}
+      
+#NAE 20160229 ADD ANNOTATIONS 4 AND 5      
+    field_configs << {:field_type => 'TextField',
+      :field_name => 'annotation_4_label',
+      :settings   => {:label_caption => 'Annotation 4 label:'}}
+
+    field_configs <<  {:field_type => 'DropDownField',
+      :field_name => 'annotation_4_field_type',
+      :settings => {:list => field_types,
+                    :label_caption => 'Type:'}}
+
+    field_configs << {:field_type => 'TextField',
+      :field_name => 'annotation_4_possible_values',
+      :settings   => {:label_caption => 'values:'}}      
+      
+    field_configs << {:field_type => 'TextField',
+      :field_name => 'annotation_5_label',
+      :settings   => {:label_caption => 'Annotation 5 label:'}}
+
+    field_configs <<  {:field_type => 'DropDownField',
+      :field_name => 'annotation_5_field_type',
+      :settings => {:list => field_types,
+                    :label_caption => 'Type:'}}
+
+    field_configs << {:field_type => 'TextField',
+      :field_name => 'annotation_5_possible_values',
+      :settings   => {:label_caption => 'values:'}}      
 
     #set_form_layout '4', false, 1, 8 # This does nothing!
     set_form_layout '2', false, nil, 8 # This does nothing!
@@ -856,6 +1038,11 @@ module Qc::QcSetupHelper
     column_configs << {:field_type => 'text',:field_name => 'annotation_3_label'}
     column_configs << {:field_type => 'text',:field_name => 'annotation_3_field_type'}
 #    column_configs << {:field_type => 'text',:field_name => 'annotation_3_possible_values'}
+#NAE 20160229  ADD ANNOTATIONS 4 AND 5
+    column_configs << {:field_type => 'text',:field_name => 'annotation_4_label'}
+    column_configs << {:field_type => 'text',:field_name => 'annotation_4_field_type'}
+    column_configs << {:field_type => 'text',:field_name => 'annotation_5_label'}
+    column_configs << {:field_type => 'text',:field_name => 'annotation_5_field_type'}    
 
     grid_command = {:field_type => 'link_window_field', :field_name => 'new_measurement_type',
                     :settings   => {

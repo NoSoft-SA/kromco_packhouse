@@ -174,7 +174,8 @@ class QcInspection < ActiveRecord::Base
         end
       end
     end
-    from_qc_inspection_test.qc_results.find(:all, :conditions => "sample_no > #{max_old_sample}", :order => 'sample_no')
+    #NAE 20160229  ADD ORDERING OF FIELDS
+    from_qc_inspection_test.qc_results.find(:all, :include => 'qc_result_measurements', :conditions => "qc_results.sample_no > #{max_old_sample}", :order => 'qc_results.sample_no, qc_result_measurements.qc_measurement_code')
   end
 
   def all_tests_complete?

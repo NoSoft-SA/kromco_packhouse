@@ -35,6 +35,7 @@ class QcInspectionTest < ActiveRecord::Base
 
   # Check each measurement for this test to check which annotations need to be filled-in.
   def max_columns_for_measurements
+  #NAE 20160229  ADD ANNOTATIONS 4 AND 5
     @max_columns_for_measurements ||= begin
       cnt = 1
       measurement_rules.each do |k,v|
@@ -42,6 +43,8 @@ class QcInspectionTest < ActiveRecord::Base
         c += 1 if v[:annotation_1][:active]
         c += 2 if v[:annotation_2][:active]
         c += 3 if v[:annotation_3][:active]
+        c += 4 if v[:annotation_4][:active]
+        c += 5 if v[:annotation_5][:active]	
         cnt = c if c > cnt
       end
       cnt

@@ -173,8 +173,8 @@ code # TODO: WHAT IS THIS DOING HERE?
   def bins_in_location(location_id)
     location_code = session[:location].location_code
     stock_items   = StockItem.find_by_sql("select * from stock_items where location_id =#{location_id} and (destroyed = false or destroyed is null)").map{|p|"'#{p.inventory_reference}'"}
-
-    if session[:new_status_code]=="LOADING" || session[:new_status_code]=="EMPTY"
+#NAE 2016-02-29 REPLACED 'LOADING' WITH 'LOADING_CA' AND 'LOADING_RA_SMARTFRESH'
+    if session[:new_status_code]=="LOADING_CA" ||session[:new_status_code]=="LOADING_RA_SMARTFRESH" || session[:new_status_code]=="EMPTY"
 
       StatusMan.set_status(session[:new_status_code], session[:location].location_type_code, session[:location], session[:user_id].user_name)
       render :inline => %{<script>
