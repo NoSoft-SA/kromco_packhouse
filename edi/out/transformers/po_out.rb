@@ -295,7 +295,8 @@ class PoOut < TextOutTransformer
                 cartons.grade_code cart_grade,
                 case item_pack_products.size_ref when 'NOS' then cast(item_pack_products.actual_count as varchar) else item_pack_products.size_ref end as cart_count,
                 count(cartons.id) no_cartons,
-		      count(cartons.id) / cast(pallets.carton_quantity_actual as float) * 100 no_pallets,pallets.pallet_format_product_id, sum(cartons.carton_fruit_nett_mass) as mass",
+		      count(cartons.id) / cast(pallets.carton_quantity_actual as float) * 100 no_pallets,pallets.pallet_format_product_id, sum(cartons.carton_fruit_nett_mass) as mass,
+			 ppecb_inspections.created_at as inspec_date",
     :joins => 'join load_details on load_details.load_order_id = load_orders.id
                join pallets on pallets.load_detail_id = load_details.id
                join cartons on cartons.pallet_id = pallets.id
@@ -307,7 +308,8 @@ class PoOut < TextOutTransformer
                join extended_fgs on extended_fgs.extended_fg_code = cartons.extended_fg_code
                join fg_products on fg_products.fg_product_code = extended_fgs.fg_code
 	          join target_markets on target_markets.target_market_code = cartons.target_market_code
-               join item_pack_products on item_pack_products.item_pack_product_code = fg_products.item_pack_product_code',
+               join item_pack_products on item_pack_products.item_pack_product_code = fg_products.item_pack_product_code
+			join ppecb_inspections on ppecb_inspections.id = pallets.ppecb_inspection_id',
     :conditions => ['load_orders.id = ?', @record_map['id']],
     :group => 'pallets.id, pallets.consignment_note_number, pallets.is_depot_pallet,
                 pallets.pallet_number, pallets.remark, pallet_bases.edi_out_pallet_base,
@@ -322,7 +324,7 @@ class PoOut < TextOutTransformer
                 cartons.old_pack_code,
                 cartons.season_code,		
                 cartons.grade_code,
-                item_pack_products.size_ref, item_pack_products.actual_count,pallets.pallet_format_product_id',
+                item_pack_products.size_ref, item_pack_products.actual_count,pallets.pallet_format_product_id,ppecb_inspections.created_at',
     :order => 'pallets.pallet_number')
 
       prev       = ''
@@ -509,7 +511,8 @@ class PoOut < TextOutTransformer
               'revision'         => @load_o.revision_number,
               'tran_time'        => Time.now,
               'Stack_variance'   => stack_variance,
-	      'Mass' => pallet.mass
+	      'Mass' => pallet.mass,
+	      'Inspec_date' => Time.parse(pallet.inspec_date)  
               }, 'OP')
 
       oc_rec.add_child op_rec

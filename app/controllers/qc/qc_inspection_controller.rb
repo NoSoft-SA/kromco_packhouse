@@ -141,11 +141,26 @@ class  Qc::QcInspectionController < ApplicationController
   def new_qc_inspection
     @business_object_id      = params[:id]
     @qc_inspection_type_code = params[:id_value]
-    qc_inspection_type       = QcInspectionType.find_by_qc_inspection_type_code(params[:id_value])
+    qc_inspection_type       = QcInspectionType.find_by_qc_inspection_type_code(params[:id_value])   
     @qc_inspection_type_id   = qc_inspection_type.id
     @qc_inspection           = QcInspection.new
     @qc_inspection.set_business_info( qc_inspection_type, @business_object_id )
     @qc_inspection.population_size = qc_inspection_type.population_size
+      
+#NAE 2016-02-24  - Default some fields for qc_inspection_type = 'PSAA'
+    if qc_inspection_type.qc_inspection_type_code == 'PSAA' 
+	prev_qc_inspection = QcInspection.find_by_sql("select * from qc_inspections where qc_inspection_type_id = '#{qc_inspection_type.id}' and business_object_id = '#{params[:id]}' order by id desc limit 1")[0]
+	if !prev_qc_inspection.nil?		    
+		@qc_inspection.remark_1 = prev_qc_inspection.remark_1
+		@qc_inspection.remark_2 = prev_qc_inspection.remark_2
+		@qc_inspection.remark_3 = prev_qc_inspection.remark_3
+		@qc_inspection.remark_4 = prev_qc_inspection.remark_4
+		@qc_inspection.remark_5 = prev_qc_inspection.remark_5	
+		@qc_inspection.remark_6 = prev_qc_inspection.remark_6	
+	end
+    end
+
+
     render_new_qc_inspection
   end
 
@@ -352,6 +367,15 @@ class  Qc::QcInspectionController < ApplicationController
             qc_result_measurement.annotation_1 = params[:samples][qc_result_measurement.sample_no.to_s]["annotation_1_#{qc_result_measurement.id}"] unless @qc_inspection_test.cull_test
             qc_result_measurement.annotation_2 = params[:samples][qc_result_measurement.sample_no.to_s]["annotation_2_#{qc_result_measurement.id}"]
             qc_result_measurement.annotation_3 = params[:samples][qc_result_measurement.sample_no.to_s]["annotation_3_#{qc_result_measurement.id}"]
+	    #NAE20160229 - ADD ANNOTATIONS 4 AND 5
+            qc_result_measurement.annotation_4 = params[:samples][qc_result_measurement.sample_no.to_s]["annotation_4_#{qc_result_measurement.id}"]	   
+	    qc_result_measurement.annotation_5 = params[:samples][qc_result_measurement.sample_no.to_s]["annotation_5_#{qc_result_measurement.id}"]
+	    
+	RAILS_DEFAULT_LOGGER.info ("QCQCQC annotation_1 : " + params[:samples][qc_result_measurement.sample_no.to_s]["annotation_1_#{qc_result_measurement.id}"] .to_s)        
+	RAILS_DEFAULT_LOGGER.info ("QCQCQC annotation_2 : " + params[:samples][qc_result_measurement.sample_no.to_s]["annotation_2_#{qc_result_measurement.id}"] .to_s)        
+	RAILS_DEFAULT_LOGGER.info ("QCQCQC annotation_3 : " + params[:samples][qc_result_measurement.sample_no.to_s]["annotation_3_#{qc_result_measurement.id}"].to_s)        
+	RAILS_DEFAULT_LOGGER.info ("QCQCQC annotation_4 : " + params[:samples][qc_result_measurement.sample_no.to_s]["annotation_4_#{qc_result_measurement.id}"].to_s)        
+	RAILS_DEFAULT_LOGGER.info ("QCQCQC annotation_5 : " + params[:samples][qc_result_measurement.sample_no.to_s]["annotation_5_#{qc_result_measurement.id}"].to_s)        
             qc_result_measurement.save!
           end
         end
@@ -452,9 +476,17 @@ class  Qc::QcInspectionController < ApplicationController
                          map {|r| ["#{r.qc_measurement_code} - #{r.qc_measurement_description}", r.id]}
         @cull_measures.reject! {|m| used_measurements.include? m[1].to_i }
         render :template => '/qc/qc_inspection/edit_qc_inspection_cull_test.rhtml', :layout => 'content'
+	    RAILS_DEFAULT_LOGGER.info ("VARIATION 1 " )       
       else
         # otherwise renders standard rails rhtml...
-        render :template => '/qc/qc_inspection/edit_qc_inspection_test.rhtml', :layout => 'content'
+	    RAILS_DEFAULT_LOGGER.info ("VARIATION CODE qc_inspection_type.qc_inspection_type_code "+qc_inspection_type.qc_inspection_type_code )    			
+        if qc_inspection_type.qc_inspection_type_code =='PSAA' 	
+	    RAILS_DEFAULT_LOGGER.info ("VARIATION 2 " )    		
+         render :template => '/qc/qc_inspection/edit_qc_inspection_test_variation.rhtml', :layout => 'content'		
+	else
+	    RAILS_DEFAULT_LOGGER.info ("VARIATION 3 " )    		
+         render :template => '/qc/qc_inspection/edit_qc_inspection_test.rhtml', :layout => 'content'
+	end
       end
     end
   end
@@ -523,10 +555,17 @@ class  Qc::QcInspectionController < ApplicationController
 
         render :update do |page|
           new_results.each do |result|
+           if @qc_inspection_type_code == 'PSAA' 
+            page.insert_html :bottom, 'qc_test_results', :partial => 'result_variation',
+                                               :object => result,
+                                               :locals => {:max_cols => @qc_inspection_test.max_columns_for_measurements,
+                                                           :measurement_rules => @qc_inspection_test.measurement_rules}		   
+	   else
             page.insert_html :bottom, 'qc_test_results', :partial => 'result',
                                                :object => result,
                                                :locals => {:max_cols => @qc_inspection_test.max_columns_for_measurements,
                                                            :measurement_rules => @qc_inspection_test.measurement_rules}
+	   end
           end
           page.replace_html 'qc_sample_size', @qc_inspection_test.qc_results.size
           page.visual_effect :highlight, 'qc_sample_size'

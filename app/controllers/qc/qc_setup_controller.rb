@@ -943,7 +943,7 @@ class  Qc::QcSetupController < ApplicationController
   #*****************************************************************************
   #--------------- QC MEASUREMENT TYPES ---------------------------------------*
   #*****************************************************************************
-
+#NAE 2016-02-29 ADD ANNOTATION 4 AND 5 CODE
   def query_for_qc_measurement_types(cond='', paginate=true)
     if paginate
     "@qc_measurement_type_pages = Paginator.new self, QcMeasurementType.count, @@page_size,@current_page
@@ -951,11 +951,12 @@ class  Qc::QcSetupController < ApplicationController
          :select => 'qc_measurement_types.id, qc_measurement_types.qc_measurement_code,
                      qc_measurement_types.qc_measurement_description, qc_measurement_types.qc_test_id,
                      qc_measurement_types.test_uom, qc_measurement_types.test_criteria,
-                     qc_measurement_types.test_method, qc_measurement_types.annotation_1_label,
-                     qc_measurement_types.annotation_1_field_type, qc_measurement_types.annotation_1_possible_values,
-                     qc_measurement_types.annotation_2_label, qc_measurement_types.annotation_2_field_type,
-                     qc_measurement_types.annotation_2_possible_values, qc_measurement_types.annotation_3_label,
-                     qc_measurement_types.annotation_3_field_type, qc_measurement_types.annotation_3_possible_values,
+                     qc_measurement_types.test_method, 
+		           qc_measurement_types.annotation_1_label, qc_measurement_types.annotation_1_field_type, qc_measurement_types.annotation_1_possible_values,
+                     qc_measurement_types.annotation_2_label, qc_measurement_types.annotation_2_field_type, qc_measurement_types.annotation_2_possible_values, 
+		           qc_measurement_types.annotation_3_label, qc_measurement_types.annotation_3_field_type, qc_measurement_types.annotation_3_possible_values,
+		           qc_measurement_types.annotation_4_label, qc_measurement_types.annotation_4_field_type, qc_measurement_types.annotation_4_possible_values,
+		           qc_measurement_types.annotation_5_label, qc_measurement_types.annotation_5_field_type, qc_measurement_types.annotation_5_possible_values,
                      qc_tests.qc_test_code, qc_tests.qc_test_description',
          :joins => 'join qc_tests on qc_tests.id = qc_measurement_types.qc_test_id',
          :order => 'qc_tests.qc_test_code, qc_measurement_types.qc_measurement_code',
@@ -966,11 +967,12 @@ class  Qc::QcSetupController < ApplicationController
          :select => 'qc_measurement_types.id, qc_measurement_types.qc_measurement_code,
                      qc_measurement_types.qc_measurement_description, qc_measurement_types.qc_test_id,
                      qc_measurement_types.test_uom, qc_measurement_types.test_criteria,
-                     qc_measurement_types.test_method, qc_measurement_types.annotation_1_label,
-                     qc_measurement_types.annotation_1_field_type, qc_measurement_types.annotation_1_possible_values,
-                     qc_measurement_types.annotation_2_label, qc_measurement_types.annotation_2_field_type,
-                     qc_measurement_types.annotation_2_possible_values, qc_measurement_types.annotation_3_label,
-                     qc_measurement_types.annotation_3_field_type, qc_measurement_types.annotation_3_possible_values,
+                     qc_measurement_types.test_method, 
+		           qc_measurement_types.annotation_1_label, qc_measurement_types.annotation_1_field_type, qc_measurement_types.annotation_1_possible_values,
+   			      qc_measurement_types.annotation_2_label, qc_measurement_types.annotation_2_field_type, qc_measurement_types.annotation_2_possible_values, 
+			      qc_measurement_types.annotation_3_label, qc_measurement_types.annotation_3_field_type, qc_measurement_types.annotation_3_possible_values,
+		           qc_measurement_types.annotation_4_label, qc_measurement_types.annotation_4_field_type, qc_measurement_types.annotation_4_possible_values,
+		           qc_measurement_types.annotation_5_label, qc_measurement_types.annotation_5_field_type, qc_measurement_types.annotation_5_possible_values,			      
                      qc_tests.qc_test_code, qc_tests.qc_test_description',
          :order => 'qc_tests.qc_test_code, qc_measurement_types.qc_measurement_code',
          :joins => 'join qc_tests on qc_tests.id = qc_measurement_types.qc_test_id' #{cond})"
