@@ -315,6 +315,7 @@ function saveArrayToCsv(data, filename) {
 
   // Submit ids and editable values from grid.
   function returnChangesFromGrid(gridid, action) {
+    Slick.GlobalEditorLock.commitCurrentEdit(); // Ensure current edit is saved to the grid first.
     var grid     = jQuery('#'+gridid).data('slickgrid');
     var dataView = jQuery('#'+gridid).data('slickgridView'),
         columns = [],
