@@ -11,19 +11,20 @@
 
 <%if(!@can_edit && !@is_new_inspection)%>
     <div id="kromco_inspection_info" class="collapse_set_no_pad">
-      <%if(@cull_analysis)%>
-        <h3>Cull Analyses</h3>
-        <div style="width:100%">
-        <%= build_cull_analyses_form(@cull_analysis)%>
-        </div>
-      <%end%>
-
       <%if(@additional_info)%>
         <h3>Extra Info</h3>
         <div style="width:100%">
-        <%= build_additional_info_form(@additional_info)%>
+            <%= build_additional_info_form(@additional_info)%>
         </div>
       <%end%>
+
+      <%if(@cull_analysis)%>
+        <h3>Cull Analyses</h3>
+        <div style="width:100%">
+            <%= build_cull_analyses_form(@cull_analysis)%>
+        </div>
+      <%end%>
+
     </div>
 
 <%end%>
