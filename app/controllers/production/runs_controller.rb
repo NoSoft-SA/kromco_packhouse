@@ -591,17 +591,19 @@ class Production::RunsController < ApplicationController
           puts "error ppecb"
           @ppecb_inspection = session[:ppecb_inspection]
           @content_header_caption = "'set ppecb inspection details'"
-          render :inline => %{
-            <% @content_header_caption = "'set ppecb inspection details'"%>
-            <%= build_ppecb_inspection_form(@ppecb_inspection)%>
-          }, :layout => 'content'
+
+          @can_edit = false
+          render :template => "production/runs/ppecb_inspection", :layout => "content"
+          # render :inline => %{
+          #   <% @content_header_caption = "'set ppecb inspection details'"%>
+          #   <%= build_ppecb_inspection_form(@ppecb_inspection)%>
+          # }, :layout => 'content'
         end
       end
     rescue
       handle_error("PPECB inspection could not be saved")
     end
   end
-
 
   def submit_ppecb_carton_num
     carton_num = params['carton_number']['carton_number'].chop!.to_i
@@ -623,8 +625,12 @@ class Production::RunsController < ApplicationController
       return
     end
 
+
+
     @last_inspection = PpecbInspection.most_recent_inspection?(carton_num)
     if !params['carton_number']['hidden_data']
+      @can_edit = false
+      @is_new_inspection = true
       @ppecb_inspection = PpecbInspection.new
       @ppecb_inspection.pallet_number = carton.pallet.pallet_number
       @ppecb_inspection.pallet_id = carton.pallet.id
@@ -648,6 +654,10 @@ class Production::RunsController < ApplicationController
 
       end
     else
+      @can_edit = true
+      @can_edit = false if(@cull_analysis = PpecbCullAnalysis.find_by_ppecb_inspection_id(@last_inspection.id))
+      @can_edit = false if(@additional_info = PpecbAdditionalInfo.find_by_ppecb_inspection_id(@last_inspection.id))
+
       if !@last_inspection
         redirect_to_index("No inspection was done yet")
         return
@@ -684,12 +694,14 @@ class Production::RunsController < ApplicationController
       end
     end
 
-
     session[:ppecb_inspection]= @ppecb_inspection
-    render :inline => %{
-      <% @content_header_caption = "'set ppecb inspection details'"%>
-      <%= build_ppecb_inspection_form(@ppecb_inspection)%>
-		}, :layout => 'content'
+    render :template => "production/runs/ppecb_inspection", :layout => "content"
+
+
+    # render :inline => %{
+     #  <% @content_header_caption = "'set ppecb inspection details'"%>
+     #  <%= build_ppecb_inspection_form(@ppecb_inspection)%>
+		# }, :layout => 'content'
   end
 
   def kromco_extra_ppec_info_grid
@@ -703,7 +715,7 @@ class Production::RunsController < ApplicationController
       end
     end
 
-    AppFactory::PostgresMetaData.get_column_defs('ppecb_additional_info', ActiveRecord::Base.connection).each do |cl|
+    AppFactory::PostgresMetaData.get_column_defs('ppecb_additional_infos', ActiveRecord::Base.connection).each do |cl|
       if(cl[:field_name]!='id' && cl[:field_name]!='ppecb_inspection_id' && cl[:field_name]!='created_on')
         @data_set<<{'id'=>cl[:field_name],'info_value'=>nil,'info_type'=>'ppecb_additional_info'}
         session[:info_field_types].store(cl[:field_name],'ppecb_additional_info')
@@ -745,39 +757,30 @@ class Production::RunsController < ApplicationController
       end
     end
 
-    ActiveRecord::Base.transaction do
-      if(!cull_analyses_attributes.empty?)
-        cull_analyses_attributes.store('ppecb_inspection_id',session[:ppecb_inspection].id)
-        cull_analyses = PpecbCullAnalysis.new(cull_analyses_attributes)
-        if cull_analyses.save!
-          # redirect_to_index("ppecb inspection details saved")
-        else
-          # @ppecb_inspection = session[:ppecb_inspection]
-          # @content_header_caption = "'set ppecb inspection details'"
-          # render :inline => %{
-          #     <% @content_header_caption = "'set ppecb inspection details'"%>
-          #     <%= build_ppecb_inspection_form(@ppecb_inspection)%>
-          #   }, :layout => 'content'
+    begin
+      ActiveRecord::Base.transaction do
+        if(!cull_analyses_attributes.empty?)
+          cull_analyses_attributes.store('ppecb_inspection_id',session[:ppecb_inspection].id)
+          cull_analyses = PpecbCullAnalysis.new(cull_analyses_attributes)
+          !cull_analyses.save!
+        end
+
+        if(!additional_info_attributes.empty?)
+          additional_info_attributes.store('ppecb_inspection_id',session[:ppecb_inspection].id)
+          additional_info = PpecbAdditionalInfo.new(additional_info_attributes)
+          additional_info.save!
         end
       end
 
-      if(!additional_info_attributes.empty?)
-        additional_info_attributes.store('ppecb_inspection_id',session[:ppecb_inspection].id)
-        additional_info = PpecbAdditionalInfo.new(additional_info_attributes)
-        if additional_info.save!
-          # redirect_to_index("ppecb inspection details saved")
-        else
-          # @ppecb_inspection = session[:ppecb_inspection]
-          # @content_header_caption = "'set ppecb inspection details'"
-          # render :inline => %{
-          #     <% @content_header_caption = "'set ppecb inspection details'"%>
-          #     <%= build_ppecb_inspection_form(@ppecb_inspection)%>
-          #   }, :layout => 'content'
-        end
-      end
+      render :inline => %{<script>
+                              window.parent.location.reload(true);
+                            </script>
+        }, :layout => 'content'
+    rescue
+      raise $!
+      # flash[:error] = $!.message
+      # kromco_extra_ppec_info_grid
     end
-
-    puts
   end
 
 

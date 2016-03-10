@@ -9,6 +9,28 @@ module Production::RunsHelper
     return get_data_grid(data_set, column_configs, nil, true, nil, :save_action => 'capture_kromco_inspection_results')
   end
 
+  def build_cull_analyses_form(cull_analysis)
+    field_configs = Array.new
+
+    cull_analysis.attributes.each do |k,v|
+      field_configs << {:field_type => 'LabelField',:field_name => k} if(k!='ppecb_inspection_id' && k!='id')
+    end
+
+
+    build_form(cull_analysis,field_configs,nil,'PpecbCullAnalysis','')
+  end
+
+  def build_additional_info_form(additional_info)
+    field_configs = Array.new
+
+    additional_info.attributes.each do |k,v|
+      field_configs << {:field_type => 'LabelField',:field_name => k} if(k!='ppecb_inspection_id' && k!='id')
+    end
+
+
+    build_form(additional_info,field_configs,nil,'PpecbAdditionalInfo','')
+  end
+
   def build_mini_production_run_view(run,action,ignore_pack_groups = nil)
 
   field_configs = Array.new
@@ -330,15 +352,16 @@ def build_ppecb_inspection_form(ppecb_inspection)
   field_configs[field_configs.length()] = {:field_type => 'LabelField',:settings=>{:css_class => "bold_label_field"}, :field_name => '',:settings  => {:show_label => false, :is_separator => false, :static_value => "", :css_class => "borderless_label_field"}}
   field_configs[field_configs.length()] =  {:field_type => 'LabelField',:settings=>{:css_class => "bold_label_field"},:field_name => 'batch_code'}
 
-  field_configs[field_configs.length()] = {:field_type => 'Screen',
-                                           :field_name => "extra_ppec_info_grid",
-                                           :settings =>{:controller => 'production/runs',
-                                               :target_action => 'kromco_extra_ppec_info_grid',
-                                               :width => 1200,:height => 230,
-                                               :id_value => ppecb_inspection.id,
-                                               :no_scroll => true
-                                           }
-  }
+  if(@can_edit)
+    field_configs[field_configs.length()] = {:field_type => 'Screen',
+                                             :field_name => "extra_ppec_info_grid",
+                                             :settings =>{:controller => 'production/runs',
+                                                 :target_action => 'kromco_extra_ppec_info_grid',
+                                                 :width => 1200,:height => 230,
+                                                 :no_scroll => true
+                                             }
+    }
+  end
 
   set_form_layout "2",nil,1,32
   set_submit_button_align('left')

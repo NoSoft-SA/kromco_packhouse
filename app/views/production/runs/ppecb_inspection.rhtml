@@ -1,9 +1,30 @@
+<% content_for :head_extras do -%>
+    <script type="text/javascript">
+        jQuery(function() {
+            jQuery("#kromco_inspection_info").collapse();
+        });
+    </script>
+<% end -%>
+
+
 <%= build_ppecb_inspection_form(@ppecb_inspection)%>
 
+<%if(!@can_edit && !@is_new_inspection)%>
+    <div id="kromco_inspection_info" class="collapse_set_no_pad">
+      <%if(@cull_analysis)%>
+        <h3>Cull Analyses</h3>
+        <div style="width:100%">
+        <%= build_cull_analyses_form(@cull_analysis)%>
+        </div>
+      <%end%>
 
-<% grid            = build_forecast_grid(@forecasts,@can_edit,@can_delete) %>
-<% grid.caption    = 'forecasts' %>
-<% @header_content = grid.build_grid_data %>
-<% @pagination = pagination_links(@forecast_pages) if @forecast_pages != nil %>
-<%= grid.render_html %>
-<%= grid.render_grid %>
+      <%if(@additional_info)%>
+        <h3>Extra Info</h3>
+        <div style="width:100%">
+        <%= build_additional_info_form(@additional_info)%>
+        </div>
+      <%end%>
+    </div>
+
+<%end%>
+
