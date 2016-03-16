@@ -435,15 +435,20 @@ class DevelopmentTools::CrudToolsController < ApplicationController
   end
 
   def show_reference
-    @icons = []
+    @icons  = []
+    colours = []
     File.foreach('public/stylesheets/grid_icons_n_colours.css') do |l|
       if l =~ /\A.context-menu-item\.icon-/
         s = l.split(' ')[0].sub(/\A\./,'')
         s2 = l.split('{')[1].split('}').first.strip
         @icons << [s.split('icon-').last, s2]
       end
+      if l =~ /slick_row_/
+        colours << l.chomp.sub(/.slick_row_(\w+)\s.*/, "\\1")
+      end
     end
     @icons.sort!
+    @grid_row_colours = ":#{colours.sort.uniq.join(', :')}"
 
   end
 

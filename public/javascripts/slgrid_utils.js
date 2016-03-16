@@ -540,6 +540,12 @@ function saveArrayToCsv(data, filename) {
     return "<span class='"+cls+"'>"+value+"</span>";
   }
 
+  // Format a numeric text cell with percent sign.
+  function slickPercentFormatter(row, cell, value, columnDef, dataContext) {
+    if(value === ''){ return ''; }
+    return numberWithCommas2(value)+'%'; // 98.23%
+  }
+
   // Format a numeric text cell with thousands separator.
   function slickDelimitedFormatter(row, cell, value, columnDef, dataContext) {
     if(value === ''){ return ''; }

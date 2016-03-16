@@ -1989,6 +1989,11 @@ end
     else
       hidden = {}
     end
+    if grid_configs && grid_configs['colour_rules']
+      colour_rules = grid_configs['colour_rules']
+    else
+      colour_rules = {}
+    end
 
     column_configs = Array.new
     keys = recordset[0].keys
@@ -2004,6 +2009,7 @@ end
         column_configs[column_index][:data_type]      = data_types[col.to_s.strip] if data_types[col.to_s.strip]
         column_configs[column_index][:column_caption] = column_captions[col.to_s.strip] if column_captions[col.to_s.strip]
         column_configs[column_index][:format]         = formats[col.to_s.strip] if formats[col.to_s.strip]
+        column_configs[column_index][:colour_rules]   = colour_rules[col.to_s.strip] if colour_rules[col.to_s.strip]
         column_configs[column_index][:hide]           = true if hidden[col.to_s.strip]
         column_index += 1
       end
@@ -2015,6 +2021,7 @@ end
           column_configs.last[:data_type]      = data_types[key.to_s] if data_types[key.to_s]
           column_configs.last[:column_caption] = column_captions[key.to_s] if column_captions[key.to_s]
           column_configs.last[:format]         = formats[key.to_s] if formats[key.to_s]
+          column_configs.last[:colour_rules]   = colour_rules[key.to_s] if colour_rules[key.to_s]
           column_configs.last[:hide]           = true if hidden[key.to_s]
         end
       else
@@ -2032,6 +2039,7 @@ end
           temp[index][:data_type]      = data_types[bare_col]      if data_types[bare_col]
           temp[index][:column_caption] = column_captions[bare_col] if column_captions[bare_col]
           temp[index][:format]         = formats[bare_col]         if formats[bare_col]
+          temp[index][:colour_rules]   = colour_rules[bare_col]    if colour_rules[bare_col]
           temp[index][:hide]           = true                      if hidden[bare_col]
         end
         # Go through all the fields in the dataset that were not matched in the columns list and place them
@@ -2043,6 +2051,7 @@ end
           temp[index][:data_type]      = data_types[key.to_s] if data_types[key.to_s]
           temp[index][:column_caption] = column_captions[key.to_s] if column_captions[key.to_s]
           temp[index][:format]         = formats[key.to_s] if formats[key.to_s]
+          temp[index][:colour_rules]   = colour_rules[key.to_s] if colour_rules[key.to_s]
           temp[index][:hide]           = true if hidden[key.to_s]
         end
         # Update the column_configs with the (hopefully) correctly-sequenced columns.
@@ -2146,6 +2155,11 @@ end
     else
       hidden = {}
     end
+    if grid_configs && grid_configs['colour_rules']
+      colour_rules = grid_configs['colour_rules']
+    else
+      colour_rules = {}
+    end
 
     if (columns_list != nil && columns_list.length > 0) &&
       (stat.to_s.upcase().index("SUM(")   == nil &&
@@ -2160,6 +2174,7 @@ end
         column_configs.last[:data_type]      = data_types[bare_col]      if data_types[bare_col]
         column_configs.last[:column_caption] = column_captions[bare_col] if column_captions[bare_col]
         column_configs.last[:format]         = formats[bare_col]         if formats[bare_col]
+        column_configs.last[:colour_rules]   = colour_rules[bare_col]    if colour_rules[bare_col]
         column_configs.last[:hide]           = true                      if hidden[bare_col]
       end
     else
@@ -2170,6 +2185,7 @@ end
           column_configs.last[:data_type]      = data_types[key.to_s] if data_types[key.to_s]
           column_configs.last[:column_caption] = column_captions[key.to_s] if column_captions[key.to_s]
           column_configs.last[:format]         = formats[key.to_s] if formats[key.to_s]
+          column_configs.last[:colour_rules]   = colour_rules[key.to_s] if colour_rules[key.to_s]
           column_configs.last[:hide]           = true if hidden[key.to_s]
         end
       else
@@ -2190,6 +2206,7 @@ end
             temp[index][:data_type]      = data_types[bare_col]      if data_types[bare_col]
             temp[index][:column_caption] = column_captions[bare_col] if column_captions[bare_col]
             temp[index][:format]         = formats[bare_col]         if formats[bare_col]
+            temp[index][:colour_rules]   = colour_rules[bare_col]    if colour_rules[bare_col]
             temp[index][:hide]           = true                      if hidden[bare_col]
           end
           # Go through all the fields in the dataset that were not matched in the columns list and place them
@@ -2201,6 +2218,7 @@ end
             temp[index][:data_type]      = data_types[key.to_s] if data_types[key.to_s]
             temp[index][:column_caption] = column_captions[key.to_s] if column_captions[key.to_s]
             temp[index][:format]         = formats[key.to_s] if formats[key.to_s]
+            temp[index][:colour_rules]   = colour_rules[key.to_s] if colour_rules[key.to_s]
             temp[index][:hide]           = true if hidden[key.to_s]
           end
         end
@@ -2477,6 +2495,25 @@ end
     else
       '<span class="bool_uncheck"></span>'
     end
+  end
+
+  # Format help text for display in a form.
+  # Use like this:
+  #
+  # field_configs << help_block(str)
+  #
+  # - where str contains whatever string you want to display (can be formatted using HTML).
+  def help_block(help_text)
+    show_hide = %Q|</table>
+    <a href="#" onclick="var ht = document.getElementById('help_text'); if(ht.style.display === 'none') { ht.style.display = 'block';ht.text = 'Hide';} else {ht.style.display = 'none';};return false"><img src="/images/info.png" style="vertical-align:text-bottom"> Toggle help text</a>
+    <div id="help_text" style="display : none;background-color:aliceblue;">#{help_text}</div><table>|
+
+    {:field_type => 'LabelField',
+     :field_name => 'ht',
+     :settings   => {:static_value => show_hide,
+                     :non_dbfield  => true,
+                     :show_label   => false,
+                     :css_class    => 'unbordered_label_field'}}
   end
 
 end

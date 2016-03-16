@@ -1939,3 +1939,9 @@ div.collapseAlls p {
   color: maroon;
   background-color: #ffc;
 }
+
+/* Reset color for select options so that disabled option set by jQuery doesn't persist to other options. */
+select option:not(:disabled) {
+  color:black;
+}
+

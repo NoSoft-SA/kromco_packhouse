@@ -59,7 +59,23 @@ then <code>user.parent</code> will return nil and <code>user.parent.name</code> 
 equivalent of an <code>SQL LEFT OUTER JOIN</code> on the joined association so that no exception is raised.
 </p></li>
 <li>:truncate <span class="info_column">(Optional, text only. Set to true if the field value should be trimmed to the value of <strong>Globals.get_column_data_width</strong>)</span></li>
-<li>:format <span class="info_column">(Optional, text only. Can be &quot;<strong>default_currency</strong>&quot;, &quot;<strong>default_currency_4</strong>&quot; or &quot;<strong>delimited_1000</strong>&quot;, &quot;<strong>delimited_1000_4</strong>&quot;<br>&nbsp; to format as R12,123.12, R12,123.1234 or 12,123.12, 12,123.1234)</span><br>&nbsp;</li>
+<li>:format <span class="info_column">(Optional, text only. Can be &quot;<strong>default_currency</strong>&quot;, &quot;<strong>default_currency_4</strong>&quot; or &quot;<strong>delimited_1000</strong>&quot;, &quot;<strong>delimited_1000_4</strong>&quot; or &quot;<strong>percent</strong>&quot;<br>&nbsp; to format as R12,123.12, R12,123.1234 or 12,123.12, 12,123.1234 or 12.12%)</span><br>&nbsp;</li>
+<li>:colour_rules <span class="info_column">(Optional, text only. Specify an Array of rules as [lambda, colour] Arrays. The colour (a :symbol) will be applied to the row if the lambda evaluates to true.)<br> Only one column in a grid can have colour rules. It is a good idea to guard against nil (see &quot;<tt>a &amp;&amp; ...</tt>&quot; below) in the lambdas.</span><br>&nbsp;
+<div class="CodeRay">
+<pre>
+<span class="symbol">:colour_rules</span> =&gt; [
+                  [lambda {|a| a &amp;&amp; (a == <span class="string"><span class="delimiter">'</span><span class="content">t</span><span class="delimiter">'</span></span> || a == <span class="predefined-constant">true</span>) }, <span class="symbol">:red</span>],
+                  [lambda {|a| a.nil?                       }, <span class="symbol">:green</span>]
+                 ]
+</pre>
+</div>
+  <p>
+    - If the cell value is 't' or true, the row will be coloured red.<br>
+    - If the cell value is nil, the row will be coloured green.<br>
+    - Any other value (in this case probably just false), the row wil be black (default colour).<br>
+    - Available colours are: <em><%= @grid_row_colours %></em>.
+</p>
+</li>
 <li>:settings <span class="info_column">(Optional hash of settings. See notes below for settings per field_type)</span></li>
 </ul>
 <h2 id="settings-attributes-per-column-type">Settings attributes per column type</h2>

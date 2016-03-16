@@ -790,7 +790,11 @@ module MesScada
           if @settings[:disabled_list].first.respond_to?(:first)
             elem = @settings[:disabled_list].rassoc(val)
           else
-            elem = @settings[:disabled_list].fetch(val, nil)
+            if @settings[:disabled_list].is_a? Hash
+              elem = @settings[:disabled_list].fetch(val, nil)
+            else
+              elem = val if @settings[:disabled_list].include?(val)
+            end
           end
           unless elem.nil?
             list << elem
