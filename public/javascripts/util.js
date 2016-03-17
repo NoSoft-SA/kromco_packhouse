@@ -150,6 +150,17 @@
       }
     });
 
+    // Highlight disabled option in a select.
+    jQuery(document).ready(function () {
+      jQuery('select > option:selected:disabled').each(function(){
+        jQuery(this).parent().css("color","red");
+      });
+
+      jQuery('select').change(function(){
+        jQuery(this).css("color", "inherit");
+      }); 
+    });
+
 
     // Datepickers
     // ------------------------------------------------------------------------

@@ -36,7 +36,7 @@ Used in the Report Index page. Reports are grouped together by this value. Most 
   <li>column_widths <span class="info_column"> Provide a width for each column in pixels. e.g. <em>customer: 200</em></span></li>
   <li>data_types <span class="info_column"> Provide a data type for each column. Valid types are <strong>date, boolean</strong> and <strong>integer</strong>. e.g. <em>is_paid: boolean</em></span></li>
   <li>column_captions <span class="info_column"> Provide a caption for each column. e.g. <em>customer: Customer Name</em></span></li>
-  <li>formats <span class="info_column"> Provide a format for each column. Valid formats are <strong>delimited_1000, delimited_1000_4, default_currency, default_currency_4</strong> e.g. <em>amount: delimited_1000</em></span></li>
+  <li>formats <span class="info_column"> Provide a format for each column. Valid formats are <strong>delimited_1000, delimited_1000_4, default_currency, default_currency_4, percent</strong> e.g. <em>amount: delimited_1000</em></span></li>
   <li>hidden <span class="info_column"> List which fields are to be included in the SQL query, but hidden from the display. e.g. <em>id: true</em></span></li>
   <li>groupable_fields <span class="info_column"> Array of columns that the user can group by. e.g. <em>- customer</em> This gives the user an option in the grid UI to change the grouping dynamically with any set of these columns.</span></li>
   <li>group_fields_to_sum <span class="info_column"> Array of columns that should be summed per group. e.g. <em>- amount</em></span></li>
@@ -45,20 +45,37 @@ Used in the Report Index page. Reports are grouped together by this value. Most 
   <li>group_fields_to_max <span class="info_column"> Array of columns that should have the maximum calculated per group. e.g. <em>- amount</em></span></li>
   <li>group_fields <span class="info_column"> Array of columns that the report will be grouped by. e.g. <em>- customer</em></span></li>
   <li>grouped <span class="info_column"> Boolean. If true, the report will be grouped on initialisation (using the fields under <em>group_fields</em>. Defaults to false.</span></li>
+  <li>colour_rules <span class="info_column"> Hash of one column as key and Array of Arrays as value. The first rule to evaluate to true has its colour applied to the row. See example below:</span></li>
 </ul>
+<div class="CodeRay">
+  <pre>
+  <span class="key">colour_rules</span>:
+    <span class="key">status</span>:
+      -
+        - <span class="string"><span class="content">lambda {|a| a &amp;&amp; a == 'Received' }</span></span>
+        - <span class="string"><span class="content">:orange</span></span>
+      -
+        - <span class="string"><span class="content">lambda {|a| a &amp;&amp; a == 'Finalised' }</span></span>
+        - <span class="string"><span class="content">:green</span></span>
+      -
+        - <span class="string"><span class="content">lambda {|a| a &amp;&amp; a == 'On Hold' }</span></span>
+        - <span class="string"><span class="content">:red</span></span> </pre> </div>
+Available colours are: <em><%= @grid_row_colours %></em>.
 <h2>fields</h2>
 <p>Format:<br />
+<div class="CodeRay">
 <pre>
-fields:
-  field1:
-    field_name:        col_name
-    caption:           Column Name
-    field_type:        lookup
-    list:              SELECT code FROM table
-    sorted:            true
-    searchable:        false
-    lookup_search_uri: diagnostics/alerts/lookup_consignment_record
+<span class="key">fields</span>:
+  <span class="key">field1</span>:
+    <span class="key">field_name</span>:        <span class="string"><span class="content">col_name</span></span>
+    <span class="key">caption</span>:           <span class="string"><span class="content">Column Name</span></span>
+    <span class="key">field_type</span>:        <span class="string"><span class="content">lookup</span></span>
+    <span class="key">list</span>:              <span class="string"><span class="content">SELECT code FROM table</span></span>
+    <span class="key">sorted</span>:            <span class="string"><span class="content">true</span></span>
+    <span class="key">searchable</span>:        <span class="string"><span class="content">false</span></span>
+    <span class="key">lookup_search_uri</span>: <span class="string"><span class="content">diagnostics/alerts/lookup_consignment_record</span></span>
 </pre>
+</div>
 <ul>
   <li>field_name <span class="info_column">Required. Must match the name in the query's where clause exactly. e.g. <em>customers.party_name</em></span></li>
   <li>caption <span class="info_column">Required. Any text</span></li>

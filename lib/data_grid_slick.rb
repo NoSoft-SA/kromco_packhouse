@@ -606,6 +606,9 @@ EOS
     if(columns[i].formatter === 'text') {
       columns[i].formatter = slickTextFormatter;
     }
+    if(columns[i].formatter === 'percent') {
+      columns[i].formatter = slickPercentFormatter;
+    }
     if(columns[i].formatter === 'delimited_1000') {
       columns[i].formatter = slickDelimitedFormatter;
     }
@@ -1092,6 +1095,13 @@ EOS
       num_cols  = @column_configs.select {|c| c[:data_type] && c[:data_type] == 'number' }.map {|r| r[:field_name]}
       bool_cols = @column_configs.select {|c| c[:data_type] && c[:data_type] == 'boolean' }.map {|r| r[:field_name]}
 
+      # Unpack colour rules
+      colour_key   = nil
+      colour_rules = @column_configs.select {|c| c[:colour_rules] }.map {|r| {r[:field_name] => r[:colour_rules]}}
+      raise MesScada::Error, "DataGrid: Only one column can specify colour rules." if colour_rules.length > 1
+      colour_key   = colour_rules.first.keys.first unless colour_rules.empty?
+      colour_rules = colour_rules.first[colour_key].map {|a,b| [a.kind_of?(String) ? eval(a) : a,b]} unless colour_key.nil?
+
       cols_to_format = []
       unless @plugin.nil?
         cols_to_format = @plugin.cols_to_format || []
@@ -1130,6 +1140,9 @@ EOS
           rescue
             raise MesScada::Error, "DataGrid: A plugin styling method crashed when getting the row colour."
           end
+        elsif colour_key # If there are colour rules, call them to choose the first that returns true for this row:
+          colour_rule = colour_rules.select {|a| a.first.call(active_record[colour_key]) }.first
+          row_colour  = colour_rule.last unless colour_rule.nil?
         end
 
         row['row_colour'] = row_colour.blank? ? '' : "slick_row_#{row_colour}"
