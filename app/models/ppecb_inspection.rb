@@ -8,8 +8,7 @@ class PpecbInspection < ActiveRecord::Base
   belongs_to :carton
   belongs_to :pallet
 
-  attr_accessor :production_run_code,:ignore_cascade_ctn_updates,
-                :product_size,:line_code,:carton_number,:actual_size_count_code,:season,:puc,:no_bags_insp,:grade_code,:target_market_code,:no_fruit_insp ,:brand_code,:product_weight,:commodity_code,:variety,:pick_reference,:pallet_number,:batch_code
+  attr_accessor :production_run_code,:ignore_cascade_ctn_updates,:product_size,:line_code,:actual_size_count_code,:season,:puc,:no_bags_insp,:grade_code,:target_market_code,:no_fruit_insp,:brand_code,:product_weight,:commodity_code,:variety,:pick_reference,:batch_code
 
 
 #	============================

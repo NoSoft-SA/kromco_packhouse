@@ -365,8 +365,9 @@ def build_ppecb_inspection_form(ppecb_inspection)
 
   set_form_layout "2",nil,1,32
   set_submit_button_align('left')
-	build_form(ppecb_inspection,field_configs,'set_ppecb_inspection','ppecb_inspection','save')
 
+  action = (@is_new_inspection && !ppecb_inspection.new_record?) ? nil : 'set_ppecb_inspection'
+  build_form(ppecb_inspection,field_configs,action,'ppecb_inspection','save')
 end
 
 

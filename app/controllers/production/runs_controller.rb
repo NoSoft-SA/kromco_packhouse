@@ -562,11 +562,6 @@ class Production::RunsController < ApplicationController
           fault_log.create
         end
 
-
-        #session[:ppecb_inspection].carton.qc_status_code = "INSPECTED"
-        #session[:ppecb_inspection].carton.update
-
-
         if !session[:ppecb_inspection].inspection_level_code.upcase().index("HG")
 
 
@@ -581,23 +576,28 @@ class Production::RunsController < ApplicationController
           session[:ppecb_inspection].carton.pallet.update
         end
 
+        @is_new_inspection = true if(session[:ppecb_inspection].new_record?)
         if session[:ppecb_inspection].save!
 
           session[:last_inspection]= session[:ppecb_inspection]
 
-
-          redirect_to_index("ppecb inspection details saved")
+          if(!@is_new_inspection)
+            redirect_to_index("ppecb inspection details saved")
+          else
+            # @inspection = session[:ppecb_inspection]
+            # @ppecb_inspection = session[:ppecb_inspection]
+            # render :template => "production/runs/ppecb_inspection", :layout => "content"
+            params['carton_number'] = {}
+            params['carton_number']['carton_number'] = "#{session[:ppecb_inspection].carton_number}0"
+            params['carton_number']['hidden_data'] = true
+            submit_ppecb_carton_num
+          end
         else
-          puts "error ppecb"
           @ppecb_inspection = session[:ppecb_inspection]
           @content_header_caption = "'set ppecb inspection details'"
 
           @can_edit = false
           render :template => "production/runs/ppecb_inspection", :layout => "content"
-          # render :inline => %{
-          #   <% @content_header_caption = "'set ppecb inspection details'"%>
-          #   <%= build_ppecb_inspection_form(@ppecb_inspection)%>
-          # }, :layout => 'content'
         end
       end
     rescue
@@ -654,10 +654,6 @@ class Production::RunsController < ApplicationController
 
       end
     else
-      @can_edit = true
-      @can_edit = false if(@cull_analysis = PpecbCullAnalysis.find_by_ppecb_inspection_id(@last_inspection.id))
-      @can_edit = false if(@additional_info = PpecbAdditionalInfo.find_by_ppecb_inspection_id(@last_inspection.id))
-
       if !@last_inspection
         redirect_to_index("No inspection was done yet")
         return
@@ -665,17 +661,20 @@ class Production::RunsController < ApplicationController
         @last_inspection.corrected = true
         @ppecb_inspection = @last_inspection
 
+        @can_edit = true
+        @can_edit = false if((@cull_analysis = PpecbCullAnalysis.find_by_ppecb_inspection_id(@last_inspection.id)) && !params['carton_number']['edit_cull_factors_and_additional_info'])
+        @can_edit = false if((@additional_info = PpecbAdditionalInfo.find_by_ppecb_inspection_id(@last_inspection.id)) && !params['carton_number']['edit_cull_factors_and_additional_info'])
       end
     end
 
-    extra_inspection_fields = PpecbInspection.find_by_sql("SELECT cartons.carton_number,cartons.pallet_number,substring(cartons.target_market_code,1,2) as target_market_code
+    extra_inspection_fields = PpecbInspection.find_by_sql("SELECT substring(cartons.target_market_code,1,2) as target_market_code
           ,substring(cartons.variety_short_long,1,3) as variety,cartons.grade_code,cartons.puc,cartons.pick_reference
           ,cartons.line_code,cartons.actual_size_count_code,production_runs.batch_code
           ,coalesce(extended_fgs.ri_diameter_range,extended_fgs.ri_weight_range) as product_size
           ,to_char((cartons.carton_fruit_nett_mass + basic_packs.weight), '999D99')as product_weight
           ,(select marks.brand_code from marks where marks.mark_code = cartons.carton_mark_code) as brand_code
           ,cartons.id,cartons.season_code as season,cartons.commodity_code,'Top Layer' as no_bags_insp
-          ,'50' as no_fruit_insp 
+          ,'50' as no_fruit_insp
           FROM cartons
           INNER JOIN production_runs ON (production_runs.id = cartons.production_run_id)
           INNER JOIN extended_fgs ON (extended_fgs.extended_fg_code=cartons.extended_fg_code)
@@ -696,28 +695,34 @@ class Production::RunsController < ApplicationController
 
     session[:ppecb_inspection]= @ppecb_inspection
     render :template => "production/runs/ppecb_inspection", :layout => "content"
+  end
 
-
-    # render :inline => %{
-     #  <% @content_header_caption = "'set ppecb inspection details'"%>
-     #  <%= build_ppecb_inspection_form(@ppecb_inspection)%>
-		# }, :layout => 'content'
+  def edit_cull_factors_and_additional_info
+    params['carton_number'] = {}
+    params['carton_number']['carton_number'], params['carton_number']['edit_cull_factors_and_additional_info'] = params[:id].split('|')
+    params['carton_number']['hidden_data'] = true
+    submit_ppecb_carton_num
   end
 
   def kromco_extra_ppec_info_grid
     @data_set = []
     session[:info_field_types] = {}
 
+    @cull_analysis = PpecbCullAnalysis.find_by_ppecb_inspection_id(session[:ppecb_inspection].id)
+    @additional_info = PpecbAdditionalInfo.find_by_ppecb_inspection_id(session[:ppecb_inspection].id)
+
     AppFactory::PostgresMetaData.get_column_defs('ppecb_cull_analyses', ActiveRecord::Base.connection).each do |cl|
       if(cl[:field_name]!='id' && cl[:field_name]!='ppecb_inspection_id' && cl[:field_name]!='created_on')
-        @data_set<<{'id'=>cl[:field_name],'info_value'=>nil,'info_type'=>'ppecb_cull_analyses'}
+        info_value = @cull_analysis ? @cull_analysis.attributes[cl[:field_name]] : nil
+        @data_set<<{'id'=>cl[:field_name],'info_value'=>info_value,'info_type'=>'ppecb_cull_analyses'}
         session[:info_field_types].store(cl[:field_name],'ppecb_cull_analyses')
       end
     end
 
     AppFactory::PostgresMetaData.get_column_defs('ppecb_additional_infos', ActiveRecord::Base.connection).each do |cl|
       if(cl[:field_name]!='id' && cl[:field_name]!='ppecb_inspection_id' && cl[:field_name]!='created_on')
-        @data_set<<{'id'=>cl[:field_name],'info_value'=>nil,'info_type'=>'ppecb_additional_info'}
+        info_value = @additional_info ? @additional_info.attributes[cl[:field_name]] : nil
+        @data_set<<{'id'=>cl[:field_name],'info_value'=>info_value,'info_type'=>'ppecb_additional_info'}
         session[:info_field_types].store(cl[:field_name],'ppecb_additional_info')
       end
     end
@@ -778,8 +783,6 @@ class Production::RunsController < ApplicationController
         }, :layout => 'content'
     rescue
       raise $!
-      # flash[:error] = $!.message
-      # kromco_extra_ppec_info_grid
     end
   end
 
