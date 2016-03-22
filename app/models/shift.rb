@@ -71,7 +71,16 @@ class Shift < ActiveRecord::Base
       end
       #validates uniqueness for this record
       validate_overlap
+    else
+      end_time_quarters_minutes = self.end_time_quarters.to_i*60
+      if self.start_time < self.end_time
+        self.end_date_time = self.calendar_date.to_time().at_beginning_of_day + self.end_time.hours + end_time_quarters_minutes#.mins
+      else
+        self.end_date_time = self.calendar_date.to_time().tomorrow.at_beginning_of_day + self.end_time.hours + end_time_quarters_minutes#.mins
+      end
+      validate_overlap_for_update
     end
+
   end
 
 
@@ -86,12 +95,20 @@ class Shift < ActiveRecord::Base
 
 
   def validate_overlap
-
     #query  = "select * from shifts where line_code = '#{self.line_code}' and (start_date_time between '#{self.start_date_time.to_formatted_s(:db)}' and '#{self.end_date_time.to_formatted_s(:db)}' or end_date_time between '#{self.start_date_time.to_formatted_s(:db)}' and '#{self.end_date_time.to_formatted_s(:db)}') "
     query  = "select * from shifts where line_code = '#{self.line_code}' and (start_date_time between '#{self.start_date_time.to_formatted_s(:db)}' and cast('#{self.end_date_time.to_formatted_s(:db)}' as timestamp) - interval '1 seconds' or end_date_time - interval '1 seconds' between '#{self.start_date_time.to_formatted_s(:db)}' and '#{self.end_date_time.to_formatted_s(:db)}') "
     #puts     query
     shifts = Shift.find_by_sql(query)
+    if shifts.length() > 0
+      errors.add_to_base("There already exists a shift for the selected line and between the start and end times")
+    end
+  end
 
+  #MM032016 - Shifts: allow user to edit end_time(hours) and end time quarter field. On submit: generate new end_date_time (replace existing value)
+  def validate_overlap_for_update
+    # where id != current id
+    query  = "select * from shifts where line_code = '#{self.line_code}' and (start_date_time between '#{self.start_date_time.to_formatted_s(:db)}' and cast('#{self.end_date_time.to_formatted_s(:db)}' as timestamp) - interval '1 seconds' or end_date_time - interval '1 seconds' between '#{self.start_date_time.to_formatted_s(:db)}' and '#{self.end_date_time.to_formatted_s(:db)}') and id != #{self.id} "
+    shifts = Shift.find_by_sql(query)
     if shifts.length() > 0
       errors.add_to_base("There already exists a shift for the selected line and between the start and end times")
     end
@@ -101,12 +118,11 @@ class Shift < ActiveRecord::Base
 #	 foreign key validations:
 #	===========================
   def set_shift_type
-
     shift_type = ShiftType.find_by_shift_type_code(self.shift_type_code)
     if shift_type != nil
       self.shift_type = shift_type #setting the values to be sent to the browser since they are now label fields
       self.start_time = shift_type.start_time
-      self.end_time   = shift_type.end_time
+      # self.end_time   = shift_type.end_time #MM032016 - Shifts: allow user to edit end_time(hours) and end time quarter field. On submit: generate new end_date_time (replace existing value)
       return true
     else
       errors.add_to_base("shift Type not found")
