@@ -122,7 +122,8 @@ class Shift < ActiveRecord::Base
     if shift_type != nil
       self.shift_type = shift_type #setting the values to be sent to the browser since they are now label fields
       self.start_time = shift_type.start_time
-      # self.end_time   = shift_type.end_time #MM032016 - Shifts: allow user to edit end_time(hours) and end time quarter field. On submit: generate new end_date_time (replace existing value)
+      #MM032016 - Shifts: allow user to edit end_time(hours) and end time quarter field. On submit: generate new end_date_time (replace existing value)
+      self.end_time   = shift_type.end_time if self.new_record?
       return true
     else
       errors.add_to_base("shift Type not found")
