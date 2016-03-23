@@ -175,6 +175,16 @@ end
  def build_shift_grid(data_set,can_edit,can_delete)
 
 	column_configs = Array.new
+
+  if can_edit
+    column_configs[column_configs.length()] = {:field_type => 'action',:field_name => 'edit shift',
+                                               :settings =>
+                                                   {:link_text => 'edit',
+                                                    :target_action => 'edit_shift',
+                                                    :id_column => 'id'}}
+  end
+
+
 	column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'shift_type_code'}
 	column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'start_date_time'}
 	column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'end_date_time'}
@@ -214,16 +224,7 @@ end
 
 
 
-#	----------------------
-#	define action columns
-#	----------------------
-	if can_edit
-		column_configs[column_configs.length()] = {:field_type => 'action',:field_name => 'edit shift',
-			:settings =>
-				 {:link_text => 'edit',
-				:target_action => 'edit_shift',
-				:id_column => 'id'}}
-	end
+
 
 	if can_delete
 		column_configs[column_configs.length()] = {:field_type => 'action',:field_name => 'delete shift',
@@ -256,6 +257,11 @@ end
     for i in 0..23
       end_times << i
     end
+
+    field_configs[field_configs.length()] =  {:field_type => 'LabelField',:field_name => 'start_date_time'}
+    field_configs[field_configs.length()] =  {:field_type => 'LabelField',:field_name => 'end_date_time'}
+
+
     field_configs[field_configs.length()] = {:field_type => 'DropDownField',
                                              :field_name => 'end_time',
                                              :settings=>{:list => end_times}
