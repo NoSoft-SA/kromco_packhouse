@@ -613,11 +613,15 @@ module MesScada
       if @static_value
         value = @static_value.to_s
       elsif @form.active_record
+        if @field_name.include?('.')
+          value = eval("@form.active_record.#{@field_name}")
+        else
         rec_val = @form.active_record.send(@field_name)
         if rec_val.is_a? Time
           value = rec_val.strftime('%a %b %d %H:%M:%S %Y')
         else
           value = rec_val.to_s
+          end
         end
       end
 
