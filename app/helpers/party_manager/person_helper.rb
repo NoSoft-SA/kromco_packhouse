@@ -196,7 +196,7 @@ column_configs << {:field_type => 'action_collection', :field_name => 'actions',
   column_configs << {:field_type => 'text',:field_name => 'maiden_name'}
   column_configs << {:field_type => 'text',:field_name => 'initials'}
   column_configs << {:field_type => 'text',:field_name => 'industry_number'}
-  column_configs << {:field_type => 'text',:field_name => 'messcada_people_view_messcada_rfid_allocation.rfid ', :use_outer_join => true}
+  column_configs << {:field_type => 'text',:field_name => 'messcada_people_view_messcada_rfid_allocation.rfid', :use_outer_join => true}
   column_configs << {:field_type => 'text',:field_name => 'messcada_people_view_messcada_rfid_allocation.start_date', :use_outer_join => true}
   column_configs << {:field_type => 'text',:field_name => 'messcada_people_view_messcada_rfid_allocation.end_date', :use_outer_join => true}
 
