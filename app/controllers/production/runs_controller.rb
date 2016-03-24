@@ -711,6 +711,9 @@ class Production::RunsController < ApplicationController
     @cull_analysis = PpecbCullAnalysis.find_by_ppecb_inspection_id(session[:ppecb_inspection].id)
     @additional_info = PpecbAdditionalInfo.find_by_ppecb_inspection_id(session[:ppecb_inspection].id)
 
+    # @cull_analysis = PpecbCullAnalysis.find(:all, :conditions=>"ppecb_inspection_id=#{session[:ppecb_inspection].id}", :order=>"id desc")[0]
+    # @additional_info = PpecbAdditionalInfo.find(:all, :conditions=>"ppecb_inspection_id=#{session[:ppecb_inspection].id}", :order=>"id desc")[0]
+
     AppFactory::PostgresMetaData.get_column_defs('ppecb_cull_analyses', ActiveRecord::Base.connection).each do |cl|
       if(cl[:field_name]!='id' && cl[:field_name]!='ppecb_inspection_id' && cl[:field_name]!='created_on')
         info_value = @cull_analysis ? @cull_analysis.attributes[cl[:field_name]] : nil
@@ -765,15 +768,23 @@ class Production::RunsController < ApplicationController
     begin
       ActiveRecord::Base.transaction do
         if(!cull_analyses_attributes.empty?)
-          cull_analyses_attributes.store('ppecb_inspection_id',session[:ppecb_inspection].id)
-          cull_analyses = PpecbCullAnalysis.new(cull_analyses_attributes)
-          !cull_analyses.save!
+          if(cull_analysis = PpecbCullAnalysis.find_by_ppecb_inspection_id(session[:ppecb_inspection].id))
+            cull_analysis.update_attributes(cull_analyses_attributes)
+          else
+            cull_analyses_attributes.store('ppecb_inspection_id',session[:ppecb_inspection].id)
+            cull_analyses = PpecbCullAnalysis.new(cull_analyses_attributes)
+            cull_analyses.save!
+          end
         end
 
         if(!additional_info_attributes.empty?)
-          additional_info_attributes.store('ppecb_inspection_id',session[:ppecb_inspection].id)
-          additional_info = PpecbAdditionalInfo.new(additional_info_attributes)
-          additional_info.save!
+          if(additional_info = PpecbAdditionalInfo.find_by_ppecb_inspection_id(session[:ppecb_inspection].id))
+            additional_info.update_attributes(additional_info_attributes)
+          else
+            additional_info_attributes.store('ppecb_inspection_id',session[:ppecb_inspection].id)
+            additional_info = PpecbAdditionalInfo.new(additional_info_attributes)
+            additional_info.save!
+          end
         end
       end
 
