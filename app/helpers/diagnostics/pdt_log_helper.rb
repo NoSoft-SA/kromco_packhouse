@@ -71,7 +71,7 @@ def build_rails_grid(data_set, can_edit, can_delete)
 	end
 
 	if can_delete
-		column_configs[column_configs.length()] = {:field_type => 'action',:field_name => 'delete ',
+		column_configs[column_configs.length()] = {:field_type => 'action',:field_name => 'delete',
 			:settings =>
 				 {:link_text => 'delete',
 				:target_action => 'delete',

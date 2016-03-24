@@ -404,7 +404,7 @@ module Inventory::GroupedAssetsHelper
      column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'transaction_type_code', :col_width=> 144}
      column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'location_from', :col_width=> 142}
      column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'stock_type_code', :col_width=> 144}
-     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'inventory_reference ', :col_width=> 55}
+     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'inventory_reference', :col_width=> 55}
      column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'pack_material_product_code', :col_width=> 110}
 
     return get_data_grid(data_set, column_configs, nil, true)

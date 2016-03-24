@@ -207,9 +207,10 @@ class PoOut < TextOutTransformer
     load_container = @load.load_containers.first
     unless load_container.nil?
       port = VoyagePort.find(:first,
-                             :select => 'voyage_ports.*',
+                             :select => 'voyage_ports.*,ports.country_code',
                              :joins => 'join load_voyage_ports on load_voyage_ports.voyage_port_id = voyage_ports.id
-                                        join voyage_port_types on voyage_port_types.id = voyage_ports.voyage_port_type_id',
+                            join voyage_port_types on voyage_port_types.id = voyage_ports.voyage_port_type_id
+					   join ports on ports.id = voyage_ports.port_id',
                              :conditions => ['load_voyage_ports.load_voyage_id = ? and UPPER(voyage_port_types.voyage_port_type_code) = ?',
                                              load_voyage.id, 'ARRIVAL'])
       raise EdiOutError, "#{@err_prefix} - No Arrival VoyagePort for LoadVoyage with id: #{load_voyage.id}." if port.nil?
@@ -219,7 +220,7 @@ class PoOut < TextOutTransformer
                'container'      => load_container.container_code,
                'stuff_date'     => @load.shipped_date_time,
                'temp_set'       => load_container.container_setting,
-               'disch_port'     => port.port_code,
+               'disch_port'     => port.country_code+port.port_code,
                'ship_number'    => load_voyage.voyage.voyage_code,
                'pallet_btype'   => pallet_base.edi_out_pallet_base,
                'container_ref'      => load_voyage.booking_reference, #load_voyage.voyage.vessel.vessel_code,

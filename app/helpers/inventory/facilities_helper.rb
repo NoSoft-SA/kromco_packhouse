@@ -160,7 +160,7 @@ module Inventory::FacilitiesHelper
 
     column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'pallet_number',:col_width=>140}
     column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'oldest_pack_date_time',:col_width=>143}
-    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'carton_quantity_actual ',:column_caption=>'actual_qty',:col_width=>100}
+    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'carton_quantity_actual',:column_caption=>'actual_qty',:col_width=>100}
     column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'build_status',:col_width=>110}
     column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'commodity_code',:column_caption=>'commodity',:col_width=>100}
     column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'holdover',:col_width=>100}

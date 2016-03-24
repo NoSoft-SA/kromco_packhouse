@@ -169,23 +169,22 @@ end
  
 def update_shift
  begin
-
 	 id = params[:shift][:id]
 	 if id && @shift = Shift.find(id)
+     @shift.end_time = params[:shift][:end_time]
 		 if @shift.update_attributes(params[:shift])
 			@shifts = eval(session[:query])
 			flash[:notice] = 'record saved'
 			render_list_shifts
-	 else
+	   else
 			 render_edit_shift
-
 		 end
 	 end
 rescue
 	 handle_error('record could not be saved')
 end
  end
- 
+
 #	--------------------------------------------------------------------------------
 #	 combo_changed event handlers for composite foreign key: shift_type_id
 #	---------------------------------------------------------------------------------

@@ -132,7 +132,7 @@ end
     end
 
     if can_delete
-      column_configs[column_configs.length()] = {:field_type => 'action', :field_name => 'delete ',:col_width=>50,
+      column_configs[column_configs.length()] = {:field_type => 'action', :field_name => 'delete',:col_width=>50,
                                                  :settings =>
                                                          {:link_text => 'delete',
                                                           :target_action => 'delete_voyage',
@@ -304,7 +304,7 @@ return get_data_grid(data_set,column_configs,nil,nil,nil)
         #if session[:edit_voyage]==true
          column_configs <<  {:field_type => 'link_window', :field_name => 'edit',
                                                  :settings =>
-                                                         {:link_text => 'edit ',
+                                                         {:link_text => 'edit',
                                                           :target_action => 'edit_voyage_port_from_popup',
                                                          :id_column => 'id'}}
 
@@ -312,9 +312,9 @@ return get_data_grid(data_set,column_configs,nil,nil,nil)
 end
 	if can_delete
     #if session[:edit_voyage]==true
-		column_configs << {:field_type => 'action',:field_name => 'delete ',
+		column_configs << {:field_type => 'action',:field_name => 'delete',
 			:settings =>
-				 {:link_text => 'delete ',
+				 {:link_text => 'delete',
 				:target_action => 'delete_voyage_port',
 				:id_column => 'id'}}
   #end
@@ -418,7 +418,7 @@ end
     end
 
     if can_delete
-      column_configs[column_configs.length()] = {:field_type => 'action', :field_name => 'delete ',:col_width=>50,
+      column_configs[column_configs.length()] = {:field_type => 'action', :field_name => 'delete',:col_width=>50,
                                                  :settings =>
                                                          {:link_text => 'delete',
                                                           :target_action => 'delete_voyage',

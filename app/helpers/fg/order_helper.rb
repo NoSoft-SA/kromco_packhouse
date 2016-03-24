@@ -652,7 +652,7 @@ end
   def build_order_grid(data_set, can_edit, can_delete)
     column_configs = Array.new
     if can_edit
-          column_configs[column_configs.length()] = {:field_type => 'action', :field_name => 'edit ',
+          column_configs[column_configs.length()] = {:field_type => 'action', :field_name => 'edit',
                                                     :col_width=>30,
                                                      :settings =>
                                                              {:image => 'edit',
@@ -660,7 +660,7 @@ end
                                                               :id_column => 'id'
                                                               }}
         end
-    column_configs[column_configs.length()] = {:field_type => 'action', :field_name => 'view ',
+    column_configs[column_configs.length()] = {:field_type => 'action', :field_name => 'view',
                                                     :col_width=>30,
                                                      :settings =>
                                                              {:link_text => 'view',
@@ -699,7 +699,7 @@ end
     column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'marketer'}
 
 #    if can_delete
-      column_configs[column_configs.length()] = {:field_type => 'action', :field_name => 'delete ',
+      column_configs[column_configs.length()] = {:field_type => 'action', :field_name => 'delete',
                                                 :col_width=>36,
                                                  :settings =>
                                                          {:image => 'delete',
