@@ -10,7 +10,7 @@ module MesScada::GridPlugins
       #     return cell_value +  "[#{@menu_items_friendly_names[record[:menu_item]]}]"
       #   end
       #
-      #   return "Blackson" #cell_value= @env.text_field('ppecb_inspection', 'inspection_point', {:size=>30,:value=>record[column_name]})
+      #   return "" #cell_value= @env.text_field('ppecb_inspection', 'inspection_point', {:size=>30,:value=>record[column_name]})
       # end
 
     end

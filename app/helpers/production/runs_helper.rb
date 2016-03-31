@@ -3,8 +3,8 @@ module Production::RunsHelper
 
     column_configs = Array.new
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'id', :column_caption=>'info_field', :col_width => 154}
-    column_configs[column_configs.length()]= {:field_type => 'text', :editor => :select, :field_name => 'info_value',:select_options =>["bags","loose"]}
-    # column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'info_value', :col_width => 350, :editor=>:text}
+    # column_configs[column_configs.length()]= {:field_type => 'text', :editor => :select, :field_name => 'info_value',:select_options =>["bags","loose"]}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'info_value', :col_width => 350, :editor=>:text}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'info_type', :col_width => 154}
 
     return get_data_grid(data_set, column_configs, MesScada::GridPlugins::Production::PpecbExtraInfoPlugin.new(self), true, nil, :save_action => 'capture_kromco_inspection_results')

@@ -742,6 +742,35 @@ class Production::RunsController < ApplicationController
 
   end
 
+  def launch_carton_export_inspection_report
+    begin
+      report_type = 'carton_export_inspection'
+      out_file_type = "PDF"
+      file_name = "carton_export_inspection_#{Time.now.strftime("%m_%d_%Y_%H_%M_%S")}"
+      out_file_path = Globals.jasper_reports_pdf_downloads + "/#{file_name}"
+      errors = JasperReports.generate_report(report_type, session[:user_id].user_name,
+                                             {:ppecb_inspection_id => params[:id], :MODE => "GENERATE", :OUT_FILE_NAME => out_file_path,
+                                              :OUT_FILE_TYPE => out_file_type, :printer => Globals.jasper_reports_printer_name})
+
+      if (errors)
+        flash[:error] = "Could not print Document : " + errors.to_s
+        render :inline => %{}, :layout => 'content'
+      else
+        flash[:notice] = "Document printed successfully."
+        @outfile_to_launch = "/downloads/pdf" + "/#{file_name}" + ".#{out_file_type.downcase}"
+        render :inline => %{
+          <script>
+            window.resizeTo(1200,800);
+            window.location.href= "<%=@outfile_to_launch%>";
+          </script>
+        }, :layout => 'content'
+      end
+    rescue
+      flash[:error] = $!
+      render :inline => %{}, :layout => 'content'
+    end
+  end
+
   def capture_kromco_inspection_results
     data_set = []
     submission = eval (params['grid_values'].gsub("id=>","id=>'").gsub(",:info_value","',:info_value"))
@@ -768,22 +797,22 @@ class Production::RunsController < ApplicationController
     begin
       ActiveRecord::Base.transaction do
         if(!cull_analyses_attributes.empty?)
+          cull_analyses_attributes.store('ppecb_inspection_id',session[:ppecb_inspection].id)
+          new_cull_analyses = PpecbCullAnalysis.new(cull_analyses_attributes)
           if(cull_analysis = PpecbCullAnalysis.find_by_ppecb_inspection_id(session[:ppecb_inspection].id))
-            cull_analysis.update_attributes(cull_analyses_attributes)
+            cull_analysis.update_attributes(new_cull_analyses.attributes)
           else
-            cull_analyses_attributes.store('ppecb_inspection_id',session[:ppecb_inspection].id)
-            cull_analyses = PpecbCullAnalysis.new(cull_analyses_attributes)
-            cull_analyses.save!
+            new_cull_analyses.save!
           end
         end
 
         if(!additional_info_attributes.empty?)
+          additional_info_attributes.store('ppecb_inspection_id',session[:ppecb_inspection].id)
+          new_additional_info = PpecbAdditionalInfo.new(additional_info_attributes)
           if(additional_info = PpecbAdditionalInfo.find_by_ppecb_inspection_id(session[:ppecb_inspection].id))
-            additional_info.update_attributes(additional_info_attributes)
+            additional_info.update_attributes(new_additional_info.attributes)
           else
-            additional_info_attributes.store('ppecb_inspection_id',session[:ppecb_inspection].id)
-            additional_info = PpecbAdditionalInfo.new(additional_info_attributes)
-            additional_info.save!
+            new_additional_info.save!
           end
         end
       end
