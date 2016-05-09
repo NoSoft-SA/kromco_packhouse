@@ -324,8 +324,11 @@ class FgSetup < ActiveRecord::Base
     variety_2 = nil
     
     if @marketing_variety_description.length > 10
-      variety_1 = @marketing_variety_description.slice(0..9)
-      variety_2 = @marketing_variety_description.slice(10..@marketing_variety_description.length)
+      #variety_1 = @marketing_variety_description
+      #variety_2 = @marketing_variety_description
+
+      variety_1 = @marketing_variety_description.slice(0..10)
+      variety_2 = @marketing_variety_description.slice(11..@marketing_variety_description.length)
     else
       variety_1 = @marketing_variety_description
     end

@@ -92,7 +92,7 @@ unit_pack_products.nett_mass AS unit_pack_product_nett_mass, commodities.commodi
 commodities.commodity_description_short, marketing_varieties.marketing_variety_description, item_pack_products.grade_code,
 item_pack_products.product_class_code, item_pack_products.standard_size_count_value, item_pack_products.size_ref,
 item_pack_products.cosmetic_code_name, item_pack_products.treatment_code, item_pack_products.actual_count,
-extended_fgs.created_on, extended_fgs.updated_on,rmt_setups.variety_code,incoterms.incoterm_code,currencies.currency_code, order_products.price_per_carton',
+extended_fgs.created_on, extended_fgs.updated_on,rmt_setups.variety_code,incoterms.incoterm_code,currencies.currency_code, order_products.price_per_carton, loads.shipped_date_time',
 
 :joins => 'INNER JOIN load_details ON (load_orders.load_id = load_details.load_id)
 INNER JOIN pallets ON (load_details.id = pallets.load_detail_id)
@@ -124,14 +124,16 @@ LEFT OUTER JOIN incoterms ON (orders.incoterm_id = incoterms.id)
 LEFT OUTER JOIN voyages ON (load_voyages.voyage_id = voyages.id)
 LEFT OUTER JOIN vessels ON (vessels.id = voyages.vessel_id)
 INNER JOIN unit_pack_product_types ON (unit_pack_products.type_code = unit_pack_product_types.type_code)
-INNER JOIN unit_pack_product_subtypes ON (unit_pack_products.subtype_code = unit_pack_product_subtypes.subtype_code)',
+INNER JOIN unit_pack_product_subtypes ON (unit_pack_products.subtype_code = unit_pack_product_subtypes.subtype_code)
+LEFT JOIN loads ON loads.id = load_details.load_id',
 
 :conditions => ['load_orders.id = ?', @record_map['id']])
 
 
     load_orders.each do |record|
-      ucr = "#{record.season_code[-1,1]}ZA01507472C#{trading_partner}"
-
+      #NAE 20160404 replace first digit of season with first digit of calender year
+      #ucr = "#{record.season_code[-1,1]}ZA01507472C#{trading_partner}"
+      ucr = "#{record.shipped_date_time[3,1]}ZA01507472C#{trading_partner}"
       count_array = LoadDetail.find_by_sql(['select count(cartons.id) FROM load_details join pallets on pallets.load_detail_id = load_details.id join cartons on cartons.pallet_id = pallets.id WHERE (load_details.id = ?)', record.load_detail_id])
       no_cartons = count_array[0].count
       #sell_by = no_cartons == 1 ? 'ndc' : record.sell_by_code
