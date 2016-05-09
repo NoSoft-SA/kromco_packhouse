@@ -3108,6 +3108,8 @@ end
   end
 
 
+
+
   def carton_added
 
     #validation
@@ -3143,6 +3145,14 @@ end
         add_carton_to_pallet
         return
       end
+    end
+
+    oldest_carton_sell_by_code = carton.is_valid_carton_sell_by_code?(carton,pallet)
+
+    if oldest_carton_sell_by_code
+      flash[:error] = "Carton cannot be added,its sell by date: (#{carton.sell_by_code}) is different from the oldest pallet's carton sell by date (#{oldest_carton_sell_by_code})"
+      add_carton_to_pallet
+      return
     end
 
     carton.transaction do

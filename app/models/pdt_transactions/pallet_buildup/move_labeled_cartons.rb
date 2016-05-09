@@ -5,7 +5,7 @@ class MoveLabeledCartons < PDTTransactionState
     @moved_pallets_count = 0
     @moved_cartons_count = 0
   end
-  
+
 
   def build_default_screen
     #puts "11. build_default_screen"
@@ -66,15 +66,31 @@ class MoveLabeledCartons < PDTTransactionState
 
   def validate_input
     if valid_carton? && valid_ctn_plt_assoc?
-      if false#(error = self.parent.org_rules_passed?(self.parent.scratch_pad["carton"].attributes)) != nil
-        return error
-        #return nil #To bypass this check - for testing purposes
+      if !is_valid_carton_sell_by_code?
+        return @error
       else
-        return nil
+       return nil
       end
-    else
+   else
       return @error
     end
+  end
+
+  def is_valid_carton_sell_by_code?
+    carton=Carton.find_by_carton_number(self.parent.scratch_pad["carton"].carton_number.to_s)
+    to_pallet= Pallet.find_by_pallet_number(self.parent.to_pallet_no)
+    oldest_carton =  to_pallet.get_oldest_carton
+
+    if oldest_carton
+      oldest_carton_sell_by_code = carton.is_valid_carton_sell_by_code?(carton,oldest_carton)
+      if oldest_carton_sell_by_code
+        @error=["Carton cannot be added,its sell by date:" + " (#{carton.sell_by_code}) is different"  + "  from the oldest  carton of the pallet sell by date (#{oldest_carton.sell_by_code})" ]
+        return false
+      end
+    else
+       return nil
+    end
+
   end
 
   def valid_carton?

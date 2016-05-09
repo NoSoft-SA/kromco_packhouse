@@ -14,6 +14,27 @@ class RwActiveCarton < ActiveRecord::Base
                 :calculated_mass, :target_market_short,
                 :inventory_code_short, :pc_code_short, :is_fg_carton, :marketing_variety_code, :address_line1, :address_line2 , :run_track_indicator_code,:label_data
 
+  def is_valid_carton_sell_by_code?(carton,pallet)
+    oldest_carton_sell_by_code=RwActiveCarton.find_by_sql("select sell_by_code from rw_active_cartons where pallet_number='#{pallet.pallet_number}' order by id asc")
+    if oldest_carton_sell_by_code.empty?
+      return  nil
+    else
+      carton_sell_by_code= carton.sell_by_code
+      sell_by_code= oldest_carton_sell_by_code[0]['sell_by_code']
+      if oldest_carton_sell_by_code[0]['sell_by_code']== "<empty>"  || oldest_carton_sell_by_code[0]['sell_by_code']==nil || oldest_carton_sell_by_code[0]['sell_by_code']=="_"
+        sell_by_code=nil
+      end
+      if carton.sell_by_code== "<empty>"  || carton.sell_by_code==nil || carton.sell_by_code=="_"
+        carton_sell_by_code =nil
+      end
+      if   sell_by_code != carton_sell_by_code
+        return oldest_carton_sell_by_code[0]['sell_by_code']
+      else
+        return nil
+      end
+    end
+  end
+
 
   def self.bulk_update(set_map, carton_nums=nil, additional_criteria=nil)
     updates = ""
@@ -611,7 +632,7 @@ class RwActiveCarton < ActiveRecord::Base
             (public.gtins.commodity_code = '#{self.commodity_code.to_s}') AND
             (public.gtins.marketing_variety_code = '#{self.marketing_variety_code.to_s}') AND
             (public.gtins.old_pack_code = '#{self.old_pack_code.to_s}') AND
-            (public.gtins.brand_code = '#{brand_code}') AND 
+            (public.gtins.brand_code = '#{brand_code}') AND
             (public.gtins.actual_count = '#{self.actual_size_count_code.to_s}') AND
             (public.gtins.grade_code = '#{self.grade_code.to_s}' AND
             (public.gtins.inventory_code = '#{self.inventory_code_short.to_s}'))"
@@ -732,14 +753,14 @@ class RwActiveCarton < ActiveRecord::Base
 #     msg = "You cannot change the commodity code of a carton(from: " + self.commodity_code + ", to: " + extended_fg.commodity_code + ")"
 #     return send_message(msg)
 #   end
-#   
-#   
-#   input_variety_code = self.production_run.production_schedule.rmt_setup.variety_code 
+#
+#
+#   input_variety_code = self.production_run.production_schedule.rmt_setup.variety_code
 #   input_variety = RmtVariety.find_by_commodity_code_and_rmt_variety_code(self.commodity_code,input_variety_code)
 #   if !input_variety
 #     return send_message("input variety not found for commodity: " + self.commodity_code + " and input variety: " + input_variety_code)
 #   end
-#---------------------------------------------------   
+#---------------------------------------------------
 
 
     run                           = ProductionRun.find_by_production_run_code(self.production_run_code)
