@@ -15,7 +15,7 @@ class RwActiveCarton < ActiveRecord::Base
                 :inventory_code_short, :pc_code_short, :is_fg_carton, :marketing_variety_code, :address_line1, :address_line2 , :run_track_indicator_code,:label_data
 
   def is_valid_carton_sell_by_code?(carton,pallet)
-    oldest_carton_sell_by_code=RwActiveCarton.find_by_sql("select sell_by_code from rw_active_cartons where pallet_number='#{pallet.pallet_number}' order by id asc")
+    oldest_carton_sell_by_code=RwActiveCarton.find_by_sql("select sell_by_code from rw_active_cartons where pallet_number='#{pallet.pallet_number}' order by id asc limit 1")
     if oldest_carton_sell_by_code.empty?
       return  nil
     else
