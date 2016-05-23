@@ -94,13 +94,18 @@ class Production::RunsController < ApplicationController
 
   def update_ranked_runs
     return if authorise_for_web(program_name?, 'production_run_setup')==false
-    params[:run].each do |k, v|
-      k = k.split('_')
-      key = k.shift
-
+    run_ranks =grid_edited_values_to_array(params)
+    run_ranks.each do |k|
+      run_id=k[:id]
+      rank= k[:rank]
+      if k[:rank] &&  k[:rank]!=""
+        rank = "rank=#{k[:rank]}"
+      else
+        rank = "rank=null"
+      end
       ActiveRecord::Base.transaction do
-        ActiveRecord::Base.connection.execute("update production_runs set rank=#{v} where id = #{key.to_i}") if v!=""
-        ActiveRecord::Base.connection.execute("update production_runs set rank=null where id = #{key.to_i}") if v==""
+        ActiveRecord::Base.connection.execute("update production_runs set #{rank} where id = #{run_id.to_i}") if k[:rank]!="" || k[:rank]!=nil
+        ActiveRecord::Base.connection.execute("update production_runs set #{rank} where id = #{run_id.to_i}") if k[:rank]=="" || k[:rank]==nil
       end
     end
     editing_runs
@@ -1827,8 +1832,8 @@ class Production::RunsController < ApplicationController
         elsif other_child = @production_run.get_active_child_runs()
           warn_msg = "A parent run can only have one active child. First complete (at least set to rebinning) child run: " + other_child
 
-        elsif @production_run.parent_run_code && @production_run.child_run_code
-          warn_msg = "A run cannot be both a parent and a child"
+        #elsif @production_run.parent_run_code && @production_run.child_run_code
+        #  warn_msg = "A run cannot be both a parent and a child"
         end
 
 
