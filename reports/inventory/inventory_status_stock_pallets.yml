@@ -25,11 +25,13 @@ fields:
   field_name: vwonstock_pallets.season_code
   caption: season
   field_type: lookup
+  searchable: false
   list: "select distinct season from seasons order by season desc"  
  field6:
   field_name: vwonstock_pallets.commodity_code
   caption: commodity
   field_type: lookup
+  searchable: false
   list: "select commodity_code from commodities order by commodity_code"    
  field7:
   field_name: vwonstock_pallets.marketing_variety_code

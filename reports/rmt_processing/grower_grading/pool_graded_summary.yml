@@ -20,11 +20,13 @@ fields:
   field_name:  season_code
   caption: season_code
   field_type: lookup
+  searchable: false  
   list: "select distinct season_code from seasons order by season_code asc"
  field5:
   field_name:  commodity_code
   caption: commodity_code
   field_type: lookup
+  searchable: false  
   list: "select distinct commodity_code from commodities order by commodity_code asc"  
  field6:
   field_name:  status

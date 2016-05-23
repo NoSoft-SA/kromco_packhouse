@@ -28,7 +28,7 @@ Rails::Initializer.run do |config|
   config.action_mailer.raise_delivery_errors = true
   #config.action_mailer.server_settings       = {
   config.action_mailer.server_settings       = {
-      :address        => "mail.kromco.co.za",
+      :address        => "palpatine2.kromco.co.za",
       :domain         => "localhost",
       :port           => "25"
   }

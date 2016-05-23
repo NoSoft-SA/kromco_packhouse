@@ -90,6 +90,7 @@ fields:
    field_name: pallets.season_code
    caption: season_code
    field_type: lookup
+   searchable: false   
    list: "select distinct season as season_code from seasons order by season"   
   field21:
    field_name: rw_scrap_pallets.puc

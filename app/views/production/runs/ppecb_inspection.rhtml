@@ -29,16 +29,16 @@
 
     <%= link_to('edit cull factors additional info', {:controller => 'production/runs', :action => 'edit_cull_factors_and_additional_info', :id => "#{@ppecb_inspection.carton_number}0|edit_cull_factors_and_additional_info"}) %>
 
+    <%
+       carton_export_inspection_link_settings = {:controller =>"production/runs",
+                                                  :target_action => 'launch_carton_export_inspection_report', :link_text => "carton_export_inspection_report",
+                                                  :id_value => @ppecb_inspection.id}
+       carton_export_inspection_popup_link = ApplicationHelper::LinkWindowField.new(nil, nil, 'none', 'none', 'none', carton_export_inspection_link_settings, true, nil, self)
+       carton_export_inspection_link = carton_export_inspection_popup_link.build_control
+    %>
+
+    <br>
+
+    <%= carton_export_inspection_link %>
 <%end%>
 
-<%
-   carton_export_inspection_link_settings = {:controller =>"production/runs",
-                                             :target_action => 'launch_carton_export_inspection_report', :link_text => "carton_export_inspection_report",
-                                             :id_value => @ppecb_inspection.id}
-   carton_export_inspection_popup_link = ApplicationHelper::LinkWindowField.new(nil, nil, 'none', 'none', 'none', carton_export_inspection_link_settings, true, nil, self)
-   carton_export_inspection_link = carton_export_inspection_popup_link.build_control
-%>
-
-<br>
-
-<%= carton_export_inspection_link %>

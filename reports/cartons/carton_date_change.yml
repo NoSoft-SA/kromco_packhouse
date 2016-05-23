@@ -51,9 +51,10 @@ fields:
   field_type: lookup
   list: "select party_name from parties_roles where role_name ='MARKETER'  order by party_name" 
  field11:
-  field_name: season_code
-  caption: season_code
+  field_name: cartons.season_code
+  caption: cartons.season_code
   field_type: lookup
+  searchable: false
   list: " select distinct season from seasons order by season" 
  field12:
   field_name: qc_result_status

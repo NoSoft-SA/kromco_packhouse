@@ -19,7 +19,7 @@ fields:
   field_name: variety_short_long
   caption: variety_short_long
   field_type: lookup
-  list: "select distinct variety_short_long from cartons order by variety_short_long"
+  list: "select variety_short_long from vwmarketing_varieties"
  field5:
   field_name: grade_code
   caption: grade_code
@@ -54,6 +54,7 @@ fields:
   field_name: season_code
   caption: season_code
   field_type: lookup
+  searchable: false
   list: " select distinct season from seasons order by season" 
  field12:
   field_name: qc_result_status

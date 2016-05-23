@@ -5,6 +5,7 @@ fields:
    field_name: commodity_code
    caption: commodity_code
    field_type: lookup
+   searchable: false
    list: "select commodity_code from commodities order by commodity_code asc"
   field2:
    field_name: farm_code

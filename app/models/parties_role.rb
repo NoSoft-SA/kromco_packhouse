@@ -9,7 +9,7 @@ class PartiesRole < ActiveRecord::Base
   belongs_to :party
 
   # Roles that are created via their own CRUD functions (not the generic parties role CRUD functions)
-  OWN_CRUD_ROLES = %w|CUSTOMER FIN_SUPPLIER SERVICE_PROVIDER|
+  OWN_CRUD_ROLES = []
 
   #  ============================
   #   Validations declarations:

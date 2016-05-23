@@ -10,4 +10,5 @@ fields:
   field_name:  season
   caption: season
   field_type: lookup
+  searchable: false
   list: "select distinct season from seasons order by season asc"

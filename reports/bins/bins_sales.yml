@@ -36,6 +36,7 @@ fields:
   field_name:  vwbins.commodity_code
   caption: vwbins.commodity_code
   field_type: lookup
+  searchable: false
   list: "select commodity_code from commodities order by commodity_code"
  field9:
   field_name:  vwbins.variety_code
@@ -46,11 +47,13 @@ fields:
   field_name:  vwbins.pc_code_code
   caption: vwbins.pc_code
   field_type: lookup
+  searchable: false
   list: "select pc_code from pc_codes order by pc_code"
  field11:
   field_name:  vwbins.season
   caption: vwbins.season
   field_type: lookup
+  searchable: false
   list: "select distinct season from seasons order by season"
  field12:
   field_name:  vwbins.stock_type_code

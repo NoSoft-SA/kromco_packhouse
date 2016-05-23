@@ -9,6 +9,7 @@ fields:
     field_name: vw_ctn_insp_f82.season
     caption:    season
     field_type: lookup
+    searchable: false    
     list:       " select distinct season from seasons order by season asc"
   field3:
     field_name: qc_inspections.status

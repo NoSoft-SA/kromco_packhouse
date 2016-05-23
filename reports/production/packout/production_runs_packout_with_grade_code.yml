@@ -11,6 +11,7 @@ fields:
    field_name: season
    caption: season
    field_type: lookup
+   searchable: false
    list: "select distinct season from seasons order by season desc"     
   field3:
    field_name: track_indicator_code

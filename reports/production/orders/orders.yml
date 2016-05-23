@@ -9,4 +9,5 @@ fields:
   field_name: season_code
   caption: season_code
   field_type: lookup
+  searchable: false
   list: select season_code from seasons

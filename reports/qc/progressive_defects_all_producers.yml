@@ -18,6 +18,7 @@ fields:
   field_name:  season
   caption: season
   field_type: lookup
+  searchable: false
   list: "select distinct season from seasons order by season asc"
  field5:
   field_name:  rmt_variety_code
@@ -28,6 +29,7 @@ fields:
   field_name:  commodity_code
   caption: commodity_code
   field_type: lookup
+  searchable: false
   list: "select distinct commodity_code from commodities order by commodity_code asc"
  field7:
   field_name:  track_slms_indicator_code

@@ -9,6 +9,7 @@ fields:
   field_name: commodity_code
   caption: commodity_code
   field_type: lookup
+  searchable: false 
   list: "select commodity_description_short from commodities order by commodity_description_short"
  field3:
   field_name: target_market_code
@@ -54,6 +55,7 @@ fields:
   field_name: season_code
   caption: season_code
   field_type: lookup
+  searchable: false
   list: " select distinct season from seasons order by season" 
  field12:
   field_name: qc_result_status

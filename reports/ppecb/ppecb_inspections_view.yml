@@ -1,4 +1,4 @@
-query: SELECT farm_code, id, passed, inspection_point, inspector_number, inspection_report, sample_carton_label, grade_code, inspection_type_code, inspection_type_id, carton_id, carton_number, pallet_id, pallet_number, reason, created_at, cancelled, dispensation_certificate_number, dispensation_body, inspection_level_code, corrected, cancelled_inspection_id, variety_short_long, commodity_code, fg_code_old, extended_fg_code, puc, product_class_code, product_class_description_short, product_class_description, organization_code, target_market_code, line_code, target_market_region_code, target_market_country_code, carton_quantity_actual, season_code, packed_by, rmt_variety_code, created_by, consignment_note_number, location_code, qc_result_status, order_number, load_number, qc_result FROM vwppecb_inspections WHERE(created_at={created_at} and reason={reason} and organization_code={organization_code} and inspection_level_code={inspection_level_code} and season_code={season_code} and inspection_type_code={inspection_type_code} and inspection_report={inspection_report} and target_market_code={target_market_code} and commodity_code={commodity_code} and variety_short_long={variety_short_long} and packed_by={packed_by} and passed={passed} and rmt_variety_code={rmt_variety_code} and inspector_number={inspector_number} and pallet_number={pallet_number} and consignment_note_number={consignment_note_number} and location_code={location_code})
+query: SELECT farm_code, id, passed, inspection_point, inspector_number, inspection_report, sample_carton_label, grade_code, inspection_type_code, inspection_type_id, carton_id, carton_number, pallet_id, pallet_number, reason, created_at, cancelled, dispensation_certificate_number, dispensation_body, inspection_level_code, corrected, cancelled_inspection_id, variety_short_long, commodity_code, fg_code_old, extended_fg_code, puc, product_class_code, product_class_description_short, product_class_description, organization_code, target_market_code, line_code, target_market_region_code, target_market_country_code, carton_quantity_actual, season_code, packed_by, rmt_variety_code, created_by, consignment_note_number, location_code, qc_result_status, order_number, load_number, qc_result,bitterpit, decay, fusi, insect, lenticel_damage, major_bruise, mechanical_damage, minor_bruise, puncture, retiform_russet, rubmarks, russet, sunburn, undersize, windmarks, bags_or_loose, comment, consignment_comment, pallet_quality, perc_loose_fruit, plu_code, sample_reference FROM vwppecb_inspections WHERE(created_at={created_at} and reason={reason} and organization_code={organization_code} and inspection_level_code={inspection_level_code} and season_code={season_code} and inspection_type_code={inspection_type_code} and inspection_report={inspection_report} and target_market_code={target_market_code} and commodity_code={commodity_code} and variety_short_long={variety_short_long} and packed_by={packed_by} and passed={passed} and rmt_variety_code={rmt_variety_code} and inspector_number={inspector_number} and pallet_number={pallet_number} and consignment_note_number={consignment_note_number} and location_code={location_code})
 main_table_name: vwppecb_inspections
 fields:
   field1:
@@ -19,6 +19,7 @@ fields:
    field_name: season_code
    caption: season_code
    field_type: lookup
+   searchable: false
    list: "select distinct season from seasons order by season"
   field5:
    field_name: target_market_code
@@ -29,6 +30,7 @@ fields:
    field_name: commodity_code
    caption: commodity_code
    field_type: lookup
+   searchable: false
    list: "select distinct commodity_code from commodities order by commodity_code"      
   field7:
    field_name: packed_by

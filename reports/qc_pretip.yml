@@ -4,7 +4,7 @@
 # which can be used to find the uniquely chosen record via the SQL in qc_inspection_types.qc_filter_context_search
 
 #query: SELECT deliveries.delivery_number, deliveries.farm_code, deliveries.farm_id, deliveries.orchard_description, deliveries.commodity_code, deliveries.tripsheet_id, deliveries.rmt_variety_code, deliveries.quantity_full_bins, deliveries.quantity_partial_units, deliveries.quantity_empty_units, deliveries.quantity_damaged_units, deliveries.delivery_status, deliveries.orchard_code, deliveries.truck_registration_number, deliveries.id AS business_object_id FROM deliveries WHERE( deliveries.farm_code={deliveries.farm_code} AND deliveries.commodity_code={deliveries.commodity_code})
-query: select bins.bin_number, deliveries.delivery_number, deliveries.delivery_number_preprinted, deliveries.rmt_variety_code, farms.farm_code, bins.season_code, rmt_products.rmt_product_code, deliveries.commodity_code,bins.id AS business_object_id from bins inner join deliveries on deliveries.id = bins.delivery_id inner join farms on farms.id = bins.farm_id inner join rmt_products on rmt_products.id = bins.rmt_product_id WHERE(NOT EXISTS((SUBQSTART SELECT qc_inspections.id FROM qc_inspections JOIN qc_inspection_types on qc_inspection_types.id=qc_inspections.qc_inspection_type_id AND  qc_inspection_types.qc_inspection_type_code= 'PRETIP' WHERE( qc_inspections.business_object_id=bins.id) SUBQEND))  AND bins.bin_number={bins.bin_number} and  deliveries.delivery_number_preprinted={deliveries.delivery_number_preprinted} AND deliveries.farm_code={deliveries.farm_code} and bins.season_code={bins.season_code} and deliveries.rmt_variety_code={deliveries.rmt_variety_code})
+query: select bins.bin_number, deliveries.delivery_number,  deliveries.delivery_number_preprinted, track_slms_indicators.rmt_variety_code, farms.farm_code, bins.season_code, rmt_products.rmt_product_code, deliveries.commodity_code,bins.id AS business_object_id from bins left join deliveries on deliveries.id = bins.delivery_id inner join farms on farms.id = bins.farm_id inner join rmt_products on rmt_products.id = bins.rmt_product_id inner join seasons on bins.season_code = seasons.season_code inner join stock_items on stock_items.inventory_reference = bins.bin_number inner join track_slms_indicators on track_slms_indicators.id = bins.track_indicator1_id WHERE(NOT EXISTS((SUBQSTART SELECT qc_inspections.id FROM qc_inspections JOIN qc_inspection_types on qc_inspection_types.id=qc_inspections.qc_inspection_type_id AND  qc_inspection_types.qc_inspection_type_code= 'PRETIP' WHERE( qc_inspections.business_object_id=bins.id) SUBQEND))  and season > '2014' and (stock_items.destroyed is null or stock_items.destroyed = false)  AND  (bins.rebin_status = 'printed' OR bins.rebin_status IS NULL) AND (bins.exit_ref <> 'scrapped' OR bins.exit_ref IS NULL)  AND bins.bin_number={bins.bin_number} and  deliveries.delivery_number_preprinted={deliveries.delivery_number_preprinted} AND deliveries.farm_code={deliveries.farm_code} and bins.season_code={bins.season_code} and deliveries.rmt_variety_code={deliveries.rmt_variety_code} and stock_items.stock_type_code={stock_items.stock_type_code})
 main_table_name: bins
 
 fields:
@@ -24,9 +24,15 @@ fields:
     field_name: bins.season_code
     caption:    season_code
     field_type: lookup
+    searchable: false    
     list:       " select distinct season_code from seasons where season > '2012' and (commodity_code = 'AP' OR commodity_code = 'PR' OR commodity_code ='PL' OR commodity_code = 'PZ') order by season_code desc"
   field5:
     field_name: deliveries.rmt_variety_code
     caption:    rmt_variety_code
     field_type: lookup
     list: " select rmt_variety_code from rmt_varieties where (commodity_code = 'AP' OR commodity_code = 'PR' OR commodity_code ='PL' OR commodity_code = 'PZ') order by rmt_variety_code"      
+  field6:
+    field_name: stock_items.stock_type_code
+    caption:    stock_type_code
+    field_type: lookup
+    list: " select stock_type_code from stock_types where stock_type_code <> 'PALLET' ORDER BY stock_type_code"          

@@ -8,6 +8,7 @@ fields:
   field_name: season_code
   caption: season_code
   field_type: lookup
+  searchable: false
   list: "select distinct season_code from seasons order by season_code asc"
  field3:
   field_name: production_run_code

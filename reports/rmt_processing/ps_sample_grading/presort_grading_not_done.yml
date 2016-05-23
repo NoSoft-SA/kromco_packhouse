@@ -1,4 +1,4 @@
-query: select  ps_tipped_lot_no,farm_code,season_code, track_slms_indicator_code, done_status,  'row ' || CAST(ROW_NUMBER() OVER() AS character varying) AS id , delivery_number_preprinted, bin_weight, bin_count, created_by, created_at from vw_ps_gg_not_done WHERE(ps_tipped_lot_no={ps_tipped_lot_no} and season_code={season_code} and farm_code={farm_code} and track_slms_indicator_code={track_slms_indicator_code} and delivery_number_preprinted={delivery_number_preprinted} and created_by={created_by}) order by ps_tipped_lot_no
+query: select  delivery_number_preprinted, ps_tipped_lot_no,farm_code,season_code, track_slms_indicator_code, done_status,  'row ' || CAST(ROW_NUMBER() OVER() AS character varying) AS id , bin_weight, bin_count, created_by, created_at from vw_ps_gg_not_done WHERE(ps_tipped_lot_no={ps_tipped_lot_no} and season_code={season_code} and farm_code={farm_code} and track_slms_indicator_code={track_slms_indicator_code} and delivery_number_preprinted={delivery_number_preprinted} and created_by={created_by}) order by delivery_number_preprinted, ps_tipped_lot_no
 main_table_name: bins
 fields:
  field1:
@@ -10,6 +10,7 @@ fields:
   field_name:  season_code
   caption: season_code
   field_type: lookup
+  searchable: false  
   list: "select distinct season_code from seasons where commodity_code = 'AP' order by season_code asc"
  field3:
   field_name:  farm_code

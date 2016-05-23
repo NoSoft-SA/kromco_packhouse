@@ -1,4 +1,4 @@
-query: select 'row ' || CAST(ROW_NUMBER() OVER() AS character varying) AS id , batch, booking_reference, brand_code, carton_fruit_nett_mass, commodity_code, consignment_note_number, container_code, container_seal_code, ctn_gross_mass, ctn_qty, cpp, customer_contact_name, customer_order_number, departure_date, departure_port_code, diameter_range, dispatch_consignment_number, egap, export_party_role_name, exporter_certificate_code, external_party_product_code, grade_code, gtin, haulier_party_name, inspection_point, inventory_code, line_phc, load_id, load_number, load_order_id, marking, old_pack_code, order_number, organization_code, pack_material_weight, pallet_format_product_code, pallet_number, ppecb_inspection_date, port_name, arrival_date, product_class_code, product_class_description_short, puc, puc_description, sell_by_code, shipped_date_time, shipper_party_role_name, shipping_agent_party_role_name, shipping_line_party_role_name, size_ref, stack_type_code, target_market_code, tu_gross_mass, units_per_carton, unit_fruit_nett_mass, variety, vessel_code, voyage_code, voyage_number, plt_qty, packed_by, oldest_pack_date_time, depot_code, season_code, type_of_box, packaging, cf_supplier_no, supplier_no, storage, warning_note, priority, temptale, organic_cert_no, ru_description, as_ch_marking, fruit_per_ru, external_fruit_per_ru, external_fruit_per_ru_combined, external_custom_pack_code1, external_custom_pack_code2, marketing_variety_description, product, storage_days, old_fg_code, carton_quantity_actual, cto_consec_code, pc_code, pt_product_characteristics, container_temperature_rhine, container_temperature_rhine2, pallet_base_code, pallet_base_code_desc, basic_pack_code, harvest_date, commodity_group_desc, account_code, size_count_code, vehicle_number from vw_mates_receipt where (order_number={order_number} and load_number={load_number} and load_order_id={load_order_id} and shipped_date_time={shipped_date_time} and dispatch_consignment_number={dispatch_consignment_number} and pallet_number={pallet_number} and commodity_code={commodity_code} and variety={variety} and brand_code={brand_code} and old_pack_code={old_pack_code} and grade_code={grade_code}  and target_market_code={target_market_code}  and inventory_code={inventory_code} and organization_code={organization_code} and season_code={season_code} and pallet_base_code={pallet_base_code})
+query: select 'row ' || CAST(ROW_NUMBER() OVER() AS character varying) AS id , batch, booking_reference, brand_code, carton_fruit_nett_mass, commodity_code, consignment_note_number, container_code, container_seal_code, ctn_gross_mass, ctn_qty, cpp, customer_contact_name, customer_order_number, departure_date, departure_port_code, diameter_range, dispatch_consignment_number, egap, export_party_role_name, exporter_certificate_code, external_party_product_code, grade_code, gtin, haulier_party_name, inspection_point, inventory_code, line_phc, load_id, load_number, load_order_id, marking, old_pack_code, order_number, organization_code, pack_material_weight, pallet_format_product_code, pallet_number, ppecb_inspection_date, port_name, arrival_date, product_class_code, product_class_description_short, puc, puc_description, sell_by_code, shipped_date_time, shipper_party_role_name, shipping_agent_party_role_name, shipping_line_party_role_name, size_ref, stack_type_code, target_market_code, tu_gross_mass, units_per_carton, unit_fruit_nett_mass, variety, vessel_code, voyage_code, voyage_number, plt_qty, packed_by, oldest_pack_date_time, depot_code, season_code, type_of_box, packaging, cf_supplier_no, supplier_no, storage, warning_note, priority, temptale, organic_cert_no, ru_description, as_ch_marking, fruit_per_ru, external_fruit_per_ru, external_fruit_per_ru_combined, external_custom_pack_code1, external_custom_pack_code2, marketing_variety_description, product, storage_days, old_fg_code, carton_quantity_actual, cto_consec_code, pc_code, pt_product_characteristics, container_temperature_rhine, container_temperature_rhine2, pallet_base_code, pallet_base_code_desc, basic_pack_code, harvest_date, commodity_group_desc, account_code, size_count_code, vehicle_number,pack_date,line_code, customer_code from vw_mates_receipt where (order_number={order_number} and load_number={load_number} and load_order_id={load_order_id} and shipped_date_time={shipped_date_time} and dispatch_consignment_number={dispatch_consignment_number} and pallet_number={pallet_number} and commodity_code={commodity_code} and variety={variety} and brand_code={brand_code} and old_pack_code={old_pack_code} and grade_code={grade_code}  and target_market_code={target_market_code}  and inventory_code={inventory_code} and organization_code={organization_code} and season_code={season_code} and pallet_base_code={pallet_base_code} and pack_date={pack_date})
 main_table_name: orders
 fields:
  field1:
@@ -9,6 +9,7 @@ fields:
   field_name: commodity_code
   caption: commodity_code
   field_type: lookup
+  searchable: false
   list: "select commodity_code from commodities order by commodity_code"  
  field3:
   field_name: variety
@@ -49,6 +50,7 @@ fields:
   field_name: season_code
   caption: season_code
   field_type: lookup
+  searchable: false
   list: " select distinct season from seasons order by season"  
  field11:
   field_name: shipped_date_time
@@ -58,3 +60,7 @@ fields:
   field_name: pallet_base_code
   field_type: lookup
   list: "select pallet_base_code from pallet_bases"
+ field13:
+  field_name: pack_date
+  caption: pack_date
+  field_type: daterange

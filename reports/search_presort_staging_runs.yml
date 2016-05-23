@@ -16,6 +16,7 @@ fields:
    field_name: s.season_code
    caption: season code
    field_type: lookup
+   searchable: false   
    list: "select season_code from seasons order by season_code"
   field4:
    field_name: t.track_slms_indicator_code

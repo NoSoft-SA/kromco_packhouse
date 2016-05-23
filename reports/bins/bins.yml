@@ -1,4 +1,4 @@
-query: select delivery_number, delivery_number_preprinted, delivery_description, id, bin_number, weight, is_half_bin, is_sample_bin, bin_receive_date_time, binfill_station_code, rebin_status, rebin_label_station_code, rebin_date_time, orchard_code, user_name, print_number, exit_ref, exit_reference_date_time, tipped_date_time, tipped_run, tipped_parent_run, rebin_run, rebin_parent_run, commodity_code, variety_code, rmt_product_code, pack_material_product_code, farm_code, farm_description, farm_group_code, pc_code_code, cold_store_type_code, ripe_point_code, treatment_code, treatment_type_code, ripe_code, location_code, parent_location_code, season_code, season, destroyed, stock_type_code, product_class_code, size_code, track_slms_indicator_1_code, track_slms_indicator_2_code, created_on, week_created, week_exited, fruit_age, bin_order_load_detail_id, bin_fruit_standard_mass, rmt_variety_description, track_slms_indicator_1_description, group_1_code, group_2_code, bin_load_number, bin_tip_status, sealed_ca_location, bin_order_number, tipped_shift_user_name, tipped_shift_calendar_date, tipped_shift_type_code, tipped_line_code, carton_fruit_standard_mass, orchard_description, pc_name, shift_id, product_class_description, trading_partner_code, trading_partner_name, sealed_ca_date_time, rmtp_treatment_code, rmtp_treatment_type_code, map_ps_lot_no_mix, mix_ps_bin, ps_tipped_lot_no, numero_lot_max, code_cumul, code_adherent_max, color, coldstore_type, rmt_variety_code,  sealed_ca_open_date_time, duration_sealed, ps_reworked_lot, year_created, iso_year_created, iso_week_created, location_status from vwbins WHERE (stock_type_code={stock_type_code} and season={season} and bin_number={bin_number} and bin_receive_date_time={bin_receive_date_time} and binfill_station_code={binfill_station_code} and commodity_code={commodity_code} and delivery_description={delivery_description} and exit_ref={exit_ref} and exit_reference_date_time={exit_reference_date_time} and farm_code={farm_code} and farm_description={farm_description} and farm_group_code={farm_group_code} and farm_group_code={farm_group_code} and location_code={location_code} and orchard_code={orchard_code} and pack_material_product_code={pack_material_product_code} and pc_code_code={pc_code_code} and print_number={print_number} and rebin_date_time={rebin_date_time} and rebin_label_station_code={rebin_label_station_code} and rebin_parent_run={rebin_parent_run} and rebin_run={rebin_run} and rebin_status={rebin_status} and rmt_product_code={rmt_product_code} and tipped_date_time={tipped_date_time} and tipped_parent_run={tipped_parent_run} and tipped_run={tipped_run} and user_name={user_name} and variety_code={variety_code} and delivery_number_preprinted={delivery_number_preprinted} and group_1_code={group_1_code} and group_2_code={group_2_code} and bin_tip_status={bin_tip_status} and delivery_number={delivery_number} and pack_material_product_code={pack_material_product_code} and product_class_code={product_class_code} and track_slms_indicator_1_code={track_slms_indicator_1_code} and track_slms_indicator_2_code={track_slms_indicator_2_code} and treatment_code={treatment_code} and tipped_shift_calendar_date={tipped_shift_calendar_date} and color={color} and ps_tipped_lot_no={ps_tipped_lot_no}) 
+query: select delivery_number, delivery_number_preprinted, delivery_description, id, bin_number, weight, is_half_bin, is_sample_bin, bin_receive_date_time, binfill_station_code, rebin_status, rebin_label_station_code, rebin_date_time, orchard_code, user_name, print_number, exit_ref, exit_reference_date_time, tipped_date_time, tipped_run, tipped_parent_run, rebin_run, rebin_parent_run, commodity_code, variety_code, rmt_product_code, pack_material_product_code, farm_code, farm_description, farm_group_code, pc_code_code, cold_store_type_code, ripe_point_code, treatment_code, treatment_type_code, ripe_code, location_code, parent_location_code, season_code, season, destroyed, stock_type_code, product_class_code, size_code, track_slms_indicator_1_code, track_slms_indicator_2_code, created_on, week_created, week_exited, fruit_age, bin_order_load_detail_id, bin_fruit_standard_mass, rmt_variety_description, track_slms_indicator_1_description, group_1_code, group_2_code, bin_load_number, bin_tip_status, sealed_ca_location, bin_order_number, tipped_shift_user_name, tipped_shift_calendar_date, tipped_shift_type_code, tipped_line_code, carton_fruit_standard_mass, orchard_description, pc_name, shift_id, product_class_description, trading_partner_code, trading_partner_name, sealed_ca_date_time, rmtp_treatment_code, rmtp_treatment_type_code, map_ps_lot_no_mix, mix_ps_bin, ps_tipped_lot_no, numero_lot_max, code_cumul, code_adherent_max, color, coldstore_type, rmt_variety_code,  sealed_ca_open_date_time, duration_sealed, ps_reworked_lot, year_created, iso_year_created, iso_week_created, location_status from vwbins WHERE (stock_type_code={stock_type_code} and season={season} and bin_number={bin_number} and bin_receive_date_time={bin_receive_date_time} and binfill_station_code={binfill_station_code} and commodity_code={commodity_code} and delivery_description={delivery_description} and exit_ref={exit_ref} and exit_reference_date_time={exit_reference_date_time} and farm_code={farm_code} and farm_description={farm_description} and farm_group_code={farm_group_code} and farm_group_code={farm_group_code} and location_code={location_code} and orchard_code={orchard_code} and pack_material_product_code={pack_material_product_code} and pc_code_code={pc_code_code} and print_number={print_number} and rebin_date_time={rebin_date_time} and rebin_label_station_code={rebin_label_station_code} and rebin_parent_run={rebin_parent_run} and rebin_run={rebin_run} and rebin_status={rebin_status} and rmt_product_code={rmt_product_code} and tipped_date_time={tipped_date_time} and tipped_parent_run={tipped_parent_run} and tipped_run={tipped_run} and user_name={user_name} and variety_code={variety_code} and delivery_number_preprinted={delivery_number_preprinted} and group_1_code={group_1_code} and group_2_code={group_2_code} and bin_tip_status={bin_tip_status} and delivery_number={delivery_number} and pack_material_product_code={pack_material_product_code} and product_class_code={product_class_code} and track_slms_indicator_1_code={track_slms_indicator_1_code} and track_slms_indicator_2_code={track_slms_indicator_2_code} and treatment_code={treatment_code} and tipped_shift_calendar_date={tipped_shift_calendar_date} and color={color} and ps_tipped_lot_no={ps_tipped_lot_no} and numero_lot_max={numero_lot_max} and id={id}) 
 main_table_name: bins
 fields:
  field1:
@@ -36,6 +36,7 @@ fields:
   field_name:  commodity_code
   caption: commodity_code
   field_type: lookup
+  searchable: false
   list: "select commodity_code from commodities order by commodity_code"
  field9:
   field_name:  variety_code
@@ -46,11 +47,13 @@ fields:
   field_name:  pc_code_code
   caption: pc_code
   field_type: lookup
+  searchable: false
   list: "select pc_code from pc_codes order by pc_code"
  field11:
   field_name:  season
   caption: season
   field_type: lookup
+  searchable: false
   list: "select distinct season from seasons order by season"
  field12:
   field_name:  stock_type_code
@@ -72,11 +75,6 @@ fields:
   caption: bin_tip_status
   field_type: lookup
   list: "select distinct status_code from statuses where status_type_code = 'bin_tip_status' order by status_code"
- field16:
-  field_name:  delivery_number
-  caption: delivery_number
-  field_type: lookup
-  list: "select distinct delivery_number from deliveries order by delivery_number asc"  
  field17:
   field_name:  pack_material_product_code
   caption: pack_material_product_code

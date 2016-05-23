@@ -5,6 +5,7 @@ fields:
   field_name:  season
   caption: season
   field_type: lookup
+  searchable: false  
   list: "select distinct season from seasons order by season desc"
  field2:
   field_name:  farm_code
@@ -15,6 +16,7 @@ fields:
   field_name:  commodity_code
   caption: commodity_code
   field_type: lookup
+  searchable: false  
   list: "select distinct commodity_code from commodities order by commodity_code asc"  
  field4:
   field_name:  track_slms_indicator_code

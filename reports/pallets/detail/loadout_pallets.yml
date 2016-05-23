@@ -9,6 +9,7 @@ fields:
   field_name: commodity_code
   caption: commodity_code
   field_type: lookup
+  searchable: false
   list: "select commodity_code from commodities order by commodity_code"  
  field3:
   field_name: marketing_variety_code
@@ -49,6 +50,7 @@ fields:
   field_name: season_code
   caption: season_code
   field_type: lookup
+  searchable: false
   list: " select distinct season from seasons order by season" 
  field11:
   field_name: fg_code_old

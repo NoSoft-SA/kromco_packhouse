@@ -9,6 +9,7 @@ fields:
   field_name: productgroup
   caption: commodity_code
   field_type: lookup
+  searchable: false  
   list: "select commodity_code from commodities order by commodity_code"  
  field3:
   field_name: variety

@@ -55,7 +55,7 @@ class PutAwayPallet < PDTTransaction
       assignment = 'RECOOL' if pallet.store_type_code = "cold_store"
 
       load_pallet_condition = ""
-      load_pallet_condition = " and (locations.locaction_code NOT like '%PART_PALLETS%')" if pallet.load_detail_id
+      load_pallet_condition = " and (locations.location_code NOT like '%PART_PALLETS%')" if pallet.load_detail_id
       
       query = " SELECT DISTINCT location_setups.priority,location_setups.location_code
                 from location_setups

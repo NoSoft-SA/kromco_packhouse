@@ -36,6 +36,7 @@ fields:
   field_name:  commodity_code
   caption: commodity_code
   field_type: lookup
+  searchable: false
   list: "select commodity_code from commodities order by commodity_code"
  field9:
   field_name:  variety_code
@@ -46,11 +47,13 @@ fields:
   field_name:  pc_code_code
   caption: pc_code
   field_type: lookup
+  searchable: false
   list: "select pc_code from pc_codes order by pc_code"
  field11:
   field_name:  season
   caption: season
   field_type: lookup
+  searchable: false
   list: "select distinct season from seasons order by season"
  field12:
   field_name:  stock_type_code

@@ -13,6 +13,7 @@ fields:
   field_name: season_order_quantities.season_code
   caption: season_code
   field_type: lookup
+  searchable: false
   list: select season_code from seasons
  field4:
   field_name:season_order_qty_mail_logs.sent_to

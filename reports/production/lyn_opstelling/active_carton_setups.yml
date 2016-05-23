@@ -9,6 +9,7 @@ fields:
    field_name: carton_label_setups.commodity_code
    caption: commodity_code
    field_type: lookup
+   searchable: false
    list: "select commodity_description_short from commodities order by commodity_description_short asc"
   field3:
    field_name: carton_label_setups.variety_short_long

@@ -8,7 +8,6 @@ class Carton < ActiveRecord::Base
 
   attr_accessor :marketing_variety_code, :inventory_code_short, :facility_code, :location_code
 
-
   def is_valid_carton_sell_by_code?(carton,oldest_carton)
     oldest_carton_sell_by_code= oldest_carton.sell_by_code
       carton_sell_by_code= carton.sell_by_code
@@ -25,8 +24,6 @@ class Carton < ActiveRecord::Base
         return nil
       end
   end
-
-
   def get_inspection_cartons
 
     query = "select cartons.carton_number from cartons where pallet_number = '#{self.pallet_number}' and is_inspection_carton = true"
