@@ -1695,7 +1695,7 @@ class Production::RunsController < ApplicationController
       #@production_run.set_status('active',session[:user_id])
 
       flash[:notice]= "run executed successfully"
-      flash[:notice] += "<BR>Shift: #{@shift.shift_code}, foreman is #{@shift.user}" if @shift
+      flash[:notice] += "<BR>Shift: #{@shift.shift_code}, foreman is #{@shift.user}" if @shift && @shift.respond_to?("shift_code")
       if session[:current_ctl_line_run]
         control_line @production_run.line_code
       else
@@ -1886,8 +1886,8 @@ class Production::RunsController < ApplicationController
             if @shift.class.to_s == "String"
               params[:id] = nil
               session[:alert] = @shift
-              current_schedule_runs
-              return
+             # current_schedule_runs
+             # return
             end
             #session[:executing_run][:shift]= shift_details
             #session[:current_ctl_line_run] = @production_run
