@@ -92,7 +92,7 @@ unit_pack_products.nett_mass AS unit_pack_product_nett_mass, commodities.commodi
 commodities.commodity_description_short, marketing_varieties.marketing_variety_description, item_pack_products.grade_code,
 item_pack_products.product_class_code, item_pack_products.standard_size_count_value, item_pack_products.size_ref,
 item_pack_products.cosmetic_code_name, item_pack_products.treatment_code, item_pack_products.actual_count,
-extended_fgs.created_on, extended_fgs.updated_on,rmt_setups.variety_code,incoterms.incoterm_code,currencies.currency_code, order_products.price_per_carton, loads.shipped_date_time',
+extended_fgs.created_on, extended_fgs.updated_on,rmt_setups.variety_code,incoterms.incoterm_code,currencies.currency_code, order_products.price_per_carton, loads.shipped_date_time,cartons.puc',
 
 :joins => 'INNER JOIN load_details ON (load_orders.load_id = load_details.load_id)
 INNER JOIN pallets ON (load_details.id = pallets.load_detail_id)
@@ -127,7 +127,10 @@ INNER JOIN unit_pack_product_types ON (unit_pack_products.type_code = unit_pack_
 INNER JOIN unit_pack_product_subtypes ON (unit_pack_products.subtype_code = unit_pack_product_subtypes.subtype_code)
 LEFT JOIN loads ON loads.id = load_details.load_id',
 
-:conditions => ['load_orders.id = ?', @record_map['id']])
+:conditions => ['load_orders.id = ?', @record_map['id']],
+
+:order => 'extended_fgs.extended_fg_code,cartons.puc,pallets.pallet_number desc'
+    )
 
 
     load_orders.each do |record|
