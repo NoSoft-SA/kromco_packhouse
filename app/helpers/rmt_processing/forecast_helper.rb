@@ -559,4 +559,16 @@ module RmtProcessing::ForecastHelper
     build_form(forecast, field_configs, action, 'forecast', caption, nil)
   end
 
+  def build_print_screen_form(hash_object)
+    printers = Globals.bin_ticket_printer_names
+    field_configs = []
+    field_configs << {:field_type => 'TextField',
+                      :field_name => 'qty'}
+    field_configs <<  {:field_type => 'DropDownField',
+                                            :field_name => 'printer',
+                                            :settings => {:list => printers}}
+    field_configs << {:field_type=>'HiddenField', :field_name=>'id'}
+
+    build_form(hash_object,field_configs,'print_bin_tickets_commit','hash_object','print',nil)
+  end
 end

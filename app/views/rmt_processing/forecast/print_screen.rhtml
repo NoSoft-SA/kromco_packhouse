@@ -1,0 +1,38 @@
+
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.12.0/themes/base/jquery-ui.css">
+  <link rel="stylesheet" href="/resources/demos/style.css">
+  <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.js"></script>
+  <script>
+      $( function() {
+          $( "#dialog" ).dialog();
+      } );
+  </script>
+
+
+<div id="dialog" title="Basic dialog">
+  <p>This is the default dialog which is useful for displaying information. The dialog window can be moved, resized and closed with the 'x' icon.</p>
+</div>
+
+  <%
+     @can_edit   = true
+     id = 174
+     if id && @forecast = Forecast.find(id)
+       session[:forecast_id]  = @forecast.id
+       @action                 = 'update_forecast'
+       @caption                = 'update_forecast'
+       @track_slms_indicators = @forecast.track_slms_indicators
+  %>
+      <%= build_forecast_form(@forecast,@action,@caption,true,@is_create_retry,@is_view)%>
+
+     <%end%>
+
+
+
+  <script>
+//      window.parent.frames[1].location.href = "/rmt_processing/forecast/edit_forecast/174";
+//      alert(window.parent.frames[1].location);
+//      alert(window.opener.frames[1].location);
+//      window.close();
+//      window.opener.frames[1].location.reload(true);
+  </script>

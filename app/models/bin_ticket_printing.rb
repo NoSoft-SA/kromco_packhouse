@@ -59,7 +59,7 @@ begin
     http_conn = Net::HTTP.new(ip, Globals.get_label_printing_server_port)
     output_msg += "BATCH PRINTING " + ARGV[2] + " tickets...<br>"
     
-    instruction = forecast_variety_indicator.print_bin_tickets http_conn, ARGV[2]
+    instruction = forecast_variety_indicator.print_bin_tickets(http_conn, ARGV[2], ARGV[3])
     puts " Batch bin ticket print command(for " + ARGV[2] + " tickets) successfully sent to printer. Instruction was: <BR>" + instruction
       
   end

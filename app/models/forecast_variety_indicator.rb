@@ -71,12 +71,12 @@ end
 #  Bin Ticket Printing by Happymore
 #======================================
 
-def print_bin_tickets(http_conn, qty_to_print)
+def print_bin_tickets(http_conn, qty_to_print, printer)
   begin
 
     @qty_to_print = qty_to_print
     data = build_bin_tickets_data
-    return_string = build_print_instruction(data)
+    return_string = build_print_instruction(data, printer)
     print_instruction = return_string.split("$")[0]
     seed_num = return_string.split("$")[1]
 
@@ -186,14 +186,14 @@ def build_bin_tickets_data
 
 end
 
-def build_print_instruction(label_data)
+def build_print_instruction(label_data, printer)
 
   seed_num = MesControlFile.next_seq_web(MesControlFile::BIN_TICKET,@qty_to_print.to_i)
   #puts seed_num.to_s
 
   start_num = seed_num.to_i - @qty_to_print.to_i
   #puts quantity.to_s
-  label_instruction = "<ProductLabel PID=\"223\" Status=\"true\" Printer=\"#{Globals.bin_ticket_printer_name}\" MC=\"[NR]\""
+  label_instruction = "<ProductLabel PID=\"223\" Status=\"true\" Printer=\"#{printer}\" MC=\"[NR]\""
 
   #label_instruction += "BIN"
   label_instruction += " StartNr=\""

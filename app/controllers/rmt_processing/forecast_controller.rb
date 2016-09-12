@@ -1060,106 +1060,146 @@ class RmtProcessing::ForecastController < ApplicationController
   end
 
   def stop_active_bin_ticket_print_job
-    stop_active_print_job(Globals.bin_ticket_printing_ip,Globals.get_label_printing_server_port,Globals.bin_ticket_printer_name)  
+    stop_active_print_job(Globals.bin_ticket_printing_ip,Globals.get_label_printing_server_port,Globals.bin_ticket_printer_name)
   end
-  
+
   def print_bin_tickets_commit
+    @id = params['hash_object']['id']
+    @qty_to_print = params['hash_object']['qty']
+    @printer = params['hash_object']['printer']
 
-
-    id_str                         = params[:id]
-
-    vals = id_str.split("!")
-    id = vals[0].to_i
-
-    if vals.length() == 2
-      qty_to_print = vals[1]
-      if qty_to_print == "null"
-         flash[:notice] = "print canceled"
-          active_forecast
-          return
-      end
-    else
+    if(params['hash_object']['qty'].to_s.empty?)
       flash[:error] = "You must provide a quantity to print"
-      active_forecast
+      params['id'] = @id
+      params['qty'] = @qty_to_print
+      print_screen
+      return
+    elsif(params['hash_object']['printer'].to_s.empty?)
+      flash[:error] = "You must select a valid printer"
+      params['id'] = @id
+      params['qty'] = @qty_to_print
+      print_screen
       return
     end
 
+    if(printer_forecast_variety_indicator = ForecastVarietyIndicator.find_by_active_printer(@printer))
+      @msg = "The printer you selected is being used to print tickets for #{printer_forecast_variety_indicator.forecast_variety.forecast.forecast_code},variety:#{printer_forecast_variety_indicator.forecast_variety.rmt_variety_code},indicator: #{printer_forecast_variety_indicator.track_slms_indicator_code}. Do you want to continue anyway?"
+      render :inline => %{
+       <script>
+         if (confirm("<%=@msg%>") == true){
+            window.location.href = "/rmt_processing/forecast/print_bin_tickets_execute?id=#{@id}&qty=#{@qty_to_print}&printer=#{@printer}";
+         }else{
+            window.location.href = "/rmt_processing/forecast/cancel_bin_tickets_printing?id=#{@id}&qty=#{@qty_to_print}&printer=#{@printer}";
+         }
+      </script>
+        }
+      return
+    end
 
-    forecast_variety_indicator = ForecastVarietyIndicator.find(id)
+    params['id'] = @id
+    params['qty'] = @qty_to_print
+    params['printer'] = @printer
+    print_bin_tickets_execute
+  end
+
+  def cancel_bin_tickets_printing
+    inactive_printer_fvi = ActiveRecord::Base.connection.select_all("
+    ((select * FROM (VALUES ('#{Globals.bin_ticket_printer_names.join("'),('")}')) A(active_printer))
+                              except
+    (select active_printer from forecast_variety_indicators where active_printer is not null))")
+    params['printer'] = (inactive_printer_fvi.length > 0 ? inactive_printer_fvi[0]['active_printer'] : nil)
+    print_screen
+  end
+
+  def print_bin_tickets_execute
     begin
       Carton.transaction do
-        #if forecast_variety_indicator.quantity > 0 && forecast_variety_indicator.number_tickets_printed < forecast_variety_indicator.quantity
 
-           if !RUBY_PLATFORM.index('linux')
-              file_name = session[:user_id].user_name + "_BIN_" + Time.now.strftime("%m_%d_%Y_%H_%M_%S") + ".bat"
-              file      = File.new(file_name, "w")
-              file.puts "ruby \"app\\models\\bin_ticket_printing.rb\"" + " BATCH " + id.to_s + " " + qty_to_print
-              file.close
-              result = eval "\`" + "\"" + file_name + "\"" + "\"`"
-           else
-              file_name = session[:user_id].user_name + "_BIN_" + Time.now.strftime("%m_%d_%Y_%H_%M_%S") + ".sh"
-              file      = File.new(file_name, "w")
-              file.puts "/usr/local/bin/ruby \"app/models/bin_ticket_printing.rb\"" + " BATCH " + id.to_s  + " " + qty_to_print
-              file.close
-              result = eval "\` sh " + file_name + "\`"
+        if !RUBY_PLATFORM.index('linux')
+          file_name = session[:user_id].user_name + "_BIN_" + Time.now.strftime("%m_%d_%Y_%H_%M_%S") + ".bat"
+          file = File.new(file_name, "w")
+          file.puts "ruby \"app\\models\\bin_ticket_printing.rb\"" + " BATCH " + params['id'].to_s + " " + params['qty'] + " " + params['printer']
+          file.close
+          @result = eval "\`" + "\"" + file_name + "\"" + "\"`"
+        else
+          file_name = session[:user_id].user_name + "_BIN_" + Time.now.strftime("%m_%d_%Y_%H_%M_%S") + ".sh"
+          file = File.new(file_name, "w")
+          # file.puts "ruby \"app/models/bin_ticket_printing.rb\"" + " BATCH " + params['id'].to_s + " " + params['qty'] + " " + params['printer']
+          file.puts "/usr/local/bin/ruby \"app/models/bin_ticket_printing.rb\"" + " BATCH " + params['id'].to_s + " " + params['qty'] + " " + params['printer']
+          file.close
+          @result = eval "\` sh " + file_name + "\`"
 
-           end
+        end
 
-           File.delete(file_name)
+        File.delete(file_name)
 
-          if result.index("error")
-            raise result
-          end
-          @forecast_variety_indicators = ForecastVarietyIndicator.find_by_sql("
+        if @result.index("error")
+          raise @result
+        end
+        @forecast_variety_indicators = ForecastVarietyIndicator.find_by_sql("
                                         select *
                                         from forecast_variety_indicators
                                           join forecast_varieties on forecast_varieties.id=forecast_variety_indicators.forecast_variety_id
                                               join forecasts on forecasts.id=forecast_varieties.forecast_id
                                         where forecasts.id=#{session[:forecast_id]} ")
-          @forecast_variety_indicators.each do |fvi|
-            if (fvi.number_tickets_printed && fvi.number_tickets_printed > 0)
-              Forecast.update(session[:forecast_id], {:tickets_printed_datetime=>Time.now})
-              break
-            end
+        @forecast_variety_indicators.each do |fvi|
+          if (fvi.number_tickets_printed && fvi.number_tickets_printed > 0)
+            Forecast.update(session[:forecast_id], {:tickets_printed_datetime => Time.now})
+            break
           end
-          puts "print result: " + result
-          #File.delete file_name
-          @freeze_flash  = true
+        end
+        @freeze_flash = true
 
-          #flash[:notice] = result
-          flash[:notice] = result
-          active_forecast
+        ActiveRecord::Base.connection.execute("update forecast_variety_indicators set active_printer=null where active_printer='#{params['printer']}';
+                                          update forecast_variety_indicators set active_printer='#{params['printer']}' where id=#{params['id']};")
 
-#      render :inline => %{
-#
-#  		<td class = 'printed'>Bin tickets printed</td>
-#
-#  	   }
-        #else
-        #  redirect_to_index("Bin tickets could not be printed, Reason: bin tickets already printed")
-        #end
+        render :inline => %{
+                <script>
+                      window.opener.location.href = "/rmt_processing/forecast/active_forecast";
+                      window.close();
+                </script>
+          }, :layout => 'content'
       end
 
     rescue
       handle_error("Bin Tickets could not be printed")
     end
-
-
   end
 
+  def job_completed
+    ActiveRecord::Base.connection.execute("update forecast_variety_indicators set active_printer=null where id=#{params['id']};")
+    active_forecast
+  end
+
+  def cancel_print_job
+    @forecast_variety_indicator = ForecastVarietyIndicator.find(params[:id].to_i)
+    ActiveRecord::Base.connection.execute("update forecast_variety_indicators set active_printer=null where id=#{params['id']};")
+    flash[:notice] = stop_active_print_job(Globals.bin_ticket_printing_ip,Globals.get_label_printing_server_port,@forecast_variety_indicator.active_printer).body
+    active_forecast
+  end
+
+  def print_screen
+    @object_builder = ObjectBuilder.new
+    @hash_object = @object_builder.build_hash_object({:id=>params['id'], :qty=>params['qty'], :printer=>params['printer']})
+    @forecast_variety_indicator = ForecastVarietyIndicator.find(params[:id].to_i)
+    @content_header_caption = "'print bin tickets for commodity(#{@forecast_variety_indicator.forecast_variety.commodity_code}), rmt_variety(#{@forecast_variety_indicator.forecast_variety.rmt_variety_code}),  indicator(#{@forecast_variety_indicator.track_slms_indicator_code})'"
+    render :inline => %{
+      <%= build_print_screen_form(@hash_object)%>
+    }, :layout => 'content'
+  end
 
   def print_bin_tickets
-    @id                         = params[:id]
-    @qty = ForecastVarietyIndicator.find(@id.to_i).quantity
+    @forecast_variety_indicator = ForecastVarietyIndicator.find(params[:id].to_i)
 
+    render :inline => %{
+  	   <% @url = "http://" + request.host_with_port + "/" + "rmt_processing/forecast/print_screen?id=#{@forecast_variety_indicator.id}&qty=#{@forecast_variety_indicator.quantity}" %>
+  	   <script>
+          another_window = window.open("<%=@url%>", "","width=600,height=280,top=200,left=200,toolbar=no,menubar=no,status=yes,scrollbars=yes,resizable=no" );
+          window.location.href = "/rmt_processing/forecast/edit_forecast/<%= @forecast_variety_indicator.forecast_variety.forecast.id %>"
+       </script>
 
+  	 }, :layout => "content"
 
-     render :inline => %{
-     <script>
-     val = prompt("Please enter the amount of tickets to print",<%=@qty.to_s %>);
-     window.location.href = "/rmt_processing/forecast/print_bin_tickets_commit/<%= @id + '!'%>" + val;
-     </script>
-     }
   end
 
 #=======================================================
