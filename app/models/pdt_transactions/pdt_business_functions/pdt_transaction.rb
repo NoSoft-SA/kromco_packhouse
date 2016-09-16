@@ -162,18 +162,18 @@ class PDTTransaction
 # uses build_msg_output_lines() to construct a pdt_screen_definition objectbuild_msg_output_lines
 # for the returned outputs
 #------------------------------------------------------------------------------------------------
-  def PDTTransaction.build_msg_screen_definition(msg=nil,line_max=nil,num_lines=nil,additonal_lines_array=nil)
-     outputs = build_msg_output_lines(msg,line_max,num_lines)
-     outputs = additonal_lines_array + outputs if additonal_lines_array != nil
+  def PDTTransaction.build_msg_screen_definition(msg=nil,line_max=nil,num_lines=nil,additonal_lines_array=nil, caption=nil)
+    outputs = build_msg_output_lines(msg,line_max,num_lines)
+    outputs = additonal_lines_array + outputs if additonal_lines_array != nil
 
-     field_configs = Array.new
-     for output_line in outputs
-       field_configs[field_configs.length] = {:type=>"text_line",:name=>"output",:value=>output_line.to_s}
-     end
-     screen_attributes = {:auto_submit=>"false",:content_header_caption=>""}
-     buttons = {"B3Label"=>"Cancel" ,"B2Label"=>"No","B1Label"=>"Yes","B1Enable"=>"false","B2Enable"=>"false","B3Enable"=>"false" }
-     screen_xml = PdtScreenDefinition.gen_screen_xml(field_configs,buttons,screen_attributes,nil)
-     return screen_xml
+    field_configs = Array.new
+    for output_line in outputs
+      field_configs[field_configs.length] = {:type=>"text_line",:name=>"output",:value=>output_line.to_s}
+    end
+    screen_attributes = {:auto_submit=>"false",:content_header_caption=>caption}
+    buttons = {"B3Label"=>"Cancel" ,"B2Label"=>"No","B1Label"=>"Yes","B1Enable"=>"false","B2Enable"=>"false","B3Enable"=>"false" }
+    screen_xml = PdtScreenDefinition.gen_screen_xml(field_configs,buttons,screen_attributes,nil)
+    return screen_xml
   end
 
 #-----------------------------------------------------------------
