@@ -130,8 +130,9 @@ def create_shift
 		
        @freeze_flash = true
        redirect_to_index("Created shift:<br> #{@shift.shift_code} ") 
-	else
+	 else
 		@is_create_retry = true
+		@shift.shift_type_code=nil
 		render_new_shift
 	 end
 rescue
@@ -191,10 +192,13 @@ end
 #	---------------------------------------------------------------------------------
 def shift_shift_type_code_changed
 	shift_type_code = get_selected_combo_value(params)
-	@shift_type = ShiftType.find_by_shift_type_code(shift_type_code)
 
-  #render (inline) the html to replace the contents of the td that contains the drop_down
-	render :inline => %{
+	if shift_type_code == nil
+		render :inline => %{ select shift type }
+	else
+		@shift_type = ShiftType.find_by_shift_type_code(shift_type_code)
+
+		render :inline => %{
 	<script>
 		 <%= update_element_function(
         "start_time_cell", :action => :update,
@@ -205,6 +209,8 @@ def shift_shift_type_code_changed
         :content => @shift_type.end_time.to_s) %>
          </script>
 		}
+
+	end
 
 
 end
