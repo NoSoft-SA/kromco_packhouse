@@ -882,6 +882,18 @@ class Production::RunsController < ApplicationController
       if  production_run_details_params['track_indicator_id']=="" || production_run_details_params['track_indicator_id']==nil || production_run_details_params['track_indicator_id']=="<empty>" || production_run_details_params['track_indicator_id']=="empty"
         error << "track_indicator_code is empty"
       end
+      if  production_run_details_params['pc_code_id']=="" || production_run_details_params['pc_code_id']==nil || production_run_details_params['pc_code_id']=="<empty>" || production_run_details_params['pc_code_id']=="empty"
+        error << "pc code is empty"
+      end
+    else
+      if  production_run_details_params['ripe_point_id']=="" || production_run_details_params['ripe_point_id']==nil || production_run_details_params['ripe_point_id']=="<empty>" || production_run_details_params['ripe_point_id']=="empty"
+        error << "ripe point is empty"
+      end
+      if  production_run_details_params['pc_code_id']=="" || production_run_details_params['pc_code_id']==nil || production_run_details_params['pc_code_id']=="<empty>" || production_run_details_params['pc_code_id']=="empty"
+        error << "pc code is empty"
+      end
+
+
     end
     return error
   end

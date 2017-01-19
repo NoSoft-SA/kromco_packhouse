@@ -288,6 +288,14 @@ module Production::MesscadaCrudHelper
         server_code = link_values[0].server_code
       end
 
+
+      field_configs << {:field_type => 'DropDownField',
+                        :field_name => 'facility_id?required',
+                        :settings => {:list => facilities,
+                                      :prompt => 'select a facility'
+                        }}
+
+
       field_configs << {:field_type =>'LinkWindowField', :field_name => 'facility_code',
                         :settings   =>
                             {:controller    => request.path_parameters['controller'].to_s ,
