@@ -442,6 +442,16 @@ module RmtProcessing::DeliveryHelper
       field_configs += delivery_drench_stations_array
     end
 
+    if(!delivery.new_record?)
+      field_configs[field_configs.length()] = {:field_type => 'LinkWindowField',
+                                               :field_name => '',
+                                               :settings   => {
+                                                   :target_action => 'capture_summary_starch_results',
+                                                   :link_text     => "capture summary starch results",
+                                                   :id_value      => delivery.id.to_s
+                                               }}
+    end
+
     if (show_print_tripsheet_link)
       field_configs[field_configs.length()] = {:field_type => 'LinkWindowField',
                                                :field_name => '',
@@ -451,6 +461,7 @@ module RmtProcessing::DeliveryHelper
                                                    :id_value      => delivery.id.to_s
                                                }}
     end
+
     field_configs[field_configs.length()] = {:field_type => 'LinkWindowField',
                                              :field_name => '',
                                              :settings   => {
@@ -627,6 +638,16 @@ module RmtProcessing::DeliveryHelper
                                                :settings   => {
                                                    :target_action => 'edit_destination_complex',
                                                    :link_text     => "edit destination",
+                                                   :id_value      => delivery.id.to_s
+                                               }}
+    end
+
+    if(!delivery.new_record?)
+      field_configs[field_configs.length()] = {:field_type => 'LinkWindowField',
+                                               :field_name => '',
+                                               :settings   => {
+                                                   :target_action => 'capture_summary_starch_results',
+                                                   :link_text     => "capture summary starch results",
                                                    :id_value      => delivery.id.to_s
                                                }}
     end
@@ -1189,4 +1210,30 @@ module RmtProcessing::DeliveryHelper
     build_form(delivery, field_configs, action, 'delivery', caption)
   end
 
+  def build_capture_summary_starch_results_form(starch_summary_results)
+    field_configs = Array.new
+
+    field_configs[field_configs.length()] = {:field_type => 'TextField',:field_name => 'cat1_value',
+                                            :settings=>{:label_caption=>Globals.starch_result_categories[:cat1_value]}}
+    field_configs[field_configs.length()] = {:field_type => 'TextField',:field_name => 'cat2_value',
+                                             :settings=>{:label_caption=>Globals.starch_result_categories[:cat2_value]}}
+    field_configs[field_configs.length()] = {:field_type => 'TextField',:field_name => 'cat3_value',
+                                             :settings=>{:label_caption=>Globals.starch_result_categories[:cat3_value]}}
+    field_configs[field_configs.length()] = {:field_type => 'TextField',:field_name => 'cat4_value',
+                                             :settings=>{:label_caption=>Globals.starch_result_categories[:cat4_value]}}
+    field_configs[field_configs.length()] = {:field_type => 'TextField',:field_name => 'cat5_value',
+                                             :settings=>{:label_caption=>Globals.starch_result_categories[:cat5_value]}}
+    field_configs[field_configs.length()] = {:field_type => 'TextField',:field_name => 'cat6_value',
+                                             :settings=>{:label_caption=>Globals.starch_result_categories[:cat6_value]}}
+    field_configs[field_configs.length()] = {:field_type => 'TextField',:field_name => 'cat7_value',
+                                             :settings=>{:label_caption=>Globals.starch_result_categories[:cat7_value]}}
+    field_configs[field_configs.length()] = {:field_type => 'TextField',:field_name => 'cat8_value',
+                                             :settings=>{:label_caption=>Globals.starch_result_categories[:cat8_value]}}
+    field_configs[field_configs.length()] = {:field_type => 'TextField',:field_name => 'cat9_value',
+                                             :settings=>{:label_caption=>Globals.starch_result_categories[:cat9_value]}}
+
+
+    build_form(starch_summary_results, field_configs, 'capture_summary_starch_results_submit', 'starch_summary_results', 'capture', nil)
+
+  end
 end

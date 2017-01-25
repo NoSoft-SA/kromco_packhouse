@@ -2454,4 +2454,32 @@ class RmtProcessing::DeliveryController < ApplicationController
             </script>
             }, :layout => 'content'
   end
+
+
+  def capture_summary_starch_results
+    @starch_summary_results = StarchSummaryResult.find_by_delivery_id(params[:id])
+    render :inline => %{
+		<% @content_header_caption = "'capture summary starch results'"%>
+
+		<%= build_capture_summary_starch_results_form(@starch_summary_results)%>
+
+		}, :layout => 'content'
+  end
+
+  def capture_summary_starch_results_submit
+    if(starch_summary_results = StarchSummaryResult.find_by_delivery_id(session[:new_delivery].id))
+      starch_summary_results.update_attributes(params[:starch_summary_results])
+    else
+      starch_summary_results = StarchSummaryResult.new(params[:starch_summary_results])
+      starch_summary_results.delivery_id = session[:new_delivery].id
+      starch_summary_results.save!
+    end
+
+    session[:alert] = "summary starch results captured successfully"
+    render :inline => %{
+        <script>
+          window.close();
+        </script>
+		}, :layout => 'content'
+  end
 end
