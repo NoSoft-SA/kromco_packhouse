@@ -839,6 +839,10 @@ def build_track_slms_indicator_form(track_slms_indicator,action,caption,is_edit 
 						:field_name => 'ajax_distributor2',
 						:non_db_field => true}
 
+    #MM012017 - add config_data column
+    field_configs[field_configs.length()] = {:field_type => 'TextField',
+                                             :field_name => 'config_data'}
+
 	 build_form(track_slms_indicator,field_configs,action,'track_slms_indicator',caption,is_edit)
 
 end
@@ -987,4 +991,81 @@ end
 #==================================================================================================
 #END TRACK SLMS INDICATORS/Happymore
 #==================================================================================================
+
+ #MM012017 - starch_ripeness_indicator_match_rules
+  def build__indicator_match_rule_form(indicator_match_rule,action,caption,is_flat_search = nil)
+
+    field_configs = Array.new
+
+    rmt_varieties = RmtVariety.find_by_sql('select distinct id,rmt_variety_code,rmt_variety_description from rmt_varieties').map{|g|["#{g.rmt_variety_code} - #{g.rmt_variety_description}", g.id]}
+    match_ripeness_indicators = TrackSlmsIndicator.find_by_sql("select * from track_slms_indicators where track_indicator_type_code = 'STA'").map{|g|["#{g.track_slms_indicator_code} - #{g.track_slms_indicator_description}", g.id]}
+
+    search_combos_js = gen_combos_clear_js_for_combos(["indicator_match_rule_rmt_variety_id","indicator_match_rule_match_ripeness_indicator_id"])
+    rmt_variety_observer  = {:updated_field_id => "match_ripeness_indicator_id_cell",
+                             :remote_method => 'rmt_variety_search_combo_changed',
+                             :on_completed_js => search_combos_js["indicator_match_rule_rmt_variety_id"]
+    }
+
+    field_configs << {:field_type => 'DropDownField',
+                      :field_name => 'rmt_variety_id',
+                      :settings => {:list => rmt_varieties},
+                      :observer => rmt_variety_observer
+    }
+
+    field_configs << {:field_type => 'TextField',
+                      :field_name => 'opt_cat_count'}
+
+    field_configs << {:field_type => 'TextField',
+                      :field_name => 'pre_opt_cat_count'}
+
+    field_configs << {:field_type => 'TextField',
+                      :field_name => 'post_opt_cat_count'}
+
+    field_configs << {:field_type => 'DropDownField',
+                      :field_name => 'match_ripeness_indicator_id',
+                      :settings => {:list => match_ripeness_indicators}
+    }
+
+    field_configs << {:field_type => 'HiddenField',
+                      :field_name => 'id'}
+
+    build_form(indicator_match_rule,field_configs,action,'indicator_match_rule',caption,false)
+
+  end
+
+  def build_indicator_match_rules_grid(data_set)
+
+    column_configs = []
+    action_configs = []
+
+    action_configs << {:field_type => 'action',:field_name => 'edit',
+                       :settings => {:link_text => 'edit',
+                                     :link_icon => 'edit',
+                                     :target_action => 'edit_indicator_match_rule',
+                                     :id_column => 'id',
+                                     :col_width => 150
+                       }
+    }
+    action_configs << {:field_type => 'action',:field_name => 'delete',
+                       :settings => {:link_text => 'delete',
+                                     :link_icon => 'delete',
+                                     :target_action => 'delete_indicator_match_rule',
+                                     :id_column => 'id',
+                                     :col_width => 150
+                       }
+    }
+
+    column_configs << {:field_type => 'action_collection', :field_name => 'actions', :settings => {:actions => action_configs}} unless action_configs.empty?
+    column_configs << {:field_type => 'text',:field_name => 'rmt_variety_code', :col_width => 150}
+    column_configs << {:field_type => 'text',:field_name => 'rmt_variety_description', :col_width => 200}
+    column_configs << {:field_type => 'text',:field_name => 'pre_opt_cat_count', :col_width => 150}
+    column_configs << {:field_type => 'text',:field_name => 'opt_cat_count', :col_width => 150}
+    column_configs << {:field_type => 'text',:field_name => 'post_opt_cat_count', :col_width => 150}
+    column_configs << {:field_type => 'text',:field_name => 'track_slms_indicator_code', :col_width => 200}
+    column_configs << {:field_type => 'text',:field_name => 'track_slms_indicator_description', :col_width => 250}
+    column_configs << {:field_type => 'text',:field_name => 'id',:hide => true, :col_width => 100}
+
+    return get_data_grid(data_set,column_configs,nil,true)
+  end
+
 end

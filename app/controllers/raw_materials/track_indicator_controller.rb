@@ -1248,6 +1248,8 @@ def create_track_slms_indicator
    @track_slms_indicator.date_to = params[:track_slms_indicator][:date_to]
    @track_slms_indicator.track_variable_1 = params[:track_slms_indicator][:track_variable_1]
    @track_slms_indicator.track_variable_2 = params[:track_slms_indicator][:track_variable_2]
+   #MM012017 - add config_data column
+   @track_slms_indicator.config_data = params[:track_slms_indicator][:config_data]
 	 #@track_slms_indicator.variety_id = TrackSlmsIndicator.get_variety_id(@track_slms_indicator.variety_type,@track_slms_indicator.variety_code)
    if(params[:track_slms_indicator][:variety_type] == "rmt_variety")
      puts "rmt_variety"
@@ -1334,8 +1336,10 @@ def update_track_slms_indicator
      @track_slms_indicator.date_to = params[:track_slms_indicator][:date_to]
      @track_slms_indicator.track_variable_1 = params[:track_slms_indicator][:track_variable_1]
      @track_slms_indicator.track_variable_2 = params[:track_slms_indicator][:track_variable_2]
-     
-      if(params[:track_slms_indicator][:variety_type] == "rmt_variety")
+     #MM012017 - add config_data column
+     @track_slms_indicator.config_data = params[:track_slms_indicator][:config_data]
+
+     if(params[:track_slms_indicator][:variety_type] == "rmt_variety")
         puts "rmt_variety"
         @track_slms_indicator.marketing_variety_code = params[:track_slms_indicator][:marketing_variety_code] if params[:track_slms_indicator][:marketing_variety_code]
         @track_slms_indicator.rmt_variety_code = params[:track_slms_indicator][:variety_code]
@@ -1597,5 +1601,165 @@ def create_new_gtin_target_market
     end
   end
 end
+
+  #MM012017 -  On delivery: help user to lookup starch related track-slms-indicator2. Step one: CRUD tools and rule definitions
+  def create_track_slms_indicators_script
+
+    # create a new track_slms_indicator_type called 'starch_ripeness'
+    ActiveRecord::Base.connection.execute("INSERT INTO track_indicator_types(description, track_indicator_type_code) VALUES ('STARCH RIPENESS','STA');")
+
+    #add config_data
+    ActiveRecord::Base.connection.execute("alter table track_slms_indicators add column config_data character varying(200);")
+
+    #create_track_slms_indicators_script
+    query = "CREATE TABLE starch_ripeness_indicator_match_rules
+              (
+                id serial NOT NULL,
+                rmt_variety_id integer,
+                opt_cat_count character varying(200),
+                pre_opt_cat_count character varying(200),
+                post_opt_cat_count character varying(200),
+                match_ripeness_indicator_id integer,
+                CONSTRAINT starch_ripeness_indicator_match_rules_pkey PRIMARY KEY (id),
+                CONSTRAINT rmt_variety_fk FOREIGN KEY (rmt_variety_id)
+                    REFERENCES rmt_varieties (id) MATCH SIMPLE
+                    ON UPDATE CASCADE ON DELETE RESTRICT,
+                CONSTRAINT track_slms_indicators_fk FOREIGN KEY (match_ripeness_indicator_id)
+                    REFERENCES track_slms_indicators (id) MATCH SIMPLE
+                    ON UPDATE CASCADE ON DELETE RESTRICT,
+                CONSTRAINT starch_ripeness_indicator_match_rules_unique UNIQUE (rmt_variety_id,match_ripeness_indicator_id)
+              )
+              WITH (
+                OIDS=TRUE
+              );
+              ALTER TABLE starch_ripeness_indicator_match_rules
+                OWNER TO postgres;"
+    ActiveRecord::Base.connection.execute(query)
+
+    #create starch_ripeness_indicator_match_rules
+    insert_query = ""
+    insert_part = "INSERT INTO track_slms_indicators(track_slms_indicator_code, track_indicator_type_id,track_indicator_type_code,variety_type, commodity_code, commodity_id, rmt_variety_code, track_slms_indicator_description)"
+    ["PRE_OPT","OPT","POST_OPT"].each do |opt|
+      RmtVariety.find_by_sql("select * from rmt_varieties where commodity_code = 'AP'").each do |rmt_variety|
+        track_slms_indicator_code = "STA_" + "#{rmt_variety.rmt_variety_code}_" + "#{opt}"
+        track_slms_indicator_desc = "STARCH RIPENESS " + "#{rmt_variety.rmt_variety_code} " + "#{opt}"
+        insert_query << "#{insert_part}\nVALUES ('#{track_slms_indicator_code}', #{TrackIndicatorType.find_by_track_indicator_type_code('STA').id},'STA', 'rmt_variety', 'AP',#{rmt_variety.commodity_id}, '#{rmt_variety.rmt_variety_code}', '#{track_slms_indicator_desc}');\n"
+      end
+    end
+    ActiveRecord::Base.connection.execute(insert_query)
+    close_page
+  end
+
+  def close_page
+    session[:alert] = "track_slms_indicators records added successfully"
+    render :inline=>%{
+                      <script>
+                        window.close();
+                      </script>
+                      },:layout=>'content'
+  end
+
+  def new_indicator_match_rules
+      render_indicator_match_rules
+  end
+
+  def render_indicator_match_rules
+    render :inline => %{
+		<% @content_header_caption = "'new indicator match rules'"%>
+
+		<%= build__indicator_match_rule_form(@indicator_match_rule,'create_indicator_match_rule','create_indicator_match_rule',@is_flat_search)%>
+
+		}, :layout => 'content'
+  end
+
+  def create_indicator_match_rule
+    begin
+      @indicator_match_rule = StarchRipenessIndicatorMatchRule.new(params[:indicator_match_rule])
+      if @indicator_match_rule.save
+        redirect_to_index("'new record created successfully'","'create successful'")
+      else
+        @is_create_retry = true
+        render_indicator_match_rules
+      end
+    rescue
+      handle_error("indicator_match_rule could not be created")
+    end
+  end
+
+  def list_indicator_match_rules
+    query = "select SRIMR.id,SRIMR.pre_opt_cat_count,SRIMR.opt_cat_count,SRIMR.post_opt_cat_count,RV.rmt_variety_code
+             ,RV.rmt_variety_description,TSI.track_slms_indicator_code,TSI.track_slms_indicator_description from starch_ripeness_indicator_match_rules SRIMR
+             inner join track_slms_indicators TSI on TSI.id = SRIMR.match_ripeness_indicator_id
+             inner join rmt_varieties RV on RV.id = SRIMR.rmt_variety_id
+             where TSI.track_indicator_type_code = 'STA' "
+    conn = User.connection
+    @indicator_match_rules = conn.select_all(query)
+    render_list_indicator_match_rules
+  end
+
+  def render_list_indicator_match_rules
+    render :inline => %{
+        <% grid            = build_indicator_match_rules_grid(@indicator_match_rules)%>
+        <% grid.caption    = 'list indicator match rules' %>
+        <% @header_content = grid.build_grid_data %>
+        <%= grid.render_html %>
+        <%= grid.render_grid %>
+        }, :layout => 'content'
+  end
+
+  def rmt_variety_search_combo_changed
+    rmt_variety = get_selected_combo_value(params)
+    rmt_variety_code = RmtVariety.find(rmt_variety).rmt_variety_code
+    @match_ripeness_indicators = TrackSlmsIndicator.find_by_sql("select * from track_slms_indicators where track_indicator_type_code = 'STA' and rmt_variety_code ='#{rmt_variety_code}'").map{|g|["#{g.track_slms_indicator_code} - #{g.track_slms_indicator_description}", g.id]}
+    render :inline=>%{
+        <%=select('indicator_match_rule','match_ripeness_indicator_id',@match_ripeness_indicators) %>
+    }
+  end
+
+  def edit_indicator_match_rule
+    return if authorise_for_web(program_name?,'edit')==false
+    id = params[:id]
+    if id && @indicator_match_rule = StarchRipenessIndicatorMatchRule.find(id)
+      render_edit_indicator_match_rules
+    end
+  end
+
+  def render_edit_indicator_match_rules
+    render :inline => %{
+		<% @content_header_caption = "'edit indicator_match_rules'"%>
+
+		<%= build__indicator_match_rule_form(@indicator_match_rule,'update_indicator_match_rule','update_indicator_match_rule',@is_flat_search)%>
+
+		}, :layout => 'content'
+  end
+
+  def update_indicator_match_rule
+    begin
+      id = params[:indicator_match_rule][:id]
+      if id && @indicator_match_rule = StarchRipenessIndicatorMatchRule.find(id)
+        if @indicator_match_rule.update_attributes(params[:indicator_match_rule])
+          session[:alert] = 'record updated successfully'
+          list_indicator_match_rules
+        else
+          render_edit_indicator_match_rules
+        end
+      end
+    rescue
+      handle_error("old pack could not be updated")
+    end
+  end
+
+  def delete_indicator_match_rule
+    begin
+      id = params[:id]
+      if id && indicator_match_rule = StarchRipenessIndicatorMatchRule.find(id)
+        indicator_match_rule.destroy
+        session[:alert] = " Record deleted."
+        render_list_indicator_match_rules
+      end
+    rescue
+      handle_error("record could not be created")
+    end
+  end
 
 end
