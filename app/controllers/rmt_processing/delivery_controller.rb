@@ -2458,6 +2458,10 @@ class RmtProcessing::DeliveryController < ApplicationController
 
   def capture_summary_starch_results
     @starch_summary_results = StarchSummaryResult.find_by_delivery_id(params[:id])
+    render_capture_summary_starch_results
+  end
+
+  def render_capture_summary_starch_results
     render :inline => %{
 		<% @content_header_caption = "'capture summary starch results'"%>
 
@@ -2467,6 +2471,12 @@ class RmtProcessing::DeliveryController < ApplicationController
   end
 
   def capture_summary_starch_results_submit
+    if(params[:starch_summary_results].values.map{|v| v.to_i}.sum > 20)
+      flash[:error] = "starch results could not be captured. Starch results add up to more than 20"
+      @starch_summary_results = StarchSummaryResult.new(params[:starch_summary_results])
+      render_capture_summary_starch_results
+      return
+    end
     if(starch_summary_results = StarchSummaryResult.find_by_delivery_id(session[:new_delivery].id))
       starch_summary_results.update_attributes(params[:starch_summary_results])
     else
