@@ -12,47 +12,55 @@ class PoolGradedCarton < ActiveRecord::Base
   # Creates two sets of instances - one set for Primary Line and another for Secondary Line.
   # Calls make_cartons to insert the records.
   def self.create_cartons_for_summary( pool_graded_summary, production_run_code )
-    # 1) Create from parent production run
-    primary_cartons = get_cartons( pool_graded_summary, [production_run_code] )
-    make_cartons( pool_graded_summary, primary_cartons, 'Primary Line')
+    # # 1) Create from parent production run
+    # primary_cartons = get_cartons( pool_graded_summary, [production_run_code] )
+    #
+    # #make_cartons( pool_graded_summary, primary_cartons, 'Primary Line')
+    #
+    # # 2) Create from child runs
+    # child_codes = ProductionRun.find(:all, :select => 'production_run_code',
+    #                                  :conditions => ['parent_run_code = ?', production_run_code]).map {|c| c.production_run_code }
+    # unless child_codes.empty?
+    #   secondary_cartons = get_cartons( pool_graded_summary, child_codes )
+    #   #make_cartons( pool_graded_summary, secondary_cartons, 'Secondary Line')
+    # end
 
-    # 2) Create from child runs
-    child_codes = ProductionRun.find(:all, :select => 'production_run_code',
-                                     :conditions => ['parent_run_code = ?', production_run_code]).map {|c| c.production_run_code }
-    unless child_codes.empty?
-      secondary_cartons = get_cartons( pool_graded_summary, child_codes )
-      make_cartons( pool_graded_summary, secondary_cartons, 'Secondary Line')
-    end
-
+    all_cartons = get_cartons(production_run_code )
+    make_cartons( pool_graded_summary, all_cartons, 'Primary Line')
   end
 
-  # Get summarised cartons for a given array of ProductionRun codes.
-  def self.get_cartons( pool_graded_summary, pr_codes )
+  def self.get_cartons( production_run_code)
     query = " SELECT cartons.actual_size_count_code, cartons.product_class_code, cartons.fg_code_old,
- cartons.variety_short_long, cartons.grade_code, cartons.old_pack_code, cartons.organization_code,
- cartons.inspection_type_code, cartons.target_market_code, cartons.inventory_code,
- item_pack_products.standard_size_count_value,
- SUM(cartons.carton_fruit_nett_mass) as schedule_weight,
- COUNT(cartons.*) as cartons_quantity,
- COUNT(cartons.is_inspection_carton = true) as qty_inspected,
- COUNT(distinct ppecb_inspections.id) as qty_failed
- FROM cartons
- LEFT OUTER JOIN ppecb_inspections ON ppecb_inspections.id = cartons.ppecb_inspection_id
- AND ppecb_inspections.passed = false
- JOIN fg_products on fg_products.fg_product_code = cartons.fg_product_code
- JOIN item_pack_products on item_pack_products.item_pack_product_code = fg_products.item_pack_product_code
- WHERE cartons.production_run_code IN ('#{pr_codes.join("', '")}')
-   AND (cartons.exit_ref IS NULL OR cartons.exit_ref = 'Notscrapped')
-   AND cartons.pallet_id IS NOT NULL
- GROUP BY cartons.actual_size_count_code, cartons.product_class_code, cartons.fg_code_old,
- cartons.variety_short_long, cartons.grade_code, cartons.old_pack_code, cartons.organization_code,
- cartons.inspection_type_code, cartons.target_market_code, cartons.inventory_code,
- item_pack_products.standard_size_count_value
+             cartons.variety_short_long, cartons.grade_code, cartons.old_pack_code, cartons.organization_code,
+             cartons.inspection_type_code, cartons.target_market_code, cartons.inventory_code,
+             item_pack_products.standard_size_count_value,
+             SUM(cartons.carton_fruit_nett_mass) as schedule_weight,
+             COUNT(cartons.*) as cartons_quantity,
+             COUNT(cartons.is_inspection_carton = true) as qty_inspected,
+             COUNT(distinct ppecb_inspections.id) as qty_failed
 
- ORDER BY cartons.actual_size_count_code, cartons.product_class_code, cartons.fg_code_old,
- cartons.variety_short_long, cartons.grade_code"
-    PoolGradedCarton.connection.select_all(query)
+              FROM production_runs p1
+              left join production_runs p2 on p1.production_run_code=p2.parent_run_code
+              left join cartons on cartons.production_run_code in (p1.production_run_code,p2.production_run_code,p2.child_run_code)
+
+              LEFT OUTER JOIN ppecb_inspections ON ppecb_inspections.id = cartons.ppecb_inspection_id
+              AND ppecb_inspections.passed = false
+              JOIN fg_products on fg_products.fg_product_code = cartons.fg_product_code
+              JOIN item_pack_products on item_pack_products.item_pack_product_code = fg_products.item_pack_product_code
+              WHERE p1.production_run_code='#{production_run_code}'
+              AND (cartons.exit_ref IS NULL OR cartons.exit_ref = 'Notscrapped')
+              AND cartons.pallet_id IS NOT NULL
+              GROUP BY cartons.actual_size_count_code, cartons.product_class_code, cartons.fg_code_old,
+              cartons.variety_short_long, cartons.grade_code, cartons.old_pack_code, cartons.organization_code,
+              cartons.inspection_type_code, cartons.target_market_code, cartons.inventory_code,
+              item_pack_products.standard_size_count_value
+
+              ORDER BY cartons.actual_size_count_code, cartons.product_class_code, cartons.fg_code_old,
+              cartons.variety_short_long, cartons.grade_code"
+              PoolGradedCarton.connection.select_all(query)
   end
+
+
 
   # Create PoolGradedCarton instances and associate them with PoolGradedSummary.
   def self.make_cartons( pool_graded_summary, cartons, line_type )
