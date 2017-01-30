@@ -966,6 +966,8 @@ end
   column_configs[column_configs.length()] = {:field_type => 'text', :field_name =>'track_variable_2'}
 	column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'date_from'}
 	column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'date_to'}
+  #MM012017 - add config_data column
+  column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'config_data'}
 	
 #	----------------------
 #	define action columns
@@ -997,13 +999,24 @@ end
 
     field_configs = Array.new
 
-    rmt_varieties = RmtVariety.find_by_sql('select distinct id,rmt_variety_code,rmt_variety_description from rmt_varieties').map{|g|["#{g.rmt_variety_code} - #{g.rmt_variety_description}", g.id]}
+    rmt_varieties = RmtVariety.find_by_sql("select distinct id,rmt_variety_code,rmt_variety_description from rmt_varieties where commodity_code = 'AP'").map{|g|["#{g.rmt_variety_code} - #{g.rmt_variety_description}", g.id]}
     match_ripeness_indicators = TrackSlmsIndicator.find_by_sql("select * from track_slms_indicators where track_indicator_type_code = 'STA'").map{|g|["#{g.track_slms_indicator_code} - #{g.track_slms_indicator_description}", g.id]}
 
     search_combos_js = gen_combos_clear_js_for_combos(["indicator_match_rule_rmt_variety_id","indicator_match_rule_match_ripeness_indicator_id"])
     rmt_variety_observer  = {:updated_field_id => "match_ripeness_indicator_id_cell",
                              :remote_method => 'rmt_variety_search_combo_changed',
                              :on_completed_js => search_combos_js["indicator_match_rule_rmt_variety_id"]
+    }
+
+    nb_msg = "Values here denote the amount of fruit falling in the categories defined for track_slms_indicator 'STARCH_OPT'. <br> These values are expressed as a mathematical expressions <br>
+              Use 'x' for OPT (opt cat count) expressions, 'y' for PRE_OPT (pre opt cat count) expressions and 'z' for POST_OPT (post opt cat count) expressions <br> e.g: <br> x > 1 && x < 5 ; y > 5 ; z == 5  OR <br> x == 1 || x == 2 ; y != 5 ; z >= 5 <br> "
+    field_configs << {:field_type => 'LabelField',
+                      :field_name => 'opt_cat_count',
+                      :settings => {:static_value => nb_msg ,
+                                    :non_dbfield => true,
+                                    :show_label => false,
+                                    :css_class => 'nb_label'
+                      }
     }
 
     field_configs << {:field_type => 'DropDownField',
@@ -1058,8 +1071,8 @@ end
     column_configs << {:field_type => 'action_collection', :field_name => 'actions', :settings => {:actions => action_configs}} unless action_configs.empty?
     column_configs << {:field_type => 'text',:field_name => 'rmt_variety_code', :col_width => 150}
     column_configs << {:field_type => 'text',:field_name => 'rmt_variety_description', :col_width => 200}
-    column_configs << {:field_type => 'text',:field_name => 'pre_opt_cat_count', :col_width => 150}
     column_configs << {:field_type => 'text',:field_name => 'opt_cat_count', :col_width => 150}
+    column_configs << {:field_type => 'text',:field_name => 'pre_opt_cat_count', :col_width => 150}
     column_configs << {:field_type => 'text',:field_name => 'post_opt_cat_count', :col_width => 150}
     column_configs << {:field_type => 'text',:field_name => 'track_slms_indicator_code', :col_width => 200}
     column_configs << {:field_type => 'text',:field_name => 'track_slms_indicator_description', :col_width => 250}

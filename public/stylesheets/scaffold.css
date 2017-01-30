@@ -350,6 +350,15 @@ pre {
 
 }
 
+/*MM012017*/
+.nb_label {
+    border: 2px solid red;
+    padding: 1em;
+    margin-bottom: 2em;
+    background-color: yellow;
+    font: bold smaller sans-serif;
+}
+
 .heading_field{
     border-right: gray thin solid;
     border-top: gray thin solid;
