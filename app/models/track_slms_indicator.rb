@@ -279,6 +279,7 @@ end
 # If no matches are found, or more than one, return an appropriate error message (include details)
 #
 # }
+
 #   def self.find_starch_ripeness_indicator(opt_cat_count, pre_opt_cat_count, post_opt_cat_count,rmt_variety_id)
 #     #get indicator match rules
 #     matched_rules = []
