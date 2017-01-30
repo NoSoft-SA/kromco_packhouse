@@ -1604,7 +1604,7 @@ end
 
   #MM012017 -  On delivery: help user to lookup starch related track-slms-indicator2. Step one: CRUD tools and rule definitions
   def create_track_slms_indicators_script
-    qwerty = TrackSlmsIndicator.find_starch_ripeness_indicator(2, 6, 10,489)
+    # qwerty = TrackSlmsIndicator.find_starch_ripeness_indicator(2, 6, 10,489)
 
     # create a new track_slms_indicator_type called 'starch_ripeness'
     ActiveRecord::Base.connection.execute("INSERT INTO track_indicator_types(description, track_indicator_type_code) VALUES ('STARCH RIPENESS','STA');")
