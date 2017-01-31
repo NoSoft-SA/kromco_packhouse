@@ -1604,7 +1604,7 @@ end
 
   #MM012017 -  On delivery: help user to lookup starch related track-slms-indicator2. Step one: CRUD tools and rule definitions
   def create_track_slms_indicators_script
-    # qwerty = TrackSlmsIndicator.find_starch_ripeness_indicator(2, 6, 10,489)
+    # starch_ripeness_indicator = TrackSlmsIndicator.find_starch_ripeness_indicator(2, 6, 10,489)
 
     # create a new track_slms_indicator_type called 'starch_ripeness'
     ActiveRecord::Base.connection.execute("INSERT INTO track_indicator_types(description, track_indicator_type_code) VALUES ('STARCH RIPENESS','STA');")
@@ -1640,12 +1640,13 @@ end
 
     #create starch_ripeness_indicator_match_rules
     insert_query = ""
-    insert_part = "INSERT INTO track_slms_indicators(track_slms_indicator_code, track_indicator_type_id,track_indicator_type_code,variety_type, commodity_code, commodity_id, rmt_variety_code, track_slms_indicator_description,sub_type)"
+    insert_part = "INSERT INTO track_slms_indicators(track_slms_indicator_code, track_indicator_type_id,track_indicator_type_code,variety_type, commodity_code, commodity_id, rmt_variety_code, track_slms_indicator_description,sub_type,season_id,season_code)"
     ["PRE_OPT","OPT","POST_OPT"].each do |opt|
       RmtVariety.find_by_sql("select * from rmt_varieties where commodity_code = 'AP'").each do |rmt_variety|
         track_slms_indicator_code = "STA_" + "#{rmt_variety.rmt_variety_code}_" + "#{opt}"
         track_slms_indicator_desc = "STARCH RIPENESS " + "#{rmt_variety.rmt_variety_code} " + "#{opt}"
-        insert_query << "#{insert_part}\nVALUES ('#{track_slms_indicator_code}', #{TrackIndicatorType.find_by_track_indicator_type_code('STA').id},'STA', 'rmt_variety', 'AP',#{rmt_variety.commodity_id}, '#{rmt_variety.rmt_variety_code}', '#{track_slms_indicator_desc}','#{opt}');\n"
+        season = Season.find_by_sql("select * from seasons where commodity_id = #{rmt_variety.commodity_id} and '#{Time.now.to_formatted_s(:db)}' BETWEEN start_date AND end_date")
+        insert_query << "#{insert_part}\nVALUES ('#{track_slms_indicator_code}', #{TrackIndicatorType.find_by_track_indicator_type_code('STA').id},'STA', 'rmt_variety', 'AP',#{rmt_variety.commodity_id}, '#{rmt_variety.rmt_variety_code}', '#{track_slms_indicator_desc}','#{opt}',#{season[0].id},'#{season[0].season_code}');\n"
       end
     end
     ActiveRecord::Base.connection.execute(insert_query)
