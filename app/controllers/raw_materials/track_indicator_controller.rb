@@ -1646,6 +1646,7 @@ end
         track_slms_indicator_code = "STA_" + "#{rmt_variety.rmt_variety_code}_" + "#{opt}"
         track_slms_indicator_desc = "STARCH RIPENESS " + "#{rmt_variety.rmt_variety_code} " + "#{opt}"
         season = Season.find_by_sql("select * from seasons where commodity_id = #{rmt_variety.commodity_id} and '#{Time.now.to_formatted_s(:db)}' BETWEEN start_date AND end_date")
+        raise  "No season defined for #{rmt_variety.commodity.commodity_code} and current date" if !season[0]
         insert_query << "#{insert_part}\nVALUES ('#{track_slms_indicator_code}', #{TrackIndicatorType.find_by_track_indicator_type_code('STA').id},'STA', 'rmt_variety', 'AP',#{rmt_variety.commodity_id}, '#{rmt_variety.rmt_variety_code}', '#{track_slms_indicator_desc}','#{opt}',#{season[0].id},'#{season[0].season_code}');\n"
       end
     end
