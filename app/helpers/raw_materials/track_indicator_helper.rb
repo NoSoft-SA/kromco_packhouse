@@ -995,12 +995,15 @@ end
 #==================================================================================================
 
  #MM012017 - starch_ripeness_indicator_match_rules
-  def build__indicator_match_rule_form(indicator_match_rule,action,caption,is_flat_search = nil)
+  def build__indicator_match_rule_form(indicator_match_rule,action,caption,is_flat_search = nil,is_edit = nil)
 
     field_configs = Array.new
 
     rmt_varieties = RmtVariety.find_by_sql("select distinct id,rmt_variety_code,rmt_variety_description from rmt_varieties where commodity_code = 'AP'").map{|g|["#{g.rmt_variety_code} - #{g.rmt_variety_description}", g.id]}
-    match_ripeness_indicators = TrackSlmsIndicator.find_by_sql("select * from track_slms_indicators where track_indicator_type_code = 'STA'").map{|g|["#{g.track_slms_indicator_code}", g.id]}
+
+    query = "select * from track_slms_indicators where track_indicator_type_code = 'STA'"
+    query << "and rmt_variety_code ='#{RmtVariety.find(indicator_match_rule.rmt_variety_id).rmt_variety_code}'" if is_edit
+    match_ripeness_indicators = TrackSlmsIndicator.find_by_sql(query).map{|g|["#{g.track_slms_indicator_code}", g.id]}
 
     search_combos_js = gen_combos_clear_js_for_combos(["indicator_match_rule_rmt_variety_id","indicator_match_rule_match_ripeness_indicator_id"])
     rmt_variety_observer  = {:updated_field_id => "match_ripeness_indicator_id_cell",

@@ -1640,14 +1640,14 @@ end
 
     #create starch_ripeness_indicator_match_rules
     insert_query = ""
-    insert_part = "INSERT INTO track_slms_indicators(track_slms_indicator_code, track_indicator_type_id,track_indicator_type_code,variety_type, commodity_code, commodity_id, rmt_variety_code, track_slms_indicator_description,sub_type,season_id,season_code)"
+    insert_part = "INSERT INTO track_slms_indicators(track_slms_indicator_code, track_indicator_type_id,track_indicator_type_code,variety_type, commodity_code, commodity_id, rmt_variety_code, track_slms_indicator_description,sub_type,season_id,season_code,variety_id,variety_code)"
     ["PRE_OPT","OPT","POST_OPT"].each do |opt|
       RmtVariety.find_by_sql("select * from rmt_varieties where commodity_code = 'AP'").each do |rmt_variety|
         track_slms_indicator_code = "STA_" + "#{rmt_variety.rmt_variety_code}_" + "#{opt}"
         track_slms_indicator_desc = "STARCH RIPENESS " + "#{rmt_variety.rmt_variety_code} " + "#{opt}"
         season = Season.find_by_sql("select * from seasons where commodity_id = #{rmt_variety.commodity_id} and '#{Time.now.to_formatted_s(:db)}' BETWEEN start_date AND end_date")
         raise  "No season defined for #{rmt_variety.commodity.commodity_code} and current date" if !season[0]
-        insert_query << "#{insert_part}\nVALUES ('#{track_slms_indicator_code}', #{TrackIndicatorType.find_by_track_indicator_type_code('STA').id},'STA', 'rmt_variety', 'AP',#{rmt_variety.commodity_id}, '#{rmt_variety.rmt_variety_code}', '#{track_slms_indicator_desc}','#{opt}',#{season[0].id},'#{season[0].season_code}');\n"
+        insert_query << "#{insert_part}\nVALUES ('#{track_slms_indicator_code}', #{TrackIndicatorType.find_by_track_indicator_type_code('STA').id},'STA', 'rmt_variety', 'AP',#{rmt_variety.commodity_id}, '#{rmt_variety.rmt_variety_code}', '#{track_slms_indicator_desc}','#{opt}',#{season[0].id},'#{season[0].season_code}', #{rmt_variety.id}, '#{rmt_variety.rmt_variety_code}');\n"
       end
     end
     ActiveRecord::Base.connection.execute(insert_query)
@@ -1671,7 +1671,7 @@ end
     render :inline => %{
 		<% @content_header_caption = "'new indicator match rules'"%>
 
-		<%= build__indicator_match_rule_form(@indicator_match_rule,'create_indicator_match_rule','create_indicator_match_rule',@is_flat_search)%>
+		<%= build__indicator_match_rule_form(@indicator_match_rule,'create_indicator_match_rule','create_indicator_match_rule',@is_flat_search,false)%>
 
 		}, :layout => 'content'
   end
@@ -1714,7 +1714,7 @@ end
   def rmt_variety_search_combo_changed
     rmt_variety = get_selected_combo_value(params)
     rmt_variety_code = RmtVariety.find(rmt_variety).rmt_variety_code
-    @match_ripeness_indicators = TrackSlmsIndicator.find_by_sql("select * from track_slms_indicators where track_indicator_type_code = 'STA' and rmt_variety_code ='#{rmt_variety_code}'").map{|g|["#{g.track_slms_indicator_code} - #{g.track_slms_indicator_description}", g.id]}
+    @match_ripeness_indicators = TrackSlmsIndicator.find_by_sql("select * from track_slms_indicators where track_indicator_type_code = 'STA' and rmt_variety_code ='#{rmt_variety_code}'").map{|g|["#{g.track_slms_indicator_code}", g.id]}
     render :inline=>%{
         <%=select('indicator_match_rule','match_ripeness_indicator_id',@match_ripeness_indicators) %>
     }
@@ -1732,7 +1732,7 @@ end
     render :inline => %{
 		<% @content_header_caption = "'edit indicator_match_rules'"%>
 
-		<%= build__indicator_match_rule_form(@indicator_match_rule,'update_indicator_match_rule','update_indicator_match_rule',@is_flat_search)%>
+		<%= build__indicator_match_rule_form(@indicator_match_rule,'update_indicator_match_rule','update_indicator_match_rule',@is_flat_search,true)%>
 
 		}, :layout => 'content'
   end
@@ -1759,7 +1759,7 @@ end
       if id && indicator_match_rule = StarchRipenessIndicatorMatchRule.find(id)
         indicator_match_rule.destroy
         session[:alert] = " Record deleted."
-        render_list_indicator_match_rules
+        list_indicator_match_rules
       end
     rescue
       handle_error("record could not be created")
