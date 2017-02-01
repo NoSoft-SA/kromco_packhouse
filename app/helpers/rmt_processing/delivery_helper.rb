@@ -874,7 +874,28 @@ module RmtProcessing::DeliveryHelper
     return get_data_grid(data_set, column_configs, MesScada::GridPlugins::RmtProcessing::DeliveriesGridPlugin.new(), true)
   end
 
+  def is_sta_overriden_indicator?(id)
+    if(UserOverride.find_by_object_identifier(id))
+      return true
+    end
+    return false
+  end
 
+  def build_view_suggested_indicator_form(user_overide,action,caption)
+    field_configs    = Array.new
+#	----------------------------------------------------------------------------------------------
+#	Define search Combo fields to represent the unique index on this table
+#	----------------------------------------------------------------------------------------------
+    field_configs << {:field_type => 'LabelField',
+                        :field_name => 'user_value',
+                        :settings   => {:label_caption => 'user selected indicator', :css_class    =>'delivery_label'}}
+
+    field_configs << {:field_type=>'LabelField',
+                        :field_name=>'system_value',
+                        :settings  =>{:label_caption=>'system advised indicator', :css_class=>'delivery_status'}}
+
+    build_form(user_overide, field_configs, action, 'user_overide', caption)
+  end
 #===========================================================
 #       add track indicator to delivery code
 #===========================================================
@@ -908,14 +929,12 @@ module RmtProcessing::DeliveryHelper
                                                                                     :remote_method   =>'non_supervisor_variety_type_changed',
                                                                                     :on_completed_js =>combos_js_for_delivery_indicator["delivery_track_indicator_variety_type"]}
 
-#	on_complete_js_rmt_variety = "\n img = document.getElementById('img_delivery_track_indicator_rmt_variety_code');"
-#	on_complete_js_rmt_variety += "\n if(img != null) img.style.display = 'none';"
     track_indicator_type_codes                                                   = TrackSlmsIndicator.find_by_sql("select distinct track_indicator_type_code from track_indicator_types").map { |g| [g.track_indicator_type_code] }
-#    track_indicator_type_codes.unshift("<non_fruit>")
 
     variety_types              = ["<non_fruit>", "rmt_variety", "marketing_variety"]
 
     track_slms_indicator_codes = []
+    track_slms_indicator_codes.unshift(delivery_track_indicator.track_slms_indicator_code) if(delivery_track_indicator.track_slms_indicator_code)
 
 
     @rmt_record                = RmtVariety.find_by_rmt_variety_code(session[:new_delivery].rmt_variety_code)

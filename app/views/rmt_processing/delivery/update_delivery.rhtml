@@ -36,7 +36,7 @@
         
         <% if session[:delivery_track_indicators] != nil %>
             <% if session[:delivery_track_indicators].length()!= 0 %>
-                <% for indicator in session[:delivery_track_indicators] %>
+                <% session[:delivery_track_indicators].each do|indicator| %>
                     <tr>
                         <% if indicator.track_indicator_type_code == 'LOB' %>
                             <td class="delivery_new_track"> <%= indicator.track_indicator_type_code %> </td>
@@ -56,12 +56,26 @@
                             <% end %>
                             <td class="delivery_new_track" style="text-decoration:underline;"> <%= link_to 'edit', :action=>'edit_delivery_track_indicator', :id=> indicator %> </td>
                             <td class="delivery_new_track" style="text-decoration:underline;">
-                              <% if(session[:delivery_track_indicators].index(indicator) > 1) %>
+                              <% if(session[:delivery_track_indicators].index(indicator) == (session[:delivery_track_indicators].length-1)) %>
                                   <%= link_to 'remove', {:action=>'delete_delivery_track_indicator', :id=>indicator}, :confirm => 'Are you sure?', :method => :post %> </td>
                               <% end %>
                         <% else %>
                             <td class="delivery_new_odd_track"> <%= indicator.track_indicator_type_code %> </td>
-                            <td class="delivery_new_odd_track"> <%= indicator.track_slms_indicator_code %> </td>
+
+                          <% if(is_sta_overriden_indicator?(indicator.id)) %>
+                              <%
+                                 link_settings = {:controller =>"rmt_processing/delivery",
+                                                                          :target_action => 'view_suggested_indicator', :link_text => indicator.track_slms_indicator_code,
+                                                                          :id_value => indicator.id,:window_width =>800,:window_height =>350}
+                                 popup_link = ApplicationHelper::LinkWindowField.new(nil, nil, 'none', 'none', 'none', link_settings, true, nil, self)
+                                 link = popup_link.build_control
+                              %>
+                              <td class="delivery_new_odd_track"> <%= link %> </td>
+
+                          <% else %>
+                            <td class="delivery_new_odd_track"> <%= indicator.track_slms_indicator_code %></td>
+                          <% end %>
+
                             <td class="delivery_new_odd_track"> <%= indicator.season_code %> </td>
                             <td class="delivery_new_odd_track"> rmt_variety </td>
                             <td class="delivery_new_odd_track"> <%= indicator.rmt_variety_code %> </td>
@@ -77,7 +91,7 @@
                             <% end %>
                             <td class="delivery_new_odd_track" style="text-decoration:underline;"> <%= link_to 'edit', :action=>'edit_delivery_track_indicator', :id=> indicator %></td>
                             <td class="delivery_new_odd_track" style="text-decoration:underline;">
-                              <% if(session[:delivery_track_indicators].index(indicator) > 0) %>
+                              <% if(session[:delivery_track_indicators].index(indicator) == (session[:delivery_track_indicators].length-1)) %>
                                   <%= link_to 'remove', {:action=>'delete_delivery_track_indicator', :id=>indicator}, :confirm => 'Are you sure?', :method => :post %> </td>
                               <% end %>
                         <% end %>

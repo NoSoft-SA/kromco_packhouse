@@ -99,7 +99,7 @@ class RmtProcessing::DeliveryController < ApplicationController
 #	session[:is_flat_search] = @is_flat_search
 ##	 render (inline) the search form
 #	render :inline => %{
-#		<% @content_header_caption = "'search  deliveries'"%> 
+#		<% @content_header_caption = "'search  deliveries'"%>
 #
 #		<%= build_delivery_search_form(nil,'submit_deliveries_search','submit_deliveries_search',@is_flat_search)%>
 #
@@ -117,7 +117,7 @@ class RmtProcessing::DeliveryController < ApplicationController
     session[:is_flat_search] = @is_flat_search
 #	 render (inline) the search form
     render :inline => %{
-		<% @content_header_caption = "'search  deliveries'"%> 
+		<% @content_header_caption = "'search  deliveries'"%>
 
 		<%= build_delivery_search_form(nil,'submit_deliveries_search','submit_deliveries_search',@is_flat_search)%>
 
@@ -431,7 +431,7 @@ class RmtProcessing::DeliveryController < ApplicationController
   def render_new_delivery
 #	 render (inline) the edit template
 #	render :inline => %{
-#		<% @content_header_caption = "'create new delivery note entry'"%> 
+#		<% @content_header_caption = "'create new delivery note entry'"%>
 #
 #		<%= build_delivery_form(@delivery,'create_delivery','create_delivery',false,@is_create_retry)%>
 #
@@ -463,7 +463,7 @@ class RmtProcessing::DeliveryController < ApplicationController
     @show_print_tripsheet_link = should_show_print_tripsheet_link_for_delivery?(params[:id])
     @hundred_fruit_sample_completed = hundred_fruit_sample_completed?(params[:id])
     if !can_edit_delivery?
-      @delivery_track_indicators = DeliveryTrackIndicator.find_by_sql("select * from delivery_track_indicators where delivery_id = '#{session[:new_delivery].id}'")
+      @delivery_track_indicators = DeliveryTrackIndicator.find_by_sql("select * from delivery_track_indicators where delivery_id = '#{session[:new_delivery].id}' order by id asc")
       session[:delivery_track_indicators] = @delivery_track_indicators
 
       @delivery_route_steps = DeliveryRouteStep.find_by_sql("select delivery_route_steps.*,route_steps.sequence_number from delivery_route_steps 	join route_steps on delivery_route_steps.route_step_id=route_steps.id where delivery_id ='#{session[:new_delivery].id}' order by route_steps.sequence_number ASC")
@@ -489,7 +489,7 @@ class RmtProcessing::DeliveryController < ApplicationController
         if session[:delivery_track_indicators]!=nil
           session[:delivery_track_indicators] = nil
         end
-        @delivery_track_indicators = DeliveryTrackIndicator.find_by_sql("select * from delivery_track_indicators where delivery_id = '#{@delivery.id}'")
+        @delivery_track_indicators = DeliveryTrackIndicator.find_by_sql("select * from delivery_track_indicators where delivery_id = '#{@delivery.id}' order by id asc")
         session[:delivery_track_indicators] = @delivery_track_indicators
 
         if session[:delivery_route_steps]!=nil
@@ -523,7 +523,7 @@ class RmtProcessing::DeliveryController < ApplicationController
   def render_edit_delivery
 #	 render (inline) the edit template
     render :inline => %{
-		<% @content_header_caption = "'edit delivery'"%> 
+		<% @content_header_caption = "'edit delivery'"%>
 
 		<%= build_delivery_form(@delivery,'update_delivery','update_delivery',true)%>
 
@@ -625,7 +625,7 @@ class RmtProcessing::DeliveryController < ApplicationController
           if session[:delivery_track_indicators]!=nil
             session[:delivery_track_indicators] = nil
           end
-          @delivery_track_indicators = DeliveryTrackIndicator.find_by_sql("select * from delivery_track_indicators where delivery_id = '#{id}'")
+          @delivery_track_indicators = DeliveryTrackIndicator.find_by_sql("select * from delivery_track_indicators where delivery_id = '#{id}' order id asc")
           session[:delivery_track_indicators] = @delivery_track_indicators
 
           if session[:delivery_route_steps]!=nil
@@ -984,6 +984,41 @@ class RmtProcessing::DeliveryController < ApplicationController
   def add_delivery_track_indicator
     set_is_first_time
     @delivery_track_indicator = DeliveryTrackIndicator.new
+
+    if (session[:new_delivery].delivery_track_indicators.length == 1)
+      ripeness_groups = TrackSlmsIndicator.find(:all, :conditions => "variety_code='#{session[:new_delivery].rmt_variety_code}' and track_indicator_type_code='STA'")
+      starch_summary_results = StarchSummaryResult.find_by_delivery_id(session[:new_delivery].id)
+      opt_cat_count = 0
+      pre_opt_cat_count = 0
+      post_opt_cat_count = 0
+
+      opt = ripeness_groups.find{|t| t.sub_type=="OPT"}
+      opt.config_data.split(",").each do |o|
+        opt_cat_count += eval("starch_summary_results.cat#{o}_value").to_i
+      end
+
+      pre_opt = ripeness_groups.find{|t| t.sub_type=="PRE_OPT"}
+      pre_opt.config_data.split(",").each do |p|
+        pre_opt_cat_count += eval("starch_summary_results.cat#{p}_value").to_i
+      end
+
+      post_opt = ripeness_groups.find{|t| t.sub_type=="POST_OPT"}
+      post_opt.config_data.split(",").each do |p|
+        post_opt_cat_count += eval("starch_summary_results.cat#{p}_value").to_i
+      end
+
+     if((suggested_indicator_id = TrackSlmsIndicator.find_starch_ripeness_indicator(opt_cat_count, pre_opt_cat_count, post_opt_cat_count, session[:new_delivery].rmt_variety_id)).is_a?(String))
+       raise suggested_indicator_id
+     else
+       suggested_indicator = TrackSlmsIndicator.find(suggested_indicator_id)
+       puts "SUGGESTION : #{suggested_indicator.track_slms_indicator_code}"
+       session[:suggested_indicator] = suggested_indicator.track_slms_indicator_code
+       @delivery_track_indicator.track_slms_indicator_code = suggested_indicator.track_slms_indicator_code
+       @delivery_track_indicator.track_indicator_type_code = "STA"
+       @delivery_track_indicator.variety_type = "rmt_variety"
+     end
+    end
+
     render_add_delivery_track_indicator
   end
 
@@ -991,7 +1026,7 @@ class RmtProcessing::DeliveryController < ApplicationController
     #if authorise_for_web(program_name?, 'edit') == true
     @is_delivery_intake_supervisor = authorise(program_name?, 'delivery_intake_supervisor', session[:user_id])
     render :inline => %{
-                <% @content_header_caption = "'add track indicator to delivery'"%> 
+                <% @content_header_caption = "'add track indicator to delivery'"%>
 
 		        <%= build_add_track_indicator_form(@delivery_track_indicator,'create_delivery_indicator','Add indicator',@is_first_time,@is_delivery_intake_supervisor, false,@is_create_retry)%>
            }, :layout => 'content'
@@ -1027,6 +1062,14 @@ class RmtProcessing::DeliveryController < ApplicationController
     delivery_route_step.update_attributes({:date_activated => DateTime.now, :date_completed => DateTime.now}) if (delivery_route_step && should_update_mrl_labels_printed_route_step)
   end
 
+  def view_suggested_indicator
+    @user_overide = UserOverride.find_by_object_identifier(params[:id])
+    render :inline => %{
+        <% @content_header_caption = "'view  system advised indicator'"%>
+        <%= build_view_suggested_indicator_form(@user_overide,nil,'submit')%>
+     }, :layout => 'content'
+  end
+
   def create_delivery_indicator
     set_is_first_time
     @delivery_track_indicator = DeliveryTrackIndicator.new(params[:delivery_track_indicator])
@@ -1049,14 +1092,14 @@ class RmtProcessing::DeliveryController < ApplicationController
     end
 
     #create a delivery track indicator record
-    if session[:delivery_track_indicator_form][:first_time]== true && params[:delivery_track_indicator][:variety_type] != "rmt_variety"
-      @delivery_track_indicator.errors.add_to_base("the first track indicator for delivery must be of type rmt_variety")
+    if session[:delivery_track_indicator_form][:first_time]== true && params[:delivery_track_indicator][:track_indicator_type_code] != "RMI"
+      @delivery_track_indicator.errors.add_to_base("the first track indicator for delivery must be of type RMI")
       render_add_delivery_track_indicator
       return
     end
 
-    if (is_second_one? && params[:delivery_track_indicator][:track_indicator_type_code] != "OPT")
-      flash[:error] = "Delivery track indicator could not be saved : second track indicator must be of type OPT"
+    if (is_second_one? && params[:delivery_track_indicator][:track_indicator_type_code] != "STA")
+      flash[:error] = "Delivery track indicator could not be saved : second track indicator must be of type STA"
       render_add_delivery_track_indicator
       return
     end
@@ -1070,13 +1113,18 @@ class RmtProcessing::DeliveryController < ApplicationController
       @delivery_track_indicator.track_slms_indicator = track_slms_indicator
     else
       flash[:error] = "Delivery track indicator could not be saved : corresponding slms indicator record was not found [#{params[:delivery_track_indicator][:track_slms_indicator_code].to_s}]"
-#             set_is_first_time
       render_add_delivery_track_indicator
       return
     end
-    #               end
 
     if @delivery_track_indicator.save
+
+      if(@delivery_track_indicator.track_indicator_type_code=="STA" && (@delivery_track_indicator.track_slms_indicator_code != session[:suggested_indicator]))
+        user_overrides = UserOverride.new({:user_name=>session[:user_id].user_name,:app=>'deliveries', :app_feature=>'track_slms_indicator2', :message=>'user overrode default indicator',
+                                           :user_value=>@delivery_track_indicator.track_slms_indicator_code,:object_identifier=>@delivery_track_indicator.id, :system_value=>session[:suggested_indicator]})
+        user_overrides.save
+      end
+
       if (@is_first_time || !is_second_one?)
         @freeze_flash = false
         params[:id] = session[:new_delivery].id
@@ -1147,7 +1195,7 @@ class RmtProcessing::DeliveryController < ApplicationController
 
       #---
 
-      del_track_indicators = DeliveryTrackIndicator.find_by_sql("select * from delivery_track_indicators where delivery_id = '#{session[:new_delivery].id}'")
+      del_track_indicators = DeliveryTrackIndicator.find_by_sql("select * from delivery_track_indicators where delivery_id = '#{session[:new_delivery].id}' order by id asc")
       session[:delivery_track_indicators] = nil if session[:delivery_track_indicators]!=nil
       session[:delivery_track_indicators] = Array.new
       del_track_indicators.each do |record|
@@ -1288,7 +1336,7 @@ class RmtProcessing::DeliveryController < ApplicationController
   def render_edit_delivery_track_indicator
     @is_delivery_intake_supervisor = authorise(program_name?, 'delivery_intake_supervisor', session[:user_id])
     render :inline => %{
-		<% @content_header_caption = "'edit delivery'"%> 
+		<% @content_header_caption = "'edit delivery'"%>
 
 		<%= build_edit_delivery_track_indicator_form(@delivery_track_indicator,'update_delivery_track_indicator','update_delivery_track_indicator',@is_delivery_intake_supervisor,true)%>
 
@@ -1360,7 +1408,7 @@ class RmtProcessing::DeliveryController < ApplicationController
           #@deliveries = eval(session[:query])
           flash[:notice] = 'delivery track indicator record updated'
           session[:delivery_track_indicators] = nil if session[:delivery_track_indicators]!= nil
-          delivery_track_indicators = DeliveryTrackIndicator.find_by_sql("select * from delivery_track_indicators where delivery_id = '#{session[:new_delivery].id}'")
+          delivery_track_indicators = DeliveryTrackIndicator.find_by_sql("select * from delivery_track_indicators where delivery_id = '#{session[:new_delivery].id}' order by id asc")
           session[:delivery_track_indicators] = delivery_track_indicators
           render_existing_new_delivery
 
@@ -1389,7 +1437,7 @@ class RmtProcessing::DeliveryController < ApplicationController
           delivery_track_indicator.destroy
           session[:alert] = " Delivery Track Indicator Record deleted."
           session[:delivery_track_indicators] = nil if session[:delivery_track_indicators]!= nil
-          delivery_track_indicators = DeliveryTrackIndicator.find_by_sql("select * from delivery_track_indicators where delivery_id = '#{session[:new_delivery].id}'")
+          delivery_track_indicators = DeliveryTrackIndicator.find_by_sql("select * from delivery_track_indicators where delivery_id = '#{session[:new_delivery].id}' order by id asc")
           session[:delivery_track_indicators] = delivery_track_indicators
           render_existing_new_delivery
         end
@@ -1626,19 +1674,19 @@ class RmtProcessing::DeliveryController < ApplicationController
     @season_codes.unshift("<select>")
 
     render :inline => %{
-              
+
               <%= select('delivery_track_indicator','season_code', @season_codes) %>
               <img src='/images/spinner.gif' style='display:none;' id='img_delivery_track_indicator_season_code'/>
               <%= observe_field('delivery_track_indicator_season_code', :update=>'track_slms_indicator_code_cell', :url=>{:action=>session[:delivery_track_indicator_form][:season_code_observer][:remote_method]}, :loading=>"show_element('img_delivery_track_indicator_season_code');", :complete=>session[:delivery_track_indicator_form][:season_code_observer][:on_completed_js])%>
-                  
+
               <script>
-                  
+
                   <%= update_element_function(
                       "rmt_drench_cell", :action=>:update,
                       :content=>@drench
                     )
                   %>
-                  
+
                   <%= update_element_function(
                         "rmt_sample_bins_cell", :action=>:update,
                         :content=>@sample
@@ -1679,7 +1727,7 @@ class RmtProcessing::DeliveryController < ApplicationController
       session[:track_slms_indicator][:track_variable_2] = @slms_record.track_variable_2
     end
 
-    #render inline 
+    #render inline
     render :inline => %{
         <% @check_1_content = check_box('slms_record', 'track_variable_1') %>
         <% @check_2_content = check_box('slms_record', 'track_variable_2') %>
@@ -1689,7 +1737,7 @@ class RmtProcessing::DeliveryController < ApplicationController
                   :content=>@check_1_content
               )
               %>
-              
+
               <%= update_element_function(
                   "track_variable_2_cell", :action=>:update,
                   :content=>@check_2_content
@@ -1836,7 +1884,7 @@ class RmtProcessing::DeliveryController < ApplicationController
                   <label class="drench_label"> deactivated </label>
               </td>
             </tr>
-           </table>  
+           </table>
         <% end %>
        <% end %>
       }
@@ -1950,7 +1998,7 @@ class RmtProcessing::DeliveryController < ApplicationController
 
                       #refresh session[:delivery_track_indicators]
                       session[:delivery_track_indicators] = nil if session[:delivery_track_indicators]!= nil
-                      @del_track_indicators = DeliveryTrackIndicator.find_by_sql("select * from delivery_track_indicators where delivery_id = '#{session[:new_delivery].id}'")
+                      @del_track_indicators = DeliveryTrackIndicator.find_by_sql("select * from delivery_track_indicators where delivery_id = '#{session[:new_delivery].id}' order by id asc")
                       session[:delivery_track_indicators] = @del_track_indicators
                     end
                   end
@@ -2014,7 +2062,7 @@ class RmtProcessing::DeliveryController < ApplicationController
 #    template_file_path = "C://reports//delivery.rpt"
 #    #xml_data = escape_xml_data(render_to_string(:template=>'rmt_processing/delivery/export_report.rxml', :layout=>false))
 #    xml_data = render_to_string(:template=>'rmt_processing/delivery/export_report.rexml', :layout=>false)
-#    
+#
 #    xml_schema = CrystalReportGenerator.build_xml_schema('data', body_elements)
 #    #xml_schema =""
 #    send_data CrystalReportGenerator.generate_report(xml_data, xml_schema,template_file_path), :filename=>'Delivery.pdf', :type=>'pdf/application'
@@ -2473,6 +2521,12 @@ class RmtProcessing::DeliveryController < ApplicationController
   def capture_summary_starch_results_submit
     if(params[:starch_summary_results].values.map{|v| v.to_i}.sum > 20)
       flash[:error] = "starch results could not be captured. Starch results add up to more than 20"
+      @starch_summary_results = StarchSummaryResult.new(params[:starch_summary_results])
+      render_capture_summary_starch_results
+      return
+    end
+    if(params[:starch_summary_results].values.map{|v| v.to_i}.sum < 20)
+      flash[:error] = "starch results could not be captured. Starch results add up to less than 20"
       @starch_summary_results = StarchSummaryResult.new(params[:starch_summary_results])
       render_capture_summary_starch_results
       return
