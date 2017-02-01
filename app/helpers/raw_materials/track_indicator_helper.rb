@@ -1002,7 +1002,7 @@ end
     rmt_varieties = RmtVariety.find_by_sql("select distinct id,rmt_variety_code,rmt_variety_description from rmt_varieties where commodity_code = 'AP'").map{|g|["#{g.rmt_variety_code} - #{g.rmt_variety_description}", g.id]}
 
     query = "select * from track_slms_indicators where track_indicator_type_code = 'STA'"
-    query << "and rmt_variety_code ='#{RmtVariety.find(indicator_match_rule.rmt_variety_id).rmt_variety_code}'" if is_edit
+    query << " and rmt_variety_code ='#{RmtVariety.find(indicator_match_rule.rmt_variety_id).rmt_variety_code}'" if is_edit
     match_ripeness_indicators = TrackSlmsIndicator.find_by_sql(query).map{|g|["#{g.track_slms_indicator_code}", g.id]}
 
     search_combos_js = gen_combos_clear_js_for_combos(["indicator_match_rule_rmt_variety_id","indicator_match_rule_match_ripeness_indicator_id"])
