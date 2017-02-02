@@ -987,7 +987,11 @@ class RmtProcessing::DeliveryController < ApplicationController
 
     if (session[:new_delivery].delivery_track_indicators.length == 1)
       ripeness_groups = TrackSlmsIndicator.find(:all, :conditions => "variety_code='#{session[:new_delivery].rmt_variety_code}' and track_indicator_type_code='STA'")
-      starch_summary_results = StarchSummaryResult.find_by_delivery_id(session[:new_delivery].id)
+      if(!(starch_summary_results = StarchSummaryResult.find_by_delivery_id(session[:new_delivery].id)))
+        flash[:error] = "Starch Summary Results must be captured first before creating a starch indicator"
+        current_delivery
+        return
+      end
       opt_cat_count = 0
       pre_opt_cat_count = 0
       post_opt_cat_count = 0
@@ -1007,32 +1011,27 @@ class RmtProcessing::DeliveryController < ApplicationController
         post_opt_cat_count += eval("starch_summary_results.cat#{p}_value").to_i
       end
 
-     if((suggested_indicator_id = TrackSlmsIndicator.find_starch_ripeness_indicator(opt_cat_count, pre_opt_cat_count, post_opt_cat_count, session[:new_delivery].rmt_variety_id)).is_a?(String))
-       raise suggested_indicator_id
-     else
+      if((suggested_indicator_id = TrackSlmsIndicator.find_starch_ripeness_indicator(opt_cat_count, pre_opt_cat_count, post_opt_cat_count, session[:new_delivery].rmt_variety_id)).is_a?(String))
+       flash[:error] = suggested_indicator_id
+      else
        suggested_indicator = TrackSlmsIndicator.find(suggested_indicator_id)
-       puts "SUGGESTION : #{suggested_indicator.track_slms_indicator_code}"
        session[:suggested_indicator] = suggested_indicator.track_slms_indicator_code
        @delivery_track_indicator.track_slms_indicator_code = suggested_indicator.track_slms_indicator_code
-       @delivery_track_indicator.track_indicator_type_code = "STA"
-       @delivery_track_indicator.variety_type = "rmt_variety"
-     end
+      end
+      @delivery_track_indicator.track_indicator_type_code = "STA"
+      @delivery_track_indicator.variety_type = "rmt_variety"
     end
 
     render_add_delivery_track_indicator
   end
 
   def render_add_delivery_track_indicator
-    #if authorise_for_web(program_name?, 'edit') == true
     @is_delivery_intake_supervisor = authorise(program_name?, 'delivery_intake_supervisor', session[:user_id])
     render :inline => %{
                 <% @content_header_caption = "'add track indicator to delivery'"%>
 
 		        <%= build_add_track_indicator_form(@delivery_track_indicator,'create_delivery_indicator','Add indicator',@is_first_time,@is_delivery_intake_supervisor, false,@is_create_retry)%>
            }, :layout => 'content'
-    #    else
-    #        render :inline=>%{},:layout=>'content'
-    #    end
   end
 
   def update_mrl_labels_printed_route_step
