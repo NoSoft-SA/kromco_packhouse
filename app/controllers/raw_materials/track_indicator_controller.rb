@@ -1671,7 +1671,7 @@ end
     render :inline => %{
 		<% @content_header_caption = "'new indicator match rules'"%>
 
-		<%= build__indicator_match_rule_form(@indicator_match_rule,'create_indicator_match_rule','create_indicator_match_rule',@is_flat_search,false)%>
+		<%= build_indicator_match_rule_form(@indicator_match_rule,'create_indicator_match_rule','create_indicator_match_rule',@is_flat_search,false)%>
 
 		}, :layout => 'content'
   end
@@ -1732,7 +1732,7 @@ end
     render :inline => %{
 		<% @content_header_caption = "'edit indicator_match_rules'"%>
 
-		<%= build__indicator_match_rule_form(@indicator_match_rule,'update_indicator_match_rule','update_indicator_match_rule',@is_flat_search,true)%>
+		<%= build_indicator_match_rule_form(@indicator_match_rule,'update_indicator_match_rule','update_indicator_match_rule',@is_flat_search,true)%>
 
 		}, :layout => 'content'
   end
@@ -1764,6 +1764,31 @@ end
     rescue
       handle_error("record could not be created")
     end
+  end
+
+  def test_starch_rules
+    render_test_starch_rules
+  end
+
+  def render_test_starch_rules
+    render :inline => %{
+		<% @content_header_caption = "'test starch rules'"%>
+
+		<%= build_test_starch_rules_form(@indicator_match_rule,'test_match_rule','test_match_rule',@is_flat_search,false)%>
+
+		}, :layout => 'content'
+  end
+
+  def test_match_rule
+    @indicator_match_rule = StarchRipenessIndicatorMatchRule.new(params[:indicator_match_rule])
+    if((suggested_indicator_id = TrackSlmsIndicator.find_starch_ripeness_indicator(@indicator_match_rule.opt_cat_count.to_i, @indicator_match_rule.pre_opt_cat_count.to_i, @indicator_match_rule.post_opt_cat_count.to_i,@indicator_match_rule.rmt_variety_id.to_i)).is_a?(String))
+      @message =  suggested_indicator_id
+      flash[:error] = @message
+    else
+      @message = "Match rule test successful. Suggested track slms indicator code: #{TrackSlmsIndicator.find(suggested_indicator_id).track_slms_indicator_code}"
+      flash[:notice] = @message
+    end
+    render_test_starch_rules
   end
 
 end

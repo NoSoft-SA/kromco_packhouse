@@ -995,7 +995,7 @@ end
 #==================================================================================================
 
  #MM012017 - starch_ripeness_indicator_match_rules
-  def build__indicator_match_rule_form(indicator_match_rule,action,caption,is_flat_search = nil,is_edit = nil)
+  def build_indicator_match_rule_form(indicator_match_rule,action,caption,is_flat_search = nil,is_edit = nil)
 
     field_configs = Array.new
 
@@ -1012,7 +1012,7 @@ end
     }
 
     nb_msg = "Values here denote the amount of fruit falling in the categories defined for track_slms_indicator 'STARCH_OPT'. <br> These values are expressed as a mathematical expressions <br>
-              Use 'x' for OPT (opt cat count) expressions, 'y' for PRE_OPT (pre opt cat count) expressions and 'z' for POST_OPT (post opt cat count) expressions <br> e.g: <br> x > 1 && x < 5 ; y > 5 ; z == 5  OR <br> x == 1 || x == 2 ; y != 5 ; z >= 5 <br> "
+              Use 'x' for PRE_OPT (pre opt cat count) expressions,'y' for OPT (opt cat count) expressions and 'z' for POST_OPT (post opt cat count) expressions <br> e.g: <br> x > 1 && x < 5 ; y > 5 ; z == 5  OR <br> x == 1 || x == 2 ; y != 5 ; z >= 5 <br> "
     field_configs << {:field_type => 'LabelField',
                       :field_name => 'opt_cat_count',
                       :settings => {:static_value => nb_msg ,
@@ -1074,14 +1074,41 @@ end
     column_configs << {:field_type => 'action_collection', :field_name => 'actions', :settings => {:actions => action_configs}} unless action_configs.empty?
     column_configs << {:field_type => 'text',:field_name => 'rmt_variety_code', :col_width => 150}
     column_configs << {:field_type => 'text',:field_name => 'rmt_variety_description', :col_width => 200}
-    column_configs << {:field_type => 'text',:field_name => 'opt_cat_count', :col_width => 150}
     column_configs << {:field_type => 'text',:field_name => 'pre_opt_cat_count', :col_width => 150}
+    column_configs << {:field_type => 'text',:field_name => 'opt_cat_count', :col_width => 150}
     column_configs << {:field_type => 'text',:field_name => 'post_opt_cat_count', :col_width => 150}
     column_configs << {:field_type => 'text',:field_name => 'track_slms_indicator_code', :col_width => 200}
     column_configs << {:field_type => 'text',:field_name => 'track_slms_indicator_description', :col_width => 250}
     column_configs << {:field_type => 'text',:field_name => 'id',:hide => true, :col_width => 100}
 
     return get_data_grid(data_set,column_configs,nil,true)
+  end
+
+  def build_test_starch_rules_form(indicator_match_rule,action,caption,is_flat_search = nil,is_edit = nil)
+
+    field_configs = Array.new
+
+    rmt_varieties = RmtVariety.find_by_sql("select distinct id,rmt_variety_code,rmt_variety_description from rmt_varieties where commodity_code = 'AP'").map{|g|["#{g.rmt_variety_code} - #{g.rmt_variety_description}", g.id]}
+
+    field_configs << {:field_type => 'DropDownField',
+                      :field_name => 'rmt_variety_id',
+                      :settings => {:list => rmt_varieties}
+    }
+
+    field_configs << {:field_type => 'TextField',
+                      :field_name => 'pre_opt_cat_count'}
+
+    field_configs << {:field_type => 'TextField',
+                      :field_name => 'opt_cat_count'}
+
+    field_configs << {:field_type => 'TextField',
+                      :field_name => 'post_opt_cat_count'}
+
+    field_configs << {:field_type => 'HiddenField',
+                      :field_name => 'id'}
+
+    build_form(indicator_match_rule,field_configs,action,'indicator_match_rule',caption,false)
+
   end
 
 end
