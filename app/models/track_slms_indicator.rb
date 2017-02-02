@@ -280,30 +280,32 @@ end
 #
 # }
 
-#   def self.find_starch_ripeness_indicator(opt_cat_count, pre_opt_cat_count, post_opt_cat_count,rmt_variety_id)
-#     #get indicator match rules
-#     matched_rules = []
-#     indicator_match_rules = StarchRipenessIndicatorMatchRule.find_by_sql("select * from starch_ripeness_indicator_match_rules where rmt_variety_id =  #{rmt_variety_id}")
-#     indicator_match_rules.each do |match_rule|
-#       is_opt,is_pre_opt,is_post_opt = false
-#       x = opt_cat_count
-#       is_opt = true if eval(match_rule.opt_cat_count)
-#       x = pre_opt_cat_count
-#       is_pre_opt = true if eval(match_rule.pre_opt_cat_count)
-#       x = post_opt_cat_count
-#       is_post_opt = true if eval(match_rule.post_opt_cat_count)
-#       # matched_rules.push(match_rule.id) if is_opt && is_pre_opt && is_post_opt
-#       matched_rules.push(match_rule.match_ripeness_indicator_id) if is_opt && is_pre_opt && is_post_opt
-#     end
-#     check_matched_rules(matched_rules)
-#   end
+  # def self.find_starch_ripeness_indicator(opt_cat_count, pre_opt_cat_count, post_opt_cat_count,rmt_variety_id)
+  #   #get indicator match rules
+  #   matched_rules = []
+  #   indicator_match_rules = StarchRipenessIndicatorMatchRule.find_by_sql("select * from starch_ripeness_indicator_match_rules where rmt_variety_id =  #{rmt_variety_id}")
+  #   indicator_match_rules.each do |match_rule|
+  #     is_opt,is_pre_opt,is_post_opt = false
+  #     x = opt_cat_count
+  #     is_opt = true if eval(match_rule.opt_cat_count)
+  #     x = pre_opt_cat_count
+  #     is_pre_opt = true if eval(match_rule.pre_opt_cat_count)
+  #     x = post_opt_cat_count
+  #     is_post_opt = true if eval(match_rule.post_opt_cat_count)
+  #     # matched_rules.push(match_rule.id) if is_opt && is_pre_opt && is_post_opt
+  #     matched_rules.push(match_rule.match_ripeness_indicator_id) if is_opt && is_pre_opt && is_post_opt
+  #   end
+  #   check_matched_rules(matched_rules)
+  # end
 
-  def self.find_starch_ripeness_indicator(x, y, z,rmt_variety_id)
+  def self.find_starch_ripeness_indicator(opt_cat_count, pre_opt_cat_count, post_opt_cat_count,rmt_variety_id)
+    x = pre_opt_cat_count
+    y = opt_cat_count
+    z = post_opt_cat_count
     matched_rules = []
     indicator_match_rules = StarchRipenessIndicatorMatchRule.find_by_sql("select * from starch_ripeness_indicator_match_rules where rmt_variety_id =  #{rmt_variety_id}")
     indicator_match_rules.each do |match_rule|
-      # matched_rules.push(match_rule.id) if eval(match_rule.opt_cat_count) && eval(match_rule.pre_opt_cat_count) && eval(match_rule.post_opt_cat_count)
-      matched_rules.push(match_rule.match_ripeness_indicator_id) if eval(match_rule.opt_cat_count) && eval(match_rule.pre_opt_cat_count) && eval(match_rule.post_opt_cat_count)
+      matched_rules.push(match_rule.match_ripeness_indicator_id) if eval(match_rule.pre_opt_cat_count) && eval(match_rule.opt_cat_count) && eval(match_rule.post_opt_cat_count)
     end
     check_matched_rules(matched_rules)
   end
@@ -311,10 +313,9 @@ end
   def self.check_matched_rules(matched_rules)
     case matched_rules.length
       when 0
-        starch_ripeness_indicator = "Track_slms_indicator passed-in quantities entered failed to match starch_ripeness_indicator_match_rules <br> "
+        starch_ripeness_indicator = "Track_slms_indicator passed-in quantities entered failed to match starch_ripeness_indicator_match_rules <br> Please notify the System Administrator"
       when 1
         starch_ripeness_indicator = matched_rules[0]
-        # starch_ripeness_indicator = StarchRipenessIndicatorMatchRule.find(matched_rules[0]).match_ripeness_indicator_id
       else
         starch_ripeness_indicator = "Track_slms_indicator passed-in quantities entered returned more than 1 matched starch_ripeness_indicator_match_rules <br> "
     end

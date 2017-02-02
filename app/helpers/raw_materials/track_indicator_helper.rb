@@ -1029,10 +1029,10 @@ end
     }
 
     field_configs << {:field_type => 'TextField',
-                      :field_name => 'opt_cat_count'}
+                      :field_name => 'pre_opt_cat_count'}
 
     field_configs << {:field_type => 'TextField',
-                      :field_name => 'pre_opt_cat_count'}
+                      :field_name => 'opt_cat_count'}
 
     field_configs << {:field_type => 'TextField',
                       :field_name => 'post_opt_cat_count'}
