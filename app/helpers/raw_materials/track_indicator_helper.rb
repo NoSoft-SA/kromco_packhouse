@@ -1089,10 +1089,18 @@ end
     field_configs = Array.new
 
     rmt_varieties = RmtVariety.find_by_sql("select distinct id,rmt_variety_code,rmt_variety_description from rmt_varieties where commodity_code = 'AP'").map{|g|["#{g.rmt_variety_code} - #{g.rmt_variety_description}", g.id]}
+    msg = " "
+    search_combos_js = gen_combos_clear_js_for_combos(["indicator_match_rule_rmt_variety_id","indicator_match_rule_msg"])
+    rmt_variety_observer  = {:updated_field_id => "msg_cell",
+                             :remote_method => 'test_starch_rules_combo_changed',
+                             :on_completed_js => search_combos_js["indicator_match_rule_rmt_variety_id"]
+    }
+
 
     field_configs << {:field_type => 'DropDownField',
                       :field_name => 'rmt_variety_id',
-                      :settings => {:list => rmt_varieties}
+                      :settings => {:list => rmt_varieties},
+                      :observer => rmt_variety_observer
     }
 
     field_configs << {:field_type => 'TextField',
@@ -1106,6 +1114,15 @@ end
 
     field_configs << {:field_type => 'HiddenField',
                       :field_name => 'id'}
+
+    field_configs << {:field_type => 'LabelField',
+                      :field_name => 'msg',
+                      :settings => {:static_value => msg ,
+                                    :non_dbfield => true,
+                                    :show_label => false,
+                                    :css_class => 'nb_label'
+                      }
+    }
 
     build_form(indicator_match_rule,field_configs,action,'indicator_match_rule',caption,false)
 

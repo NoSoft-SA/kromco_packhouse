@@ -1791,4 +1791,27 @@ end
     render_test_starch_rules
   end
 
+  def test_starch_rules_combo_changed
+    @msg = "<table>
+                <tr><td colspan = 3 ><strong>The following rules applies:</strong></td></tr>
+                <tr>
+                    <td><font color='#5D7B9D'>pre_opt_cat_count &nbsp;&nbsp</font></td>
+                    <td><font color='#5D7B9D'>opt_cat_count &nbsp;&nbsp</font></td>
+                    <td><font color='#5D7B9D'>post_opt_cat_count &nbsp;&nbsp</font></td>
+                </tr>"
+    rmt_variety_id = get_selected_combo_value(params)
+    match_rules = StarchRipenessIndicatorMatchRule.find_by_sql("select * from starch_ripeness_indicator_match_rules where rmt_variety_id = #{rmt_variety_id}")
+    match_rules.each do |match_rule|
+      @msg += "<tr>
+                  <td>" + match_rule.pre_opt_cat_count + "</td>
+                  <td>" + match_rule.opt_cat_count + "</td>
+                  <td>" + match_rule.post_opt_cat_count + "</td>
+               </tr>"
+    end
+    @msg += "</table>"
+    render :inline => %{
+		  <%= @msg %>
+		}
+  end
+
 end
