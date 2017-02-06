@@ -985,7 +985,7 @@ class RmtProcessing::DeliveryController < ApplicationController
     set_is_first_time
     @delivery_track_indicator = DeliveryTrackIndicator.new
 
-    if (session[:new_delivery].delivery_track_indicators.length == 1)
+    if (session[:new_delivery].delivery_track_indicators.length == 1  && session[:new_delivery].commodity_code == "AP")
       ripeness_groups = TrackSlmsIndicator.find(:all, :conditions => "variety_code='#{session[:new_delivery].rmt_variety_code}' and track_indicator_type_code='STA'")
       if(!(starch_summary_results = StarchSummaryResult.find_by_delivery_id(session[:new_delivery].id)))
         flash[:error] = "Starch Summary Results must be captured first before creating a starch indicator"
@@ -1097,7 +1097,7 @@ class RmtProcessing::DeliveryController < ApplicationController
       return
     end
 
-    if (is_second_one? && params[:delivery_track_indicator][:track_indicator_type_code] != "STA")
+    if (is_second_one? && params[:delivery_track_indicator][:track_indicator_type_code] != "STA"  && session[:new_delivery].commodity_code == "AP")
       flash[:error] = "Delivery track indicator could not be saved : second track indicator must be of type STA"
       render_add_delivery_track_indicator
       return
