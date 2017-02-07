@@ -1604,7 +1604,22 @@ end
 
   #MM012017 -  On delivery: help user to lookup starch related track-slms-indicator2. Step one: CRUD tools and rule definitions
   def create_track_slms_indicators_script
+    # combinations = StarchRipenessIndicatorMatchRule.summation(20)
+
     # starch_ripeness_indicator = TrackSlmsIndicator.find_starch_ripeness_indicator(2, 6, 10,489)
+
+    # update_variety_id_and_variety_code
+    # query = "with rmt_variety as (
+    #               select TSI.id as tsi_id,RV.id as rmt_variety_id, RV.rmt_variety_code as rmt_variety_code
+    #               from track_slms_indicators TSI
+    #               join rmt_varieties RV on TSI.rmt_variety_code = RV.rmt_variety_code and TSI.commodity_code = RV.commodity_code
+    #               where TSI.track_indicator_type_code = 'STA' and TSI.commodity_code = 'AP'
+    #           )
+    #           update track_slms_indicators
+    #           set variety_id = rmt_variety.rmt_variety_id, variety_code = rmt_variety.rmt_variety_code
+    #           from rmt_variety
+    #           where id = rmt_variety.tsi_id"
+    # ActiveRecord::Base.connection.execute(query)
 
     # create a new track_slms_indicator_type called 'starch_ripeness'
     ActiveRecord::Base.connection.execute("INSERT INTO track_indicator_types(description, track_indicator_type_code) VALUES ('STARCH RIPENESS','STA');")
@@ -1628,8 +1643,7 @@ end
                     ON UPDATE CASCADE ON DELETE RESTRICT,
                 CONSTRAINT track_slms_indicators_fk FOREIGN KEY (match_ripeness_indicator_id)
                     REFERENCES track_slms_indicators (id) MATCH SIMPLE
-                    ON UPDATE CASCADE ON DELETE RESTRICT,
-                CONSTRAINT starch_ripeness_indicator_match_rules_unique UNIQUE (rmt_variety_id,match_ripeness_indicator_id)
+                    ON UPDATE CASCADE ON DELETE RESTRICT
               )
               WITH (
                 OIDS=TRUE
@@ -1637,7 +1651,9 @@ end
               ALTER TABLE starch_ripeness_indicator_match_rules
                 OWNER TO postgres;"
     ActiveRecord::Base.connection.execute(query)
-
+    # ,
+    #     CONSTRAINT starch_ripeness_indicator_match_rules_unique UNIQUE (rmt_variety_id,match_ripeness_indicator_id)
+    
     #create starch_ripeness_indicator_match_rules
     insert_query = ""
     insert_part = "INSERT INTO track_slms_indicators(track_slms_indicator_code, track_indicator_type_id,track_indicator_type_code,variety_type, commodity_code, commodity_id, rmt_variety_code, track_slms_indicator_description,sub_type,season_id,season_code,variety_id,variety_code)"
@@ -1792,6 +1808,66 @@ end
   end
 
   def test_starch_rules_combo_changed
+    @msg = "<table>
+                <tr><td colspan = 3 ><strong>The following rules applies:</strong></td></tr>
+                <tr>
+                    <td><font color='#5D7B9D'>pre_opt_cat_count &nbsp;&nbsp</font></td>
+                    <td><font color='#5D7B9D'>opt_cat_count &nbsp;&nbsp</font></td>
+                    <td><font color='#5D7B9D'>post_opt_cat_count &nbsp;&nbsp</font></td>
+                </tr>"
+    rmt_variety_id = get_selected_combo_value(params)
+    match_rules = StarchRipenessIndicatorMatchRule.find_by_sql("select * from starch_ripeness_indicator_match_rules where rmt_variety_id = #{rmt_variety_id}")
+    match_rules.each do |match_rule|
+      @msg += "<tr>
+                  <td>" + match_rule.pre_opt_cat_count + "</td>
+                  <td>" + match_rule.opt_cat_count + "</td>
+                  <td>" + match_rule.post_opt_cat_count + "</td>
+               </tr>"
+    end
+    @msg += "</table>"
+    render :inline => %{
+		  <%= @msg %>
+		}
+  end
+
+  def run_full_test
+    render_run_full_test
+  end
+
+  def render_run_full_test
+    render :inline => %{
+		<% @content_header_caption = "'test starch rules'"%>
+
+		<%= build_run_full_test_form(@run_full_test,'full_test','full_test',@is_flat_search,false)%>
+
+		}, :layout => 'content'
+  end
+
+  def full_test
+    message = "<table>
+                <tr><td colspan = 4 ><strong>The following tests failed:</strong></td></tr>
+                <tr>
+                    <td><font color='#5D7B9D'>pre_opt_cat_count &nbsp;&nbsp</font></td>
+                    <td><font color='#5D7B9D'>opt_cat_count &nbsp;&nbsp</font></td>
+                    <td><font color='#5D7B9D'>post_opt_cat_count &nbsp;&nbsp</font></td>
+                    <td><font color='#5D7B9D'>Msg &nbsp;&nbsp</font></td>
+                </tr>"
+    StarchRipenessIndicatorMatchRule.summation(20).each do |match_rule|
+      if((suggested_indicator_id = TrackSlmsIndicator.find_starch_ripeness_indicator(match_rule[1],match_rule[0], match_rule[2],params[:run_full_test][:rmt_variety_id].to_i)).is_a?(String))
+        message += "<tr>
+                      <td>" + match_rule[0].to_s + "</td>
+                      <td>" + match_rule[1].to_s + "</td>
+                      <td>" + match_rule[2].to_s + "</td>
+                      <td>" + suggested_indicator_id.to_s + "</td>
+                   </tr>"
+      end
+    end
+    message += "</table>"
+    flash[:error] = message
+    render_run_full_test
+  end
+
+  def run_full_test_combo_changed
     @msg = "<table>
                 <tr><td colspan = 3 ><strong>The following rules applies:</strong></td></tr>
                 <tr>

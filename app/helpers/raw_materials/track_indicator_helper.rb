@@ -1128,4 +1128,35 @@ end
 
   end
 
+  def build_run_full_test_form(run_full_test,action,caption,is_flat_search = nil,is_edit = nil)
+
+    field_configs = Array.new
+
+    rmt_varieties = RmtVariety.find_by_sql("select distinct id,rmt_variety_code,rmt_variety_description from rmt_varieties where commodity_code = 'AP'").map{|g|["#{g.rmt_variety_code} - #{g.rmt_variety_description}", g.id]}
+    msg = " "
+    search_combos_js = gen_combos_clear_js_for_combos(["run_full_test_rmt_variety_id","run_full_test_msg"])
+    rmt_variety_observer  = {:updated_field_id => "msg_cell",
+                             :remote_method => 'run_full_test_combo_changed',
+                             :on_completed_js => search_combos_js["run_full_test_rmt_variety_id"]
+    }
+
+    field_configs << {:field_type => 'DropDownField',
+                      :field_name => 'rmt_variety_id',
+                      :settings => {:list => rmt_varieties},
+                      :observer => rmt_variety_observer
+    }
+
+    field_configs << {:field_type => 'LabelField',
+                      :field_name => 'msg',
+                      :settings => {:static_value => msg ,
+                                    :non_dbfield => true,
+                                    :show_label => false,
+                                    :css_class => 'nb_label'
+                      }
+    }
+
+    build_form(run_full_test,field_configs,action,'run_full_test',caption,false)
+
+  end
+
 end
