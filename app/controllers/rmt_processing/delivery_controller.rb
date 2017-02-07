@@ -1002,7 +1002,6 @@ class RmtProcessing::DeliveryController < ApplicationController
         opt.config_data.split(",").each do |o|
           opt_cat_count += eval("starch_summary_results.cat#{o}_value").to_i
         end
-        @starch_summary_results_label += "opt:    #{opt_cat_count}<br>"
       else
         ripeness_groups_error = "There is no OPT starch track indicator set up for variety(#{session[:new_delivery].rmt_variety_code})"
       end
@@ -1011,7 +1010,6 @@ class RmtProcessing::DeliveryController < ApplicationController
         pre_opt.config_data.split(",").each do |p|
           pre_opt_cat_count += eval("starch_summary_results.cat#{p}_value").to_i
         end
-        @starch_summary_results_label += "pre:    #{pre_opt_cat_count}<br>"
       else
         ripeness_groups_error = "There is no PRE_OPT starch track indicator set up for variety(#{session[:new_delivery].rmt_variety_code})"
       end
@@ -1020,7 +1018,6 @@ class RmtProcessing::DeliveryController < ApplicationController
         post_opt.config_data.split(",").each do |p|
           post_opt_cat_count += eval("starch_summary_results.cat#{p}_value").to_i
         end
-        @starch_summary_results_label += "post:    #{post_opt_cat_count}<br>"
       else
         ripeness_groups_error = "There is no POST_OPT starch track indicator set up for variety(#{session[:new_delivery].rmt_variety_code})"
       end
@@ -1032,6 +1029,9 @@ class RmtProcessing::DeliveryController < ApplicationController
         return
       end
 
+      @starch_summary_results_label += "pre:    #{pre_opt_cat_count}<br>"
+      @starch_summary_results_label += "opt:    #{opt_cat_count}<br>"
+      @starch_summary_results_label += "post:    #{post_opt_cat_count}<br>"
       if((suggested_indicator_id = TrackSlmsIndicator.find_starch_ripeness_indicator(opt_cat_count, pre_opt_cat_count, post_opt_cat_count, session[:new_delivery].rmt_variety_id)).is_a?(String))
         flash[:error] = suggested_indicator_id
         @starch_summary_results_label += "No indicator found<br>"
