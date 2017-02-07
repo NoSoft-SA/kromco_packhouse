@@ -9,7 +9,7 @@ module RmtProcessing::DeliveryHelper
 
 
     field_configs[field_configs.length()] = {:field_type => 'TextField',
-                                                :field_name => 'weight'}
+                                             :field_name => 'weight'}
 
 
     build_form(nil, field_configs, 'weigh_delivery_submit', 'delivery', 'accept weight', nil)
@@ -493,7 +493,7 @@ module RmtProcessing::DeliveryHelper
 #    puts "PUTSA: " + grp.to_s
     return grp
   end
-  
+
   def build_uneditable_delivery_form(delivery, action, show_100_fruit_sample_link, show_print_tripsheet_link)
 
     field_configs                         = Array.new
@@ -521,26 +521,26 @@ module RmtProcessing::DeliveryHelper
                                              :field_name => 'rmt_variety_code'}
 #------------------------------2--------------------------
 #--------------------------------------------------------
-      field_configs[field_configs.length()] = {:field_type => 'LabelField',
-                                               :field_name => 'ripe_code'}
-
-      field_configs[field_configs.length()] = {:field_type => 'LabelField',
-                                               :field_name => 'rmt_product_type_code',
-                                               :settings   =>{:css_class=>'delivery_label',:show_label=>true}}
-
-      field_configs[field_configs.length()] = {:field_type => 'LabelField',
-                                               :field_name => 'advised_ripe_point_code',
-                                               :settings   =>{:css_class=>'delivery_label',:show_label=>true}}
-
-      field_configs[field_configs.length()] = {:field_type => 'LabelField',
-                                               :field_name => 'ripe_point_code'}
+    field_configs[field_configs.length()] = {:field_type => 'LabelField',
+                                             :field_name => 'ripe_code'}
 
     field_configs[field_configs.length()] = {:field_type => 'LabelField',
-                                                   :field_name => 'treatment_code'}
-      
-      field_configs[field_configs.length()] = {:field_type => 'LabelField',
-                                               :field_name => 'advised_rmt_product_code',
-                                               :settings   =>{:css_class=>'delivery_label',:show_label=>true}}
+                                             :field_name => 'rmt_product_type_code',
+                                             :settings   =>{:css_class=>'delivery_label',:show_label=>true}}
+
+    field_configs[field_configs.length()] = {:field_type => 'LabelField',
+                                             :field_name => 'advised_ripe_point_code',
+                                             :settings   =>{:css_class=>'delivery_label',:show_label=>true}}
+
+    field_configs[field_configs.length()] = {:field_type => 'LabelField',
+                                             :field_name => 'ripe_point_code'}
+
+    field_configs[field_configs.length()] = {:field_type => 'LabelField',
+                                             :field_name => 'treatment_code'}
+
+    field_configs[field_configs.length()] = {:field_type => 'LabelField',
+                                             :field_name => 'advised_rmt_product_code',
+                                             :settings   =>{:css_class=>'delivery_label',:show_label=>true}}
 #----------------------------2----------------------------
 #--------------------------------------------------------
     field_configs[field_configs.length()] = {:field_type => 'LabelField',
@@ -548,8 +548,8 @@ module RmtProcessing::DeliveryHelper
                                              :settings   =>{:label_caption=>'rmt_product_code', :show_label => true, :static_value=>RmtProduct.find(delivery.rmt_product_id).rmt_product_code}}
 
     field_configs[field_configs.length()] = {:field_type => 'LabelField',
-                                               :field_name => 'destination_complex'}
-    
+                                             :field_name => 'destination_complex'}
+
     field_configs[field_configs.length()] = {:field_type => 'LabelField',
                                              :field_name => 'delivery_number_preprinted'}
 
@@ -609,9 +609,9 @@ module RmtProcessing::DeliveryHelper
     if delivery.delivery_sample_bins && delivery.delivery_sample_bins.length() > 0
 #       sequences =   format_delivery_sample_bin_sequences(delivery.delivery_sample_bins.map{|d|d.sample_bin_sequence_number.to_s})#.join(",")
       sequences =   format_delivery_sample_bin_sequences(delivery.delivery_sample_bins.map{|d|d.sample_bin_sequence_number.to_s})
-       field_configs[field_configs.length()] = {:field_type => 'LabelField',
-                                                :field_name => 'sample sequences',
-                                                :settings => {:static_value => sequences,:css_class => "blue_label_field", :show_label => true}}
+      field_configs[field_configs.length()] = {:field_type => 'LabelField',
+                                               :field_name => 'sample sequences',
+                                               :settings => {:static_value => sequences,:css_class => "blue_label_field", :show_label => true}}
 
     end
 
@@ -663,12 +663,12 @@ module RmtProcessing::DeliveryHelper
     end
 
     field_configs[field_configs.length()] = {:field_type => 'LinkWindowField',
-                                               :field_name => '',
-                                               :settings   => {
-                                                   :target_action => 'print_composite_report',
-                                                   :link_text     => "print composite report",
-                                                   :id_value      => delivery.delivery_number.to_s
-                                               }}
+                                             :field_name => '',
+                                             :settings   => {
+                                                 :target_action => 'print_composite_report',
+                                                 :link_text     => "print composite report",
+                                                 :id_value      => delivery.delivery_number.to_s
+                                             }}
 #  field_configs[ field_configs.length()]={:field_type=>'link_window_field',:field_name =>'mrl_data',
 #                       :settings =>
 #                      {
@@ -742,13 +742,13 @@ module RmtProcessing::DeliveryHelper
       rmt_variety_codes = ["select a value from commodity_code"]
       season_codes      = ["select a value from rmt_variety_code"]
     end
-#	----------------------------------------
-#	 Define search fields to build form from
-#	----------------------------------------
+    #	----------------------------------------
+    #	 Define search fields to build form from
+    #	----------------------------------------
     field_configs    = Array.new
-#	----------------------------------------------------------------------------------------------
-#	Define search Combo fields to represent the unique index on this table 
-#	----------------------------------------------------------------------------------------------
+    #	----------------------------------------------------------------------------------------------
+    #	Define search Combo fields to represent the unique index on this table
+    #	----------------------------------------------------------------------------------------------
     field_configs[0] = {:field_type => 'DropDownField',
                         :field_name => 'farm_code',
                         :settings   => {:list => farm_codes},
@@ -781,9 +781,9 @@ module RmtProcessing::DeliveryHelper
                         :field_name=>'date_to'}
     #:non_db_field=>true}
 
-#    field_configs[field_configs.length()] = {:field_type=>'HiddenField',
-#                                             :field_name=>'ajax_distributor',
-#                                             :non_db_field=>true}
+    #    field_configs[field_configs.length()] = {:field_type=>'HiddenField',
+    #                                             :field_name=>'ajax_distributor',
+    #                                             :non_db_field=>true}
 
 
     build_form(delivery, field_configs, action, 'delivery', caption, false)
@@ -796,8 +796,8 @@ module RmtProcessing::DeliveryHelper
     column_configs = Array.new
 
     #	----------------------
-#	define action columns
-#	----------------------
+    #	define action columns
+    #	----------------------
     if can_edit
       column_configs[column_configs.length()] = {:field_type => 'action', :field_name => 'edit delivery', :col_width=> 35,
                                                  :settings   =>
@@ -811,7 +811,7 @@ module RmtProcessing::DeliveryHelper
                                                      {:image     => 'complete',
                                                       :target_action => 'set_mrl_done',
                                                       :id_column     => 'id'},
-                                                      :html_options => {:prompt => "Are you sure you want to complete the mrl data capture route step)"}}
+                                                 :html_options => {:prompt => "Are you sure you want to complete the mrl data capture route step)"}}
 
     else
       column_configs[column_configs.length()] = {:field_type => 'action', :field_name => 'view delivery', :col_width=> 35,
@@ -870,7 +870,7 @@ module RmtProcessing::DeliveryHelper
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name =>keys[keys.index('truck_registration_number')], :col_width=> 102}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name =>keys[keys.index('residue_free')], :col_width=> 35}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name =>keys[keys.index('mrl_result_type')], :col_width=> 145}
- 
+
     return get_data_grid(data_set, column_configs, MesScada::GridPlugins::RmtProcessing::DeliveriesGridPlugin.new(), true)
   end
 
@@ -887,12 +887,12 @@ module RmtProcessing::DeliveryHelper
 #	Define search Combo fields to represent the unique index on this table
 #	----------------------------------------------------------------------------------------------
     field_configs << {:field_type => 'LabelField',
-                        :field_name => 'user_value',
-                        :settings   => {:label_caption => 'user selected indicator', :css_class    =>'delivery_label'}}
+                      :field_name => 'user_value',
+                      :settings   => {:label_caption => 'user selected indicator', :css_class    =>'delivery_label'}}
 
     field_configs << {:field_type=>'LabelField',
-                        :field_name=>'system_value',
-                        :settings  =>{:label_caption=>'system advised indicator', :css_class=>'delivery_status'}}
+                      :field_name=>'system_value',
+                      :settings  =>{:label_caption=>'system advised indicator', :css_class=>'delivery_status'}}
 
     build_form(user_overide, field_configs, action, 'user_overide', caption)
   end
@@ -934,13 +934,14 @@ module RmtProcessing::DeliveryHelper
     variety_types              = ["<non_fruit>", "rmt_variety", "marketing_variety"]
 
     track_slms_indicator_codes = []
+    track_slms_indicator_codes = @suggested_track_slms_indicator_codes if(@suggested_track_slms_indicator_codes)
     track_slms_indicator_codes.unshift(delivery_track_indicator.track_slms_indicator_code) if(delivery_track_indicator.track_slms_indicator_code)
 
 
     @rmt_record                = RmtVariety.find_by_rmt_variety_code(session[:new_delivery].rmt_variety_code)
-#	---------------------------------
-#	 Define fields to build form from
-#	---------------------------------
+    #	---------------------------------
+    #	 Define fields to build form from
+    #	---------------------------------
     field_configs              = Array.new
 
     if  is_first_time
@@ -1023,7 +1024,7 @@ module RmtProcessing::DeliveryHelper
 #      delivery_track_indicator.track_variable_2 = true
       field_configs[field_configs.length] = {:field_type=>'CheckBox',
                                              :field_name=>'track_variable_1'}
-
+      track_slms_indicator_codes
       field_configs[field_configs.length] = {:field_type=>'CheckBox',
                                              :field_name=>'track_variable_2'}
     elsif (!is_delivery_intake_supervisor)
@@ -1046,6 +1047,11 @@ module RmtProcessing::DeliveryHelper
                                            :field_name  =>'ajax_distributor2',
                                            :non_db_field=>true}
 
+    if(@second_track_indicator)
+      field_configs[field_configs.length] = {:field_type=>'LabelField',
+                                             :field_name=>'starch_summary_results',
+                                             :settings  =>{:show_label=>false, :static_value=>@starch_summary_results_label}}
+    end
 
     build_form(delivery_track_indicator, field_configs, action, 'delivery_track_indicator', caption, is_edit)
 
@@ -1223,8 +1229,8 @@ module RmtProcessing::DeliveryHelper
 
     field_configs = []
     field_configs << {:field_type => 'DropDownField',
-                     :field_name => 'destination_complex',
-                     :settings   =>{:list=>destination_complexes}}
+                      :field_name => 'destination_complex',
+                      :settings   =>{:list=>destination_complexes}}
 
     build_form(delivery, field_configs, action, 'delivery', caption)
   end
@@ -1233,7 +1239,7 @@ module RmtProcessing::DeliveryHelper
     field_configs = Array.new
 
     field_configs[field_configs.length()] = {:field_type => 'TextField',:field_name => 'cat1_value',
-                                            :settings=>{:label_caption=>Globals.starch_result_categories[:cat1_value]}}
+                                             :settings=>{:label_caption=>Globals.starch_result_categories[:cat1_value]}}
     field_configs[field_configs.length()] = {:field_type => 'TextField',:field_name => 'cat2_value',
                                              :settings=>{:label_caption=>Globals.starch_result_categories[:cat2_value]}}
     field_configs[field_configs.length()] = {:field_type => 'TextField',:field_name => 'cat3_value',

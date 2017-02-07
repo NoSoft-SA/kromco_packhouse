@@ -60,6 +60,9 @@ class Globals
     "234"
   end
 
+  def Globals.bin_ticket_printer_names
+    ['PRN-01','PRN-02','PRN-03','PRN-05','PRN-16']
+  end
 
   def Globals.reworks_printer_name
     "PRN-01"
@@ -183,7 +186,7 @@ class Globals
   end
 
   def Globals.bin_ticket_printing_ip
-    "172.16.16.1"
+    "192.168.50.101"
   end
 
   def Globals.get_pdt_simulator_config
@@ -215,7 +218,7 @@ class Globals
   end
 
   def Globals.get_label_printing_server_port
-    2080
+    3001
   end
 
   #=====================
@@ -433,6 +436,14 @@ class Globals
     8082
   end
 
+  def Globals.pdt_presort_staging_ip
+    '192.168.50.101'
+  end
+
+  def Globals.pdt_presort_staging_port
+    300
+  end
+
   def Globals.ms_sql_server_host
     '172.16.16.1'
   end
@@ -551,5 +562,9 @@ class Globals
     s.gsub(/\\/, '\&\&').gsub(/'/, "''")
   end
 
+  def Globals.starch_result_categories
+    {:cat1_value=>"5%",:cat2_value=>"10%",:cat3_value=>"20%",:cat4_value=>"25%",
+     :cat5_value=>"30%",:cat6_value=>"40%",:cat7_value=>"60%",:cat8_value=>"70%",:cat9_value=>"80%"}
+  end
 end
 

@@ -985,7 +985,8 @@ class RmtProcessing::DeliveryController < ApplicationController
     set_is_first_time
     @delivery_track_indicator = DeliveryTrackIndicator.new
 
-    if (session[:new_delivery].delivery_track_indicators.length == 1  && session[:new_delivery].commodity_code == "AP")
+    if (session[:new_delivery].delivery_track_indicators.length == 1 && session[:new_delivery].commodity_code=="AP")
+      @second_track_indicator = true
       ripeness_groups = TrackSlmsIndicator.find(:all, :conditions => "variety_code='#{session[:new_delivery].rmt_variety_code}' and track_indicator_type_code='STA'")
       if(!(starch_summary_results = StarchSummaryResult.find_by_delivery_id(session[:new_delivery].id)))
         flash[:error] = "Starch Summary Results must be captured first before creating a starch indicator"
@@ -996,30 +997,54 @@ class RmtProcessing::DeliveryController < ApplicationController
       pre_opt_cat_count = 0
       post_opt_cat_count = 0
 
-      opt = ripeness_groups.find{|t| t.sub_type=="OPT"}
-      opt.config_data.split(",").each do |o|
-        opt_cat_count += eval("starch_summary_results.cat#{o}_value").to_i
+      @starch_summary_results_label = "starch summary results<br>"
+      if(opt = ripeness_groups.find{|t| t.sub_type=="OPT"})
+        opt.config_data.split(",").each do |o|
+          opt_cat_count += eval("starch_summary_results.cat#{o}_value").to_i
+        end
+        @starch_summary_results_label += "opt:    #{opt_cat_count}<br>"
+      else
+        ripeness_groups_error = "There is no OPT starch track indicator set up for variety(#{session[:new_delivery].rmt_variety_code})"
       end
 
-      pre_opt = ripeness_groups.find{|t| t.sub_type=="PRE_OPT"}
-      pre_opt.config_data.split(",").each do |p|
-        pre_opt_cat_count += eval("starch_summary_results.cat#{p}_value").to_i
+      if(pre_opt = ripeness_groups.find{|t| t.sub_type=="PRE_OPT"})
+        pre_opt.config_data.split(",").each do |p|
+          pre_opt_cat_count += eval("starch_summary_results.cat#{p}_value").to_i
+        end
+        @starch_summary_results_label += "pre:    #{pre_opt_cat_count}<br>"
+      else
+        ripeness_groups_error = "There is no PRE_OPT starch track indicator set up for variety(#{session[:new_delivery].rmt_variety_code})"
       end
 
-      post_opt = ripeness_groups.find{|t| t.sub_type=="POST_OPT"}
-      post_opt.config_data.split(",").each do |p|
-        post_opt_cat_count += eval("starch_summary_results.cat#{p}_value").to_i
+      if(post_opt = ripeness_groups.find{|t| t.sub_type=="POST_OPT"})
+        post_opt.config_data.split(",").each do |p|
+          post_opt_cat_count += eval("starch_summary_results.cat#{p}_value").to_i
+        end
+        @starch_summary_results_label += "post:    #{post_opt_cat_count}<br>"
+      else
+        ripeness_groups_error = "There is no POST_OPT starch track indicator set up for variety(#{session[:new_delivery].rmt_variety_code})"
+      end
+
+      if(ripeness_groups_error)
+        flash[:error] = ripeness_groups_error
+        render :inline => %{
+        }, :layout => 'content'
+        return
       end
 
       if((suggested_indicator_id = TrackSlmsIndicator.find_starch_ripeness_indicator(opt_cat_count, pre_opt_cat_count, post_opt_cat_count, session[:new_delivery].rmt_variety_id)).is_a?(String))
-       flash[:error] = suggested_indicator_id
+        flash[:error] = suggested_indicator_id
+        @starch_summary_results_label += "No indicator found<br>"
       else
-       suggested_indicator = TrackSlmsIndicator.find(suggested_indicator_id)
-       session[:suggested_indicator] = suggested_indicator.track_slms_indicator_code
-       @delivery_track_indicator.track_slms_indicator_code = suggested_indicator.track_slms_indicator_code
+        suggested_indicator = TrackSlmsIndicator.find(suggested_indicator_id)
+        session[:suggested_indicator] = suggested_indicator.track_slms_indicator_code
+        @delivery_track_indicator.track_slms_indicator_code = suggested_indicator.track_slms_indicator_code
+        @starch_summary_results_label += "Indicator found<br>"
+        @starch_summary_results_label += "#{suggested_indicator.track_slms_indicator_code}<br>"
       end
       @delivery_track_indicator.track_indicator_type_code = "STA"
       @delivery_track_indicator.variety_type = "rmt_variety"
+      @suggested_track_slms_indicator_codes = TrackSlmsIndicator.find_by_sql("select distinct track_slms_indicator_code from track_slms_indicators where track_indicator_type_code = 'STA' and variety_code='#{session[:new_delivery].rmt_variety_code}' and variety_type='rmt_variety' ").map { |g| [g.track_slms_indicator_code] }
     end
 
     render_add_delivery_track_indicator
