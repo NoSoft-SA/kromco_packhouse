@@ -45,7 +45,7 @@ class StarchRipenessIndicatorMatchRule < ActiveRecord::Base
   def self.summation(sum)
     combinations = []
     for x in 0..(sum)
-      for y in 0...(sum)
+      for y in 0...(sum+1)
         z = (sum - (x + y))
         # combinations << "#{i},#{j},#{diff}" if diff >= 0
         combinations << [x,y,z] if z >= 0
