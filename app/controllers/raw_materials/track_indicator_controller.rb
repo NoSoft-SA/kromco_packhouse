@@ -1860,6 +1860,13 @@ end
                       <td>" + match_rule[2].to_s + "</td>
                       <td>" + suggested_indicator_id.to_s + "</td>
                    </tr>"
+      else
+        message += "<tr>
+                      <td>" + match_rule[0].to_s + "</td>
+                      <td>" + match_rule[1].to_s + "</td>
+                      <td>" + match_rule[2].to_s + "</td>
+                      <td>" + "Passed" + "</td>
+                   </tr>"
       end
     end
     message += "</table>"
