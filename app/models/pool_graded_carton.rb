@@ -26,7 +26,7 @@ class PoolGradedCarton < ActiveRecord::Base
     # end
 
     all_cartons = get_cartons(production_run_code )
-    make_cartons( pool_graded_summary, all_cartons, 'Primary Line')
+    make_cartons( pool_graded_summary, all_cartons)
   end
 
   def self.get_cartons( production_run_code)
@@ -38,7 +38,7 @@ class PoolGradedCarton < ActiveRecord::Base
              COUNT(cartons.*) as cartons_quantity,
              COUNT(cartons.is_inspection_carton = true) as qty_inspected,
              COUNT(distinct ppecb_inspections.id) as qty_failed,
-             ,case when cartons.production_run_code=p1.production_run_code then 'Primary Line' else 'Secondary Line' end
+             ,case when cartons.production_run_code=p1.production_run_code then 'Primary Line' else 'Secondary Line' end as line_type
 
 
               FROM production_runs p1
@@ -67,7 +67,7 @@ class PoolGradedCarton < ActiveRecord::Base
 
 
   # Create PoolGradedCarton instances and associate them with PoolGradedSummary.
-  def self.make_cartons( pool_graded_summary, cartons, line_type )
+  def self.make_cartons( pool_graded_summary, cartons )
     cartons.each do |carton|
       pool_graded_carton = PoolGradedCarton.new(:actual_size_count_code => carton.actual_size_count_code,
                                    :product_class_code     => carton.product_class_code,
@@ -81,7 +81,7 @@ class PoolGradedCarton < ActiveRecord::Base
                                    :inventory_code         => carton.inventory_code,
                                    :schedule_weight        => carton.schedule_weight,
                                    :cartons_quantity       => carton.cartons_quantity.to_i,
-                                   :line_type              => line_type,
+                                   :line_type              => carton.line_type,
                                    :graded_size            => carton.standard_size_count_value,
                                    :graded_class           => carton.product_class_code[/\d/], # Grab the first digit in the string, else nil
                                    :qty_not_inspected      => carton.cartons_quantity.to_i - carton.qty_inspected.to_i,
