@@ -37,7 +37,7 @@ class PoolGradedCarton < ActiveRecord::Base
              SUM(cartons.carton_fruit_nett_mass) as schedule_weight,
              COUNT(cartons.*) as cartons_quantity,
              COUNT(cartons.is_inspection_carton = true) as qty_inspected,
-             COUNT(distinct ppecb_inspections.id) as qty_failed,
+             COUNT(distinct ppecb_inspections.id) as qty_failed
              ,case when cartons.production_run_code=p1.production_run_code then 'Primary Line' else 'Secondary Line' end as line_type
 
 
