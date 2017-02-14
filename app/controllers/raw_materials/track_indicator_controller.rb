@@ -1801,7 +1801,8 @@ end
       @message =  suggested_indicator_id
       flash[:error] = @message
     else
-      @message = "Match rule test successful. Suggested track slms indicator code: #{TrackSlmsIndicator.find(suggested_indicator_id).track_slms_indicator_code}"
+      @message = "Match rule test successful. Suggested track slms indicator code: #{TrackSlmsIndicator.find(StarchRipenessIndicatorMatchRule.find(suggested_indicator_id).match_ripeness_indicator_id).track_slms_indicator_code}"
+      # @message = "Match rule test successful. Suggested track slms indicator code: #{TrackSlmsIndicator.find(suggested_indicator_id).track_slms_indicator_code}"
       flash[:notice] = @message
     end
     render_test_starch_rules
@@ -1865,9 +1866,10 @@ end
                       <td>" + match_rule[0].to_s + "</td>
                       <td>" + match_rule[1].to_s + "</td>
                       <td>" + match_rule[2].to_s + "</td>
-                      <td>" + "Passed" + "</td>
+                      <td>" + "Passed :- Rule ID : " + "#{suggested_indicator_id.to_s} ;" +  " Outcome : " + "#{TrackSlmsIndicator.find(StarchRipenessIndicatorMatchRule.find(suggested_indicator_id).match_ripeness_indicator_id).sub_type}" + "</td>
                    </tr>"
       end
+      # <td>" + "Passed :- Rule ID : " + "#{suggested_indicator_id.to_s} ;" +  " Outcome : " + "#{TrackSlmsIndicator.find(suggested_indicator_id).sub_type}" + "</td>
     end
     message += "</table>"
     flash[:error] = message

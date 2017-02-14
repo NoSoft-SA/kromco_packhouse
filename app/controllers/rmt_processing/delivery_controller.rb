@@ -1036,7 +1036,8 @@ class RmtProcessing::DeliveryController < ApplicationController
         flash[:error] = suggested_indicator_id
         @starch_summary_results_label += "No indicator found<br>"
       else
-        suggested_indicator = TrackSlmsIndicator.find(suggested_indicator_id)
+        # suggested_indicator = TrackSlmsIndicator.find(suggested_indicator_id)
+        suggested_indicator = TrackSlmsIndicator.find(StarchRipenessIndicatorMatchRule.find(suggested_indicator_id).match_ripeness_indicator_id)
         session[:suggested_indicator] = suggested_indicator.track_slms_indicator_code
         @delivery_track_indicator.track_slms_indicator_code = suggested_indicator.track_slms_indicator_code
         @starch_summary_results_label += "Indicator found<br>"

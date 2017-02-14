@@ -287,7 +287,8 @@ end
     matched_rules = []
     indicator_match_rules = StarchRipenessIndicatorMatchRule.find_by_sql("select * from starch_ripeness_indicator_match_rules where rmt_variety_id =  #{rmt_variety_id}")
     indicator_match_rules.each do |match_rule|
-      matched_rules.push(match_rule.match_ripeness_indicator_id) if eval(match_rule.pre_opt_cat_count) && eval(match_rule.opt_cat_count) && eval(match_rule.post_opt_cat_count)
+      matched_rules.push(match_rule.id) if eval(match_rule.pre_opt_cat_count) && eval(match_rule.opt_cat_count) && eval(match_rule.post_opt_cat_count)
+      # matched_rules.push(match_rule.match_ripeness_indicator_id) if eval(match_rule.pre_opt_cat_count) && eval(match_rule.opt_cat_count) && eval(match_rule.post_opt_cat_count)
     end
     check_matched_rules(matched_rules)
   end
