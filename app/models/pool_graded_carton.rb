@@ -37,7 +37,9 @@ class PoolGradedCarton < ActiveRecord::Base
              SUM(cartons.carton_fruit_nett_mass) as schedule_weight,
              COUNT(cartons.*) as cartons_quantity,
              COUNT(cartons.is_inspection_carton = true) as qty_inspected,
-             COUNT(distinct ppecb_inspections.id) as qty_failed
+             COUNT(distinct ppecb_inspections.id) as qty_failed,
+             ,case when cartons.production_run_code=p1.production_run_code then 'Primary Line' else 'Secondary Line' end
+
 
               FROM production_runs p1
               left join production_runs p2 on p1.production_run_code=p2.parent_run_code
@@ -53,9 +55,11 @@ class PoolGradedCarton < ActiveRecord::Base
               GROUP BY cartons.actual_size_count_code, cartons.product_class_code, cartons.fg_code_old,
               cartons.variety_short_long, cartons.grade_code, cartons.old_pack_code, cartons.organization_code,
               cartons.inspection_type_code, cartons.target_market_code, cartons.inventory_code,
-              item_pack_products.standard_size_count_value
+              item_pack_products.standard_size_count_value,
+              case when cartons.production_run_code=p1.production_run_code then 'Primary Line' else 'Secondary Line' end
 
-              ORDER BY cartons.actual_size_count_code, cartons.product_class_code, cartons.fg_code_old,
+              ORDER BY case when cartons.production_run_code=p1.production_run_code then 'Primary Line' else 'Secondary Line' end,
+              cartons.actual_size_count_code, cartons.product_class_code, cartons.fg_code_old,
               cartons.variety_short_long, cartons.grade_code"
               PoolGradedCarton.connection.select_all(query)
   end
