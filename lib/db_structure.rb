@@ -46,10 +46,23 @@ module DbStructure
     # Returns a sorted array of Table objects for a given database connection.
     def initialize
       @tables = []
-      ActiveRecord::Base.connection.tables.each do |t|
+      table_list.each do |t|
         @tables << Table.new(t)
       end
       @tables = @tables.sort_by {|t| t.name }
+    end
+
+    # This is written like this because ActiveRecord::Base.connection.tables
+    # has a bug when run against later versions of Postgresql:
+    # the query below is run using <tt>WHERE schemaname IN ('"$user"',' public')</tt>.
+    # PG 9.5 balks at the space in ' public' and returns nothing. Earlier versions ignore the space.
+    def table_list
+      query = <<-EOQ
+      SELECT tablename
+        FROM pg_tables
+       WHERE schemaname IN ('"$user"','public')
+      EOQ
+      ActiveRecord::Base.connection.select_values(query)
     end
 
     def generate
