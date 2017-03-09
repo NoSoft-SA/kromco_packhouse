@@ -101,6 +101,15 @@ class Services::PdtController < ApplicationController
           raw_control['id_value'] = input_id_value[1]
         end
         raw_control['value'] = input_id_value[0]
+
+        if(raw_control['type'] == 'check_box')
+          if(raw_control['value'].to_s == '1')
+            raw_control['value'] = 'true'
+          elsif(raw_control['value'].to_s == '0')
+            raw_control['value'] = 'false'
+          end
+        end
+
       end
     end
     return pdt_screen_def.get_output_xml
