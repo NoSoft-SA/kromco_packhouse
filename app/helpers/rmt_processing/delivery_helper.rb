@@ -929,7 +929,11 @@ module RmtProcessing::DeliveryHelper
                                                                                     :remote_method   =>'non_supervisor_variety_type_changed',
                                                                                     :on_completed_js =>combos_js_for_delivery_indicator["delivery_track_indicator_variety_type"]}
 
-    track_indicator_type_codes                                                   = TrackSlmsIndicator.find_by_sql("select distinct track_indicator_type_code from track_indicator_types").map { |g| [g.track_indicator_type_code] }
+    if(@empty_track_indicator_type_code_list)
+      track_indicator_type_codes = [delivery_track_indicator.track_indicator_type_code]
+    else
+      track_indicator_type_codes                                                   = TrackSlmsIndicator.find_by_sql("select distinct track_indicator_type_code from track_indicator_types").map { |g| [g.track_indicator_type_code] }
+    end
 
     variety_types              = ["<non_fruit>", "rmt_variety", "marketing_variety"]
 
@@ -955,16 +959,19 @@ module RmtProcessing::DeliveryHelper
                                            :field_name=>'track_indicator_type_code',
                                            :settings  =>{:list=>track_indicator_type_codes},
                                            :observer  =>track_indicator_type_code_observer}
-    if (is_delivery_intake_supervisor)
-      field_configs[field_configs.length] = {:field_type=>'DropDownField',
-                                             :field_name=>'variety_type',
-                                             :settings  =>{:list=>variety_types},
-                                             :observer  =>variety_type_observer}
-    else
-      field_configs[field_configs.length] = {:field_type=>'DropDownField',
-                                             :field_name=>'variety_type',
-                                             :settings  =>{:list=>variety_types},
-                                             :observer  =>non_supervisor_variety_type_observer}
+
+    if(!@hide_variety_type)
+      if (is_delivery_intake_supervisor)
+        field_configs[field_configs.length] = {:field_type=>'DropDownField',
+                                               :field_name=>'variety_type',
+                                               :settings  =>{:list=>variety_types},
+                                               :observer  =>variety_type_observer}
+      else
+        field_configs[field_configs.length] = {:field_type=>'DropDownField',
+                                               :field_name=>'variety_type',
+                                               :settings  =>{:list=>variety_types},
+                                               :observer  =>non_supervisor_variety_type_observer}
+      end
     end
 
     field_configs[field_configs.length] = {:field_type=>'LabelField',

@@ -981,6 +981,49 @@ class RmtProcessing::DeliveryController < ApplicationController
     return false
   end
 
+  def is_third_one?
+    if (session[:new_delivery].delivery_track_indicators.length == 2)
+      return true
+    end
+    return false
+  end
+
+  def summarise_pressure_readings
+    pressure_readings = ActiveRecord::Base.connection.select_all("
+        SELECT deliveries.id as delivery_id,qc_result_measurements.sample_no,avg(cast(qc_result_measurements.measurement as numeric)) avg_kg
+        FROM deliveries
+        INNER JOIN public.qc_inspections ON (deliveries.id = public.qc_inspections.business_object_id)
+        INNER JOIN public.qc_inspection_types ON (public.qc_inspections.qc_inspection_type_id = public.qc_inspection_types.id)
+        INNER JOIN public.qc_inspection_tests ON (public.qc_inspection_tests.qc_inspection_id = public.qc_inspections.id)
+        INNER JOIN public.qc_results ON (public.qc_results.qc_inspection_test_id = public.qc_inspection_tests.id)
+        INNER JOIN public.qc_result_measurements ON (public.qc_result_measurements.qc_result_id = public.qc_results.id)
+        inner join seasons on seasons.id = deliveries.season_id
+        where qc_inspection_type_code = 'QTYFS'
+        and qc_measurement_code like 'PRESS%'
+        and qc_result_measurements.measurement is not null and deliveries.id = #{session[:new_delivery].id}
+        group by deliveries.id,qc_result_measurements.sample_no
+        limit 30
+      ")
+
+    if(pressure_readings.length != 30)
+      raise "There needs to be 30 pressure readings.#{pressure_readings.length} have been captured for this delivery"
+    end
+
+    if(!(groups = QcPressureStandard.find(:all, :select=>"qc_pressure_standards.*,i.track_slms_indicator_code", :conditions => "qc_pressure_standards.rmt_variety_code='#{session[:new_delivery].rmt_variety_code}' ",
+                                     :joins => "join track_slms_indicators i on i.id=qc_pressure_standards.track_slms_indictor_id",
+                                     :order => "track_slms_indicator_code asc")).empty?)
+      grp1 = pressure_readings.find_all{|p| p['avg_kg'] >= groups[0].min_value && p['avg_kg'] <= groups[0].max_value}
+      grp2 = pressure_readings.find_all{|p| p['avg_kg'] >= groups[1].min_value && p['avg_kg'] <= groups[1].max_value}
+      grp3 = pressure_readings.find_all{|p| p['avg_kg'] >= groups[2].min_value && p['avg_kg'] <= groups[2].max_value}
+      grp4 = pressure_readings.find_all{|p| p['avg_kg'] >= groups[3].min_value && p['avg_kg'] <= groups[3].max_value}
+      grp5 = pressure_readings.find_all{|p| p['avg_kg'] >= groups[4].min_value && p['avg_kg'] <= groups[4].max_value}
+    else
+      raise "qc_pressure_standards have not been setup for rmt_variety_code[#{session[:new_delivery].rmt_variety_code}]"
+    end
+
+    return [grp1.length,grp2.length,grp3.length,grp4.length,grp5.length]
+  end
+
   def add_delivery_track_indicator
     set_is_first_time
     @delivery_track_indicator = DeliveryTrackIndicator.new
@@ -1036,7 +1079,6 @@ class RmtProcessing::DeliveryController < ApplicationController
         flash[:error] = suggested_indicator_id
         @starch_summary_results_label += "No indicator found<br>"
       else
-        # suggested_indicator = TrackSlmsIndicator.find(suggested_indicator_id)
         suggested_indicator = TrackSlmsIndicator.find(StarchRipenessIndicatorMatchRule.find(suggested_indicator_id).match_ripeness_indicator_id)
         session[:suggested_indicator] = suggested_indicator.track_slms_indicator_code
         @delivery_track_indicator.track_slms_indicator_code = suggested_indicator.track_slms_indicator_code
@@ -1046,6 +1088,26 @@ class RmtProcessing::DeliveryController < ApplicationController
       @delivery_track_indicator.track_indicator_type_code = "STA"
       @delivery_track_indicator.variety_type = "rmt_variety"
       @suggested_track_slms_indicator_codes = TrackSlmsIndicator.find_by_sql("select distinct track_slms_indicator_code from track_slms_indicators where track_indicator_type_code = 'STA' and variety_code='#{session[:new_delivery].rmt_variety_code}' and variety_type='rmt_variety' ").map { |g| [g.track_slms_indicator_code] }
+    elsif (session[:new_delivery].delivery_track_indicators.length == 2)
+      @delivery_track_indicator.track_indicator_type_code = "pressure_ripeness"
+      @empty_track_indicator_type_code_list = true
+      @suggested_track_slms_indicator_codes = TrackSlmsIndicator.find(:all, :conditions=>"track_indicator_type_code='pressure_ripeness'").map { |g| [g.track_slms_indicator_code] }
+      @hide_variety_type = true
+      begin
+        groups = QcPressureStandard.find(:all, :select=>"qc_pressure_standards.*,i.track_slms_indicator_code", :conditions => "qc_pressure_standards.rmt_variety_code='#{session[:new_delivery].rmt_variety_code}' ",
+                                         :joins => "join track_slms_indicators i on i.id=qc_pressure_standards.track_slms_indictor_id",
+                                         :order => "track_slms_indicator_code asc")
+
+        pressure_reading_qtys = summarise_pressure_readings
+        suggested_indicator = Delivery.calc_pressure_indicator(pressure_reading_qtys, groups)
+        @delivery_track_indicator.track_slms_indicator_code = suggested_indicator.track_slms_indicator_code
+      rescue
+        flash[:error] = $!.message
+        current_delivery
+        return
+      end
+
+
     end
 
     render_add_delivery_track_indicator
@@ -1125,6 +1187,12 @@ class RmtProcessing::DeliveryController < ApplicationController
 
     if (is_second_one? && params[:delivery_track_indicator][:track_indicator_type_code] != "STA"  && session[:new_delivery].commodity_code == "AP")
       flash[:error] = "Delivery track indicator could not be saved : second track indicator must be of type STA"
+      render_add_delivery_track_indicator
+      return
+    end
+
+    if (is_third_one? && params[:delivery_track_indicator][:track_indicator_type_code] != "pressure_ripeness"  && session[:new_delivery].commodity_code == "AP")
+      flash[:error] = "Delivery track indicator could not be saved : second track indicator must be of type pressure_ripeness"
       render_add_delivery_track_indicator
       return
     end
@@ -1478,7 +1546,7 @@ class RmtProcessing::DeliveryController < ApplicationController
     track_indicator_type_code = get_selected_combo_value(params)
     variety_type = session[:delivery_track_indicator_form][:variety_type_combo_selection]
     session[:delivery_track_indicator_form][:track_indicator_type_code_combo_selection] = track_indicator_type_code
-    puts "PUTSAAAA = " + variety_type.to_s
+
     if (variety_type == nil || variety_type == "")
       render :inline => %{
             <%= select('delivery_track_indicator', 'rmt_variety_code', ['<empty>']) %>

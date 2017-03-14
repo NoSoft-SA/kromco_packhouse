@@ -288,4 +288,41 @@ def self.get_unit_type_codes
     return PackMaterialProduct.find_by_sql(query).map{|g|[g.pack_material_product_code]}
 end
 
+  def Delivery.pressure_rule1(grp5_qty, groups)
+    if(grp5_qty > 9)
+      return groups[4]
+    end
+    return nil
+  end
+
+  def Delivery.pressure_rule2(grp1_qty, groups)
+    if(grp1_qty > 10)
+      return groups[0]
+    end
+    return nil
+  end
+
+  def Delivery.pressure_rule3(summarised_pressure_readings, groups)
+    cumul_total = 0
+    index = 0
+    summarised_pressure_readings.length.times do
+      cumul_total += summarised_pressure_readings[index]
+      if(cumul_total > 22)
+        return groups[index]
+      end
+      index += 1
+    end
+    return nil
+  end
+
+  def Delivery.calc_pressure_indicator(pressure_reading_qtys, groups)
+    if(grp5 = Delivery.pressure_rule1(pressure_reading_qtys[4], groups))
+      return grp5
+    elsif(grp1 = Delivery.pressure_rule2(pressure_reading_qtys[0], groups))
+      return grp1
+    else
+      return Delivery.pressure_rule3(pressure_reading_qtys, groups)
+    end
+  end
+
 end
