@@ -53,7 +53,7 @@ class Orchard < ActiveRecord::Base
                                                 inner join track_slms_indicators on track_slms_indicators.rmt_variety_code = rmt_varieties.rmt_variety_code
                                                 where farms.id = #{self.farm_id}
                                                 and orchards.id = #{self.id}
-                                                and rmt_varieties.id = #{self.orchard_rmt_variety_id}
+                                                and rmt_varieties.id = #{self.orchard_rmt_variety_id}  and track_indicator_type_code='RMI'
                                                 order by farms.farm_code ")
 
       inserts = []
