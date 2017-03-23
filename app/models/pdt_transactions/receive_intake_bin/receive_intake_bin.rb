@@ -50,7 +50,8 @@ class ReceiveIntakeBin < PDTTransaction
     @scan              = DeliveryBinScannedList.new(self.delivery_id, nil)
     @active_bins_list    = nil
 
-    track_indicator_rec  = DeliveryTrackIndicator.find_by_sql("select * from delivery_track_indicators where delivery_id = '#{@delivery_id}' order by id asc")[0]
+    track_indicator_for_delivery  = DeliveryTrackIndicator.find_by_sql("select * from delivery_track_indicators where delivery_id = '#{@delivery_id}' order by id asc")
+    track_indicator_rec  = track_indicator_for_delivery[0]
     if  track_indicator_rec == nil
       return PDTTransaction.build_msg_screen_definition("no record found for delivery_track_indicators  done ", nil, nil, nil)
     end
@@ -93,6 +94,11 @@ class ReceiveIntakeBin < PDTTransaction
 
       set_scan_mode_to_full_bins
 
+    end
+
+    if((delivery.commodity_code=='AP' || delivery.commodity_code=='PL') && (!track_indicator_for_delivery[2]))
+      result_screen = PDTTransaction.build_msg_screen_definition(["Delivery needs a third indicator of type[pressure_ripeness]"], nil, nil, nil)
+      return result_screen
     end
 
     next_state = BinScanning.new(self)

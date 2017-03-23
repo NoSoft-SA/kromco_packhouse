@@ -58,8 +58,30 @@ class Orchard < ActiveRecord::Base
 
       inserts = []
       parcelles.each do |parcelle|
-        index_parcelle+=1
-        inserts.push("INSERT INTO [productionv50].[dbo].[Parcelle]([Code_parcelle],[Code_clone],[Code_adherent],[Nom_parcelle],[Surface],[Index_parcelle]) VALUES ('#{parcelle.orchard_code}_#{parcelle.farm_code}_#{parcelle.track_slms_indicator_code}'  ,'#{parcelle.track_slms_indicator_code}'  ,'#{parcelle.farm_code}' ,'#{parcelle.orchard_code}_#{parcelle.farm_code}_#{parcelle.track_slms_indicator_code}' ,1,#{index_parcelle});")
+        #-------------------------------------------------------------------------------------------------------------------------------------------
+        #-------------------------------------------------------------------------------------------------------------------------------------------
+        http = Net::HTTP.new(Globals.bin_created_mssql_server_host, Globals.bin_created_mssql_presort_server_port)
+        request = Net::HTTP::Post.new("/select")
+        parameters = {'method' => 'select', 'statement' => Base64.encode64("SELECT TOP 1 Code_parcelle
+        FROM [productionv50].[dbo].[Parcelle]
+        where Code_parcelle='#{parcelle.orchard_code}_#{parcelle.farm_code}_#{parcelle.track_slms_indicator_code}'")}
+        request.set_form_data(parameters)
+        response = http.request(request)
+
+        if '200' == response.code
+          res = response.body.split('resultset>').last.split('</res').first
+          results = Marshal.load(Base64.decode64(res))
+          if(results.empty?)
+            index_parcelle+=1
+            inserts.push("INSERT INTO [productionv50].[dbo].[Parcelle]([Code_parcelle],[Code_clone],[Code_adherent],[Nom_parcelle],[Surface],[Index_parcelle]) VALUES ('#{parcelle.orchard_code}_#{parcelle.farm_code}_#{parcelle.track_slms_indicator_code}'  ,'#{parcelle.track_slms_indicator_code}'  ,'#{parcelle.farm_code}' ,'#{parcelle.orchard_code}_#{parcelle.farm_code}_#{parcelle.track_slms_indicator_code}' ,1,#{index_parcelle});")
+          end
+        else
+          err = response.body.split('</message>').first.split('<message>').last
+          error = " \"\". The http code is #{response.code}. Message: #{err}."
+          raise error
+        end
+        #-------------------------------------------------------------------------------------------------------------------------------------------
+        #-------------------------------------------------------------------------------------------------------------------------------------------
       end
 
       http = Net::HTTP.new(Globals.bin_scanned_mssql_server_host, Globals.bin_created_mssql_presort_server_port)
