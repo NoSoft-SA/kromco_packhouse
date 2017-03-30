@@ -96,7 +96,12 @@ class Shift < ActiveRecord::Base
 
   def validate_overlap
     #query  = "select * from shifts where line_code = '#{self.line_code}' and (start_date_time between '#{self.start_date_time.to_formatted_s(:db)}' and '#{self.end_date_time.to_formatted_s(:db)}' or end_date_time between '#{self.start_date_time.to_formatted_s(:db)}' and '#{self.end_date_time.to_formatted_s(:db)}') "
-    query  = "select * from shifts where line_code = '#{self.line_code}' and (start_date_time between '#{self.start_date_time.to_formatted_s(:db)}' and cast('#{self.end_date_time.to_formatted_s(:db)}' as timestamp) - interval '1 seconds' or end_date_time - interval '1 seconds' between '#{self.start_date_time.to_formatted_s(:db)}' and '#{self.end_date_time.to_formatted_s(:db)}') "
+    #MM032017 - Shifts: check for containment
+    query  = "select * from shifts where line_code = '#{self.line_code}'
+              and (start_date_time < '#{self.start_date_time.to_formatted_s(:db)}' and end_date_time - interval '1 seconds' > '#{self.end_date_time.to_formatted_s(:db)}'
+              or start_date_time between '#{self.start_date_time.to_formatted_s(:db)}' and cast('#{self.end_date_time.to_formatted_s(:db)}' as timestamp) - interval '1 seconds'
+              or end_date_time - interval '1 seconds' between '#{self.start_date_time.to_formatted_s(:db)}' and '#{self.end_date_time.to_formatted_s(:db)}') "
+    # query  = "select * from shifts where line_code = '#{self.line_code}' and (start_date_time between '#{self.start_date_time.to_formatted_s(:db)}' and cast('#{self.end_date_time.to_formatted_s(:db)}' as timestamp) - interval '1 seconds' or end_date_time - interval '1 seconds' between '#{self.start_date_time.to_formatted_s(:db)}' and '#{self.end_date_time.to_formatted_s(:db)}') "
     #puts     query
     shifts = Shift.find_by_sql(query)
     if shifts.length() > 0
@@ -107,7 +112,13 @@ class Shift < ActiveRecord::Base
   #MM032016 - Shifts: allow user to edit end_time(hours) and end time quarter field. On submit: generate new end_date_time (replace existing value)
   def validate_overlap_for_update
     # where id != current id
-    query  = "select * from shifts where line_code = '#{self.line_code}' and (start_date_time between '#{self.start_date_time.to_formatted_s(:db)}' and cast('#{self.end_date_time.to_formatted_s(:db)}' as timestamp) - interval '1 seconds' or end_date_time - interval '1 seconds' between '#{self.start_date_time.to_formatted_s(:db)}' and '#{self.end_date_time.to_formatted_s(:db)}') and id != #{self.id} "
+    #MM032017 - Shifts: check for containment
+    query  = "select * from shifts where line_code = '#{self.line_code}'
+              and (start_date_time < '#{self.start_date_time.to_formatted_s(:db)}' and end_date_time - interval '1 seconds' > '#{self.end_date_time.to_formatted_s(:db)}'
+              or start_date_time between '#{self.start_date_time.to_formatted_s(:db)}' and cast('#{self.end_date_time.to_formatted_s(:db)}' as timestamp) - interval '1 seconds'
+              or end_date_time - interval '1 seconds' between '#{self.start_date_time.to_formatted_s(:db)}' and '#{self.end_date_time.to_formatted_s(:db)}')
+              and id != #{self.id}"
+    # query  = "select * from shifts where line_code = '#{self.line_code}' and (start_date_time between '#{self.start_date_time.to_formatted_s(:db)}' and cast('#{self.end_date_time.to_formatted_s(:db)}' as timestamp) - interval '1 seconds' or end_date_time - interval '1 seconds' between '#{self.start_date_time.to_formatted_s(:db)}' and '#{self.end_date_time.to_formatted_s(:db)}') and id != #{self.id} "
     shifts = Shift.find_by_sql(query)
     if shifts.length() > 0
       errors.add_to_base("There already exists a shift for the selected line and between the start and end times")
