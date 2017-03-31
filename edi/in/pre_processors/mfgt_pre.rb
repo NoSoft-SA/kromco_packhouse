@@ -6,6 +6,14 @@ class MfgtPre < RecordPadder
      required_record_length_for_mf(flow_type,record_type,current_length,must_have_size)
    end
 
+   #Remove a doc trailer for this MF file- the trailer line must consist only/exactly of "BT"
+  def process_record(line)
+    if line.strip == "BT"
+      return ""
+    else
+      super(line)
+    end
+  end
 
 
 end
