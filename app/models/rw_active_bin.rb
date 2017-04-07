@@ -3,6 +3,7 @@ class RwActiveBin < ActiveRecord::Base
     belongs_to :rw_run
     belongs_to :rw_receipt_bin
     belongs_to :production_run
+    belongs_to :pack_material_product
 
     attr_accessor :bin_time_search,:farm_code,:production_schedule_name,:input_variety,:trans_date_from,:trans_date_to,:line_code,:pc_code,
                   :track_slms_indicator_code ,:track_indicator_code1 ,:track_indicator_code2,:track_indicator_code3, :track_indicator_code4,

@@ -362,6 +362,29 @@ class RwRun < ActiveRecord::Base
   #   -> pallet_scrap: for every rw_scrap_pallet record
   #===========================================================================================
 
+
+  def move_bin_asset(asset_item,from_location, to_location, qty_moved, bin_number,run_id)
+
+    #	----------------------
+    transaction_type           = TransactionType.find_by_transaction_type_code('move_asset_quantity')
+    transaction_business_name  = TransactionBusinessName.find_by_transaction_business_name_code('REWORKS_BIN_RECLASSIFY')
+
+    inventory_transaction      = InventoryTransaction.new({:transaction_type_code         =>transaction_type.transaction_type_code, :transaction_type_id=>transaction_type.id,
+                                                           :transaction_business_name_code=>transaction_business_name.transaction_business_name_code, :transaction_business_name_id=>transaction_business_name.id,
+                                                           :location_from                 =>from_location, :location_to => to_location,:transaction_quantity_plus=>qty_moved,
+                                                           :transaction_date_time         =>Time.now.to_formatted_s(:db), :reference_number=>bin_number.to_s,
+                                                           :comments=> run_id.to_s
+                                                          })
+
+     asset_item                 = AssetItem.find_by_asset_number(asset_item)
+
+      Inventory::MoveAssetClass.new(asset_item, inventory_transaction).process
+
+
+
+
+  end
+
   def complete
     required_actions = Array.new
 
@@ -391,11 +414,17 @@ class RwRun < ActiveRecord::Base
             progress_stats.event_bin_reclassified
 
             original_bin = Bin.find(bin.bin_id)
-            from_pack_material_product_id =original_bin.pack_material_product_id
+            from_pack_material_product =original_bin.pack_material_product
 
-            if bin.pack_material_product_id !=from_pack_material_product_id
-              add_quantity_to_location(bin, original_bin, "add_asset_quantity")
-              add_quantity_to_location(bin, original_bin, "remove_asset_quantity")
+            #Spec from GF: if asset item (type of bin) has changed (bin.pm_code):
+            #  1) reduce the current asset item's aggregate qty at the bin's location  by moving 1 bin to empty 'KROMCO' store
+            #  2) increase the new(changed pm) asset items's aggregate qty at the bin's location by 1
+
+            if bin.pack_material_product !=from_pack_material_product
+              from_location =  stock_item = StockItem.find_by_inventory_reference(original_bin.bin_number).location_code
+              move_bin_asset(from_pack_material_product.pack_material_product_code,from_location,"KROMCO",1,original_bin.bin_number,self.id)
+              move_bin_asset(bin.pack_material_product.pack_material_product_code,"KROMCO",from_location,1,original_bin.bin_number,self.id)
+
             end
 
 
