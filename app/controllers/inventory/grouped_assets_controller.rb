@@ -160,6 +160,8 @@ class Inventory::GroupedAssetsController < ApplicationController
   end
 
   def delete_asset_location
+
+    return if authorise_for_web(program_name?, 'delete_asset_location')== false
     #	----------------------
     #	 Define lookup fields
     #	----------------------
@@ -283,20 +285,8 @@ class Inventory::GroupedAssetsController < ApplicationController
     else
       session[:asset_locations_page] = nil
     end
-#
-#    list_query      = "@asset_location_pages = Paginator.new self, AssetLocation.count, @@page_size,@current_page
-#	 @locations = Location.find_by_sql(\"select locations.id,locations.location_type_code,locations.location_code,locations.parent_location_code,
-#                      locations.units_in_location,locations.location_maximum_units,locations.location_status,
-#                      locations.current_job_reference_id,count(asset_locations.location_id) as assets_in_location
-#                      from locations
-#                      join asset_locations on locations.id = asset_locations.location_id
-#                      where asset_locations.asset_item_id = #{params[:id]}
-#                      GROUP BY locations.id,locations.location_type_code,locations.location_code,
-#                      locations.parent_location_code, locations.units_in_location,
-#                      locations.location_maximum_units,locations.location_status,
-#                      locations.current_job_reference_id
-#                      LIMIT \#\{@asset_location_pages.items_per_page\} OFFSET \#\{@asset_location_pages.current.offset\}\")"
-#
+
+
     list_query      = "@asset_location_pages = Paginator.new self, AssetLocation.count, @@page_size,@current_page
 	 @locations = Location.find_by_sql(\"select locations.id,locations.location_type_code,locations.location_code,locations.parent_location_code,
                       locations.units_in_location,locations.location_maximum_units,locations.location_status,
@@ -594,6 +584,9 @@ class Inventory::GroupedAssetsController < ApplicationController
   end
 
   def add_assets
+    return if authorise_for_web(program_name?, 'add_asset')== false
+
+
     session[:current_location] = params[:id]
     render :inline=>%{
       <% @content_header_caption="'add assets to location: #{Location.find(session[:current_location]).location_code}'" %>
@@ -668,6 +661,8 @@ class Inventory::GroupedAssetsController < ApplicationController
   end
 
   def remove_assets
+    return if authorise_for_web(program_name?, 'remove_asset')== false
+
     session[:current_location] = params[:id]
     render :inline=>%{
       <% @content_header_caption="'remove assets from location: #{Location.find(session[:current_location]).location_code}'" %>
@@ -741,6 +736,8 @@ class Inventory::GroupedAssetsController < ApplicationController
   end
 
   def move_asset_quantity
+    return if authorise_for_web(program_name?, 'edit')== false
+
     session[:current_location] = params[:id]
     render :inline=>%{
       <% @content_header_caption="'move assets from location: #{Location.find(session[:current_location]).location_code}'" %>
