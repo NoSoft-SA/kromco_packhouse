@@ -617,13 +617,12 @@ module Inventory
         if errors != ""
           raise "Transaction could not be created, reason: " + errors.to_s + $!.to_s
         else
-          #ActiveRecord::Base.transaction do
+          ActiveRecord::Base.transaction do
           create_transaction
-#          log_transaction
           execute
           log_transaction
-          log_status
-          #end
+          #log_status
+          end
         end
       rescue
         raise $!

@@ -29,7 +29,7 @@ class Services::PreSortingController < ApplicationController
     #view-source:http://192.168.10.7:3000/services/pre_sorting/bin_created?bin=704
     begin
 
-      raise "Bin:#{@created_bin} already exists in Kromco Mes db" if (Bin.find_by_bin_number(@created_bin))
+      raise  "Bin:#{@created_bin} already exists in Kromco Mes db" if (Bin.find_by_bin_number(@created_bin))
 
       http = Net::HTTP.new(Globals.bin_created_mssql_server_host, Globals.bin_created_mssql_presort_server_port)
       request = Net::HTTP::Post.new("/select")
@@ -160,6 +160,7 @@ class Services::PreSortingController < ApplicationController
       end
       return nil
     rescue
+      handle_error_silently("Bin created presort integration failed")
       return $!.message
     end
   end
