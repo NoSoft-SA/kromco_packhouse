@@ -299,6 +299,12 @@ class Services::PreSortingController < ApplicationController
   end
 
   def get_majority_weight_bin_farm(bin_farms)
+    bin_farms.each do |b|
+      if(b['Poids'].to_s.strip.empty?)
+        raise "Bin[#{b['Numero_palox']}] does not have a value for weight. presort_lot_no=#{b['Numero_lot_max']}"
+      end
+    end
+
     if (bin_farms.length > 1)
       return bin_farms.find_all { |bin| bin['Code_adherent_max'] == bin['Code_adherent'] }.sort { |x, y| y['Poids'] <=> x['Poids'] }[0]
     end
