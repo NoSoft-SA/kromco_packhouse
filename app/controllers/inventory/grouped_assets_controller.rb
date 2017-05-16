@@ -748,13 +748,8 @@ class Inventory::GroupedAssetsController < ApplicationController
   def move_qty_to_location
     @location = Location.find(session[:current_location])
     @asset_item_location = AssetLocation.find_by_asset_item_id_and_location_id(session[:current_asset_item],session[:current_location])
-#    if (@asset_item_location.location_maximum_units == nil)
-#      @freeze_flash  = true
-#      flash[:notice] = build_error_div("Validation failed: location maximum units has a null value - WHAT TO DO : IS this check necessary??-Hans")
-#      params[:id]    = @asset_item_location.id
-#      move_asset_quantity
-#      return
-    if false# ((@asset_item_location.location_quantity < params[:asset_item][:qty_to_move].to_i))
+
+    if((@asset_item_location.location_quantity < params[:asset_item][:qty_to_move].to_i))
       flash[:notice] = build_error_div("Validation failed: quantity to move[#{params[:asset_item][:qty_to_move]}] ecxceedes qty in location[#{@asset_item_location.location_quantity}]")
       params[:id]    = @location.id
       move_asset_quantity
@@ -777,17 +772,15 @@ class Inventory::GroupedAssetsController < ApplicationController
     transaction_type           = TransactionType.find_by_transaction_type_code('move_asset_quantity')
     transaction_business_name  = TransactionBusinessName.find_by_transaction_business_name_code(params[:asset_item][:bus_transaction_type])
 
-    inventory_transaction      = InventoryTransaction.new({:transaction_type_code         =>transaction_type.transaction_type_code, :transaction_type_id=>transaction_type.id,
-                                                           :transaction_business_name_code=>params[:asset_item][:bus_transaction_type], :transaction_business_name_id=>transaction_business_name.id,
-                                                           :location_from                 =>@location.location_code, :location_to=>params[:asset_item][:to_location],
-                                                           :truck_licence_number       =>params[:asset_item][:truck_code],:transaction_quantity_plus=>params[:asset_item][:qty_to_move].to_i,
-                                                           :transaction_date_time         =>Time.now.to_formatted_s(:db), :reference_number=>params[:asset_item][:reference_number],
-                                                           :comments=>params[:asset_item][:comments]
-                                                          })
-
     asset_item                 = AssetItem.find(session[:current_asset_item])
+
+    asset_move_request = AssetMoveRequest.new({:pack_material_product_code=>asset_item.asset_type.pack_material_product_code,
+                                               :transaction_type_code => transaction_type.transaction_type_code,:transaction_type_id => transaction_type.id,
+                                               :location_from => @location.location_code,:location_to => params[:asset_item][:to_location],
+                                               :transaction_business_name_code => params[:asset_item][:bus_transaction_type],:transaction_business_name_id => transaction_business_name.id,
+                                               :reference_number => params[:asset_item][:reference_number]})
     begin
-      Inventory::MoveAssetClass.new(asset_item, inventory_transaction).process
+      asset_move_request.save!
 
       if(params[:asset_item][:bus_transaction_type].to_s.upcase == "INTAKE_DELIVERY")
         delivery = Delivery.find_by_delivery_number(params[:asset_item][:reference_number])
@@ -809,7 +802,6 @@ class Inventory::GroupedAssetsController < ApplicationController
       return
     end
     session[:current_location] = nil
-    puts "IT ERADICATES"
   end
 
   def view_stock
