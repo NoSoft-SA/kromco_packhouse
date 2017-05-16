@@ -778,7 +778,10 @@ class Inventory::GroupedAssetsController < ApplicationController
                                                :transaction_type_code => transaction_type.transaction_type_code,:transaction_type_id => transaction_type.id,
                                                :location_from => @location.location_code,:location_to => params[:asset_item][:to_location],
                                                :transaction_business_name_code => params[:asset_item][:bus_transaction_type],:transaction_business_name_id => transaction_business_name.id,
-                                               :reference_number => params[:asset_item][:reference_number]})
+                                               :reference_number => params[:asset_item][:reference_number],
+
+                                               :transaction_quantity_plus => params[:asset_item][:qty_to_move].to_i,:truck_licence_number => params[:asset_item][:truck_code],
+                                               :comments => params[:asset_item][:comments]})
     begin
       asset_move_request.save!
 
@@ -802,6 +805,39 @@ class Inventory::GroupedAssetsController < ApplicationController
       return
     end
     session[:current_location] = nil
+
+
+
+    # asset_move_requests = AssetMoveRequest.find(:all,:conditions=>"process_attempts=0")
+    # asset_move_requests.each do |mv_asset_req|
+    #   begin
+    #     ActiveRecord::Base.transaction do
+    #       asset_item = AssetItem.find_by_asset_number(mv_asset_req.pack_material_product_code)
+    #       inventory_transaction = InventoryTransaction.new({:transaction_type_code => mv_asset_req.transaction_type_code,:transaction_type_id => mv_asset_req.transaction_type_id,
+    #                                                         :location_from => mv_asset_req.location_from,:location_to => mv_asset_req.location_to,:transaction_quantity_plus => params[:asset_item][:qty_to_move].to_i,
+    #                                                         :transaction_business_name_code => mv_asset_req.transaction_business_name_code, :transaction_business_name_id => mv_asset_req.transaction_business_name_id,
+    #                                                         :transaction_date_time => Time.now.to_formatted_s(:db), :reference_number => mv_asset_req.inventory_reference,
+    #                                                         :parent_inventory_transaction_id => mv_asset_req.parent_inventory_transaction_id,:is_stock_asset_move=>true})
+    #
+    #       Inventory::MoveAssetClass.new(asset_item, inventory_transaction).process
+    #
+    #       processed_mv_asset_req = ProcessedAssetMoveRequest.new()
+    #       mv_asset_req.export_attributes(processed_mv_asset_req, true)
+    #       processed_mv_asset_req.save!
+    #
+    #       mv_asset_req.destroy
+    #     end
+    #   rescue
+    #     err_entry = RailsError.new
+    #     err_entry.description = $!.message
+    #     err_entry.stack_trace = $!.backtrace.join("\n").to_s if $!
+    #     err_entry.logged_on_user = 'move_asset'
+    #     err_entry.error_type = 'move_asset'
+    #     err_entry.create
+    #     mv_asset_req.update_attributes({:process_attempts=>mv_asset_req.process_attempts+1,:rails_error_id=>err_entry.id})
+    #   end
+    # end
+
   end
 
   def view_stock

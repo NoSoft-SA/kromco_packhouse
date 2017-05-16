@@ -15,10 +15,13 @@ while (true)
       ActiveRecord::Base.transaction do
         asset_item = AssetItem.find_by_asset_number(mv_asset_req.pack_material_product_code)
         inventory_transaction = InventoryTransaction.new({:transaction_type_code => mv_asset_req.transaction_type_code,:transaction_type_id => mv_asset_req.transaction_type_id,
-                                                          :location_from => mv_asset_req.location_from,:location_to => mv_asset_req.location_to,:transaction_quantity_plus => 1,
+                                                          :location_from => mv_asset_req.location_from,:location_to => mv_asset_req.location_to,
                                                           :transaction_business_name_code => mv_asset_req.transaction_business_name_code, :transaction_business_name_id => mv_asset_req.transaction_business_name_id,
-                                                          :transaction_date_time => Time.now.to_formatted_s(:db), :reference_number => mv_asset_req.inventory_reference,
-                                                          :parent_inventory_transaction_id => mv_asset_req.parent_inventory_transaction_id,:is_stock_asset_move=>true})
+                                                          :transaction_date_time => Time.now.to_formatted_s(:db), :reference_number => mv_asset_req.reference_number,
+                                                          :parent_inventory_transaction_id => mv_asset_req.parent_inventory_transaction_id,:is_stock_asset_move=>true,
+
+                                                          :transaction_quantity_plus => (mv_asset_req.transaction_quantity_plus ? mv_asset_req.transaction_quantity_plus : 1),
+                                                          :truck_licence_number => mv_asset_req.truck_licence_number,:comments => mv_asset_req.comments})
 
         MoveAssetClass.new(asset_item, inventory_transaction).process
 
