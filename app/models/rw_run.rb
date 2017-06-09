@@ -369,16 +369,29 @@ class RwRun < ActiveRecord::Base
     transaction_type           = TransactionType.find_by_transaction_type_code('move_asset_quantity')
     transaction_business_name  = TransactionBusinessName.find_by_transaction_business_name_code('REWORKS_BIN_RECLASSIFY')
 
-    inventory_transaction      = InventoryTransaction.new({:transaction_type_code         =>transaction_type.transaction_type_code, :transaction_type_id=>transaction_type.id,
-                                                           :transaction_business_name_code=>transaction_business_name.transaction_business_name_code, :transaction_business_name_id=>transaction_business_name.id,
-                                                           :location_from                 =>from_location, :location_to => to_location,:transaction_quantity_plus=>qty_moved,
-                                                           :transaction_date_time         =>Time.now.to_formatted_s(:db), :reference_number=>bin_number.to_s,
-                                                           :comments=> run_id.to_s
-                                                          })
+    # inventory_transaction      = InventoryTransaction.new({:transaction_type_code         =>transaction_type.transaction_type_code, :transaction_type_id=>transaction_type.id,
+    #                                                        :transaction_business_name_code=>transaction_business_name.transaction_business_name_code, :transaction_business_name_id=>transaction_business_name.id,
+    #                                                        :location_from                 =>from_location, :location_to => to_location,:transaction_quantity_plus=>qty_moved,
+    #                                                        :transaction_date_time         =>Time.now.to_formatted_s(:db), :reference_number=>bin_number.to_s,
+    #                                                        :comments=> run_id.to_s
+    #                                                       })
 
-     asset_item                 = AssetItem.find_by_asset_number(asset_item)
 
-      Inventory::MoveAssetClass.new(asset_item, inventory_transaction).process
+    asset_move_request = AssetMoveRequest.new({:pack_material_product_code=>asset_item,
+                                               :transaction_type_code => transaction_type.transaction_type_code,:transaction_type_id => transaction_type.id,
+                                               :location_from => from_location,:location_to => to_location,
+                                               :transaction_business_name_code => transaction_business_name.transaction_business_name_code,:transaction_business_name_id => transaction_business_name.id,
+                                               :reference_number => bin_number.to_s,
+
+                                               :transaction_quantity_plus => qty_moved,:truck_licence_number => "",
+                                               :comments => run_id.to_s})
+
+
+    asset_move_request.save!
+
+     #asset_item                 = AssetItem.find_by_asset_number(asset_item)
+
+     # Inventory::MoveAssetClass.new(asset_item, inventory_transaction).process
 
 
 
