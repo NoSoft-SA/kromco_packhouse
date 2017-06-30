@@ -8,7 +8,17 @@
       }
   </script>
   <tr>
-  <td ><a href="JavaScript:newPopup('/rmt_processing/presort_grower_grading/add_line/');"><font color="blue">add line</font></a></td>
+  <!--<td ><a href="JavaScript:newPopup('/rmt_processing/presort_grower_grading/add_line/');"><font color="blue">add line</font></a></td> -->
+    <td >
+
+      <%= ApplicationHelper::LinkWindowField.new(nil, nil, 'none', 'none', 'none',
+                                                 {:controller => "rmt_processing/presort_grower_grading",
+                                                  :target_action => 'add_line',
+                                                  :link_text => 'add line',
+                                                  :window_width => 800,
+                                                  :window_height => 700}, true, nil, self).build_control %>
+
+    </td>
   <td  colspan="11">&nbsp;</td>
   </tr>
 
