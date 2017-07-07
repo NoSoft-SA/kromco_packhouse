@@ -28,13 +28,14 @@ class RwReceiptCarton < ActiveRecord::Base
 
    raise  "carton #{carton.carton_number} belongs to no pallet " if !carton.pallet_id
 
+   #todo uncomment for live
    plt = Pallet.find(carton.pallet_id.to_i)
    raise  "carton #{carton.carton_number} belongs to a pallet(#{carton.pallet_number}) that is still on a palletizing bay " if plt.process_status && plt.process_status.upcase.gsub("S","Z").index("PALLETIZING")
 
 
-   #raise   "carton #{carton.carton_number} has an exit_ref(#{carton.exit_reference})" if carton.exit_reference
+   raise   "carton #{carton.carton_number} has an exit_ref(#{carton.exit_reference})" if carton.exit_reference
 
-   #raise   "carton #{carton.carton_number} belongs to a pallet(#{plt.pallet_number}) with an exit_ref(#{plt.exit_ref})" if plt.exit_ref
+   raise   "carton #{carton.carton_number} belongs to a pallet(#{plt.pallet_number}) with an exit_ref(#{plt.exit_ref})" if plt.exit_ref
 
    received_carton = RwReceiptCarton.new
    carton.export_attributes(received_carton,true)

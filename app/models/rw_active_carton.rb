@@ -712,6 +712,29 @@ class RwActiveCarton < ActiveRecord::Base
   end
 
 
+  def derive_puc_account
+    if !self.is_depot_carton
+
+        fpa = FarmPucAccount.get_record_for_farm_and_marketer(self.farm_code, self.organization_code)
+        if !fpa
+          msg = "A farm_puc_account record does not exist for farm: " + self.farm_code + " and marketer: " + self.organization_code
+          raise msg
+        end
+
+        puts "NON DP_DERIVING FARM-PUC"
+
+        self.puc          = fpa.puc_code
+        self.account_code = fpa.account_code
+        puc               = Puc.find_by_puc_code(fpa.puc_code)
+        self.egap         = puc.eurogap_code
+
+
+    end
+
+
+  end
+
+
   def send_message(msg)
 
     return "Carton: " + self.carton_number.to_s + " could not be updated. Trying to save new values created the following problem: <BR>" + msg
@@ -902,7 +925,7 @@ class RwActiveCarton < ActiveRecord::Base
 
         puts "NON DP_DERIVING FARM-PUC"
 
-        self.puc          = fpa.puc_code  if ! changed.has_key?('puc')
+        self.puc          = fpa.puc_code
         self.farm_code    = run.farm_code if !self.bin_id
         self.account_code = fpa.account_code
         puc               = Puc.find_by_puc_code(fpa.puc_code)
