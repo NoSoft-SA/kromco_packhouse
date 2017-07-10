@@ -33,7 +33,7 @@ class Services::PreSortingController < ApplicationController
 
       http = Net::HTTP.new(Globals.bin_created_mssql_server_host, Globals.bin_created_mssql_presort_server_port)
       request = Net::HTTP::Post.new("/select")
-      parameters = {'method' => 'select', 'statement' => Base64.encode64("select * from ViewpaloxKromco where ViewpaloxKromco.Numero_palox=#{@created_bin}")}
+      parameters = {'method' => 'select', 'statement' => Base64.encode64("select * from ViewpaloxKromco where (poids >0 and poids is not null) and ViewpaloxKromco.Numero_palox=#{@created_bin}")}
       request.set_form_data(parameters)
       response = http.request(request)
       puts "---\n#{response.code} - #{response.message}\n---\n"
