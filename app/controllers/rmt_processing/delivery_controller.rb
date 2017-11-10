@@ -860,19 +860,17 @@ class RmtProcessing::DeliveryController < ApplicationController
 
   end
 
-  #MM112014 - add orchard id
   def orchard_id_changed
     orchard_id = get_selected_combo_value(params)
     session[:delivery_form][:orchard_id_combo_selection] = orchard_id
     @orchard_description = ""
+    @orchard_group_code = ""
 
-    orchard = Orchard.find(orchard_id)
-    if (orchard != nil)
-      orchard_description = orchard.orchard_description
-      @orchard_description = orchard_description
-      session[:delivery_form][:orchard_description] = orchard_description
-    else
-      @orchard_description = ""
+    if(orchard_id)
+      orchard = Orchard.find(orchard_id)
+      @representative_orchard = orchard.representative_orchard ? orchard.representative_orchard.orchard_code : ""
+      @orchard_description = orchard.orchard_description
+      session[:delivery_form][:orchard_description] = @orchard_description
     end
 
     @rmt_product_codes = ["select a value from rmt_product_type_code above"]
@@ -882,6 +880,7 @@ class RmtProcessing::DeliveryController < ApplicationController
             <%= @rmt_product_codes_content = select('delivery','rmt_product_id',@rmt_product_codes,{:sorted=>true})%>
             <script>
                 <%= update_element_function("orchard_description_cell", :action => :update,:content => @orchard_description_content) %>
+                <%= update_element_function("representative_orchard_cell", :action => :update,:content => @representative_orchard) %>
                 <%= update_element_function("advised_rmt_product_code_cell", :action => :update,:content => @rmt_product_codes_content) %>
             </script>
         }

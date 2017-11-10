@@ -1,5 +1,5 @@
 class Delivery < ActiveRecord::Base
-	attr_accessor :treatment_code, :ripe_code, :advised_ripe_point_code, :ripe_point_code, :advised_rmt_product_code, :rmt_product_type_code
+	attr_accessor :treatment_code, :ripe_code, :advised_ripe_point_code, :ripe_point_code, :advised_rmt_product_code, :rmt_product_type_code, :representative_orchard
 #	===========================
 # 	Association declarations:
 #	===========================

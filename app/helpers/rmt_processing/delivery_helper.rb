@@ -223,10 +223,9 @@ module RmtProcessing::DeliveryHelper
       field_configs[field_configs.length()] = {:field_type => 'LabelField',
                                                :field_name => 'orchard_description'}
 
-      #field_configs[field_configs.length()] = {:field_type => 'DropDownField',
-      #                                         :field_name => 'rmt_product_type_code',
-      #                                         :settings   =>{:list=>rmt_product_type_codes},
-      #                                         :observer   =>rmt_product_type_code_observer}
+      field_configs[field_configs.length()] = {:field_type => 'LabelField',
+                                               :field_name => 'representative_orchard'}
+
     else
       session[:delivery_form][:commodity_code_combo_selection] = delivery.commodity_code
       session[:delivery_form][:rmt_product_type_code_combo_selection] = delivery.rmt_product.rmt_product_type_code if(delivery.rmt_product)
@@ -509,6 +508,9 @@ module RmtProcessing::DeliveryHelper
 
     field_configs[field_configs.length()] = {:field_type => 'LabelField',
                                              :field_name => 'orchard_description'}
+
+    field_configs[field_configs.length()] = {:field_type => 'LabelField',
+                                             :field_name => 'representative_orchard'}
 
     field_configs[field_configs.length()] = {:field_type => 'LabelField',
                                              :field_name => 'destination_process_var',

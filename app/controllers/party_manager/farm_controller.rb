@@ -1154,7 +1154,7 @@ def create_farm
    begin
 	 @farm = Farm.new(params[:farm])
 	 if @farm.save
-
+		 session[:farm_id_value].store("my_farm_id", @farm.id)
 		 redirect_to_index("'new record created successfully'","'create successful'")
 	else
 		@is_create_retry = true
@@ -1277,6 +1277,51 @@ def create_orchard
    end
 end
 
+	def set_orchard_as_group
+		begin
+			id = params[:id]
+			if id && @orchard = Orchard.find(id)
+				if @orchard.update_attribute(:is_group, true)
+					@farm = session[:farm_record]
+					render_edit_farm
+				end
+			end
+		rescue
+			flash[:error] = "Orchard could not be set as group"
+			@farm = session[:farm_record]
+			render_edit_farm
+		end
+	end
+
+	def view_child_orchards
+		return if authorise_for_web(program_name?,'read') == false
+
+		if params[:page]!= nil
+
+			session[:orchards_page] = params['page']
+
+			render_list_child_orchards
+
+			return
+		else
+			session[:orchards_page] = nil
+		end
+
+		# , CASE parent_orchard_id WHEN #{params[:id]} THEN null ELSE parent_orchard_id END
+		list_query = "@orchard_pages = Paginator.new self, Orchard.count, @@page_size,@current_page
+	  @orchards = Orchard.find(:all,
+				 :select=>\"distinct orchards.id,orchards.orchard_code,orchards.orchard_description,commodities.commodity_description_long as commodity, rmt_varieties.rmt_variety_description as rmt_variety
+										, Null as parent_orchard_id, true as is_child_orchard\",
+				 :conditions=>\"parent_orchard_id=#{params[:id]}\",
+				 :joins=>\"left outer join rmt_varieties on orchards.orchard_rmt_variety_id = rmt_varieties.id
+									 left outer join commodities on rmt_varieties.commodity_id = commodities.id\",
+				 :limit => @orchard_pages.items_per_page,
+				 :offset => @orchard_pages.current.offset)"
+		session[:current_orchard] = params[:id]
+		session[:query] = list_query
+		render_list_child_orchards
+	end
+
 def edit_orchard
     return if authorise_for_web(program_name?,'edit')==false
     id = params[:id]
@@ -1297,7 +1342,6 @@ end
 def update_orchard
     begin
         id = params[:orchard][:id]
-        puts id.to_s
         if id && @orchard = Orchard.find(id)
             if @orchard.update_attributes(params[:orchard])
                 @farm = session[:farm_record]
@@ -1455,6 +1499,80 @@ def farm_farm_group_code_search_combo_changed
 
 end
 
+	def render_list_child_orchards
+		@can_edit = authorise(program_name?,'edit',session[:user_id])
+		@can_delete = authorise(program_name?,'delete',session[:user_id])
+		@current_page = session[:orchards_page] if session[:orchards_page]
+		@current_page = params['page'] if params['page']
+		@orchards =  eval(session[:query]) if !@orchards
 
+		@grid_selected_rows = @orchards
+		@single_childed = (@orchards.size==1) ? true : false
+
+		orchards =Orchard.find_by_sql("select distinct orchards.id,orchards.orchard_code,orchards.orchard_description,commodities.commodity_description_long as commodity,
+																	 rmt_varieties.rmt_variety_description as rmt_variety
+																	 , orchards.parent_orchard_id, false as is_child_orchard
+																	 from orchards
+																	 left outer join rmt_varieties on orchards.orchard_rmt_variety_id = rmt_varieties.id
+																	 left outer join commodities on rmt_varieties.commodity_id = commodities.id
+																	 where farm_id = #{session[:farm_record].id} and (parent_orchard_id<>#{params[:id]} or orchards.parent_orchard_id is null)
+																	 and (orchards.is_group is null or orchards.is_group is false) and orchards.id<>#{params[:id]}
+																	 group by orchards.id,orchard_code,orchard_description, commodity, rmt_variety, parent_orchard_id
+																	 order by parent_orchard_id desc")
+		@orchards += orchards
+
+		render :inline => %{
+      <% grid            = build_orchard_grid(@orchards,@can_edit,@can_delete) %>
+      <% grid.caption    = 'list of all orchard groups' %>
+      <% @header_content = grid.build_grid_data %>
+
+      <% @pagination = pagination_links(@orchard_pages) if @orchard_pages != nil %>
+      <%= grid.render_html %>
+      <%= grid.render_grid %>
+      }, :layout => 'content'
+	end
+
+	def remove_orchard_as_parent
+		ActiveRecord::Base.transaction do
+			parent_orchard = Orchard.find(params[:id])
+			parent_orchard.update_attribute(:is_group, false)
+			Orchard.update_all(ActiveRecord::Base.extend_set_sql_with_request("parent_orchard_id=Null","orchards"),"parent_orchard_id=#{params[:id]}")
+		end
+
+		@farm = session[:farm_record]
+		render_edit_farm
+	end
+
+	def selected_products
+		child_orchards = Orchard.find_all_by_parent_orchard_id(session[:current_orchard]).map{|o| o.id}
+		removed_orchards = child_orchards - (child_orchards & eval(params['selection']['list']))
+		added_orchards = eval(params['selection']['list']) - child_orchards
+
+		ActiveRecord::Base.transaction do
+			if(!removed_orchards.empty?)
+				removed_orchards_clause = "id=#{removed_orchards.join(" or id=")} "
+				Orchard.update_all(ActiveRecord::Base.extend_set_sql_with_request("parent_orchard_id=Null","orchards"), removed_orchards_clause)
+			end
+
+			if(!added_orchards.empty?)
+				added_orchards_clause = "id=#{added_orchards.join(" or id=")} "
+				Orchard.update_all(ActiveRecord::Base.extend_set_sql_with_request("parent_orchard_id=#{session[:current_orchard]}","orchards"), added_orchards_clause)
+			end
+		end
+
+		render_children_for_current_orchard
+	end
+
+	def render_children_for_current_orchard
+		params[:id] = session[:current_orchard]
+		view_child_orchards
+	end
+
+	def remove_child_orchard
+		ActiveRecord::Base.transaction do
+			Orchard.update_all(ActiveRecord::Base.extend_set_sql_with_request("parent_orchard_id=Null","orchards"),"id=#{params[:id]}")
+		end
+		render_children_for_current_orchard
+	end
 
 end
