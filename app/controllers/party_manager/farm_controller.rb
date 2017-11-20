@@ -1209,7 +1209,15 @@ def render_edit_farm
 
 		}, :layout => 'content'
 end
- 
+
+	def current_farm
+		if(@farm = session[:farm_record])
+			render_edit_farm
+		else
+			session[:alert] = 'no current farm'
+			render :inline => %{}, :layout => 'content'
+		end
+	end
 def update_farm
   begin
 	if params[:page]
