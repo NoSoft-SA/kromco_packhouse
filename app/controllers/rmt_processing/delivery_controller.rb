@@ -810,7 +810,7 @@ class RmtProcessing::DeliveryController < ApplicationController
                                       inner join rmt_varieties on orchards.orchard_rmt_variety_id = rmt_varieties.id
                                       inner join commodities on rmt_varieties.commodity_id = commodities.id
                                       inner join farms on orchards.farm_id = farms.id
-                                      where farm_code = '#{farm_code}' and rmt_varieties.commodity_code = '#{commodity_code}' and rmt_varieties.rmt_variety_code = '#{rmt_variety_code}'").map{|g|["#{g.orchard_code} - #{g.orchard_description}", g.id]}
+                                      where (parent_orchard_id is not null) and (farm_code = '#{farm_code}' and rmt_varieties.commodity_code = '#{commodity_code}' and rmt_varieties.rmt_variety_code = '#{rmt_variety_code}')").map{|g|["#{g.orchard_code} - #{g.orchard_description}", g.id]}
     @orchard_id.unshift(["<empty>", nil]) #if !@orchard_id.empty?
 
     # render :inline => %{
