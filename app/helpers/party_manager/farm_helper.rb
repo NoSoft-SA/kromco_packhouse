@@ -730,15 +730,23 @@ def build_orchard_form(orchard,action,caption,is_edit = nil,is_create_retry = ni
 		 parent_orchard_ids = !parent_orchards.empty? ? parent_orchards.map{|g|[g.orchard_code, g.id]} : []
      orchard_rmt_variety_id = ["Select a value from commodity_code"]
 
-     search_combos_js = gen_combos_clear_js_for_combos(["orchard_orchard_commodity_id","orchard_orchard_rmt_variety_id"])
-     orchard_commodity_id_observer  = {:updated_field_id => "orchard_rmt_variety_id_cell",
-                                       :remote_method => 'orchard_commodity_id_search_combo_changed',
-                                       :on_completed_js => search_combos_js["orchard_orchard_commodity_id"]}
+		 session[:orchard_form]= Hash.new
+		 search_combos_js = gen_combos_clear_js_for_combos(["orchard_parent_orchard_id","orchard_orchard_commodity_id","orchard_orchard_rmt_variety_id"])
+	   parent_orchard_id_observer  = {:updated_field_id => "orchard_commodity_id_cell",
+																	:remote_method => 'orchard_parent_orchard_id_search_combo_changed',
+																	:on_completed_js => search_combos_js["orchard_parent_orchard_id"]}
+		 session[:orchard_form][:parent_orchard_id_observer] = parent_orchard_id_observer
 
-		 field_configs <<  {:field_type => 'DropDownField',
+	   orchard_commodity_id_observer  = {:updated_field_id => "orchard_rmt_variety_id_cell",
+																		:remote_method => 'orchard_commodity_id_search_combo_changed',
+																		:on_completed_js => search_combos_js["orchard_orchard_commodity_id"]}
+		 session[:orchard_form][:orchard_commodity_id_observer] = orchard_commodity_id_observer
+
+	   field_configs <<  {:field_type => 'DropDownField',
 												:field_name => 'parent_orchard_id',
 												:non_db_field => true,
-												:settings => {:list => parent_orchard_ids, :label_caption => 'parent orchard code'}}
+												:settings => {:list => parent_orchard_ids, :label_caption => 'parent orchard code'},
+												:observer => parent_orchard_id_observer}
 
      field_configs <<  {:field_type => 'DropDownField',
                         :field_name => 'orchard_commodity_id?required',
@@ -782,17 +790,30 @@ def build_edit_orchard_form(orchard,action,caption,is_edit=nil,is_create_retry=n
       orchard_rmt_variety_id_list = RmtVariety.find_by_sql("select * from rmt_varieties where commodity_id = #{orchard.orchard_commodity_id}").map{|g|["#{g.rmt_variety_code} - #{g.rmt_variety_description}", g.id]}
     end
 
-		search_combos_js = gen_combos_clear_js_for_combos(["orchard_orchard_commodity_id","orchard_orchard_rmt_variety_id"])
-    orchard_commodity_id_observer  = {:updated_field_id => "orchard_rmt_variety_id_cell",
-                                      :remote_method => 'orchard_commodity_id_search_combo_changed',
-                                      :on_completed_js => search_combos_js["orchard_orchard_commodity_id"]}
+    # search_combos_js = gen_combos_clear_js_for_combos(["orchard_orchard_commodity_id","orchard_orchard_rmt_variety_id"])
+    # orchard_commodity_id_observer  = {:updated_field_id => "orchard_rmt_variety_id_cell",
+    #                                   :remote_method => 'orchard_commodity_id_search_combo_changed',
+    #                                   :on_completed_js => search_combos_js["orchard_orchard_commodity_id"]}
+
+		session[:orchard_form]= Hash.new
+		search_combos_js = gen_combos_clear_js_for_combos(["orchard_parent_orchard_id","orchard_orchard_commodity_id","orchard_orchard_rmt_variety_id"])
+		parent_orchard_id_observer  = {:updated_field_id => "orchard_commodity_id_cell",
+																	 :remote_method => 'orchard_parent_orchard_id_search_combo_changed',
+																	 :on_completed_js => search_combos_js["orchard_parent_orchard_id"]}
+		session[:orchard_form][:parent_orchard_id_observer] = parent_orchard_id_observer
+
+		orchard_commodity_id_observer  = {:updated_field_id => "orchard_rmt_variety_id_cell",
+																			:remote_method => 'orchard_commodity_id_search_combo_changed',
+																			:on_completed_js => search_combos_js["orchard_orchard_commodity_id"]}
+		session[:orchard_form][:orchard_commodity_id_observer] = orchard_commodity_id_observer
 
 		if(!orchard.is_group)
-			parent_orchard_ids = Orchard.find_by_sql("select * from orchards where (is_group is true and id<>#{orchard.id})").map{|g|[g.orchard_code, g.id]}
+			parent_orchard_ids = Orchard.find_by_sql("select * from orchards where (is_group is true and id<>#{orchard.id} and farm_id=#{orchard.farm_id})").map{|g|[g.orchard_code, g.id]}
 			field_configs <<  {:field_type => 'DropDownField',
 												 :field_name => 'parent_orchard_id',
 												 :non_db_field => true,
-												 :settings => {:list => parent_orchard_ids, :label_caption => 'parent orchard code'}}
+												 :settings => {:list => parent_orchard_ids, :label_caption => 'parent orchard code'},
+												 :observer => parent_orchard_id_observer}
 		end
 
 		field_configs <<  {:field_type => 'DropDownField',

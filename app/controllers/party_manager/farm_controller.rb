@@ -1290,12 +1290,13 @@ end
 			id = params[:id]
 			if id && @orchard = Orchard.find(id)
 				if @orchard.update_attribute(:is_group, true)
+					@orchard.integrate_representative_orchard_into_MAF
 					@farm = session[:farm_record]
 					render_edit_farm
 				end
 			end
 		rescue
-			flash[:error] = "Orchard could not be set as group"
+			flash[:error] = "Orchard could not be set as group - #{$!.message}"
 			@farm = session[:farm_record]
 			render_edit_farm
 		end
@@ -1325,6 +1326,7 @@ end
 									 left outer join commodities on rmt_varieties.commodity_id = commodities.id\",
 				 :limit => @orchard_pages.items_per_page,
 				 :offset => @orchard_pages.current.offset)"
+		@parent_orchard =Orchard.find(params[:id])
 		session[:current_orchard] = params[:id]
 		session[:query] = list_query
 		render_list_child_orchards
@@ -1340,7 +1342,7 @@ end
 
 def render_edit_orchard
     render :inline => %{
-		<% @content_header_caption = "'edit farm'"%> 
+		<% @content_header_caption = "'edit orchard'"%>
 
 		<%= build_edit_orchard_form(@orchard,'update_orchard','update_orchard',true)%>
 
@@ -1377,22 +1379,45 @@ def delete_orchard
     end
 end
 
-  #MM102014 -
+  def orchard_parent_orchard_id_search_combo_changed
+		orchard_parent_orchard_id = get_selected_combo_value(params)
+		session[:orchard_parent_orchard_id] = orchard_parent_orchard_id
+		if(orchard_parent_orchard_id)
+			@rmt_variety = RmtVariety.find_by_sql("select r.*, c.commodity_description_long
+																						 from rmt_varieties r
+																						 join commodities c on c.id=r.commodity_id
+																						 join orchards o on o.orchard_rmt_variety_id=r.id
+																						 where o.id = #{orchard_parent_orchard_id}")[0]
+			@commodities = [["#{@rmt_variety.commodity_code} - #{@rmt_variety.commodity_description_long}", @rmt_variety.commodity_id]]
+			@rmt_varieties = [["#{@rmt_variety.rmt_variety_code} - #{@rmt_variety.rmt_variety_description}", @rmt_variety.id]]
+		else
+			@commodities = Commodity.find_by_sql("select * from commodities").map{|g|["#{g.commodity_code} - #{g.commodity_description_long}", g.id]}
+			@commodities.unshift(['<empty>',nil])
+			@rmt_varieties = ["Select a value from commodity_code"]
+		end
+
+		render :inline => %{
+      <%= select('orchard','orchard_commodity_id', @commodities) %>
+		  <img src = '/images/spinner.gif' style = 'display:none;' id = 'img_orchard_orchard_commodity_id'/>
+		  <%= observe_field('orchard_orchard_commodity_id',:update => 'orchard_rmt_variety_id_cell',:url => {:action => session[:orchard_form][:orchard_commodity_id_observer][:remote_method]},:loading => "show_element('img_orchard_orchard_commodity_id');",:complete => session[:orchard_form][:orchard_commodity_id_observer][:on_completed_js])%>
+
+
+      <% orchard_rmt_variety_id_content = select('orchard','orchard_rmt_variety_id', @rmt_varieties) %>
+			<script> <%= update_element_function("orchard_rmt_variety_id_cell", :action => :update,:content => orchard_rmt_variety_id_content) %> </script>
+		}
+	end
 
   def orchard_commodity_id_search_combo_changed
 
     orchard_commodity_id = get_selected_combo_value(params)
     session[:orchard_commodity_id] = orchard_commodity_id
+		orchard_commodity_clause = orchard_commodity_id ? "commodity_id = '#{orchard_commodity_id}'" : "commodity_id is null"
 
-    @orchard_rmt_variety_id = RmtVariety.find_by_sql("select * from rmt_varieties where commodity_id = '#{orchard_commodity_id}'").map{|g|["#{g.rmt_variety_code} - #{g.rmt_variety_description}", g.id]}
+		@orchard_rmt_variety_id = RmtVariety.find_by_sql("select * from rmt_varieties where #{orchard_commodity_clause}").map{|g|["#{g.rmt_variety_code} - #{g.rmt_variety_description}", g.id]}
+		@orchard_rmt_variety_id.unshift(['<empty>',nil])
 
     render :inline => %{
-      <%=
-          orchard_rmt_variety_id_content = select('orchard','orchard_rmt_variety_id',@orchard_rmt_variety_id)
-      %>
-      <script>
-          <%= update_element_function("orchard_rmt_variety_id_cell", :action => :update,:content => orchard_rmt_variety_id_content) %>
-      </script>
+      <%= select('orchard','orchard_rmt_variety_id',@orchard_rmt_variety_id) %>
 		}
 
   end
@@ -1524,7 +1549,7 @@ end
 																	 left outer join rmt_varieties on orchards.orchard_rmt_variety_id = rmt_varieties.id
 																	 left outer join commodities on rmt_varieties.commodity_id = commodities.id
 																	 where farm_id = #{session[:farm_record].id} and (parent_orchard_id<>#{params[:id]} or orchards.parent_orchard_id is null)
-																	 and (orchards.is_group is null or orchards.is_group is false) and orchards.id<>#{params[:id]}
+																	 and (orchards.is_group is null or orchards.is_group is false) and orchards.id<>#{params[:id]} and (orchards.orchard_rmt_variety_id=#{@parent_orchard.orchard_rmt_variety_id})
 																	 group by orchards.id,orchard_code,orchard_description, commodity, rmt_variety, parent_orchard_id
 																	 order by parent_orchard_id desc")
 		@orchards += orchards
