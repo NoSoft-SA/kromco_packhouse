@@ -60,7 +60,7 @@ class Orchard < ActiveRecord::Base
                                                   and rmt_varieties.id = #{self.orchard_rmt_variety_id}  and track_indicator_type_code='RMI'
                                                   order by farms.farm_code ")
 
-        inserts = []
+        inserts = ['BEGIN TRANSACTION ']
         parcelles.each do |parcelle|
           #-------------------------------------------------------------------------------------------------------------------------------------------
           #-------------------------------------------------------------------------------------------------------------------------------------------
@@ -87,6 +87,7 @@ class Orchard < ActiveRecord::Base
           #-------------------------------------------------------------------------------------------------------------------------------------------
           #-------------------------------------------------------------------------------------------------------------------------------------------
         end
+        inserts << ' COMMIT TRANSACTION'
 
         http = Net::HTTP.new(Globals.bin_scanned_mssql_server_host, Globals.bin_created_mssql_presort_server_port)
         request = Net::HTTP::Post.new("/exec")

@@ -657,6 +657,7 @@ class Services::PreSortingController < ApplicationController
     # puts insert_ql
 
     if (!insert_ql.strip.empty?)
+      insert_ql ="BEGIN TRANSACTION\n#{insert_ql}COMMIT TRANSACTION"
       http = Net::HTTP.new(Globals.bin_scanned_mssql_server_host, Globals.bin_scanned_mssql_integration_server_port)
       request = Net::HTTP::Post.new("/exec")
       parameters = {'method' => 'insert', 'statement' => Base64.encode64(insert_ql)}
