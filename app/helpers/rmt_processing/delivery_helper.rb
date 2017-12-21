@@ -508,9 +508,14 @@ module RmtProcessing::DeliveryHelper
 
     field_configs[field_configs.length()] = {:field_type => 'LabelField',
                                              :field_name => 'orchard_description'}
+    repr_orchard = ""
+     if delivery.orchard.representative_orchard
+       repr_orchard = delivery.orchard.representative_orchard.orchard_code
+     end
 
     field_configs[field_configs.length()] = {:field_type => 'LabelField',
-                                             :field_name => 'representative_orchard'}
+                                             :field_name => 'representative_orchard',
+                                             :settings => {:static_value => repr_orchard, :show_label => true}}
 
     field_configs[field_configs.length()] = {:field_type => 'LabelField',
                                              :field_name => 'destination_process_var',
