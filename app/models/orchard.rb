@@ -109,10 +109,10 @@ class Orchard < ActiveRecord::Base
           end
           #-------------------------------------------------------------------------------------------------------------------------------------------
           #-------------------------------------------------------------------------------------------------------------------------------------------
-          inserts << ' COMMIT TRANSACTION'
         end
+        inserts << ' COMMIT TRANSACTION'
 
-        if(!inserts.empty?)
+        if inserts.length > 2
           http = Net::HTTP.new(Globals.bin_scanned_mssql_server_host, Globals.bin_created_mssql_presort_server_port)
           request = Net::HTTP::Post.new("/exec")
           parameters = {'method' => 'insert', 'statement' => Base64.encode64(inserts.join)}
