@@ -246,6 +246,7 @@ class Services::PdtController < ApplicationController
     #    end
     @user = params[:user]
     @ip = params[:ip]
+    @ip = @request.env.REMOTE_ADDR if !@ip || @ip.strip() == ""|| @ip.strip().upcase == "NULL"
     @special_commands = {"1a" => "refresh", "1b" => "undo", "1c"=> "cancel", "1f"=> "redo", "1d"=> "save_process", "1e"=> "load_process", "1d.1"=> "save_process_submit", "1e.1"=> "load_process_submit", "1g"=> "exit_process", "1g.1"=> "save_process_choice_submit"}
     @instruction = nil
     @menu_item = params[:menu_item] if params[:trans_type] == nil

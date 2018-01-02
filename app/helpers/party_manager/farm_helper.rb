@@ -431,7 +431,41 @@ end
  
 	build_form(puc,field_configs,action,'puc',caption,false)
 
-end
+ end
+
+
+ def build_farm_puc_account_grid(data_set,can_edit,can_delete)
+
+	 column_configs = Array.new
+	 column_configs[0] = {:field_type => 'text',:field_name => 'puc_code'}
+	 column_configs[1] = {:field_type => 'text',:field_name => 'farm_code'}
+	 column_configs[2] = {:field_type => 'text',:field_name => 'from_date'}
+	 column_configs[3] = {:field_type => 'text',:field_name => 'thru_date'}
+	 column_configs[4] = {:field_type => 'text',:field_name => 'party_name'}
+	 column_configs[5] = {:field_type => 'text',:field_name => 'party_type_name'}
+	 column_configs[6] = {:field_type => 'text',:field_name => 'role_name'}
+	 column_configs[7] = {:field_type => 'text',:field_name => 'account_code'}
+	 column_configs[8] = {:field_type => 'text',:field_name => 'puc_type_code'}
+#	----------------------
+#	define action columns
+#	----------------------
+	 if can_edit
+		 column_configs[column_configs.length()] = {:field_type => 'action',:field_name => 'edit farm_puc_account',
+																								:settings =>
+																										{:link_text => 'edit',
+																										 :target_action => 'edit_farm_puc_account',
+																										 :id_column => 'id'}}
+	 end
+
+	 if can_delete
+		 column_configs[column_configs.length()] = {:field_type => 'action',:field_name => 'delete farm_puc_account',
+																								:settings =>
+																										{:link_text => 'delete',
+																										 :target_action => 'delete_farm_puc_account',
+																										 :id_column => 'id'}}
+	 end
+	 return get_data_grid(data_set,column_configs)
+ end
 
  
  def build_puc_grid(data_set,can_edit,can_delete)

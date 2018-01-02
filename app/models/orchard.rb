@@ -19,7 +19,7 @@ class Orchard < ActiveRecord::Base
   end
 
   def validate_uniqueness
-    exists = Orchard.find_by_farm_id_and_orchard_code(self.farm_id,self.orchard_code)
+    exists = Orchard.find_by_farm_id_and_orchard_code_and_orchard_rmt_variety_id_and_is_group(self.farm_id,self.orchard_code,self.orchard_rmt_variety_id,self.is_group)
     if exists != nil
       errors.add_to_base("There already exists a record with the combined values of fields: 'orchard_code'")
     end
