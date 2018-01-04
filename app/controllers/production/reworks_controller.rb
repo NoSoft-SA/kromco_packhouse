@@ -3355,7 +3355,8 @@ end
       end
 
       stock_item = StockItem.find_by_inventory_reference(session[:pallet_to_scrap].pallet_number)
-      if stock_item && !(stock_item.location_code.upcase == "PACKHSE" ||stock_item.location_code.upcase == "REWORKS")
+#      if stock_item && !(stock_item.location_code.upcase == "PACKHSE" ||stock_item.location_code.upcase == "REWORKS")
+       if stock_item && !(stock_item.location_code.upcase == "PACKHSE" ||stock_item.location_code.upcase == "REWORKS"||stock_item.location_code.upcase == "BAGGING"||stock_item.location_code.upcase == "BAGGING_REWORKS"||stock_item.location_code.upcase == "PART_PALLETS")
         flash[:error] = "Pallet is at location: " + stock_item.location_code + ". Only pallets in REWORKS or PACKHSE can be scrapped"
         rw_pallets
         return
