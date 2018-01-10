@@ -477,6 +477,61 @@ class DevelopmentTools::CrudToolsController < ApplicationController
     redirect_to :controller => 'tools/processes', :action => 'show_object_transactions', :model => "#{params[:model_class]}/#{params[:id]}"
   end
 
+  #MM082017 - list_globals_methods
+  def list_globals_methods
+    methods = (Globals.methods  - Object.methods).sort#.join("<br>")
+    @table_definition = "<table class='thinbordertable'>"
+    methods.each do |method|
+      @table_definition += "<tr class='hover-row'>
+                              <td style='color:black'' bgcolor='whitesmoke'>#{method.to_s} </td>
+                          </tr>"
+    end
+    @table_definition += "</table> "
+
+    render :inline => %{
+      <% @content_header_caption = "Globals Methods"%>
+
+      <%= @table_definition %>
+    }, :layout => 'content'
+  end
+
+  #MM082017 - list_project_files
+  def list_directories
+    render_list_directories_form
+  end
+
+  def render_list_directories_form
+    render :inline => %{
+		<% @content_header_caption = "'list directories'"%>
+
+		<%= build_list_directories_form(nil,'list_project_files','list_project_files')%>
+
+		}, :layout => 'content'
+  end
+
+  def list_project_files
+    count = 0
+    path = Dir.getwd + "/**"
+    path = Dir.getwd + "/#{params[:project_files][:directory_name]}/**" if !params[:project_files][:directory_name].to_s.empty?
+    path += "/*" if params[:project_files][:include_files].to_i.equal?(1)
+    path += "{#{params[:project_files][:wild_card]}}" if params[:project_files][:include_files].to_i.equal?(1) && !params[:project_files][:wild_card].to_s.empty?
+    files = Dir.glob(path).sort_by {|a| a.ljust(4,'ZZ') }
+    @table_definition = "<table class='thinbordertable'>"
+    files.each do |rb_file|
+      next if rb_file == '.' or rb_file == '..'
+      count +=1
+      @table_definition += "<tr class='hover-row'>
+                              <td style='color:black'' bgcolor='whitesmoke'>#{rb_file.to_s.gsub(Dir.getwd,"")} </td>
+                          </tr>"
+    end
+    @table_definition += "</table> "
+    render :inline => %{
+      <% @content_header_caption = "project files"%>
+
+      <%= @table_definition %>
+    }, :layout => 'content'
+  end
+
 end
 
 
