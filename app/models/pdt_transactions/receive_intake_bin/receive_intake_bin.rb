@@ -52,11 +52,10 @@ class ReceiveIntakeBin < PDTTransaction
 
     track_indicator_for_delivery  = DeliveryTrackIndicator.find_by_sql("select * from delivery_track_indicators where delivery_id = '#{@delivery_id}' order by id asc")
     track_indicator_rec  = track_indicator_for_delivery[0]
-    if  track_indicator_rec == nil
-      return PDTTransaction.build_msg_screen_definition("no record found for delivery_track_indicators  done ", nil, nil, nil)
+    if  track_indicator_rec
+      @track_slms_indicator_id   = track_indicator_rec.track_slms_indicator_id
+      @track_slms_indicator_code = track_indicator_rec.track_slms_indicator_code
     end
-    @track_slms_indicator_id   = track_indicator_rec.track_slms_indicator_id
-    @track_slms_indicator_code = track_indicator_rec.track_slms_indicator_code
     @sample_bins_sequences     = delivery.delivery_sample_bins.map { |f| f.sample_bin_sequence_number }
 
     delivery_scans             =DeliveryScan.find_all_by_delivery_id(delivery.id)
@@ -66,21 +65,12 @@ class ReceiveIntakeBin < PDTTransaction
       else
         return screen
       end
-
-
     else
-
       delivery_route_steps = DeliveryRouteStep.find_by_sql("select *  from  delivery_route_steps  where delivery_id = '#{ @delivery_id }' and
      ( route_step_code = '100_fruit_sample_completed' or  route_step_code='intake_bin_scan_completed') order by id asc")
 
-
-
-#      route_step_date_1    = delivery_route_steps[0].date_completed
       fruit_sample_completed   = delivery_route_steps[0].date_completed
       intake_bin_scan_completed   = delivery_route_steps[1].date_completed
-#      if route_step_date_1 == nil
-#        return PDTTransaction.build_msg_screen_definition("delivery route steps not done for route_step_code :'#{delivery_route_steps[0].route_step_code}' ", nil, nil, nil)
-#      end
       if  fruit_sample_completed   == nil
         return PDTTransaction.build_msg_screen_definition("delivery route steps not done for route_step_code :'#{delivery_route_steps[0].route_step_code}'", nil, nil, nil)
       end

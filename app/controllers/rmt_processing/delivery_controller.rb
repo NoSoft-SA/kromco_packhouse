@@ -1209,194 +1209,196 @@ class RmtProcessing::DeliveryController < ApplicationController
       return
     end
 
-    if @delivery_track_indicator.save
+    ActiveRecord::Base.transaction do
+      if @delivery_track_indicator.save
 
-      if(@delivery_track_indicator.track_indicator_type_code=="STA" && (@delivery_track_indicator.track_slms_indicator_code != session[:suggested_indicator]))
-        user_overrides = UserOverride.new({:user_name=>session[:user_id].user_name,:app=>'deliveries', :app_feature=>'track_slms_indicator2', :message=>'user overrode default indicator',
-                                           :user_value=>@delivery_track_indicator.track_slms_indicator_code,:object_identifier=>@delivery_track_indicator.id, :system_value=>session[:suggested_indicator]})
-        user_overrides.save
-      end
+        if(@delivery_track_indicator.track_indicator_type_code=="STA" && (@delivery_track_indicator.track_slms_indicator_code != session[:suggested_indicator]))
+          user_overrides = UserOverride.new({:user_name=>session[:user_id].user_name,:app=>'deliveries', :app_feature=>'track_slms_indicator2', :message=>'user overrode default indicator',
+                                             :user_value=>@delivery_track_indicator.track_slms_indicator_code,:object_identifier=>@delivery_track_indicator.id, :system_value=>session[:suggested_indicator]})
+          user_overrides.save
+        end
 
-      if (@is_first_time || !is_second_one?)
-        @freeze_flash = false
-        params[:id] = session[:new_delivery].id
-        edit_delivery
-        return
-      end
-      #========== delivery_sample_bins_test
-      checked_1 = params[:delivery_track_indicator][:track_variable_1]
-      checked_2 = params[:delivery_track_indicator][:track_variable_2]
-      first_delivery_track_indicator = session[:new_delivery].delivery_track_indicators[0]
-      passed_1 = first_delivery_track_indicator.track_variable_1
-      passed_2 = first_delivery_track_indicator.track_variable_2
-
-      @delivery_track_indicator.track_variable_1 = checked_1
-      @delivery_track_indicator.track_variable_2 = checked_2
-
-      if passed_2 || session[:new_delivery].commodity_code == "PL"
-        #create sample bins
-        sample_percentage = RmtVariety.find_by_rmt_variety_code_and_commodity_code(session[:new_delivery].rmt_variety_code, session[:new_delivery].commodity_code).sample_percentage
-        if sample_percentage || session[:new_delivery].commodity_code == "PL"
-          quantity_full_bins = session[:new_delivery].quantity_full_bins
-          if (session[:new_delivery].commodity_code == "PL")
-            array = Array.new
-            (1..quantity_full_bins).each do |x|
-              array.push x
-            end
-          else
-            sample_size = (sample_percentage.to_f / 100) * quantity_full_bins
-            size = sample_size.round
-            size = 1 if (size < 1)
-            array = RandomGenerator.new(size, quantity_full_bins).generate_sequence_numbers
-          end
-
-          if array.length()!=0
-            array.each do |number|
-#                                puts "numero = " + number.to_s
-              delivery_sample_bin = DeliverySampleBin.new
-              delivery_sample_bin.sample_bin_sequence_number = number
-              delivery_sample_bin.delivery_id = session[:new_delivery].id
-              delivery_sample_bin.save
-            end
-          end
-        else
-          flash[:error] = "delivery_sample_bin and delivery_route_steps could not be created: sample_percentage for rmt_variety[#{session[:new_delivery].rmt_variety_code}] has not been set up"
+        if (@is_first_time || !is_second_one?)
           @freeze_flash = false
           params[:id] = session[:new_delivery].id
           edit_delivery
           return
         end
-        #updating the delivery record[drench_delivery && sample_bins attributes]
-        session[:new_delivery].update_attributes(:drench_delivery => checked_1, :sample_bins => checked_2)
-      else
-        #this_delivery.update_attribute(:sample_bins, "FALSE")
-        #session[:new_delivery].sample_bins = "FALSE"
-      end
-      #============
+        #========== delivery_sample_bins_test
+        checked_1 = params[:delivery_track_indicator][:track_variable_1]
+        checked_2 = params[:delivery_track_indicator][:track_variable_2]
+        first_delivery_track_indicator = session[:new_delivery].delivery_track_indicators[0]
+        passed_1 = first_delivery_track_indicator.track_variable_1
+        passed_2 = first_delivery_track_indicator.track_variable_2
 
-      puts @delivery_track_indicator.track_variable_1.to_s
-      #TESTING FOR OPERATOR OVERRIDE
-      if @delivery_track_indicator.track_variable_1 != session[:rmt_variables][:drench_rmt] || @delivery_track_indicator.track_variable_2 != session[:rmt_variables][:sample_rmt]
-        @delivery_track_indicator.update_attributes(:operator_override => session[:user_id].user_name, :date_override => DateTime.now)
-        session[:new_delivery].update_attributes(:operator_override => session[:user_id].user_name, :date_override => DateTime.now)
-      end
+        @delivery_track_indicator.track_variable_1 = checked_1
+        @delivery_track_indicator.track_variable_2 = checked_2
 
-      if session[:delivery_track_indicators] == nil
-        session[:delivery_track_indicators] = Array.new
-      end
-
-      #---
-
-      del_track_indicators = DeliveryTrackIndicator.find_by_sql("select * from delivery_track_indicators where delivery_id = '#{session[:new_delivery].id}' order by id asc")
-      session[:delivery_track_indicators] = nil if session[:delivery_track_indicators]!=nil
-      session[:delivery_track_indicators] = Array.new
-      del_track_indicators.each do |record|
-        session[:delivery_track_indicators].push(record)
-      end
-
-
-      #update delivery status of delivery record
-      #            	     if session[:new_delivery].update_attribute(:delivery_status, "delivery captured")
-      #register a long transaction
-      session[:new_delivery].transaction do
-        route_step_type = RouteStepType.find_by_route_step_type_code("rmt_delivery")
-        route_steps = route_step_type.route_steps
-        #Test if the route steps were already copied
-        del_route_steps_test = DeliveryRouteStep.find_by_delivery_id(session[:new_delivery].id)
-        grower_commitment_season = Season.find(session[:new_delivery].season_id)
-        #                           grower_commitment_record = GrowerCommitment.find(:first, :conditions=>["farm_id = ? and season = ?", session[:new_delivery].farm_id, grower_commitment_season.season]) if(grower_commitment_season)
-        grower_commitment_record = GrowerCommitment.find_by_sql("select grower_commitments.* from grower_commitments join spray_program_results on spray_program_results.grower_commitment_id=grower_commitments.id where grower_commitments.farm_id=#{session[:new_delivery].farm_id} and grower_commitments.season='#{grower_commitment_season.season}' and spray_program_results.rmt_variety_code='#{session[:new_delivery].rmt_variety_code}' ")[0] if (grower_commitment_season)
-        if del_route_steps_test==nil
-          #copying route steps to delivery route steps table
-          if route_steps!=nil
-            for route_step in route_steps
-              delivery_route_step = DeliveryRouteStep.new
-              delivery_route_step.route_step_code = route_step.route_step_code
-              delivery_route_step.route_step_id = route_step.id
-              delivery_route_step.delivery_number = session[:new_delivery].delivery_number
-              delivery_route_step.delivery_id = session[:new_delivery].id
-              if (delivery_route_step.route_step_code == "grower_commitment_data_captured" && grower_commitment_record)
-                delivery_route_step.date_activated = grower_commitment_record.grower_commitment_data_capture_date_time
-                delivery_route_step.date_completed = grower_commitment_record.grower_commitment_data_capture_date_time
-                Delivery.update(session[:new_delivery].id, {:delivery_status => delivery_route_step.route_step_code})
-              elsif (delivery_route_step.route_step_code == "mrl_data_capture_completed" && grower_commitment_record)
-                delivery_route_step.date_activated = grower_commitment_record.mrl_data_capture_date_time
-                delivery_route_step.date_completed = grower_commitment_record.mrl_data_capture_date_time
-                Delivery.update(session[:new_delivery].id, {:delivery_status => delivery_route_step.route_step_code})
+        if passed_2 || session[:new_delivery].commodity_code == "PL"
+          #create sample bins
+          sample_percentage = RmtVariety.find_by_rmt_variety_code_and_commodity_code(session[:new_delivery].rmt_variety_code, session[:new_delivery].commodity_code).sample_percentage
+          if sample_percentage || session[:new_delivery].commodity_code == "PL"
+            quantity_full_bins = session[:new_delivery].quantity_full_bins
+            if (session[:new_delivery].commodity_code == "PL")
+              array = Array.new
+              (1..quantity_full_bins).each do |x|
+                array.push x
               end
-              delivery_route_step.save
+            else
+              sample_size = (sample_percentage.to_f / 100) * quantity_full_bins
+              size = sample_size.round
+              size = 1 if (size < 1)
+              array = RandomGenerator.new(size, quantity_full_bins).generate_sequence_numbers
+            end
+
+            if array.length()!=0
+              array.each do |number|
+  #                                puts "numero = " + number.to_s
+                delivery_sample_bin = DeliverySampleBin.new
+                delivery_sample_bin.sample_bin_sequence_number = number
+                delivery_sample_bin.delivery_id = session[:new_delivery].id
+                delivery_sample_bin.save
+              end
+            end
+          else
+            flash[:error] = "delivery_sample_bin and delivery_route_steps could not be created: sample_percentage for rmt_variety[#{session[:new_delivery].rmt_variety_code}] has not been set up"
+            @freeze_flash = false
+            params[:id] = session[:new_delivery].id
+            edit_delivery
+            return
+          end
+          #updating the delivery record[drench_delivery && sample_bins attributes]
+          session[:new_delivery].update_attributes(:drench_delivery => checked_1, :sample_bins => checked_2)
+        else
+          #this_delivery.update_attribute(:sample_bins, "FALSE")
+          #session[:new_delivery].sample_bins = "FALSE"
+        end
+        #============
+
+        puts @delivery_track_indicator.track_variable_1.to_s
+        #TESTING FOR OPERATOR OVERRIDE
+        if @delivery_track_indicator.track_variable_1 != session[:rmt_variables][:drench_rmt] || @delivery_track_indicator.track_variable_2 != session[:rmt_variables][:sample_rmt]
+          @delivery_track_indicator.update_attributes(:operator_override => session[:user_id].user_name, :date_override => DateTime.now)
+          session[:new_delivery].update_attributes(:operator_override => session[:user_id].user_name, :date_override => DateTime.now)
+        end
+
+        if session[:delivery_track_indicators] == nil
+          session[:delivery_track_indicators] = Array.new
+        end
+
+        #---
+
+        del_track_indicators = DeliveryTrackIndicator.find_by_sql("select * from delivery_track_indicators where delivery_id = '#{session[:new_delivery].id}' order by id asc")
+        session[:delivery_track_indicators] = nil if session[:delivery_track_indicators]!=nil
+        session[:delivery_track_indicators] = Array.new
+        del_track_indicators.each do |record|
+          session[:delivery_track_indicators].push(record)
+        end
+
+
+        #update delivery status of delivery record
+        #            	     if session[:new_delivery].update_attribute(:delivery_status, "delivery captured")
+        #register a long transaction
+        session[:new_delivery].transaction do
+          route_step_type = RouteStepType.find_by_route_step_type_code("rmt_delivery")
+          route_steps = route_step_type.route_steps
+          #Test if the route steps were already copied
+          del_route_steps_test = DeliveryRouteStep.find_by_delivery_id(session[:new_delivery].id)
+          grower_commitment_season = Season.find(session[:new_delivery].season_id)
+          #                           grower_commitment_record = GrowerCommitment.find(:first, :conditions=>["farm_id = ? and season = ?", session[:new_delivery].farm_id, grower_commitment_season.season]) if(grower_commitment_season)
+          grower_commitment_record = GrowerCommitment.find_by_sql("select grower_commitments.* from grower_commitments join spray_program_results on spray_program_results.grower_commitment_id=grower_commitments.id where grower_commitments.farm_id=#{session[:new_delivery].farm_id} and grower_commitments.season='#{grower_commitment_season.season}' and spray_program_results.rmt_variety_code='#{session[:new_delivery].rmt_variety_code}' ")[0] if (grower_commitment_season)
+          if del_route_steps_test==nil
+            #copying route steps to delivery route steps table
+            if route_steps!=nil
+              for route_step in route_steps
+                delivery_route_step = DeliveryRouteStep.new
+                delivery_route_step.route_step_code = route_step.route_step_code
+                delivery_route_step.route_step_id = route_step.id
+                delivery_route_step.delivery_number = session[:new_delivery].delivery_number
+                delivery_route_step.delivery_id = session[:new_delivery].id
+                if (delivery_route_step.route_step_code == "grower_commitment_data_captured" && grower_commitment_record)
+                  delivery_route_step.date_activated = grower_commitment_record.grower_commitment_data_capture_date_time
+                  delivery_route_step.date_completed = grower_commitment_record.grower_commitment_data_capture_date_time
+                  Delivery.update(session[:new_delivery].id, {:delivery_status => delivery_route_step.route_step_code})
+                elsif (delivery_route_step.route_step_code == "mrl_data_capture_completed" && grower_commitment_record)
+                  delivery_route_step.date_activated = grower_commitment_record.mrl_data_capture_date_time
+                  delivery_route_step.date_completed = grower_commitment_record.mrl_data_capture_date_time
+                  Delivery.update(session[:new_delivery].id, {:delivery_status => delivery_route_step.route_step_code})
+                end
+                delivery_route_step.save
+              end
+            end
+          end
+
+          #check if quantity_damaged_units field is empty
+          #delete this route step if quantity_damaged_units field is empty
+          if session[:new_delivery].quantity_damaged_units==nil || session[:new_delivery].quantity_damaged_units == "" || session[:new_delivery].quantity_damaged_units.to_i == 0
+            qd_del_route_step = DeliveryRouteStep.find_by_route_step_code_and_delivery_id("damaged_crates_receive_yes", session[:new_delivery].id)
+            if qd_del_route_step
+              qd_del_route_step.destroy
+            end
+          end
+
+          #updating delivery route step where route_code = delivery_captured
+          if route_steps!=nil
+            @delivery_route_step = DeliveryRouteStep.find_by_route_step_code_and_delivery_id("delivery_note_captured", session[:new_delivery].id) #????delivery_capture_started
+            if @delivery_route_step != nil
+              @delivery_route_step.update_attributes({:date_activated => DateTime.now.to_formatted_s(:db), :date_completed => DateTime.now.to_formatted_s(:db)})
+              session[:new_delivery].update_attribute(:delivery_status, @delivery_route_step.route_step_code)
             end
           end
         end
+        # end of transaction
 
-        #check if quantity_damaged_units field is empty
-        #delete this route step if quantity_damaged_units field is empty
-        if session[:new_delivery].quantity_damaged_units==nil || session[:new_delivery].quantity_damaged_units == "" || session[:new_delivery].quantity_damaged_units.to_i == 0
-          qd_del_route_step = DeliveryRouteStep.find_by_route_step_code_and_delivery_id("damaged_crates_receive_yes", session[:new_delivery].id)
-          if qd_del_route_step
-            qd_del_route_step.destroy
+        #(spec 5) test to find if delivery is first for (season, farm, rmt_variety)
+        delivery_season_farm_rmt_test = Delivery.find_by_sql("select * from deliveries where season_code = '#{session[:new_delivery].season_code}'and farm_code = '#{session[:new_delivery].farm_code}' and rmt_variety_code = '#{session[:new_delivery].rmt_variety_code}'")
+        if delivery_season_farm_rmt_test.length() > 0 #&& delivery_season_farm_rmt_test.length() == 1
+          update_mrl_labels_printed_route_step
+        end
+
+  #                	     #(spec 6) activation of 'delivery capture complete' route step
+  #                	     grower_commit_route_step_test = DeliveryRouteStep.find_by_route_step_code_and_delivery_id("grower_commitment_data_captured", session[:new_delivery].id)
+  #                	     mrl_data_capture_route_step_test = DeliveryRouteStep.find_by_route_step_code_and_delivery_id("mrl_data_capture_completed", session[:new_delivery].id)
+  ##                	     mrl_required_route_step_test = DeliveryRouteStep.find_by_route_step_code_and_delivery_id("5", session[:new_delivery].id)
+  #                       mrl_required_route_step_test = DeliveryRouteStep.find_by_route_step_code_and_delivery_id("mrl_labels_printed", session[:new_delivery].id)
+
+
+  #DELETING ROUTE STEPS ASSOCIATED WITH DELIVERY WHERE delivery_route_code = 'drench1 complete'
+        if @delivery_track_indicator.track_variable_1 == false
+          delivery_route_step_1 = DeliveryRouteStep.find_by_route_step_code_and_delivery_id("drench_1_completed", session[:new_delivery].id)
+          delivery_route_step_2 = DeliveryRouteStep.find_by_route_step_code_and_delivery_id("drench_2_completed", session[:new_delivery].id)
+          if delivery_route_step_1
+            delivery_route_step_1.destroy
+          end
+          if delivery_route_step_2
+            delivery_route_step_2.destroy
           end
         end
 
-        #updating delivery route step where route_code = delivery_captured
-        if route_steps!=nil
-          @delivery_route_step = DeliveryRouteStep.find_by_route_step_code_and_delivery_id("delivery_note_captured", session[:new_delivery].id) #????delivery_capture_started
-          if @delivery_route_step != nil
-            @delivery_route_step.update_attributes({:date_activated => DateTime.now.to_formatted_s(:db), :date_completed => DateTime.now.to_formatted_s(:db)})
-            session[:new_delivery].update_attribute(:delivery_status, @delivery_route_step.route_step_code)
-          end
+        #putting route steps into a session array
+        if session[:delivery_route_steps]!=nil
+          session[:delivery_route_steps] = nil
         end
+        #@route_step_type = RouteStepType.find_by_route_step_type_code("rmt_delivery")
+        @del_route_steps = DeliveryRouteStep.find_by_sql("select delivery_route_steps.*,route_steps.sequence_number from delivery_route_steps 	join route_steps on delivery_route_steps.route_step_id=route_steps.id where delivery_id ='#{session[:new_delivery].id}' order by route_steps.sequence_number ASC")
+        session[:delivery_route_steps] = @del_route_steps
+        #            	     end
+        #end update delivery status of delivery record
+
+        flash[:notice] = "delivery track indicator created! " + @mrl_print_msg.to_s
+
+        DeliveryTrackIndicator.add_delivery_track_indicator_to_bins(session[:new_delivery],@delivery_track_indicator, session[:user_id].user_name)
+
+        @freeze_flash = false
+        params[:id] = session[:new_delivery].id
+        edit_delivery
+      else
+        @is_create_retry = true
+
+        render_add_delivery_track_indicator
       end
-      # end of transaction
-
-      #(spec 5) test to find if delivery is first for (season, farm, rmt_variety)
-      delivery_season_farm_rmt_test = Delivery.find_by_sql("select * from deliveries where season_code = '#{session[:new_delivery].season_code}'and farm_code = '#{session[:new_delivery].farm_code}' and rmt_variety_code = '#{session[:new_delivery].rmt_variety_code}'")
-      if delivery_season_farm_rmt_test.length() > 0 #&& delivery_season_farm_rmt_test.length() == 1
-        update_mrl_labels_printed_route_step
-      end
-
-#                	     #(spec 6) activation of 'delivery capture complete' route step
-#                	     grower_commit_route_step_test = DeliveryRouteStep.find_by_route_step_code_and_delivery_id("grower_commitment_data_captured", session[:new_delivery].id)
-#                	     mrl_data_capture_route_step_test = DeliveryRouteStep.find_by_route_step_code_and_delivery_id("mrl_data_capture_completed", session[:new_delivery].id)
-##                	     mrl_required_route_step_test = DeliveryRouteStep.find_by_route_step_code_and_delivery_id("5", session[:new_delivery].id)
-#                       mrl_required_route_step_test = DeliveryRouteStep.find_by_route_step_code_and_delivery_id("mrl_labels_printed", session[:new_delivery].id)
-
-
-#DELETING ROUTE STEPS ASSOCIATED WITH DELIVERY WHERE delivery_route_code = 'drench1 complete'
-      if @delivery_track_indicator.track_variable_1 == false
-        delivery_route_step_1 = DeliveryRouteStep.find_by_route_step_code_and_delivery_id("drench_1_completed", session[:new_delivery].id)
-        delivery_route_step_2 = DeliveryRouteStep.find_by_route_step_code_and_delivery_id("drench_2_completed", session[:new_delivery].id)
-        if delivery_route_step_1
-          delivery_route_step_1.destroy
-        end
-        if delivery_route_step_2
-          delivery_route_step_2.destroy
-        end
-      end
-
-      #putting route steps into a session array
-      if session[:delivery_route_steps]!=nil
-        session[:delivery_route_steps] = nil
-      end
-      #@route_step_type = RouteStepType.find_by_route_step_type_code("rmt_delivery")
-      @del_route_steps = DeliveryRouteStep.find_by_sql("select delivery_route_steps.*,route_steps.sequence_number from delivery_route_steps 	join route_steps on delivery_route_steps.route_step_id=route_steps.id where delivery_id ='#{session[:new_delivery].id}' order by route_steps.sequence_number ASC")
-      session[:delivery_route_steps] = @del_route_steps
-      #            	     end
-      #end update delivery status of delivery record
-
-      flash[:notice] = "delivery track indicator created! " + @mrl_print_msg.to_s
-      #                   @delivery_route_step.update_attribute(:date_completed, DateTime.now)
-      @freeze_flash = false
-      params[:id] = session[:new_delivery].id
-      edit_delivery
-    else
-      @is_create_retry = true
-
-#                   set_is_first_time
-      render_add_delivery_track_indicator
     end
   end
-
 
   def add_delivery_indicator_for_captured_delivery
     if session[:new_delivery] == nil
@@ -1518,26 +1520,31 @@ class RmtProcessing::DeliveryController < ApplicationController
   def delete_delivery_track_indicator
     begin
       return if authorise_for_web(program_name?, 'delivery_delete')== false
-      id = params[:id]
-      if id && delivery_track_indicator = DeliveryTrackIndicator.find(id)
-        #test for bin scanning
-        bin_scanning_route_step = DeliveryRouteStep.find_by_delivery_id_and_route_step_code(session[:new_delivery].id, "22")
-        if bin_scanning_route_step!=nil && bin_scanning_route_step.date_completed!=nil
-          flash[:error] = "Editing of the indicator is not allowed since bins were scanned against this delivery"
-          render_existing_new_delivery
-        else
-          delivery_track_indicator.destroy
-          session[:alert] = " Delivery Track Indicator Record deleted."
-          session[:delivery_track_indicators] = nil if session[:delivery_track_indicators]!= nil
-          delivery_track_indicators = DeliveryTrackIndicator.find_by_sql("select * from delivery_track_indicators where delivery_id = '#{session[:new_delivery].id}' order by id asc")
-          session[:delivery_track_indicators] = delivery_track_indicators
-          render_existing_new_delivery
+
+      ActiveRecord::Base.transaction do
+        id = params[:id]
+        if id && delivery_track_indicator = DeliveryTrackIndicator.find(id)
+          #test for bin scanning
+          bin_scanning_route_step = DeliveryRouteStep.find_by_delivery_id_and_route_step_code(session[:new_delivery].id, "22")
+          if bin_scanning_route_step!=nil && bin_scanning_route_step.date_completed!=nil
+            flash[:error] = "Editing of the indicator is not allowed since bins were scanned against this delivery"
+            render_existing_new_delivery
+          else
+            delivery_track_indicator.destroy
+            session[:alert] = " Delivery Track Indicator Record deleted."
+            session[:delivery_track_indicators] = nil if session[:delivery_track_indicators]!= nil
+            delivery_track_indicators = DeliveryTrackIndicator.find_by_sql("select * from delivery_track_indicators where delivery_id = '#{session[:new_delivery].id}' order by id asc")
+            session[:delivery_track_indicators] = delivery_track_indicators
+
+            DeliveryTrackIndicator.delete_delivery_track_indicator_from_bins(delivery_track_indicator, session[:new_delivery], session[:user_id].user_name)
+
+            render_existing_new_delivery
+          end
         end
       end
     rescue handle_error('record could not be deleted')
     end
   end
-
 
 #observers remote methods
 
@@ -2370,7 +2377,7 @@ class RmtProcessing::DeliveryController < ApplicationController
     bins = Bin.find_by_sql("select * from bins join deliveries on deliveries.id = bins.delivery_id where deliveries.delivery_number=#{session[:new_delivery].delivery_number}")
     if (bins.length > 0)
       @content_header_caption = "'sorry, " + bins.length.to_s + " bin(s) have already been scanned for this delivery'"
-      return false
+      return true
     end
     route_step = DeliveryRouteStep.find_by_delivery_id_and_route_step_code(session[:new_delivery].id, "100_fruit_sample_completed")
     if (route_step && route_step.date_completed && session[:new_delivery].rmt_product_id)
