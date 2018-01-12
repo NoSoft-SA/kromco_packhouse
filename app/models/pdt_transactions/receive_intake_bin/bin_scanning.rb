@@ -77,13 +77,13 @@ class BinScanning < PDTTransactionState
     slms_indicator    = TrackSlmsIndicator.find(track_slms_id)
     slms_indicator_id = slms_indicator.id
 
-    if (slms_indicator_id.to_i == @parent.track_slms_indicator_id.to_i)
+    # if (slms_indicator_id.to_i == @parent.track_slms_indicator_id.to_i)
       @parent.bin_number = scan_bin_number
 
-    else
-      error = ["The delivery expects Fruit Type :'#{@parent.track_slms_indicator_code}' but this bin is of type :'#{slms_indicator.track_slms_indicator_code}' "]
-      return error
-    end
+    # else
+    #   error = ["The delivery expects Fruit Type :'#{@parent.track_slms_indicator_code}' but this bin is of type :'#{slms_indicator.track_slms_indicator_code}' "]
+    #   return error
+    # end
     #================================================================================
 
 #    #CHECK IF route step 'intake' bin scanning complete' IS DONE, RETURN
