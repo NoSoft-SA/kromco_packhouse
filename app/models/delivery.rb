@@ -28,9 +28,17 @@ class Delivery < ActiveRecord::Base
     # end
   end
 
-  def after_save
+  def before_create
+    validate
+  end
+
+  def after_create
+    self.updated_at = Time.now
     create_route_steps
     generate_sample_bins
+  end
+
+  def after_save
     set_bins_rmt_product
   end
 
@@ -97,8 +105,8 @@ class Delivery < ActiveRecord::Base
   end
 
   def set_bins_rmt_product
-    if(self.rmt_product_id && !(Bin.find(:first, :condition=>"delivery_id=#{self.id}")))
-      self.connection.execute("update bins set rmt_product_id=#{self.rmt_product_id} delivery_id=#{self.id}")
+    if(self.rmt_product_id && !(Bin.find(:first, :conditions=>"delivery_id=#{self.id}")))
+      self.connection.execute("update bins set rmt_product_id=#{self.rmt_product_id} where delivery_id=#{self.id}")
     end
   end
 
@@ -201,10 +209,6 @@ class Delivery < ActiveRecord::Base
 #        self.treatment_code = ripe_point.treatment_code
       end
     end
-  end
-
-  def after_create
-    self.updated_at = Time.now
   end
 
 
