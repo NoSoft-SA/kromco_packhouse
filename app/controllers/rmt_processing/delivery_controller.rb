@@ -1302,33 +1302,6 @@ class RmtProcessing::DeliveryController < ApplicationController
         session[:new_delivery].transaction do
           route_step_type = RouteStepType.find_by_route_step_type_code("rmt_delivery")
           route_steps = route_step_type.route_steps
-          #Test if the route steps were already copied
-          del_route_steps_test = DeliveryRouteStep.find_by_delivery_id(session[:new_delivery].id)
-          grower_commitment_season = Season.find(session[:new_delivery].season_id)
-          #                           grower_commitment_record = GrowerCommitment.find(:first, :conditions=>["farm_id = ? and season = ?", session[:new_delivery].farm_id, grower_commitment_season.season]) if(grower_commitment_season)
-          grower_commitment_record = GrowerCommitment.find_by_sql("select grower_commitments.* from grower_commitments join spray_program_results on spray_program_results.grower_commitment_id=grower_commitments.id where grower_commitments.farm_id=#{session[:new_delivery].farm_id} and grower_commitments.season='#{grower_commitment_season.season}' and spray_program_results.rmt_variety_code='#{session[:new_delivery].rmt_variety_code}' ")[0] if (grower_commitment_season)
-          if del_route_steps_test==nil
-            #copying route steps to delivery route steps table
-            if route_steps!=nil
-              for route_step in route_steps
-                delivery_route_step = DeliveryRouteStep.new
-                delivery_route_step.route_step_code = route_step.route_step_code
-                delivery_route_step.route_step_id = route_step.id
-                delivery_route_step.delivery_number = session[:new_delivery].delivery_number
-                delivery_route_step.delivery_id = session[:new_delivery].id
-                if (delivery_route_step.route_step_code == "grower_commitment_data_captured" && grower_commitment_record)
-                  delivery_route_step.date_activated = grower_commitment_record.grower_commitment_data_capture_date_time
-                  delivery_route_step.date_completed = grower_commitment_record.grower_commitment_data_capture_date_time
-                  Delivery.update(session[:new_delivery].id, {:delivery_status => delivery_route_step.route_step_code})
-                elsif (delivery_route_step.route_step_code == "mrl_data_capture_completed" && grower_commitment_record)
-                  delivery_route_step.date_activated = grower_commitment_record.mrl_data_capture_date_time
-                  delivery_route_step.date_completed = grower_commitment_record.mrl_data_capture_date_time
-                  Delivery.update(session[:new_delivery].id, {:delivery_status => delivery_route_step.route_step_code})
-                end
-                delivery_route_step.save
-              end
-            end
-          end
 
           #check if quantity_damaged_units field is empty
           #delete this route step if quantity_damaged_units field is empty
@@ -1356,14 +1329,7 @@ class RmtProcessing::DeliveryController < ApplicationController
           update_mrl_labels_printed_route_step
         end
 
-  #                	     #(spec 6) activation of 'delivery capture complete' route step
-  #                	     grower_commit_route_step_test = DeliveryRouteStep.find_by_route_step_code_and_delivery_id("grower_commitment_data_captured", session[:new_delivery].id)
-  #                	     mrl_data_capture_route_step_test = DeliveryRouteStep.find_by_route_step_code_and_delivery_id("mrl_data_capture_completed", session[:new_delivery].id)
-  ##                	     mrl_required_route_step_test = DeliveryRouteStep.find_by_route_step_code_and_delivery_id("5", session[:new_delivery].id)
-  #                       mrl_required_route_step_test = DeliveryRouteStep.find_by_route_step_code_and_delivery_id("mrl_labels_printed", session[:new_delivery].id)
-
-
-  #DELETING ROUTE STEPS ASSOCIATED WITH DELIVERY WHERE delivery_route_code = 'drench1 complete'
+        #DELETING ROUTE STEPS ASSOCIATED WITH DELIVERY WHERE delivery_route_code = 'drench1 complete'
         if @delivery_track_indicator.track_variable_1 == false
           delivery_route_step_1 = DeliveryRouteStep.find_by_route_step_code_and_delivery_id("drench_1_completed", session[:new_delivery].id)
           delivery_route_step_2 = DeliveryRouteStep.find_by_route_step_code_and_delivery_id("drench_2_completed", session[:new_delivery].id)

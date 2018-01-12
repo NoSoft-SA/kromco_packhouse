@@ -29,12 +29,43 @@ class Delivery < ActiveRecord::Base
     puts
   end
 
+  def after_save
+    create_route_steps
+  end
+
   def self.do_mrl_test_for_commodity(commodity_code)
     commodity = Commodity.find_by_commodity_code(commodity_code)
     if(commodity && commodity.grower_commitment_required)
       return true
     end
     return false
+  end
+
+  def create_route_steps
+    route_step_type = RouteStepType.find_by_route_step_type_code("rmt_delivery")
+    route_steps = route_step_type.route_steps
+
+    if(route_steps && !DeliveryRouteStep.find_by_delivery_id(self.id))
+      grower_commitment_season = Season.find(self.season_id)
+      grower_commitment_record = GrowerCommitment.find_by_sql("select grower_commitments.* from grower_commitments join spray_program_results on spray_program_results.grower_commitment_id=grower_commitments.id where grower_commitments.farm_id=#{self.farm_id} and grower_commitments.season='#{grower_commitment_season.season}' and spray_program_results.rmt_variety_code='#{self.rmt_variety_code}' ")[0] if (grower_commitment_season)
+      for route_step in route_steps
+        delivery_route_step = DeliveryRouteStep.new
+        delivery_route_step.route_step_code = route_step.route_step_code
+        delivery_route_step.route_step_id = route_step.id
+        delivery_route_step.delivery_number = self.delivery_number
+        delivery_route_step.delivery_id = self.id
+        if (delivery_route_step.route_step_code == "grower_commitment_data_captured" && grower_commitment_record)
+          delivery_route_step.date_activated = grower_commitment_record.grower_commitment_data_capture_date_time
+          delivery_route_step.date_completed = grower_commitment_record.grower_commitment_data_capture_date_time
+          Delivery.update(self.id, {:delivery_status => delivery_route_step.route_step_code})
+        elsif (delivery_route_step.route_step_code == "mrl_data_capture_completed" && grower_commitment_record)
+          delivery_route_step.date_activated = grower_commitment_record.mrl_data_capture_date_time
+          delivery_route_step.date_completed = grower_commitment_record.mrl_data_capture_date_time
+          Delivery.update(self.id, {:delivery_status => delivery_route_step.route_step_code})
+        end
+        delivery_route_step.save
+      end
+    end
   end
 
    def self.delivery_mrl_passed?(delivery_id)
