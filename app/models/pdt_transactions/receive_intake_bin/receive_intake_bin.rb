@@ -71,9 +71,9 @@ class ReceiveIntakeBin < PDTTransaction
 
       fruit_sample_completed   = delivery_route_steps[0].date_completed
       intake_bin_scan_completed   = delivery_route_steps[1].date_completed
-      if  fruit_sample_completed   == nil
-        return PDTTransaction.build_msg_screen_definition("delivery route steps not done for route_step_code :'#{delivery_route_steps[0].route_step_code}'", nil, nil, nil)
-      end
+      # if  fruit_sample_completed   == nil
+      #   return PDTTransaction.build_msg_screen_definition("delivery route steps not done for route_step_code :'#{delivery_route_steps[0].route_step_code}'", nil, nil, nil)
+      # end
       if intake_bin_scan_completed!= nil
         return PDTTransaction.build_msg_screen_definition("Bin scan has already completed successfully  ", nil, nil, nil)
       end
@@ -86,10 +86,10 @@ class ReceiveIntakeBin < PDTTransaction
 
     end
 
-    if((delivery.commodity_code=='AP' || delivery.commodity_code=='PL') && (!track_indicator_for_delivery[2]))
-      result_screen = PDTTransaction.build_msg_screen_definition(["Delivery needs a third indicator of type[pressure_ripeness]"], nil, nil, nil)
-      return result_screen
-    end
+    # if((delivery.commodity_code=='AP' || delivery.commodity_code=='PL') && (!track_indicator_for_delivery[2]))
+    #   result_screen = PDTTransaction.build_msg_screen_definition(["Delivery needs a third indicator of type[pressure_ripeness]"], nil, nil, nil)
+    #   return result_screen
+    # end
 
     next_state = BinScanning.new(self)
     self.set_active_state(next_state)
