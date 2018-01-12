@@ -393,12 +393,8 @@ class RmtProcessing::DeliveryController < ApplicationController
           return
         end
 
+        @delivery.delivery_number = MesControlFile.next_seq_web(MesControlFile.const_get("INTAKE_DELIVERY_NUMBER"))
         if @delivery.save
-          #get the mes control file value and update it
-          delivery_number = MesControlFile.next_seq_web(MesControlFile.const_get("INTAKE_DELIVERY_NUMBER"))
-
-          @delivery.update_attribute(:delivery_number, delivery_number)
-
           session[:new_delivery] = @delivery
           puts session[:new_delivery].id.to_s
           puts "++++++++++++++++++++"
@@ -1234,45 +1230,22 @@ class RmtProcessing::DeliveryController < ApplicationController
         @delivery_track_indicator.track_variable_1 = checked_1
         @delivery_track_indicator.track_variable_2 = checked_2
 
-        if passed_2 || session[:new_delivery].commodity_code == "PL"
-          #create sample bins
-          sample_percentage = RmtVariety.find_by_rmt_variety_code_and_commodity_code(session[:new_delivery].rmt_variety_code, session[:new_delivery].commodity_code).sample_percentage
-          if sample_percentage || session[:new_delivery].commodity_code == "PL"
-            quantity_full_bins = session[:new_delivery].quantity_full_bins
-            if (session[:new_delivery].commodity_code == "PL")
-              array = Array.new
-              (1..quantity_full_bins).each do |x|
-                array.push x
-              end
-            else
-              sample_size = (sample_percentage.to_f / 100) * quantity_full_bins
-              size = sample_size.round
-              size = 1 if (size < 1)
-              array = RandomGenerator.new(size, quantity_full_bins).generate_sequence_numbers
-            end
-
-            if array.length()!=0
-              array.each do |number|
-  #                                puts "numero = " + number.to_s
-                delivery_sample_bin = DeliverySampleBin.new
-                delivery_sample_bin.sample_bin_sequence_number = number
-                delivery_sample_bin.delivery_id = session[:new_delivery].id
-                delivery_sample_bin.save
-              end
-            end
-          else
-            flash[:error] = "delivery_sample_bin and delivery_route_steps could not be created: sample_percentage for rmt_variety[#{session[:new_delivery].rmt_variety_code}] has not been set up"
-            @freeze_flash = false
-            params[:id] = session[:new_delivery].id
-            edit_delivery
-            return
-          end
-          #updating the delivery record[drench_delivery && sample_bins attributes]
-          session[:new_delivery].update_attributes(:drench_delivery => checked_1, :sample_bins => checked_2)
-        else
-          #this_delivery.update_attribute(:sample_bins, "FALSE")
-          #session[:new_delivery].sample_bins = "FALSE"
-        end
+        # if passed_2 || session[:new_delivery].commodity_code == "PL"
+        #   #create sample bins
+        #
+        #   else
+        #     flash[:error] = "delivery_sample_bin and delivery_route_steps could not be created: sample_percentage for rmt_variety[#{session[:new_delivery].rmt_variety_code}] has not been set up"
+        #     @freeze_flash = false
+        #     params[:id] = session[:new_delivery].id
+        #     edit_delivery
+        #     return
+        #   end
+        #   #updating the delivery record[drench_delivery && sample_bins attributes]
+        #   session[:new_delivery].update_attributes(:drench_delivery => checked_1, :sample_bins => checked_2)
+        # else
+        #   #this_delivery.update_attribute(:sample_bins, "FALSE")
+        #   #session[:new_delivery].sample_bins = "FALSE"
+        # end
         #============
 
         puts @delivery_track_indicator.track_variable_1.to_s

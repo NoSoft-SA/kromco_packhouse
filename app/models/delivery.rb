@@ -23,14 +23,15 @@ class Delivery < ActiveRecord::Base
 
   def before_save
     changed_fields?
-    if(@changed_fields && @changed_fields.keys.include?('rmt_product_id') && ((bins = Bin.find_all_by_delivery_id(self.id)).length>0))
-      raise "sorry cannot change rmt_product of this delivery , #{bins.length} bin(s) have already been scanned for this delivery"
-    end
-    puts
+    # if(@changed_fields && @changed_fields.keys.include?('rmt_product_id') && ((bins = Bin.find_all_by_delivery_id(self.id)).length>0))
+    #   raise "sorry cannot change rmt_product of this delivery , #{bins.length} bin(s) have already been scanned for this delivery"
+    # end
   end
 
   def after_save
     create_route_steps
+    generate_sample_bins
+    set_bins_rmt_product
   end
 
   def self.do_mrl_test_for_commodity(commodity_code)
@@ -65,6 +66,39 @@ class Delivery < ActiveRecord::Base
         end
         delivery_route_step.save
       end
+    end
+  end
+
+  def generate_sample_bins
+    sample_percentage = RmtVariety.find_by_rmt_variety_code_and_commodity_code(self.rmt_variety_code, self.commodity_code).sample_percentage
+    if sample_percentage || self.commodity_code == "PL"
+      quantity_full_bins = self.quantity_full_bins
+      if (self.commodity_code == "PL")
+        array = Array.new
+        (1..quantity_full_bins).each do |x|
+          array.push x
+        end
+      else
+        sample_size = (sample_percentage.to_f / 100) * quantity_full_bins
+        size = sample_size.round
+        size = 1 if (size < 1)
+        array = RandomGenerator.new(size, quantity_full_bins).generate_sequence_numbers
+      end
+
+      if array.length()!=0
+        array.each do |number|
+          delivery_sample_bin = DeliverySampleBin.new
+          delivery_sample_bin.sample_bin_sequence_number = number
+          delivery_sample_bin.delivery_id = self.id
+          delivery_sample_bin.save
+        end
+      end
+    end
+  end
+
+  def set_bins_rmt_product
+    if(self.rmt_product_id && !(Bin.find(:first, :condition=>"delivery_id=#{self.id}")))
+      self.connection.execute("update bins set rmt_product_id=#{self.rmt_product_id} delivery_id=#{self.id}")
     end
   end
 

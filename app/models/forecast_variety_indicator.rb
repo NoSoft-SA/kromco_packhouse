@@ -98,7 +98,7 @@ def print_bin_tickets(http_conn, qty_to_print, printer)
     self.update_attribute(:number_tickets_printed, (self.number_tickets_printed + qty_to_print.to_i))
 
     #hans: uncomment
-    http_conn.get("/" + print_instruction, nil)
+    # http_conn.get("/" + print_instruction, nil)
     puts "bin ticket printed"
 
     return print_instruction
