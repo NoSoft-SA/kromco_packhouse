@@ -1119,7 +1119,7 @@ end
     if id && @delivery = Delivery.find(id)
       #Test for bin scanning
       bin_scanning_route_step = DeliveryRouteStep.find_by_route_step_code_and_delivery_id("22", id)
-      if bin_scanning_route_step!=nil && bin_scanning_route_step.date_activated!= nil
+      if false#bin_scanning_route_step!=nil && bin_scanning_route_step.date_activated!= nil
         # flash[:notice] = "Editing of this delivery is not allowed since bins were scanned"
         # render_list_deliveries
       else
@@ -1156,9 +1156,9 @@ end
     if id && @delivery_track_indicator = DeliveryTrackIndicator.find(id)
       #Testing for bin scanning
       bin_scanning_route_step = DeliveryRouteStep.find_by_delivery_id_and_route_step_code(session[:new_delivery].id, "22")
-      if bin_scanning_route_step!=nil && bin_scanning_route_step.date_activated!=nil
-        flash[:notice] = "Editing of the indicator is not allowed since bins were scanned against this delivery"
-        render_existing_new_delivery
+      if  false#bin_scanning_route_step!=nil && bin_scanning_route_step.date_activated!=nil
+        # flash[:notice] = "Editing of the indicator is not allowed since bins were scanned against this delivery"
+        # render_existing_new_delivery
       else
         render_view_delivery_track_indicator
       end
