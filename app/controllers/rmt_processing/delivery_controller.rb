@@ -2414,7 +2414,7 @@ class RmtProcessing::DeliveryController < ApplicationController
     ripe_point_code = session[:delivery_form][:ripe_point_code_combo_selection]
 
     if authorise(program_name?, 'choose_rmt_product_code', session[:user_id])
-      @rmt_product_codes = RmtProduct.find_by_sql("select rmt_product_code,id from rmt_products where variety_code='#{session[:delivery_form][:rmt_variety_code_combo_selection]}' and commodity_code='#{session[:delivery_form][:commodity_code_combo_selection]}' and rmt_product_type_code='#{session[:delivery_form][:rmt_product_type_code_combo_selection]}' ORDER BY rmt_product_code").map { |g| [g.rmt_product_code, g.id] }
+      @rmt_product_codes = RmtProduct.find_by_sql("select rmt_product_code,id from rmt_products where variety_code='#{session[:delivery_form][:rmt_variety_code_combo_selection]}' and commodity_code='#{session[:delivery_form][:commodity_code_combo_selection]}' and rmt_product_type_code='orchard_run' ORDER BY rmt_product_code").map { |g| [g.rmt_product_code, g.id] }
     else
       @rmt_product_codes = ["<empty>"]
     end
@@ -2422,7 +2422,7 @@ class RmtProcessing::DeliveryController < ApplicationController
     if ((session[:delivery_form][:rmt_variety_code_combo_selection] && session[:delivery_form][:rmt_variety_code_combo_selection].to_s != "") && (ripe_point_code && ripe_point_code != ""))
       more_conditions = ""
       #sql = "select * from rmt_products where size_code = 'UNS' and product_class_code = 'OR' and treatment_code = '#{treatment_code}' and commodity_code='#{session[:delivery_form][:commodity_code_combo_selection]}' and variety_code='#{session[:delivery_form][:rmt_variety_code_combo_selection].to_s}' and ripe_point_code='#{ripe_point_code}' #{more_conditions}"
-      sql = "select * from rmt_products where size_code = 'UNS' and product_class_code = 'OR' and treatment_code = '#{treatment_code}' and commodity_code='#{session[:delivery_form][:commodity_code_combo_selection]}' and variety_code='#{session[:delivery_form][:rmt_variety_code_combo_selection].to_s}' and ripe_point_code='#{ripe_point_code}'  and rmt_product_type_code='#{session[:delivery_form][:rmt_product_type_code_combo_selection]}' #{more_conditions}"
+      sql = "select * from rmt_products where size_code = 'UNS' and product_class_code = 'OR' and treatment_code = '#{treatment_code}' and commodity_code='#{session[:delivery_form][:commodity_code_combo_selection]}' and variety_code='#{session[:delivery_form][:rmt_variety_code_combo_selection].to_s}' and ripe_point_code='#{ripe_point_code}'  and rmt_product_type_code='orchard_run' #{more_conditions}"
       puts "2. Search by = #{sql}"
 
       @advised_rmt_product_code = RmtProduct.find_by_sql(sql).map { |g| [g.rmt_product_code, g.id] }[0]
