@@ -474,8 +474,8 @@ class RmtProcessing::DeliveryController < ApplicationController
       #Test for bin scanning
       bin_scanning_route_step = DeliveryRouteStep.find_by_route_step_code_and_delivery_id("sample_bin_weigh_completed", id) #??? HANS
       if bin_scanning_route_step!=nil && bin_scanning_route_step.date_completed!= nil
-        flash[:error] = "Editing of this delivery is not allowed since bins were scanned"
-        render_list_deliveries
+        # flash[:error] = "Editing of this delivery is not allowed since bins were scanned"
+        # render_list_deliveries
       else
 
         if session[:new_delivery]!=nil
@@ -607,8 +607,8 @@ class RmtProcessing::DeliveryController < ApplicationController
         #Test for bin scanning
         bin_scanning_route_step = DeliveryRouteStep.find_by_route_step_code_and_delivery_id("22", id)
         if bin_scanning_route_step!=nil && bin_scanning_route_step.date_completed!= nil
-          flash[:error] = "Editing of this delivery is not allowed since bins were scanned"
-          render_list_deliveries
+          # flash[:error] = "Editing of this delivery is not allowed since bins were scanned"
+          # render_list_deliveries
         else
 
           if session[:new_delivery]!=nil

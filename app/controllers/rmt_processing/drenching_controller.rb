@@ -1120,8 +1120,8 @@ end
       #Test for bin scanning
       bin_scanning_route_step = DeliveryRouteStep.find_by_route_step_code_and_delivery_id("22", id)
       if bin_scanning_route_step!=nil && bin_scanning_route_step.date_activated!= nil
-        flash[:notice] = "Editing of this delivery is not allowed since bins were scanned"
-        render_list_deliveries
+        # flash[:notice] = "Editing of this delivery is not allowed since bins were scanned"
+        # render_list_deliveries
       else
 
         if session[:new_delivery]!=nil
