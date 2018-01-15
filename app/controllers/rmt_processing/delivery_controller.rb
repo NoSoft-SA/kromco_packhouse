@@ -394,7 +394,7 @@ class RmtProcessing::DeliveryController < ApplicationController
         end
 
         @delivery.delivery_number = MesControlFile.next_seq_web(MesControlFile.const_get("INTAKE_DELIVERY_NUMBER"))
-        if @delivery.save
+        if @delivery.create
           session[:new_delivery] = @delivery
           puts session[:new_delivery].id.to_s
           puts "++++++++++++++++++++"
