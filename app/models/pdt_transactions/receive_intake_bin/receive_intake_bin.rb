@@ -33,10 +33,8 @@ class ReceiveIntakeBin < PDTTransaction
     if delivery == nil
       return PDTTransaction.build_msg_screen_definition("delivery number does not exists ", nil, nil, nil)
     end
-    if(delivery.rmt_product_id && rmt_product = RmtProduct.find(delivery.rmt_product_id))
-      @delivery_rmt_variety = rmt_product.variety_code
-    end
     @delivery_number        = delivery.delivery_number
+    @delivery_rmt_variety = delivery.rmt_variety_code
     @delivery_id            = delivery.id
     @qty_full_bins_required = delivery.quantity_full_bins
     @qty_half_bins_required = delivery.quantity_partial_units

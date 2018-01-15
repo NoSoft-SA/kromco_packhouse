@@ -77,6 +77,11 @@ class BinScanning < PDTTransactionState
     slms_indicator    = TrackSlmsIndicator.find(track_slms_id)
     slms_indicator_id = slms_indicator.id
 
+    if(forecast_variety.forecast_variety.rmt_variety_code != @parent.delivery_rmt_variety)
+      error = ["The forecast rmt_variety_code[#{forecast_variety.forecast_variety.rmt_variety_code}] is not the same as the delivery[#{@parent.delivery_rmt_variety}]"]
+      return error
+    end
+
     # if (slms_indicator_id.to_i == @parent.track_slms_indicator_id.to_i)
       @parent.bin_number = scan_bin_number
 
