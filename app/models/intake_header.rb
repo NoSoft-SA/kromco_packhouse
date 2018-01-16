@@ -59,7 +59,7 @@ class IntakeHeader < ActiveRecord::Base
     mapped_sequences  = MappedPalletSequence.find_all_by_intake_header_id(self.id)
     seq_rmt_groups    = mapped_sequences.group(['commodity', 'variety', 'class_code', 'pc_code'], nil, true)
     shift             = Shift.find_by_shift_code('UNKNOWN')
-    rraise MesScada::InfoError,"Shift: 'UNKNOWN' does not exist. Needed for depot runs" if !shift
+    raise MesScada::InfoError,"Shift: 'UNKNOWN' does not exist. Needed for depot runs" if !shift
     for seq_rmt_group in seq_rmt_groups
 
       variety_rec = Variety.find_all_by_commodity_code_and_marketing_variety_code(seq_rmt_group[0].commodity, seq_rmt_group[0].variety)[0]

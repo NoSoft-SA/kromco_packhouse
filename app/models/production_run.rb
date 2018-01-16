@@ -66,6 +66,11 @@ class ProductionRun < ActiveRecord::Base
   end
 
 
+  def after_save
+    validate_parent_and_child
+  end
+
+
   def after_create
     return if self.is_depot_run
     puts "RUN AFTER CREATE"
@@ -1436,6 +1441,25 @@ class ProductionRun < ActiveRecord::Base
     end
 
   end
+
+
+  def validate_parent_and_child
+
+    codes = []
+    codes << self.production_run_code
+    codes << self.parent_run_code if self.parent_run_code
+    codes << self.child_run_code if self.child_run_code
+
+    size = codes.size
+    if size != codes.uniq.size
+      raise MesScada::InfoError, "run-code, parent-code and child-code must all be different: <BR> #{codes.join(",")}"
+    end
+    #all items must be unique
+
+
+
+  end
+
 
 
   def validate
