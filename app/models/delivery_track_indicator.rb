@@ -9,18 +9,25 @@ class DeliveryTrackIndicator < ActiveRecord::Base
 
   def DeliveryTrackIndicator.add_delivery_track_indicator_to_bins(delivery, delivery_track_indicator, user_name)
     if (b=delivery.bins[0])
-      (1..5).each do |g|
-        if (!eval("b.track_indicator#{g}_id"))
+      # (1..5).each do |g|
+      #   if (!eval("b.track_indicator#{g}_id"))
           or_clause = "bins.bin_number='#{delivery.bins.map { |bn| bn.bin_number }.join("' or bins.bin_number='")}'"
+          if(delivery_track_indicator.track_indicator_type_code == 'RMI')
+            g = 1
+          elsif(delivery_track_indicator.track_indicator_type_code == 'STA')
+            g = 2
+          elsif(delivery_track_indicator.track_indicator_type_code == 'pressure_ripeness')
+            g = 3
+          end
           ActiveRecord::Base.connection.execute("update bins set track_indicator#{g}_id=#{delivery_track_indicator.track_slms_indicator_id} where #{or_clause}")
 
           LogDataChange.create!(:user_name => user_name,
                                 :ref_nos => "Delivery Number=#{delivery.delivery_number} , Track Indicator=#{delivery_track_indicator.track_slms_indicator_id}",
                                 :notes => "#{delivery.bins.map { |bn| bn.bin_number }.join(",")}",
                                 :type_of_change => 'ADD TRACK INDICATOR TO A LIST OF BINS')
-          break
-        end
-      end
+          # break
+        # end
+      # end
     end
   end
 

@@ -1214,6 +1214,8 @@ class RmtProcessing::DeliveryController < ApplicationController
           user_overrides.save
         end
 
+        DeliveryTrackIndicator.add_delivery_track_indicator_to_bins(session[:new_delivery],@delivery_track_indicator, session[:user_id].user_name)
+
         if (@is_first_time || !is_second_one?)
           @freeze_flash = false
           params[:id] = session[:new_delivery].id
@@ -1325,8 +1327,6 @@ class RmtProcessing::DeliveryController < ApplicationController
         #end update delivery status of delivery record
 
         flash[:notice] = "delivery track indicator created! " + @mrl_print_msg.to_s
-
-        DeliveryTrackIndicator.add_delivery_track_indicator_to_bins(session[:new_delivery],@delivery_track_indicator, session[:user_id].user_name)
 
         @freeze_flash = false
         params[:id] = session[:new_delivery].id
