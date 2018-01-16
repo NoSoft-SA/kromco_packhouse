@@ -105,7 +105,7 @@ class Delivery < ActiveRecord::Base
   end
 
   def set_bins_rmt_product
-    if(self.rmt_product_id && !(Bin.find(:first, :conditions=>"delivery_id=#{self.id}")))
+    if(self.rmt_product_id && (Bin.find(:first, :conditions=>"delivery_id=#{self.id} and (rmt_product_id is null or rmt_product_id<>#{self.rmt_product_id})")))
       self.connection.execute("update bins set rmt_product_id=#{self.rmt_product_id} where delivery_id=#{self.id}")
     end
   end
