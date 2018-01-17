@@ -77,6 +77,7 @@ def print_bin_tickets(http_conn, qty_to_print, printer)
     @qty_to_print = qty_to_print
     data = build_bin_tickets_data
     return_string = build_print_instruction(data, printer)
+    puts return_string
     print_instruction = return_string.split("$")[0]
     seed_num = return_string.split("$")[1]
 
@@ -123,64 +124,38 @@ def build_bin_tickets_data
   farm_group_code = forecast.farm.farm_group.farm_group_code
   farm_code = forecast.farm_code
 
+  rmt_variety = RmtVariety.find_by_rmt_variety_code(self.forecast_variety.rmt_variety_code)
+  rmt_variety_description = rmt_variety.rmt_variety_description
+  if(rmt_variety_description.length < 11)
+    f4 = rmt_variety_description
+    f5 = nil
+  elsif((parts=rmt_variety_description.split(" ")).length > 1)
+    if(parts[0].length < 11)
+      f4=parts[0]
+    else
+      f4 = parts[0][0..9]
+      prefix = parts[0][10..(parts[0].length-1)] + " "
+    end
 
-  #date = Time.now.strftime("%d/%m/%Y")
 
-  data.store("F1", "")
-  data.store("F2", track_slms_indicator_code)
+    i=1
+    f5 = prefix.to_s
+    (parts.length-1).times do |a|
+      f5 += parts[i].to_s + " "
+      i+=1
+    end
+  else
+    f4 = rmt_variety_description[0..9]
+  end
+
+  f5.strip!
+
+  data.store("F1", farm_code)
+  data.store("F2", "[NR]")
   data.store("F3", "[NR]")
-  #data.store("F4", Time.now.strftime("%d/%m/%Y"))
-  data.store("F4", "[NR]")
-  data.store("F5", track_slms_indicator_description)
-  data.store("F6", farm_code)
-  data.store("F7", "[NR]")
-  data.store("F8", "") #pack_material_product_code
-  data.store("F9", "0")
-  data.store("F10", "")   #bins.rmt_products.ripe_points.pc_code_code) #"" if is null
-  data.store("F11", "UNS")   #bins.rmt_products.ripe_points.size_code) #"" if is null
-  data.store("F12", "")   #bins.rmt_products.ripe_points.product_class_code) #"" if is null
-  data.store("F13", Time.now().strftime("%d %b %Y")) #bins.created_on
-  data.store("F14", "[NR]")
-  data.store("F15", "")  #bins.production_run_rebin_id.production_runs.line_code) # "" if is null
-  data.store("F16", "")  #binfill station code
-  data.store("F17", "")  #bins.production_run_rebin_id.production_runs.id) #"" if is null
-  data.store("F18", farm_code)
-  data.store("F19", "")#bins.pack_material_product_code
-  data.store("F20", "")#bins.rmt_products.ripe_points.product_class_code) # "" if is null
-  data.store("F21", Time.now().strftime("%d %b %Y"))
-  data.store("F22", "0")  #bins.bin_weight) #0 if is null
-
-  data.store("F23", "")    #bins.rmt_products.ripe_points.pc_code_code) #"" if is null
-
-  data.store("F24", "")  #bins.binfill_station_code) #"" if is null
-
-  data.store("F25", "")#bins.production_run_rebin_id.production_runs.id) #"" if is null
-
-  data.store("F26", "UNS") #bins.rmt_products.ripe_points.size_code) #"" if is null
-
-  data.store("F27", "")  #bins.production_run_rebin_id.production_runs.line_code) # "" if is null
-
-  data.store("F28", "[NR]")
-  data.store("F29", "[NR]")
-  data.store("F30", track_slms_indicator_code)
-  data.store("F31", farm_code)
-  data.store("F32", "") #bins.pack_material_product_code
-  data.store("F33", "") #bins.rmt_products.ripe_points.product_class_code) # "" if is null
-  data.store("F34", Time.now().strftime("%d %b %Y"))
-  data.store("F35", "0")#bins.bin_weight) #0 if is null
-
-  data.store("F36", "") #bins.rmt_products.ripe_points.pc_code_code) #"" if is null
-
-  data.store("F37", "") #bins.binfill_station_code) #"" if is null
-
-  data.store("F38", "") #bins.production_run_rebin_id.production_runs.id) #"" if is null
-
-  data.store("F39", "UNS") #bins.rmt_products.ripe_points.size_code) #"" if is null
-
-  data.store("F40", "") #bins.production_run_rebin_id.production_runs.line_code) # "" if is null
-
-  data.store("F41", track_slms_indicator_code) #bins.rmt_products.ripe_points.product_class_code) # "" if is null
-
+  data.store("F4", f4)
+  data.store("F5", f5)
+  data.store("F6", self.forecast_variety.rmt_variety_code)
 
   return data
 
