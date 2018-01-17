@@ -73,13 +73,15 @@ class Li   < DocEventHandlers
     #for_depot = record.fields['destination_type'] == 'DP' # Depot ('CU' == Customer)
 
     #depot = Depot.find_by_depot_code( record.fields['destination_code'] )
-    depot = Depot.find_by_depot_code( 'ETI' )
+    depot_code = 'ETI'
+    depot_code = 'B49' if record.fields['destination_code'] == 'TRUJHB'
+    depot = Depot.find_by_depot_code(depot_code)
     if depot.nil?
-      raise EdiInError, "No depot record for depot code \"ETI\""
+      raise EdiInError, "No depot record for depot code #{depot_code}"
     else
       order.depot_id   = depot.id
-      order.depot_code = 'ETI'
-      order.depot_code = 'B49' if record.fields['destination_code'] == 'TRUJHB'
+      order.depot_code = depot.depot_code
+
     end
 
     order.customer_party_role_id  = Party.get_party_role_id_for record.fields['organization'], 'CUSTOMER'
