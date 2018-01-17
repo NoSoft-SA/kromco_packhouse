@@ -72,6 +72,9 @@ class ProductionRun < ActiveRecord::Base
 
 
   def after_create
+
+    validate_parent_and_child
+
     return if self.is_depot_run
     puts "RUN AFTER CREATE"
     run_stats                     = ProductionRunStat.new

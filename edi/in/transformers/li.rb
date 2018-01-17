@@ -79,6 +79,7 @@ class Li   < DocEventHandlers
     else
       order.depot_id   = depot.id
       order.depot_code = 'ETI'
+      order.depot_code = 'B49' if record.fields['destination_code'] == 'TRUJHB'
     end
 
     order.customer_party_role_id  = Party.get_party_role_id_for record.fields['organization'], 'CUSTOMER'
