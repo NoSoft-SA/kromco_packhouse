@@ -67,7 +67,7 @@ class RmtProcessing::DeliveryController < ApplicationController
       session[:deliveries_page] = nil
     end
 
-    list_query = "@deliveries = Delivery.find_by_sql(' select * from deliveries order by updated_at desc limit 100')"
+    list_query = "@deliveries = Delivery.find_by_sql(\"select (select track_slms_indicator_code from deliveries d join delivery_track_indicators t on t.delivery_id=d.id where d.id = od.id and t.track_indicator_type_code='RMI'), od.* from deliveries od order by od.id desc limit 100\")"
     session[:query] = list_query
     render_list_deliveries
   end
@@ -95,16 +95,6 @@ class RmtProcessing::DeliveryController < ApplicationController
     render_delivery_search_form
   end
 
-#def render_delivery_search_form(is_flat_search = nil)
-#	session[:is_flat_search] = @is_flat_search
-##	 render (inline) the search form
-#	render :inline => %{
-#		<% @content_header_caption = "'search  deliveries'"%>
-#
-#		<%= build_delivery_search_form(nil,'submit_deliveries_search','submit_deliveries_search',@is_flat_search)%>
-#
-#		}, :layout => 'content'
-#end
 
   def search_deliveries_hierarchy
     return if authorise_for_web(program_name?, 'read')== false
@@ -396,6 +386,12 @@ class RmtProcessing::DeliveryController < ApplicationController
         @delivery.delivery_number = MesControlFile.next_seq_web(MesControlFile.const_get("INTAKE_DELIVERY_NUMBER"))
         if @delivery.create
           session[:new_delivery] = @delivery
+
+          @delivery_route_step = DeliveryRouteStep.find_by_route_step_code_and_delivery_id("delivery_note_captured", session[:new_delivery].id)
+          if @delivery_route_step != nil
+            @delivery_route_step.update_attributes({:date_activated => DateTime.now.to_formatted_s(:db), :date_completed => DateTime.now.to_formatted_s(:db)})
+          end
+
           puts session[:new_delivery].id.to_s
           puts "++++++++++++++++++++"
           puts session[:delivery_form][:mrl_result_type_combo_selection].to_s
@@ -1288,13 +1284,13 @@ class RmtProcessing::DeliveryController < ApplicationController
           end
 
           #updating delivery route step where route_code = delivery_captured
-          if route_steps!=nil
-            @delivery_route_step = DeliveryRouteStep.find_by_route_step_code_and_delivery_id("delivery_note_captured", session[:new_delivery].id) #????delivery_capture_started
-            if @delivery_route_step != nil
-              @delivery_route_step.update_attributes({:date_activated => DateTime.now.to_formatted_s(:db), :date_completed => DateTime.now.to_formatted_s(:db)})
-              session[:new_delivery].update_attribute(:delivery_status, @delivery_route_step.route_step_code)
-            end
-          end
+          # if route_steps!=nil
+          #   @delivery_route_step = DeliveryRouteStep.find_by_route_step_code_and_delivery_id("delivery_note_captured", session[:new_delivery].id) #????delivery_capture_started
+          #   if @delivery_route_step != nil
+          #     @delivery_route_step.update_attributes({:date_activated => DateTime.now.to_formatted_s(:db), :date_completed => DateTime.now.to_formatted_s(:db)})
+          #     session[:new_delivery].update_attribute(:delivery_status, @delivery_route_step.route_step_code)
+          #   end
+          # end
         end
         # end of transaction
 

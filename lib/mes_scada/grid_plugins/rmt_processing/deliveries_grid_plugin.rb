@@ -23,6 +23,8 @@ module MesScada::GridPlugins
           return :green
         elsif record["delivery_status"] == "arrived_at_complex "
           return :grey
+        elsif !record["track_slms_indicator_code"]
+          return :orange
         end
       end
 
