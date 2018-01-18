@@ -126,9 +126,9 @@ def build_bin_tickets_data
 
   rmt_variety = RmtVariety.find_by_rmt_variety_code(self.forecast_variety.rmt_variety_code)
   rmt_variety_description = rmt_variety.rmt_variety_description
+  f5 = ""
   if(rmt_variety_description.length < 11)
     f4 = rmt_variety_description
-    f5 = nil
   elsif((parts=rmt_variety_description.split(" ")).length > 1)
     if(parts[0].length < 11)
       f4=parts[0]
@@ -148,14 +148,15 @@ def build_bin_tickets_data
     f4 = rmt_variety_description[0..9]
   end
 
-  f5.strip!
+  f5.to_s.strip!
 
-  data.store("F1", farm_code)
-  data.store("F2", "[NR]")
+  data.store("F1", "")
+  data.store("F2", farm_code)
   data.store("F3", "[NR]")
-  data.store("F4", f4)
-  data.store("F5", f5)
-  data.store("F6", self.forecast_variety.rmt_variety_code)
+  data.store("F4", "[NR]")
+  data.store("F5", f4)
+  data.store("F6", f5)
+  data.store("F7", self.forecast_variety.rmt_variety_code)
 
   return data
 
