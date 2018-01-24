@@ -294,7 +294,16 @@ class ScanBinOnTrip < PDTTransactionState
 
 
       Inventory.move_stock("Create_Tripsheet", @parent.tripsheet_number, "IN_TRANSIT", @parent.scanned_bins)
-      print_result_screen = send_tripsheet_to_printer(vehicle_jobs)
+      result_screen = nil
+
+      if self.pdt_screen_def.get_control_value("printer") && self.pdt_screen_def.get_control_value("printer").strip != ""
+        return  send_tripsheet_to_printer(vehicle_jobs)
+      else
+        result        = ["Tripsheet created. You can print with Web App "]
+        return  PDTTransaction.build_msg_screen_definition(nil, nil, nil, result)
+
+
+      end
 
 
 
