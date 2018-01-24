@@ -179,7 +179,7 @@ class ScanBinOnTrip < PDTTransactionState
 
     exit_reference = bin_record.exit_ref
     if exit_reference != nil
-      error = ["bin :'#{exit_ref}'"]
+      error = ["bin :'#{bin_record.exit_ref}'"]
       return error
     end
 
