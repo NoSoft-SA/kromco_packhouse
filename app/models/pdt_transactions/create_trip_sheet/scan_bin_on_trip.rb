@@ -237,6 +237,39 @@ class ScanBinOnTrip < PDTTransactionState
   end
 
 
+  def send_tripsheet_to_printer(vehicle_job)
+
+      out_file_type = "PDF"
+      out_file_name = "interwarehouse_tripsheet_#{Time.now.strftime("%m_%d_%Y_%H_%M_%S")}"
+      out_file_path = Globals.jasper_reports_pdf_downloads + "/#{out_file_name}"
+      printer = self.pdt_screen_def.get_control_value("printer")
+
+      err = JasperReports.generate_report('interwarehouse_tripsheet',self.pdt_screen_def.user,{:vehicle_job_number=>vehicle_job.vehicle_job_number,:printer=>printer,:MODE=>"PRINT",:OUT_FILE_NAME=>out_file_path,:OUT_FILE_TYPE=>out_file_type})
+      if(!err)
+
+          # create vehicle_job_statuses record
+          vehicle_job_status = VehicleJobStatus.new
+          vehicle_job_status.vehicle_job_number = vehicle_job.vehicle_job_number
+          vehicle_job_status.vehicle_job_id = vehicle_job.id
+          vehicle_job_status.tripsheet_status_code = "printed"
+          vehicle_job_status.create()
+
+          return result = PDTTransaction.build_msg_screen_definition(nil, nil, nil, ["Tripsheet was printed successifully!"])
+
+      else
+        errors_array = [err.gsub("<BR>","")]
+        field_configs = Array.new
+        errors_array.each do |err_line|
+          field_configs[field_configs.length] = {:type=>"text_line", :name=>"output",:value=>err_line}
+        end
+        screen_attributes = {:auto_submit=>"false",:content_header_caption=>"error messages"}
+        buttons = {"B3Label"=>"Clear" ,"B2Label"=>"Cancel","B1Submit"=>"print_tripsheet_submit","B1Label"=>"Submit","B1Enable"=>"false","B2Enable"=>"false","B3Enable"=>"false" }
+        return PdtScreenDefinition.gen_screen_xml(field_configs, buttons, screen_attributes, nil)
+      end
+
+  end
+
+
   def print_confirmed
     ActiveRecord::Base.transaction do
       veh_job_type                      = VehicleJobType.find_by_sql("select * from vehicle_job_types  where vehicle_job_types.vehicle_job_type_code = 'BINS' order by vehicle_job_types.id desc")[0]
@@ -261,24 +294,14 @@ class ScanBinOnTrip < PDTTransactionState
 
 
       Inventory.move_stock("Create_Tripsheet", @parent.tripsheet_number, "IN_TRANSIT", @parent.scanned_bins)
+      print_result_screen = send_tripsheet_to_printer(vehicle_jobs)
 
-     # http_conn = Net::HTTP.new('192.168.10.199', nil)
-     # msg, body = http_conn.get("/jasperserver/flow.html?_flowId=viewReportFlow&reportUnit=/FG/first_intake&j_username=jasperadmin&j_password=jasperadmin&output=pdf&consignment_note_number=A031000009", nil)
-     # puts "body = " + body.to_s
-     # puts "msg = " + msg.to_s
 
-##      ===== test code =========
-#      msg = PDTTransaction.print_report("first_intake",{:consignment_note_number=>"L031063021"},@pdt_screen_def.user)
-#      return PDTTransaction.build_msg_screen_definition(nil,nil,nil,[msg]) if msg
-##      ===== test code =========
-      
-      #msg = PDTTransaction.print_report("rmt_tripsheet",{:tripsheet_number=>@parent.tripsheet_number},@pdt_screen_def.user)
-      #return PDTTransaction.build_msg_screen_definition(nil,nil,nil,[msg]) if msg
 
       self.parent.set_transaction_complete_flag
-      result        = ["Transaction has been completed successfully "]
-      result_screen = PDTTransaction.build_msg_screen_definition(nil, nil, nil, result)
-      return result_screen
+      #result        = ["Transaction has been completed successfully "]
+      #result_screen = PDTTransaction.build_msg_screen_definition(nil, nil, nil, result)
+      return print_result_screen #result_screen
     end
   end
 
