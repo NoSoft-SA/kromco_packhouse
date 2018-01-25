@@ -1154,6 +1154,7 @@ def create_farm
    begin
 	 @farm = Farm.new(params[:farm])
 	 if @farm.save
+		 session[:farm_id_value] = {} if(!session[:farm_id_value])
 		 session[:farm_id_value].store("my_farm_id", @farm.id)
 		 redirect_to_index("'new record created successfully'","'create successful'")
 	else
