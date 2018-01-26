@@ -8,6 +8,46 @@ class Production::ReworksController < ApplicationController
     "reworks"
   end
 
+  def check_for_carton_diffs
+
+    carton_numbers = []
+    @cartons.each do |c|
+      carton_numbers << "'#{c['carton_number']}'"
+    end
+
+    carton_type_list,left_rec_set,right_rec_set= get_carton_history_diff_attr(carton_numbers.uniq)
+    cartons_with_diffs = {}
+
+    if carton_numbers.uniq.length ==1
+      left_diffs, right_diffs = get_comparer_diff_lists(left_rec_set, right_rec_set)
+      cartons_with_diffs[carton_numbers[0]] = left_diffs.values[0]
+    else
+      left_diffs, right_diffs = get_comparer_diff_lists(left_rec_set, right_rec_set)
+      cartons_with_diffs = left_diffs
+    end
+
+
+    cols_to_format = []
+    @cartons.each do |carton|
+      if carton_numbers.uniq.length ==1
+        if !cartons_with_diffs.empty? && cartons_with_diffs.keys.include?("'#{carton['carton_number']}'")
+          carton['diff_col'] = true
+          carton['diff_cols'] = cartons_with_diffs["'#{carton['carton_number']}'"].keys.delete_if { |key, value| key == "carton_number" }
+          cartons_with_diffs["'#{carton['carton_number']}'"].keys.each do |col| cols_to_format << col if !cols_to_format.include?(col) && col !="carton_number" end
+        end
+      else
+        if !cartons_with_diffs.empty? && cartons_with_diffs.keys.include?(carton['carton_number'])
+          carton['diff_col'] = true
+          carton['diff_cols'] = cartons_with_diffs[carton['carton_number']].keys.delete_if { |key, value| key == "carton_number" }
+          cartons_with_diffs[carton['carton_number']].keys.each do |col| cols_to_format << col if !cols_to_format.include?(col) && col !="carton_number" end
+        end
+      end
+
+    end
+     session[:cols_to_format] = cols_to_format
+    @cartons
+  end
+
 
   def scrap_bin
     if !params[:item]
@@ -5067,6 +5107,7 @@ end
 
     session[:query]= "@cartons = ActiveRecord::Base.connection.select_all(\"#{query}\")"
     @cartons = ActiveRecord::Base.connection.select_all(query)
+    check_for_carton_diffs
 
     render :inline => %{
       <% grid            = build_carton_histories_grid(@cartons) %>
@@ -5096,43 +5137,74 @@ end
   end
 
   def view_carton_history_diff
-    rw_reclassed_carton = RwReclassedCarton.find_by_sql("select 'rw_reclassed_cartons' as tablename,rw_reclassed_cartons.id as record_id,account_code,actual_size_count_code,affected_by_env,affected_by_function,affected_by_program,
-            carton_fruit_nett_mass,carton_fruit_nett_mass_actual,0 as carton_id,carton_label_code,carton_label_station_code,carton_mark_code,carton_number,
-            carton_pack_station_code,carton_template_id,cold_store_code,commodity_code,created_at,created_by,date_time_created,egap,
-            erp_cultivar,erp_pack_point,erp_station,exit_date_time,exit_reference,extended_fg_code,farm_code,fg_code_old,
-            fg_mark_code,fg_product_code,grade_code,gtin,id,inspection_type_code,intake_header_id,intake_header_number,inventory_code,is_depot_carton,
-            is_inspection_carton,iso_week_code,items_per_unit,line_code,mapped_pallet_sequence_id,n_labels_printed,old_pack_code,order_number,organization_code,
-            pack_date_time,packer_number,pallet_id,pallet_number,pallet_sequence_number,pc_code,pick_reference,ppecb_inspection_id,product_class_code,
-            production_run_code,production_run_id,puc,qc_datetime_in,qc_datetime_out,qc_result_status,qc_status_code,quantity,
-            remarks,reprint_acknowledged_by,reprint_acknowledged_date_time,'' as reworks_action,'' as run_track_indicator_code,rw_create_datetime,
-            null as rw_receipt_datetime,0 as rw_receipt_intake_headers_production_id,0 as rw_receipt_pallet_id,rw_receipt_unit,
-            rw_run_id,season_code,sell_by_code,shift_code,shift_id,spray_program_code,target_market_code,track_indicator_code,treatment_code,treatment_type_code,
-            unit_pack_product_code,units_per_carton,updated_at,updated_by,variety_short_long,cast(rw_reclassed_datetime as varchar) as rw_reclassed_datetime  ,
-            rw_reclassed_intake_headers_production_id, '' as person,0 as rw_reason_id,'' as rw_scrap_datetime,'' as user_name
-            from rw_reclassed_cartons where rw_reclassed_cartons.id=#{params[:id]}").map{|c|
-      c.attributes.delete_if {|key, value| RwReclassedCarton.exclude_in_rw_histories_comparisons.include?(key)}
-    }
+    rhs_carton_header, rw_receipt_carton, rw_reclassed_carton = get_carton_history_diff_attr([params[:id]])
+    left_diffs, right_diffs = get_comparer_diff_lists(rw_receipt_carton, rw_reclassed_carton)
+    @discrepancy_report_contents = to_discrep_htm(left_diffs, right_diffs,"rw_reclassed_carton",rhs_carton_header,"carton_number","pallet_sequence_number",nil,nil,nil)
+    @discrepancy_report_contents
+    render :inline => %{
+        <%= @discrepancy_report_contents %>
+        }, :layout => 'content'
 
-    rw_receipt_carton = RwReceiptCarton.find_by_sql("select 'rw_receipt_cartons' as tablename,rw_receipt_cartons.id as record_id, account_code,actual_size_count_code,affected_by_env,affected_by_function,affected_by_program,
-            carton_fruit_nett_mass,carton_fruit_nett_mass_actual,carton_id,carton_label_code,carton_label_station_code,carton_mark_code,carton_number,
-            carton_pack_station_code,carton_template_id,cold_store_code,commodity_code,created_at,created_by,date_time_created,egap,
-            erp_cultivar,erp_pack_point,erp_station,exit_date_time,exit_reference,extended_fg_code,farm_code,fg_code_old,
-            fg_mark_code,fg_product_code,grade_code,gtin,id,inspection_type_code,intake_header_id,intake_header_number,inventory_code,is_depot_carton,
-            is_inspection_carton,iso_week_code,items_per_unit,line_code,mapped_pallet_sequence_id,n_labels_printed,old_pack_code,order_number,organization_code,
-            pack_date_time,packer_number,pallet_id,pallet_number,pallet_sequence_number,pc_code,pick_reference,ppecb_inspection_id,product_class_code,
-            production_run_code,production_run_id,puc,qc_datetime_in,qc_datetime_out,qc_result_status,qc_status_code,quantity,
-            remarks,reprint_acknowledged_by,reprint_acknowledged_date_time,reworks_action,run_track_indicator_code,rw_create_datetime,
-            rw_receipt_datetime,rw_receipt_intake_headers_production_id,rw_receipt_pallet_id,rw_receipt_unit,
-            rw_run_id,season_code,sell_by_code,shift_code,shift_id,spray_program_code,target_market_code,track_indicator_code,
-            treatment_code,treatment_type_code,unit_pack_product_code,units_per_carton,updated_at,updated_by,variety_short_long,
-            '' as rw_reclassed_datetime,0 as rw_reclassed_intake_headers_production_id , '' as person,0 as rw_reason_id,'' as rw_scrap_datetime,'' as user_name
-            from rw_receipt_cartons where carton_number='#{rw_reclassed_carton[0].carton_number}' and rw_run_id=#{rw_reclassed_carton[0].rw_run_id}").map{|c|
-      c.attributes.delete_if {|key, value| RwReclassedCarton.exclude_in_rw_histories_comparisons.include?(key)}
-    }
-    rhs_carton_header = "rw_receipt_carton"
+  end
 
-    if(rw_receipt_carton.length == 0)
-      rw_receipt_carton = RwReceiptCartonsHistory.find_by_sql("
+  def get_comparer_diff_lists(rw_receipt_carton, rw_reclassed_carton)
+    if (discrepancies = Comparer.calc_discrepancies(rw_reclassed_carton, rw_receipt_carton, "carton_number", "pallet_sequence_number"))
+      left_diffs = discrepancies['left_diffs']
+      right_diffs = discrepancies['right_diffs']
+    end
+    return left_diffs, right_diffs
+  end
+
+  def get_carton_history_diff_attr(carton_numbers)
+    rw_reclassed_cartons = get_rw_reclassed_cartons(carton_numbers)
+
+    carton_numbers = rw_reclassed_cartons.map{|p|"'#{p['carton_number']}'"}
+
+    rw_receipt_cartons = get_rw_receipt_cartons(carton_numbers)
+
+    rw_receipt_carton_histories = get_rw_receipt_carton_histories(carton_numbers)
+
+    carton_type_list, left_rec_set, right_rec_set = calc_carton_diffs(rw_receipt_carton_histories, rw_receipt_cartons, rw_reclassed_cartons)
+
+    if carton_numbers.length == 1
+      carton_type_list[0].each do |k,v|
+        return [],v['rw_receipt_carton'],v['rw_reclassed_carton']
+      end
+    else
+      return carton_type_list, left_rec_set,right_rec_set
+    end
+
+  end
+
+  def calc_carton_diffs(rw_receipt_carton_histories, rw_receipt_cartons, rw_reclassed_cartons)
+    carton_type_list = []
+    left_rec_set = []
+    right_rec_set = []
+    rw_reclassed_cartons.each do |rw_reclassed_carton|
+      carton_type={}
+      rw_reclassed_carton.delete_if { |key, value| RwReclassedCarton.exclude_in_rw_histories_comparisons.include?(key) }
+
+
+      rw_receipt_carton = rw_receipt_cartons.find_all { |p| (p['carton_number'] == rw_reclassed_carton['carton_number'] && p['rw_run_id'] == rw_reclassed_carton['rw_run_id']) }.map { |c|
+        c.delete_if { |key, value| RwReclassedCarton.exclude_in_rw_histories_comparisons.include?(key) } }
+      rhs_carton_header = "rw_receipt_carton"
+
+      if (rw_receipt_carton.length == 0)
+        rw_receipt_carton = rw_receipt_carton_histories.find_all { |p| (p['carton_number'] == rw_reclassed_carton['carton_number'] && p['rw_run_id'] == rw_reclassed_carton['rw_run_id']) }.map { |c|
+          c.delete_if { |key, value| RwReclassedCarton.exclude_in_rw_histories_comparisons.include?(key) } }
+        rhs_carton_header = "rw_receipt_cartons_histories"
+      end
+
+      carton_type[rw_reclassed_carton['carton_number']] = {"rw_reclassed_carton" => [rw_reclassed_carton], "rw_receipt_carton" => rw_receipt_carton, "rhs_carton_header" => rhs_carton_header}
+      carton_type_list << carton_type
+      left_rec_set << rw_reclassed_carton
+      right_rec_set << rw_receipt_carton[0]
+    end
+    return carton_type_list, left_rec_set, right_rec_set
+  end
+
+  def get_rw_receipt_carton_histories(carton_numbers)
+    rw_receipt_carton_histories = ActiveRecord::Base.connection.select_all("
             select 'rw_receipt_cartons_histories' as tablename,rw_receipt_cartons_histories.id as record_id, account_code,actual_size_count_code,affected_by_env,affected_by_function,affected_by_program,
             carton_fruit_nett_mass,carton_fruit_nett_mass_actual,carton_id,carton_label_code,carton_label_station_code,carton_mark_code,carton_number,
             carton_pack_station_code,carton_template_id,cold_store_code,commodity_code,created_at,created_by,date_time_created,egap,
@@ -5146,22 +5218,43 @@ end
             rw_run_id,season_code,sell_by_code,shift_code,shift_id,spray_program_code,target_market_code,track_indicator_code,
             treatment_code,treatment_type_code,unit_pack_product_code,units_per_carton,updated_at,updated_by,variety_short_long ,
             '' as rw_reclassed_datetime,0 as rw_reclassed_intake_headers_production_id,'' as person,0 as rw_reason_id,'' as rw_scrap_datetime,'' as user_name
-            from rw_receipt_cartons_histories where carton_number='#{rw_reclassed_carton[0].carton_number}' and rw_run_id=#{rw_reclassed_carton[0].rw_run_id}").map{|c|
-        c.attributes.delete_if {|key, value| RwReclassedCarton.exclude_in_rw_histories_comparisons.include?(key)}
-      }
-      rhs_carton_header = "rw_receipt_cartons_histories"
-    end
-    if(discrepancies = Comparer.calc_discrepancies(rw_reclassed_carton, rw_receipt_carton,"carton_number","pallet_sequence_number"))
-      left_diffs = discrepancies['left_diffs']
-      right_diffs = discrepancies['right_diffs']
-    end
-    @discrepancy_report_contents = to_discrep_htm(left_diffs, right_diffs,"rw_reclassed_carton",rhs_carton_header,"carton_number","pallet_sequence_number",nil,nil,nil)
-
-    render :inline => %{
-        <%= @discrepancy_report_contents %>
-        }, :layout => 'content'
-
+            from rw_receipt_cartons_histories where carton_number in (#{carton_numbers.join(',')}) ")
   end
+
+  def get_rw_receipt_cartons(carton_numbers)
+    rw_receipt_cartons = ActiveRecord::Base.connection.select_all("select 'rw_receipt_cartons' as tablename,rw_receipt_cartons.id as record_id, account_code,actual_size_count_code,affected_by_env,affected_by_function,affected_by_program,
+            carton_fruit_nett_mass,carton_fruit_nett_mass_actual,carton_id,carton_label_code,carton_label_station_code,carton_mark_code,carton_number,
+            carton_pack_station_code,carton_template_id,cold_store_code,commodity_code,created_at,created_by,date_time_created,egap,
+            erp_cultivar,erp_pack_point,erp_station,exit_date_time,exit_reference,extended_fg_code,farm_code,fg_code_old,
+            fg_mark_code,fg_product_code,grade_code,gtin,id,inspection_type_code,intake_header_id,intake_header_number,inventory_code,is_depot_carton,
+            is_inspection_carton,iso_week_code,items_per_unit,line_code,mapped_pallet_sequence_id,n_labels_printed,old_pack_code,order_number,organization_code,
+            pack_date_time,packer_number,pallet_id,pallet_number,pallet_sequence_number,pc_code,pick_reference,ppecb_inspection_id,product_class_code,
+            production_run_code,production_run_id,puc,qc_datetime_in,qc_datetime_out,qc_result_status,qc_status_code,quantity,
+            remarks,reprint_acknowledged_by,reprint_acknowledged_date_time,reworks_action,run_track_indicator_code,rw_create_datetime,
+            rw_receipt_datetime,rw_receipt_intake_headers_production_id,rw_receipt_pallet_id,rw_receipt_unit,
+            rw_run_id,season_code,sell_by_code,shift_code,shift_id,spray_program_code,target_market_code,track_indicator_code,
+            treatment_code,treatment_type_code,unit_pack_product_code,units_per_carton,updated_at,updated_by,variety_short_long,
+            '' as rw_reclassed_datetime,0 as rw_reclassed_intake_headers_production_id , '' as person,0 as rw_reason_id,'' as rw_scrap_datetime,'' as user_name
+            from rw_receipt_cartons where carton_number in (#{carton_numbers.join(',')})")
+  end
+
+  def get_rw_reclassed_cartons(carton_numbers)
+    rw_reclassed_cartons = ActiveRecord::Base.connection.select_all("select 'rw_reclassed_cartons' as tablename,rw_reclassed_cartons.id as record_id,account_code,actual_size_count_code,affected_by_env,affected_by_function,affected_by_program,
+            carton_fruit_nett_mass,carton_fruit_nett_mass_actual,0 as carton_id,carton_label_code,carton_label_station_code,carton_mark_code,carton_number,
+            carton_pack_station_code,carton_template_id,cold_store_code,commodity_code,created_at,created_by,date_time_created,egap,
+            erp_cultivar,erp_pack_point,erp_station,exit_date_time,exit_reference,extended_fg_code,farm_code,fg_code_old,
+            fg_mark_code,fg_product_code,grade_code,gtin,id,inspection_type_code,intake_header_id,intake_header_number,inventory_code,is_depot_carton,
+            is_inspection_carton,iso_week_code,items_per_unit,line_code,mapped_pallet_sequence_id,n_labels_printed,old_pack_code,order_number,organization_code,
+            pack_date_time,packer_number,pallet_id,pallet_number,pallet_sequence_number,pc_code,pick_reference,ppecb_inspection_id,product_class_code,
+            production_run_code,production_run_id,puc,qc_datetime_in,qc_datetime_out,qc_result_status,qc_status_code,quantity,
+            remarks,reprint_acknowledged_by,reprint_acknowledged_date_time,'' as reworks_action,'' as run_track_indicator_code,rw_create_datetime,
+            null as rw_receipt_datetime,0 as rw_receipt_intake_headers_production_id,0 as rw_receipt_pallet_id,rw_receipt_unit,
+            rw_run_id,season_code,sell_by_code,shift_code,shift_id,spray_program_code,target_market_code,track_indicator_code,treatment_code,treatment_type_code,
+            unit_pack_product_code,units_per_carton,updated_at,updated_by,variety_short_long,cast(rw_reclassed_datetime as varchar) as rw_reclassed_datetime  ,
+            rw_reclassed_intake_headers_production_id, '' as person,0 as rw_reason_id,'' as rw_scrap_datetime,'' as user_name
+            from rw_reclassed_cartons where rw_reclassed_cartons.carton_number in (#{carton_numbers.join(',')})")
+  end
+
 
   def view_pallet_history_diff
 

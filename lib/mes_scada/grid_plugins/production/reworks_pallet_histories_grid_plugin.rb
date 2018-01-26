@@ -7,6 +7,8 @@ module MesScada::GridPlugins
       def initialize(env = nil, request = nil)
         @env = env
         @request = request
+        @cols_to_format = @env.session.data[:cols_to_format]
+        @cols_to_format
       end
 
 
@@ -33,9 +35,17 @@ module MesScada::GridPlugins
       #grid column. To work, the same plugin must also implmement the
       #'cancel_cell_rendering' method and return true.
       #-------------------------------------------------------------------
-      def render_cell(column_name,cell_value,record)
-        # ""
-        return cell_value
+      def format_cell(column_name, cell_value, record)
+
+        if (record['tablename'] == 'rw_reclassed_cartons' || record['tablename'] == 'rw_receipt_cartons_histories') &&  record['diff_col'] == true && record['diff_cols'].include?(column_name)
+          return :red
+        else
+          nil
+        end
+      end
+
+      def cancel_cell_rendering(column_name, cell_value, record)
+        return true
       end
 
     end
