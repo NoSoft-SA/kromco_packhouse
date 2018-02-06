@@ -203,7 +203,6 @@ class ReceiveIntakeBin < PDTTransaction
     bin_rec.destination_process_var  = @delivery.destination_process_var
     bin_rec.pack_material_product_id = pack_material_product_id
     bin_rec.bin_receive_date_time    = Time.now()
-    # bin_rec.orchard_code             = @delivery.orchard.orchard_code
     bin_rec.orchard_code             = @delivery.orchard.representative_orchard ? @delivery.orchard.representative_orchard.orchard_code : ""
     bin_rec.user_name                = self.pdt_screen_def.user
     bin_rec.is_half_bin = true if is_half_bin?(bin_number) == true
@@ -214,7 +213,7 @@ class ReceiveIntakeBin < PDTTransaction
     bin_rec.track_indicator4_id = delivery_track[3].track_slms_indicator_id if  delivery_track[3]
     bin_rec.track_indicator5_id = delivery_track[4].track_slms_indicator_id if  delivery_track[4]
     bin_rec.save
-
+puts
   end
 
   def complete_bin_scan_trans
@@ -239,7 +238,7 @@ class ReceiveIntakeBin < PDTTransaction
         delivery                 = Delivery.find_by_delivery_number(@delivery_number)
         delivery.delivery_status = "intake_bin_scan_completed"
         delivery.update
-  m.black
+  # m.bla
         empty_units_quantity = delivery.quantity_empty_units
         #if empty_units_quantity == nil ||   empty_units_quantity == 0
         DeliveryRouteStep.update_all(ActiveRecord::Base.extend_set_sql_with_request("date_completed = '#{Time.now()}' ","delivery_route_steps"), "delivery_route_steps.delivery_id = '#{delivery.id}' and delivery_route_steps.route_step_code = 'intake_bin_scanning'")
@@ -255,6 +254,7 @@ class ReceiveIntakeBin < PDTTransaction
       end
     rescue
       DeliveryRouteStep.update_all(ActiveRecord::Base.extend_set_sql_with_request("date_activated = null","delivery_route_steps"), "delivery_route_steps.delivery_id = '#{@delivery_id}' and delivery_route_steps.route_step_code = 'intake_bin_scanning'")
+      raise $!
     end
   end
 end
