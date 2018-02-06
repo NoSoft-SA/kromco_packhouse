@@ -65,7 +65,7 @@ class ReceiveIntakeBin < PDTTransaction
       end
     else
       delivery_route_steps = DeliveryRouteStep.find_by_sql("select *  from  delivery_route_steps  where delivery_id = '#{ @delivery_id }' and
-     ( route_step_code = '100_fruit_sample_completed' or  route_step_code='intake_bin_scan_completed') order by id asc")
+     ( route_step_code = '100_fruit_sample_completed' or  route_step_code='intake_bin_scanning') order by id asc")
 
       fruit_sample_completed   = delivery_route_steps[0].date_completed
       intake_bin_scan_completed   = delivery_route_steps[1].date_completed
@@ -219,36 +219,42 @@ class ReceiveIntakeBin < PDTTransaction
 
   def complete_bin_scan_trans
 
-    ActiveRecord::Base.transaction do
-      bin_nums=Array.new
-      self.full_bins.each { |b| bin_nums << b }
+    DeliveryRouteStep.update_all(ActiveRecord::Base.extend_set_sql_with_request("date_activated = '#{Time.now}'","delivery_route_steps"), "delivery_route_steps.delivery_id = '#{@delivery_id}' and delivery_route_steps.route_step_code = 'intake_bin_scanning'")
 
-      self.half_bins.each { |c| bin_nums << c }
+    begin
+      ActiveRecord::Base.transaction do
+        bin_nums=Array.new
+        self.full_bins.each { |b| bin_nums << b }
+
+        self.half_bins.each { |c| bin_nums << c }
 
 
-      for bin_number in bin_nums
-        create_bin(bin_number)
+        for bin_number in bin_nums
+          create_bin(bin_number)
+        end
+        #(owner_party_role_id,stock_type,farm_code,truck_code,trans_name,trans_id,location_code,stock_ids)
+
+        Inventory.create_stock(@delivery.owner_party_role_id, "BIN", @delivery.farm_code, @delivery.truck_registration_number, "receive_intake_bins", @delivery.delivery_number, "INTAKE", bin_nums)
+
+        delivery                 = Delivery.find_by_delivery_number(@delivery_number)
+        delivery.delivery_status = "intake_bin_scan_completed"
+        delivery.update
+  m.black
+        empty_units_quantity = delivery.quantity_empty_units
+        #if empty_units_quantity == nil ||   empty_units_quantity == 0
+        DeliveryRouteStep.update_all(ActiveRecord::Base.extend_set_sql_with_request("date_completed = '#{Time.now()}' ","delivery_route_steps"), "delivery_route_steps.delivery_id = '#{delivery.id}' and delivery_route_steps.route_step_code = 'intake_bin_scanning'")
+        #end
+
+        self.set_transaction_complete_flag
+        result        = ["Bin scan completed successfully "]
+
+        result_screen = PDTTransaction.build_msg_screen_definition(result, nil, nil, nil)
+
+        return result_screen
+
       end
-      #(owner_party_role_id,stock_type,farm_code,truck_code,trans_name,trans_id,location_code,stock_ids)
-
-      Inventory.create_stock(@delivery.owner_party_role_id, "BIN", @delivery.farm_code, @delivery.truck_registration_number, "receive_intake_bins", @delivery.delivery_number, "INTAKE", bin_nums)
-
-      delivery                 = Delivery.find_by_delivery_number(@delivery_number)
-      delivery.delivery_status = "intake_bin_scan_completed"
-      delivery.update
-
-      empty_units_quantity = delivery.quantity_empty_units
-      #if empty_units_quantity == nil ||   empty_units_quantity == 0
-      DeliveryRouteStep.update_all(ActiveRecord::Base.extend_set_sql_with_request("date_completed = '#{Time.now()}' , date_activated = '#{Time.now}'","delivery_route_steps"), "delivery_route_steps.delivery_id = '#{delivery.id}' and delivery_route_steps.route_step_code = 'intake_bin_scan_completed'")
-      #end
-
-      self.set_transaction_complete_flag
-      result        = ["Bin scan completed successfully "]
-
-      result_screen = PDTTransaction.build_msg_screen_definition(result, nil, nil, nil)
-
-      return result_screen
-
+    rescue
+      DeliveryRouteStep.update_all(ActiveRecord::Base.extend_set_sql_with_request("date_activated = null","delivery_route_steps"), "delivery_route_steps.delivery_id = '#{@delivery_id}' and delivery_route_steps.route_step_code = 'intake_bin_scanning'")
     end
   end
 end

@@ -102,7 +102,7 @@ class BinScanning < PDTTransactionState
        end
       end
 
-    delivery_route_steps = DeliveryRouteStep.find_by_sql("select *  from  delivery_route_steps  where delivery_id = '#{ @parent.delivery_id }' and route_step_code='intake_bin_scan_completed'  ")
+    delivery_route_steps = DeliveryRouteStep.find_by_sql("select *  from  delivery_route_steps  where delivery_id = '#{ @parent.delivery_id }' and route_step_code='intake_bin_scanning'  ")
     route_step_date_1    = delivery_route_steps[0].date_completed
 
     if route_step_date_1 != nil

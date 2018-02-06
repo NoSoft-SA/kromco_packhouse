@@ -320,7 +320,7 @@ def tripsheet_in_std_move?
         return error_msg if error_msg
 
       else
-        @required_route_step = "intake_bin_scan_completed"
+        @required_route_step = "intake_bin_scanning"
         @new_route_step      = "arrived_at_complex"
       end
 

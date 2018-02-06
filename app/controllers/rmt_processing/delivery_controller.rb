@@ -505,7 +505,7 @@ class RmtProcessing::DeliveryController < ApplicationController
   end
 
   def should_show_print_tripsheet_link_for_delivery?(delivery_id)
-    intake_bin_scan_completed_route_step = DeliveryRouteStep.find_by_route_step_code_and_delivery_id("intake_bin_scan_completed", delivery_id)
+    intake_bin_scan_completed_route_step = DeliveryRouteStep.find_by_route_step_code_and_delivery_id("intake_bin_scanning", delivery_id)
     hundred_fruit_sample_completed_route_step = DeliveryRouteStep.find_by_route_step_code_and_delivery_id("100_fruit_sample_completed", delivery_id)
 #    trip_sheet_printed_route_step = DeliveryRouteStep.find_by_route_step_code_and_delivery_id("trip_sheet_printed",delivery_id)
     return true if (hundred_fruit_sample_completed_route_step && intake_bin_scan_completed_route_step && hundred_fruit_sample_completed_route_step.date_completed && intake_bin_scan_completed_route_step.date_completed) #&& !trip_sheet_printed_route_step.date_completed
@@ -1149,6 +1149,15 @@ class RmtProcessing::DeliveryController < ApplicationController
   end
 
   def create_delivery_indicator
+    intake_bin_scanning=DeliveryRouteStep.find_by_delivery_id_and_route_step_code(session[:new_delivery].id, 'intake_bin_scanning')
+    if(intake_bin_scanning.date_activated && !intake_bin_scanning.date_completed)
+      flash[:error] = "cannot create delivery track indicator: intake_bin_scanning in progress" + @mrl_print_msg.to_s
+      @freeze_flash = false
+      params[:id] = session[:new_delivery].id
+      edit_delivery
+      return
+    end
+
     set_is_first_time
     @delivery_track_indicator = DeliveryTrackIndicator.new(params[:delivery_track_indicator])
 
