@@ -106,7 +106,7 @@ class Delivery < ActiveRecord::Base
 
   def set_bins_rmt_product
     intake_bin_scanning=DeliveryRouteStep.find_by_delivery_id_and_route_step_code(self.id, 'intake_bin_scanning')
-    if(intake_bin_scanning.date_activated && !intake_bin_scanning.date_completed)
+    if(intake_bin_scanning && (intake_bin_scanning.date_activated && !intake_bin_scanning.date_completed))
       raise "cannot update delivery: intake_bin_scanning in progress"
     end
 
