@@ -105,6 +105,11 @@ class Delivery < ActiveRecord::Base
   end
 
   def set_bins_rmt_product
+    intake_bin_scanning=DeliveryRouteStep.find_by_delivery_id_and_route_step_code(self.id, 'intake_bin_scanning')
+    if(intake_bin_scanning.date_activated && !intake_bin_scanning.date_completed)
+      raise "cannot update delivery: intake_bin_scanning in progress"
+    end
+
     if(self.rmt_product_id && (Bin.find(:first, :conditions=>"delivery_id=#{self.id} and (rmt_product_id is null or rmt_product_id<>#{self.rmt_product_id})")))
       self.connection.execute("update bins set rmt_product_id=#{self.rmt_product_id} where delivery_id=#{self.id}")
     end

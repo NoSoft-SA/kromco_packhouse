@@ -582,6 +582,12 @@ class RmtProcessing::DeliveryController < ApplicationController
 
       end
     rescue
+      if($!.message=='cannot update delivery: intake_bin_scanning in progress')
+        flash[:error] = $!.message
+        params[:id] = @delivery.id
+        edit_delivery
+        return
+      end
       handle_error('delivery record could not be updated')
     end
   end
