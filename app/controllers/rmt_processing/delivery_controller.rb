@@ -508,6 +508,15 @@ class RmtProcessing::DeliveryController < ApplicationController
     intake_bin_scan_completed_route_step = DeliveryRouteStep.find_by_route_step_code_and_delivery_id("intake_bin_scanning", delivery_id)
     hundred_fruit_sample_completed_route_step = DeliveryRouteStep.find_by_route_step_code_and_delivery_id("100_fruit_sample_completed", delivery_id)
 #    trip_sheet_printed_route_step = DeliveryRouteStep.find_by_route_step_code_and_delivery_id("trip_sheet_printed",delivery_id)
+
+    if(session[:new_delivery].commodity_code=='AP')
+      return false if(!session[:new_delivery].rmt_product_id or ((DeliveryTrackIndicator.find_by_sql("select * from delivery_track_indicators where delivery_id = '#{session[:new_delivery].id}'  and (track_indicator_type_code='STA' or track_indicator_type_code='RMI') order by id asc").length < 2)))
+    end
+
+    if(session[:new_delivery].commodity_code=='PR')
+      return false if(!session[:new_delivery].rmt_product_id or DeliveryTrackIndicator.find_by_sql("select * from delivery_track_indicators where delivery_id = '#{session[:new_delivery].id}' and (track_indicator_type_code='RMI') order by id asc").empty?)
+    end
+
     return true if (hundred_fruit_sample_completed_route_step && intake_bin_scan_completed_route_step && hundred_fruit_sample_completed_route_step.date_completed && intake_bin_scan_completed_route_step.date_completed) #&& !trip_sheet_printed_route_step.date_completed
     return false
   end
