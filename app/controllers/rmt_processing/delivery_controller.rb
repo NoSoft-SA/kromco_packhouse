@@ -510,7 +510,7 @@ class RmtProcessing::DeliveryController < ApplicationController
 #    trip_sheet_printed_route_step = DeliveryRouteStep.find_by_route_step_code_and_delivery_id("trip_sheet_printed",delivery_id)
 
     if(session[:new_delivery].commodity_code=='AP')
-      return false if(!session[:new_delivery].rmt_product_id or ((DeliveryTrackIndicator.find_by_sql("select * from delivery_track_indicators where delivery_id = '#{session[:new_delivery].id}'  and (track_indicator_type_code='STA' or track_indicator_type_code='RMI') order by id asc").length < 2)))
+      return false if(!session[:new_delivery].rmt_product_id or ((DeliveryTrackIndicator.find_by_sql("select * from delivery_track_indicators where delivery_id = '#{session[:new_delivery].id}'  and (track_indicator_type_code='STA' or track_indicator_type_code='RMI' or track_indicator_type_code='pressure_ripeness') order by id asc").length < 2)))
     end
 
     if(session[:new_delivery].commodity_code=='PR')
