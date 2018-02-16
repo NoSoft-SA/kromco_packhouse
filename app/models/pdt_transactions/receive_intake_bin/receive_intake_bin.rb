@@ -196,14 +196,14 @@ class ReceiveIntakeBin < PDTTransaction
 
     bin_rec                          = Bin.new
     bin_rec.bin_number               = bin_number
-    bin_rec.rmt_product_id           = @delivery.rmt_product_id
+    bin_rec.rmt_product_id           = 11278
     bin_rec.season_code              = @delivery.season_code
     bin_rec.delivery_id              = @delivery.id
     bin_rec.farm_id                  = @delivery.farm_id
     bin_rec.destination_process_var  = @delivery.destination_process_var
     bin_rec.pack_material_product_id = pack_material_product_id
     bin_rec.bin_receive_date_time    = Time.now()
-    bin_rec.orchard_code             = @delivery.orchard.representative_orchard ? @delivery.orchard.representative_orchard.orchard_code : ""
+    # bin_rec.orchard_code             = @delivery.orchard.representative_orchard ? @delivery.orchard.representative_orchard.orchard_code : ""
     bin_rec.user_name                = self.pdt_screen_def.user
     bin_rec.is_half_bin = true if is_half_bin?(bin_number) == true
     bin_rec.is_sample_bin = true if is_sample_bin?(bin_number) == true

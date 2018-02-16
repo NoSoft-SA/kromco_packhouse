@@ -26,13 +26,13 @@ begin
         http_conn = Net::HTTP.new(server, port)
         http_conn.open_timeout = 5* 60
         http_conn.read_timeout = 5* 60
-        report_parameters = "bin=#{retr.bin_number}"
+        report_parameters = "bin=#{retr.bin_number}&unit=#{retr.presort_unit}"
         response = http_conn.get("/services/pre_sorting/#{retr.event_type}?" + report_parameters, nil)
 
         require 'nokogiri'
         response_xml = Nokogiri::XML(response.body.to_s)
         if(response_xml.root.children[0].name == 'bins')
-          presort_integration_retry_history = PresortIntegrationRetryHistory.new({:event_type=>retr.event_type,:process_attempts=>retr.process_attempts,:bin_number=>retr.bin_number,:error=>retr.error})
+          presort_integration_retry_history = PresortIntegrationRetryHistory.new({:presort_unit=>retr.presort_unit, :event_type=>retr.event_type,:process_attempts=>retr.process_attempts,:bin_number=>retr.bin_number,:error=>retr.error})
           presort_integration_retry_history.save!
 
           retr.destroy

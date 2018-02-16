@@ -31,7 +31,7 @@ class Services::PreSortingController < ApplicationController
 
       raise  "Bin:#{@created_bin} already exists in Kromco Mes db" if (Bin.find_by_bin_number(@created_bin))
 
-      http = Net::HTTP.new(Globals.bin_created_mssql_server_host, Globals.bin_created_mssql_presort_server_port)
+      http = Net::HTTP.new(Globals.bin_created_mssql_server_host(params[:unit]), Globals.bin_created_mssql_presort_server_port(params[:unit]))
       request = Net::HTTP::Post.new("/select")
       parameters = {'method' => 'select', 'statement' => Base64.encode64("select * from ViewpaloxKromco where (poids >0 and poids is not null) and ViewpaloxKromco.Numero_palox=#{@created_bin}")}
       request.set_form_data(parameters)
@@ -167,7 +167,7 @@ class Services::PreSortingController < ApplicationController
 
   def clear_bin_presort_integration_retries(bin_number,event_type)
     if(presort_integration_retry=PresortIntegrationRetry.find_by_bin_number_and_event_type(bin_number.strip,event_type.strip))
-      presort_integration_retry_history = PresortIntegrationRetryHistory.new({:event_type=>presort_integration_retry.event_type,:process_attempts=>presort_integration_retry.process_attempts,:bin_number=>presort_integration_retry.bin_number,:error=>presort_integration_retry.error})
+      presort_integration_retry_history = PresortIntegrationRetryHistory.new({:presort_unit=>presort_integration_retry.presort_unit, :event_type=>presort_integration_retry.event_type,:process_attempts=>presort_integration_retry.process_attempts,:bin_number=>presort_integration_retry.bin_number,:error=>presort_integration_retry.error})
       presort_integration_retry_history.save!
       presort_integration_retry.destroy
     end
@@ -187,13 +187,23 @@ class Services::PreSortingController < ApplicationController
     end
   end
 
+  def luks
+    @l = "resultset> #{Base64.encode64(Marshal.dump([]))} </res"
+    render :inline => %{ <%= @l%> }
+  end
+
+  def get_index_parcelle
+    @result = "resultset> #{Base64.encode64(Marshal.dump([{'Index_parcelle'=>52}]))} </res"
+    render :inline => %{<%= @result %>}
+  end
+
   def bin_tipped_intergration
     #view-source:http://192.168.10.7:3000/services/pre_sorting/bin_tipped?bin=704
     begin
       raise "Bin:#{@tipped_bin} not found in Kromco Mes db" if (!(kromco_bin = Bin.find_by_bin_number(@tipped_bin)))
       raise "Bin:#{@tipped_bin} already tipped" if (kromco_bin.tipped_date_time)
 
-      http = Net::HTTP.new(Globals.bin_tipped_mssql_server_host, Globals.bin_tipped_mssql_integration_server_port)
+      http = Net::HTTP.new(Globals.bin_tipped_mssql_server_host(params[:unit]), Globals.bin_tipped_mssql_integration_server_port(params[:unit]))
       request = Net::HTTP::Post.new("/select")
       parameters = {'method' => 'select', 'statement' => Base64.encode64("select Apport.* from Apport where Apport.NumPalox='#{@tipped_bin}'")}
       request.set_form_data(parameters)
@@ -317,9 +327,10 @@ class Services::PreSortingController < ApplicationController
       if(presort_integration_retry=PresortIntegrationRetry.find_by_bin_number_and_event_type(params[:bin].strip,params[:action].strip))
         presort_integration_retry.process_attempts=presort_integration_retry.process_attempts+1
         presort_integration_retry.error=error
+        presort_integration_retry.presort_unit=params[:unit]
         presort_integration_retry.update
       else
-        presort_integration_retry= PresortIntegrationRetry.new({:event_type=>params[:action].strip,:bin_number=>params[:bin].strip,:error=>error})
+        presort_integration_retry= PresortIntegrationRetry.new({:event_type=>params[:action].strip,:bin_number=>params[:bin].strip,:error=>error, :presort_unit=>params[:unit]})
         presort_integration_retry.create
       end
     end
@@ -336,7 +347,7 @@ class Services::PreSortingController < ApplicationController
   end
 
   def validate_active_run
-    active_pre_sort_stagin_runs=PresortStagingRun.find(:all, :conditions => "status='ACTIVE' or status='active'")
+    active_pre_sort_stagin_runs=PresortStagingRun.find(:all, :conditions => "(status='ACTIVE' or status='active') and presort_unit='#{params[:unit]}'")
     return "no active pre_sort run could be found" if (active_pre_sort_stagin_runs.empty?)
     return "more than one pre_sort run found" if (active_pre_sort_stagin_runs.length > 1)
     @active_pre_sort_stagin_run = active_pre_sort_stagin_runs[0]
@@ -455,7 +466,7 @@ class Services::PreSortingController < ApplicationController
       return handle_error(error)
     end
 
-    active_pre_sort_stagin_run=PresortStagingRun.find(:first, :conditions => "status='ACTIVE' or status='active'")
+    active_pre_sort_stagin_run=PresortStagingRun.find(:first, :conditions => "(status='ACTIVE' or status='active') and presort_unit='#{params[:unit]}'")
     active_pre_sort_stagin_run_child=PresortStagingRunChild.find(:first, :conditions => "presort_staging_run_id=#{@active_pre_sort_stagin_run.id} and (status='ACTIVE' or status='active')")
 
     bins_validation_results =  get_stage_bins_results(active_pre_sort_stagin_run,active_pre_sort_stagin_run_child,bin1, bin2, bin3,overridden)
@@ -509,6 +520,7 @@ class Services::PreSortingController < ApplicationController
     err_entry.bin1_error = bin1 ? bin1[:errs].join("\n") : nil
     err_entry.bin2_error = bin2 ? bin2[:errs].join("\n") : nil
     err_entry.bin3_error = bin3 ? bin3[:errs].join("\n") : nil
+    err_entry.presort_unit = params[:unit]
     err_entry.create
   end
 
@@ -584,7 +596,7 @@ class Services::PreSortingController < ApplicationController
     insert_ql = ""
     Bin.find(:all, :conditions => apport_bins_or_clause).each do |apport_bin|
 #-------------------------------------------------------- error=delete_untipped_maf_opharned_bin_records(apport_bin.bin_number)
-      http = Net::HTTP.new(Globals.bin_scanned_mssql_server_host, Globals.bin_scanned_mssql_integration_server_port)
+      http = Net::HTTP.new(Globals.bin_scanned_mssql_server_host(params[:unit]), Globals.bin_scanned_mssql_integration_server_port(params[:unit]))
       request = Net::HTTP::Post.new("/select")
       parameters = {'method' => 'select', 'statement' => Base64.encode64("select * from Apport where NumPalox = '#{apport_bin.bin_number}' and LotMAF is null and DateLecture is null and StatusMAF is null")}
       request.set_form_data(parameters)
@@ -594,7 +606,7 @@ class Services::PreSortingController < ApplicationController
         res = response.body.split('resultset>').last.split('</res').first
         results = Marshal.load(Base64.decode64(res))
         if (!results.empty?)
-          http = Net::HTTP.new(Globals.bin_scanned_mssql_server_host, Globals.bin_scanned_mssql_integration_server_port)
+          http = Net::HTTP.new(Globals.bin_scanned_mssql_server_host(params[:unit]), Globals.bin_scanned_mssql_integration_server_port(params[:unit]))
           request = Net::HTTP::Post.new("/exec")
           parameters = {'method' => 'delete', 'statement' => Base64.encode64("delete from Apport where NumPalox = '#{apport_bin.bin_number}' and LotMAF is null and DateLecture is null and StatusMAF is null")}
           request.set_form_data(parameters)
@@ -658,7 +670,7 @@ class Services::PreSortingController < ApplicationController
 
     if (!insert_ql.strip.empty?)
       insert_ql ="BEGIN TRANSACTION\n#{insert_ql}COMMIT TRANSACTION"
-      http = Net::HTTP.new(Globals.bin_scanned_mssql_server_host, Globals.bin_scanned_mssql_integration_server_port)
+      http = Net::HTTP.new(Globals.bin_scanned_mssql_server_host(params[:unit]), Globals.bin_scanned_mssql_integration_server_port(params[:unit]))
       request = Net::HTTP::Post.new("/exec")
       parameters = {'method' => 'insert', 'statement' => Base64.encode64(insert_ql)}
       request.set_form_data(parameters)
@@ -911,6 +923,7 @@ class Services::PreSortingController < ApplicationController
   def manual_integation_submit
     integration_flows = params[:bin]['integration_params'].split(',').map { |comp| comp.split('?') }
     @progress = []
+    params[:unit] = params[:bin]['presort_unit']
     integration_flows.each do |integration_flow|
       if (integration_flow[0].strip == 'bin_tipped')
         @tipped_bin = integration_flow[1].split('=')[1]

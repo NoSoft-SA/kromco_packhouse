@@ -27,12 +27,12 @@ class Orchard < ActiveRecord::Base
 
 
 
-  def integrate_representative_orchard_into_MAF
+  def integrate_representative_orchard_into_MAF(unit)
     begin
       rmt = RmtVariety.find_by_sql("select commodity_code from rmt_varieties where rmt_varieties.id = #{self.orchard_rmt_variety_id}")
       if rmt[0].commodity_code=='AP'
 
-        http = Net::HTTP.new(Globals.bin_created_mssql_server_host, Globals.bin_created_mssql_presort_server_port)
+        http = Net::HTTP.new(Globals.bin_created_mssql_server_host(unit), Globals.bin_created_mssql_presort_server_port(unit))
         request = Net::HTTP::Post.new("/select")
         parameters = {'method' => 'select', 'statement' => Base64.encode64("SELECT TOP 1 [Index_parcelle]
           FROM [productionv50].[dbo].[Parcelle]
@@ -62,7 +62,7 @@ class Orchard < ActiveRecord::Base
 
         if(!parcelles.empty?)
           existing_pacel_clause = "where Code_parcelle='#{parcelles.map{|p| "#{p.orchard_code}_#{p.farm_code}_#{p.track_slms_indicator_code}" }.join("' or Code_parcelle='")}' "
-          http = Net::HTTP.new(Globals.bin_created_mssql_server_host, Globals.bin_created_mssql_presort_server_port)
+          http = Net::HTTP.new(Globals.bin_created_mssql_server_host(unit), Globals.bin_created_mssql_presort_server_port(unit))
           request = Net::HTTP::Post.new("/select")
           parameters = {'method' => 'select', 'statement' => Base64.encode64("SELECT *
             FROM [productionv50].[dbo].[Parcelle]
@@ -87,7 +87,7 @@ class Orchard < ActiveRecord::Base
         parcelles.each do |parcelle|
           #-------------------------------------------------------------------------------------------------------------------------------------------
           #-------------------------------------------------------------------------------------------------------------------------------------------
-          http = Net::HTTP.new(Globals.bin_created_mssql_server_host, Globals.bin_created_mssql_presort_server_port)
+          http = Net::HTTP.new(Globals.bin_created_mssql_server_host(unit), Globals.bin_created_mssql_presort_server_port(unit))
           request = Net::HTTP::Post.new("/select")
           parameters = {'method' => 'select', 'statement' => Base64.encode64("SELECT TOP 1 Code_parcelle
           FROM [productionv50].[dbo].[Parcelle]
@@ -113,7 +113,7 @@ class Orchard < ActiveRecord::Base
         inserts << ' COMMIT TRANSACTION'
 
         if inserts.length > 2
-          http = Net::HTTP.new(Globals.bin_scanned_mssql_server_host, Globals.bin_created_mssql_presort_server_port)
+          http = Net::HTTP.new(Globals.bin_scanned_mssql_server_host(unit), Globals.bin_created_mssql_presort_server_port(unit))
           request = Net::HTTP::Post.new("/exec")
           parameters = {'method' => 'insert', 'statement' => Base64.encode64(inserts.join)}
           request.set_form_data(parameters)

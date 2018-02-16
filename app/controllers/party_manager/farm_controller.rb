@@ -1291,7 +1291,8 @@ end
 			id = params[:id]
 			if id && @orchard = Orchard.find(id)
 				if @orchard.update_attribute(:is_group, true)
-					@orchard.integrate_representative_orchard_into_MAF
+					@orchard.integrate_representative_orchard_into_MAF('PST-01')
+					@orchard.integrate_representative_orchard_into_MAF('PST-02')
 					@farm = session[:farm_record]
 					render_edit_farm
 				end

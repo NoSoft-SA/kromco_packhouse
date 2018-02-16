@@ -107,6 +107,12 @@ module RmtProcessing::PresortStagingRunHelper
                         :field_name => 'treatment_id',
                         :settings => {:list =>treatment_codes,:label_caption=>'treatment code'}}
 
+      field_configs << {:field_type => 'DropDownField',
+                        :field_name => 'presort_unit',
+                        :settings => {:list =>['<empty>','PST-01', 'PST-02']}}
+      field_configs[field_configs.length()] = {:field_type => 'LabelField', :field_name => 'cop', :non_db_field=>true, :settings => { :is_separator => false, :static_value => '', :css_class => "borderless_label_field"}}
+      field_configs[field_configs.length()] = {:field_type => 'LabelField', :field_name => 'cop', :non_db_field=>true, :settings => { :is_separator => false, :static_value => '', :css_class => "borderless_label_field"}}
+
 
       field_configs[field_configs.length()] = {:field_type => 'LinkWindowField',
                                                :field_name => '',
@@ -202,8 +208,13 @@ module RmtProcessing::PresortStagingRunHelper
 
 
       field_configs << {:field_type => 'LabelField',
-                        :field_name => 'treatment_id',
-                      :settings => { :label_caption=>'treatment code',:static_value =>treatment_code, :show_label => true}}
+                        :field_name => 'treatment_id'}
+
+      field_configs << {:field_type => 'LabelField',
+                        :field_name => 'presort_unit'}
+
+      field_configs[field_configs.length()] = {:field_type => 'LabelField', :field_name => 'cop', :non_db_field=>true, :settings => { :is_separator => false, :static_value => '', :css_class => "borderless_label_field"}}
+      field_configs[field_configs.length()] = {:field_type => 'LabelField', :field_name => 'cop', :non_db_field=>true, :settings => { :is_separator => false, :static_value => '', :css_class => "borderless_label_field"}}
 
       field_configs[field_configs.length()] = {:field_type => 'LinkWindowField',
                                                :field_name => '',
@@ -244,7 +255,7 @@ module RmtProcessing::PresortStagingRunHelper
 
     if presort_staging_run.status
       @submit_button_align = "left"
-      set_form_layout "3", nil,1,15
+      set_form_layout "3", nil,1,18
     end
       build_form(presort_staging_run,field_configs,action,'presort_staging_run',caption,is_edit)
 
@@ -334,6 +345,10 @@ module RmtProcessing::PresortStagingRunHelper
    field_configs << {:field_type => 'DropDownField',
                      :field_name => 'size_id',
                      :settings => {:list =>size_codes,:label_caption=>'size code'}}
+
+   field_configs << {:field_type => 'DropDownField',
+                     :field_name => 'presort_unit',
+                     :settings => {:list =>['<empty>','PST-01', 'PST-02']}}
 
 	build_form(presort_staging_run,field_configs,action,'presort_staging_run',caption,is_edit)
 

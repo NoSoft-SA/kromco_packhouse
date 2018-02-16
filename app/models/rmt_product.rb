@@ -18,12 +18,16 @@ class RmtProduct < ActiveRecord::Base
 
 
   def after_create
+    integrate_rmt_product_into_MAF('PST-01')
+    integrate_rmt_product_into_MAF('PST-02')
+  end
+
+  def integrate_rmt_product_into_MAF(unit)
     begin
-      if(self.rmt_product_type_code.to_s.upcase=='PRESORT')
+      if (self.rmt_product_type_code.to_s.upcase=='PRESORT')
         code_article_client = "#{self.product_class_code}_#{self.treatment_code}_#{self.size_code}"
 
-
-        http = Net::HTTP.new(Globals.bin_scanned_mssql_server_host, Globals.bin_created_mssql_presort_server_port)
+        http = Net::HTTP.new(Globals.bin_scanned_mssql_server_host(unit), Globals.bin_created_mssql_presort_server_port(unit))
         request = Net::HTTP::Post.new("/select")
         parameters = {'method' => 'select', 'statement' => Base64.encode64("select * from [productionv50].[dbo].[Articleclient] where [productionv50].[dbo].[Articleclient].[Code_Articleclient]='#{code_article_client}'")}
         request.set_form_data(parameters)
@@ -32,7 +36,7 @@ class RmtProduct < ActiveRecord::Base
 
         if '200' == response.code
           res = response.body.split('resultset>').last.split('</res').first
-          if((results = Marshal.load(Base64.decode64(res))).length > 0)
+          if ((results = Marshal.load(Base64.decode64(res))).length > 0)
             return
           end
         else
@@ -44,7 +48,7 @@ class RmtProduct < ActiveRecord::Base
         end
 
 
-        http = Net::HTTP.new(Globals.bin_scanned_mssql_server_host, Globals.bin_created_mssql_presort_server_port)
+        http = Net::HTTP.new(Globals.bin_scanned_mssql_server_host(unit), Globals.bin_created_mssql_presort_server_port(unit))
         request = Net::HTTP::Post.new("/exec")
         parameters = {'method' => 'insert', 'statement' => Base64.encode64("INSERT INTO [productionv50].[dbo].[Articleclient] ([Code_articleclient],[Nom_articleclient]) VALUES('#{code_article_client}','#{code_article_client}')")}
         request.set_form_data(parameters)
@@ -62,7 +66,7 @@ class RmtProduct < ActiveRecord::Base
   end
 
 
-def after_find
+  def after_find
  self.ripe_point_description = self.ripe_point.ripe_point_description if self.ripe_point
 end
 

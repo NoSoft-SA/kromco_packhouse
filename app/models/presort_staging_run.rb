@@ -17,6 +17,8 @@ class PresortStagingRun < ActiveRecord::Base
   has_many :presort_staging_run_children
   has_many :bins
 
+  validates_presence_of :presort_unit
+
   def after_save
     if self.status=="STAGED"
       active_child=PresortStagingRunChild.find_by_presort_staging_run_id_and_status(self.id,"ACTIVE")
