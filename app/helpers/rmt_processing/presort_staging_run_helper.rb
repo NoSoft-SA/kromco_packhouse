@@ -402,6 +402,7 @@ end
    end
 	column_configs << {:field_type => 'text', :field_name => 'presort_run_code', :column_caption => 'Pre sort run code',:col_width=>180}
 	column_configs << {:field_type => 'text', :field_name => 'status', :column_caption => 'Status'}
+	column_configs << {:field_type => 'text', :field_name => 'presort_unit'}
   column_configs << {:field_type => 'text', :field_name => 'rmt_variety_code',:col_width=>150}
   column_configs << {:field_type => 'text', :field_name => 'ripe_point_code',:col_width=>120}
   column_configs << {:field_type => 'text', :field_name => 'track_slms_indicator_code',:col_width=>180}
