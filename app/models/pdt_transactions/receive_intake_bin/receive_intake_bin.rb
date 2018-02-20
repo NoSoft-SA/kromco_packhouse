@@ -236,7 +236,7 @@ class ReceiveIntakeBin < PDTTransaction
           updates << get_unupdated_bin_track_indicators(bins, n)
         end
 
-        Bin.update_all(ActiveRecord::Base.extend_set_sql_with_request(updates.compact.join(','),"bins"), "bins.delivery_id=#{@delivery.id}")
+        Bin.update_all(ActiveRecord::Base.extend_set_sql_with_request(updates.compact.join(','),"bins"), "bins.delivery_id=#{@delivery.id}") if(!updates.compact.empty?)
 
         Inventory.create_stock(@delivery.owner_party_role_id, "BIN", @delivery.farm_code, @delivery.truck_registration_number, "receive_intake_bins", @delivery.delivery_number, "INTAKE", bin_nums)
 
