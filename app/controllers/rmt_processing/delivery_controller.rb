@@ -1106,7 +1106,20 @@ class RmtProcessing::DeliveryController < ApplicationController
 
         pressure_reading_qtys = summarise_pressure_readings
         suggested_indicator = Delivery.calc_pressure_indicator(pressure_reading_qtys, groups)
-        @delivery_track_indicator.track_slms_indicator_code = suggested_indicator.track_slms_indicator_code
+        if(suggested_indicator)
+          @delivery_track_indicator.track_slms_indicator_code = suggested_indicator.track_slms_indicator_code
+        else
+          raise "System could not calc a default pressure track ind based on the 3 rules <br>
+                Rule 1: <br>
+                &nbsp &nbsp If 10 or more fruit falls into <br>
+                &nbsp &nbsp group 5, then the dominant group (T.I) is group_5 <br>
+                Rule 2: <br>
+                &nbsp &nbsp If 11 or more fruit falls into group 1, then the dominant group (T.I) is group_1 <br>
+                Rule 3: <br>
+                &nbsp &nbsp This rule involves a calculation that needs to loop through the groups from 1 to 5, building up a <br>
+                &nbsp &nbsp cumulative total of all fruit at every iteration. Whenever the total of 23 is reached or exceeded, <br>
+                &nbsp &nbsp the loop (group) indexer, is seen as the dominant group"
+        end
       rescue
         flash[:error] = $!.message
         current_delivery
