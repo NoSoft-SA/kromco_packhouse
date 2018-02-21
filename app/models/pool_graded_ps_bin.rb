@@ -16,6 +16,9 @@ class PoolGradedPsBin < ActiveRecord::Base
    maf_ps_bin_recordset=[]
    maf_tipped_qty = nil
    maf_total_lot_weight = nil
+
+    presort_unit = Globals.get_presort_unit_from_lot_number(pool_graded_ps_summary.maf_lot_number)
+
    ActiveRecord::Base.transaction do
 
      http = Net::HTTP.new(Globals.bin_created_mssql_server_host, Globals.bin_created_mssql_presort_server_port)

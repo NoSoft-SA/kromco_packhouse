@@ -20,6 +20,16 @@ class Globals
     cattr_accessor :log_levels, :console_log_levels
   end
 
+  def Globals.get_presort_unit_from_lot_number(lot_nr)
+
+    if lot_nr.to_i >= 10000
+      return 1
+    else
+      2
+    end
+
+  end
+
   def Globals.tables_to_be_logged_in_changed_logs
     return ["orders","voyages","people","messcada_people_view_messcada_rfid_allocations"]
   end
