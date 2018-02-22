@@ -26,6 +26,9 @@ module Services::PreSortingHelper
 
 
     field_configs << {:field_type => 'TextField',:field_name => 'bin1'}
+    field_configs << {:field_type => 'DropDownField',
+                      :field_name => 'presort_unit',
+                      :settings => {:list =>['<empty>','PST-01', 'PST-02']}}
     # field_configs << {:field_type => 'TextField',:field_name => 'bin2'}
     # field_configs << {:field_type => 'TextField',:field_name => 'bin3'}
 

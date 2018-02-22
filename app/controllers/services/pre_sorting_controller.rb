@@ -392,6 +392,7 @@ class Services::PreSortingController < ApplicationController
     @bin1 = Bin.find_by_bin_number(params['staging']['bin1'])
     session[:current_force_stage_bin_farm] = @bin1.farm_id
     bin_track_slms_indicator=TrackSlmsIndicator.find(@bin1.track_indicator1_id)
+    session[:forced_staging_presort_unit] = params['staging']['presort_unit']
 
     @presort_staging_runs = PresortStagingRun.find_by_sql("
       select p.presort_run_code ,pc.product_class_code ,tm.treatment_code,sizes.size_code,ripe_points.ripe_point_code,p.id ,t.track_slms_indicator_code,r.rmt_variety_code,s.season_code
@@ -409,7 +410,7 @@ class Services::PreSortingController < ApplicationController
       left  join sizes on p.size_id=sizes.id
       where fm.id='#{@bin1.farm_id}' and s.season_code='#{@bin1.season_code}' and f.id=#{@bin1.farm.farm_group.id} and r.id=#{@bin1.rmt_product.variety.rmt_variety.id}
       and t.id=#{bin_track_slms_indicator.id}
-      and ripe_points.id=#{@bin1.rmt_product.ripe_point.id}
+      and ripe_points.id=#{@bin1.rmt_product.ripe_point.id} and presort_unit='#{params['staging']['presort_unit']}'
       group by pc.product_class_code ,tm.treatment_code,sizes.size_code,ripe_points.ripe_point_code,p.id ,t.track_slms_indicator_code,r.rmt_variety_code,s.season_code
       ,p.presort_run_code ,p.status ,p.created_on ,p.completed_on ,p.created_by ,f.farm_group_code
       order by p.id desc
@@ -445,6 +446,7 @@ class Services::PreSortingController < ApplicationController
 
   def force_stage_bin
     pre_sort_staging_run_child=PresortStagingRunChild.find(params[:id])
+    params[:unit] = session[:forced_staging_presort_unit]
 
     bins_validation_results =  get_stage_bins_results(pre_sort_staging_run_child.presort_staging_run,pre_sort_staging_run_child,session[:current_force_stage_bin_number], nil, nil,nil)
 
