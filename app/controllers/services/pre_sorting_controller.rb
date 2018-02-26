@@ -396,7 +396,7 @@ class Services::PreSortingController < ApplicationController
 
     @presort_staging_runs = PresortStagingRun.find_by_sql("
       select p.presort_run_code ,pc.product_class_code ,tm.treatment_code,sizes.size_code,ripe_points.ripe_point_code,p.id ,t.track_slms_indicator_code,r.rmt_variety_code,s.season_code
-      ,p.status ,p.created_on ,p.completed_on ,p.created_by ,f.farm_group_code
+      ,p.status ,p.created_on ,p.completed_on ,p.created_by ,f.farm_group_code, p.presort_unit
       from presort_staging_runs p
       inner join presort_staging_run_children rc on rc.presort_staging_run_id=p.id
       inner join farms fm on fm.id=rc.farm_id
@@ -430,10 +430,12 @@ class Services::PreSortingController < ApplicationController
   def select_presort_staging_run
     @presort_staging_run_children = PresortStagingRunChild.find(:all,
                                                                 :conditions=>"presort_staging_run_id=#{params[:id]} and (farms.id=#{session[:current_force_stage_bin_farm]} or farms.farm_code='0P')",
-                                                                :select => "presort_staging_run_children.*,farms.farm_code",
-                                                                :joins => "inner join farms on presort_staging_run_children.farm_id=farms.id")
+                                                                :select => "presort_staging_run_children.*,farms.farm_code, p.presort_unit",
+                                                                :joins => "inner join farms on presort_staging_run_children.farm_id=farms.id
+                                                                           inner join presort_staging_runs p on p.id=presort_staging_run_children.presort_staging_run_id")
     render :inline => %{
       <% grid = build_presort_staging_run_child_grid(@presort_staging_run_children)%>
+      <% @content_header_caption = "'select a run child to stage bin: #{session[:current_force_stage_bin_number] }'"%>
       <% grid.caption = 'select a run child to stage bin: #{session[:current_force_stage_bin_number] }'%>
       <%grid.height='200'%>
       <% @header_content = grid.build_grid_data %>
