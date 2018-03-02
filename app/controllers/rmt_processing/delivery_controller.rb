@@ -1100,7 +1100,10 @@ class RmtProcessing::DeliveryController < ApplicationController
       @suggested_track_slms_indicator_codes = TrackSlmsIndicator.find(:all, :conditions=>"track_indicator_type_code='pressure_ripeness'").map { |g| [g.track_slms_indicator_code] }
       @hide_variety_type = true
       begin
-        groups = QcPressureStandard.find(:all, :select=>"qc_pressure_standards.*,i.track_slms_indicator_code", :conditions => "qc_pressure_standards.rmt_variety_code='#{session[:new_delivery].rmt_variety_code}' ",
+
+        season_year = session[:new_delivery].season.season
+
+        groups = QcPressureStandard.find(:all, :select=>"qc_pressure_standards.*,i.track_slms_indicator_code", :conditions => "qc_pressure_standards.rmt_variety_code='#{session[:new_delivery].rmt_variety_code}' and season = #{season_year} ",
                                          :joins => "join track_slms_indicators i on i.id=qc_pressure_standards.track_slms_indictor_id",
                                          :order => "track_slms_indicator_code asc")
 
