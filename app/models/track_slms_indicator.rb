@@ -57,7 +57,7 @@ end
 
   def after_create
     integrate_track_slms_indicator_into_MAF('PST-01')
-    # integrate_track_slms_indicator_into_MAF('PST-02')
+    integrate_track_slms_indicator_into_MAF('PST-02') #TO DO: Uncoment whe plant 2 goes live
   end
 
   def integrate_track_slms_indicator_into_MAF(unit)

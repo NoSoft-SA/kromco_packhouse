@@ -1292,7 +1292,7 @@ end
 			if id && @orchard = Orchard.find(id)
 				if @orchard.update_attribute(:is_group, true)
 					@orchard.integrate_representative_orchard_into_MAF('PST-01')
-					# @orchard.integrate_representative_orchard_into_MAF('PST-02') #TO DO: Uncoment whe plant 2 goes live
+					@orchard.integrate_representative_orchard_into_MAF('PST-02') #TO DO: Uncoment whe plant 2 goes live
 					@farm = session[:farm_record]
 					render_edit_farm
 				end
