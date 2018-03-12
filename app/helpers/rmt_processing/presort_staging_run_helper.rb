@@ -263,7 +263,7 @@ module RmtProcessing::PresortStagingRunHelper
 
   def get_statuses(presort_staging_run)
     statuses=[]
-    active_run =PresortStagingRun.find_by_status("ACTIVE")
+    active_run=PresortStagingRun.find_by_status_and_presort_unit("ACTIVE", presort_staging_run.presort_unit)
     if presort_staging_run.status ==  'EDITING' && active_run
       statuses = ['EDITING','CANCELLED']
     elsif  presort_staging_run.status ==  'EDITING' && !active_run

@@ -322,7 +322,7 @@ class  RmtProcessing::PresortStagingRunController < ApplicationController
 
   def check_for_active_run
     active_run=nil
-    active_run=PresortStagingRun.find_by_status("ACTIVE")
+    active_run=PresortStagingRun.find_by_status_and_presort_unit("ACTIVE", @presort_staging_run.presort_unit)
     return active_run
   end
 

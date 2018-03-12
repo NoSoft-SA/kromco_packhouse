@@ -52,6 +52,7 @@ module Services::PreSortingHelper
     column_configs << {:field_type => 'text', :field_name => 'presort_run_code', :column_caption => 'Pre sort run code',:col_width=>180}
     column_configs << {:field_type => 'text', :field_name => 'status', :column_caption => 'Status'}
     column_configs << {:field_type => 'text', :field_name => 'rmt_variety_code'}
+    column_configs << {:field_type => 'text', :field_name => 'presort_unit'}
     column_configs << {:field_type => 'text', :field_name => 'ripe_point_code',:col_width=>50}
     column_configs << {:field_type => 'text', :field_name => 'track_slms_indicator_code'}
     column_configs << {:field_type => 'text', :field_name => 'farm_group_code'}
@@ -77,6 +78,7 @@ module Services::PreSortingHelper
                             :id_column => 'id'}}
     column_configs << {:field_type => 'text', :field_name => 'presort_staging_run_child_code',:col_width=>250}
     column_configs << {:field_type => 'text', :field_name => 'farm_code', :column_caption => 'Farm code'}
+    column_configs << {:field_type => 'text', :field_name => 'presort_unit'}
     column_configs << {:field_type => 'text', :field_name => 'status',:settings =>{:target_action => 'edit_child_status', :id_column => 'id'}, :column_caption => 'Status'}
     column_configs << {:field_type => 'text', :field_name => 'created_on', :data_type => 'date', :column_caption => 'Created on'}
     column_configs << {:field_type => 'text', :field_name => 'updated_on', :data_type => 'date', :column_caption => 'Updated on'}
