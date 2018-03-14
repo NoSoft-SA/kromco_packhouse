@@ -17,32 +17,36 @@ class Production::ReworksController < ApplicationController
 
     carton_type_list,left_rec_set,right_rec_set= get_carton_history_diff_attr(carton_numbers.uniq)
     cartons_with_diffs = {}
-
-    if carton_numbers.uniq.length ==1
-      left_diffs, right_diffs = get_comparer_diff_lists(left_rec_set, right_rec_set)
-      cartons_with_diffs[carton_numbers[0]] = left_diffs.values[0]
-    else
-      left_diffs, right_diffs = get_comparer_diff_lists(left_rec_set, right_rec_set)
-      cartons_with_diffs = left_diffs
-    end
-
-
     cols_to_format = []
-    @cartons.each do |carton|
+
+
+
       if carton_numbers.uniq.length ==1
-        if !cartons_with_diffs.empty? && cartons_with_diffs.keys.include?("'#{carton['carton_number']}'")
-          carton['diff_col'] = true
-          carton['diff_cols'] = cartons_with_diffs["'#{carton['carton_number']}'"].keys.delete_if { |key, value| key == "carton_number" }
-          cartons_with_diffs["'#{carton['carton_number']}'"].keys.each do |col| cols_to_format << col if !cols_to_format.include?(col) && col !="carton_number" end
-        end
+        left_diffs, right_diffs = get_comparer_diff_lists(left_rec_set, right_rec_set)
+        cartons_with_diffs[carton_numbers[0]] = left_diffs.values[0] if left_diffs
       else
-        if !cartons_with_diffs.empty? && cartons_with_diffs.keys.include?(carton['carton_number'])
-          carton['diff_col'] = true
-          carton['diff_cols'] = cartons_with_diffs[carton['carton_number']].keys.delete_if { |key, value| key == "carton_number" }
-          cartons_with_diffs[carton['carton_number']].keys.each do |col| cols_to_format << col if !cols_to_format.include?(col) && col !="carton_number" end
-        end
+        left_diffs, right_diffs = get_comparer_diff_lists(left_rec_set, right_rec_set)
+        cartons_with_diffs = left_diffs if left_diffs
       end
 
+    if !cartons_with_diffs.empty?
+
+      @cartons.each do |carton|
+        if carton_numbers.uniq.length ==1
+          if !cartons_with_diffs.empty? && cartons_with_diffs.keys.include?("'#{carton['carton_number']}'")
+            carton['diff_col'] = true
+            carton['diff_cols'] = cartons_with_diffs["'#{carton['carton_number']}'"].keys.delete_if { |key, value| key == "carton_number" }
+            cartons_with_diffs["'#{carton['carton_number']}'"].keys.each do |col| cols_to_format << col if !cols_to_format.include?(col) && col !="carton_number" end
+          end
+        else
+          if !cartons_with_diffs.empty? && cartons_with_diffs.keys.include?(carton['carton_number'])
+            carton['diff_col'] = true
+            carton['diff_cols'] = cartons_with_diffs[carton['carton_number']].keys.delete_if { |key, value| key == "carton_number" }
+            cartons_with_diffs[carton['carton_number']].keys.each do |col| cols_to_format << col if !cols_to_format.include?(col) && col !="carton_number" end
+          end
+        end
+
+      end
     end
      session[:cols_to_format] = cols_to_format
     @cartons
@@ -5148,6 +5152,7 @@ end
   end
 
   def get_comparer_diff_lists(rw_receipt_carton, rw_reclassed_carton)
+
     if (discrepancies = Comparer.calc_discrepancies(rw_reclassed_carton, rw_receipt_carton, "carton_number", "pallet_sequence_number"))
       left_diffs = discrepancies['left_diffs']
       right_diffs = discrepancies['right_diffs']
@@ -5158,7 +5163,9 @@ end
   def get_carton_history_diff_attr(carton_numbers)
     rw_reclassed_cartons = get_rw_reclassed_cartons(carton_numbers)
 
-    carton_numbers = rw_reclassed_cartons.map{|p|"'#{p['carton_number']}'"}
+    if !rw_reclassed_cartons.empty?
+      carton_numbers = rw_reclassed_cartons.map{|p|"'#{p['carton_number']}'"}
+    end
 
     rw_receipt_cartons = get_rw_receipt_cartons(carton_numbers)
 
@@ -5167,8 +5174,12 @@ end
     carton_type_list, left_rec_set, right_rec_set = calc_carton_diffs(rw_receipt_carton_histories, rw_receipt_cartons, rw_reclassed_cartons)
 
     if carton_numbers.length == 1
-      carton_type_list[0].each do |k,v|
-        return [],v['rw_receipt_carton'],v['rw_reclassed_carton']
+      if !carton_type_list.empty?
+        carton_type_list[0].each do |k,v|
+          return [],v['rw_receipt_carton'],v['rw_reclassed_carton']
+        end
+      else
+        return [],[],[]
       end
     else
       return carton_type_list, left_rec_set,right_rec_set
