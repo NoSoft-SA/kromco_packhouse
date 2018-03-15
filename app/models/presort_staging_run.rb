@@ -47,7 +47,7 @@ class PresortStagingRun < ActiveRecord::Base
   end
 
   def PresortStagingRun.new_activated_child(farm_code,user,presort_unit)
-    active_child=PresortStagingRun.find(:first, :conditions => "(status='ACTIVE' or status='active') and presort_unit='#{presort_unit}'")
+    active_child=PresortStagingRunChild.find(:first,:joins => "join presort_staging_runs on presort_staging_runs.id = presort_staging_run_children.presort_staging_run_id", :conditions => "(presort_staging_run_children.status='ACTIVE' or presort_staging_run_children.status='active') and presort_unit='#{presort_unit}'")
     presort_staging_run=PresortStagingRun.find(active_child.presort_staging_run_id)
     PresortStagingRun.set_child_status('STAGED',active_child,presort_staging_run,user)
     PresortStagingRun.new_child_run(farm_code,presort_staging_run,user)
