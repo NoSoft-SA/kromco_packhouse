@@ -577,7 +577,7 @@ class Services::PreSortingController < ApplicationController
   def stage_overriden_bins(presort_staging_child_run, validation_results)
     if (validation_results && ((overridden_bins=validation_results.group_by { |a| a[:status] }).keys.include?('OVERRIDDEN')))
       bin = Bin.find_by_bin_number(overridden_bins['OVERRIDDEN'][0][:bin_num])
-      PresortStagingRun.new_activated_child(bin.farm.farm_code, 'system')
+      PresortStagingRun.new_activated_child(bin.farm.farm_code, 'system', params[:unit])
 
       new_presort_staging_child_run=PresortStagingRunChild.find(:all, :conditions => "presort_staging_run_id=#{presort_staging_child_run.presort_staging_run_id} and (status='ACTIVE' or status='active')")[0]
       pre_sort_staging_run_overrides = PresortStagingRunOverride.new({:old_staging_child_run_id => presort_staging_child_run.id, :new_staging_child_run_id => new_presort_staging_child_run.id, :new_farm_code => bin.farm.farm_code,
@@ -710,7 +710,7 @@ class Services::PreSortingController < ApplicationController
           else
             bin_results[:status] = 'OVERRIDDEN'
           end
-          bin_results[:msg] = "bin belongs to farm [#{bin.farm.farm_code}], but child_run's farm is [#{staging_child_run.farm.farm_code}]. Start new run?"
+          bin_results[:msg] = "bin belongs to farm [#{bin.farm.farm_code}](bin_number=#{bin.bin_number}), but child_run's farm is [#{staging_child_run.farm.farm_code}](child_run_id=#{staging_child_run.id}). Start new run?"
         else
           bin_results[:errs] = ["bin's farm[#{bin.farm.farm_code}] is not part of parent's farm group[#{staging_run.farm_group.farm_group_code}]"]
           bin_results[:status] = 'FAILED'
