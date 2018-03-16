@@ -44,13 +44,17 @@ class PresortStagingRun < ActiveRecord::Base
     presort_staging_run_child.presort_staging_run_id=presort_staging_run.id
     presort_staging_run_child.save
     PresortStagingRun.set_child_status('ACTIVE',presort_staging_run_child,presort_staging_run,user)
+    return presort_staging_run_child
   end
 
   def PresortStagingRun.new_activated_child(farm_code,user,presort_unit)
-    active_child=PresortStagingRunChild.find(:first,:joins => "join presort_staging_runs on presort_staging_runs.id = presort_staging_run_children.presort_staging_run_id", :conditions => "(presort_staging_run_children.status='ACTIVE' or presort_staging_run_children.status='active') and presort_unit='#{presort_unit}'")
+    active_child=PresortStagingRunChild.find(:first, :select => "presort_staging_run_children.*",
+                                             :joins => "join presort_staging_runs on presort_staging_runs.id = presort_staging_run_children.presort_staging_run_id",
+                                             :conditions => "(presort_staging_run_children.status='ACTIVE' or presort_staging_run_children.status='active') and presort_unit='#{presort_unit}'")
+
     presort_staging_run=PresortStagingRun.find(active_child.presort_staging_run_id)
     PresortStagingRun.set_child_status('STAGED',active_child,presort_staging_run,user)
-    PresortStagingRun.new_child_run(farm_code,presort_staging_run,user)
+    new_activated_run_child =  PresortStagingRun.new_child_run(farm_code,presort_staging_run,user)
   end
 
   def PresortStagingRun.get_bins_per_location_farm(location_code,farm_code,presort_run)

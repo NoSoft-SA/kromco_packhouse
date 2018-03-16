@@ -351,7 +351,7 @@ class Services::PreSortingController < ApplicationController
     return "no active pre_sort run could be found" if (active_pre_sort_stagin_runs.empty?)
     return "more than one pre_sort run found" if (active_pre_sort_stagin_runs.length > 1)
     @active_pre_sort_stagin_run = active_pre_sort_stagin_runs[0]
-    active_pre_sort_stagin_run_children=PresortStagingRunChild.find(:all, :conditions => "presort_staging_run_id=#{@active_pre_sort_stagin_run.id} and (status='ACTIVE' or status='active')")
+    active_pre_sort_stagin_run_children=PresortStagingRunChild.find(:all, :select => "presort_staging_run_children.*", :conditions => "presort_staging_run_id=#{@active_pre_sort_stagin_run.id} and (status='ACTIVE' or status='active')")
     return "no active pre_sort child run could be found" if (active_pre_sort_stagin_run_children.empty?)
     return "more than one pre_sort child run found" if (active_pre_sort_stagin_run_children.length > 1)
     @active_pre_sort_stagin_run_child = active_pre_sort_stagin_run_children[0]
@@ -428,7 +428,7 @@ class Services::PreSortingController < ApplicationController
   end
 
   def select_presort_staging_run
-    @presort_staging_run_children = PresortStagingRunChild.find(:all,
+    @presort_staging_run_children = PresortStagingRunChild.find(:all, :select => "presort_staging_run_children.*",
                                                                 :conditions=>"presort_staging_run_id=#{params[:id]} and (farms.id=#{session[:current_force_stage_bin_farm]} or farms.farm_code='0P')",
                                                                 :select => "presort_staging_run_children.*,farms.farm_code, p.presort_unit",
                                                                 :joins => "inner join farms on presort_staging_run_children.farm_id=farms.id
@@ -471,7 +471,7 @@ class Services::PreSortingController < ApplicationController
     end
 
     active_pre_sort_stagin_run=PresortStagingRun.find(:first, :conditions => "(status='ACTIVE' or status='active') and presort_unit='#{params[:unit]}'")
-    active_pre_sort_stagin_run_child=PresortStagingRunChild.find(:first, :conditions => "presort_staging_run_id=#{@active_pre_sort_stagin_run.id} and (status='ACTIVE' or status='active')")
+    active_pre_sort_stagin_run_child=PresortStagingRunChild.find(:first, :select => "presort_staging_run_children.*", :conditions => "presort_staging_run_id=#{@active_pre_sort_stagin_run.id} and (status='ACTIVE' or status='active')")
 
     bins_validation_results =  get_stage_bins_results(active_pre_sort_stagin_run,active_pre_sort_stagin_run_child,bin1, bin2, bin3,overridden)
 
@@ -579,7 +579,7 @@ class Services::PreSortingController < ApplicationController
       bin = Bin.find_by_bin_number(overridden_bins['OVERRIDDEN'][0][:bin_num])
       PresortStagingRun.new_activated_child(bin.farm.farm_code, 'system', params[:unit])
 
-      new_presort_staging_child_run=PresortStagingRunChild.find(:all, :conditions => "presort_staging_run_id=#{presort_staging_child_run.presort_staging_run_id} and (status='ACTIVE' or status='active')")[0]
+      new_presort_staging_child_run=PresortStagingRunChild.find(:all, :select => "presort_staging_run_children.*", :conditions => "presort_staging_run_id=#{presort_staging_child_run.presort_staging_run_id} and (status='ACTIVE' or status='active')")[0]
       pre_sort_staging_run_overrides = PresortStagingRunOverride.new({:old_staging_child_run_id => presort_staging_child_run.id, :new_staging_child_run_id => new_presort_staging_child_run.id, :new_farm_code => bin.farm.farm_code,
                                                                       :override_bin1_num => (bin1=overridden_bins['OVERRIDDEN'].find { |b| b[:bin_item]==1 }) ? bin1[:bin_num] : nil,
                                                                       :override_bin2_num => (bin2=overridden_bins['OVERRIDDEN'].find { |b| b[:bin_item]==2 }) ? bin2[:bin_num] : nil,

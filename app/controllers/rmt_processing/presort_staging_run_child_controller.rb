@@ -164,7 +164,7 @@ class  RmtProcessing::PresortStagingRunChildController < ApplicationController
   end
 
   def check_for_active_child
-    active_child =PresortStagingRunChild.find(:first,
+    active_child =PresortStagingRunChild.find(:first, :select => "presort_staging_run_children.*",
                                               :joins=>"join presort_staging_runs p on p.id=presort_staging_run_children.presort_staging_run_id",
                                               :conditions=>"presort_staging_run_children.status='ACTIVE' and p.status='ACTIVE' and p.presort_unit='#{@presort_staging_run_child.presort_staging_run.presort_unit}'")
 
