@@ -1048,24 +1048,36 @@ class RmtProcessing::DeliveryController < ApplicationController
 
       @starch_summary_results_label = "starch summary results<br>"
       if(opt = ripeness_groups.find{|t| t.sub_type=="OPT"})
-        opt.config_data.split(",").each do |o|
-          opt_cat_count += eval("starch_summary_results.cat#{o}_value").to_i
+        if(opt.config_data)
+          opt.config_data.split(",").each do |o|
+            opt_cat_count += eval("starch_summary_results.cat#{o}_value").to_i
+          end
+        else
+          ripeness_groups_error = "Track_slms_indicator:#{opt.track_slms_indicator_code} for variety_type(#{session[:new_delivery].rmt_variety_code}) has no config_data specified for 'opt'"
         end
       else
         ripeness_groups_error = "There is no OPT starch track indicator set up for variety(#{session[:new_delivery].rmt_variety_code})"
       end
 
       if(pre_opt = ripeness_groups.find{|t| t.sub_type=="PRE_OPT"})
-        pre_opt.config_data.split(",").each do |p|
-          pre_opt_cat_count += eval("starch_summary_results.cat#{p}_value").to_i
+        if(pre_opt.config_data)
+          pre_opt.config_data.split(",").each do |p|
+            pre_opt_cat_count += eval("starch_summary_results.cat#{p}_value").to_i
+          end
+        else
+          ripeness_groups_error = "Track_slms_indicator:#{pre_opt.track_slms_indicator_code} for variety_type(#{session[:new_delivery].rmt_variety_code}) has no config_data specified for 'pre_opt'"
         end
       else
         ripeness_groups_error = "There is no PRE_OPT starch track indicator set up for variety(#{session[:new_delivery].rmt_variety_code})"
       end
 
       if(post_opt = ripeness_groups.find{|t| t.sub_type=="POST_OPT"})
-        post_opt.config_data.split(",").each do |p|
-          post_opt_cat_count += eval("starch_summary_results.cat#{p}_value").to_i
+        if(post_opt.config_data)
+          post_opt.config_data.split(",").each do |p|
+            post_opt_cat_count += eval("starch_summary_results.cat#{p}_value").to_i
+          end
+        else
+          ripeness_groups_error = "Track_slms_indicator:#{post_opt.track_slms_indicator_code} for variety_type(#{session[:new_delivery].rmt_variety_code}) has no config_data specified for 'post_opt'"
         end
       else
         ripeness_groups_error = "There is no POST_OPT starch track indicator set up for variety(#{session[:new_delivery].rmt_variety_code})"
