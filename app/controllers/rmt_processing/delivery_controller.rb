@@ -79,14 +79,20 @@ class RmtProcessing::DeliveryController < ApplicationController
     @current_page = session[:deliveries_page] if session[:deliveries_page]
     @current_page = params['page'] if params['page']
     @deliveries = eval(session[:query]) if !@deliveries
-    render :inline => %{
-      <% grid            = build_delivery_grid(@deliveries,@can_edit,@can_delete) %>
-      <% grid.caption    = 'list of all deliveries' %>
-      <% @header_content = grid.build_grid_data %>
 
-      <%= grid.render_html %>
-      <%= grid.render_grid %>
-      }, :layout => 'content'
+    if(@deliveries.length > 0)
+      render :inline => %{
+        <% grid            = build_delivery_grid(@deliveries,@can_edit,@can_delete) %>
+        <% grid.caption    = 'list of all deliveries' %>
+        <% @header_content = grid.build_grid_data %>
+
+        <%= grid.render_html %>
+        <%= grid.render_grid %>
+        }, :layout => 'content'
+    else
+      session[:alert] = "No records to show"
+      render :inline => %{}, :layout => 'content'
+    end
   end
 
   def search_deliveries_flat
