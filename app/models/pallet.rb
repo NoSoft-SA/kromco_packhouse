@@ -67,11 +67,11 @@ class Pallet < ActiveRecord::Base
         if   @pallet.load_detail_id
           failed_pallets.push(pallet_number + "(pallet is on load)".to_s)
         end
-        if stock_item
-          if   stock_item.location_code.upcase.index("PART_PALLETS")
-          failed_pallets.push(pallet_number + "(location_code has PART_PALLETS)".to_s)
-          end
-        end
+        # if stock_item Check of location_code removed on kromco_request 12_04_2018 Judy
+        #   if   stock_item.location_code.upcase.index("PART_PALLETS")
+        #   failed_pallets.push(pallet_number + "(location_code has PART_PALLETS)".to_s)
+        #   end
+        # end
 
         if @pallet.target_market_code=="P9_PART PALLETS"
           failed_pallets.push(pallet_number + "(target_market_code is P9_PART PALLETS)".to_s)
@@ -96,9 +96,9 @@ class Pallet < ActiveRecord::Base
         if @pallet.exit_ref
           failed_pallets.push(pallet_number + "(exit_ref: #{@pallet.exit_ref})")
         end
-        if   @pallet.consignment_note_number == nil
-          failed_pallets.push(pallet_number + "(not on intake consignment)".to_s)
-        end
+        # if   @pallet.consignment_note_number == nil  Check of intake removed on kromco_request 12_04_2018 Judy
+        #   #failed_pallets.push(pallet_number + "(not on intake consignment)".to_s)
+        # end
         if   @pallet.load_detail_id
           failed_pallets.push(pallet_number + "(pallet is on load)".to_s)
         end
@@ -119,11 +119,11 @@ class Pallet < ActiveRecord::Base
             end
           end
         end
-        if stock_item  
-            if   stock_item.location_code.upcase.index("PART_PALLETS")
-              failed_pallets.push(pallet_number + "(location_code has PART_PALLETS)".to_s)
-            end
-        end
+        # if stock_item   Check of intake removed on kromco_request 12_04_2018 Judy
+        #     if   stock_item.location_code.upcase.index("PART_PALLETS")
+        #       failed_pallets.push(pallet_number + "(location_code has PART_PALLETS)".to_s)
+        #     end
+        # end
 
         if @pallet.target_market_code=="P9_PART PALLETS"
           failed_pallets.push(pallet_number + "(target_market_code is P9_PART PALLETS)".to_s)
