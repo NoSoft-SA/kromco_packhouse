@@ -810,6 +810,7 @@ class Fg::OrderController < ApplicationController
           set_active_doc("order", @order.id)
           @order = Order.find(:first, :conditions => "order_number = '#{@order.order_number}'")
           params[:id] = @order.id
+          flash[:error] = @returned_msg
           edit_order
         else
           @is_create_retry = true
@@ -841,7 +842,12 @@ class Fg::OrderController < ApplicationController
            msg += " " + "Customer: #{trading_partner.party_name} - #{trading_partner.remarks}.<br>"
            msg += " " + "Load date:  #{order.loading_date.to_date if order.loading_date}.<br>"
            subj = "#{order.order_number} for Customer: #{trading_partner.party_name} - #{trading_partner.remarks}"
-           order.notify_marketer_order_created(msg,subj,marketer.email_address)
+           if !marketer.email_address || marketer.email_address==""
+             @returned_msg = "Marketer not notified because email address is not specified or is not valid"
+           else
+             order.notify_marketer_order_created(msg,subj,marketer.email_address)
+           end
+
      end
 end
   end
