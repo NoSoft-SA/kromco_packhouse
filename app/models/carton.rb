@@ -711,7 +711,11 @@ class Carton < ActiveRecord::Base
     inventory_rec = InventoryCode.find_by_inventory_code(mapped_pallet_sequence[:inventory_code])
     gtin = Carton.get_gtin( mapped_pallet_sequence[:organization_code], mapped_pallet_sequence[:commodity_code], mapped_pallet_sequence[:marketing_variety_code], mapped_pallet_sequence[:old_pack_code], mapped_pallet_sequence[:actual_size_count_code], mapped_pallet_sequence[:grade_code], mapped_pallet_sequence[:inventory_code_short],mapped_pallet_sequence[:brand])
     ext_fg_rec = ExtendedFg.find_by_extended_fg_code(mapped_pallet_sequence[:extended_fg_code])
+
+    raise "Extended FG: #{mapped_pallet_sequence[:extended_fg_code]} does not exit" if ! ext_fg_rec
+
     fg_product_rec = FgProduct.find_by_fg_product_code(ext_fg_rec.fg_code)
+
     marketing_variety = MarketingVariety.find_by_marketing_variety_code_and_commodity_code(mapped_pallet_sequence[:marketing_variety_code],mapped_pallet_sequence[:commodity_code])
     egap = Puc.find_by_puc_code(mapped_pallet_sequence[:puc]).eurogap_code
     item_pack = fg_product_rec.item_pack_product
