@@ -588,7 +588,8 @@ class RwActiveCarton < ActiveRecord::Base
     orchard_printed = false
 
     if self.carton.bin
-      if self.carton.bin.orchard_code && (self.target_market_code.split("_")[0].upcase == "NI"||self.target_market_code.split("_")[0].upcase == "FE")
+      if self.carton.bin.orchard_code && (self.target_market_code.split("_")[0].upcase == "NI"||
+          self.target_market_code.split("_")[0].upcase == "FE" || self.target_market_code.split("_")[0].upcase == "P6")
         data.store("F32", "ORCHARD")
         data.store("F33", self.carton.bin.orchard_code)
         orchard_printed = true
