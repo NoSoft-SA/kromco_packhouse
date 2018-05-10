@@ -79,8 +79,6 @@ class Services::SampleBinWeighingController < ApplicationController
   end
 
   def complete_delivery
-
-
     tripsheet_number = params[:id]
     delivery = Delivery.find_by_delivery_number(tripsheet_number)
     input = params[:input]
@@ -102,23 +100,21 @@ class Services::SampleBinWeighingController < ApplicationController
             sample_bin_avg_weight += element.attributes['bin_weight'].to_f
             count+=1
           end
-#          Inventory.move_stock('sample_bin_weighing', tripsheet_number, 'sample_bin_weighing', [element.attributes['bin_number']])
         end
         sample_bin_avg_weight = (sample_bin_avg_weight/count).to_f if(count > 0)
 
         if(delivery.commodity_code != 'PL')
-          all_bins = Bin.find_by_sql("select * from bins where bins.delivery_id=#{delivery.id} and bins.is_half_bin is not true")  #.map{|b|[b.bin_number]}
-          all_bins.each do |bin|
-            material_mass = PackMaterialProduct.find(bin.pack_material_product_id).material_mass.to_f
-            bin.update_attributes!({:weight=>(sample_bin_avg_weight - material_mass)})
-          end
-#          Bin.bulk_update({:bin_weight =>"#{(sample_bin_avg_weight - material_mass)}"},'bin_number',sample_bins) if(sample_bins.length > 0)
-        end        
+          all_bins = Bin.find_by_sql("select * from bins where bins.delivery_id=#{delivery.id} and bins.is_half_bin is not true")
+          non_sample_bins_or_clause = " (bin_number='#{all_bins.map{|b| b.bin_number}.join("' or bin_number='")}') "
+          ActiveRecord::Base.connection.execute("update bins
+          set rebin_status=(#{sample_bin_avg_weight}-p.material_mass)
+          from pack_material_products p
+          where (p.id=bins.pack_material_product_id)
+          and #{non_sample_bins_or_clause}")
+        end
       end
-#      send_error("MASIMPA")
       send_response("<complete>delivery weighing completed OK</complete>")
       return
-#      return nil
     rescue
       send_error($!.to_s)
       return
