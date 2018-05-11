@@ -107,7 +107,7 @@ class Services::SampleBinWeighingController < ApplicationController
           all_bins = Bin.find_by_sql("select * from bins where bins.delivery_id=#{delivery.id} and bins.is_half_bin is not true")
           non_sample_bins_or_clause = " (bin_number='#{all_bins.map{|b| b.bin_number}.join("' or bin_number='")}') "
           ActiveRecord::Base.connection.execute("update bins
-          set rebin_status=(#{sample_bin_avg_weight}-p.material_mass)
+          set weight=(#{sample_bin_avg_weight}-p.material_mass)
           from pack_material_products p
           where (p.id=bins.pack_material_product_id)
           and #{non_sample_bins_or_clause}")
