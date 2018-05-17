@@ -42,11 +42,15 @@ class Fg::LoadController < ApplicationController
   def update_pallet
     id = session[:pallet_id].to_i
     @pallet = Pallet.find("#{id}")
-    @pallet.update_attributes({:remarks1, "#{params[:pallet][:remarks1]}",
-                               :remarks2, "#{params[:pallet][:remarks2]}",
-                               :remarks3, "#{params[:pallet][:remarks3]}",
-                               :remarks4, "#{params[:pallet][:remarks4]}",
-                               :remarks5, "#{params[:pallet][:remarks5]}"})
+    @pallet.update_attributes(
+                               {
+                               :remarks1 => "#{params[:pallet][:remarks1]}",
+                               :remarks2 => "#{params[:pallet][:remarks2]}",
+                               :remarks3 =>  "#{params[:pallet][:remarks3]}",
+                               :remarks4 =>  "#{params[:pallet][:remarks4]}",
+                               :remarks5 =>  "#{params[:pallet][:remarks5]}"
+                               }
+                              )
     if @pallet.save
       render :inline => %{<script>
                              alert('pallet edited');
@@ -91,7 +95,7 @@ class Fg::LoadController < ApplicationController
         oderz[o['pallet_number']]=[o['pallet_number']]
       end
     end
-    session[:load_pallets]=@pallets
+    session[:load_pallet_ids]=@pallets.map{|v|v['id']}
     session[:query]=  "ActiveRecord::Base.connection.select_all(\"#{pallets_query}\")"
 
     session[:load_id] = id
@@ -113,13 +117,15 @@ class Fg::LoadController < ApplicationController
   def  edit_pallets_remarks
     id = params[:id].to_i
     set_active_doc("loads",params[:id])
-
-    pallets = Pallet.find_by_sql("select pallets.*
+    pallets_query=  "select pallets.*
                                     from pallets
                                     inner join load_details on pallets.load_detail_id=load_details.id
                                     inner join load_orders on load_details.load_order_id=load_orders.id
                                     inner join  loads on load_orders.load_id=loads.id
-                                    where loads.id=#{id}   ")
+                                    where loads.id=#{id}   "
+
+
+    pallets = Pallet.find_by_sql(pallets_query)
     @pallets =[]
     oderz ={}
     if !pallets.empty?
@@ -128,8 +134,10 @@ class Fg::LoadController < ApplicationController
         oderz[o['pallet_number']]=[o['pallet_number']]
       end
     end
-    session[:load_pallets]=@pallets
-    session[:query]= @pallets
+    session[:load_pallet_ids]=@pallets.map{|v|v['id']}
+    session[:query] = "ActiveRecord::Base.connection.select_all(\"#{pallets_query}\")"
+
+
     session[:load_id] = id
     @use_jq_grid = true
     if @use_jq_grid
@@ -140,7 +148,7 @@ class Fg::LoadController < ApplicationController
     @can_delete = authorise(program_name?, 'delete', session[:user_id])
     @current_page = session[:load_details_page]
     @current_page = params['page']||= session[:load_details_page]
-    @pallets = eval(session[:query]) if !@pallets
+    @pallets = Pallet.find_by_sql("select * from pallets where id in (#{session[:load_pallet_ids].join(",")})") if !@pallets
     render :inline => %{
       <% grid            = build_edit_pallets_grid(@pallets) %>
       <% grid.caption    = "'Edit Pallet Remarks'" %>
@@ -210,7 +218,7 @@ class Fg::LoadController < ApplicationController
   end
 
   def deallocated_pallets
-    load_pallets = session[:load_pallets]
+    load_pallets = Pallet.find_by_sql("select * from pallets where id in (#{session[:load_pallet_ids].join(",")})")
     selected_pallets = selected_records?(load_pallets, nil)
     load_id=session[:load_id]
     order=Order.find_by_sql("select orders.* from orders inner join load_orders on load_orders.order_id=orders.id where load_orders.load_id=#{load_id}")[0]
