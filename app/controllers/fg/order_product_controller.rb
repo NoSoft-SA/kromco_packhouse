@@ -56,7 +56,7 @@ class Fg::OrderProductController < ApplicationController
     load_order=LoadOrder.find_by_load_id(session[:load_id])
     @order_id=load_order.order_id
     @load_id = session[:load_id]
-    order_products = session[:products]
+    order_products = ActiveRecord::Base.connection.select_all("select * from order_products where id in (#{session[:order_product_ids].join(",")})")
     selected_order_products = selected_records?(order_products)
     LoadDetail.create_load_details(selected_order_products,session[:load_id])
     render :inline => %{<script>
@@ -280,7 +280,7 @@ class Fg::OrderProductController < ApplicationController
       @order_products=order_products
       @caption="Order Products for Order #{@order.order_number}"
     end
-    session[:products] =  @order_products
+    session[:order_product_ids]=@order_products.map{|x|x['id']}
     if session[:current_viewing_order]
       @view_order=true
     else
@@ -616,7 +616,7 @@ class Fg::OrderProductController < ApplicationController
   end
 
   def selected_item_packs
-    order_products = session[:products]
+    order_products = ActiveRecord::Base.connection.select_all("select * from order_products where id in (#{session[:order_product_ids].join(",")})")
     @selected_item_packs = selected_records?(order_products)
     selected_item_packs
   end
