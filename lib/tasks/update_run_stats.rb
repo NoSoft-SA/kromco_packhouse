@@ -39,11 +39,11 @@ class UpdateRunStats
     log_query = "insert into run_stats_job_logs  ( production_run_id,cartons_printed,cartons_weight,rebins_printed,rebins_weight,bins_tipped,bins_tipped_weight,
                                           pallets_completed,logged_at,updated_at)
                  (select  production_run_id,cartons_printed,cartons_weight,rebins_printed,rebins_weight,bins_tipped,bins_tipped_weight,
-                                          pallets_completed,logged_at,now() from run_stats_jobs where id in (#{jobs.map{|j|j.id}.join(",")})) "
+                                          pallets_completed,logged_at,now() from run_stats_jobs where id in (#{jobs.map{|j|j['id']}.join(",")})) "
 
     ActiveRecord::Base.connection.execute(log_query) if jobs.size > 0
 
-    query = "delete from run_stats_jobs where id in (#{jobs.map{|j|j.id}.join(",")}) "
+    query = "delete from run_stats_jobs where id in (#{jobs.map{|j|j['id']}.join(",")}) "
     puts query
     ActiveRecord::Base.connection.execute(query) if jobs.size > 0
 
