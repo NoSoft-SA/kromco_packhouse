@@ -515,7 +515,7 @@ class RwActiveCarton < ActiveRecord::Base
     data.store("F12", self.pick_reference)
     data.store("F13", self.puc)
     data.store("F14", self.egap.to_s)
-    data.store("F15", self.target_market_code)
+    data.store("F15", self.target_market_code.slice(0,2))
     class_code = ProductClass.find_by_product_class_code(self.product_class_code).product_class_description
     data.store("F16", class_code)
 
