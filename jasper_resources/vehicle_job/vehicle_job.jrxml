@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="vehicle_job" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="1670303d-5e13-4567-8bc4-35f213272454">
+	<property name="ireport.zoom" value="2.253944402704733"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<property name="ireport.jasperserver.reportUnit" value="/reports/MES/RMT/vehicle_job"/>
+	<property name="ireport.jasperserver.url" value="http://172.16.16.40/jasperserver-pro/"/>
+	<property name="ireport.jasperserver.user" value="jasperadmin"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/MES/RMT/vehicle_job_files/vehicle_job_"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="kromco_mes"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<parameter name="vehicle_job_number" class="java.lang.String"/>
+	<queryString language="SQL">
+		<![CDATA[SELECT
+  vj.planned_location,
+  s.location_code as location_code,
+  vju.unit_reference_id,
+  vj.vehicle_job_number,
+  vj.id as vehicle_job_id,
+  f.farm_code,
+  r.commodity_code,
+  r.variety_code,v.variety_description,
+  r.product_class_code,
+  r.size_code,
+  p.pack_material_product_code,
+  ti.track_slms_indicator_code,
+  cast(b.weight as decimal(7,2)) as weight,
+  now() as datenow,
+  b.coldstore_type,
+  r.treatment_code as colour,pc_code_code,date(now()) - date(b.created_on) AS fruit_age
+FROM
+  public.vehicle_job_units vju
+  INNER JOIN public.vehicle_jobs vj ON (vju.vehicle_job_id = vj.id)
+  INNER JOIN public.bins b ON (vju.unit_reference_id = b.bin_number)
+  INNER JOIN public.farms f ON (b.farm_id = f.id)
+  INNER JOIN public.rmt_products r ON (b.rmt_product_id = r.id)
+  INNER JOIN public.ripe_points q ON (r.ripe_point_id = q.id)
+  left JOIN public.varieties v on (v.id = r.variety_id)
+  INNER JOIN public.pack_material_products p ON (b.pack_material_product_id = p.id)
+  inner join public.stock_items s on (b.bin_number = s.inventory_reference)
+  left join public.deliveries d on (b.delivery_id = d.id)
+  left join public.track_slms_indicators ti on ti.id = b.track_indicator1_id
+where vj.vehicle_job_number=$P{vehicle_job_number}]]>
+	</queryString>
+	<field name="planned_location" class="java.lang.String"/>
+	<field name="location_code" class="java.lang.String"/>
+	<field name="unit_reference_id" class="java.lang.String"/>
+	<field name="vehicle_job_number" class="java.lang.String"/>
+	<field name="vehicle_job_id" class="java.lang.Integer"/>
+	<field name="farm_code" class="java.lang.String"/>
+	<field name="commodity_code" class="java.lang.String"/>
+	<field name="variety_code" class="java.lang.String"/>
+	<field name="variety_description" class="java.lang.String"/>
+	<field name="product_class_code" class="java.lang.String"/>
+	<field name="size_code" class="java.lang.String"/>
+	<field name="pack_material_product_code" class="java.lang.String"/>
+	<field name="track_slms_indicator_code" class="java.lang.String"/>
+	<field name="weight" class="java.math.BigDecimal"/>
+	<field name="datenow" class="java.sql.Timestamp"/>
+	<field name="coldstore_type" class="java.lang.String"/>
+	<field name="colour" class="java.lang.String"/>
+	<field name="pc_code_code" class="java.lang.String"/>
+	<field name="fruit_age" class="java.lang.Integer"/>
+	<variable name="unit_reference_id_1" class="java.lang.Integer" calculation="Count">
+		<variableExpression><![CDATA[$F{unit_reference_id}]]></variableExpression>
+	</variable>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="40" splitType="Stretch">
+			<componentElement>
+				<reportElement x="355" y="0" width="200" height="40" uuid="4b4f79f1-54ad-4ef7-89d0-84c76703445a"/>
+				<jr:barbecue xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" type="Code128" drawText="true" checksumRequired="false">
+					<jr:codeExpression><![CDATA[$F{vehicle_job_number}]]></jr:codeExpression>
+				</jr:barbecue>
+			</componentElement>
+			<staticText>
+				<reportElement x="155" y="0" width="200" height="19" uuid="cbae7901-596f-4335-b0e4-72a652d9edd0"/>
+				<textElement>
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Inter Warehouse Tripsheet]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="1" width="115" height="19" uuid="6b58f921-017a-4679-96f9-05dd1dea1e0e"/>
+				<textElement>
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Kromco Pty Ltd.]]></text>
+			</staticText>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="16" splitType="Stretch">
+			<textField>
+				<reportElement x="207" y="1" width="65" height="15" uuid="581db3c2-1cec-4528-94d9-3cfb2e2fbc28"/>
+				<textFieldExpression><![CDATA[$F{vehicle_job_number}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="87" y="0" width="53" height="15" uuid="4997ebd2-8a15-46d5-bddf-20a54368cd80"/>
+				<textFieldExpression><![CDATA[$F{vehicle_job_id}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="0" width="87" height="15" uuid="4cb1bc51-cb0c-4454-ad05-84e06a322982"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Vehicle Job ID:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="142" y="1" width="65" height="15" uuid="a4217eb9-9830-4388-89a8-a99f42f62966"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Vehicle Job Number:]]></text>
+			</staticText>
+			<line>
+				<reportElement x="0" y="15" width="555" height="1" uuid="b80b0f16-51ea-4b2d-b382-9453b549827a">
+					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+				</reportElement>
+			</line>
+			<staticText>
+				<reportElement x="426" y="0" width="129" height="15" uuid="6f7593c2-2676-4356-b302-5bd76c8cbfcd"/>
+				<text><![CDATA[Received:................................................]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="272" y="1" width="85" height="14" uuid="10b992cd-19c9-45fe-956b-4fd25ef65f7f"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Dest Location:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="357" y="1" width="69" height="14" uuid="59fd6c5d-fa8b-4f0a-ab1e-13878eb6123b"/>
+				<textFieldExpression><![CDATA[$F{planned_location}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band height="26" splitType="Stretch">
+			<staticText>
+				<reportElement x="279" y="0" width="100" height="25" uuid="e090d6b0-2247-44fa-8d28-1e46435b00ec">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font fontName="SansSerif" size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[bin id]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="470" y="0" width="85" height="25" uuid="8e0fd5c5-bef9-472c-8d6c-7688837b7b3e"/>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font fontName="SansSerif" size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[location]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="200" y="0" width="25" height="25" uuid="0809614d-8e39-413a-815f-5a21b074cab5"/>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font fontName="SansSerif" size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[cls]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="0" width="30" height="25" uuid="05fac16b-f9fb-4b26-acaf-3cab9ce25b23"/>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font fontName="SansSerif" size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[track slms]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="172" y="0" width="28" height="25" uuid="236f257f-dac7-4f3b-a771-d22171452302"/>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font fontName="SansSerif" size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[farm]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="420" y="0" width="50" height="25" uuid="df249624-f222-42ce-9d9d-d4550472bef5"/>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font fontName="SansSerif" size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[bin type]]></text>
+			</staticText>
+			<line>
+				<reportElement x="0" y="25" width="555" height="1" uuid="71d2c7c5-65a6-470c-8dcf-d00aca0c7cbf"/>
+			</line>
+			<staticText>
+				<reportElement x="225" y="0" width="20" height="25" uuid="5f881ed7-d687-46f9-96b6-09d15ba57f4f"/>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[RA CA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="31" y="0" width="57" height="25" uuid="6a24982c-6103-4295-9bc4-25ef6696d23b"/>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font fontName="SansSerif" size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[colour]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="89" y="0" width="26" height="25" uuid="f3323f18-1c17-439a-8d12-c8c25214a597"/>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font fontName="SansSerif" size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[size]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="245" y="0" width="25" height="25" uuid="32257feb-0ea0-42b4-ab8c-7da768c67904"/>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font fontName="SansSerif" size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[PC]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="136" y="0" width="24" height="25" uuid="4bd38e68-fab5-4cd9-8f14-6e571940ba35"/>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font fontName="SansSerif" size="10"/>
+				</textElement>
+				<text><![CDATA[age]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="379" y="0" width="41" height="25" uuid="ee952da5-db45-4b80-be4a-7a95b81945e2"/>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font fontName="SansSerif" size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[weight]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="14" splitType="Stretch">
+			<textField>
+				<reportElement x="277" y="0" width="100" height="14" uuid="760aaf8b-99f3-450a-b2e9-7a72964421ab">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<textFieldExpression><![CDATA[$F{unit_reference_id}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="470" y="0" width="85" height="14" uuid="87747837-fea1-417b-ad86-e4fc8ed3f0d4"/>
+				<textFieldExpression><![CDATA[$F{location_code}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="200" y="0" width="25" height="14" uuid="bb8aa18f-e128-4d77-b8f2-41d0e8782f85"/>
+				<textFieldExpression><![CDATA[$F{product_class_code}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="0" y="0" width="30" height="14" uuid="3922daf1-3e87-4a99-a37b-25db30187d1b"/>
+				<textFieldExpression><![CDATA[$F{track_slms_indicator_code}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="172" y="0" width="28" height="14" uuid="a2a32eff-1fc4-4b6d-a334-5ce3fe2de4ee"/>
+				<textFieldExpression><![CDATA[$F{farm_code}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="420" y="0" width="50" height="14" uuid="fc30f99e-6572-4798-bf39-c42364af954a"/>
+				<textFieldExpression><![CDATA[$F{pack_material_product_code}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0.0">
+				<reportElement x="379" y="0" width="41" height="14" uuid="5935100f-c0d8-408f-bd2f-180005176b01"/>
+				<textFieldExpression><![CDATA[$F{weight}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="225" y="0" width="38" height="14" uuid="4e38b749-15b0-4d98-9d7c-52e50103cefd"/>
+				<textFieldExpression><![CDATA[$F{coldstore_type}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="31" y="0" width="57" height="14" uuid="5471b7d1-2580-462d-918c-8f82213c65b1"/>
+				<textFieldExpression><![CDATA[$F{colour}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="89" y="0" width="52" height="14" uuid="9be64d99-19dd-4777-a888-dd138b5313b7"/>
+				<textFieldExpression><![CDATA[$F{size_code}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="264" y="0" width="13" height="14" uuid="eff0d46e-a685-4008-9428-a7f7e88d2c2d"/>
+				<textFieldExpression><![CDATA[$F{pc_code_code}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="141" y="0" width="31" height="14" uuid="5dac23a8-e416-4562-abb4-a9739b238554"/>
+				<textFieldExpression><![CDATA[$F{fruit_age}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<summary>
+		<band height="16" splitType="Stretch">
+			<textField>
+				<reportElement x="349" y="1" width="46" height="15" uuid="a2656a43-f721-4f79-a542-a3b2adf1b616"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{unit_reference_id_1}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="272" y="1" width="77" height="15" uuid="79ea8ec0-8317-4910-abfa-948f4343a8d2"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Total Bins:]]></text>
+			</staticText>
+			<line>
+				<reportElement x="0" y="-1" width="555" height="1" uuid="89589d51-bc9e-4759-aa2f-90baf62803ea"/>
+			</line>
+			<staticText>
+				<reportElement x="0" y="1" width="88" height="15" uuid="750d60c1-859a-4566-ab6d-d89a300fad69"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Date Printed:]]></text>
+			</staticText>
+			<textField pattern="dd/MM/yyyy hh:mm a">
+				<reportElement x="110" y="1" width="100" height="15" uuid="dd69f0d1-f920-4051-968c-d184a5ba1c71"/>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>

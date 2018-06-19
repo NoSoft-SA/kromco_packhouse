@@ -71,6 +71,7 @@ class ScanBinOnTrip < PDTTransactionState
     field_configs                         = Array.new
     field_configs[field_configs.length()] = {:type=>"static_text", :name=>"tripsheet", :value=>@parent.tripsheet_number}
     field_configs[field_configs.length()] = {:type=>"static_text", :name=>"bins_scanned", :value=>@parent.scanned_bins.length().to_s}
+    field_configs[field_configs.length()] = {:type=>"drop_down", :name=>"destination_location", :is_required=>"true", :list => ",CDE Floor,1-5 Floor,Packhouse,Reworks", :is_required=>"true"}
     field_configs[field_configs.length]   = {:type=>"text_box", :name=>"printer", :is_required=>"false"}
     field_configs[field_configs.length()] = {:type=>"text_line", :name=>"question", :value=>question}
 
@@ -289,6 +290,7 @@ class ScanBinOnTrip < PDTTransactionState
       first_scanned_stock_item = StockItem.find_by_inventory_reference(@parent.scanned_bins[0])
       vehicle_jobs.created_at_location = first_scanned_stock_item.location_code if(first_scanned_stock_item)
       vehicle_jobs.created_by = @parent.pdt_screen_def.user
+      vehicle_jobs.planned_location = self.pdt_screen_def.get_input_control_value("destination_location")
 
       vehicle_jobs.create
 
