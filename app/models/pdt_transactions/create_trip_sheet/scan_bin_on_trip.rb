@@ -255,7 +255,7 @@ class ScanBinOnTrip < PDTTransactionState
           vehicle_job_status.tripsheet_status_code = "printed"
           vehicle_job_status.create()
 
-          return result = PDTTransaction.build_msg_screen_definition(nil, nil, nil, ["Tripsheet was printed successifully!"])
+          return result = PDTTransaction.build_msg_screen_definition(nil, nil, nil, ["Tripsheet was printed successfully!"])
 
       else
         errors_array = [err.gsub("<BR>","")]
