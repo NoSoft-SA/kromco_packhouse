@@ -4,8 +4,7 @@ class Person < ActiveRecord::Base
  #	===========================
 # 	Association declarations:
 #	===========================
- 
-	belongs_to :party
+
 
   #MM112014 - messcada changes
   has_one :messcada_people_view_messcada_rfid_allocation,:dependent => :destroy
