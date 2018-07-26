@@ -160,6 +160,12 @@ code # TODO: WHAT IS THIS DOING HERE?
         session[:new_status_code] =new_status_code
         location                  = session[:location].location_code
         session[:status_changed_date_time] =params[:location][:status_changed_date_time]
+        if(session[:location].location_status == new_status_code)
+          flash[:error] = "#{location} status is:#{session[:location].location_status}. Please choose a different status"
+          params[:id] = session[:location].id
+          set_status
+          return
+        end
         bins_in_location(session[:location].id) and return
 
       end
