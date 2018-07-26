@@ -82,17 +82,15 @@ class User < ActiveRecord::Base
 
   def get_person_record
     person = nil
-    if self.new_record?
+    if self.new_record? && !self.person
       person = Person.new
-    else
-      person = self.person
-    end
       person.first_name = self.first_name
       person.last_name = self.last_name
       person.abbr_name = self.first_name + "_" + self.last_name
       person.save
       self.person = person
-      self.person_id = person.id
+
+    end
 
   end
 

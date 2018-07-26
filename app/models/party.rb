@@ -4,7 +4,7 @@ class Party < ActiveRecord::Base
 
   has_and_belongs_to_many :roles
   has_one :postal_address
-  has_and_belongs_to_many :groups
+  #has_and_belongs_to_many :groups
   has_many :parties_roles,:dependent => :destroy
   has_many :persons,:dependent => :destroy
   has_many :contact_methods_parties
