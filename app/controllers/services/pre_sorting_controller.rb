@@ -118,7 +118,7 @@ class Services::PreSortingController < ApplicationController
                       })
 
         bin.save!
-        Inventory.create_stock(nil, "PRESORT", 'KROMCO', nil, "presort_bin_created", bin.bin_number, "PRESORT", [bin.bin_number.to_s])
+        Inventory.create_stock(nil, "PRESORT", 'KROMCO', nil, "presort_bin_created", bin.bin_number, (params[:unit]=="PST-01") ? 'PRESORT_1' : 'PRESORT_2', [bin.bin_number.to_s])
 
         if (results.length > 1)
           bulk_insert = ""
@@ -562,7 +562,7 @@ class Services::PreSortingController < ApplicationController
       stage_overriden_bins(presort_staging_child_run, validation_results)
       stage_ok_bins(presort_staging_child_run, validation_results)
 
-      Inventory.move_stock('PRESORT_STAGING', presort_staging_child_run.presort_staging_run.presort_run_code, 'PRESORT_STAGING', [bin1, bin2, bin3].compact)
+      Inventory.move_stock('PRESORT_STAGING', presort_staging_child_run.presort_staging_run.presort_run_code, (params[:unit]=="PST-01") ? 'PRESORT_STAGING_1' : 'PRESORT_STAGING_2', [bin1, bin2, bin3].compact)
       create_apport_bins([bin1, bin2, bin3].compact,presort_staging_child_run)
     end
   end
