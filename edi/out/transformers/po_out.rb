@@ -287,7 +287,7 @@ class PoOut < TextOutTransformer
                 substring(cartons.variety_short_long,1,3) as marketing_variety_code, pallets.pt_product_characteristics,
                 marks.brand_code, commodities.commodity_group_code,
                 marketing_varieties.variety_group_code,
-                pallets.cpp, cartons.organization_code carton_org, cartons.gtin,
+                pallets.cpp, cartons.organization_code carton_org, max(cartons.gtin) as gtin,
                 cartons.target_market_code cart_tgt_marget,target_markets.target_market_region_code as cart_tgt_region, target_markets.target_market_country_code as cart_tgt_country,
                 case when cartons.sell_by_code ='-' then ' ' else cartons.sell_by_code end as sell_by_code, pallets.pick_reference_code, cartons.puc,
                 cartons.commodity_code cart_commodity_code,
@@ -318,7 +318,7 @@ class PoOut < TextOutTransformer
                 cartons.variety_short_long, pallets.pt_product_characteristics,
                 marks.brand_code, commodities.commodity_group_code,
                 marketing_varieties.variety_group_code,
-                pallets.cpp, pallets.carton_quantity_actual,cartons.organization_code, cartons.gtin,
+                pallets.cpp, pallets.carton_quantity_actual,cartons.organization_code, 
                 cartons.target_market_code,target_markets.target_market_region_code,target_markets.target_market_country_code,
                 cartons.sell_by_code, pallets.pick_reference_code, cartons.puc,
                 cartons.commodity_code,
@@ -327,8 +327,8 @@ class PoOut < TextOutTransformer
                 cartons.season_code,		
                 cartons.grade_code,
                 item_pack_products.size_ref, item_pack_products.actual_count,pallets.pallet_format_product_id,ppecb_inspections.created_at',
-    :order => 'pallets.pallet_number')
-
+    #:order => 'pallets.pallet_number')
+    :order => 'pallets.pallet_number,commodities.commodity_group_code, cartons.commodity_code, marketing_varieties.variety_group_code, marks.brand_code, cartons.old_pack_code, cartons.grade_code, item_pack_products.size_ref, item_pack_products.actual_count, cartons.organization_code, cartons.target_market_code,target_markets.target_market_region_code,target_markets.target_market_country_code, pallets.pick_reference_code, cartons.puc')
       prev       = ''
       tot_pall   = 100
       diffs      = {}

@@ -59,6 +59,10 @@ class HcsOut < CsvOutTransformer
       port_code = port.port_code
     end
 
+    if !port_code
+      port_code="LOCAL"
+    end
+
     # ---------
     # BH record (heading)
     # ---------
@@ -92,7 +96,7 @@ unit_pack_products.nett_mass AS unit_pack_product_nett_mass, commodities.commodi
 commodities.commodity_description_short, marketing_varieties.marketing_variety_description, item_pack_products.grade_code,
 item_pack_products.product_class_code, item_pack_products.standard_size_count_value, item_pack_products.size_ref,
 item_pack_products.cosmetic_code_name, item_pack_products.treatment_code, item_pack_products.actual_count,
-extended_fgs.created_on, extended_fgs.updated_on,rmt_setups.variety_code,incoterms.incoterm_code,currencies.currency_code, order_products.price_per_carton, loads.shipped_date_time,cartons.puc',
+extended_fgs.created_on, extended_fgs.updated_on,rmt_setups.variety_code,incoterms.incoterm_code,currencies.currency_code, order_products.price_per_carton, loads.shipped_date_time',
 
 :joins => 'INNER JOIN load_details ON (load_orders.load_id = load_details.load_id)
 INNER JOIN pallets ON (load_details.id = pallets.load_detail_id)
