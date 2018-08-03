@@ -331,6 +331,7 @@ class PiOut < TextOutTransformer
            'reference_number' => intake_headers_production.order_number,
            'packh_code'       => phc,
            'sellbycode'       => intake_headers_production.revision_number == 99 ? nil : carton.sell_by_code,
+           'channel'          => intake_headers_production.organization_code == 'TI' ? 'L' : 'E',
            'waybill_no'       => intake_headers_production.phytowaybill
     }
   end
@@ -456,6 +457,7 @@ class PiOut < TextOutTransformer
            'product_characteristic' => prod_char,
            'transaction_date'       => Date.today,
            'transaction_time'       => Time.now,
+           'channel'                => pallet.organization_code == 'TI' ? 'L' : 'E',
            'pallet_base_type'       => pallet_base.edi_out_pallet_base
     }
   end
@@ -544,6 +546,7 @@ class PiOut < TextOutTransformer
            'gtin'                   => pallet.gtin,
            'packh_code'             => phc,
            'sellbycode'             => pallet.sell_by_code,
+           'channel'                => pallet.organization_code == 'TI' ? 'L' : 'E',
            'season'                 => pallet.season_code
     }
   end

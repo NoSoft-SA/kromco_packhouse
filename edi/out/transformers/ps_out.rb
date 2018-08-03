@@ -272,6 +272,7 @@ class PsOut < TextOutTransformer
       'packh_code'       => phc,
       'original_account' => orig_account_code,
       'stack_variance' => stack_variance,
+      'channel'        => pallet.carton_org == 'TI' ? 'L' : 'E',
       'season'         => pallet.cart_season
           }
   end

@@ -256,6 +256,7 @@ class PoOut < TextOutTransformer
     oc_rec = HierarchicalRecordSet.new({
              'load_id'        => @load_id,
              'orgzn'          => one_pallet.organization_code,
+             'channel'        => one_pallet.organization_code == 'TI' ? 'L' : 'E',
              'cons_no'        => @load_o.dispatch_consignment_number,
              'cons_type'      => cons_type,
              'cons_date'      => @load.shipped_date_time,
@@ -510,6 +511,7 @@ class PoOut < TextOutTransformer
               'tran_date'        => Date.today,
               'season'           => pallet.cart_season,	      
               'revision'         => @load_o.revision_number,
+              'channel'          => pallet.carton_org == 'TI' ? 'L' : 'E',
               'tran_time'        => Time.now,
               'Stack_variance'   => stack_variance,
 	      'Mass' => pallet.mass,

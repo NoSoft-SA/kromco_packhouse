@@ -136,7 +136,8 @@ LEFT JOIN loads ON loads.id = load_details.load_id',
     load_orders.each do |record|
       #NAE 20160404 replace first digit of season with first digit of calender year
       #ucr = "#{record.season_code[-1,1]}ZA01507472C#{trading_partner}"
-      ucr = "#{record.shipped_date_time[3,1]}ZA01507472C#{trading_partner}"
+      ucr = "#{record.shipped_date_time[3,1]}ZA01507472CDEL#{order.order_number}S"
+
       count_array = LoadDetail.find_by_sql(['select count(cartons.id) FROM load_details join pallets on pallets.load_detail_id = load_details.id join cartons on cartons.pallet_id = pallets.id WHERE (load_details.id = ?)', record.load_detail_id])
       no_cartons = count_array[0].count
       #sell_by = no_cartons == 1 ? 'ndc' : record.sell_by_code

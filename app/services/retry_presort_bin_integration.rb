@@ -94,11 +94,11 @@ class RetryPresortBinIntegration
 
   def write_log
 
-    @ref = "\n #{@n_bins} prestort re-integration attempts"
+    @ref = "\n #{@n_bins} presort re-integration attempts"
     @ref << "\n Duration: #{(@end_time - @start_time).seconds} seconds"
 
     # log ould have notes in html and include hash.inspect output within html comments...
-    LogDataChange.create!(:user_name      => user_name,
+    LogDataChange.create!(:user_name      => "system",
                           :ref_nos => @ref ,
                           :notes          => @debug_text,
                           :type_of_change => 'PRESORT RE-INTEGRATION SERVICE')
