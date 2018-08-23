@@ -242,7 +242,7 @@ class Services::PreSortingController < ApplicationController
       end
       
       ActiveRecord::Base.transaction do
-        if ((num_rows_updated = Bin.update_all(ActiveRecord::Base.extend_set_sql_with_request("tipped_date_time='#{Time.now.to_formatted_s(:db)}',exit_reference_date_time='#{Time.now.to_formatted_s(:db)}',exit_ref='PRESORT_BIN_TIPPED',ps_tipped_lot_no='#{tipped_apport_bin['LotMAF']}'", "bins"), "bin_number = '#{@tipped_bin}'")) == 0)
+        if ((num_rows_updated = Bin.update_all(ActiveRecord::Base.extend_set_sql_with_request("tipped_date_time='#{tipped_apport_bin['DateLecture']}',exit_reference_date_time='#{tipped_apport_bin['DateLecture']}',exit_ref='PRESORT_BIN_TIPPED',ps_tipped_lot_no='#{tipped_apport_bin['LotMAF']}'", "bins"), "bin_number = '#{@tipped_bin}'")) == 0)
           raise "Error Tipped Presorted Bin:#{@tipped_bin}: could not be tipped"
         end
 
