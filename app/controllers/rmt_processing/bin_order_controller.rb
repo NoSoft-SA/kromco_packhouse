@@ -9,23 +9,32 @@ def bypass_generic_security?
 end
 
 def cancel_bin_order
+  authorised = authorise("bin_order", 'bin_sales_supervisor',session[:user_id].user_name)
+
+  if !authorised
+    flash[:error] = "You do not have permission to perfom this function"
+    list_bin_orders
+  else
     begin
-     ActiveRecord::Base.transaction do
-      id= params[:id]
-      bin_order = BinOrder.find(id)
+      ActiveRecord::Base.transaction do
+        id= params[:id]
+        bin_order = BinOrder.find(id)
 
 #      bin_order.find_objects
-      bin_order.archive_bin_order_objects(session[:user_id].user_name)
+        bin_order.archive_bin_order_objects(session[:user_id].user_name)
 
-          session[:alert] = " Order canceled."
-          list_bin_orders
+        session[:alert] = " Order canceled."
+        list_bin_orders
 
 
 
-     end
+      end
     rescue
       raise $!
     end
+  end
+
+
 end
 
 
