@@ -187,7 +187,9 @@ end
 
 	column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'shift_type_code'}
 	column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'start_date_time'}
-	column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'end_date_time'}
+	column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'start_time_quarters'}
+  column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'end_date_time'}
+  column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'end_time_quarters'}
 	column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'calendar_date'}
 	column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'line_code'}
 	column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'user'}
@@ -269,8 +271,14 @@ end
 
     time_quarters = ["00","15","30","45"]
     field_configs[field_configs.length()] = {:field_type => 'DropDownField',
+                                             :field_name => 'start_time_quarters',
+                                             :settings=>{:label_caption => 'start time quarter',
+                                                         :list => time_quarters}
+    }
+
+    field_configs[field_configs.length()] = {:field_type => 'DropDownField',
                                              :field_name => 'end_time_quarters',
-                                             :settings=>{:label_caption => 'end time quarters to add',
+                                             :settings=>{:label_caption => 'end time quarter',
                                                          :list => time_quarters}
     }
 

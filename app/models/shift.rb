@@ -14,7 +14,7 @@ class Shift < ActiveRecord::Base
   validates_presence_of :shift_type_code, :line_code, :user
 
 
-  attr_accessor :start_time_quarters,:end_time_quarters
+  # attr_accessor :start_time_quarters,:end_time_quarters
 
   # validate :calendar_date_time_quarter
   #
@@ -47,8 +47,9 @@ class Shift < ActiveRecord::Base
 #	=====================
 #	 Complex validations:
 #	=====================
+
   def validate
-#	first check whether combo fields have been selected
+    #	first check whether combo fields have been selected
     is_valid = true
     if is_valid
       is_valid = ModelHelper::Validations.validate_combos([{:shift_type_code => self.shift_type_code}, {:calendar_date => self.calendar_date}], self)
@@ -58,30 +59,57 @@ class Shift < ActiveRecord::Base
       is_valid = set_shift_type
     end
 
+    #MM122015 - change from PopupDateSelector to PopupDateTimeSelector. Change date-selector to capture times (currently only days) + validate that selected time is a quarter (00, 15, 30 or 45 )
+    end_time_quarters_minutes = end_time_quarters.to_i*60
+    self.start_date_time = calendar_date.to_time().at_beginning_of_day + start_time.hours + (start_time_quarters.to_i*60)
+    if self.start_time < self.end_time
+      self.end_date_time = calendar_date.to_time().at_beginning_of_day + end_time.hours + end_time_quarters_minutes#.mins
+    else
+      self.end_date_time = calendar_date.to_time().tomorrow.at_beginning_of_day + end_time.hours + end_time_quarters_minutes#.mins
+    end
     if self.new_record? && is_valid
-      #MM122015 - change from PopupDateSelector to PopupDateTimeSelector
-      #MM122015 - change date-selector to capture times (currently only days) + validate that selected time is a quarter (00, 15, 30 or 45 )
-      start_time_quarters_minutes = self.start_time_quarters.to_i*60
-      end_time_quarters_minutes = self.end_time_quarters.to_i*60
-      self.start_date_time = self.calendar_date.to_time().at_beginning_of_day + self.start_time.hours + start_time_quarters_minutes#.mins
-      if self.start_time < self.end_time
-        self.end_date_time = self.calendar_date.to_time().at_beginning_of_day + self.end_time.hours + end_time_quarters_minutes#.mins
-      else
-        self.end_date_time = self.calendar_date.to_time().tomorrow.at_beginning_of_day + self.end_time.hours + end_time_quarters_minutes#.mins
-      end
-      #validates uniqueness for this record
       validate_overlap
     else
-      end_time_quarters_minutes = self.end_time_quarters.to_i*60
-      if self.start_time < self.end_time
-        self.end_date_time = self.calendar_date.to_time().at_beginning_of_day + self.end_time.hours + end_time_quarters_minutes#.mins
-      else
-        self.end_date_time = self.calendar_date.to_time().tomorrow.at_beginning_of_day + self.end_time.hours + end_time_quarters_minutes#.mins
-      end
       validate_overlap_for_update
     end
 
   end
+
+#   def validate
+# #	first check whether combo fields have been selected
+#     is_valid = true
+#     if is_valid
+#       is_valid = ModelHelper::Validations.validate_combos([{:shift_type_code => self.shift_type_code}, {:calendar_date => self.calendar_date}], self)
+#     end
+#     #now check whether fk combos combine to form valid foreign keys
+#     if is_valid
+#       is_valid = set_shift_type
+#     end
+#
+#     if self.new_record? && is_valid
+#       #MM122015 - change from PopupDateSelector to PopupDateTimeSelector
+#       #MM122015 - change date-selector to capture times (currently only days) + validate that selected time is a quarter (00, 15, 30 or 45 )
+#       start_time_quarters_minutes = self.start_time_quarters.to_i*60
+#       end_time_quarters_minutes = self.end_time_quarters.to_i*60
+#       self.start_date_time = self.calendar_date.to_time().at_beginning_of_day + self.start_time.hours + start_time_quarters_minutes#.mins
+#       if self.start_time < self.end_time
+#         self.end_date_time = self.calendar_date.to_time().at_beginning_of_day + self.end_time.hours + end_time_quarters_minutes#.mins
+#       else
+#         self.end_date_time = self.calendar_date.to_time().tomorrow.at_beginning_of_day + self.end_time.hours + end_time_quarters_minutes#.mins
+#       end
+#       #validates uniqueness for this record
+#       validate_overlap
+#     else
+#       end_time_quarters_minutes = self.end_time_quarters.to_i*60
+#       if self.start_time < self.end_time
+#         self.end_date_time = self.calendar_date.to_time().at_beginning_of_day + self.end_time.hours + end_time_quarters_minutes#.mins
+#       else
+#         self.end_date_time = self.calendar_date.to_time().tomorrow.at_beginning_of_day + self.end_time.hours + end_time_quarters_minutes#.mins
+#       end
+#       validate_overlap_for_update
+#     end
+#
+#   end
 
 
   def Shift.get_shift_details(line_code)
