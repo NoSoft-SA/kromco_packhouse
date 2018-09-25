@@ -180,7 +180,7 @@ class Services::PreSortingController < ApplicationController
     if (error = move_bin)
       render_result(handle_error(error))
     else
-      render_result("<result>OK</result>")
+      render_result("OK")
     end
   end
 
