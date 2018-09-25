@@ -173,6 +173,26 @@ class Services::PreSortingController < ApplicationController
     end
   end
 
+  # view-source:http://192.168.50.107:3000/services/pre_sorting/move_presort_bin?location_to=CA_AB_CA_A_02&bin=10833616
+  def move_presort_bin
+    @bin = params[:bin]
+    @location_to = params[:location_to]
+    if (error = move_bin)
+      render_result(handle_error(error))
+    else
+      render_result("<result>OK</result>")
+    end
+  end
+
+  def move_bin
+    begin
+      Inventory.move_stock('MOVE_PRESORT_BIN', @bin, @location_to, [@bin])
+      return nil
+    rescue
+      return $!.message
+    end
+  end
+
   def bin_created
     @created_bin = params[:bin]
     if (error = bin_created_intergration)
@@ -185,11 +205,6 @@ class Services::PreSortingController < ApplicationController
     else
       render_result("<bins><bin result_status=\"OK\" msg=\"created bin #{@created_bin}\" /></bins>")
     end
-  end
-
-  def luks
-    @l = "resultset> #{Base64.encode64(Marshal.dump([]))} </res"
-    render :inline => %{ <%= @l%> }
   end
 
   def get_index_parcelle
