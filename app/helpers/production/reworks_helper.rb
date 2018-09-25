@@ -166,7 +166,7 @@ module Production::ReworksHelper
 
   def build_runs_grid
 
-    runs = RwRun.find_by_sql("select * from rw_runs where rw_run_status_code = 'editing'  and (username = '#{session[:user_id].user_name}' or username is null) ")
+    runs = RwRun.find_by_sql("select * from rw_runs where rw_run_status_code = 'editing' and (username = '#{session[:user_id].user_name}' or username is null) ")
     column_configs = Array.new
 
 

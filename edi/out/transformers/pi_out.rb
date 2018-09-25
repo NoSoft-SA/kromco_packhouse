@@ -502,7 +502,7 @@ class PiOut < TextOutTransformer
     
 
     # Special account code used for TI:
-    if @account_code = '8385'
+    if @account_code == '8385'
 	    if pallet.puc.start_with?('C')
 	       orig_account_code = 'CFG'
 	    else
