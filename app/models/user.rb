@@ -82,12 +82,14 @@ class User < ActiveRecord::Base
 
   def get_person_record
     person = nil
+    self.person = Person.find_by_first_name_and_last_name(self.first_name,self.last_name)
+
     if self.new_record? && !self.person
       person = Person.new
       person.first_name = self.first_name
       person.last_name = self.last_name
       person.abbr_name = self.first_name + "_" + self.last_name
-      person.save
+      person.save!
       self.person = person
 
     end
