@@ -1,0 +1,14 @@
+# Find all created (but not yet completed) tests for a particular inspection type.
+# Filter by test code.
+
+query: SELECT qc_inspection_tests.id, qc_inspections.inspection_number, qc_inspections.inspection_reference, qc_inspection_tests.inspection_test_number, qc_tests.qc_test_code, qc_tests.qc_test_description, qc_inspection_tests.status, qc_inspection_tests.passed, qc_inspection_tests.created_on, qc_inspection_tests.username, qc_inspection_tests.optional FROM qc_inspection_tests JOIN qc_inspections on qc_inspections.id = qc_inspection_tests.qc_inspection_id JOIN qc_inspection_types on qc_inspection_types.id = qc_inspections.qc_inspection_type_id JOIN qc_inspection_type_tests on qc_inspection_type_tests.id = qc_inspection_tests.qc_inspection_type_test_id JOIN qc_tests on qc_tests.id = qc_inspection_type_tests.qc_test_id WHERE(qc_inspection_tests.status = 'QC INSPECTION TEST CREATED'   and qc_inspection_types.qc_inspection_type_code = 'PSAA' AND qc_tests.qc_test_code={qc_tests.qc_test_code}) ORDER by qc_inspection_tests.created_on DESC
+main_table_name: qc_inspection_tests
+
+
+fields:
+  field1:
+    field_name: qc_tests.qc_test_code
+    caption:    qc_test_code
+    field_type: lookup
+    list:       SELECT distinct qc_tests.qc_test_code FROM qc_inspection_types JOIN qc_inspection_type_tests ON qc_inspection_type_tests.qc_inspection_type_id = qc_inspection_types.id JOIN qc_tests on qc_tests.id = qc_inspection_type_tests.qc_test_id WHERE( qc_inspection_types.qc_inspection_type_code = 'PSAA') ORDER BY qc_tests.qc_test_code
+

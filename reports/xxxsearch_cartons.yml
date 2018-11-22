@@ -1,0 +1,826 @@
+query: |
+  SELECT cartons.id, cartons.carton_label_station_code, cartons.carton_number,
+  cartons.erp_station, cartons.erp_pack_point, cartons.commodity_code,
+  cartons.carton_mark_code, cartons.target_market_code,
+  cartons.variety_short_long, cartons.fg_code_old, cartons.quarantine,
+  cartons.inspection_type_code, cartons.carton_label_code,
+  cartons.carton_pack_station_code, cartons.order_number, cartons.pack_date_time,
+  cartons.actual_size_count_code, cartons.grade_code, cartons.old_pack_code,
+  cartons.qc_status_code, cartons.treatment_code, cartons.chemical_status_code,
+  cartons.product_class_code, cartons.erp_cultivar, cartons.track_indicator_code,
+  cartons.pc_code, cartons.cold_store_code, cartons.inventory_code,
+  cartons.farm_code, cartons.spray_program_code, cartons.carton_fruit_nett_mass,
+  cartons.quantity, cartons.pi, cartons.pick_reference, cartons.line_code,
+  cartons.shift_code, cartons.remarks, cartons.organization_code,
+  cartons.quality_group_code, cartons.iso_week_code, cartons.season_code,
+  cartons.puc, cartons.exit_reference, cartons.exit_date_time,
+  cartons.pallet_sequence_number, cartons.fg_product_code,
+  cartons.date_time_created, cartons.date_time_erp_xmit,
+  cartons.production_run_code, cartons.packer_number, cartons.account_code,
+  cartons.egap, cartons.is_inspection_carton, cartons.sell_by_code,
+  cartons.qc_datetime_out, cartons.qc_datetime_in, cartons.rw_create_datetime,
+  cartons.rw_counter, cartons.n_labels_printed, cartons.treatment_type_code,
+  cartons.items_per_unit, cartons.units_per_carton, cartons.fg_mark_code,
+  cartons.extended_fg_code, cartons.exit_ref, cartons.gtin,
+  cartons.unit_pack_product_code, cartons.rw_receipt_unit,
+  cartons.qc_result_status, cartons.carton_fruit_nett_mass_actual,
+  cartons.is_depot_carton, cartons.intake_header_number, cartons.encrypt_pick_ref,
+  cartons.pallet_number, cartons.affected_by_env, cartons.affected_by_function,
+  cartons.affected_by_program, cartons.created_by, cartons.updated_by,
+  cartons.reprint_acknowledged_by, cartons.reprint_acknowledged_date_time,
+  cartons.orig_target_market_code, pallets.fg_product_code,
+  pallets.ca_cold_room_code, pallets.inspection_code, pallets.final_status_code,
+  pallets.size_count_code, pallets.carton_mark_code, pallets.target_market_code,
+  pallets.grade_code, pallets.marketing_variety_code, pallets.old_pack_code,
+  pallets.pallet_label_code, pallets.qc_status_code, pallets.country_origin_code,
+  pallets.inventory_code, pallets.pick_reference_code, pallets.pc_code,
+  pallets.commodity_code, pallets.pallet_format_product_code,
+  pallets.organization_code, pallets.label_standard_code,
+  pallets.inspect_type_code, pallets.farm_code, pallets.quality_group_code,
+  pallets.class_code, pallets.actual_size_count_code, pallets.cold_store_code,
+  pallets.store_type_code, pallets.party_name, pallets.iso_week_code,
+  pallets.season_code, pallets.account_code, pallets.orig_target_market_code,
+  bins.binfill_station_code, bins.rebin_label_station_code, bins.orchard_code,
+  bins.user_name, bins.rebin_track_indicator_code, bins.season_code 
+  FROM cartons 
+  JOIN pallets ON pallets.id = cartons.pallet_id
+  JOIN bins ON bins.id = cartons.bin_id 
+  WHERE(cartons.carton_label_station_code={cartons.carton_label_station_code} AND
+  cartons.carton_number={cartons.carton_number} AND
+  cartons.erp_station={cartons.erp_station} AND
+  cartons.erp_pack_point={cartons.erp_pack_point} AND
+  cartons.commodity_code={cartons.commodity_code} AND
+  cartons.carton_mark_code={cartons.carton_mark_code} AND
+  cartons.target_market_code={cartons.target_market_code} AND
+  cartons.variety_short_long={cartons.variety_short_long} AND
+  cartons.fg_code_old={cartons.fg_code_old} AND
+  cartons.quarantine={cartons.quarantine} AND
+  cartons.inspection_type_code={cartons.inspection_type_code} AND
+  cartons.carton_label_code={cartons.carton_label_code} AND
+  cartons.carton_pack_station_code={cartons.carton_pack_station_code} AND
+  cartons.order_number={cartons.order_number} AND
+  cartons.pack_date_time={cartons.pack_date_time} AND
+  cartons.actual_size_count_code={cartons.actual_size_count_code} AND
+  cartons.grade_code={cartons.grade_code} AND
+  cartons.old_pack_code={cartons.old_pack_code} AND
+  cartons.qc_status_code={cartons.qc_status_code} AND
+  cartons.treatment_code={cartons.treatment_code} AND
+  cartons.chemical_status_code={cartons.chemical_status_code} AND
+  cartons.product_class_code={cartons.product_class_code} AND
+  cartons.erp_cultivar={cartons.erp_cultivar} AND
+  cartons.track_indicator_code={cartons.track_indicator_code} AND
+  cartons.pc_code={cartons.pc_code} AND
+  cartons.cold_store_code={cartons.cold_store_code} AND
+  cartons.inventory_code={cartons.inventory_code} AND
+  cartons.farm_code={cartons.farm_code} AND
+  cartons.spray_program_code={cartons.spray_program_code} AND
+  cartons.carton_fruit_nett_mass={cartons.carton_fruit_nett_mass} AND
+  cartons.quantity={cartons.quantity} AND cartons.pi={cartons.pi} AND
+  cartons.pick_reference={cartons.pick_reference} AND
+  cartons.line_code={cartons.line_code} AND
+  cartons.shift_code={cartons.shift_code} AND cartons.remarks={cartons.remarks}
+  AND cartons.organization_code={cartons.organization_code} AND
+  cartons.quality_group_code={cartons.quality_group_code} AND
+  cartons.iso_week_code={cartons.iso_week_code} AND
+  cartons.season_code={cartons.season_code} AND cartons.puc={cartons.puc} AND
+  cartons.exit_reference={cartons.exit_reference} AND
+  cartons.exit_date_time={cartons.exit_date_time} AND
+  cartons.pallet_sequence_number={cartons.pallet_sequence_number} AND
+  cartons.fg_product_code={cartons.fg_product_code} AND
+  cartons.date_time_created={cartons.date_time_created} AND
+  cartons.date_time_erp_xmit={cartons.date_time_erp_xmit} AND
+  cartons.production_run_code={cartons.production_run_code} AND
+  cartons.packer_number={cartons.packer_number} AND
+  cartons.account_code={cartons.account_code} AND cartons.egap={cartons.egap} AND
+  cartons.sell_by_code={cartons.sell_by_code} AND
+  cartons.qc_datetime_out={cartons.qc_datetime_out} AND
+  cartons.qc_datetime_in={cartons.qc_datetime_in} AND
+  cartons.rw_create_datetime={cartons.rw_create_datetime} AND
+  cartons.rw_counter={cartons.rw_counter} AND
+  cartons.n_labels_printed={cartons.n_labels_printed} AND
+  cartons.treatment_type_code={cartons.treatment_type_code} AND
+  cartons.items_per_unit={cartons.items_per_unit} AND
+  cartons.units_per_carton={cartons.units_per_carton} AND
+  cartons.fg_mark_code={cartons.fg_mark_code} AND
+  cartons.extended_fg_code={cartons.extended_fg_code} AND
+  cartons.exit_ref={cartons.exit_ref} AND cartons.gtin={cartons.gtin} AND
+  cartons.unit_pack_product_code={cartons.unit_pack_product_code} AND
+  cartons.rw_receipt_unit={cartons.rw_receipt_unit} AND
+  cartons.qc_result_status={cartons.qc_result_status} AND
+  cartons.carton_fruit_nett_mass_actual={cartons.carton_fruit_nett_mass_actual}
+  AND cartons.intake_header_number={cartons.intake_header_number} AND
+  cartons.encrypt_pick_ref={cartons.encrypt_pick_ref} AND
+  cartons.pallet_number={cartons.pallet_number} AND
+  cartons.affected_by_env={cartons.affected_by_env} AND
+  cartons.affected_by_function={cartons.affected_by_function} AND
+  cartons.affected_by_program={cartons.affected_by_program} AND
+  cartons.created_by={cartons.created_by} AND
+  cartons.updated_by={cartons.updated_by} AND
+  cartons.reprint_acknowledged_by={cartons.reprint_acknowledged_by} AND
+  cartons.reprint_acknowledged_date_time={cartons.reprint_acknowledged_date_time}
+  AND cartons.orig_target_market_code={cartons.orig_target_market_code} AND
+  pallets.fg_product_code={pallets.fg_product_code} AND
+  pallets.ca_cold_room_code={pallets.ca_cold_room_code} AND
+  pallets.inspection_code={pallets.inspection_code} AND
+  pallets.final_status_code={pallets.final_status_code} AND
+  pallets.size_count_code={pallets.size_count_code} AND
+  pallets.carton_mark_code={pallets.carton_mark_code} AND
+  pallets.target_market_code={pallets.target_market_code} AND
+  pallets.grade_code={pallets.grade_code} AND
+  pallets.marketing_variety_code={pallets.marketing_variety_code} AND
+  pallets.old_pack_code={pallets.old_pack_code} AND
+  pallets.pallet_label_code={pallets.pallet_label_code} AND
+  pallets.qc_status_code={pallets.qc_status_code} AND
+  pallets.country_origin_code={pallets.country_origin_code} AND
+  pallets.inventory_code={pallets.inventory_code} AND
+  pallets.pick_reference_code={pallets.pick_reference_code} AND
+  pallets.pc_code={pallets.pc_code} AND
+  pallets.commodity_code={pallets.commodity_code} AND
+  pallets.pallet_format_product_code={pallets.pallet_format_product_code} AND
+  pallets.organization_code={pallets.organization_code} AND
+  pallets.label_standard_code={pallets.label_standard_code} AND
+  pallets.inspect_type_code={pallets.inspect_type_code} AND
+  pallets.farm_code={pallets.farm_code} AND
+  pallets.quality_group_code={pallets.quality_group_code} AND
+  pallets.class_code={pallets.class_code} AND
+  pallets.actual_size_count_code={pallets.actual_size_count_code} AND
+  pallets.cold_store_code={pallets.cold_store_code} AND
+  pallets.store_type_code={pallets.store_type_code} AND
+  pallets.party_name={pallets.party_name} AND
+  pallets.iso_week_code={pallets.iso_week_code} AND
+  pallets.season_code={pallets.season_code} AND
+  pallets.account_code={pallets.account_code} AND
+  pallets.orig_target_market_code={pallets.orig_target_market_code} AND
+  bins.binfill_station_code={bins.binfill_station_code} AND
+  bins.rebin_label_station_code={bins.rebin_label_station_code} AND
+  bins.orchard_code={bins.orchard_code} AND bins.user_name={bins.user_name} AND
+  bins.rebin_track_indicator_code={bins.rebin_track_indicator_code} AND
+  bins.season_code={bins.season_code})
+main_table_name: cartons
+default_report_index_group_name: System
+
+grid_configs:
+  caption: Cartons
+  column_widths:
+  data_types:
+    items_per_unit: integer
+    is_depot_carton: boolean
+    quantity: integer
+    id: integer
+    units_per_carton: integer
+    rw_counter: integer
+    intake_header_number: integer
+    n_labels_printed: integer
+    pallet_sequence_number: integer
+    carton_number: integer
+    is_inspection_carton: boolean
+  column_captions:
+    pick_reference_code: Pick reference code
+    commodity_code: Commodity code
+    pi: Pi
+    carton_label_code: Carton label code
+    sell_by_code: Sell by code
+    qc_datetime_in: Qc datetime in
+    rebin_track_indicator_code: Rebin track indicator code
+    party_name: Party name
+    carton_fruit_nett_mass_actual: Carton fruit nett mass actual
+    production_run_code: Production run code
+    carton_mark_code: Carton mark code
+    farm_code: Farm code
+    remarks: Remarks
+    size_count_code: Size count code
+    country_origin_code: Country origin code
+    erp_pack_point: Erp pack point
+    puc: Puc
+    units_per_carton: Units per carton
+    season_code: Season code
+    line_code: Line code
+    created_by: Created by
+    intake_header_number: Intake header number
+    account_code: Account code
+    fg_product_code: Fg product code
+    erp_station: Erp station
+    qc_datetime_out: Qc datetime out
+    quantity: Quantity
+    packer_number: Packer number
+    track_indicator_code: Track indicator code
+    rebin_label_station_code: Rebin label station code
+    label_standard_code: Label standard code
+    reprint_acknowledged_by: Reprint acknowledged by
+    is_inspection_carton: Is inspection carton
+    carton_number: Carton number
+    product_class_code: Product class code
+    organization_code: Organization code
+    exit_date_time: Exit date time
+    encrypt_pick_ref: Encrypt pick ref
+    gtin: Gtin
+    shift_code: Shift code
+    qc_status_code: Qc status code
+    egap: Egap
+    orchard_code: Orchard code
+    store_type_code: Store type code
+    orig_target_market_code: Orig target market code
+    updated_by: Updated by
+    affected_by_env: Affected by env
+    old_pack_code: Old pack code
+    date_time_created: Date time created
+    unit_pack_product_code: Unit pack product code
+    exit_ref: Exit ref
+    id: Id
+    order_number: Order number
+    inspect_type_code: Inspect type code
+    grade_code: Grade code
+    fg_code_old: Fg code old
+    n_labels_printed: N labels printed
+    spray_program_code: Spray program code
+    is_depot_carton: Is depot carton
+    rw_create_datetime: Rw create datetime
+    pack_date_time: Pack date time
+    extended_fg_code: Extended fg code
+    treatment_type_code: Treatment type code
+    ca_cold_room_code: Ca cold room code
+    reprint_acknowledged_date_time: Reprint acknowledged date time
+    affected_by_function: Affected by function
+    rw_receipt_unit: Rw receipt unit
+    actual_size_count_code: Actual size count code
+    quality_group_code: Quality group code
+    inspection_type_code: Inspection type code
+    erp_cultivar: Erp cultivar
+    pick_reference: Pick reference
+    chemical_status_code: Chemical status code
+    cold_store_code: Cold store code
+    inventory_code: Inventory code
+    pallet_format_product_code: Pallet format product code
+    class_code: Class code
+    carton_label_station_code: Carton label station code
+    fg_mark_code: Fg mark code
+    pc_code: Pc code
+    binfill_station_code: Binfill station code
+    pallet_number: Pallet number
+    iso_week_code: Iso week code
+    carton_fruit_nett_mass: Carton fruit nett mass
+    exit_reference: Exit reference
+    pallet_label_code: Pallet label code
+    qc_result_status: Qc result status
+    carton_pack_station_code: Carton pack station code
+    date_time_erp_xmit: Date time erp xmit
+    target_market_code: Target market code
+    quarantine: Quarantine
+    items_per_unit: Items per unit
+    inspection_code: Inspection code
+    affected_by_program: Affected by program
+    variety_short_long: Variety short long
+    user_name: User name
+    final_status_code: Final status code
+    marketing_variety_code: Marketing variety code
+    pallet_sequence_number: Pallet sequence number
+    rw_counter: Rw counter
+    treatment_code: Treatment code
+#NB. The following lines provide a hint of what other options are possible
+#    for manipulating the grid presentation. The field names are fictitious.
+#    Delete or use whatever applies. These must remain part of the grid_configs hash.
+#  groupable_fields:
+#    - code1
+#    - code2
+#    - code3
+#  group_fields_to_sum:
+#    - quantity
+#  group_fields_to_count:
+#    - id
+#  group_fields_to_min:
+#    - start_date
+#  group_fields_to_max:
+#    - end_date
+#  grouped: true
+#  group_fields:
+#    - code1
+#    - code2
+#  hidden:
+#    id: true
+
+
+fields:
+  field1:
+    field_name: cartons.carton_label_station_code
+    caption: Carton label station code
+    field_type: text
+  field2:
+    field_name: cartons.carton_number
+    caption: Carton number
+    field_type: text
+  field3:
+    field_name: cartons.erp_station
+    caption: Erp station
+    field_type: text
+  field4:
+    field_name: cartons.erp_pack_point
+    caption: Erp pack point
+    field_type: text
+  field5:
+    field_name: cartons.commodity_code
+    caption: Commodity code
+    field_type: lookup
+    list: SELECT DISTINCT commodity_code FROM pallets ORDER BY commodity_code
+  field6:
+    field_name: cartons.carton_mark_code
+    caption: Carton mark code
+    field_type: lookup
+    list: SELECT DISTINCT carton_mark_code FROM pallets ORDER BY carton_mark_code
+  field7:
+    field_name: cartons.target_market_code
+    caption: Target market code
+    field_type: lookup
+    list: SELECT DISTINCT target_market_code FROM pallets ORDER BY target_market_code
+  field8:
+    field_name: cartons.variety_short_long
+    caption: Variety short long
+    field_type: text
+  field9:
+    field_name: cartons.fg_code_old
+    caption: Fg code old
+    field_type: text
+  field10:
+    field_name: cartons.quarantine
+    caption: Quarantine
+    field_type: text
+  field11:
+    field_name: cartons.inspection_type_code
+    caption: Inspection type code
+    field_type: text
+  field12:
+    field_name: cartons.carton_label_code
+    caption: Carton label code
+    field_type: text
+  field13:
+    field_name: cartons.carton_pack_station_code
+    caption: Carton pack station code
+    field_type: text
+  field14:
+    field_name: cartons.order_number
+    caption: Order number
+    field_type: text
+  field15:
+    field_name: cartons.pack_date_time
+    caption: Pack date time
+    field_type: text
+  field16:
+    field_name: cartons.actual_size_count_code
+    caption: Actual size count code
+    field_type: lookup
+    list: SELECT DISTINCT actual_size_count_code FROM pallets ORDER BY actual_size_count_code
+  field17:
+    field_name: cartons.grade_code
+    caption: Grade code
+    field_type: lookup
+    list: SELECT DISTINCT grade_code FROM pallets ORDER BY grade_code
+  field18:
+    field_name: cartons.old_pack_code
+    caption: Old pack code
+    field_type: lookup
+    list: SELECT DISTINCT old_pack_code FROM pallets ORDER BY old_pack_code
+  field19:
+    field_name: cartons.qc_status_code
+    caption: Qc status code
+    field_type: lookup
+    list: SELECT DISTINCT qc_status_code FROM pallets ORDER BY qc_status_code
+  field20:
+    field_name: cartons.treatment_code
+    caption: Treatment code
+    field_type: text
+  field21:
+    field_name: cartons.chemical_status_code
+    caption: Chemical status code
+    field_type: text
+  field22:
+    field_name: cartons.product_class_code
+    caption: Product class code
+    field_type: text
+  field23:
+    field_name: cartons.erp_cultivar
+    caption: Erp cultivar
+    field_type: text
+  field24:
+    field_name: cartons.track_indicator_code
+    caption: Track indicator code
+    field_type: text
+  field25:
+    field_name: cartons.pc_code
+    caption: Pc code
+    field_type: lookup
+    list: SELECT DISTINCT pc_code FROM pallets ORDER BY pc_code
+  field26:
+    field_name: cartons.cold_store_code
+    caption: Cold store code
+    field_type: lookup
+    list: SELECT DISTINCT cold_store_code FROM pallets ORDER BY cold_store_code
+  field27:
+    field_name: cartons.inventory_code
+    caption: Inventory code
+    field_type: lookup
+    list: SELECT DISTINCT inventory_code FROM pallets ORDER BY inventory_code
+  field28:
+    field_name: cartons.farm_code
+    caption: Farm code
+    field_type: lookup
+    list: SELECT DISTINCT farm_code FROM pallets ORDER BY farm_code
+  field29:
+    field_name: cartons.spray_program_code
+    caption: Spray program code
+    field_type: text
+  field30:
+    field_name: cartons.carton_fruit_nett_mass
+    caption: Carton fruit nett mass
+    field_type: text
+  field31:
+    field_name: cartons.quantity
+    caption: Quantity
+    field_type: text
+  field32:
+    field_name: cartons.pi
+    caption: Pi
+    field_type: text
+  field33:
+    field_name: cartons.pick_reference
+    caption: Pick reference
+    field_type: text
+  field34:
+    field_name: cartons.line_code
+    caption: Line code
+    field_type: text
+  field35:
+    field_name: cartons.shift_code
+    caption: Shift code
+    field_type: text
+  field36:
+    field_name: cartons.remarks
+    caption: Remarks
+    field_type: text
+  field37:
+    field_name: cartons.organization_code
+    caption: Organization code
+    field_type: lookup
+    list: SELECT DISTINCT organization_code FROM pallets ORDER BY organization_code
+  field38:
+    field_name: cartons.quality_group_code
+    caption: Quality group code
+    field_type: lookup
+    list: SELECT DISTINCT quality_group_code FROM pallets ORDER BY quality_group_code
+  field39:
+    field_name: cartons.iso_week_code
+    caption: Iso week code
+    field_type: lookup
+    list: SELECT DISTINCT iso_week_code FROM pallets ORDER BY iso_week_code
+  field40:
+    field_name: cartons.season_code
+    caption: Season code
+    field_type: lookup
+    list: SELECT DISTINCT season_code FROM bins ORDER BY season_code
+  field41:
+    field_name: cartons.puc
+    caption: Puc
+    field_type: text
+  field42:
+    field_name: cartons.exit_reference
+    caption: Exit reference
+    field_type: text
+  field43:
+    field_name: cartons.exit_date_time
+    caption: Exit date time
+    field_type: text
+  field44:
+    field_name: cartons.pallet_sequence_number
+    caption: Pallet sequence number
+    field_type: text
+  field45:
+    field_name: cartons.fg_product_code
+    caption: Fg product code
+    field_type: lookup
+    list: SELECT DISTINCT fg_product_code FROM pallets ORDER BY fg_product_code
+  field46:
+    field_name: cartons.date_time_created
+    caption: Date time created
+    field_type: text
+  field47:
+    field_name: cartons.date_time_erp_xmit
+    caption: Date time erp xmit
+    field_type: text
+  field48:
+    field_name: cartons.production_run_code
+    caption: Production run code
+    field_type: text
+  field49:
+    field_name: cartons.packer_number
+    caption: Packer number
+    field_type: text
+  field50:
+    field_name: cartons.account_code
+    caption: Account code
+    field_type: lookup
+    list: SELECT DISTINCT account_code FROM pallets ORDER BY account_code
+  field51:
+    field_name: cartons.egap
+    caption: Egap
+    field_type: text
+  field52:
+    field_name: cartons.sell_by_code
+    caption: Sell by code
+    field_type: text
+  field53:
+    field_name: cartons.qc_datetime_out
+    caption: Qc datetime out
+    field_type: text
+  field54:
+    field_name: cartons.qc_datetime_in
+    caption: Qc datetime in
+    field_type: text
+  field55:
+    field_name: cartons.rw_create_datetime
+    caption: Rw create datetime
+    field_type: text
+  field56:
+    field_name: cartons.rw_counter
+    caption: Rw counter
+    field_type: text
+  field57:
+    field_name: cartons.n_labels_printed
+    caption: N labels printed
+    field_type: text
+  field58:
+    field_name: cartons.treatment_type_code
+    caption: Treatment type code
+    field_type: text
+  field59:
+    field_name: cartons.items_per_unit
+    caption: Items per unit
+    field_type: text
+  field60:
+    field_name: cartons.units_per_carton
+    caption: Units per carton
+    field_type: text
+  field61:
+    field_name: cartons.fg_mark_code
+    caption: Fg mark code
+    field_type: text
+  field62:
+    field_name: cartons.extended_fg_code
+    caption: Extended fg code
+    field_type: text
+  field63:
+    field_name: cartons.exit_ref
+    caption: Exit ref
+    field_type: text
+  field64:
+    field_name: cartons.gtin
+    caption: Gtin
+    field_type: text
+  field65:
+    field_name: cartons.unit_pack_product_code
+    caption: Unit pack product code
+    field_type: text
+  field66:
+    field_name: cartons.rw_receipt_unit
+    caption: Rw receipt unit
+    field_type: text
+  field67:
+    field_name: cartons.qc_result_status
+    caption: Qc result status
+    field_type: text
+  field68:
+    field_name: cartons.carton_fruit_nett_mass_actual
+    caption: Carton fruit nett mass actual
+    field_type: text
+  field69:
+    field_name: cartons.intake_header_number
+    caption: Intake header number
+    field_type: text
+  field70:
+    field_name: cartons.encrypt_pick_ref
+    caption: Encrypt pick ref
+    field_type: text
+  field71:
+    field_name: cartons.pallet_number
+    caption: Pallet number
+    field_type: text
+  field72:
+    field_name: cartons.affected_by_env
+    caption: Affected by env
+    field_type: text
+  field73:
+    field_name: cartons.affected_by_function
+    caption: Affected by function
+    field_type: text
+  field74:
+    field_name: cartons.affected_by_program
+    caption: Affected by program
+    field_type: text
+  field75:
+    field_name: cartons.created_by
+    caption: Created by
+    field_type: text
+  field76:
+    field_name: cartons.updated_by
+    caption: Updated by
+    field_type: text
+  field77:
+    field_name: cartons.reprint_acknowledged_by
+    caption: Reprint acknowledged by
+    field_type: text
+  field78:
+    field_name: cartons.reprint_acknowledged_date_time
+    caption: Reprint acknowledged date time
+    field_type: text
+  field79:
+    field_name: cartons.orig_target_market_code
+    caption: Orig target market code
+    field_type: lookup
+    list: SELECT DISTINCT orig_target_market_code FROM pallets ORDER BY orig_target_market_code
+  field80:
+    field_name: pallets.fg_product_code
+    caption: Fg product code
+    field_type: lookup
+    list: SELECT DISTINCT fg_product_code FROM pallets ORDER BY fg_product_code
+  field81:
+    field_name: pallets.ca_cold_room_code
+    caption: Ca cold room code
+    field_type: lookup
+    list: SELECT DISTINCT ca_cold_room_code FROM pallets ORDER BY ca_cold_room_code
+  field82:
+    field_name: pallets.inspection_code
+    caption: Inspection code
+    field_type: lookup
+    list: SELECT DISTINCT inspection_code FROM pallets ORDER BY inspection_code
+  field83:
+    field_name: pallets.final_status_code
+    caption: Final status code
+    field_type: lookup
+    list: SELECT DISTINCT final_status_code FROM pallets ORDER BY final_status_code
+  field84:
+    field_name: pallets.size_count_code
+    caption: Size count code
+    field_type: lookup
+    list: SELECT DISTINCT size_count_code FROM pallets ORDER BY size_count_code
+  field85:
+    field_name: pallets.carton_mark_code
+    caption: Carton mark code
+    field_type: lookup
+    list: SELECT DISTINCT carton_mark_code FROM pallets ORDER BY carton_mark_code
+  field86:
+    field_name: pallets.target_market_code
+    caption: Target market code
+    field_type: lookup
+    list: SELECT DISTINCT target_market_code FROM pallets ORDER BY target_market_code
+  field87:
+    field_name: pallets.grade_code
+    caption: Grade code
+    field_type: lookup
+    list: SELECT DISTINCT grade_code FROM pallets ORDER BY grade_code
+  field88:
+    field_name: pallets.marketing_variety_code
+    caption: Marketing variety code
+    field_type: lookup
+    list: SELECT DISTINCT marketing_variety_code FROM pallets ORDER BY marketing_variety_code
+  field89:
+    field_name: pallets.old_pack_code
+    caption: Old pack code
+    field_type: lookup
+    list: SELECT DISTINCT old_pack_code FROM pallets ORDER BY old_pack_code
+  field90:
+    field_name: pallets.pallet_label_code
+    caption: Pallet label code
+    field_type: lookup
+    list: SELECT DISTINCT pallet_label_code FROM pallets ORDER BY pallet_label_code
+  field91:
+    field_name: pallets.qc_status_code
+    caption: Qc status code
+    field_type: lookup
+    list: SELECT DISTINCT qc_status_code FROM pallets ORDER BY qc_status_code
+  field92:
+    field_name: pallets.country_origin_code
+    caption: Country origin code
+    field_type: lookup
+    list: SELECT DISTINCT country_origin_code FROM pallets ORDER BY country_origin_code
+  field93:
+    field_name: pallets.inventory_code
+    caption: Inventory code
+    field_type: lookup
+    list: SELECT DISTINCT inventory_code FROM pallets ORDER BY inventory_code
+  field94:
+    field_name: pallets.pick_reference_code
+    caption: Pick reference code
+    field_type: lookup
+    list: SELECT DISTINCT pick_reference_code FROM pallets ORDER BY pick_reference_code
+  field95:
+    field_name: pallets.pc_code
+    caption: Pc code
+    field_type: lookup
+    list: SELECT DISTINCT pc_code FROM pallets ORDER BY pc_code
+  field96:
+    field_name: pallets.commodity_code
+    caption: Commodity code
+    field_type: lookup
+    list: SELECT DISTINCT commodity_code FROM pallets ORDER BY commodity_code
+  field97:
+    field_name: pallets.pallet_format_product_code
+    caption: Pallet format product code
+    field_type: lookup
+    list: SELECT DISTINCT pallet_format_product_code FROM pallets ORDER BY pallet_format_product_code
+  field98:
+    field_name: pallets.organization_code
+    caption: Organization code
+    field_type: lookup
+    list: SELECT DISTINCT organization_code FROM pallets ORDER BY organization_code
+  field99:
+    field_name: pallets.label_standard_code
+    caption: Label standard code
+    field_type: lookup
+    list: SELECT DISTINCT label_standard_code FROM pallets ORDER BY label_standard_code
+  field100:
+    field_name: pallets.inspect_type_code
+    caption: Inspect type code
+    field_type: lookup
+    list: SELECT DISTINCT inspect_type_code FROM pallets ORDER BY inspect_type_code
+  field101:
+    field_name: pallets.farm_code
+    caption: Farm code
+    field_type: lookup
+    list: SELECT DISTINCT farm_code FROM pallets ORDER BY farm_code
+  field102:
+    field_name: pallets.quality_group_code
+    caption: Quality group code
+    field_type: lookup
+    list: SELECT DISTINCT quality_group_code FROM pallets ORDER BY quality_group_code
+  field103:
+    field_name: pallets.class_code
+    caption: Class code
+    field_type: lookup
+    list: SELECT DISTINCT class_code FROM pallets ORDER BY class_code
+  field104:
+    field_name: pallets.actual_size_count_code
+    caption: Actual size count code
+    field_type: lookup
+    list: SELECT DISTINCT actual_size_count_code FROM pallets ORDER BY actual_size_count_code
+  field105:
+    field_name: pallets.cold_store_code
+    caption: Cold store code
+    field_type: lookup
+    list: SELECT DISTINCT cold_store_code FROM pallets ORDER BY cold_store_code
+  field106:
+    field_name: pallets.store_type_code
+    caption: Store type code
+    field_type: lookup
+    list: SELECT DISTINCT store_type_code FROM pallets ORDER BY store_type_code
+  field107:
+    field_name: pallets.party_name
+    caption: Party name
+    field_type: lookup
+    list: SELECT DISTINCT party_name FROM pallets ORDER BY party_name
+  field108:
+    field_name: pallets.iso_week_code
+    caption: Iso week code
+    field_type: lookup
+    list: SELECT DISTINCT iso_week_code FROM pallets ORDER BY iso_week_code
+  field109:
+    field_name: pallets.season_code
+    caption: Season code
+    field_type: lookup
+    list: SELECT DISTINCT season_code FROM bins ORDER BY season_code
+  field110:
+    field_name: pallets.account_code
+    caption: Account code
+    field_type: lookup
+    list: SELECT DISTINCT account_code FROM pallets ORDER BY account_code
+  field111:
+    field_name: pallets.orig_target_market_code
+    caption: Orig target market code
+    field_type: lookup
+    list: SELECT DISTINCT orig_target_market_code FROM pallets ORDER BY orig_target_market_code
+  field112:
+    field_name: bins.binfill_station_code
+    caption: Binfill station code
+    field_type: lookup
+    list: SELECT DISTINCT binfill_station_code FROM bins ORDER BY binfill_station_code
+  field113:
+    field_name: bins.rebin_label_station_code
+    caption: Rebin label station code
+    field_type: lookup
+    list: SELECT DISTINCT rebin_label_station_code FROM bins ORDER BY rebin_label_station_code
+  field114:
+    field_name: bins.orchard_code
+    caption: Orchard code
+    field_type: lookup
+    list: SELECT DISTINCT orchard_code FROM bins ORDER BY orchard_code
+  field115:
+    field_name: bins.user_name
+    caption: User name
+    field_type: lookup
+    list: SELECT DISTINCT user_name FROM bins ORDER BY user_name
+  field116:
+    field_name: bins.rebin_track_indicator_code
+    caption: Rebin track indicator code
+    field_type: lookup
+    list: SELECT DISTINCT rebin_track_indicator_code FROM bins ORDER BY rebin_track_indicator_code
+  field117:
+    field_name: bins.season_code
+    caption: Season code
+    field_type: lookup
+    list: SELECT DISTINCT season_code FROM bins ORDER BY season_code
