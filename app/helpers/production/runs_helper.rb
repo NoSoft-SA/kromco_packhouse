@@ -727,16 +727,9 @@ end
                          :field_name => 'product_class_id',
                          :settings => {:static_value=> product_class_code,:label_caption=>'product class code',:show_label=>true}}
 
-       # field_configs << {:field_type => 'LabelField',
-       #                   :field_name => 'track_indicator_id',
-       #                   :settings => {:static_value=> track_indicator_code,:show_label=>true,:label_caption=> 'track indicator code'}}
-
-
-
-       field_configs << {:field_type => 'DropDownField',
+       field_configs << {:field_type => 'LabelField',
                          :field_name => 'track_indicator_id',
-                         :settings => {:list => track_indicator_codes},:label_caption=>'track indicator code'}
-
+                         :settings => {:static_value=> track_indicator_code,:show_label=>true,:label_caption=> 'track indicator code'}}
 
 
      end
@@ -871,14 +864,6 @@ end
 
  end
 
-  def remove_duplicates(records,col=nil)
-    filtered_records =[]
-    records.group_by { |a| [a[col]] }.each do |group|
-      filtered_records << group[1][0]
-    end
-    return filtered_records
-  end
-
  def build_production_run_form(run,submit_action = nil)
 
   action = 'current_schedule_runs'
@@ -933,20 +918,9 @@ end
   treatment_code=Treatment.find_by_sql("select  id,treatment_code from treatments where id = #{run.treatment_id} ")[0].treatment_code  if run.treatment_id
   size_code=Size.find_by_sql("select id,size_code  from sizes where id = #{run.size_id}")[0].size_code  if run.size_id
   ripe_point_code=RipePoint.find_by_sql("select   id,ripe_point_code from ripe_points where id = #{run.ripe_point_id}")[0].ripe_point_code  if run.ripe_point_id
-  track_indicator = ActiveRecord::Base.connection.select_one("select  * from track_indicators where id = #{run.track_indicator_id} ")  if run.track_indicator_id
-
-  track_indicator_code = track_indicator.track_indicator_code  if run.track_indicator_id
+  track_indicator_code = TrackIndicator.find_by_sql("select  id,track_indicator_code from track_indicators where id = #{run.track_indicator_id} ")[0].track_indicator_code  if run.track_indicator_id
   product_class_code=ProductClass.find_by_sql("select distinct product_classes.id,product_classes.product_class_code from product_classes   where id = #{run.product_class_id}")[0].product_class_code if   run.product_class_id
-  if run
-    track_indicator_codes=TrackIndicator.find_by_sql("select  distinct track_indicators.id,track_indicators.track_indicator_code
-                                    from track_indicators
-                                    join commodities on track_indicators.commodity_code=commodities.commodity_code
-                                    join rmt_varieties on track_indicators.rmt_variety_id=rmt_varieties.id
-                                    join varieties v on v.rmt_variety_id = rmt_varieties.id
-                                     where  rmt_varieties.id='#{track_indicator.rmt_variety_id}' and commodities.commodity_code='#{track_indicator.commodity_code}' order by track_indicators.track_indicator_code")
-    track_indicator_codes = remove_duplicates(track_indicator_codes,"track_indicator_code").map{|g|[g.track_indicator_code,g.id]}
-    track_indicator_codes.unshift("<empty>") if !track_indicator_codes.empty?
-  end
+
   field_configs << {:field_type => 'LabelField',
                     :field_name => 'treatment_id',
                     :settings => {:static_value =>treatment_code,:label_caption=>'treatment code',:show_label=>true}}
@@ -967,15 +941,9 @@ end
                     :field_name => 'product_class_id',
                     :settings => {:static_value=> product_class_code,:label_caption=>'product class code',:show_label=>true}}
 
-  # field_configs << {:field_type => 'LabelField',
-  #                   :field_name => 'track_indicator_id',
-  #                   :settings => {:static_value=> track_indicator_code,:show_label=>true,:label_caption=> 'track indicator code'}}
-
-  field_configs << {:field_type => 'DropDownField',
+  field_configs << {:field_type => 'LabelField',
                     :field_name => 'track_indicator_id',
-                    :settings => {:list => track_indicator_codes},:label_caption=>'track indicator code'}
-
-
+                    :settings => {:static_value=> track_indicator_code,:show_label=>true,:label_caption=> 'track indicator code'}}
 
   #--------------------------------------
   	if run && run.production_run_status == "configuring"
