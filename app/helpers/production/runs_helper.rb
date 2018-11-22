@@ -706,15 +706,6 @@ end
        track_indicator_code = TrackIndicator.find_by_sql("select  id,track_indicator_code from track_indicators where id = #{production_run.track_indicator_id} ")[0].track_indicator_code  if production_run.track_indicator_id
        product_class_code=ProductClass.find_by_sql("select distinct product_classes.id,product_classes.product_class_code from product_classes   where id = #{production_run.product_class_id}")[0].product_class_code if   production_run.product_class_id
        pc_code =PcCode.find_by_sql("select pc_codes.pc_name from pc_codes join ripe_points on ripe_points.pc_code_id=pc_codes.id where ripe_points.id=#{production_run.ripe_point_id} ")[0].pc_name
-       # if production_run
-       #   track_indicator_codes=TrackIndicator.find_by_sql("select  track_indicators.id,track_indicators.track_indicator_code
-       #                              from track_indicators
-       #                              join commodities on track_indicators.commodity_code=commodities.commodity_code
-       #                              join rmt_varieties on track_indicators.rmt_variety_id=rmt_varieties.id
-       #                              join varieties v on v.rmt_variety_id = rmt_varieties.id
-       #                               where  v.id='#{production_run.variety_id}' and commodities.id='#{production_run.commodity_id}' order by track_indicators.track_indicator_code").map{|g|[g.track_indicator_code,g.id]}
-       #   track_indicator_codes.unshift("<empty>") if !track_indicator_codes.empty?
-       # end
 
        field_configs << {:field_type => 'LabelField',
                          :field_name => 'treatment_id',
