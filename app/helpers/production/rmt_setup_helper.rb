@@ -27,9 +27,6 @@ module Production::RmtSetupHelper
       field_configs[field_configs.length()] = {:field_type => 'LabelField',
                                                :field_name => 'treatment_code'}
 
-      field_configs[field_configs.length()] = {:field_type => 'LabelField',
-                                               :field_name => 'track_indicator_code'}
-
       field_configs[field_configs.length()] =  {:field_type => 'LabelField',
                                                 :field_name => 'size_code'}
 
@@ -74,7 +71,8 @@ module Production::RmtSetupHelper
 	field_configs[field_configs.length()] =  {:field_type => 'CheckBox',
 						:field_name => 'season_code'}
 
-    
+		field_configs[field_configs.length()] = {:field_type => 'CheckBox',
+																						 :field_name => 'track_indicator_code'}
 
 
     field_configs[field_configs.length()] =  {:field_type => 'CheckBox',
