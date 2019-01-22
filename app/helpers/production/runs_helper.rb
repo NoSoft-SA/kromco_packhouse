@@ -864,6 +864,22 @@ end
 
  end
 
+  def build_set_run_label_template_form(run_id)
+
+    field_configs = Array.new
+
+    label_templates = GetLabelTemplates.call
+    label_templates.unshift "<empty>"
+
+    field_configs << {:field_type => 'DropDownField',
+                      :field_name => 'label_template',
+                      :settings => {:list => label_templates}}
+
+    build_form(nil,field_configs,"set_run_label_template_submit",'run','save')
+
+
+  end
+
  def build_production_run_form(run,submit_action = nil)
 
   action = 'current_schedule_runs'
@@ -945,6 +961,17 @@ end
                     :field_name => 'track_indicator_id',
                     :settings => {:static_value=> track_indicator_code,:show_label=>true,:label_caption=> 'track indicator code'}}
 
+  field_configs[field_configs.length()] = {:field_type => 'LinkWindowField', :field_name => '',
+                                          :settings   => {
+                                              :target_action => 'set_run_label_template',
+                                              :link_text     => "set run label template",
+                                              :id_value      => (run ? run.id : nil)
+                                          }}
+  if(run && run.label_template_name)
+    field_configs << {:field_type => 'LabelField',
+                      :field_name => 'label_template_name',
+                      :settings => {:label_caption=>'run label template'}}
+  end
   #--------------------------------------
   	if run && run.production_run_status == "configuring"
   	 field_configs[field_configs.length()] = {:field_type => 'LinkField',:field_name => 'edit_run_details',
@@ -1745,6 +1772,7 @@ def build_set_fg_product_form(pack_station,action,caption)
       packing_order = carton_setup.sequence_number.to_s
       packing_order = carton_setup.pack_order if carton_setup.pack_order
       pack_station.packing_order = packing_order
+      pack_station.label_template = link.label_template_name
 
     end
 
@@ -1756,6 +1784,8 @@ def build_set_fg_product_form(pack_station,action,caption)
       carton_setups = ["select a value from fg product code"]
     end
 
+  label_templates = GetLabelTemplates.call.map {|l|l.strip}
+  label_templates.unshift("<empty>")
 
 	field_configs[0] =  {:field_type => 'LabelField',
 						:field_name => 'production_schedule_name'}
@@ -1780,8 +1810,8 @@ def build_set_fg_product_form(pack_station,action,caption)
 	field_configs[6] =  {:field_type => 'LabelField',
 						:field_name => 'size_count'}
 
-    field_configs[7] =  {:field_type => 'LabelField',
-						:field_name => 'station_code',:settings => {:css_class => "heading_field"}}
+  field_configs[7] =  {:field_type => 'LabelField',
+          :field_name => 'station_code',:settings => {:css_class => "heading_field"}}
 
 	field_configs[8] = {:field_type => 'DropDownField',
 						:field_name => 'fg_product_code',
@@ -1793,44 +1823,48 @@ def build_set_fg_product_form(pack_station,action,caption)
 						:settings => {:list => carton_setups},
 						:observer => carton_setup_observer}
 
+	field_configs << {:field_type => 'DropDownField',
+						:field_name => 'label_template',
+						:settings => {:list => label_templates}}
+
 	#-----------------------------------------
 	#Additional fields-related to carton setup
 	#------------------------------------------
-	field_configs[10] =  {:field_type => 'LabelField',
+	field_configs <<  {:field_type => 'LabelField',
 						:field_name => 'packing_order',:settings => {:css_class => "derived_field_nb"}}
 
-	 field_configs[11] =  {:field_type => 'LabelField',
+	 field_configs <<  {:field_type => 'LabelField',
 						:field_name => 'extended_fg_code',:settings => {:css_class => "derived_field"}}
 
-	 field_configs[12] =  {:field_type => 'LabelField',
+	 field_configs <<  {:field_type => 'LabelField',
 						:field_name => 'inventory_code',:settings => {:css_class => "derived_field"}}
 
-	 field_configs[13] =  {:field_type => 'LabelField',
+	 field_configs <<  {:field_type => 'LabelField',
 						:field_name => 'target_market',:settings => {:css_class => "derived_field"}}
 
 
-	 field_configs[14] =  {:field_type => 'LabelField',
+	 field_configs <<  {:field_type => 'LabelField',
 						:field_name => 'marking',:settings => {:css_class => "derived_field"}}
 
-	field_configs[15] =  {:field_type => 'LabelField',
+	field_configs <<  {:field_type => 'LabelField',
 						:field_name => 'diameter',:settings => {:css_class => "derived_field"}}
 
-	field_configs[15] =  {:field_type => 'LabelField',
+	field_configs <<  {:field_type => 'LabelField',
 						:field_name => 'diameter',:settings => {:css_class => "derived_field"}}
 
-	field_configs[16] =  {:field_type => 'LabelField',
+	field_configs <<  {:field_type => 'LabelField',
 						:field_name => 'retailer_sell_by_code',:settings => {:css_class => "derived_field",:label_caption => "sell_by_code"}}
 
 #	field_configs[16] =  {:field_type => 'LabelField',
 #						:field_name => 'nett_mass'}
 
-	field_configs[17] =  {:field_type => 'LabelField',
+	field_configs <<  {:field_type => 'LabelField',
 						:field_name => 'palletizing',:settings => {:css_class => "derived_field"}}
 
-    field_configs[18] =  {:field_type => 'LabelField',
+    field_configs <<  {:field_type => 'LabelField',
 						:field_name => 'order_no',:settings => {:css_class => "derived_field"}}
 
-	field_configs[19] =  {:field_type => 'HiddenField',
+	field_configs <<  {:field_type => 'HiddenField',
 						:field_name => 'ajax_distributor',
 						:non_db_field => true}
 
