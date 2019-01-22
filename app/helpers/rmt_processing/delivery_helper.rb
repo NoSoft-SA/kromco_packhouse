@@ -195,6 +195,12 @@ module RmtProcessing::DeliveryHelper
     field_configs[field_configs.length()] = {:field_type => 'TextField',
                                              :field_name => 'pick_team'}
 
+    field_configs[field_configs.length()] = {:field_type => 'TextField',
+                                             :field_name => 'temperature1'}
+
+    field_configs[field_configs.length()] = {:field_type => 'TextField',
+                                             :field_name => 'temperature2'}
+
     #MM102014 - add orchard id
     # field_configs[field_configs.length()] = {:field_type => 'TextField',
     #                                          :field_name => 'orchard_description'}
