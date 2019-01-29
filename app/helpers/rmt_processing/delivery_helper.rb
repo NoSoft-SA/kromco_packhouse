@@ -195,15 +195,10 @@ module RmtProcessing::DeliveryHelper
     field_configs[field_configs.length()] = {:field_type => 'TextField',
                                              :field_name => 'pick_team'}
 
-    field_configs[field_configs.length()] = {:field_type => 'TextField',
-                                             :field_name => 'temperature1'}
-
-    field_configs[field_configs.length()] = {:field_type => 'TextField',
-                                             :field_name => 'temperature2'}
-
-    #MM102014 - add orchard id
-    # field_configs[field_configs.length()] = {:field_type => 'TextField',
-    #                                          :field_name => 'orchard_description'}
+    (1..10).each do |num|
+      field_configs[field_configs.length()] = {:field_type => 'TextField',
+                                               :field_name => "temperature#{num}"}
+    end
 
     if !is_edit || (is_edit && delivery_track_indicators.length == 0)
       field_configs[field_configs.length()] = {:field_type => 'DropDownField',
