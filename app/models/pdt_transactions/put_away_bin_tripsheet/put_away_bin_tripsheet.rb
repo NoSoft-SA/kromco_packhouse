@@ -136,7 +136,7 @@ class PutAwayBinTripsheet < PDTTransaction
   end
 
   def filter_sealed_locations(location_candidates)
-    location_candidates.delete_if { |locn| locn['location_status'].to_s.upcase.include?('SEALED') }
+    location_candidates.delete_if { |locn| locn['location_status'].to_s.upcase.include?('SEALED') || locn['location_status'].to_s.upcase.include?('GAS')  }
   end
 
   def get_valid_locations
@@ -250,7 +250,7 @@ class PutAwayBinTripsheet < PDTTransaction
           filter_unavailable_locations(@valid_locations)
           return build_force_move_screen(["scanned location[#{@location_code}] is unavailable"]) if(@valid_locations.length == 0)
           filter_sealed_locations(@valid_locations)
-          return build_force_move_screen(["scanned location[#{@location_code}] is sealed"]) if(@valid_locations.length == 0)
+          return build_force_move_screen(["scanned location[#{@location_code}] is sealed or GAS"]) if(@valid_locations.length == 0)
         end
         return putaway_bin_tripsheet_trans
       else
@@ -325,7 +325,7 @@ class PutAwayBinTripsheet < PDTTransaction
       filter_unavailable_locations(@valid_locations)
       return ["scanned location[#{@location_code}] is unavailable"] if(@valid_locations.length == 0)
       filter_sealed_locations(@valid_locations)
-      return ["scanned location[#{@location_code}] is sealed"] if(@valid_locations.length == 0)
+      return ["scanned location[#{@location_code}] is sealed or GAS"] if(@valid_locations.length == 0)
     else
       return ["scanned location[#{@location_code}] has not been setup for this kind of tripsheet"]
     end
