@@ -37,7 +37,11 @@ class  AcceptBin < PDTTransaction
 
   location_status =  check_location_status(location.location_barcode)
   if  location_status  != nil
+     if location_status == "SEALED"
       error = ["Bins cannot be moved to location '#{location_entered}', status is: SEALED "]
+     elsif location_status == "GAS"
+       error = ["Bins cannot be moved to location '#{location_entered}', status is: GAS "]
+    end
        return error
   end
 
@@ -56,6 +60,8 @@ class  AcceptBin < PDTTransaction
       location_status=location_status[0].location_status
       if location_status && location_status.upcase.index("SEALED")
          return  location_barcode
+      elsif location_status && location_status.upcase.index("GAS")
+        return  location_barcode
       else
         return nil
       end
