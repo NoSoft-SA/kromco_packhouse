@@ -1000,7 +1000,7 @@ class RmtProcessing::DeliveryController < ApplicationController
     return false
   end
 
-  def summarise_pressure_readings
+  def summarise_pressure_readings(groups)
     pressure_readings = ActiveRecord::Base.connection.select_all("
         SELECT deliveries.id as delivery_id,qc_result_measurements.sample_no,avg(cast(qc_result_measurements.measurement as numeric)) avg_kg
         FROM deliveries
@@ -1021,9 +1021,7 @@ class RmtProcessing::DeliveryController < ApplicationController
       raise "There needs to be 30 pressure readings.#{pressure_readings.length} have been captured for this delivery"
     end
 
-    if(!(groups = QcPressureStandard.find(:all, :select=>"qc_pressure_standards.*,i.track_slms_indicator_code", :conditions => "qc_pressure_standards.rmt_variety_code='#{session[:new_delivery].rmt_variety_code}' ",
-                                     :joins => "join track_slms_indicators i on i.id=qc_pressure_standards.track_slms_indictor_id",
-                                     :order => "track_slms_indicator_code asc")).empty?)
+    unless groups.empty?
       grp1 = pressure_readings.find_all{|p| p['avg_kg'] >= groups[0].min_value && p['avg_kg'] <= groups[0].max_value}
       grp2 = pressure_readings.find_all{|p| p['avg_kg'] >= groups[1].min_value && p['avg_kg'] <= groups[1].max_value}
       grp3 = pressure_readings.find_all{|p| p['avg_kg'] >= groups[2].min_value && p['avg_kg'] <= groups[2].max_value}
@@ -1125,7 +1123,7 @@ class RmtProcessing::DeliveryController < ApplicationController
                                          :joins => "join track_slms_indicators i on i.id=qc_pressure_standards.track_slms_indictor_id",
                                          :order => "track_slms_indicator_code asc")
 
-        pressure_reading_qtys = summarise_pressure_readings
+        pressure_reading_qtys = summarise_pressure_readings(groups)
         suggested_indicator = Delivery.calc_pressure_indicator(pressure_reading_qtys, groups)
         if(suggested_indicator)
           @delivery_track_indicator.track_slms_indicator_code = suggested_indicator.track_slms_indicator_code
