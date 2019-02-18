@@ -12,6 +12,31 @@ class RmtProcessing::ForecastController < ApplicationController
 #   File Strucure Test   ===
 #===========================
 
+  def farm_changed
+      farm_code= get_selected_combo_value(params)
+
+       pucs = ActiveRecord::Base.connection.select_all("
+              select distinct p.id ,p.puc_code
+              from pucs p
+              join farm_puc_accounts fpa on fpa.puc_id = p.id
+              where fpa.farm_code = '#{farm_code}'
+             ")
+
+       pucs = pucs.map{|x|[x['puc_code'],x['id']]}  if !pucs.empty?
+
+      @pucs = pucs.unshift("<empty>")
+
+      render :inline => %{
+
+             <% puc_content = select('forecast','puc_id', @pucs) %>
+             <script>
+               <%= update_element_function(
+                    "puc_id_cell", :action => :update,
+                    :content => puc_content) %>
+              </script>
+  }
+  end
+
 
   def file_structure
     #@root_file = "C:/App_factory/app_factory"
@@ -195,6 +220,7 @@ class RmtProcessing::ForecastController < ApplicationController
       @forecast                      = Forecast.new(params[:forecast])
       @forecast.sequence_number      = generate_sequence_number(@forecast) + 1
       @forecast.forecast_status_code = "active"
+      @forecast.puc_code             = Puc.find(params[:forecast]['puc_id']).puc_code if params[:forecast]['puc_id']
 #   ========================
 #   generating forecast_code
 #   ========================
@@ -258,6 +284,7 @@ class RmtProcessing::ForecastController < ApplicationController
     @caption                = 'update_forecast'
     @farm_codes             = Farm.find_by_sql('select distinct farm_code from farms').map { |g| [g.farm_code] }
     @seasons                = Season.find_by_sql('select distinct season from seasons').map { |g| [g.season] }
+    @pucs                   = Puc.find_by_sql("select puc_code from pucs").map { |g| [g.puc_code] }
     session[:forecast_id]   = @forecast.id
     @content_header_caption = "'edit forecast'"
     render :template => "rmt_processing/forecast/edit_forecast", :layout => "content"
