@@ -118,6 +118,7 @@ def build_bin_tickets_data
   #fields to be printed
   quantity = self.quantity
   track_slms_indicator_code = self.track_slms_indicator_code
+  puc_code = forecast.puc_code
 
   track_slms_indicator_description = TrackSlmsIndicator.find_by_track_slms_indicator_code(track_slms_indicator_code).track_slms_indicator_description
   orchard_code = forecast_variety.orchard_code
@@ -157,6 +158,7 @@ def build_bin_tickets_data
   data.store("F5", f4)
   data.store("F6", f5)
   data.store("F7", self.forecast_variety.rmt_variety_code)
+  data.store("F8", puc_code)
 
   return data
 
