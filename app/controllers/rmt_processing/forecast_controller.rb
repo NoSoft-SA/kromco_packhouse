@@ -22,16 +22,16 @@ class RmtProcessing::ForecastController < ApplicationController
               where fpa.farm_code = '#{farm_code}'
              ")
 
-       pucs = pucs.map{|x|[x['puc_code'],x['id']]}  if !pucs.empty?
+       pucs = pucs.map{|x|x['puc_code']}  if !pucs.empty?
 
       @pucs = pucs.unshift("<empty>")
 
       render :inline => %{
 
-             <% puc_content = select('forecast','puc_id', @pucs) %>
+             <% puc_content = select('forecast','puc_code', @pucs) %>
              <script>
                <%= update_element_function(
-                    "puc_id_cell", :action => :update,
+                    "puc_code_cell", :action => :update,
                     :content => puc_content) %>
               </script>
   }
@@ -220,7 +220,7 @@ class RmtProcessing::ForecastController < ApplicationController
       @forecast                      = Forecast.new(params[:forecast])
       @forecast.sequence_number      = generate_sequence_number(@forecast) + 1
       @forecast.forecast_status_code = "active"
-      @forecast.puc_code             = Puc.find(params[:forecast]['puc_id']).puc_code if params[:forecast]['puc_id']
+      @forecast.puc_id             = Puc.find_by_puc_code(params[:forecast]['puc_code']).id if params[:forecast]['puc_code']
 #   ========================
 #   generating forecast_code
 #   ========================
@@ -301,8 +301,8 @@ class RmtProcessing::ForecastController < ApplicationController
       @current_page = session[:forecasts_page]
       id            = session[:forecast_id] #params[:id]
       if id && @forecast = Forecast.find(id)
-
         begin
+          @forecast.puc_id             = Puc.find_by_puc_code(params[:forecast]['puc_code']).id if params[:forecast]['puc_code']
           @forecast.update_attributes(params[:forecast])
           @forecasts            = eval(session[:query])
           flash[:notice]        = 'record saved'

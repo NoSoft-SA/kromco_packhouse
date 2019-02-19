@@ -36,11 +36,23 @@ module RmtProcessing::ForecastHelper
     seasons = Season.find_by_sql('select distinct season from seasons').map { |g| [g.season] }
     farm_codes = Farm.find_by_sql('select distinct farm_code from farms').map { |g| [g.farm_code]}
     forecast_type_codes = ForecastType.find_by_sql('select distinct forecast_type_code from forecast_types').map { |g| [g.forecast_type_code] }
-    pucs = ActiveRecord::Base.connection.select_all("select p.id ,p.puc_code
-                                                     from pucs p").map{|x|[x['puc_code'],x['id']]}
+     if forecast && forecast.farm_code
+       pucs = ActiveRecord::Base.connection.select_all("
+              select distinct p.id ,p.puc_code
+              from pucs p
+              join farm_puc_accounts fpa on fpa.puc_id = p.id
+              where fpa.farm_code = '#{forecast.farm_code}'
+             ").map{|x|x['puc_code']}
+     else
+       pucs = ActiveRecord::Base.connection.select_all("select p.id ,p.puc_code
+              from pucs p
+              join farm_puc_accounts fpa on fpa.puc_id = p.id
+             ").map{|x|x['puc_code']}
+    end
 
-    combos_js_for_farms = gen_combos_clear_js_for_combos(["forecast_farm_code", "forecast_puc_id"])
-    farm_observer = {:updated_field_id => "puc_id_cell",
+    pucs.unshift("<empty>")
+    combos_js_for_farms = gen_combos_clear_js_for_combos(["forecast_farm_code", "forecast_puc_code"])
+    farm_observer = {:updated_field_id => "puc_code_cell",
                     :remote_method => 'farm_changed',
                     :on_completed_js => combos_js_for_farms["forecast_farm_code"]
     }
@@ -88,7 +100,7 @@ module RmtProcessing::ForecastHelper
                                               :settings => {:list => farm_codes},:observer => farm_observer}
 
       field_configs[field_configs.length] =  {:field_type => 'DropDownField',
-                                              :field_name => 'puc_id',
+                                              :field_name => 'puc_code',
                                               :settings => {:list => pucs,:column_caption => "puc"}}
 
       field_configs[field_configs.length] =  {:field_type => 'DropDownField',
@@ -106,8 +118,9 @@ module RmtProcessing::ForecastHelper
       field_configs[field_configs.length] =  {:field_type => 'LabelField',
                                               :field_name => 'farm_code'}
 
-      field_configs[field_configs.length] =  {:field_type => 'LabelField',
-                                              :field_name => 'puc_code'}
+      field_configs[field_configs.length] =  {:field_type => 'DropDownField',
+                                              :field_name => 'puc_code',
+                                              :settings => {:list => pucs}}
 
       field_configs[field_configs.length] =  {:field_type => 'LabelField',
                                               :field_name => 'season'}
