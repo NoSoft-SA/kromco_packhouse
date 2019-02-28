@@ -630,8 +630,6 @@ class Production::RunsController < ApplicationController
       return
     end
 
-
-
     @last_inspection = PpecbInspection.most_recent_inspection?(carton_num)
     if !params['carton_number']['hidden_data']
       @can_edit = false
@@ -672,6 +670,19 @@ class Production::RunsController < ApplicationController
       end
     end
 
+    existing_inspection = ActiveRecord::Base.connection.select_all("
+                                    select id,carton_number from ppecb_inspections
+                                    where pallet_number = '#{carton['pallet_number']}'
+                                    and inspection_report= '#{@ppecb_inspection.inspection_report}'
+                                    and carton_number <> '#{carton['carton_number']}'
+                                    and inspection_level_code = '#{@ppecb_inspection['inspection_level_code']}'
+                                    ")
+
+    if !existing_inspection.empty?
+      redirect_to_index("There exists another carton with the same pallet_number: " + carton['pallet_number'].to_s  + "for the same inspection")
+      return
+    end
+
     extra_inspection_fields = PpecbInspection.find_by_sql("SELECT substring(cartons.target_market_code,1,2) as target_market_code
           ,substring(cartons.variety_short_long,1,3) as variety,cartons.grade_code,cartons.puc,cartons.pick_reference
           ,cartons.line_code,cartons.actual_size_count_code,production_runs.batch_code
@@ -697,6 +708,8 @@ class Production::RunsController < ApplicationController
         end
       end
     end
+
+
 
     session[:ppecb_inspection]= @ppecb_inspection
     render :template => "production/runs/ppecb_inspection", :layout => "content"
