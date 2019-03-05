@@ -672,22 +672,6 @@ class Production::RunsController < ApplicationController
       end
     end
 
-    cancelled, inspection_level_code, qc_status_code, reason = get_inspection_validation_values(carton)
-
-    existing_inspection_for_pallet = is_existing_inspection_for_pallet?(cancelled, carton, inspection_level_code, qc_status_code, reason)
-    existing_inspection_for_carton = is_existing_inspection_for_carton?(cancelled, carton, inspection_level_code, qc_status_code, reason)
-
-    if !existing_inspection_for_pallet.empty?
-      redirect_to_index("There exists another carton with the same pallet_number: " + carton['pallet_number'].to_s  + "for the same inspection")
-      return
-    end
-
-    if !existing_inspection_for_carton.empty?
-      redirect_to_index("The carton has been inspected for that reason,ppecb report and level with the same qc_status_code")
-      return
-    end
-
-
     extra_inspection_fields = PpecbInspection.find_by_sql("SELECT substring(cartons.target_market_code,1,2) as target_market_code
           ,substring(cartons.variety_short_long,1,3) as variety,cartons.grade_code,cartons.puc,cartons.pick_reference
           ,cartons.line_code,cartons.actual_size_count_code,production_runs.batch_code
@@ -716,60 +700,6 @@ class Production::RunsController < ApplicationController
 
     session[:ppecb_inspection]= @ppecb_inspection
     render :template => "production/runs/ppecb_inspection", :layout => "content"
-  end
-
-  def is_existing_inspection_for_carton?(cancelled, carton, inspection_level_code, qc_status_code, reason)
-    existing_inspection_for_carton = ActiveRecord::Base.connection.select_all("
-                                    select ppecb_inspections.id,ppecb_inspections.carton_number
-                                    from ppecb_inspections
-                                    join cartons c on ppecb_inspections.carton_id = c.id
-                                    where ppecb_inspections.pallet_number = '#{carton['pallet_number']}'
-                                    and inspection_report= '#{@ppecb_inspection['inspection_report']}'
-                                    and ppecb_inspections.carton_number = '#{carton['carton_number']}'
-                                    and (inspection_level_code #{inspection_level_code})
-                                    and (reason #{reason})
-                                    and (c.qc_status_code #{qc_status_code})
-                                    and (cancelled #{cancelled})
-                                                                              ")
-  end
-
-  def is_existing_inspection_for_pallet?(cancelled, carton, inspection_level_code, qc_status_code, reason)
-    existing_inspection_for_pallet = ActiveRecord::Base.connection.select_all("
-                                    select ppecb_inspections.id,ppecb_inspections.carton_number
-                                    from ppecb_inspections
-                                    join cartons c on ppecb_inspections.carton_id = c.id
-                                    where ppecb_inspections.pallet_number = '#{carton['pallet_number']}'
-                                    and inspection_report= '#{@ppecb_inspection['inspection_report']}'
-                                    and ppecb_inspections.carton_number <> '#{carton['carton_number']}'
-                                    and (inspection_level_code #{inspection_level_code})
-                                    and (reason #{reason})
-                                    and (c.qc_status_code #{qc_status_code})
-                                    and (cancelled #{cancelled})
-                                                                              ")
-  end
-
-  def get_inspection_validation_values(carton)
-    inspection_level_code = "like '%'  OR inspection_level_code is null "
-    if !@ppecb_inspection['inspection_level_code']
-    else
-      inspection_level_code = "= '#{@ppecb_inspection['inspection_level_code']}'"
-    end
-    reason = "like '%' OR reason is null"
-    if !@ppecb_inspection['reason']
-    else
-      reason = "= '#{@ppecb_inspection['reason']}'"
-    end
-    qc_status_code = "like '%' OR c.qc_status_code is null"
-    if !carton['qc_status_code']
-    else
-      qc_status_code = "= '#{carton['qc_status_code']}'"
-    end
-    cancelled = "is null OR cancelled is FALSE"
-    if !@ppecb_inspection['cancelled']
-    else
-      cancelled = "= #{@ppecb_inspection['cancelled']}"
-    end
-    return cancelled, inspection_level_code, qc_status_code, reason
   end
 
   def edit_cull_factors_and_additional_info
@@ -1562,6 +1492,41 @@ class Production::RunsController < ApplicationController
 
   end
 
+  def set_run_label_template
+    render :inline => %{
+		<% @content_header_caption = "'select run label template'"%>
+		<%= build_set_run_label_template_form(params[:id])%>
+		}, :layout => 'content'
+  end
+
+
+  #--------DELETE--------
+  #--------DELETE--------
+  def return_label_names
+    render :inline=>%{
+      One,Two,Free
+    }
+  end
+
+  def set_run_label_template_submit
+
+    begin
+
+      session[:current_production_run].label_template_name = ((params[:run][:label_template].to_s.strip=='') ? nil : params[:run][:label_template])
+      session[:current_production_run].update
+
+      render :inline=>%{
+          <script>
+            window.close();
+            window.opener.frames[1].location.reload(true);
+          </script>
+      },:layout=>'content'
+
+    rescue
+      handle_error("Production run label_template could not be set")
+    end
+
+  end
 
   def set_current_schedule
     @production_run = ProductionRun.find(params[:id])
@@ -2945,6 +2910,10 @@ class Production::RunsController < ApplicationController
 
         session[:current_pack_station] = @pack_station
 
+        # if(link = CartonLink.find_by_production_run_id_and_station_code(session[:current_production_run].id, session[:current_pack_station].station_code))
+        #   @pack_station.label_template = link.label_template_name
+        # end
+
         render_set_fg_product
       else
         raise "pack station with id: " + params[:id].to_s + " could not be found"
@@ -3051,6 +3020,8 @@ class Production::RunsController < ApplicationController
       puts "cart setup: " + params[:pack_station][:carton_setup_code]
       carton_setup = CartonSetup.find_by_carton_setup_code_and_production_schedule_code(params[:pack_station][:carton_setup_code], session[:current_production_run].production_schedule_name)
 
+
+      link.label_template_name = params[:pack_station][:label_template]
 
       link.carton_setup = carton_setup
       link.carton_label_setup = carton_setup.carton_label_setup
