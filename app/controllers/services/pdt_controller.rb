@@ -123,9 +123,15 @@ class Services::PdtController < ApplicationController
     @prev_screen_xml_definition = params.delete('prev_screen_xml_definition')
     observed_field =  params.delete('observed_field')
 
-    #===================================
-    #===================================
     filter_fields = {}
+    if(params['filter_fields'])
+      filters =  params.delete('filter_fields').split(',')
+      filters.delete(observed_field)
+      filters.each do |f|
+        filter_fields.store(f,params[f])
+      end
+    end
+
     if(selected_combo_value = params.find{|k,v| v=='x'})
       selected_value = selected_combo_value[0].split('|')[0]
       params.delete(selected_value)
@@ -135,9 +141,6 @@ class Services::PdtController < ApplicationController
       if(selected_filter_id = selected_combo_value[0].split('|')[1])
         filter_fields.store(observed_field,selected_filter_id)
       end
-    else
-      render :inline=>%{}
-      return
     end
 
     # params.delete('selected_combo_value')
@@ -145,6 +148,7 @@ class Services::PdtController < ApplicationController
     filter_fields.each do |k,v|
       params[k] = v
     end
+
     #===================================
     #===================================
     handle_request
@@ -246,7 +250,7 @@ class Services::PdtController < ApplicationController
     #    end
     @user = params[:user]
     @ip = params[:ip]
-    @ip = @request.env.REMOTE_ADDR if !@ip || @ip.strip() == ""|| @ip.strip().upcase == "NULL"
+    @ip = @request.env.REMOTE_ADDR if !@ip || @ip.strip() == ""||@ip == "null"
     @special_commands = {"1a" => "refresh", "1b" => "undo", "1c"=> "cancel", "1f"=> "redo", "1d"=> "save_process", "1e"=> "load_process", "1d.1"=> "save_process_submit", "1e.1"=> "load_process_submit", "1g"=> "exit_process", "1g.1"=> "save_process_choice_submit"}
     @instruction = nil
     @menu_item = params[:menu_item] if params[:trans_type] == nil
@@ -1022,6 +1026,9 @@ class Services::PdtController < ApplicationController
       return
     end
 
+    @websocket_scan = true # Load RMD SCAN javascript in the layout
+    @camera_scan_device = ClientSettings.camera_scan_devices.include?(request.remote_ip)
+
     if(@client_type=='web' && @mode==PdtScreenDefinition.const_get("CONTROL_VALUE_REPLACE").to_s)
       @result = "<PDTRF Status='true' Msg='' B3Label='' B1Enable='false' B1Label='' B2Enable='false' B2Label='' B3Enable='false'>#{@result}</PDTRF>"
       @pdt_screen_def = PdtScreenDefinition.new(@result, @menu_item, @mode, @user, @ip)
@@ -1085,7 +1092,7 @@ class Services::PdtController < ApplicationController
                 }
                </script>
            <% end %>
-      }, :layout => 'content'
+      }, :layout => 'rmd_layout' #  'content'
     elsif(@client_type=='web')
       @pdt_screen_def = PdtScreenDefinition.new(@result, @menu_item, @mode, @user, @ip)
       @no_buttons = (@pdt_screen_def.buttons == nil)
@@ -1204,7 +1211,7 @@ class Services::PdtController < ApplicationController
           }
         </script>
 
-      }, :layout => 'content'
+      }, :layout => 'rmd_layout' #  'content'
     else
       render :inline => %{
                      <%= @result %>

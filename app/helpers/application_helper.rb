@@ -347,7 +347,7 @@ end
 
 
   def build_form(active_record, field_configs, target_action, active_record_var_name, submit_caption,
-                 send_id = nil, hidden_field_data = nil, hide_spinner = nil, non_db_form = nil, plugin = nil, javascript_inject=nil)
+                 send_id = nil, hidden_field_data = nil, hide_spinner = nil, non_db_form = nil, plugin = nil, javascript_inject=nil, table_layout=true)
 
     if send_id
       field_configs.push({:field_type => "HiddenField", :field_name => "id"})
@@ -357,9 +357,10 @@ end
     end
 
 
-    Form.new(self, active_record, field_configs, target_action, active_record_var_name, submit_caption,
-             non_db_form, hide_spinner, plugin, javascript_inject).build_form
-
+    form = Form.new(self, active_record, field_configs, target_action, active_record_var_name, submit_caption,
+             non_db_form, hide_spinner, plugin, javascript_inject)
+    form.table_layout = table_layout
+    form.build_form
   end
 
   # Alias for build_form. Wraps a call to build_form. Uses options hash for optional parameters
@@ -370,7 +371,8 @@ end
                options[:hide_spinner],
                options[:non_db_form],
                options[:plugin],
-               options[:javascript_inject])
+               options[:javascript_inject],
+               options.fetch(:table_layout, true))
   end
 
   # Return a DataGridSlick::DataGrid for displaying a SlickGrid grid.
@@ -601,7 +603,7 @@ end
   class Form
 
     attr_reader :trace, :env, :active_record, :plugin, :is_popup, :field_configs
-    attr_writer :trace
+    attr_writer :trace, :table_layout
 
     def is_popup=(val)
       #puts "WRTING IS POPUP: " + val.to_s
@@ -679,6 +681,7 @@ end
     def initialize(environment, active_record, field_configs, target_action, active_record_var_name, submit_caption,
                    non_db_form = false, hide_spinner = nil, plugin = nil, javascript_inject=nil)
 
+      @table_layout = true
       @layout = environment.form_layout
       @end_at_position = environment.end_at_position
       @submit_button_align = environment.submit_button_align
@@ -730,6 +733,7 @@ end
         stage = "'building form fields'"
         @field_configs.each do |field_config|
           field = build_field(field_config)
+          field.table_layout = @table_layout
 
           form_string += field.construct
 
@@ -831,7 +835,7 @@ end
           header += @env.form_tag({:action=> @target_action})
         end
         @trace += "\n section: 'form_tag' completed. "
-        header +=  "<table>"
+        header +=  "<table>" if @table_layout
         @trace += "\n method: 'build_header' exited"
         return header
       rescue
@@ -845,8 +849,12 @@ end
         expand_sep_script = ""
         @submit_button_align = "right" if !@submit_button_align
 
+        if @table_layout
         footer = "<tr><td>" if @submit_button_align == "left"
         footer = "<tr><td></td><td>" if @submit_button_align == "right"
+        else
+          footer = '<div class="form-footer">'
+        end
         if @curr_separator > 0
           expand_sep_script = " onclick = 'expand_all();document.forms[0].submit();'"
           footer += "<button " + expand_sep_script + " id = 'submit_button'>" + @submit_caption + "</button>" if @target_action != nil
@@ -864,10 +872,12 @@ end
           sep_script = "<script> n_separators = " + @curr_separator.to_s + ";</script>"
 
         end
+        if @table_layout
         footer += "</td></tr></table>" + sep_script + '</form>' #@env.end_form_tag
-
+        else
+          footer << "</div>#{sep_script}</form>"
     end
-
+    end
 
   end
 

@@ -4,6 +4,7 @@ module MesScada
   module FormComponents
 
   class FormField
+    attr_accessor :table_layout
 
     # Ensure the image name contains a file extension.
     def image_with_ext(image_name)
@@ -12,6 +13,7 @@ module MesScada
 
     def initialize (form, active_record, field_name, field_type, active_record_var_name, settings, non_db_field = false, observer = nil, environment = nil)
 
+      @table_layout = true
       if field_name.index("?required")
         field_name = field_name.slice(0, field_name.index("?required"))
         @required_field = true
@@ -108,8 +110,15 @@ module MesScada
           # observer = @env.observe_field(@active_record_var_name + "_" + @field_name,
           #                               :update => @observer[:updated_field_id],
           #                               :url => {:action => @observer[:remote_method]}, :complete => @observer[:on_completed_js], :loading => "show_element('img_" + @active_record_var_name + "_" + @field_name + "');")
+          filter_fields = ""
           if(@observer[:extra_params])
             extra_static_params = "+'#{@observer[:extra_params].map{|k,v| "&#{k}=#{v}"}.join}'"
+
+            if(@observer[:extra_params][:filter_fields])
+              @observer[:extra_params][:filter_fields].each do |f|
+                filter_fields += "+'&#{f}='+encodeURIComponent($('web_pdt_screen_#{f}').value)"
+              end
+            end
           end
           if(@observer[:on_load_js])
             on_load_js = ""
@@ -118,12 +127,13 @@ module MesScada
             end
 
           end
+
           observer = @env.observe_field(@active_record_var_name + "_" + @field_name,
                                         :update   => @observer[:updated_field_id],
                                         :url      => {:action => @observer[:remote_method]},
                                         :complete => @observer[:on_completed_js],
-                                        :with     => "encodeURIComponent(value)+'=x'#{extra_static_params}#{on_load_js}",
-                                        :loading  => "show_element('img_" + @active_record_var_name + "_" + @field_name + "');")
+                                        :with     => "encodeURIComponent(value)+'=x'#{filter_fields}#{extra_static_params}#{on_load_js}",
+                                        :loading  => "show_element('img_" + @active_record_var_name + "_" + @field_name + "')")
         end
         if observer != ""
           loading_gif =  "<img src = '/images/spinner.gif' style = 'display:none;' id = 'img_" + @active_record_var_name + "_" + @field_name + "'/>"
@@ -132,7 +142,11 @@ module MesScada
         if @is_separator
 
           sep_id = @form.next_separator_id
-          @output_html = "<td onclick = 'hide_separator(this);' " + css_class + " id = '" + sep_id + "'>" + construct_control + "<img id = '" + sep_id + "_img' src = '/images/expanded.png' </img></td>"
+          if @table_layout
+            @output_html = "<td onclick = 'hide_separator(this);' " + css_class + " id = '" + sep_id + "'>" + construct_control + "<img id = '" + sep_id + "_img' src = '/images/expanded.png' </img></td>"
+          else
+            @output_html = "<div onclick = 'hide_separator(this);' " + css_class + " id = '" + sep_id + "'>" + construct_control + "<img id = '" + sep_id + "_img' src = '/images/expanded.png' </img></div>"
+          end
 
         else
           width = ""
@@ -155,7 +169,11 @@ module MesScada
                    jQuery(function() { jQuery( "##{@active_record_var_name}_#{@field_name}" ).catcomplete({ source: "#{@autocomplete_url}", minLength: 2 }); });
                  </script>|
           end
-          @output_html = "<td " + css_class + " valign=\"top\" id = '" + @field_name + "_cell'"  " #{width}>" + construct_control + loading_gif + observer + extra_js + "</td>"
+          if @table_layout
+            @output_html = "<td " + css_class + " valign=\"top\" id = '" + @field_name + "_cell'"  " #{width}>" + construct_control + loading_gif + observer + extra_js + "</td>"
+          else
+            @output_html = "<div " + css_class + " id='" + @field_name + "_cell'"  " #{width}>" + construct_control + loading_gif + observer + extra_js + "</div>"
+          end
         end
       # rescue
       #   raise_error "The control could not be rendered correctly. \n  The exception reported is: " + $!, "build_control"
@@ -173,12 +191,21 @@ module MesScada
       if @form.cells_in_row?
 
         if is_new_row?(@form.cells_in_row?, @form.current_field_index?)
-          open_tag = "<tr>"
-          closing_tag = ""
+          if @table_layout
+            open_tag = "<tr>"
+            closing_tag = ""
+          else
+            open_tag = "<div class=\"field-group\">"
+            closing_tag = ""
+          end
         elsif is_last_cell?(@form.cells_in_row?, @form.current_field_index?)
-          closing_tag = "</tr>"
+          if @table_layout
+            closing_tag = "</tr>"
+          else
+            closing_tag = "</div>"
+          end
           if @form.end_at_position == @form.current_field_index?
-            closing_tag += "</table><table>"
+            closing_tag += "</table><table>" if @table_layout
             #apply second layout if provided, else: reset layout
             if !@env.second_layout
               @env.set_form_layout("1", false, @form.current_field_index?, @form.field_configs.length() -1)
@@ -198,8 +225,13 @@ module MesScada
           end
         end
       else
-        open_tag = "<tr>"
-        closing_tag = "</tr>"
+        if @table_layout
+          open_tag = "<tr>"
+          closing_tag = "</tr>"
+        else
+          open_tag = "<div class=\"field-group\">"
+          closing_tag = "</div>"
+        end
       end
 
 
@@ -234,18 +266,34 @@ module MesScada
         if @required_field
           label_css = "required_field"
           label_css = @label_css if @label_css
-          if !@label_caption
-            "<td class = '#{label_css}'>#{@field_name.gsub('_', ' ').sub(/ id$/, '')}</td>"
+          if@table_layout
+            if !@label_caption
+              "<td class = '#{label_css}'>#{@field_name.gsub('_', ' ').sub(/ id$/, '')}</td>"
+            else
+              "<td class = '#{label_css}'>#{@label_caption.to_s}</td>"
+            end
           else
-            "<td class = '#{label_css}'>#{@label_caption.to_s}</td>"
+            if !@label_caption
+              "<span class = '#{label_css}'>#{@field_name.gsub('_', ' ').sub(/ id$/, '')}</span>"
+            else
+              "<span class = '#{label_css}'>#{@label_caption.to_s}</span>"
+            end
           end
         else
           label_css = ""
           label_css = " class = '#{@label_css}' " if @label_css
-          if !@label_caption
-            "<td #{label_css}>#{@field_name.gsub('_', ' ').sub(/ id$/, '')}</td>"
+          if@table_layout
+            if !@label_caption
+              "<td #{label_css}>#{@field_name.gsub('_', ' ').sub(/ id$/, '')}</td>"
+            else
+              "<td #{label_css}>#{@label_caption.to_s}</td>"
+            end
           else
-            "<td #{label_css}>#{@label_caption.to_s}</td>"
+            if !@label_caption
+              "<span #{label_css}>#{@field_name.gsub('_', ' ').sub(/ id$/, '')}</span>"
+            else
+              "<span #{label_css}>#{@label_caption.to_s}</span>"
+            end
           end
         end
       else
@@ -601,7 +649,11 @@ module MesScada
     def build_label
 
       if @static_value && !@show_label
-        "<td/>"
+        if @table_layout
+          "<td/>"
+        else
+          ''
+        end
       else
         super
       end

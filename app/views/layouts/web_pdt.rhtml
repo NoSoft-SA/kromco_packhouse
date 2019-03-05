@@ -1,9 +1,65 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" >
-<html>
-    <head>
-        <title>Admin</title>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Admin</title>
+    <style>
+      html {
+        font-family: sans-serif; /* 1 */
+        -ms-text-size-adjust: 100%; /* 2 */
+        -webkit-text-size-adjust: 100%; /* 2 */
+        color: #000000c9;
+      }
+
+      /**
+       * Remove default margin.
+       */
+
+      body {
+        margin: 0;
+      }
+      #pdt_content_header_caption {
+        width: 300px;
+        color: green;
+        background: #E6E6E6;
+        border: 1px solid #D8D8D8;
+      }
+      div.container {
+        width: 320px;
+      }
+      .pc_pdt_form_css_class div.field-group {
+        margin-left: 10px;
+      }
+      div.field-group input {
+        width: 200px;
+        height: 30px;
+      }
+      div.field-group select {
+        width: 200px;
+        height: 30px;
+      }
+      input[readonly] {
+        background-color: #ddd;
+      }
+      .pc_pdt_busy_sinner_css_class{
+        position:absolute;
+        width: 310px;
+        height: 580px;
+        background: whitesmoke;
+        opacity: 0.8;
+        border: 1px solid #d3d3d3;
+      }
+      .pc_pdt_busy_sinner_css_class td{
+        width: 83px;
+      }
+    </style>
     </head>
     <body>
+      <div class="container">
         <%= @content_for_layout %>
+      </div>
     </body>
-</html>
+  </html>

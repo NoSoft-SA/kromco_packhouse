@@ -1,0 +1,54 @@
+ # ClientSettings.
+#
+# These are available in code as "ClientSettings.setting_name".
+# Settings repeated under the client key ("unifrutti", "stargrow") will override the value in the "defaults" key.
+#
+# Any new option *must* be set in defaults.
+# Only set an option for the client if it differs from the default.
+#
+# NB *** Do not place comments in lines on their own ***
+#        - they will become part of the value of the line above.
+#        - ONLY place comments at the end of the line (with a space before the #).
+#
+defaults: &defaults
+  company_name: J&J Multi-Tier
+  company_short_name: JMT
+  company_long_name: J&J Multi-Tier (Pty) Ltd
+  system_email_sender: Packhouse System<jmt@unifrutti.co.za>
+  camera_scan_devices: [] # List of ip addresses of mobile devices that use camera to scan
+
+kromco:
+  <<: *defaults
+  company_name: Unifrutti
+  company_short_name: UD
+  company_long_name: UNIFRUTTI SOUTH AFRICA (PTY) LTD
+  system_email_sender: Unifrutti System<jmt@unifrutti.co.za>
+  jmt_monitoring_rules:
+    edi_out:
+      ps_token: ruby
+      cmd_token: run_edi_out_proc
+
+unifrutti_matcold:
+  <<: *defaults
+  company_name: Unifrutti
+  company_short_name: UD
+  company_long_name: UNIFRUTTI SOUTH AFRICA (PTY) LTD
+  system_email_sender: Unifrutti System<jmt@unifrutti.co.za>
+  jmt_monitoring_rules:
+    edi_out:
+      ps_token: ruby
+      cmd_token: run_edi_out_proc
+  auto_create_missing_master_files: true
+  auto_accept_edi: true
+  assume_cold_date_on_depot_receipt: true
+  install_location: MATCOLD
+  default_phc: P0519
+  default_inspection_report: '0000'
+  billing_client: UI
+  production_run: false
+  require_cargo_weights: false
+  select_location_on_return_delivery: false
+  inspection_dates_change_allowed: true
+  ignore_weights_for_edi_out: true
+  camera_scan_devices:
+    - 192.168.100.241

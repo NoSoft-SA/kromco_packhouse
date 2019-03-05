@@ -10,6 +10,9 @@ RAILS_GEM_VERSION = '1.2.3' unless defined? RAILS_GEM_VERSION
 # Bootstrap the Rails environment, frameworks, and default configuration
 require File.join(File.dirname(__FILE__), 'boot')
 
+# Use settingslogic for storing per-client config.
+require 'settingslogic'
+
 #ActiveSupport::Deprecation.silenced = true
 
 # For devtools and report SQL, use coderay gem to show syntax-highlighted code.

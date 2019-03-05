@@ -128,7 +128,7 @@ module Services::PdtHelper
 #	--------------------------------------------------------------------------------------------------
 #	Define an observer for each index field
 #	--------------------------------------------------------------------------------------------------
-    # session[:web_pdt_screen_search_form]= Hash.new
+# session[:web_pdt_screen_search_form]= Hash.new
 
     field_configs = generate_web_pdt_field_configs(pdt_screen_def,web_pdt_css_styles)
 
@@ -175,7 +175,8 @@ module Services::PdtHelper
       end
     end
 
-    build_form(@web_pdt_screen,field_configs,'handle_pdt_web_request','web_pdt_screen','',false)
+    # build_form(@web_pdt_screen,field_configs,'handle_pdt_web_request','web_pdt_screen','',false)
+    construct_form(@web_pdt_screen, field_configs, 'handle_pdt_web_request', 'web_pdt_screen', '', false, :table_layout => false)
   end
 
   def generate_control_to_be_replaced(field_config,control_config,web_pdt_css_styles)
@@ -187,42 +188,42 @@ module Services::PdtHelper
     @active_record = @web_pdt_screen
     env = ApplicationHelper::Form.new(self, @web_pdt_screen, [field_config], '', @active_record_var_name, '')
 
-      case field_config[:field_type]
+    case field_config[:field_type]
       when 'PopupDateRangeSelector'
-          control = MesScada::FormComponents::PopupDateRangeSelector.new(env, @active_record, field_config[:field_name], field_config[:field_type], @active_record_var_name, field_config[:settings], field_config[:non_db_field], field_config[:observer])
+        control = MesScada::FormComponents::PopupDateRangeSelector.new(env, @active_record, field_config[:field_name], field_config[:field_type], @active_record_var_name, field_config[:settings], field_config[:non_db_field], field_config[:observer])
       when "PopupDateSelector" #Henry
-          control = MesScada::FormComponents::PopupDateSelector.new(env, @active_record, field_config[:field_name], field_config[:field_type], @active_record_var_name, field_config[:settings], field_config[:non_db_field], field_config[:observer])
+        control = MesScada::FormComponents::PopupDateSelector.new(env, @active_record, field_config[:field_name], field_config[:field_type], @active_record_var_name, field_config[:settings], field_config[:non_db_field], field_config[:observer])
       when "PopupDateTimeSelector"
-          control = MesScada::FormComponents::PopupDateTimeSelector.new(env, @active_record, field_config[:field_name], field_config[:field_type], @active_record_var_name, field_config[:settings], field_config[:non_db_field], field_config[:observer])
+        control = MesScada::FormComponents::PopupDateTimeSelector.new(env, @active_record, field_config[:field_name], field_config[:field_type], @active_record_var_name, field_config[:settings], field_config[:non_db_field], field_config[:observer])
       when "CheckBox"
-          control = MesScada::FormComponents::CheckBox.new(env, @active_record, field_config[:field_name], field_config[:field_type], @active_record_var_name, field_config[:settings], field_config[:non_db_field], field_config[:observer])
-        when "TextField"
-          # field_config[:settings][:html_opts] = {:onchange=>"alert('sobhuza');"}
-          @replace_control_css_class = web_pdt_css_styles[:pdt_text_text_box]
-          # field_config[:settings][:show_label] = true
-          control = MesScada::FormComponents::TextField.new(env, @active_record, field_config[:field_name], field_config[:field_type], @active_record_var_name, field_config[:settings], field_config[:non_db_field], field_config[:observer])
+        control = MesScada::FormComponents::CheckBox.new(env, @active_record, field_config[:field_name], field_config[:field_type], @active_record_var_name, field_config[:settings], field_config[:non_db_field], field_config[:observer])
+      when "TextField"
+        # field_config[:settings][:html_opts] = {:onchange=>"alert('sobhuza');"}
+        @replace_control_css_class = web_pdt_css_styles[:pdt_text_text_box]
+        # field_config[:settings][:show_label] = true
+        control = MesScada::FormComponents::TextField.new(env, @active_record, field_config[:field_name], field_config[:field_type], @active_record_var_name, field_config[:settings], field_config[:non_db_field], field_config[:observer])
       when "LabelField"
-          # @replace_control_css_class = web_pdt_css_styles[:pdt_text_line]
-          # control = MesScada::FormComponents::StaticField.new(env, @active_record, field_config[:field_name], field_config[:field_type], @active_record_var_name, field_config[:settings], field_config[:non_db_field], field_config[:observer])
+        # @replace_control_css_class = web_pdt_css_styles[:pdt_text_line]
+        # control = MesScada::FormComponents::StaticField.new(env, @active_record, field_config[:field_name], field_config[:field_type], @active_record_var_name, field_config[:settings], field_config[:non_db_field], field_config[:observer])
         field_config[:settings][:readonly] = true
         @replace_control_css_class = web_pdt_css_styles[:pdt_static_text]
         control = MesScada::FormComponents::TextField.new(env, @active_record, field_config[:field_name], field_config[:field_type], @active_record_var_name, field_config[:settings], field_config[:non_db_field], field_config[:observer])
       when "TextArea"
-          @replace_control_css_class = web_pdt_css_styles[:pdt_text_area]
-          control = MesScada::FormComponents::TextArea.new(env, @active_record, field_config[:field_name], field_config[:field_type], @active_record_var_name, field_config[:settings], field_config[:non_db_field], field_config[:observer])
+        @replace_control_css_class = web_pdt_css_styles[:pdt_text_area]
+        control = MesScada::FormComponents::TextArea.new(env, @active_record, field_config[:field_name], field_config[:field_type], @active_record_var_name, field_config[:settings], field_config[:non_db_field], field_config[:observer])
       when "DateField"
-          @replace_control_css_class = web_pdt_css_styles[:pdt_date_field]
-          control = MesScada::FormComponents::DateField.new(env, @active_record, field_config[:field_name], field_config[:field_type], @active_record_var_name, field_config[:settings], field_config[:non_db_field], field_config[:observer])
+        @replace_control_css_class = web_pdt_css_styles[:pdt_date_field]
+        control = MesScada::FormComponents::DateField.new(env, @active_record, field_config[:field_name], field_config[:field_type], @active_record_var_name, field_config[:settings], field_config[:non_db_field], field_config[:observer])
       when "DateTimeField"
-          @replace_control_css_class = web_pdt_css_styles[:pdt_date_field]
-          control = MesScada::FormComponents::DateTimeField.new(env, @active_record, field_config[:field_name], field_config[:field_type], @active_record_var_name, field_config[:settings], field_config[:non_db_field], field_config[:observer])
-        when "DropDownField"
-          # field_config[:settings][:html_opts] = {:onfocus=>"alert('sobhuza');"}
-          @replace_control_css_class = web_pdt_css_styles[:pdt_drop_down]
-          control = MesScada::FormComponents::DropDownField.new(env, @active_record, field_config[:field_name], field_config[:field_type], @active_record_var_name, field_config[:settings], field_config[:non_db_field], field_config[:observer])
+        @replace_control_css_class = web_pdt_css_styles[:pdt_date_field]
+        control = MesScada::FormComponents::DateTimeField.new(env, @active_record, field_config[:field_name], field_config[:field_type], @active_record_var_name, field_config[:settings], field_config[:non_db_field], field_config[:observer])
+      when "DropDownField"
+        # field_config[:settings][:html_opts] = {:onfocus=>"alert('sobhuza');"}
+        @replace_control_css_class = web_pdt_css_styles[:pdt_drop_down]
+        control = MesScada::FormComponents::DropDownField.new(env, @active_record, field_config[:field_name], field_config[:field_type], @active_record_var_name, field_config[:settings], field_config[:non_db_field], field_config[:observer])
       else
-      raise "cannot create unknown field. passed-in type was: " + field_config[:field_type].to_s
-      end
+        raise "cannot create unknown field. passed-in type was: " + field_config[:field_type].to_s
+    end
 
     # puts " control : #{control.build_control}"
     return control

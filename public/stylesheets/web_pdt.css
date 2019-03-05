@@ -6,6 +6,7 @@ mobile_web + PC pdt css styling for
 
 .mobile_web_pdt_menu select{
     width: 920px;
+    height: 40px;
     font-size: 40px;
 }
 .mobile_web_pdt_menu img{
@@ -13,6 +14,7 @@ mobile_web + PC pdt css styling for
 }
 .pc_web_pdt_menu select{
     width: 300px;
+    height: 40px;
 }
 
 .mobile_web_pdt_content_container td{
@@ -97,20 +99,19 @@ mobile_web + PC pdt css styling for
     border: none;
     width: 600px;
     font-size: 35px;
-    background: whitesmoke;
 }
 .pc_pdt_static_text_css_class input{
     border: none;
-    background: whitesmoke;
-    width: 184px;
 }
 
 .mobile_web_pdt_text_box_css_class input{
     width: 600px;
     font-size: 35px;
+    height: 40px;
 }
 .pc_pdt_text_box_css_class input{
     width: 180px;
+    height: 40px;
 }
 
 .mobile_web_pdt_drop_down_css_class{

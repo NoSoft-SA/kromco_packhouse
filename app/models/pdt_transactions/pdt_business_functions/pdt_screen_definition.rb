@@ -446,6 +446,8 @@ class PdtScreenDefinition
        settings = {:field_type => 'TextField',:field_name => config['name'],
         :settings => {:css_class=>web_pdt_css_styles[:pdt_text_text_box]}}
         settings[:observer] = observer if(observer)
+        settings[:settings][:html_opts] = {'data-scanner' => 'key248_all'} if config['scan_field']
+        settings[:settings][:html_opts]['data-submit-form'] = 'submit' if config['scan_field'] && config['submit_form']
        #:html_opts => {:onchange=>"next_text_box.onfocus",:onfocus=>"this.focus();"}
      when 'text_area'
        settings = {:field_type => 'TextArea',:field_name => config['name'],

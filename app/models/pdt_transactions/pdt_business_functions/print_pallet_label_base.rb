@@ -12,7 +12,7 @@ class PrintPalletLabelBase < PDTTransaction
 
   def build_default_screen()
     field_configs                       = Array.new
-    field_configs[field_configs.length] = {:type=>"text_box", :name=>"carton_or_pallet", :label=>"scan ctn or plt", :is_required=>"true"}
+    field_configs[field_configs.length] = {:type=>"text_box", :name=>"carton_or_pallet", :label=>"scan ctn or plt", :is_required=>"true",:scan_field => true}
     field_configs[field_configs.length] = {:type=>"text_box", :name=>"printer", :label=>"scan printer", :is_required=>"true"}
     #field_configs[field_configs.length] = {:type=>"text_box", :name=>"n_labels_to_print", :label=>"print qty"}
     field_configs[field_configs.length] = {:type=>"drop_down", :name=>"n_labels_to_print", :label=>"print qty", :list=>"1,2,3,4"}

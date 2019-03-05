@@ -65,7 +65,8 @@ module WebPdtLoginHelper
     field_configs <<  {:field_type => 'HiddenField',
                          :field_name => 'dummy'}
 
-    build_form(nil,field_configs,nil,'web_pdt','',false)
+    # build_form(nil,field_configs,nil,'web_pdt','',false)
+    construct_form(nil, field_configs, nil, 'web_pdt', '', false, :table_layout => false)
   end
 
 end
