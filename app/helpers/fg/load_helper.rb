@@ -357,7 +357,7 @@ module Fg::LoadHelper
 
 
       field_configs[field_configs.length()] = {:field_type => 'LabelField',
-                                             :field_name => 'container_vents '}
+                                             :field_name => 'container_vents'}
 
     if !session[:current_viewing_order]
     build_form(load_container, field_configs, action, 'load_container', caption, is_edit)
