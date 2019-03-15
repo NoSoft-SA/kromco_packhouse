@@ -981,4 +981,107 @@ module PartyManager::ContactMethodHelper
     return get_data_grid(data_set,column_configs)
   end
 
+  def build_edit_parties_contacts_grid(data_set)
+
+    postal_address_type_codes = PartiesPostalAddress.get_all_postal_address_type_codes.flatten
+
+    column_configs = Array.new
+    column_configs << {:field_type => 'text',:field_name => 'id'}
+    column_configs << {:field_type => 'text',:field_name => 'org_name', :column_width=>150}
+    column_configs << {:field_type => 'text',:field_name => 'postal_address_type_code', :column_width=>150, :editor => :select, :select_options =>postal_address_type_codes}
+    column_configs << {:field_type => 'text',:field_name => 'city', :column_width=>150, :editor=>:text}
+    column_configs << {:field_type => 'text',:field_name => 'address1', :column_width=>200, :editor=>:text}
+    column_configs << {:field_type => 'text',:field_name => 'address2', :column_width=>200, :editor=>:text}
+    column_configs << {:field_type => 'text',:field_name => 'postal_code', :editor=>:text}
+    column_configs << {:field_type => 'text',:field_name => 'mobile', :editor=>:text}
+    column_configs << {:field_type => 'text',:field_name => 'email', :column_width=>200, :editor=>:text}
+
+    column_configs[column_configs.length()] = {:field_type => 'action',:field_name => 'edit', :column_width=>80,
+                                               :settings =>
+                                                   {:link_text => 'launch_edit_form',
+                                                    :target_action => 'edit_party_address_and_contacts',
+                                                    :id_column => 'id'}}
+
+    return get_data_grid(data_set,column_configs, MesScada::GridPlugins::PartyManager::PartyAddressesGridPlugin.new,nil,nil, :save_action=>'/party_manager/contact_method/update_parties_contacts_and_addresses')
+  end
+
+  def build_edit_party_address_and_contacts_form(party_address,action,caption, is_edit=true)
+    field_configs = []
+
+    postal_address_type_codes = PartiesPostalAddress.get_all_postal_address_type_codes
+    postal_address_type_codes.unshift("<empty>")
+
+    if(is_edit)
+      field_configs << {:field_type => 'LabelField',:field_name => 'org_name'}
+    else
+      #  --------------------------------------------------------------------------------------------------
+      #  Define an observer for each index field
+      #  --------------------------------------------------------------------------------------------------
+      session[:party_postal_address_search_form]= Hash.new
+      #generate javascript for the on_complete ajax event for each combo
+      search_combos_js = gen_combos_clear_js_for_combos(["party_postal_address_org_name","party_postal_address_mobile"])
+      #Observers for search combos
+      party_postal_address_org_name_observer  = {:updated_field_id => "mobile_cell",
+                                                 :remote_method => 'party_postal_address_org_name_search_combo_changed',
+                                                 :on_completed_js => search_combos_js["party_postal_address_org_name"]}
+
+      session[:party_postal_address_search_form][:party_postal_address_type_code_observer] = party_postal_address_org_name_observer
+
+      parties = Party.find_by_sql("select p.party_name
+        from parties p
+        left outer join parties_postal_addresses ppa on (p.party_name=ppa.party_name and p.party_type_name=ppa.party_type_name)
+        WHERE p.party_type_name='ORGANIZATION'
+        and ppa.id is null").map{|g|[g.party_name]}
+
+      field_configs << {:field_type => 'DropDownField',:field_name => 'org_name',
+                        :settings => {:list => parties},
+                        :observer => party_postal_address_org_name_observer}
+    end
+
+    field_configs <<  {:field_type => 'DropDownField',
+                       :field_name => 'postal_address_type_code',
+                       :settings => {:list => postal_address_type_codes}}
+    field_configs << {:field_type => 'TextField', :field_name => 'city',
+                      :settings => {:autocomplete_url=>'/party_manager/contact_method/auto_complete_city'}}
+    field_configs << {:field_type => 'TextField', :field_name => 'address1',
+                      :settings => {:autocomplete_url=>'/party_manager/contact_method/auto_complete_address1'}}
+    field_configs << {:field_type => 'TextField', :field_name => 'address2',
+                      :settings => {:autocomplete_url=>'/party_manager/contact_method/auto_complete_address2'}}
+    field_configs << {:field_type => 'TextField', :field_name => 'postal_code',
+                      :settings => {:autocomplete_url=>'/party_manager/contact_method/auto_complete_postal_code'}}
+    field_configs << {:field_type => 'TextField', :field_name => 'mobile',
+                      :settings => {:autocomplete_url=>'/party_manager/contact_method/auto_complete_mobile'}}
+    field_configs << {:field_type => 'TextField', :field_name => 'email',
+                      :settings => {:autocomplete_url=>'/party_manager/contact_method/auto_complete_email'}}
+    field_configs << {:field_type => 'CheckBox', :field_name => 'change_only_for_org',
+                      :settings=>{:label_caption=>'change address just for this org'}}
+    field_configs << {:field_type => 'HiddenField', :field_name => 'id'}
+
+    build_form(party_address,field_configs,action,'party_postal_address',caption)
+  end
+
+  def build_edit_parties_contacts_grid(data_set)
+
+    postal_address_type_codes = PartiesPostalAddress.get_all_postal_address_type_codes.flatten
+
+    column_configs = Array.new
+    column_configs << {:field_type => 'text',:field_name => 'id'}
+    column_configs << {:field_type => 'text',:field_name => 'org_name', :column_width=>150}
+    column_configs << {:field_type => 'text',:field_name => 'postal_address_type_code', :column_width=>150, :editor => :select, :select_options =>postal_address_type_codes}
+    column_configs << {:field_type => 'text',:field_name => 'city', :column_width=>150, :editor=>:text}
+    column_configs << {:field_type => 'text',:field_name => 'address1', :column_width=>200, :editor=>:text}
+    column_configs << {:field_type => 'text',:field_name => 'address2', :column_width=>200, :editor=>:text}
+    column_configs << {:field_type => 'text',:field_name => 'postal_code', :editor=>:text}
+    column_configs << {:field_type => 'text',:field_name => 'mobile', :editor=>:text}
+    column_configs << {:field_type => 'text',:field_name => 'email', :column_width=>200, :editor=>:text}
+
+    column_configs[column_configs.length()] = {:field_type => 'action',:field_name => 'edit', :column_width=>80,
+                                               :settings =>
+                                                   {:link_text => 'launch_edit_form',
+                                                    :target_action => 'edit_party_address_and_contacts',
+                                                    :id_column => 'id'}}
+
+    return get_data_grid(data_set,column_configs, MesScada::GridPlugins::PartyManager::PartyAddressesGridPlugin.new,nil,nil, :save_action=>'/party_manager/contact_method/update_parties_contacts_and_addresses')
+  end
+
 end

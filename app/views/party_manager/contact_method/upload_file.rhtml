@@ -1,0 +1,12 @@
+
+    <% form_tag @submit, :multipart => true do -%>
+        <table>
+          <tr><td>Choose a file:</td><td><%= file_field_tag :csv_file %></td></tr>
+        </table>
+
+          <%= submit_tag 'upload' %>
+
+    <% end -%>
+<br>
+The csv file must contains the ff collumns: <br>
+<label style="background: #EDEDED;padding: 2px;">org_name, city, address1, address2, address3, postal_code, mobile, email</label>

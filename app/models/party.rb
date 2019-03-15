@@ -97,4 +97,74 @@ class Party < ActiveRecord::Base
     end
   end
 
+  def Party.set_address_info(keys, values, change_only_for_org)
+    if(keys['mobile'] && !values[keys['mobile']].to_s.strip.empty?)
+      if(mobile_contact_party=get_contact_method('Mobile', 'ORGANIZATION', values[keys['org_name']]))
+        if(!(mobile=ContactMethod.find(:first,:conditions=>"contact_method_code='#{values[keys['mobile']]}' and contact_method_type_code='Mobile'")))
+          mobile = ContactMethod.new({:contact_method_code=>values[keys['mobile']], :contact_method_type_code=>'Mobile'})
+          mobile.save!
+        end
+        mobile_contact_party.update_attributes({:contact_method_code=>values[keys['mobile']], :contact_method_id=>mobile.id})
+      else
+        if(!ContactMethod.find(:first,:conditions=>"contact_method_code='#{values[keys['mobile']]}' and contact_method_type_code='Mobile'"))
+          mobile = ContactMethod.new({:contact_method_code=>values[keys['mobile']], :contact_method_type_code=>'Mobile'})
+          mobile.save!
+        end
+        party = ContactMethodsParty.new({:party_type_name=>'ORGANIZATION', :party_name=>values[keys['org_name']],:contact_method_code=>values[keys['mobile']], :contact_method_type_code=>'Mobile',:from_date=>Time.now.to_date.to_formatted_s(:db),:thru_date=>Time.now.to_date.to_formatted_s(:db)})
+        party.save!
+      end
+    end
+
+    if(keys['email'] && !values[keys['email']].to_s.strip.empty?)
+      if(email_contact_party=get_contact_method('E-mail', 'ORGANIZATION', values[keys['org_name']]))
+        if(!(email=ContactMethod.find(:first,:conditions=>"contact_method_code='#{values[keys['email']]}' and contact_method_type_code='E-mail'")))
+          email = ContactMethod.new({:contact_method_code=>values[keys['email']], :contact_method_type_code=>'E-mail'})
+          email.save!
+        end
+        email_contact_party.update_attributes({:contact_method_code=>values[keys['email']], :contact_method_id=>email.id})
+      else
+        if(!ContactMethod.find(:first,:conditions=>"contact_method_code='#{values[keys['email']]}' and contact_method_type_code='E-mail'"))
+          email = ContactMethod.new({:contact_method_code=>values[keys['email']], :contact_method_type_code=>'E-mail'})
+          email.save!
+        end
+        party = ContactMethodsParty.new({:party_type_name=>'ORGANIZATION', :party_name=>values[keys['org_name']],:contact_method_code=>values[keys['email']], :contact_method_type_code=>'E-mail',:from_date=>Time.now.to_date.to_formatted_s(:db),:thru_date=>Time.now.to_date.to_formatted_s(:db)})
+        party.save!
+      end
+    end
+
+    # if((keys['city'] && !values[keys['city']].to_s.strip.empty?) && (keys['address1'] && !values[keys['address1']].to_s.strip.empty?) && (keys['address2'] && !values[keys['address2']].to_s.strip.empty?))
+    if(postal_address_party=Party.get_party_postal_address(values[keys['org_name']], values[keys['postal_address_type_code']], 'ORGANIZATION'))
+      if(!change_only_for_org)
+        postal_address_party.postal_address.update_attributes({:city=>values[keys['city']],:address1=>values[keys['address1']],:address2=>values[keys['address2']], :postal_code=>values[keys['postal_code']]})
+      else
+        if(!PostalAddress.find(:first,:conditions=>"postal_address_type_code='#{values[keys['postal_address_type_code']]}' and city='#{values[keys['city']]}'"))
+          postal_address = PostalAddress.new({:postal_address_type_code=>values[keys['postal_address_type_code']], :city=>values[keys['city']], :address1=>values[keys['address1']], :address2=>values[keys['address2']], :postal_code=>values[keys['postal_code']]})
+          postal_address.save!
+        end
+      end
+      postal_address_party.update_attributes({:city=>values[keys['city']],:address1=>values[keys['address1']],:address2=>values[keys['address2']]})
+    else
+      if(!PostalAddress.find(:first,:conditions=>"postal_address_type_code='#{values[keys['postal_address_type_code']]}' and city='#{values[keys['city']]}'"))
+        postal_address = PostalAddress.new({:postal_address_type_code=>values[keys['postal_address_type_code']], :city=>values[keys['city']], :address1=>values[keys['address1']], :address2=>values[keys['address2']], :postal_code=>values[keys['postal_code']]})
+        postal_address.save!
+      end
+      postal_address_party = PartiesPostalAddress.new({:postal_address_type_code=>values[keys['postal_address_type_code']], :city=>values[keys['city']], :address1=>values[keys['address1']], :address2=>values[keys['address2']],
+                                                       :party_name=>values[keys['org_name']], :party_type_name=>'ORGANIZATION'})
+      postal_address_party.save!
+    end
+    # end
+  end
+
+  def Party.get_contact_method(contact_method_type_code, party_type_name, party_name)
+    ContactMethodsParty.find(:first, :select=>"contact_methods_parties.*", :conditions=>"contact_methods_parties.contact_method_type_code='#{contact_method_type_code}' and contact_methods_parties.party_type_name='#{party_type_name}' and contact_methods_parties.party_name='#{party_name}'",
+                             :joins=>"join contact_methods c on contact_methods_parties.contact_method_id=c.id")
+  end
+
+  def Party.get_party_postal_address(party_name, postal_address_type_code, party_type_name)
+    PartiesPostalAddress.find(:first, :select=>"parties_postal_addresses.*",
+                              :conditions=>"a.postal_address_type_code='#{postal_address_type_code}' and parties_postal_addresses.party_type_name='#{party_type_name}' and parties_postal_addresses.party_name='#{party_name}'",
+                              :joins=>"join postal_addresses a on a.id=parties_postal_addresses.postal_address_id")
+  end
+
+
 end

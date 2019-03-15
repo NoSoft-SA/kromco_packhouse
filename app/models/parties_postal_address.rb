@@ -1,5 +1,5 @@
 class PartiesPostalAddress < ActiveRecord::Base
-
+  attr_accessor :edited, :change_only_for_org
   #  ===========================
   #   Association declarations:
   #  ===========================
