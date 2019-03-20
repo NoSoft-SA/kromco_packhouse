@@ -18,7 +18,8 @@ class PartiesPostalAddress < ActiveRecord::Base
     #  first check whether combo fields have been selected
     is_valid = true
     if is_valid
-      is_valid = ModelHelper::Validations.validate_combos([{:postal_address_type_code => self.postal_address_type_code},{:city => self.city},{:address1 => self.address1}],self)
+      # is_valid = ModelHelper::Validations.validate_combos([{:postal_address_type_code => self.postal_address_type_code},{:city => self.city},{:address1 => self.address1}],self)
+      is_valid = ModelHelper::Validations.validate_combos([{:postal_address_type_code => self.postal_address_type_code},{:address1 => self.address1}],self)
     end
     #now check whether fk combos combine to form valid foreign keys
     if is_valid

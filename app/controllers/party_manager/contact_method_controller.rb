@@ -1591,6 +1591,10 @@ end
 					error = "Error on line #{lines.index(line)+1}. postal_address_type_code cannot be empty<br>"
 					error << "<br>org_name,postal_address_type_code,city,address1,address2,postal_code,mobile,email,change_only_for_org"
 					error << "<br>#{line[keys['org_name']]},<label style='color:red;'>insert postal_address_type_code here</label>,#{line[keys['city']]},#{line[keys['address1']]},#{line[keys['address2']]},#{line[keys['postal_code']]},#{line[keys['mobile']]},#{line[keys['email']]}, #{change_only_for_org}"
+				elsif(keys['address1'] && line[keys['address1']].to_s.strip.empty?)
+					error = "Error on line #{lines.index(line)+1}. address1 cannot be empty<br>"
+					error << "<br>org_name,postal_address_type_code,city,address1,address2,address3,postal_code,mobile,email,change_only_for_org"
+					error << "<br>#{line[keys['org_name']]},#{line[keys['postal_address_type_code']]},#{line[keys['city']]},<label style='color:red;'>insert address1 here</label>,#{line[keys['address2']]},#{line[keys['address3']]},#{line[keys['postal_code']]},#{line[keys['mobile']]},#{line[keys['email']]}, #{change_only_for_org}"
 				end
 
 				return display_contacts_and_addresses_error(error) if(error)
