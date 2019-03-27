@@ -1,7 +1,7 @@
 class TruckArrival < PDTTransaction
   attr_accessor :load_number ,:voyage_number,:shipping_agent,:shipping_line,:booking_reference,:vessel_code,:voyage_id,:voyage_number,:cto_consec_code_load,
                 :discharge_port,:quay_of_discharge_port ,:load_id,:load_vehicle_id,:load_container_id,:container_seal_code,:load_bay,:container_setting,
-                :container_temperature_rhine,:container_temperature_rhine2,:container_code,:cto_consec_code,:stack_type_code,:vehicle_number,:haulier_id
+                :container_temperature_rhine,:container_temperature_rhine2,:container_code,:cto_consec_code,:stack_type_code,:vehicle_number,:haulier_id,:order_id
                                                                                         
   def build_default_screen
     field_configs = Array.new
@@ -25,12 +25,13 @@ class TruckArrival < PDTTransaction
 
 
 
-
       if load_record == nil
       return result_screen = PDTTransaction.build_msg_screen_definition("load order id does not exists ",nil,nil,nil)
       else
         @load_number = load_record.load_number
       end
+
+       @order_id = LoadOrder.find(load_order_id_entered.to_i).order_id
 
        if load_record.pick_list_printed_date ==nil
         load_record.pick_list_printed_date=Time.now.to_formatted_s(:db)
