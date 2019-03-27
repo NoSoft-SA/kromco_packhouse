@@ -9,7 +9,7 @@ module DataGridSlick
                   :group_headers_colspan, :no_of_frozen_cols,
                   :group_fields_to_sum, :group_fields_to_count, :group_fields_to_avg,
                   :group_fields_to_max, :group_fields_to_min, :show_caption, :show_header,
-                  :non_selectable_ids, :clear_multi_select
+                  :non_selectable_ids, :clear_multi_select, :allow_duplicate_ids
 
     VALID_FIELD_TYPES = %w(text action checkbox frame_link link_window action_collection)
     VALID_EDITORS     = [:text, :checkbox, :long_text, :date, :integer, :select]
@@ -20,6 +20,7 @@ module DataGridSlick
       @env                   = environment
       @stack_trace           = ''
       @multi_select          = @env.multi_select.blank? ? false : true
+      @multi_select          = false if options[:switch_off_multiselect]
       @multi_select_action   = @env.url_for(:action => @env.multi_select) if @multi_select
       @key_based_access      = key_based_access
       @hidden_id_column      = @env.hidden_id_column
@@ -51,6 +52,7 @@ module DataGridSlick
       @save_action           = options[:save_action]
       @validation_for_edit   = options[:validation_for_edit]
       @no_id_field           = true
+      @allow_duplicate_ids   = options[:allow_duplicate_ids]   || false
       @totcount              = 0
       @pre_selected_ids      = []
 
@@ -168,7 +170,8 @@ module DataGridSlick
   function sumTotalsFormatter(totals, columnDef) {
     var val = totals.sum && totals.sum[columnDef.field];
     if (val != null) {
-      return "total: " + ((Math.round(parseFloat(val)*100)/100));
+      //return "&sum; " + ((Math.round(parseFloat(val)*100)/100));
+      return ((Math.round(parseFloat(val)*100)/100));
     }
     return "";
   }
@@ -624,6 +627,9 @@ EOS
     if(columns[i].formatter === 'bool') {
       columns[i].formatter = slickBooleanFormatter;
     }
+    if(columns[i].formatter === 'progress') {
+      columns[i].formatter = slickProgressFormatter;
+    }
     if(columns[i].formatter === 'link') {
       columns[i].formatter = slickLinkFormatter;
     }
@@ -841,7 +847,12 @@ EOS
       dataView.setItems(#{@grid_id}data);
     } catch (e) {
        if (String(e).indexOf('unique') !== -1) {
-          alert('Unable to completely build the grid. Some rows will be missing. The error message is "'+e+'"');
+          #{if @allow_duplicate_ids
+            ''
+          else
+            "alert('Unable to completely build the grid. Some rows will be missing. The error message is \"'+e+'\"');"
+          end
+          }
        } else {
           // cannot handle this exception, so rethrow
           alert('Unable to build the grid. The error message is "'+e+'"');
@@ -1194,7 +1205,11 @@ EOS
             elsif bool_cols.include?(grid_column.field_name)
               row[grid_column.field_name] = ['t','true','y','yes','0'].include?(rendered_cell) ? true : false
             else
-              row[grid_column.field_name] = rendered_cell
+              if rendered_cell.is_a?(String) && grid_column.is_a?(GridTextColumn)
+                row[grid_column.field_name] = rendered_cell.gsub('\"', '"').gsub("\\'", "'") # A hack to avoid \" becoming \\\", (and \' becoming \\\') in JSON below...
+              else
+                row[grid_column.field_name] = rendered_cell
+              end
             end
           end
         end

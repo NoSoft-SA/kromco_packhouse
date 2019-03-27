@@ -8,7 +8,8 @@ class PalletEnquiry < PDTTransaction
 
     field_configs = Array.new
     field_configs[field_configs.length] = {:type=>'text_box', :name=>'carton_or_pallet',
-                                           :label=>'carton_or_pallet',:is_required=>'true'}
+                                           :label=>'carton_or_pallet',:is_required=>'true',:scan_field => true,
+                                           :submit_form => true}
     buttons = {:B1Label=>"Submit",:B1Enable=>"false",:B1Submit=>"pallet_enquiry_submit",:B2Label=>"",:B2Enable=>"false",:B2Submit=>"",:B3Label=>"",:B3Enable=>"false",:B3Submit=>""}
     screen_attributes ={:content_header_caption=>"scan carton or pallet",:auto_submit=>"true",:auto_submit_to=>"pallet_enquiry_submit"}
     plugins=nil

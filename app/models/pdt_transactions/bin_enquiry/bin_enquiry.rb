@@ -3,7 +3,8 @@ class BinEnquiry < PDTTransaction
 
 
     field_configs = Array.new
-    field_configs[field_configs.length] = {:type=>"text_box",:name=>"bin_number",:is_required=>"true",:scan_only=>"false"}
+    field_configs[field_configs.length] = {:type=>"text_box",:name=>"bin_number",:is_required=>"true",:scan_only=>"false",:scan_field => true,
+                                           :submit_form => true}
 
     screen_attributes = {:auto_submit=>"true",:auto_submit_to=>"bin_scanned",:content_header_caption=>"Bin enquiry"}
     buttons = {"B3Label"=>"Clear" ,"B2Label"=>"submit", "B2Submit"=>"bin_scanned","B1Submit"=>"","B1Label"=>"","B1Enable"=>"false","B2Enable"=>"false","B3Enable"=>"false" }

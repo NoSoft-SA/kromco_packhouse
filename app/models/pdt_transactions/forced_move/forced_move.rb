@@ -96,8 +96,11 @@
       end
     end
 
-    from_locn_parent = Location.find_by_location_code(from_location.parent_location_code)
-    extract_force_location_rule(to_location_rules,from_locn_parent) if from_locn_parent != nil
+    unless from_location.parent_location_code.to_s == from_location.location_code
+      from_locn_parent = Location.find_by_location_code(from_location.parent_location_code)
+      extract_force_location_rule(to_location_rules,from_locn_parent) if from_locn_parent != nil
+    end
+
   end
 
   def get_force_location_rule(from_location,to_location)
