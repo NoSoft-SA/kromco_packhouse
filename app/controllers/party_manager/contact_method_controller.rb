@@ -1853,7 +1853,7 @@ end
 
 
 	def update_parties_contacts_and_addresses
-		submission = eval(params['grid_values'])
+		submission = grid_edited_values_to_array(params)
 
 		@parties = PartiesPostalAddress.find_by_sql("SELECT ppa.id,ppa.party_name as org_name, ppa.postal_address_type_code,ppa.city,ppa.address1 ,ppa.address2 ,a.postal_code
 																								,(SELECT contact_methods_parties.contact_method_code

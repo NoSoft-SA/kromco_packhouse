@@ -1610,4 +1610,12 @@ end
 		render_children_for_current_orchard
 	end
 
+	def list_cities
+		redirect_to :action => "list_cities", :controller => "party_manager/city"
+	end
+
+	def new_city
+		redirect_to :action => "new_city", :controller => "party_manager/city"
+	end
+
 end
