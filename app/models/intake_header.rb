@@ -474,7 +474,7 @@ class IntakeHeader < ActiveRecord::Base
 
     inventory_code_query  = "SELECT DISTINCT pallet_sequences.inventory_code FROM (pallet_sequences JOIN depot_pallets ON(pallet_sequences.depot_pallet_id=depot_pallets.id) "
     inventory_code_query  += " JOIN intake_headers ON(depot_pallets.intake_header_id=intake_headers.id)) "
-    inventory_code_query  += " WHERE intake_headers.id='#{intake_header_id}'"
+    inventory_code_query  += " WHERE intake_headers.id='#{intake_header_id}' and pallet_sequences.inventory_code is not null"
 
     header                = IntakeHeader.find(intake_header_id)
     pfp_query             = "select depot_pallet_number from depot_pallets where intake_header_id= #{intake_header_id.to_s} and pallet_format_product_code is null"
