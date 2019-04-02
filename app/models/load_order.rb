@@ -1,5 +1,5 @@
 class LoadOrder < ActiveRecord::Base
-
+  belongs_to :city, :foreign_key => 'destination_city_id'
 #	===========================
 # 	Association declarations:
 #	===========================

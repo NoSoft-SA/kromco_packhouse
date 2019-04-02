@@ -20,6 +20,7 @@ class Order < ActiveRecord::Base
   belongs_to :order_type
   belongs_to :document_destination
   belongs_to :depot
+  belongs_to :incoterm
 
   STATUS_DELETION_RECVD = 'DELETION_RECVD'
   def notify_marketer_order_created(msg,subj,recepient)

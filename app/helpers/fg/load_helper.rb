@@ -293,23 +293,38 @@ module Fg::LoadHelper
 #	Define a set of observers for each composite foreign key- in effect an observer per combo involved
 #	in a composite foreign key
 #	--------------------------------------------------------------------------------------------------
+    session[:load_vehicle_search_form]= Hash.new
+    #generate javascript for the on_complete ajax event for each combo
+    search_combos_js = gen_combos_clear_js_for_combos(["load_vehicle_haulier_party_id","load_vehicle_rate"])
+    #Observers for search combos
+    load_vehicle_haulier_party_id_observer  = {:updated_field_id => "rate_cell",
+                                               :remote_method => 'load_vehicle_haulier_party_id_search_combo_changed',
+                                               :on_completed_js => search_combos_js["load_vehicle_haulier_party_id"]}
 
-     hauliers= PartiesRole.find_by_sql("SELECT id ,party_name FROM parties_roles WHERE role_name = 'HAULIER'").map { |g| [g.party_name, g.id] }
-#      if !haulier.empty?
-#         load_vehicle.haulier=  haulier[0]['party_name']
-#      end
+    session[:load_vehicle_search_form][:load_vehicle_haulier_party_id_observer] = load_vehicle_haulier_party_id_observer
+
+    if((order = Order.find(@order_id)) && order.incoterm.incoterm_code =='DAP')
+      hauliers = PartiesRole.find(:all, :select=>'parties_roles.party_name, parties_roles.id',
+                                  :joins => "join transporters t on t.haulier_parties_role_id=parties_roles.id").map { |g| [g.party_name, g.id] }
+    else
+      hauliers= PartiesRole.find_by_sql("SELECT id ,party_name FROM parties_roles WHERE party_name = 'OWN'").map { |g| [g.party_name, g.id] }
+      load_vehicle.rate = nil
+    end
+
       field_configs = Array.new
     if session[:current_viewing_order]
     field_configs[field_configs.length()] = {:field_type=>'LabelField', :field_name=>'msg', :non_db_field=>true, :settings=>{:static_value=>"form is in view mode,changes won't be saved", :show_label=>false}}
    end
-      field_configs[field_configs.length()] = {:field_type => 'TextField',
-                                             :field_name => 'vehicle_number'}
+      field_configs[field_configs.length()] = {:field_type => 'TextField', :field_name => 'vehicle_number'}
 
-         field_configs[field_configs.length()] = {:field_type =>  'LabelField',
-                                             :field_name => 'vehicle_weight_out'}
+         field_configs[field_configs.length()] = {:field_type =>  'LabelField', :field_name => 'vehicle_weight_out'}
 
-     field_configs[field_configs.length()] = {:field_type => 'DropDownField',
-						:field_name => 'haulier_party_id',:settings=>{:list=>hauliers,:label_caption=>'haulier'}}
+     field_configs[field_configs.length()] = {:field_type => 'DropDownField', :field_name => 'haulier_party_id',
+                                              :observer=>load_vehicle_haulier_party_id_observer,
+                                              :settings=>{:list=>hauliers,:label_caption=>'haulier'}}
+    field_configs[field_configs.length()] = {:field_type => 'TextField',
+                                             :field_name => 'rate',
+                                             :settings=>{:readonly=>true}}
 
     if !session[:current_viewing_order]
       build_form(load_vehicle, field_configs, action, 'load_vehicle', caption, is_edit)
@@ -525,6 +540,10 @@ module Fg::LoadHelper
                                               :height => 1500,:settings => {:width => 1800,
                                                                             :height => 1500,:link_icon=>'edit' ,:link_text => 'edit_pallets_remarks',:target_action => 'edit_pallets_remarks',:id_column => 'id'}}
 
+    action_menu <<  {:field_type => 'link_window',:field_name => 'set_destination',:column_caption=>'set_destination',:col_width=>60, :width => 1800,
+                                              :height => 1500,:settings => {:width => 1800,
+                                                                            :height => 1500,:link_icon=>'destination' ,:link_text => 'set destination',:target_action => 'set_load_order_destination',:id_column => 'pick_list_number'}}
+
 
     if !session[:current_viewing_order]
       action_menu <<  {:field_type => 'link_window', :field_name => 'delete_load',:column_caption=>'delete',:col_width=>50,
@@ -592,6 +611,9 @@ end
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'voyage_code',:col_width=> 150}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'customer_reference', :column_caption=>'customer_ref',:col_width=> 100}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'booking_reference', :column_caption=>'booking_ref',:col_width=> 135}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'city_name', :column_caption=>'truck destination city',:col_width=> 140}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'rate'}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'haulier',:col_width=> 140}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'exporter_certificate_code',:col_width=> 160}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'exporter',:col_width=> 103}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'shipper',:col_width=> 103}
@@ -735,5 +757,37 @@ else
       end
 
    end
+
+  def build_set_destination_form(load_order,action,caption)
+#  --------------------------------------------------------------------------------------------------
+#  Define a set of observers for each composite foreign key- in effect an observer per combo involved
+#  in a composite foreign key
+#  --------------------------------------------------------------------------------------------------
+    session[:transporter_rate_form]= Hash.new
+
+    #  ---------------------------------
+    #   Define fields to build form from
+    #  ---------------------------------
+    field_configs = []
+    #  ----------------------------------------------------------------------------------------------------
+    #  Combo field to represent foreign key (transporter_id) on related table: transporters
+    #  -----------------------------------------------------------------------------------------------------
+
+    #  ----------------------------------------------------------------------------------------------
+    #  Combo fields to represent foreign key (city_id) on related table: cities
+    #  ----------------------------------------------------------------------------------------------
+    city_names = City.find_by_sql("select distinct cities.* from cities join transporter_rates t on t.city_id=cities.id").map{|g|[g.city_name,g.id]}
+
+    field_configs << {:field_type => 'DropDownField',
+                      :field_name => 'city_id',
+                      :settings => {:label_caption=>'city_name',:list => city_names}}
+
+    field_configs << {:field_type => 'HiddenField',
+                      :field_name => 'id',
+                      :settings => {:hidden_field_data => params[:id]}}
+
+    construct_form(load_order,field_configs,action,'load_order',caption,nil)
+
+  end
 
 end

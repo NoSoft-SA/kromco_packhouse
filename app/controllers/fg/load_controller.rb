@@ -767,6 +767,7 @@ class Fg::LoadController < ApplicationController
     render :inline => %{<script>
                                   alert('vehicle successfully edited!');
                                   window.close();
+window.opener.frames[1].location.reload(true);
                             </script>} and return
   end
 
@@ -1026,10 +1027,13 @@ class Fg::LoadController < ApplicationController
     if order_id
       #list_query = "SELECT loads.* FROM loads, load_orders WHERE (public.loads.id = public.load_orders.load_id) AND (public.load_orders.order_id = '#{order_id.to_s}')"
 
-      list_query=("SELECT load_orders.id as pick_list_number,voyages.voyage_code,loads.* ,load_voyages.customer_reference,load_voyages.booking_reference,load_voyages.exporter_certificate_code ,load_voyages.customer_reference,load_voyages.booking_reference,load_voyages.exporter_certificate_code ,
+      list_query=("SELECT c.city_name, v.rate, h.party_name as haulier, load_orders.id as pick_list_number,voyages.voyage_code,loads.* ,load_voyages.customer_reference,load_voyages.booking_reference,load_voyages.exporter_certificate_code ,load_voyages.customer_reference,load_voyages.booking_reference,load_voyages.exporter_certificate_code ,
       parties_sl.party_name as shipping_line,parties_sa.party_name as shipping_agent,parties_s.party_name as shipper,parties_e.party_name as exporter,load_voyages.memo_pad
       FROM loads
       inner join  load_orders on load_orders.load_id=loads.id
+      left outer join load_vehicles v on v.load_id=loads.id
+      join parties_roles h on h.id=v.haulier_party_id
+      left outer join cities c on c.id=load_orders.destination_city_id
       left join load_voyages on load_voyages.load_id=loads.id
       left join parties_roles as parties_sl on load_voyages.shipping_line_party_id=parties_sl.id
       left join parties_roles as parties_sa on load_voyages.shipping_agent_party_role_id=parties_sa.id
@@ -1291,6 +1295,47 @@ class Fg::LoadController < ApplicationController
           flash.style.background = 'white';
         </script>
       "
+  end
+
+  def set_load_order_destination
+    render :inline => %{
+		<% @content_header_caption = "'set destination'"%>
+
+		<%= build_set_destination_form(nil,'set_load_order_destination_submit','set')%>
+
+		}, :layout => 'content'
+  end
+
+  def set_load_order_destination_submit
+    begin
+      id = params[:load_order][:id]
+      if id && @load_order = LoadOrder.find(id)
+        if @load_order.update_attribute(:destination_city_id, params[:load_order][:city_id])
+          flash[:notice] = 'record saved'
+          render :inline => %{
+                            <script>
+                             window.close();
+                             window.opener.frames[1].location.reload(true);
+                            </script>
+                        }, :layout => 'content'
+        else
+          set_load_order_destination
+        end
+      end
+    rescue
+      handle_error('record could not be saved')
+    end
+  end
+
+  def load_vehicle_haulier_party_id_search_combo_changed
+    hualier_id = get_selected_combo_value(params)
+    transporter_rate = TransporterRate.find(:first, :conditions=>"h.id='#{hualier_id}'",
+                                            :joins=>"join transporters x on x.id=transporter_rates.transporter_id
+                                                     join parties_roles h on h.id=x.haulier_parties_role_id")
+    @rate = (transporter_rate ? transporter_rate.rate : nil)
+    render :inline => %{
+			<%= text_field('load_vehicle', 'rate', :value=>@rate, :readonly=>true) %>
+		}
   end
 
 end

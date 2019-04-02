@@ -4,9 +4,32 @@ class CaptureContainer < PDTTransactionState
     self.parent = parent
   end
 
+  def get_haulier_destination_rate(haulier)
+    transporter_rate = TransporterRate.find(:first, :conditions=>"h.party_name='#{haulier}' and l.load_id=#{@parent.load_id} and l.order_id=#{@parent.order_id}",
+                         :joins=>"join load_orders l on l.destination_city_id=transporter_rates.city_id
+                                  join transporters x on x.id=transporter_rates.transporter_id
+                                  join parties_roles h on h.id=x.haulier_parties_role_id")
+    return transporter_rate.rate if(transporter_rate)
+    return nil
+  end
+
+  def haulier_code_combo_changed
+    field_configs = {:name=>'rate',:type=>'static_text',:value=> get_haulier_destination_rate(@parent.params['haulier_code']),:is_required=>'false'}
+
+    return PdtScreenDefinition.gen_controls_list_xml(field_configs)
+  end
+
   def build_default_screen
-    hauliers = PartiesRole.find_by_sql("SELECT party_id,party_name FROM parties_roles WHERE parties_roles.party_type_name = 'ORGANIZATION' and parties_roles.role_name = 'HAULIER'").map { |g| g.party_name }.join(",")
-    hauliers = ", ," + hauliers
+    if((order = Order.find(@parent.order_id)) && order.incoterm.incoterm_code =='DAP')
+      hauliers = PartiesRole.find(:all, :select=>'parties_roles.party_name',
+                                       :joins => "join transporters t on t.haulier_parties_role_id=parties_roles.id").map { |g| g.party_name }.join(",")
+      hauliers = "" + hauliers
+
+      haulier_cascades ={:type=>'replace_control',
+                                     :settings=>{:target_control_name=>'rate',:remote_method=>'haulier_code_combo_changed',:filter_fields=>'haulier_code'}}
+    else
+      hauliers = "OWN"
+    end
     stack_types=StackType.find(:all).map{|o|o.stack_type_code}.join(",")
     stack_types = ", ," +  stack_types
 
@@ -27,6 +50,10 @@ class CaptureContainer < PDTTransactionState
     field_configs[field_configs.length()] = {:type=>"text_box", :name=>"temperature_rhine2", :value=>@parent.container_temperature_rhine2.to_s.strip}
     field_configs[field_configs.length()] = {:type=>"drop_down", :name=>"stack_type_code", :value=>@parent.stack_type_code, :list => stack_types}
     field_configs[field_configs.length()] = {:type=>"drop_down", :name=>"haulier_code", :is_required=>"true", :list => hauliers, :value=>@parent.haulier_id}
+    if(haulier_cascades)
+      field_configs[field_configs.length()-1].store(:cascades, haulier_cascades)
+      field_configs[field_configs.length()] = {:name=>'rate',:type=>'static_text',:value=> get_haulier_destination_rate(@parent.haulier_id),:is_required=>'false'}
+    end
     field_configs[field_configs.length()] = {:type=>"text_box", :name=>"cto_consec_no", :value=>@parent.cto_consec_code}
 
     screen_attributes = {:auto_submit=>"true", :auto_submit_to =>"load_container_submit", :content_header_caption=>"load_container"}
@@ -52,6 +79,7 @@ class CaptureContainer < PDTTransactionState
     cto_consec_code = self.pdt_screen_def.get_control_value("cto_consec_no").to_s.strip
     container_seal_code = self.pdt_screen_def.get_control_value("seal_number").to_s.strip
     stack_type_code =  self.pdt_screen_def.get_control_value("stack_type_code").to_s.strip
+    rate =  self.pdt_screen_def.get_control_value("rate").to_s.strip
 
     if container_code != ""         #==> rule for container code
       load_voyage = LoadVoyage.find_by_sql("select * from load_voyages where load_id = '#{@parent.load_id}'  order by id desc")[0]
@@ -96,6 +124,7 @@ class CaptureContainer < PDTTransactionState
         load_vehicle_update = LoadVehicle.find(@parent.load_vehicle_id)
         load_vehicle_update.vehicle_number = vehicle_number
         load_vehicle_update.haulier_party_id = haulier.id
+        load_vehicle_update.rate = rate
         load_vehicle_update.update
 
       else
@@ -104,6 +133,7 @@ class CaptureContainer < PDTTransactionState
         load_vehicle.vehicle_number = vehicle_number
         load_vehicle.load = load
         load_vehicle.haulier_party_id = haulier.id
+        load_vehicle_update.rate = rate
         load_vehicle.create
       end
 
