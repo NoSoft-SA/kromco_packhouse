@@ -30,12 +30,12 @@ module PartyManager::TransporterHelper
     field_configs << {:field_type => 'LabelField',
                       :field_name => 'contact_number'}
 
-    field_configs << {:field_type=>'link_window_field',:field_name =>'rate_change_logs',
-                                            :settings =>{:target_action => 'view_rate_change_logs',
-                                                         :id_column=>'id',
-                                                         :link_text => 'view'}}
-
     if(is_edit)
+      field_configs << {:field_type=>'link_window_field',:field_name =>'rate_change_logs',
+                        :settings =>{:target_action => 'view_rate_change_logs',
+                                     :id_column=>'id',
+                                     :link_text => 'view'}}
+
       field_configs << {:field_type => 'Screen',
                         :field_name => "rates",
                         :settings =>{
