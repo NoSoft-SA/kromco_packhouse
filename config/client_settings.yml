@@ -21,34 +21,14 @@ kromco:
   <<: *defaults
   company_name: Unifrutti
   company_short_name: UD
-  company_long_name: UNIFRUTTI SOUTH AFRICA (PTY) LTD
-  system_email_sender: Unifrutti System<jmt@unifrutti.co.za>
+  company_long_name: KROMCO SOUTH AFRICA (PTY) LTD
+  system_email_sender: Kromco system<jmt@kromco.co.za>
+  camera_scan_devices:
+    - 192.168.100.241
+    - 192.168.100.242
   jmt_monitoring_rules:
     edi_out:
       ps_token: ruby
       cmd_token: run_edi_out_proc
 
-unifrutti_matcold:
-  <<: *defaults
-  company_name: Unifrutti
-  company_short_name: UD
-  company_long_name: UNIFRUTTI SOUTH AFRICA (PTY) LTD
-  system_email_sender: Unifrutti System<jmt@unifrutti.co.za>
-  jmt_monitoring_rules:
-    edi_out:
-      ps_token: ruby
-      cmd_token: run_edi_out_proc
-  auto_create_missing_master_files: true
-  auto_accept_edi: true
-  assume_cold_date_on_depot_receipt: true
-  install_location: MATCOLD
-  default_phc: P0519
-  default_inspection_report: '0000'
-  billing_client: UI
-  production_run: false
-  require_cargo_weights: false
-  select_location_on_return_delivery: false
-  inspection_dates_change_allowed: true
-  ignore_weights_for_edi_out: true
-  camera_scan_devices:
-    - 192.168.100.241
+
