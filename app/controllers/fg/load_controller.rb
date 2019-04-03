@@ -716,6 +716,7 @@ class Fg::LoadController < ApplicationController
     end
     session[:load_vehicle]= @load_vehicle
     session[:load_id]=load_id
+    session[:order_id]=@order_id
 
     render :inline => %{
           <% @content_header_caption = "'edit vehicle'"%>
@@ -1329,9 +1330,10 @@ window.opener.frames[1].location.reload(true);
 
   def load_vehicle_haulier_party_id_search_combo_changed
     hualier_id = get_selected_combo_value(params)
-    transporter_rate = TransporterRate.find(:first, :conditions=>"h.id='#{hualier_id}'",
+    transporter_rate = TransporterRate.find(:first, :select=>"transporter_rates.*", :conditions=>"h.id='#{hualier_id}' and l.order_id=#{session[:order_id]} and l.load_id=#{session[:load_id]}",
                                             :joins=>"join transporters x on x.id=transporter_rates.transporter_id
-                                                     join parties_roles h on h.id=x.haulier_parties_role_id")
+                                                     join parties_roles h on h.id=x.haulier_parties_role_id
+                                                     join load_orders l on l.destination_city_id=transporter_rates.city_id")
     @rate = (transporter_rate ? transporter_rate.rate : nil)
     render :inline => %{
 			<%= text_field('load_vehicle', 'rate', :value=>@rate, :readonly=>true) %>
