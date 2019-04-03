@@ -72,6 +72,10 @@ def city_code
   City.find(city_id).city_code
 end
 
+def city_name
+  City.find(city_id).city_name
+end
+
 
 
 

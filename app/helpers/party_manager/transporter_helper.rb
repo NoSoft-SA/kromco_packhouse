@@ -256,15 +256,15 @@ module PartyManager::TransporterHelper
     #  Combo fields to represent foreign key (city_id) on related table: cities
     #  ----------------------------------------------------------------------------------------------
     if(!is_edit)
-      city_codes = City.find_by_sql("select * from cities where id not in(select city_id from transporter_rates where transporter_id=#{transporter_rate.transporter_id})").map{|g|[g.city_code,g.id]}
+      city_names = City.find_by_sql("select * from cities where id not in(select city_id from transporter_rates where transporter_id=#{transporter_rate.transporter_id})").map{|g|[g.city_name,g.id]}
       # city_codes = [[transporter_rate.city.city_code,transporter_rate.city.id]]
 
       field_configs << {:field_type => 'DropDownField',
                         :field_name => 'city_id',
-                        :settings => {:label_caption=>'city_code',:list => city_codes}}
+                        :settings => {:label_caption=>'city_name',:list => city_names}}
     else
       field_configs << {:field_type => 'LabelField',
-                        :field_name => 'city_code'}
+                        :field_name => 'city_name'}
     end
 
     construct_form(transporter_rate,field_configs,action,'transporter_rate',caption,is_edit)
