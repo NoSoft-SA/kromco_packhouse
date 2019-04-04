@@ -14,7 +14,7 @@ class RmtProcessing::InterWarehouseController < ApplicationController
                                             from vehicle_jobs
                                             inner join vehicle_job_types on vehicle_jobs.vehicle_job_types_id = vehicle_job_types.id
                                             where vehicle_job_types.vehicle_job_type_code = 'BINS'
-                                            order by date_time_loaded desc limit 100")
+                                            order by date_time_loaded desc limit 300")
 
     render :inline => %{
       <% grid            = build_vehicle_jobs_grid(@vehicle_jobs,@can_edit,@can_delete) %>

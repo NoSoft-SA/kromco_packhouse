@@ -251,10 +251,13 @@ module PartyManager::OrganizationHelper
     #  ----------------------------------------------------------------------------------------------
     #  Combo fields to represent foreign key (target_market_id) on related table: target_markets
     #  ----------------------------------------------------------------------------------------------
-    field_configs[1] =  {:field_type => 'DropDownField',
-                         :field_name => 'target_market_name',
-                         :settings => {:list => target_market_names,
-                                       :label_caption => "target market code"}}
+    field_configs[1] =  {:field_type => 'DropDownField', :field_name => 'target_market_name',  :settings => {:list => target_market_names,  :label_caption => "target market code"}}
+				       
+    field_configs[field_configs.length] = {:field_type => 'TextField',  :field_name => 'target_market_description'}
+
+    field_configs[field_configs.length] = {:field_type => 'TextField',  :field_name => 'target_market_country_code'}
+
+    field_configs[field_configs.length] = {:field_type => 'TextField',  :field_name => 'target_market_region_code'}				       
 
     build_form(organizations_target_market,field_configs,action,'organizations_target_market',caption,is_edit)
 
@@ -301,7 +304,7 @@ module PartyManager::OrganizationHelper
     field_configs[1] =  {:field_type => 'DropDownField',
                          :field_name => 'target_market_name',
                          :settings => {:list => target_market_names,
-                                       :label_caption => "target maret code"}}
+                                       :label_caption => "target market code"}}
 
     build_form(organizations_target_market,field_configs,action,'organizations_target_market',caption,false)
 
@@ -314,6 +317,9 @@ module PartyManager::OrganizationHelper
     column_configs = Array.new
     column_configs[0] = {:field_type => 'text',:field_name => 'target_market_name',:column_caption => "target_market_code"}
     column_configs[1] = {:field_type => 'text',:field_name => 'short_description',:column_caption => "org code"}
+    column_configs[2] = {:field_type => 'text',:field_name => 'target_market_description',:column_caption => "target _market_description"}
+    column_configs[3] = {:field_type => 'text',:field_name => 'target_market_country_code',:column_caption => "target_market_country_code code"}    
+    column_configs[4] = {:field_type => 'text',:field_name => 'target_market_region_code',:column_caption => "target_market_region_codecode"}    
     #  ----------------------
     #  define action columns
     #  ----------------------

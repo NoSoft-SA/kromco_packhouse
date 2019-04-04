@@ -1643,7 +1643,8 @@ end
                     ON UPDATE CASCADE ON DELETE RESTRICT,
                 CONSTRAINT track_slms_indicators_fk FOREIGN KEY (match_ripeness_indicator_id)
                     REFERENCES track_slms_indicators (id) MATCH SIMPLE
-                    ON UPDATE CASCADE ON DELETE RESTRICT
+                    ON UPDATE CASCADE ON DELETE RESTRICT,
+                CONSTRAINT starch_ripeness_indicator_match_rules_unique UNIQUE (rmt_variety_id,match_ripeness_indicator_id)
               )
               WITH (
                 OIDS=TRUE

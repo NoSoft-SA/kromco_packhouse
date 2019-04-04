@@ -133,7 +133,7 @@ class CaptureContainer < PDTTransactionState
         load_vehicle.vehicle_number = vehicle_number
         load_vehicle.load = load
         load_vehicle.haulier_party_id = haulier.id
-        load_vehicle_update.rate = rate
+        load_vehicle.rate = rate
         load_vehicle.create
       end
 

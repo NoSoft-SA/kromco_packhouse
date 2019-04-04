@@ -39,7 +39,7 @@ class PrintTripsheet < PDTTransaction
       out_file_type = "PDF"
       out_file_name = "interwarehouse_tripsheet_#{Time.now.strftime("%m_%d_%Y_%H_%M_%S")}"
       out_file_path = Globals.jasper_reports_pdf_downloads + "/#{out_file_name}"
-      err = JasperReports.generate_report('interwarehouse_tripsheet',self.pdt_screen_def.user,{:vehicle_job_number=>vehicle_job.vehicle_job_number,:printer=>@printer.system_name,:MODE=>"PRINT",:OUT_FILE_NAME=>out_file_path,:OUT_FILE_TYPE=>out_file_type})
+      err = JasperReports.generate_report('interwarehouse_tripsheet',self.pdt_screen_def.user,{:vehicle_job_number=>vehicle_job.vehicle_job_number,:printer=>@printer.system_name,:MODE=>"PRINT",:OUT_FILE_NAME=>out_file_path,:OUT_FILE_TYPE=>out_file_type, :keep_file=>true})
 
       if(!err)
         ActiveRecord::Base.transaction do

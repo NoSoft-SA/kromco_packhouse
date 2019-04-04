@@ -187,7 +187,7 @@ class RmtProcessing::ForecastController < ApplicationController
           session[:alert] = " Record deleted."
           redirect_to_index("'forecast header deleted successfully'", "''")
         else
-          flash[:error] = " Record deleted could not be deleted: some bin tickets have been printed for thi forecast."
+          flash[:error] = " Record deleted could not be deleted: some bin tickets have been printed for this forecast."
           redirect_to_index()
         end
       end

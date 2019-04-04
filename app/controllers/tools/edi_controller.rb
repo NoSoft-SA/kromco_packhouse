@@ -1,5 +1,8 @@
 class  Tools::EdiController < ApplicationController
 
+  # require 'uri'
+  require 'cgi'
+
   layout 'content'
 
   def program_name?
@@ -491,6 +494,311 @@ class  Tools::EdiController < ApplicationController
     return display_edi_file_content(@content,flow_type)
 
 
+  end
+
+  #MM052016 - Create web tool to search files by name or contents
+  def search_edi_file_by_name
+    session[:file_path] = Globals.configured_edi_root_search_path(false)
+    render_search_edi_file_by_name
+  end
+
+  def render_search_edi_file_by_name
+    render :inline => %{
+    <% @content_header_caption = "'search edi file by name'"%>
+
+    <%= build_search_edi_file_by_name_form(@edi_files,'find_files_by_name','find_files_by_name',false)%>
+
+    }, :layout => 'content'
+  end
+
+  #MM062017 - Search archive
+  def search_archived_edi_file_by_name
+    session[:file_path] = Globals.configured_edi_root_search_path(true)
+    render_search_edi_file_by_name
+  end
+
+  def render_search_archived_edi_file_by_name
+    render :inline => %{
+    <% @content_header_caption = "'search archived edi file by name'"%>
+
+    <%= build_search_edi_file_by_name_form(@edi_files,'find_files_by_name','find_files_by_name',false)%>
+
+    }, :layout => 'content'
+  end
+
+  def view_file
+    id_value = CGI.unescape(params[:id]).gsub("=",".")
+    file_name = id_value.split("&")[0].to_s
+    directories = id_value.split("&")[1].split(",").join("/")
+    flow_type = get_file_type(file_name).upcase
+    @fname       = file_name
+    full_path = "#{session[:file_path].to_s}/#{directories}/#{file_name}"
+    if File.file?("#{full_path}")
+      @content    = File.read(full_path)
+      return display_edi_file_content(@content,flow_type)
+    else
+      flash[:notice] = "Edi view_file error: #{full_path} is not a file"
+      render :inline => %{}, :layout => 'content'
+    end
+  end
+
+  def render_reworks_find_files_by_name
+   file_name = ActiveRecord::Base.connection.select_one("select edi_doc_name from rw_runs where id = #{params[:id]}")['edi_doc_name']
+   session[:file_path] = Globals.configured_edi_root_search_path(false)
+   @edi_files = []
+   file_name = "\*#{params[:edi_files][:file_name]}\*" if params[:edi_files]
+   file_name = "\*#{file_name}\*" if file_name
+   base_dir  = File.expand_path(session[:file_path].to_s) << "/"
+   files     = Dir[File.join(base_dir, '**', file_name)]
+
+   modified_date_files={}
+   edi_files = []
+   modified_dates = []
+   files.map {|f| f.sub(base_dir, '')}.each do |file|
+     modified_date = File.mtime(File.join(session[:file_path].to_s, file))
+     file_size = Float.round_float(1,(File.size(File.join(session[:file_path].to_s, file)) / 1024))
+     id_value      = "#{File.basename(file)}&#{File.dirname(file).gsub('/',',')}".gsub("./","").gsub(".","=")
+     folder_type   = get_folder_type(file)
+     file_type = get_file_type(File.basename(file))
+
+     if file_name
+
+       if modified_date_files.empty?
+         t = modified_date.to_date
+         modified_date_files[file] = modified_date
+         modified_dates << modified_date
+       else
+         if modified_date  && (modified_date > modified_dates[0])
+           modified_dates.delete_at(0)
+           modified_dates << modified_date
+           modified_date_files.clear
+           modified_date_files[file] = modified_date
+         end
+       end
+       edi_files << { 'id'            => CGI.escape(id_value),
+                      'file_path'     => file,
+                      'file_name'     => File.basename(file),
+                      'folder_type'   => folder_type,
+                      'file_type'     => file_type,
+                      'file_size'     => file_size,
+                      'modified_date' => modified_date.strftime("%Y-%m-%d %H:%M:%S")} if modified_date_files.keys.include?(file)
+
+     end
+   end
+   # @edi_files = edi_files
+   # render_edi_files
+    params[:id] = edi_files[0]['id']
+    view_file
+  rescue
+    handle_error("search edi file by name could not be created")
+  end
+
+  def find_files_by_name(file_name=nil)
+    @edi_files = []
+    file_name = "\*#{params[:edi_files][:file_name]}\*" if params[:edi_files]
+    file_name = "\*#{file_name}\*" if file_name
+    base_dir  = File.expand_path(session[:file_path].to_s) << "/"
+    puts "EDI SEARCH DIR: " + base_dir
+    files     = Dir[File.join(base_dir, '**', file_name)]
+
+    files.map {|f| f.sub(base_dir, '')}.each do |file|
+      modified_date = File.mtime(File.join(session[:file_path].to_s, file))
+      file_size = Float.round_float(1,(File.size(File.join(session[:file_path].to_s, file)) / 1024))
+      id_value      = "#{File.basename(file)}&#{File.dirname(file).gsub('/',',')}".gsub("./","").gsub(".","=")
+      folder_type   = get_folder_type(file)
+      file_type = get_file_type(File.basename(file))
+      @edi_files << {'id'            => CGI.escape(id_value),
+                    'file_path'     => file,
+                    'file_name'     => File.basename(file),
+                    'folder_type'   => folder_type,
+                    'file_type'     => file_type,
+                    'file_size'     => file_size,
+                    'modified_date' => modified_date.strftime("%Y-%m-%d %H:%M:%S")}
+    end
+    render_edi_files
+  rescue
+    handle_error("search edi file by name could not be created")
+  end
+
+  def get_folder_type(file_path)
+    ['transformed','encoding_errors','errors'].each do |folder_type|
+      return folder_type if file_path.include?(folder_type)
+    end
+    ''
+  end
+
+  def get_file_type(file_name)
+    if file_name.include?("MTDP")
+      return "MTDP"
+    else
+      return file_name[0..1].upcase
+    end
+  end
+
+  def render_edi_files
+    render :inline => %{
+      <% grid            = build_edi_files_grid(@edi_files) %>
+      <% grid.caption    = 'edi files' %>
+      <% @header_content = grid.build_grid_data %>
+
+      <%= grid.render_html %>
+      <%= grid.render_grid %>
+      }, :layout => 'content'
+  end
+
+  def download_file
+    id_value = CGI.unescape(params[:id]).gsub("=",".")
+    file_name = id_value.split("&")[0].to_s
+    directories = id_value.split("&")[1].split(",").join("/")
+    full_path = "#{session[:file_path].to_s}/#{directories}/#{file_name}"
+    if File.file?("#{full_path}")
+      @content    = File.read(full_path)
+      launch_file_name = "#{file_name}_#{Time.now.strftime("%m_%d_%Y_%H_%M_%S")}.csv"
+      store_csv_file("#{Globals.configured_edi_download_path}/#{launch_file_name}",@content)
+      launch_csv(launch_file_name)
+    else
+      flash[:notice] = "Edi download_file error: #{full_path} is not a file"
+      render :inline => %{}, :layout => 'content'
+    end
+  end
+
+  def view_raw_file
+    id_value = CGI.unescape(params[:id]).gsub("=",".")
+    file_name = id_value.split("&")[0].to_s
+    directories = id_value.split("&")[1].split(",").join("/")
+    full_path = "#{session[:file_path].to_s}/#{directories}/#{file_name}"
+    if File.file?("#{full_path}")
+      @content    = File.read(full_path)
+      launch_file_name = "#{file_name}_#{Time.now.strftime("%m_%d_%Y_%H_%M_%S")}.txt"
+      store_csv_file("#{Globals.configured_edi_download_path}/#{launch_file_name}",@content)
+      launch_csv(launch_file_name)
+    else
+      flash[:notice] = "Edi download_file error: #{full_path} is not a file"
+      render :inline => %{}, :layout => 'content'
+    end
+  end
+
+  def store_csv_file(full_path,lines)
+    File.open(full_path,"w") {|f| f.puts lines.to_a.join("\n") }
+  rescue
+    raise MesScada::InfoError, "File: #{full_path} could not be created. Exception reported is: \n" + $!
+  end
+
+  def launch_csv(file_name)
+    begin
+      @outfile_to_launch = "/downloads/edi/" + "#{file_name}"
+      render :inline => %{
+                  <script>
+                    window.resizeTo(1200,800);
+                    window.location.href= "<%=@outfile_to_launch%>";
+                  </script>
+                }, :layout => 'content'
+
+    rescue
+      flash[:error] = $!
+      render :inline => %{}, :layout => 'content'
+    end
+  end
+
+  def search_edi_file_by_contents
+    session[:file_path] = Globals.configured_edi_root_search_path(false)
+    render_search_edi_file_by_contents
+  end
+
+  def render_search_edi_file_by_contents
+    render :inline => %{
+    <% @content_header_caption = "'search edi file by contents'"%>
+
+    <%= build_search_edi_file_by_contents_form(@edi_file_contents,'find_files_by_contents','find_files_by_contents',false)%>
+
+    }, :layout => 'content'
+  end
+
+  def search_archived_edi_file_by_contents
+    session[:file_path] = Globals.configured_edi_root_search_path(true)
+    render_search_archived_edi_file_by_contents
+  end
+
+  def render_search_archived_edi_file_by_contents
+    render :inline => %{
+    <% @content_header_caption = "'search archived edi file by contents'"%>
+
+    <%= build_search_edi_file_by_contents_form(@edi_file_contents,'find_files_by_contents','find_files_by_contents',false)%>
+
+    }, :layout => 'content'
+  end
+
+  def find_files_by_contents
+    files = []
+    file_contents = []
+    directories = []
+    begin
+      file_name = "'#{params[:edi_file_contents][:file_contents]}'"
+      linux_command = "cd #{session[:file_path].to_s} &&  grep -hrn  #{file_name} . -l "
+      files = `#{linux_command}`.split("\n")
+      files.each do |file|
+        split_files = file.reverse.split("/",2)
+        edi_file = split_files[0].reverse.to_s
+        directories = split_files[1].reverse.to_s.split("/") if split_files[1] != nil
+        modified_date = `stat -c '%y' "#{session[:file_path].to_s}/#{file}"`
+        id_value = "#{edi_file}&#{directories.join(',')}".gsub("./","").gsub(".","=")
+        folder_type = get_folder_type(file)
+        file_type = get_file_type(edi_file)
+        file_contents.push('id' => CGI.escape(id_value),
+                           'file_path' => file,
+                           'file_name' => edi_file,
+                           'folder_type' => folder_type,
+                           'file_type' => file_type,
+                           'modified_date' => modified_date.to_datetime.strftime("%Y-%m-%d %H:%M:%S"))
+      end
+      @file_contents = file_contents
+      render_edi_contents
+    rescue
+      handle_error("search edi file by name could not be created")
+    end
+  end
+
+  def render_edi_contents
+    render :inline => %{
+      <% grid            = build_edi_contents_grid(@file_contents) %>
+      <% grid.caption    = 'edi contents' %>
+      <% @header_content = grid.build_grid_data %>
+
+      <%= grid.render_html %>
+      <%= grid.render_grid %>
+      }, :layout => 'content'
+  end
+
+  #MM082017 - edi file search tools: results grid: add 2 menu items:
+  # 1] copy_file_to_tmp (onclick copy file to 'temp' directory 2 levels upward from current directory- create temp dir if not existing)
+  # 2] re_drop_file(copy file to 'receive' dir- use a configured path in globals)
+  def copy_file_to_tmp
+    id_value = CGI.unescape(params[:id]).gsub("=",".")
+    file_name = id_value.split("&")[0].to_s
+    directories = id_value.split("&")[1].split(",").join("/")
+    full_path = "#{session[:file_path].to_s}/#{directories}/#{file_name}"
+    tmp_path = Globals.configured_edi_tmp_path
+    FileUtils.makedirs(tmp_path) # Create dir if it does not exist.
+    tmp_file = "#{tmp_path}/#{file_name}"
+    linux_command = "cp #{full_path} #{tmp_file}"
+    `#{linux_command}`
+    session[:alert] = "file copied successfully"
+    render :inline => %{}, :layout => 'content'
+  end
+
+  def re_drop_file
+    id_value = CGI.unescape(params[:id]).gsub("=",".")
+    file_name = id_value.split("&")[0].to_s
+    directories = id_value.split("&")[1].split(",").join("/")
+    full_path = "#{session[:file_path].to_s}/#{directories}/#{file_name}"
+    # tmp_path = "#{Globals.configured_edi_receive_path}/#{directories}"
+    tmp_path = Globals.configured_edi_receive_path
+    FileUtils.makedirs(tmp_path) # Create dir(s) if it does not exist.
+    tmp_file = "#{tmp_path}/#{file_name}"
+    linux_command = "cp #{full_path} #{tmp_file}"
+    `#{linux_command}`
+    session[:alert] = "file copied successfully"
+    render :inline => %{}, :layout => 'content'
   end
 
 end

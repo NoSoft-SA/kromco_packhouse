@@ -195,5 +195,194 @@ module Tools::EdiHelper
     build_form(edi_org_flow,field_configs,action,'edi_org_flow',caption,is_edit)
   end
 
+  #MM052016 - Create web tool to search files by name or contents
+  def build_search_edi_file_by_name_form(edi_files, action, caption, is_edit = nil)
+    field_configs = Array.new
+
+    field_configs << {:field_type => 'TextField',:field_name => 'file_name'}
+
+    build_form(edi_files, field_configs, action, 'edi_files', caption, is_edit)
+  end
+
+  def build_search_edi_file_by_contents_form(edi_file_contents, action, caption, is_edit = nil)
+    field_configs = Array.new
+
+    field_configs << {:field_type => 'TextField',:field_name => 'file_contents'}
+
+    build_form(edi_file_contents, field_configs, action, 'edi_file_contents', caption, is_edit)
+  end
+
+  def build_edi_files_grid(data_set)
+
+    action_configs = []
+    column_configs = []
+
+
+    action_configs << {:field_type => 'action',
+                       :field_name => 'view_file',
+                       :column_caption => 'view',
+                       :col_width => 120,
+                       :settings =>{:link_icon => 'view',
+                                    :link_text => 'view',
+                                    :host_and_port => request.host_with_port.to_s,
+                                    :controller    => request.path_parameters['controller'].to_s ,
+                                    :target_action => 'view_file',
+                                    :id_column => 'id',
+                                    :null_test => "['file_type'] == 'MTDP'"
+                       }
+    }
+
+    action_configs << {:field_type => 'action',
+                       :field_name => 'download_file',
+                       :column_caption => 'download',
+                       :col_width => 120,
+                       :settings =>{:link_icon => 'download',
+                                    :link_text => 'download',
+                                    :host_and_port => request.host_with_port.to_s,
+                                    :controller    => request.path_parameters['controller'].to_s ,
+                                    :target_action => 'download_file',
+                                    :id_column => 'id'
+                       }
+    }
+
+    action_configs << {:field_type => 'action',
+                       :field_name => 'view_raw_file',
+                       :column_caption => 'view_raw_file',
+                       :col_width => 120,
+                       :settings =>{:link_icon => 'view_raw_file',
+                                    :link_text => 'view_raw_file',
+                                    :host_and_port => request.host_with_port.to_s,
+                                    :controller    => request.path_parameters['controller'].to_s ,
+                                    :target_action => 'view_raw_file',
+                                    :id_column => 'id'
+                       }
+    }
+
+    #MM082017 - edi file search tools: results grid: add 2 menu items:
+    # 1] copy_file_to_tmp (onclick copy file to 'temp' directory 2 levels upward from current directory- create temp dir if not existing)
+    # 2] re_drop_file(copy file to 'receive' dir- use a configured path in globals)
+    action_configs << {:field_type => 'action',
+                       :field_name => 'copy_file_to_tmp',
+                       :column_caption => 'copy_file_to_tmp',
+                       :col_width => 120,
+                       :settings =>{:link_icon => 'copy_file_to_tmp',
+                                    :link_text => 'copy_file_to_tmp',
+                                    :host_and_port => request.host_with_port.to_s,
+                                    :controller    => request.path_parameters['controller'].to_s ,
+                                    :target_action => 'copy_file_to_tmp',
+                                    :id_column => 'id'
+                       }
+    }
+
+    action_configs << {:field_type => 'action',
+                       :field_name => 're_drop_file',
+                       :column_caption => 're_drop_file',
+                       :col_width => 120,
+                       :settings =>{:link_icon => 're_drop_file',
+                                    :link_text => 're_drop_file',
+                                    :host_and_port => request.host_with_port.to_s,
+                                    :controller    => request.path_parameters['controller'].to_s ,
+                                    :target_action => 're_drop_file',
+                                    :id_column => 'id'
+                       }
+    }
+
+    column_configs << {:field_type => 'action_collection', :field_name => 'actions', :settings => {:actions => action_configs}} unless action_configs.empty?
+    column_configs << {:field_type => 'text',:field_name => 'file_path',:col_width => 600}
+    column_configs << {:field_type => 'text',:field_name => 'file_name',:col_width => 300}
+    column_configs << {:field_type => 'text',:field_name => 'folder_type',:col_width => 150}
+    column_configs << {:field_type => 'text',:field_name => 'file_type',:col_width => 100}
+    column_configs << {:field_type => 'text',:field_name => 'modified_date', :col_width => 150}
+    column_configs << {:field_type => 'text',:field_name => 'file_size', :col_width => 100}
+    column_configs << {:field_type => 'text',:field_name => 'id',:col_width => 100 ,:hide => true}
+
+    return get_data_grid(data_set, column_configs,nil,true)
+  end
+
+  def build_edi_contents_grid(data_set)
+
+    action_configs = []
+    column_configs = []
+
+    action_configs << {:field_type => 'action',
+                       :field_name => 'view_file',
+                       :column_caption => 'view',
+                       :col_width => 120,
+                       :settings =>{:link_icon => 'view',
+                                    :link_text => 'view',
+                                    :host_and_port => request.host_with_port.to_s,
+                                    :controller    => request.path_parameters['controller'].to_s ,
+                                    :target_action => 'view_file',
+                                    :id_column => 'id',
+                                    :null_test => "['file_type'] == 'MTDP'"
+                       }
+    }
+
+    action_configs << {:field_type => 'action',
+                       :field_name => 'download_file',
+                       :column_caption => 'download',
+                       :col_width => 120,
+                       :settings =>{:link_icon => 'download',
+                                    :link_text => 'download',
+                                    :host_and_port => request.host_with_port.to_s,
+                                    :controller    => request.path_parameters['controller'].to_s ,
+                                    :target_action => 'download_file',
+                                    :id_column => 'id'
+                       }
+    }
+
+    action_configs << {:field_type => 'action',
+                       :field_name => 'view_raw_file',
+                       :column_caption => 'view_raw_file',
+                       :col_width => 120,
+                       :settings =>{:link_icon => 'view_raw_file',
+                                    :link_text => 'view_raw_file',
+                                    :host_and_port => request.host_with_port.to_s,
+                                    :controller    => request.path_parameters['controller'].to_s ,
+                                    :target_action => 'view_raw_file',
+                                    :id_column => 'id'
+                       }
+    }
+
+    #MM082017 - edi file search tools: results grid: add 2 menu items:
+    # 1] copy_file_to_tmp (onclick copy file to 'temp' directory 2 levels upward from current directory- create temp dir if not existing)
+    # 2] re_drop_file(copy file to 'receive' dir- use a configured path in globals)
+    action_configs << {:field_type => 'action',
+                       :field_name => 'copy_file_to_tmp',
+                       :column_caption => 'copy_file_to_tmp',
+                       :col_width => 120,
+                       :settings =>{:link_icon => 'copy_file_to_tmp',
+                                    :link_text => 'copy_file_to_tmp',
+                                    :host_and_port => request.host_with_port.to_s,
+                                    :controller    => request.path_parameters['controller'].to_s ,
+                                    :target_action => 'copy_file_to_tmp',
+                                    :id_column => 'id'
+                       }
+    }
+
+    action_configs << {:field_type => 'action',
+                       :field_name => 're_drop_file',
+                       :column_caption => 're_drop_file',
+                       :col_width => 120,
+                       :settings =>{:link_icon => 're_drop_file',
+                                    :link_text => 're_drop_file',
+                                    :host_and_port => request.host_with_port.to_s,
+                                    :controller    => request.path_parameters['controller'].to_s ,
+                                    :target_action => 're_drop_file',
+                                    :id_column => 'id'
+                       }
+    }
+
+    column_configs << {:field_type => 'action_collection', :field_name => 'actions', :settings => {:actions => action_configs}} unless action_configs.empty?
+    column_configs << {:field_type => 'text',:field_name => 'file_path',:col_width => 600}
+    column_configs << {:field_type => 'text',:field_name => 'file_name',:col_width => 300}
+    column_configs << {:field_type => 'text',:field_name => 'folder_type',:col_width => 150}
+    column_configs << {:field_type => 'text',:field_name => 'file_type',:col_width => 100}
+    column_configs << {:field_type => 'text',:field_name => 'modified_date', :col_width => 200}
+    column_configs << {:field_type => 'text',:field_name => 'id',:col_width => 100 ,:hide => true}
+
+    return get_data_grid(data_set, column_configs,nil,true)
+  end
+
 end
 
