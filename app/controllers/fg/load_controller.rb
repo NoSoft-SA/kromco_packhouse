@@ -1033,7 +1033,7 @@ window.opener.frames[1].location.reload(true);
       FROM loads
       inner join  load_orders on load_orders.load_id=loads.id
       left outer join load_vehicles v on v.load_id=loads.id
-      join parties_roles h on h.id=v.haulier_party_id
+      left join parties_roles h on h.id=v.haulier_party_id
       left outer join cities c on c.id=load_orders.destination_city_id
       left join load_voyages on load_voyages.load_id=loads.id
       left join parties_roles as parties_sl on load_voyages.shipping_line_party_id=parties_sl.id
