@@ -20,7 +20,7 @@ class CaptureContainer < PDTTransactionState
   end
 
   def build_default_screen
-    if((order = Order.find(@parent.order_id)) && order.incoterm.incoterm_code =='DAP')
+    if((order = Order.find(@parent.order_id)) && order.incoterm && order.incoterm.incoterm_code =='DAP')
       hauliers = PartiesRole.find(:all, :select=>'parties_roles.party_name',
                                        :joins => "join transporters t on t.haulier_parties_role_id=parties_roles.id").map { |g| g.party_name }.join(",")
       hauliers = "" + hauliers
@@ -48,7 +48,7 @@ class CaptureContainer < PDTTransactionState
     field_configs[field_configs.length()] = {:type=>"text_box", :name=>"container_setting", :value=>@parent.container_setting.to_s.strip}
     field_configs[field_configs.length()] = {:type=>"text_box", :name=>"temperature_rhine", :value=>@parent.container_temperature_rhine.to_s.strip}
     field_configs[field_configs.length()] = {:type=>"text_box", :name=>"temperature_rhine2", :value=>@parent.container_temperature_rhine2.to_s.strip}
-    field_configs[field_configs.length()] = {:type=>"drop_down", :name=>"stack_type_code", :value=>@parent.stack_type_code, :list => stack_types}
+    field_configs[field_configs.length()] = {:type=>"drop_down", :name=>"stack_type_code", :value=>@parent.stack_type_code, :list => stack_types,:is_required=>'true'}
     field_configs[field_configs.length()] = {:type=>"drop_down", :name=>"haulier_code", :is_required=>"true", :list => hauliers, :value=>@parent.haulier_id}
     if(haulier_cascades)
       field_configs[field_configs.length()-1].store(:cascades, haulier_cascades)
