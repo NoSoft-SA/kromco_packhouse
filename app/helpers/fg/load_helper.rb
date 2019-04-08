@@ -779,12 +779,11 @@ else
     city_names = City.find_by_sql("select distinct cities.* from cities join transporter_rates t on t.city_id=cities.id").map{|g|[g.city_name,g.id]}
 
     field_configs << {:field_type => 'DropDownField',
-                      :field_name => 'city_id',
+                      :field_name => 'destination_city_id',
                       :settings => {:label_caption=>'city_name',:list => city_names}}
 
     field_configs << {:field_type => 'HiddenField',
-                      :field_name => 'id',
-                      :settings => {:hidden_field_data => params[:id]}}
+                      :field_name => 'id'}
 
     construct_form(load_order,field_configs,action,'load_order',caption,nil)
 

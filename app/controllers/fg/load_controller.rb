@@ -1299,10 +1299,11 @@ window.opener.frames[1].location.reload(true);
   end
 
   def set_load_order_destination
+    @load_order = LoadOrder.find(params[:id])
     render :inline => %{
 		<% @content_header_caption = "'set destination'"%>
 
-		<%= build_set_destination_form(nil,'set_load_order_destination_submit','set')%>
+		<%= build_set_destination_form(@load_order,'set_load_order_destination_submit','set')%>
 
 		}, :layout => 'content'
   end
@@ -1311,7 +1312,7 @@ window.opener.frames[1].location.reload(true);
     begin
       id = params[:load_order][:id]
       if id && @load_order = LoadOrder.find(id)
-        if @load_order.update_attribute(:destination_city_id, params[:load_order][:city_id])
+        if @load_order.update_attribute(:destination_city_id, params[:load_order][:destination_city_id])
           flash[:notice] = 'record saved'
           render :inline => %{
                             <script>
