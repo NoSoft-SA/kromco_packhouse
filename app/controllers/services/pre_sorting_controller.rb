@@ -57,17 +57,17 @@ class Services::PreSortingController < ApplicationController
       representative_bin = get_majority_weight_bin_farm(results)
       raise "multiple farms for bin[#{@created_bin}] with no matching Code_adherent_max. #{results.map { |bin| "record#{results.index(bin)+1}=(#{bin['Code_adherent']},#{bin['Code_adherent_max']})" }.join(',')}" if (!representative_bin)
       
-      if (representative_bin['Palox_poids'].to_s == "")
-        raise "Presorted Bin:#{@created_bin}:  Palox_poids is null"
-        # return
-      end
+      # if (representative_bin['Palox_poids'].to_s == "")
+      #   raise "Presorted Bin:#{@created_bin}:  Palox_poids is null"
+      #   # return
+      # end
 
       
       palox_bin_presort_run=get_palox_bin_presort_run(representative_bin)
       aport_bin_rmt_product_code = get_aport_bin_full_rmt_product_code(representative_bin['Nom_article'], palox_bin_presort_run)
       
-      if (representative_bin['Nom_article'].to_s == "Article 128" )
-        raise "Error:Presorted Bin:#{@created_bin}: Article 128 is not used"	      
+      if (representative_bin['Nom_article'].to_s == "Article 128" && (representative_bin['Palox_poids'].to_s == "" || representative_bin['Palox_poids'].to_s == "0"))
+        return nil
       end
 	      
       if (!(rmt_product=RmtProduct.find_by_rmt_product_code(aport_bin_rmt_product_code)))
@@ -331,7 +331,7 @@ class Services::PreSortingController < ApplicationController
     end
 
     if (bin_farms.length > 1)
-      return bin_farms.find_all { |bin| bin['Code_adherent_max'] == bin['Code_adherent'] }.sort { |x, y| y['Poids'] <=> x['Poids'] }[0]
+      return bin_farms.sort { |x, y| y['Poids'] <=> x['Poids'] }[0]
     end
     return bin_farms[0]
   end
