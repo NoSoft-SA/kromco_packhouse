@@ -63,7 +63,7 @@ class Services::PreSortingController < ApplicationController
       palox_bin_presort_run=get_palox_bin_presort_run(representative_bin)
       aport_bin_rmt_product_code = get_aport_bin_full_rmt_product_code(representative_bin['Nom_article'], palox_bin_presort_run)
       
-      if (representative_bin['Nom_article'].to_s == "Article 128" && (representative_bin['Palox_poids'].to_s.strip() == "" || representative_bin['Palox_poids'].to_s == "0"))
+      if (representative_bin['Nom_article'].to_s == "Article 128" && (representative_bin['Palox_poids'].to_s.strip() == "" || representative_bin['Palox_poids'].to_i == 0))
         return nil
       end
 	      
