@@ -33,7 +33,7 @@ class Services::PreSortingController < ApplicationController
 
       http = Net::HTTP.new(Globals.bin_created_mssql_server_host(params[:unit]), Globals.bin_created_mssql_presort_server_port(params[:unit]))
       request = Net::HTTP::Post.new("/select")
-      parameters = {'method' => 'select', 'statement' => Base64.encode64("select * from ViewpaloxKromco where (poids >0 and poids is not null) and ViewpaloxKromco.Numero_palox=#{@created_bin}")}
+      parameters = {'method' => 'select', 'statement' => Base64.encode64("select * from ViewpaloxKromco where  ViewpaloxKromco.Numero_palox=#{@created_bin}")}
       request.set_form_data(parameters)
       response = http.request(request)
       puts "---\n#{response.code} - #{response.message}\n---\n"
@@ -57,16 +57,13 @@ class Services::PreSortingController < ApplicationController
       representative_bin = get_majority_weight_bin_farm(results)
       raise "multiple farms for bin[#{@created_bin}] with no matching Code_adherent_max. #{results.map { |bin| "record#{results.index(bin)+1}=(#{bin['Code_adherent']},#{bin['Code_adherent_max']})" }.join(',')}" if (!representative_bin)
       
-      # if (representative_bin['Palox_poids'].to_s == "")
-      #   raise "Presorted Bin:#{@created_bin}:  Palox_poids is null"
-      #   # return
-      # end
+
 
       
       palox_bin_presort_run=get_palox_bin_presort_run(representative_bin)
       aport_bin_rmt_product_code = get_aport_bin_full_rmt_product_code(representative_bin['Nom_article'], palox_bin_presort_run)
       
-      if (representative_bin['Nom_article'].to_s == "Article 128" && (representative_bin['Palox_poids'].to_s == "" || representative_bin['Palox_poids'].to_s == "0"))
+      if (representative_bin['Nom_article'].to_s == "Article 128" && (representative_bin['Palox_poids'].to_s.strip() == "" || representative_bin['Palox_poids'].to_s == "0"))
         return nil
       end
 	      
