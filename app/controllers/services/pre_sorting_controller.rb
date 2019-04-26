@@ -49,6 +49,8 @@ class Services::PreSortingController < ApplicationController
         # return
       end
 
+      # results = [{'Nom_article' => "Article 128" , 'Palox_poids' => "", 'Numero_bon_apport' => "23", 'Poids'=>"205", 'Numero_palox'=>'704', 'Numero_lot_max'=>45}]
+
       if (results.empty?)
         raise "Presorted Bin:#{@created_bin} not found in View Palox"
         return
@@ -56,17 +58,15 @@ class Services::PreSortingController < ApplicationController
 
       representative_bin = get_majority_weight_bin_farm(results)
       raise "multiple farms for bin[#{@created_bin}] with no matching Code_adherent_max. #{results.map { |bin| "record#{results.index(bin)+1}=(#{bin['Code_adherent']},#{bin['Code_adherent_max']})" }.join(',')}" if (!representative_bin)
-      
 
-
-      
-      palox_bin_presort_run=get_palox_bin_presort_run(representative_bin)
-      aport_bin_rmt_product_code = get_aport_bin_full_rmt_product_code(representative_bin['Nom_article'], palox_bin_presort_run)
-      
       if (representative_bin['Nom_article'].to_s == "Article 128" && (representative_bin['Palox_poids'].to_s.strip() == "" || representative_bin['Palox_poids'].to_i == 0))
+        @msg = "Bin #{@created_bin} creation ignored"
         return nil
       end
-	      
+
+      palox_bin_presort_run=get_palox_bin_presort_run(representative_bin)
+      aport_bin_rmt_product_code = get_aport_bin_full_rmt_product_code(representative_bin['Nom_article'], palox_bin_presort_run)
+
       if (!(rmt_product=RmtProduct.find_by_rmt_product_code(aport_bin_rmt_product_code)))
         raise "Error:Presorted Bin:#{@created_bin}:nom_article:#{representative_bin['Nom_article'].to_s.strip}:  rmt_product_code:'#{aport_bin_rmt_product_code}' does not exist"
       end
@@ -155,6 +155,7 @@ class Services::PreSortingController < ApplicationController
 	#NAE
   
       end
+      @msg = "created bin #{@created_bin}"
       return nil
     rescue
       handle_error_silently("Bin created presort integration failed")
@@ -200,7 +201,7 @@ class Services::PreSortingController < ApplicationController
         render_result(handle_error(error))
       end
     else
-      render_result("<bins><bin result_status=\"OK\" msg=\"created bin #{@created_bin}\" /></bins>")
+      render_result("<bins><bin result_status=\"OK\" msg=\"#{@msg}\" /></bins>")
     end
   end
 
@@ -963,8 +964,8 @@ class Services::PreSortingController < ApplicationController
           presort_log_result = "<result>#{handle_error(error)}</result>"
           @progress << "#{error} <br><br> "
         else
-          presort_log_result = "<bins><bin result_status=\"OK\" msg=\"created bin #{@created_bin}\" /></bins>"
-          @progress << "bin created successfully <br><br> "
+          presort_log_result = "<bins><bin result_status=\"OK\" msg=\"#{@msg}\" /></bins>"
+          @progress << "#{@msg} <br><br> "
         end
         create_presort_log(presort_log_result)
       else
