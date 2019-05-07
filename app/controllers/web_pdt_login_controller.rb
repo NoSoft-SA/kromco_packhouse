@@ -64,7 +64,7 @@ class WebPdtLoginController < ApplicationController
                                       :joins => "join programs on programs.functional_area_id=functional_areas.id
                                                  join program_users on program_users.program_id=programs.id").map{|f| ["#{f.functional_area_name}[#{f.display_name}]",f.functional_area_name]}
 
-    render :template => "web_pdt_login/pdt_logged_in",:layout => 'rmd_layout' # "content"
+    render :template => "web_pdt_login/pdt_logged_in",:layout => 'rmd_host' # "content"
   end
 
   def pdt_logout

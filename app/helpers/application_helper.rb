@@ -347,7 +347,7 @@ end
 
 
   def build_form(active_record, field_configs, target_action, active_record_var_name, submit_caption,
-                 send_id = nil, hidden_field_data = nil, hide_spinner = nil, non_db_form = nil, plugin = nil, javascript_inject=nil, table_layout=true)
+                 send_id = nil, hidden_field_data = nil, hide_spinner = nil, non_db_form = nil, plugin = nil, javascript_inject=nil, table_layout=true, id=nil)
 
     if send_id
       field_configs.push({:field_type => "HiddenField", :field_name => "id"})
@@ -360,6 +360,7 @@ end
     form = Form.new(self, active_record, field_configs, target_action, active_record_var_name, submit_caption,
              non_db_form, hide_spinner, plugin, javascript_inject)
     form.table_layout = table_layout
+    form.id = id unless id.nil?
     form.build_form
   end
 
@@ -372,7 +373,8 @@ end
                options[:non_db_form],
                options[:plugin],
                options[:javascript_inject],
-               options.fetch(:table_layout, true))
+               options.fetch(:table_layout, true),
+               options[:id])
   end
 
   # Return a DataGridSlick::DataGrid for displaying a SlickGrid grid.
@@ -602,8 +604,8 @@ end
 
   class Form
 
-    attr_reader :trace, :env, :active_record, :plugin, :is_popup, :field_configs
-    attr_writer :trace, :table_layout
+    attr_reader :trace, :env, :active_record, :plugin, :is_popup, :field_configs, :id
+    attr_writer :trace, :table_layout, :id
 
     def is_popup=(val)
       #puts "WRTING IS POPUP: " + val.to_s
@@ -682,6 +684,7 @@ end
                    non_db_form = false, hide_spinner = nil, plugin = nil, javascript_inject=nil)
 
       @table_layout = true
+      @id = nil
       @layout = environment.form_layout
       @end_at_position = environment.end_at_position
       @submit_button_align = environment.submit_button_align
@@ -829,10 +832,12 @@ end
         @trace += "\n section: 'error messages for' completed. "
         #end
 
+        form_opts = {}
+        form_opts[:id] = id unless id.nil?
         if @suppress_submit_spinner == nil || @suppress_submit_spinner == false
-          header += @env.form_tag({:action=> @target_action}, {:onSubmit=>"show_element('ident_spinner');"})
+          header += @env.form_tag({:action=> @target_action}, {:onSubmit=>"show_element('ident_spinner');"}.merge(form_opts))
         else
-          header += @env.form_tag({:action=> @target_action})
+          header += @env.form_tag({:action=> @target_action}, form_opts)
         end
         @trace += "\n section: 'form_tag' completed. "
         header +=  "<table>" if @table_layout

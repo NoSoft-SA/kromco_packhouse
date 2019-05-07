@@ -66,7 +66,7 @@ module WebPdtLoginHelper
                          :field_name => 'dummy'}
 
     # build_form(nil,field_configs,nil,'web_pdt','',false)
-    construct_form(nil, field_configs, nil, 'web_pdt', '', false, :table_layout => false)
+    construct_form(nil, field_configs, nil, 'web_pdt', '', false, :table_layout => false, :id => 'pdt_nav_form')
   end
 
 end

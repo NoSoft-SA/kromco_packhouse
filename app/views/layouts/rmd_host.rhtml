@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Kromco Packhouse PDT</title>
+
+    <script src = "/javascripts/lib/prototype.js" type="text/javascript"></script>
+
+    <style>
+      html {
+        font-family: sans-serif; /* 1 */
+        -ms-text-size-adjust: 100%; /* 2 */
+        -webkit-text-size-adjust: 100%; /* 2 */
+        color: #000000c9;
+      }
+      /**
+       * Remove default margin.
+       */
+      body {
+        margin: 0;
+      }
+      #pdt_content_header_caption {
+        padding: 0.25rem;
+        color: green;
+        background-color: lavender;
+        min-height: 1rem;
+      }
+      .pc_pdt_button_css_class{
+        width: 98px;
+        height: 40px;
+      }
+      .pc_web_pdt_messages{
+        height: 100px;
+      }
+      .mobile_web_pdt_messages {
+        height: 100px;
+      }
+      .mobile_web_pdt_button_css_class {
+        font-size: 40px;
+      }
+      .pc_pdt_form_css_class div.field-group {
+        margin-left: 10px;
+      }
+      div.field-group input {
+        width: 200px;
+        height: 30px;
+      }
+      div.field-group select {
+        width: 200px;
+        height: 40px;
+      }
+      input[readonly] {
+        background-color: #ddd;
+      }
+      .pc_pdt_busy_sinner_css_class{
+        position:absolute;
+        width: 310px;
+        height: 580px;
+        background: whitesmoke;
+        opacity: 0.8;
+        border: 1px solid #d3d3d3;
+      }
+      .pc_pdt_busy_sinner_css_class td{
+        width: 83px;
+      }
+      .mobile_web_busy_sinner_css_class{
+        position:absolute;
+        width: 980px;
+        height: 1400px;
+        background: whitesmoke;
+        opacity: 0.8;
+        border: 1px solid #d3d3d3;
+
+      }
+      .mobile_web_busy_sinner_css_class td{
+        width: 266px;
+      }
+    </style>
+  </head>
+  <body class="site" data-utf-8-ensurer="О">
+    <%= @content_for_layout %>
+  </body>
+</html>

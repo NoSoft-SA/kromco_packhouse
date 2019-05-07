@@ -1,22 +1,22 @@
 <script src = "/javascripts/web_pdt.js" type="text/javascript"></script>
 
-
-<div style="padding-left:20px">
-  <div id="web_pdt_screen_busy_spinner" class="<%= session[:pdt_busy_sinner]%>" style="visibility:hidden;">
-    <img src='/images/spinner.gif' style=''/>
-  </div>
+<div id="web_pdt_screen_busy_spinner" class="<%= session[:pdt_busy_sinner]%>" style="visibility:hidden;">
+  <img src='/images/spinner.gif' style=''/>
+</div>
+<div style="padding-left:20px;margin-bottom:1em;height:95vh;display:flex;flex-direction:column">
   <%= build_web_pdt_menus(@func_areas) %>
-
-  <div class="<%= session[:pdt_content_container_css_class]%>" style="margin-bottom:1em">
+  <div class="<%= session[:pdt_content_container_css_class]%>" style="margin-bottom:1em;height:100%;display:flex;flex-direction:column;flex:1">
     <div id="pdt_content_header_caption" class="<%= session[:pdt_content_header_css_class] %>" ></div>
     <iframe id = "content_frame" src="/services/pdt/handle_pdt_web_request" frameborder = "0" scrolling="yes" onload="stopWebPdtBusySpinner();"
-      class="<%=session[:pdt_content_css_class]%>">
+      class="<%=session[:pdt_content_css_class]%>" style="flex:1">
     </iframe>
-    <textarea id="messages" class="<%= session[:pdt_messages_css_class] %>" cols="<%=session[:pdt_messages_cols]%>" readonly></textarea>
-    <div id="buttons">
-      <button id = 'submit_button1' style="visibility: hidden" class="<%= session[:pdt_button_css_class] %>" onclick="onSubmitButtonClicked(4,'<%=session[:pdt_user_id].user_name%>')" >button1</button>
-      <button id = 'submit_button2' style="visibility: hidden" class="<%= session[:pdt_button_css_class] %>" onclick="onSubmitButtonClicked(5,'<%=session[:pdt_user_id].user_name%>')" >button2</button>
-      <button id = 'submit_button3' style="visibility: hidden" class="<%= session[:pdt_button_css_class] %>" onclick="onSubmitButtonClicked(6,'<%=session[:pdt_user_id].user_name%>')" >button3</button>
+    <div>
+      <textarea id="messages" class="<%= session[:pdt_messages_css_class] %>" cols="<%=session[:pdt_messages_cols]%>" readonly></textarea>
+      <div id="buttons">
+        <button id = 'submit_button1' style="visibility: hidden" class="<%= session[:pdt_button_css_class] %>" onclick="onSubmitButtonClicked(4,'<%=session[:pdt_user_id].user_name%>')" >button1</button>
+        <button id = 'submit_button2' style="visibility: hidden" class="<%= session[:pdt_button_css_class] %>" onclick="onSubmitButtonClicked(5,'<%=session[:pdt_user_id].user_name%>')" >button2</button>
+        <button id = 'submit_button3' style="visibility: hidden" class="<%= session[:pdt_button_css_class] %>" onclick="onSubmitButtonClicked(6,'<%=session[:pdt_user_id].user_name%>')" >button3</button>
+      </div>
     </div>
   </div>
 </div>
