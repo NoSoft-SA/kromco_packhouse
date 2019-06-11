@@ -936,6 +936,30 @@ end
                         :settings => {:list => printers}}
     build_form(@printer, field_configs, 'set_printer_submit', 'printer', 'save')
   end
+
+  def build_enter_container_code_form(container, action, caption)
+    field_configs = Array.new
+    field_configs << {:field_type=>'TextField', :field_name=>'container_code'}
+    build_form(container, field_configs, action, 'load_container', caption)
+  end
+
+  def build_enter_weights_form(container, action, caption)
+    field_configs = Array.new
+    field_configs << {:field_type=>'TextField', :field_name=>'cargo_weight'}
+    field_configs << {:field_type=>'TextField', :field_name=>'container_tare_weight'}
+    field_configs << {:field_type=>'TextField', :field_name=>'id'}
+    build_form(container, field_configs, action, 'load_container', caption)
+  end
+
+  def build_select_load_container_form(load_containers, action, caption)
+    field_configs = Array.new
+    field_configs[field_configs.length()] = {:field_type=>'DropDownField', :field_name=>'id',
+                                             :settings=>{
+                                                 :list=>load_containers.map{|lc| [lc.load_number, lc.id]},
+                                                 :label_caption => 'load number'}}
+    build_form(nil, field_configs, action, 'load_container', caption)
+  end
+
 end
 
 

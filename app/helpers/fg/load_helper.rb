@@ -623,6 +623,8 @@ end
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'pod',:col_width=> 80}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'memo_pad'}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'pick_list_number',:col_width=> 100}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'cargo_weight',:col_width=> 100}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'container_tare_weight',:col_width=> 100}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'id',:col_width=> 80}
 
 

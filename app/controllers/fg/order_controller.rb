@@ -1827,4 +1827,69 @@ end
     redirect_to_index
   end
 
+  def capture_container_weight
+    @content_header_caption = "'enter container code'"
+    render :inline => %{
+                        <%= build_enter_container_code_form(@load_container, 'capture_container_submit', 'next')%>
+                        }, :layout => 'content'
+  end
+
+  def capture_container_submit
+    if(params[:load_container][:container_code].empty?)
+      @load_container = LoadContainer.new
+      @load_container.errors.add(:container_code, 'can not be blank')
+      capture_container_weight
+      return
+    end
+
+    @load_containers = LoadContainer.find(:all, :select=>"load_containers.*, l.load_number",
+                                          :conditions => "cargo_weight is null and container_code='#{params[:load_container][:container_code]}'",
+                                          :joins=>"join loads l on l.id=load_containers.load_id")
+
+    if(@load_containers.empty? && LoadContainer.find_by_container_code(params[:load_container][:container_code]))
+      flash[:error] = "weights for container code [#{params[:load_container][:container_code]}] have already been set"
+      capture_container_weight
+    elsif(@load_containers.empty?)
+      flash[:error] = "container code [#{params[:load_container][:container_code]}] does not exist"
+      capture_container_weight
+    elsif(@load_containers.size > 1)
+      @content_header_caption = "'select a load for container[#{params[:load_container][:container_code]}]'"
+      render :inline => %{
+                    <%= build_select_load_container_form(@load_containers, 'select_load_container_submit', 'select')%>
+                    }, :layout => 'content'
+    else
+      @content_header_caption = "'enter weights'"
+      @load_container= @load_containers[0]
+      render_build_enter_weights_form
+    end
+  end
+
+  def select_load_container_submit
+    @load_container = LoadContainer.find(params[:load_container][:id])
+    render_build_enter_weights_form
+  end
+
+  def render_build_enter_weights_form
+    render :inline => %{
+                    <%= build_enter_weights_form(@load_container, 'capture_weights_submit', 'save')%>
+                    }, :layout => 'content'
+  end
+
+  def capture_weights_submit
+    begin
+      @load_container = LoadContainer.find(params[:load_container][:id])
+      if(@load_container.update_attributes({:cargo_weight=>params[:load_container][:cargo_weight],:container_tare_weight=>params[:load_container][:container_tare_weight],
+                                            :container_weight_captured_at=>Time.now.to_formatted_s(:db)}))
+        flash[:notice]  = "'weights for container[#{@load_container.container_code}]' set successfully"
+        @content_header_caption = "'weights for container[#{@load_container.container_code}]' set successfully"
+        render :inline => %{}, :layout => 'content'
+      else
+        flash[:error] = "weights could not be set [#{@load_container.container_code}]"
+        render_build_enter_weights_form
+      end
+    rescue
+      handle_error("Could set the location's availability")
+    end
+  end
+
 end
