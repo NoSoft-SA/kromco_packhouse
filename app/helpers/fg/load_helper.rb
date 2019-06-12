@@ -353,6 +353,13 @@ module Fg::LoadHelper
     field_configs[field_configs.length()] = {:field_type =>  'TextField',
                                              :field_name => 'container_seal_code'}
 
+    field_configs[field_configs.length()] = {:field_type => 'TextField',
+                                             :field_name => 'cargo_weight'}
+
+    field_configs[field_configs.length()] = {:field_type => 'TextField',
+                                             :field_name => 'container_tare_weight'}
+
+
      field_configs[field_configs.length()] = {:field_type =>  'TextField',
                                              :field_name => 'container_temperature_rhine'}
 
@@ -614,6 +621,7 @@ end
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'city_name', :column_caption=>'truck destination city',:col_width=> 140}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'rate'}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'haulier',:col_width=> 140}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'container_code',:col_width=> 200}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'exporter_certificate_code',:col_width=> 160}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'exporter',:col_width=> 103}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'shipper',:col_width=> 103}

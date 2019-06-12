@@ -1125,6 +1125,7 @@ end
     end
 
     list_query="select orders.updated_at,parties_r.party_name AS consignee_party_name,parties_roles.party_name AS customer_party_name,
+                               loads.load_number, load_containers.container_code, load_containers.cargo_weight,
 
                                 orders.*,order_customer_details.discount_percentage,depots.depot_code,order_types.order_type_code,
 
@@ -1141,6 +1142,7 @@ end
                                 inner join load_orders on load_orders.order_id=orders.id
 
                                 inner join loads on load_orders.load_id =loads.id
+                                left join load_containers on load_containers.load_id = loads.id
 
                                 where load_voyages.load_id = loads.id limit 1) as booking_reference,
 
@@ -1158,6 +1160,10 @@ end
                                 inner join  order_customer_details ON orders.id=order_customer_details.order_id
                                 inner join order_types on orders.order_type_id=order_types.id
                                 left join users on orders.marketer_user_id = users.id
+                                left join load_orders on load_orders.order_id =orders.id
+                                left join loads on load_orders.load_id =loads.id
+
+                                left join load_containers on load_containers.load_id = load_orders.load_id
 
 
                                 where orders.order_status NOT LIKE 'SHIPPED%' and order_types.order_type_code not in ('MO','MQ')

@@ -1,0 +1,8 @@
+<% key_sample = result_measurement_variation.sample_no; key_id = result_measurement_variation.id;
+    css_class = "measurement_desc_#{classify_descr(result_measurement_variation.qc_measurement_description)}"
+    css_class << ' copyable_measure' if key_sample == 1 %>
+<tr>
+  <td><%= result_measurement_variation.qc_measurement_description %></td>
+  <%= build_up_annotation_fields(result_measurement_variation, max_cols, measurement_rules) %>
+
+</tr>

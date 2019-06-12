@@ -697,6 +697,9 @@ end
     column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'loading_date'}
     column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'promised_delivery_date',:column_caption=>'delivery_date',:col_width=>122}
     column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'marketer'}
+    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'load_number'}
+    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'container_code'}
+    column_configs[column_configs.length()] = {:field_type=>'text', :field_name=>'cargo_weight'}
 
 #    if can_delete
       column_configs[column_configs.length()] = {:field_type => 'action', :field_name => 'delete',

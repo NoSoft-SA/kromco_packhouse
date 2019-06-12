@@ -1,0 +1,7 @@
+query: SELECT id, order_number, load_number, city_name, transporter_rate, haulier, customer_contact_name, customer_order_number, dispatch_consignment_number, customer, shipped_date_time FROM vw_transporter_rates WHERE (order_number={order_number} and customer={customer} and shipped_date_time={shipped_date_time})
+main_table_name: load_orders
+fields:
+ field1:
+  field_name: shipped_date_time
+  caption: shipped_date_time
+  field_type: daterange
