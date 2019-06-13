@@ -1916,4 +1916,18 @@ end
     end
   end
 
+  def print_load_order_container_weights_report
+    @load_containers = LoadContainer.find(:all, :select=>"load_containers.*",:conditions => "lo.id=#{params[:id]}",
+                                          :joins => "join loads l on l.id=load_containers.load_id
+                                                     join load_orders lo on lo.load_id=l.id")
+
+    if(@load_containers.length > 1)
+      flash[:error] = "Error: Load has many containers"
+      render :inline => %{}, :layout => 'content'
+    else
+      params[:id] = @load_containers[0].id
+      print_container_weights_report_confirmed
+    end
+  end
+
 end
