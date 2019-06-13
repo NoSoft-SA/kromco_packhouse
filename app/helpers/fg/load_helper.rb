@@ -89,7 +89,7 @@ module Fg::LoadHelper
             menu1.add_command("print_mates_receipts", "/fg/order/print_mates_receipts")#dn
             menu1.add_command("print_tracking_device_docs", "/fg/order/print_tracking_device_docs")#dn
             menu1.add_command("signed intake docs", "/fg/order/list_signed_intake_docs")
-
+            menu1.add_command("print_container_weights", "/fg/order/print_container_weights_report_confirmed")
          else
             menu1.add_command("signed intake docs", "/fg/order/list_signed_intake_docs")
             menu1.add_command("order not shipped", "/fg/order/order_not_shipped")#dn
