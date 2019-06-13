@@ -1888,12 +1888,31 @@ end
                                             :container_weight_captured_at=>Time.now.to_formatted_s(:db)}))
         flash[:notice]  = "'weights for container[#{@load_container.container_code}]' set successfully"
         @content_header_caption = "'weights for container[#{@load_container.container_code}]' set successfully"
-        render :inline => %{}, :layout => 'content'
+        render :inline=> %{
+                  <script>
+                       if (confirm("Do you want to print a container_weights report?.")== true) {
+                           window.location.href = '/fg/order/print_container_weights_report_confirmed/<%=@load_container.id%>';
+                       //}else {
+                         //  window.location.href = '/reports/reports/print_container_weights_report_cancelled';
+                       }
+                  </script>
+             }
       else
         render_build_enter_weights_form
       end
     rescue
       handle_error("Could set the location's availability")
+    end
+  end
+
+  def print_container_weights_report_confirmed
+    begin
+      report_unit ="reportUnit=/reports/MES/FG/Solas&"
+      report_parameters="output=pdf&load_container_id=" +"#{params[:id]}"
+      redirect_to_path(Globals.get_jasper_server_report_server_ip + Globals.get_jasper_server + report_unit +Globals.get_jasperserver_username_password + report_parameters)
+    rescue
+      flash[:error] = $!
+      render :inline => %{}, :layout => 'content'
     end
   end
 
