@@ -11,6 +11,8 @@ class LoadContainer < ActiveRecord::Base
 #	============================
 #	 Validations declarations:
 #	============================
+  validates_numericality_of :cargo_weight
+  validates_numericality_of :container_tare_weight
 #	=====================
 #	 Complex validations:
 #	=====================

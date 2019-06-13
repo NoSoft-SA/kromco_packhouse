@@ -1890,7 +1890,6 @@ end
         @content_header_caption = "'weights for container[#{@load_container.container_code}]' set successfully"
         render :inline => %{}, :layout => 'content'
       else
-        flash[:error] = "weights could not be set [#{@load_container.container_code}]"
         render_build_enter_weights_form
       end
     rescue
