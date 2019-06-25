@@ -1,0 +1,4 @@
+module RmtProcessing::GradingRuleHelper
+
+end
+

@@ -1,0 +1,18 @@
+grading_criteria:
+   primary_look_up_field: size
+   model_name: PoolGradingSummary
+   required_columns: size,class,grade,variety,line_type,track_indicator_code,new_size,new_class
+   csv_header_lines: 0
+   total_required_columns: 8
+   field_name_mappings:
+      size: size
+      class: class
+      grade: grade
+      variety: variety
+      line_code: line_type
+      track_indicator: track_indicator_code
+      new_size: new_size
+      new_class: new_class
+
+
+
