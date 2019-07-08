@@ -20,7 +20,7 @@ class ValidatePallets < PDTTransactionState
      field_configs = Array.new
      field_configs[field_configs.length] = {:type=>"static_text",:name=>"qty_of_pallets_to_validate",:label => "to_validate", :value=>@parent.pallets_for_trip.length.to_s}
      field_configs[field_configs.length] = {:type=>"static_text",:name=>"qty_of_pallets_remaining",:label => "remaining",:value=>@parent.not_yet_validated_pallets.length.to_s }
-     field_configs[field_configs.length] = {:type=>"text_box",:name=>"scan_pallet_to_validate",:label => "plt",:is_required=>"true"}
+     field_configs[field_configs.length] = {:type=>"text_box",:name=>"scan_pallet_to_validate",:label => "plt",:is_required=>"true",:scan_field => true}
 
      screen_attributes = {:auto_submit=>"false",:content_header_caption=>"validate pallets"}
     if @parent.pallets_for_trip.length > 1

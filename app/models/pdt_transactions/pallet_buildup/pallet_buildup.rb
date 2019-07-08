@@ -41,16 +41,16 @@ class PalletBuildup < PDTTransaction
     field_configs = Array.new
     field_configs[field_configs.length] = {:type=>'text_box', :name=>'qty_cartons', :label=>'qty cartons', :is_required=>'true', :required_type=>"number"}
     field_configs[field_configs.length] = {:type=>'text_box', :name=>'to_pallet', :label=>'to pallet', :is_required=>'true'}
-    field_configs[field_configs.length] = {:type=>'text_box', :name=>'from_pallet_1', :label=>'from pallet 1'}
-    field_configs[field_configs.length] = {:type=>'text_box', :name=>'from_pallet_2', :label=>'from pallet 2'}
-    field_configs[field_configs.length] = {:type=>'text_box', :name=>'from_pallet_3', :label=>'from pallet 3'}
-    field_configs[field_configs.length] = {:type=>'text_box', :name=>'from_pallet_4', :label=>'from pallet 4'}
-    field_configs[field_configs.length] = {:type=>'text_box', :name=>'from_pallet_5', :label=>'from pallet 5'}
-    field_configs[field_configs.length] = {:type=>'text_box', :name=>'from_pallet_6', :label=>'from pallet 6'}
-    field_configs[field_configs.length] = {:type=>'text_box', :name=>'from_pallet_7', :label=>'from pallet 7'}
-    field_configs[field_configs.length] = {:type=>'text_box', :name=>'from_pallet_8', :label=>'from pallet 8'}
-    field_configs[field_configs.length] = {:type=>'text_box', :name=>'from_pallet_9', :label=>'from pallet 9'}
-    field_configs[field_configs.length] = {:type=>'text_box', :name=>'from_pallet_10', :label=>'from pallet 10'}
+    field_configs[field_configs.length] = {:type=>'text_box', :name=>'from_pallet_1', :label=>'from pallet 1',:scan_field => true}
+    field_configs[field_configs.length] = {:type=>'text_box', :name=>'from_pallet_2', :label=>'from pallet 2',:scan_field => true}
+    field_configs[field_configs.length] = {:type=>'text_box', :name=>'from_pallet_3', :label=>'from pallet 3',:scan_field => true}
+    field_configs[field_configs.length] = {:type=>'text_box', :name=>'from_pallet_4', :label=>'from pallet 4',:scan_field => true}
+    field_configs[field_configs.length] = {:type=>'text_box', :name=>'from_pallet_5', :label=>'from pallet 5',:scan_field => true}
+    field_configs[field_configs.length] = {:type=>'text_box', :name=>'from_pallet_6', :label=>'from pallet 6',:scan_field => true}
+    field_configs[field_configs.length] = {:type=>'text_box', :name=>'from_pallet_7', :label=>'from pallet 7',:scan_field => true}
+    field_configs[field_configs.length] = {:type=>'text_box', :name=>'from_pallet_8', :label=>'from pallet 8',:scan_field => true}
+    field_configs[field_configs.length] = {:type=>'text_box', :name=>'from_pallet_9', :label=>'from pallet 9',:scan_field => true}
+    field_configs[field_configs.length] = {:type=>'text_box', :name=>'from_pallet_10', :label=>'from pallet 10',:scan_field => true}
 
     buttons = {:B1Label=>"Submit", :B1Enable=>"true", :B1Submit=>"buildup_pallet_submit", :B2Label=>"", :B2Enable=>"false", :B2Submit=>"", :B3Label=>"", :B3Enable=>"false", :B3Submit=>""}
     screen_attributes ={:content_header_caption=>"pallet build up", :auto_submit=>"false"}
