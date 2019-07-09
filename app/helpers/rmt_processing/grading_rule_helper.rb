@@ -21,7 +21,7 @@ module RmtProcessing::GradingRuleHelper
     field_configs[field_configs.length()] = {:field_type=>'DropDownField', :field_name=>'grade', :settings=>{:list=>grades,:show_label=>true}}
     field_configs[field_configs.length()] = {:field_type=>'DropDownField', :field_name=>'variety', :settings=>{:list=>varieties,:show_label=>true}}
     field_configs[field_configs.length()] = {:field_type=>'DropDownField', :field_name=>'line_type', :settings=>{:list=>line_types,:show_label=>true}}
-    field_configs[field_configs.length()] = {:field_type=>'DropDownField', :field_name=>'clasi', :settings=>{ :label_caption=> "class",:list=>classes,:show_label=>true}}
+    field_configs[field_configs.length()] = {:field_type=>'DropDownField', :field_name=>'product_class_code', :settings=>{ :label_caption=> "class",:list=>classes,:show_label=>true}}
     field_configs[field_configs.length()] = {:field_type=>'TextField',:hide => true, :field_name=>'track_slms_indicator_code'} if is_new
     field_configs[field_configs.length()] = {:field_type=>'TextField', :field_name=>'new_class'}
     field_configs[field_configs.length()] = {:field_type=>'TextField', :field_name=>'new_size'}
@@ -53,7 +53,7 @@ module RmtProcessing::GradingRuleHelper
     column_configs << {:field_type => 'text',:field_name => 'line_type' ,:col_width=>100}
     column_configs << {:field_type => 'text',:field_name => 'new_class' ,:col_width=>80}
     column_configs << {:field_type => 'text',:field_name => 'new_size' ,:col_width=>80}
-    column_configs << {:field_type => 'text',:field_name => 'clasi' ,:column_caption=>'class',:col_width=>70}
+    column_configs << {:field_type => 'text',:field_name => 'product_class_code' ,:column_caption=>'class',:col_width=>70}
     column_configs << {:field_type => 'text',:field_name => 'created_at' ,:col_width=>120}
     column_configs << {:field_type => 'text',:field_name => 'created_by' ,:col_width=>120}
     column_configs << {:field_type => 'text',:field_name => 'updated_by' ,:col_width=>120}
@@ -70,21 +70,31 @@ module RmtProcessing::GradingRuleHelper
 
 
   def build_grading_rule_headers_grid(data_set)
-
+    action_configs=[]
     column_configs = []
-    column_configs << {:field_type => 'action', :field_name => 'delete', :col_width => 33, :settings => { :null_test => "['activated'] == 't'",
-                       :target_action => 'delete_carton_grading_rule_header', :link_text => 'delete', :link_icon => 'delete',:id_column => 'id'}}
-    column_configs << {:field_type => 'link_window', :field_name => 'rules',:col_width=>100,
-                       :settings =>{:target_action => 'list_grading_rules',:link_text => 'rules', :id_column => 'id'}}
-    column_configs << {:field_type => 'text',:field_name => 'activated',:column_caption=>'active' ,:data_type => 'boolean',:col_width=>170}
-    column_configs << {:field_type => 'text',:field_name => 'season' ,:col_width=>170}
+
+    action_configs << {:field_type => 'link_window', :field_name => 'rules',:col_width=>100,
+                       :settings =>{:link_icon => 'rules',:target_action => 'list_grading_rules',:link_text => 'rules',
+                                    :id_column => 'id'}}
+
+    action_configs << {:field_type => 'action', :field_name => 'activate', :col_width => 33,
+                       :settings => {:link_icon => 'activate',
+                       :null_test => "['activated'] == 't'",:target_action => 'activate_carton_grading_rule_header',
+                                      :link_text => 'activate',:id_column => 'id'}}
+
+    action_configs << {:field_type => 'action', :field_name => 'delete', :col_width => 33,
+                       :settings => { :null_test => "['activated'] == 't'", :link_icon => 'delete',:target_action => 'delete_carton_grading_rule_header', :link_text => 'delete', :link_icon => 'delete',:id_column => 'id'}}
+
+    column_configs << {:field_type => 'action_collection', :field_name => 'actions', :settings => {:actions => action_configs}}
+    column_configs << {:field_type => 'text',:field_name => 'activated',:column_caption=>'active' ,:data_type => 'boolean',:col_width=>80}
+    column_configs << {:field_type => 'text',:field_name => 'season' ,:col_width=>80}
     column_configs << {:field_type => 'text',:field_name => 'created_at' ,:col_width=>170}
-    column_configs << {:field_type => 'text',:field_name => 'created_by' ,:col_width=>170}
-    column_configs << {:field_type => 'text',:field_name => 'updated_by' ,:col_width=>170}
-    column_configs << {:field_type => 'text',:field_name => 'updated_at' ,:col_width=>170}
-    column_configs << {:field_type => 'text',:field_name => 'description' ,:col_width=>170}
-    column_configs << {:field_type => 'text',:field_name => 'deactivated_at' ,:col_width=>170}
-    column_configs << {:field_type => 'text',:field_name => 'activated_at' ,:col_width=>170}
+    column_configs << {:field_type => 'text',:field_name => 'created_by' ,:col_width=>120}
+    column_configs << {:field_type => 'text',:field_name => 'updated_by' ,:col_width=>120}
+    column_configs << {:field_type => 'text',:field_name => 'updated_at' ,:col_width=>120}
+    column_configs << {:field_type => 'text',:field_name => 'description' ,:col_width=>120}
+    column_configs << {:field_type => 'text',:field_name => 'deactivated_at' ,:col_width=>120}
+    column_configs << {:field_type => 'text',:field_name => 'activated_at' ,:col_width=>120}
     column_configs << {:field_type => 'text',:field_name => 'deactivated',:hide => true}
     column_configs << {:field_type => 'text',:field_name => 'is_active_header',:hide => true}
 
@@ -105,9 +115,6 @@ module RmtProcessing::GradingRuleHelper
      action_configs << {:field_type => 'action', :field_name => 'deactivate', :col_width => 70,:settings =>{
                         :null_test => " ['activated'] == false || ['is_active_header'] == false",
                          :link_text => 'deactivate', :link_icon => 'view',:target_action => 'deactivate_carton_grading_rule', :id_column => 'id'}}
-
-    action_configs << {:field_type => 'link_window', :field_name => 'new_carton_grading_rule', :col_width => 70,:settings =>
-                      {:link_text => 'new_rule', :link_icon => 'new',:target_action => 'new_carton_grading_rule',:id_column => 'id'}}
 
     action_configs << {:field_type => 'link_window', :field_name => 'edit', :col_width => 35,
                        :settings =>{:link_text => 'edit', :link_icon => 'edit',:target_action => 'edit_carton_grading_rule',:id_column => 'id'}}

@@ -208,6 +208,8 @@
 .context-menu-item.icon-user             { background-image: url(/images/grid_icons/user_suit.png); }
 .context-menu-item.icon-view             { background-image: url(/images/grid_icons/view.png); }
 .context-menu-item.icon-warning          { background-image: url(/images/grid_icons/warning.png); }
+.context-menu-item.icon-warning          { background-image: url(/images/grid_icons/activate.png); }
+.context-menu-item.icon-warning          { background-image: url(/images/grid_icons/rules.png); }
 
 .slick-top-panel button, .slick-top-panel input {
   margin-right:2px;
