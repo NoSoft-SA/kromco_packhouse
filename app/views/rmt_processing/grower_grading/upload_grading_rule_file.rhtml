@@ -1,8 +1,7 @@
 <% @header_content %>
 <% form_tag '/rmt_processing/grading_rule/submit_grading_file', :multipart => true do -%>
     <table>
-      <tr><td>Object type:</td><td><%= select_tag "type", options_for_select(['','cartons','rebins']) %></td></tr>
-      <tr><td>Object type:</td><td><%= select_tag "season_id", options_for_select(@seasons) %></td></tr>
+      <tr><td>Season code:</td><td><%= select_tag "season_id", options_for_select(@seasons) %></td></tr>
       <tr><td>Choose a file:</td><td><%= file_field_tag :grading_file %></td></tr>
     </table>
     <%= submit_tag 'upload' %>
@@ -16,7 +15,7 @@
   <li><b>grade</b></li>
   <li><b>variety</b></li>
   <li><b>line_type</b></li>
-  <li><b>track_indicator_code</b></li>
+  <li><b>track_slms_indicator_code</b></li>
   <li><b>new_size</b></li>
   <li><b>new_class</b></li>
 </ul>
@@ -25,7 +24,7 @@
 <p>
 <table class="thinbordertable">
   <tr><th colspan="3">size</th><th colspan="3">class</th><th colspan="3">grade</th><th colspan="3">variety</th><th colspan="3">line_type</th>
-    <th colspan="3">track_indicator_code</th><th colspan="3">new_size</th><th colspan="3">new_class</th>
+    <th colspan="3">track_slms_indicator_code</th><th colspan="3">new_size</th><th colspan="3">new_class</th>
   </tr>
   <tr><td colspan="3"> A</td><td colspan="3"> CL1</td><td colspan="3">1L</td><td colspan="3"> GAV</td><td colspan="3">Primary line</td><td colspan="3">PTR</td><td colspan="3">MED</td><td colspan="3">2A</td></tr>
   <tr><td colspan="3">AA</td><td colspan="3">CL1</td><td colspan="3">1A</td><td colspan="3"> PACKHAM</td><td colspan="3">Depot</td><td colspan="3">PTR</td><td colspan="3">SMALL</td><td colspan="3">2L</td></tr>

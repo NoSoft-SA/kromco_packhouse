@@ -24,11 +24,13 @@ class ProcessGradingRuleFile
       csv_file_headers_order, csv_file_lines, csv_file_name_first_part, difference, required_cols_order,receivers,pods,pod_receivers,pod_and_receivers,pod_receiver_hash,customers = process_csv_file
     end
 
-    if !difference.empty?
-      return "File must contain columns in the following order:<br> #{required_cols_order.join(',')}"
-    end
+    return "File must contain columns in the following order and naming:<br> #{required_cols_order.join(',')}" if !difference.empty?
 
-    validate_file(csv_file_lines)
+
+    #todoconfirm if new classes and new sizes should be in master files
+    #TODOvaidate other master files
+    # errors = validate_file(csv_file_lines)
+    # return errors if errors
 
 
     #store file under 'public/uploads/rmt_processing/grower_grading/grading_rules' appending date and time to file name
@@ -38,43 +40,47 @@ class ProcessGradingRuleFile
 
     apply_grading_rules(csv_file_headers_order, csv_file_lines, file_name, required_cols_order)
 
-    #create_pod_receivers(csv_file_headers_order, csv_file_lines, file_name, required_cols_order,receivers,pods,pod_receivers,pod_and_receivers,pod_receiver_hash,customers)
-
+    return @carton_grading_rule_header.id.to_i
   end
 
   def apply_grading_rules(csv_file_headers_order, csv_file_lines, file_name, required_cols_order)
+    ActiveRecord::Base.transaction do
+    deactive_active_rule
     create_carton_grading_rules(csv_file_lines,required_cols_order)
+    end
+  end
+
+  def deactive_active_rule
+    ActiveRecord::Base.connection.execute("
+    update carton_grading_rule_headers set updated_at='#{Time.now}',updated_by='#{@user_name}',activated = false,deactivated =true,deactivated_at = '#{Time.now}',activated_at =null
+    where activated = true;
+    update carton_grading_rules set updated_at ='#{Time.now}',updated_by = '#{@user_name}',activated = false,deactivated =true,deactivated_at = '#{Time.now}',activated_at = null
+    where activated = true;")
   end
 
   def create_carton_grading_rules(csv_file_lines,required_cols_order)
     num_of_cols = required_cols_order.length
-    ActiveRecord::Base.transaction do
+    @carton_grading_rule_header = CartonGradingRuleHeader.new(
+        :deactivated => false,
+        :activated => true,
+        :activated_at => Time.now,
+        :season_id => @season_id
+    )
+    @carton_grading_rule_header.save
     csv_file_lines.each do |line|
-      carton_grading_rule_header = CartonGradingRuleHeader.new(
-          # :created_at => Time.now,
-          # :created_by => @user_name,
-          # :updated_by => Time.now,
-          :deactivated => false,
-          :activated => true,
-          :deactivated_at => Time.now,
-          :activated_at => Time.now,
-          :season_id => @season_id
-      )
-      carton_grading_rule_header.save
       ctn_grading_rule_col_values = []
       for i in 0..num_of_cols-1
         ctn_grading_rule_col_values << "'#{line[i]}'"
       end
-      carton_grading_rules = ActiveRecord::Base.connection.execute("
-      INSERT INTO carton_grading_rules(carton_grading_rule_header_id,deactivated_at,activated_at,activated,deactivated,
+      ctn_grading_rule_col_values
+      ActiveRecord::Base.connection.execute("
+      INSERT INTO carton_grading_rules(carton_grading_rule_header_id,activated_at,activated,created_by,
                                        #{required_cols_order.join(',')})
-                                VALUES(#{carton_grading_rule_header.id},'#{Time.now}','#{Time.now}',true,false,
+                                VALUES(#{@carton_grading_rule_header.id},'#{Time.now}',true,'#{@user_name}',
                                        #{ctn_grading_rule_col_values.join(',')})
-                                 RETURNING carton_grading_rules.*;")
-      carton_grading_rules
+                                 ")
 
     end
-  end
 
 
   end
@@ -90,30 +96,36 @@ class ProcessGradingRuleFile
     csv_file_lines.each do |line|
       comparison_array << [line[0],line[1],line[2],line[3],line[4],line[5]]
       uniq_array << "#{line[0]},#{line[1]},#{line[2]},#{line[3]},#{line[4]},#{line[5]}" if !uniq_array.include?("#{line[0]},#{line[1]},#{line[2]},#{line[3]},#{line[4]},#{line[5]}")
-      new_sizes << "'#{line[6]}'"
-      new_classes << "'#{line[7]}'"
+      new_sizes << "'#{line[6]}'"     if !new_sizes.include?("'#{line[6]}'")
+      new_classes << "'#{line[7]}'"   if !new_classes.include?("'#{line[7]}'")
     end
     if uniq_array.length < csv_file_lines.length
       errors <<  "File contains duplicate records:<br>"
     end
 
-   sizes   = ActiveRecord::Base.connection.select_all("select size_code from sizes where size_code in (#{new_sizes.join(',')})").map{|x|x['size_code']}
-   classes = ActiveRecord::Base.connection.select_all("select product_class_code from product_classes where product_class_code in (#{new_classes.join(',')})").map{|x|x['product_class_code']}
+   sizes   = ActiveRecord::Base.connection.select_all("select size_code from sizes where size_code in (#{new_sizes.uniq.join(',')})").map{|x|x['size_code']}
+   classes = ActiveRecord::Base.connection.select_all("select product_class_code from product_classes where product_class_code in (#{new_classes.uniq.join(',')})").map{|x|x['product_class_code']}
     invalid_classes = []
     invalid_sizes = []
 
     if sizes.length < new_sizes.length
-      new_sizes.each do |size| invalid_sizes << size if !new_sizes.include?("'#{size}'") end
-    elsif classes.length < new_classes.length
-      new_classes.each do |clas| invalid_classes << clas if !new_classes.include?("'#{clas}'") end
+      new_sizes.each do |size| invalid_sizes << size if (!sizes.include?("'#{size}'") || sizes.empty?) end
+    end
+    if classes.length < new_classes.length
+      new_classes.each do |clas| invalid_classes << clas if (!classes.include?("'#{clas}'") || classes.empty?) end
     end
 
-    errors << "Invalid size/s:(#{invalid_sizes.join(',')}) AND invalid classes:(#{invalid_classes.join(',')}):<br>" if !invalid_classes.empty? && !invalid_sizes.empty?
-    errors << "Invalid size/s:(#{invalid_sizes.join(',')})" if !invalid_sizes.empty?
-    errors << "Invalid classes:(#{invalid_classes.join(',')}):<br>" if !invalid_classes.empty?
+    if !invalid_classes.empty? && !invalid_sizes.empty?
+      errors << "Invalid size/s:(#{invalid_sizes.join(',')}) AND invalid classes:(#{invalid_classes.join(',')}):<br>"
+    elsif !invalid_sizes.empty?
+      errors << "Invalid size/s:(#{invalid_sizes.join(',')})"
+    elsif !invalid_classes.empty?
+      errors << "Invalid classes:(#{invalid_classes.join(',')}):<br>"
+    end
 
-    return "<br> #{errors.join('<BR>')}" if !errors.empty?
 
+    return "File could not be processed: <br> #{errors.join('<BR>')}" if !errors.empty?
+    return nil if errors.empty?
   end
 
   def process_carton_grading_csv_file

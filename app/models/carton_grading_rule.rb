@@ -5,6 +5,7 @@ class CartonGradingRule < ActiveRecord::Base
 #  ===========================
 
 
+  attr_accessor :clasi
   belongs_to :carton_grading_rule_header
 
 #  ============================

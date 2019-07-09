@@ -6,6 +6,7 @@
   <div id="pool_graded_cartons_inner">
     <table id="pool_graded_cartons_rows" class="sortable">
       <thead>
+
       <tr>
         <th class="number">Size</th>
         <th class="number">Adjusted<br />Size</th>
@@ -25,7 +26,11 @@
         <th>Inspection<br />Type</th>
         <th>Target<br />Market</th>
         <th>Inventory<br />Code</th>
+        <th>Carton<br />Grading<br />Rule id</th>
+        <th>Rule<br />Applied<br />at</th>
+        <th>Rule<br />Applied<br />by</th>
       </tr>
+
       </thead>
       <tbody>
         <%= render :partial => 'carton', :collection => @pool_graded_cartons %>

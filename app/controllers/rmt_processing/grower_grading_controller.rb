@@ -10,6 +10,91 @@ class  RmtProcessing::GrowerGradingController < ApplicationController
   def bypass_generic_security?
     true
   end
+
+  def apply_bin_grading_rules
+    @pool_graded_summary_id = params[:id]
+    pool_graded_rebins = ActiveRecord::Base.connection.select_all("
+                         select pgr.* from  pool_graded_rebins pgr where pool_graded_summary_id=#{params[:id]} ")
+
+    PoolGradedSummary.transaction do
+        ActiveRecord::Base.connection.select_all("
+         update pool_graded_rebins set graded_class = '3' ,graded_size = '120',automatic_rule = true,
+         rule_applied_at='#{Time.now}',rule_applied_by = '#{session[:user_id].user_name}'
+         where id in (#{pool_graded_rebins.map{|x|x['id']}.join(',')})")
+    end
+    pool_graded_rebins
+    render :inline=>%{
+      <script>
+        alert("rebins updated");
+        window.opener.frames[1].location.href ='/rmt_processing/grower_grading/edit_pool_graded_summary/#{@pool_graded_summary_id}';
+        window.close();
+      </script>
+      },:layout=>'content'
+  end
+
+  def apply_grading_rules(rule_cartons)
+    @pool_graded_summary = PoolGradedSummary.find(params[:id])
+    changed = {}
+    PoolGradedSummary.transaction do
+      rule_cartons.each do |rule,cartons|
+        ActiveRecord::Base.connection.select_all("
+         update pool_graded_cartons set graded_class = '#{rule['new_class']}' ,graded_size = '#{rule['new_size']}',
+         grading_applied =true,carton_grading_rule_id=#{rule['carton_grading_rule_id']},rule_applied_at='#{Time.now}',
+         rule_applied_by = '#{session[:user_id].user_name}'
+         where id in (#{cartons.map{|x|x['id']}.join(',')})")
+        changed[cartons.map{|x|x['id']}.join(",")] = [rule['new_class'],rule['new_size']]
+      end
+      changed
+    end
+
+    render :inline=>%{
+      <script>
+        alert("rules applied");
+        window.opener.frames[1].location.href ='/rmt_processing/grower_grading/edit_pool_graded_summary/#{@pool_graded_summary.id}';
+        window.close();
+      </script>
+      },:layout=>'content'
+  end
+
+  def get_matched_cartons
+    pool_graded_cartons = ActiveRecord::Base.connection.select_all("
+              select distinct pgs.season_code,pgf.track_slms_indicator_code,pgc.*
+              from pool_graded_summaries pgs
+              left join pool_graded_farms pgf on pgf.pool_graded_summary_id = pgs.id
+              join pool_graded_cartons pgc on pgc.pool_graded_summary_id = pgs.id
+              where pgs.id = #{params[:id]}")
+    active_rules = get_active_rules
+    rule_cartons = {}
+    active_rules.each do |rule|
+      matched_cartons = pool_graded_cartons.find_all{|a|
+        a['actual_size_count_code']==rule['size'] && a['product_class_code']==rule['clasi'] &&
+        a['variety_short_long']==rule['variety']  && a['grade_code']==rule['grade'] && a['line_type']==rule['line_type'] &&
+        a['season']==rule['season_code'] &&  a['track_slms_indicator_code']==rule['track_slms_indicator_code'] }
+      rule_cartons[rule] = matched_cartons if !matched_cartons.empty?
+    end
+    if !rule_cartons.empty?
+      apply_grading_rules(rule_cartons)
+    else
+      render :inline=>%{
+      <script>
+        alert("NO matching rules where found!");
+        window.close();
+      </script>
+      },:layout=>'content'
+    end
+
+  end
+
+  def get_active_rules
+    active_rules = ActiveRecord::Base.connection.select_all("
+    select distinct s.season_code as season,cgr.size,cgr.grade,cgr.variety,cgr.track_slms_indicator_code,
+     cgr.line_type,cgr.updated_by,cgr.updated_at,cgr.deactivated_at,cgr.activated,cgr.class as clasi,cgr.id as carton_grading_rule_id,
+     cgr.id,cgr.new_class,cgr.new_size,cgr.deactivated ,cgrh.activated as is_active_header,cgr.created_at,cgr.created_by
+     from carton_grading_rule_headers cgrh
+     join carton_grading_rules cgr on cgr.carton_grading_rule_header_id = cgrh.id
+     join seasons s on cgrh.season_id = s.id where cgrh.activated = true and cgr.activated =true")
+    return active_rules
+  end
  
   # Get a list of un-graded production runs to display in a grid for choosing.
   # Production Runs with bin count and weight summarised per production_run, farm_code & track_slms_indicator_code.
@@ -226,8 +311,12 @@ class  RmtProcessing::GrowerGradingController < ApplicationController
  
   def summarise_rebins( pool_graded_summary_id=nil )
     @pool_graded_summary = PoolGradedSummary.find(pool_graded_summary_id || params[:id])
-    @pool_graded_rebins  = @pool_graded_summary.pool_graded_rebins.find(:all, :order => 'class_code, size_code, graded_class')
+    #@pool_graded_rebins  = @pool_graded_summary.pool_graded_rebins.find(:all, :order => 'class_code, size_code, graded_class')
+    @pool_graded_rebins = PoolGradedRebin.find_by_sql("select (DATE(rule_applied_at) -  DATE(updated_at)) as auto_rule_age ,pool_graded_rebins.* from pool_graded_rebins
+                          where pool_graded_summary_id =#{@pool_graded_summary.id} order by class_code, size_code, graded_class")
     @refresh_main = !pool_graded_summary_id.nil?
+
+    #@data_set = [{:status=>'Shipped',:date=>Time.now},{:task=>'Paid',:date=>''},{:task=>'Returned',:date=>'2011-03-11 14:48:18'}]
     if @pool_graded_summary.complete?
       render :template => '/rmt_processing/grower_grading/summarise_rebins_view.rhtml'
     end
@@ -235,8 +324,11 @@ class  RmtProcessing::GrowerGradingController < ApplicationController
  
   def summarise_cartons
     @pool_graded_summary = PoolGradedSummary.find(params[:id])
-    @pool_graded_cartons = @pool_graded_summary.pool_graded_cartons.find(:all, :order => 'actual_size_count_code, product_class_code,
-                                                    fg_code_old, variety_short_long, grade_code, line_type')
+    # @pool_graded_cartons = @pool_graded_summary.pool_graded_cartons.find(:all, :order => 'actual_size_count_code, product_class_code,
+    #                                                 fg_code_old, variety_short_long, grade_code, line_type')
+    #
+    @pool_graded_cartons = PoolGradedCarton.find_by_sql("select (DATE(rule_applied_at) -  DATE(updated_at)) as auto_rule_age ,* from pool_graded_cartons where  pool_graded_summary_id =#{@pool_graded_summary.id}
+                           order by actual_size_count_code, product_class_code,fg_code_old, variety_short_long, grade_code, line_type")
     @summary = {}
     @pool_graded_cartons.each do |carton|
       key = "#{carton.organization_code}, #{carton.grade_code}"

@@ -10,6 +10,9 @@
       <th>Adjusted<br /> Size</th>
       <th>Weight</th>
       <th>Adjusted<br /> Weight</th>
+      <th>Automatic<br />Rule</th>
+      <th>Rule<br />Applied<br />by</th>
+      <th>Rule<br />Applied<br />at</th>
     </tr>
     <%= render :partial => 'rebin', :collection => @pool_graded_rebins %>
     <tr>
@@ -20,6 +23,9 @@
       <td>&nbsp;</td>
       <td>&nbsp;</td>
       <td align="right"><strong><%= sprintf('%0.2f', @pool_graded_rebins.sum{|p| p.total_rebin_mass }) %></strong></td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
       <td>&nbsp;</td>
     </tr>
   </table>

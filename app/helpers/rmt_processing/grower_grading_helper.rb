@@ -192,40 +192,48 @@ module RmtProcessing::GrowerGradingHelper
     #   :field_name => 'created_at',
     #     :settings => {:show_label   => true}}
 
-    # field_configs << {:field_type => 'LabelField',
-    #   :field_name => 'updated_at',
-    #     :settings => {:show_label   => true}}
+    field_configs << {:field_type    => 'LinkWindowField',
+                      :field_name => '',
+                      :settings => {:target_action => 'get_matched_cartons',
+                                    :link_text     => "Apply Cartons Grading Rules",
+                                    :id_value      => pool_graded_summary.id.to_s }}
 
     field_configs << {:field_type    => 'LinkWindowField',
-      :field_name => '',
-        :settings => {:target_action => 'summarise_rebins',
-                      :link_text     => "Summarise Rebins",
-                      :id_value      => pool_graded_summary.id.to_s }}
+                      :field_name => '',
+                      :settings => {:target_action => 'apply_bin_grading_rules',
+                                    :link_text     => "Apply Rebins Grading Rules",
+                                    :id_value      => pool_graded_summary.id.to_s }}
 
     field_configs << {:field_type    => 'LinkWindowField',
       :field_name => '',
         :settings => {:target_action => 'summarise_cartons',
-                      :window_height => 600,
+                      :window_height => 1000,
+                      :window_width => 1800,
                       :link_text     => "Summarise Cartons",
                       :id_value      => pool_graded_summary.id.to_s }}
-#
-#     field_configs << {:field_type    => 'LinkField',
-#       :field_name => '',
-#         :settings => {:target_action => 'cull_grading',
-#                       :link_text     => "Culling Capture",
-#                       :id_value      => pool_graded_summary.id.to_s }}
 
     field_configs << {:field_type    => 'LinkWindowField',
-      :field_name => '',
-        :settings => {:target_action => 'preview_grading',
-                      :link_text     => "Preview Grading",
-                      :id_value      => pool_graded_summary.id.to_s }}
+                      :field_name => '',
+                      :settings => {:target_action => 'summarise_rebins',
+                                    :link_text     => "Summarise Rebins",
+                                    :window_width => 1500,
+                                    :window_height => 500,
+                                    :id_value      => pool_graded_summary.id.to_s }}
 
     field_configs << {:field_type    => 'LinkField',
       :field_name => '',
         :settings => {:target_action => 'complete_grading',
                       :link_text     => "Complete Grading",
                       :id_value      => pool_graded_summary.id.to_s }}
+
+    field_configs << {:field_type    => 'LinkWindowField',
+                      :field_name => '',
+                      :settings => {:target_action => 'preview_grading',
+                                    :link_text     => "Preview Grading",
+                                    :id_value      => pool_graded_summary.id.to_s }}
+
+
+
 
     if PoolGradedSummary::STATUS_COMPLETE == pool_graded_summary.status
       field_configs << {:field_type    => 'LinkWindowField',
@@ -248,7 +256,7 @@ module RmtProcessing::GrowerGradingHelper
                                         :no_scroll     => true}
                                               }
 
-    set_form_layout '2', false, 1, 6
+    set_form_layout '2', false, 1, 11
 
     set_submit_button_align('left')
 

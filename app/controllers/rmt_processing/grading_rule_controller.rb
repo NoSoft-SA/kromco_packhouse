@@ -4,15 +4,194 @@ class  RmtProcessing::GradingRuleController < ApplicationController
     "grower_grading"
   end
 
+  def create_carton_grading_rule
+    if params[:grading_rule]['new_size'] == nil || params[:grading_rule]['new_size'] == nil || params[:grading_rule]['track_slms_indicator_code']== nil ||
+       params[:grading_rule]['new_size'] == "" || params[:grading_rule]['new_size'] == "" || params[:grading_rule]['track_slms_indicator_code']==""
+       flash[:error] = 'new size ,new class or new track_slms_indicator_code cannot be null '
+       new_carton_grading_rule
+    else
+      begin
+        @grading_header_id = session[:active_doc]['rule_header']
+        @grading_rule = CartonGradingRule.new(:new_size => params[:grading_rule]['new_size'],
+                                           :new_class => params[:grading_rule]['new_class'],
+                                           :grade => params[:grading_rule]['grade'],
+                                           :class => params[:grading_rule]['clasi'],
+                                           :variety => params[:grading_rule]['variety'],
+                                           :line_type => params[:grading_rule]['line_type'],
+                                           :size => params[:grading_rule]['size'],
+                                           :carton_grading_rule_header_id => session[:active_doc]['rule_header'],
+                                           :created_by =>  "'#{session[:user_id]['user_name']}'" ,
+                                           :created_at => "'#{Time.now}'" ,
+                                           :track_slms_indicator_code=> params[:grading_rule]['track_slms_indicator_code']   )
+        @grading_rule.save
+        flash[:notice] = 'record saved'
+        render :inline => %{<script>
+                                window.close();
+                                window.opener.location.href = '/rmt_processing/grading_rule/list_grading_rules/<%=@grading_header_id%>';
+                        </script>}, :layout=>"content"
+
+      rescue
+        handle_error('record could not be saved')
+      end
+    end
+  end
+
+  def new_carton_grading_rule
+    set_active_doc("rule_header" ,params[:id])
+    rules = CartonGradingRule.find_all_by_carton_grading_rule_header_id(session[:active_doc]['rule_header'])
+    @grading_rule = CartonGradingRule.new
+    @grading_rule.clasi = nil
+    @grading_rule.track_slms_indicator_code = rules[0]['track_slms_indicator_code'] if !rules.empty?
+    render :inline => %{
+		<% @content_header_caption = "'new rule'"%>
+		<%= build_carton_grading_rule_form(@grading_rule,'create_carton_grading_rule','create',false,true)%>
+		}, :layout => 'content'
+  end
+
+  def update_carton_grading_rule
+    begin
+      @grading_rule = CartonGradingRule.find(session[:active_doc]['rule'])
+        @grading_header_id = session[:active_doc]['rule_header']
+        if @grading_rule.update_attributes(:new_size => params[:grading_rule]['new_size'],
+                                           :new_class => params[:grading_rule]['new_class'],
+                                           :grade => params[:grading_rule]['grade'],
+                                           :class => params[:grading_rule]['clasi'],
+                                           :variety => params[:grading_rule]['variety'],
+                                           :line_type => params[:grading_rule]['line_type'],
+                                           :size => params[:grading_rule]['size'])
+          @grading_rule
+          flash[:notice] = 'record saved'
+          render :inline => %{<script>
+                                window.close();
+                                window.opener.location.href = '/rmt_processing/grading_rule/list_grading_rules/<%=@grading_header_id%>';
+                        </script>}, :layout=>"content"
+        else
+          list_grading_rules
+        end
+    rescue
+      handle_error('record could not be saved')
+    end
+  end
+
+  def delete_carton_grading_rule_header
+    ActiveRecord::Base.connection.execute("
+                       delete from carton_grading_rules where  carton_grading_rule_header_id = #{params[:id]};
+                       delete from carton_grading_rule_headers where  id = #{params[:id]};  ")
+    session[:alert]  = "deleted"
+    view_carton_grading_rule_headers
+  end
+
+  def edit_carton_grading_rule
+    @grading_rule = CartonGradingRule.find_by_sql(grading_rule_sql("where cgr.id = #{params[:id]}"))[0]
+    @grading_rule['clasi'] = @grading_rule['class']
+    set_active_doc("rule",params[:id])
+    render :inline => %{
+		<% @content_header_caption = "'edit rule'"%>
+		<%= build_carton_grading_rule_form(@grading_rule,'update_carton_grading_rule','update',true,false)%>
+		}, :layout => 'content'
+  end
+
+
+
+  def delete_carton_grading_rule
+    ActiveRecord::Base.connection.execute("delete from carton_grading_rules where  id = #{params[:id]}")
+    session[:alert]  = "deleted"
+    params[:id] = session[:active_doc]['rule_header']
+    list_grading_rules
+  end
+
+  def activate_carton_grading_rule
+    ActiveRecord::Base.connection.execute("
+    update carton_grading_rules set updated_at ='#{Time.now}',updated_by = '#{session[:user_id]['user_name']}',activated = true,deactivated =false,
+    deactivated_at = null ,activated_at = '#{Time.now}' where id = #{params[:id]}")
+    session[:alert]  = "activated"
+    params[:id] = session[:active_doc]['rule_header']
+    list_grading_rules
+  end
+
+  def deactivate_carton_grading_rule
+    params[:id]
+    ActiveRecord::Base.connection.execute("
+    update carton_grading_rules set updated_at ='#{Time.now}',updated_by = '#{session[:user_id]['user_name']}',activated = false,deactivated =true,deactivated_at = '#{Time.now}',activated_at = null
+    where id = #{params[:id]};")
+    session[:alert]  = "deactivated"
+    params[:id] = session[:active_doc]['rule_header']
+    list_grading_rules
+  end
+
   def bypass_generic_security?
     true
   end
 
+  def list_grading_rules
+    set_active_doc("rule_header" ,params[:id])
+    get_grading_rules("where cgrh.id = #{params[:id]}")
+    render_grading_rules_grid
+  end
+
+  def grading_rule_sql(condition=nil)
+    grading_rule_sql = "select s.season_code as season,cgr.size,cgr.grade,cgr.variety,cgr.track_slms_indicator_code,
+     cgr.line_type,cgr.updated_by,cgr.updated_at,cgr.deactivated_at,cgr.activated,cgr.class as clasi,cgr.class,
+     cgr.id,cgr.new_class,cgr.new_size,cgr.deactivated ,cgrh.activated as is_active_header,cgr.created_at,cgr.created_by
+     from carton_grading_rule_headers cgrh
+     join carton_grading_rules cgr on cgr.carton_grading_rule_header_id = cgrh.id
+     join seasons s on cgrh.season_id = s.id #{condition}"
+  end
+
+  def get_grading_rules(condition=nil)
+    @grading_rules = ActiveRecord::Base.connection.select_all(grading_rule_sql(condition))
+  end
+
+  def get_grading_rule_headers(condition=nil)
+    @grading_rule_headers = ActiveRecord::Base.connection.select_all("
+     select s.season_code as season,
+     cgrh.updated_by,cgrh.updated_at,cgrh.deactivated_at,cgrh.activated_at,cgrh.activated,cgrh.created_by
+    ,cgrh.created_at,cgrh.id
+     from carton_grading_rule_headers cgrh
+     join seasons s on cgrh.season_id = s.id
+     #{condition}
+     order by cgrh.id desc")
+  end
+
+  def view_new_carton_grading_rules(carton_grading_rule_header_id)
+    get_grading_rules("where cgrh.id = #{carton_grading_rule_header_id}")
+    render_grading_rules_grid
+  end
+
+  def view_carton_grading_rule_headers
+    get_grading_rule_headers#("where cgrh.id = 24")
+    render_grading_rule_headers_grid
+  end
+
+  def render_grading_rule_headers_grid
+    render :inline => %{
+      <% grid            = build_grading_rule_headers_grid(@grading_rule_headers) %>
+      <% grid.caption    = 'Grading Rule Headers' %>
+      <% @header_content = grid.build_grid_data %>
+      <%= grid.render_html %>
+      <%= grid.render_grid %>
+      }, :layout => 'content'
+  end
+
+  def render_grading_rules_grid
+    render :inline => %{
+      <% grid            = build_grading_rules_grid(@grading_rules) %>
+      <% grid.caption    = 'Grading Rules' %>
+      <% @header_content = grid.build_grid_data %>
+      <%= grid.render_html %>
+      <%= grid.render_grid %>
+      }, :layout => 'content'
+  end
+
+  def view_carton_grading_rules
+    get_grading_rules
+    render_grading_rules_grid
+  end
+
   def upload_grading_rule_file
-    @seasons = ActiveRecord::Base.connection.select_all("select distinct season_code,id from pool_graded_summaries"
+    @seasons = ActiveRecord::Base.connection.select_all("select distinct season_code,id from seasons order by season_code desc"
                ).map{|x|[x['season_code'],x['id']]}.unshift("")
 
-    @seasons
     @content_header_caption = "Select File"
     render :template => '/rmt_processing/grower_grading/upload_grading_rule_file.rhtml', :layout => 'content'
   end
@@ -20,17 +199,19 @@ class  RmtProcessing::GradingRuleController < ApplicationController
   def submit_grading_file
     if params && params[:grading_file].blank?
       flash[:error] = "Choose a file"
-      render :template => '/rmt_processing/grower_grading/upload_grading_rule_file.rhtml', :layout => 'content'
+      upload_grading_rule_file
       return
     end
     begin
-      x = ProcessGradingRuleFile.new(params[:grading_file],session[:user_id]['user_name'],params[:type],params[:season_id]).call
-      if x
+      x = ProcessGradingRuleFile.new(params[:grading_file],session[:user_id]['user_name'],"cartons",params[:season_id]).call
+      if x.is_a?String
         flash[:error] = x
-        render :template => '/rmt_processing/grower_grading/upload_grading_rule_file.rhtml', :layout => 'content'
-        return
-      else
-        redirect_to_index("upload successful")
+        #render :template => '/rmt_processing/grower_grading/upload_grading_rule_file.rhtml', :layout => 'content'
+        upload_grading_rule_file
+      elsif x.is_a?Integer
+        # redirect_to_index("upload successful")
+        flash[:notice] = "upload successful"
+        view_carton_grading_rule_headers
       end
     rescue
       raise $!
