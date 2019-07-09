@@ -3,6 +3,14 @@ class Globals
   @@log_levels = {}
   @@console_log_levels = {}
 
+  def Globals.get_grading_csv_file_configs_folder
+    Dir.getwd + "/public/uploads/csv_file_configs"
+  end
+
+  def Globals.get_grading_rule_folder
+    Dir.getwd + "/public/uploads/rmt_processing/grower_grading/grading_rules"
+  end
+
   if RUBY_VERSION < '1.8.7'
     def self.log_levels
       @@log_levels
@@ -19,6 +27,8 @@ class Globals
   else
     cattr_accessor :log_levels, :console_log_levels
   end
+
+
 
   def Globals.get_presort_unit_from_lot_number(lot_nr)
 
