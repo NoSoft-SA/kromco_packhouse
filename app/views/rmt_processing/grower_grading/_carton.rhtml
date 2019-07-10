@@ -2,19 +2,19 @@
 <% modified_class = carton.grading_applied ? 'pool_graded_cartons_modified' : '' %>
 <%if carton.auto_rule_age.to_i > 0 %>
 
-<tr class="<%= cycle('rowodd','roweven') %> hover-row"  style="color: black; color: lightblue;>
-  <td id="carton_size_<%=key_id%>" >
+<tr class="hover-row"   style="color: #0000DD;">
+  <td id="carton_size_<%=key_id%>" class="<%=  %>">
     <%= carton.actual_size_count_code %>
     <%= hidden_field_tag "cartons[#{key_id}][grading_applied]", carton.grading_applied %>
   </td>
-  <td id="carton_gsize_<%=key_id%>" class="<%= modified_class %>">
+  <td id="carton_gsize_<%=key_id%>" class="<%=  %>">
     <span style="display:none"><%= carton.graded_size %></span>
     <%= text_field_tag "cartons[#{key_id}][graded_size]", carton.graded_size, :size => 3 %>
   </td>
-  <td id="carton_class_<%=key_id%>" class="<%= modified_class %>"><%= carton.product_class_code %></td>
-  <td id="carton_gclass_<%=key_id%>" class="<%= modified_class %>">
+  <td id="carton_class_<%=key_id%>" class="<%=  %>"><%= carton.product_class_code %></td>
+  <td id="carton_gclass_<%=key_id%>" class="<%=  %>">
     <span style="display:none"><%= carton.graded_class %></span>
-    <%= select_tag "cartons[#{key_id}][graded_class]", options_for_select([1,2,3,4,5], carton.graded_class) %>
+    <%= select_tag "cartons[#{key_id}][graded_class]", options_for_select([1,2,3,4], carton.graded_class) %>
   </td>
   <td align="right"><%= sprintf('%0.2f', carton.schedule_weight ) %></td>
   <td><%= carton.fg_code_old %></td>
@@ -35,19 +35,19 @@
   <td><%= carton.rule_applied_by %></td>
 </tr>
 <%else%>
-  <tr class="<%= cycle('rowodd','roweven') %> hover-row">
-    <td id="carton_size_<%=key_id%>" class="<%= modified_class %>"  >
-        <%= carton.actual_size_count_code %>
-        <%= hidden_field_tag "cartons[#{key_id}][grading_applied]", carton.grading_applied %>
-        </td>
-        <td id="carton_gsize_<%=key_id%>" class="<%= modified_class %>">
-    <span style="display:none"><%= carton.graded_size %></span>
-    <%= text_field_tag "cartons[#{key_id}][graded_size]", carton.graded_size, :size => 3 %>
+  <tr class="hover-row">
+    <td id="carton_size_<%=key_id%>" class="<%=  %>">
+      <%= carton.actual_size_count_code %>
+      <%= hidden_field_tag "cartons[#{key_id}][grading_applied]", carton.grading_applied %>
     </td>
-    <td id="carton_class_<%=key_id%>" class="<%= modified_class %>"><%= carton.product_class_code %></td>
-    <td id="carton_gclass_<%=key_id%>" class="<%= modified_class %>">
+    <td id="carton_gsize_<%=key_id%>" class="<%=  %>">
+      <span style="display:none"><%= carton.graded_size %></span>
+      <%= text_field_tag "cartons[#{key_id}][graded_size]", carton.graded_size, :size => 3 %>
+    </td>
+    <td id="carton_class_<%=key_id%>" class="<%=  %>"><%= carton.product_class_code %></td>
+    <td id="carton_gclass_<%=key_id%>" class="<%=  %>">
       <span style="display:none"><%= carton.graded_class %></span>
-      <%= select_tag "cartons[#{key_id}][graded_class]", options_for_select([1,2,3,4,5], carton.graded_class) %>
+      <%= select_tag "cartons[#{key_id}][graded_class]", options_for_select([1,2,3,4], carton.graded_class) %>
     </td>
     <td align="right"><%= sprintf('%0.2f', carton.schedule_weight ) %></td>
     <td><%= carton.fg_code_old %></td>

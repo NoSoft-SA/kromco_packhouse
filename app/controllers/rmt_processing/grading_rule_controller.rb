@@ -74,11 +74,15 @@ class  RmtProcessing::GradingRuleController < ApplicationController
   end
 
   def delete_carton_grading_rule_header
+   begin
     ActiveRecord::Base.connection.execute("
                        delete from carton_grading_rules where  carton_grading_rule_header_id = #{params[:id]};
                        delete from carton_grading_rule_headers where  id = #{params[:id]};  ")
     session[:alert]  = "deleted"
     view_carton_grading_rule_headers
+   rescue
+     handle_error($!.message)
+   end
   end
 
   def edit_carton_grading_rule
@@ -93,10 +97,14 @@ class  RmtProcessing::GradingRuleController < ApplicationController
 
 
   def delete_carton_grading_rule
+    begin
     ActiveRecord::Base.connection.execute("delete from carton_grading_rules where  id = #{params[:id]}")
     session[:alert]  = "deleted"
     params[:id] = session[:active_doc]['rule_header']
     list_grading_rules
+  rescue
+    handle_error($!.message)
+  end
   end
 
   def activate_carton_grading_rule_header

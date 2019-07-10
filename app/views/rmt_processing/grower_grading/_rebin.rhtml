@@ -1,7 +1,7 @@
 <% key_id = rebin.id; %>
 <div class="taskContainer">
   <%if rebin.auto_rule_age.to_i > 0 %>
-    <tr style="color: black; color: lightblue; font-size:100%; text-align:center">
+    <tr style=" color: #0000DD; font-size:100%; text-align:center">
       <td><% if rebin.is_split_rebin? %><%= link_to 'Delete', :action => 'delete_rebin', :id => rebin.id %><% else %><%= link_to 'Split', :action => 'split_rebin', :id => rebin.id %><% end %></td>
       <td align="right"><%= rebin.rebins_quantity %></td>
       <td><%= rebin.class_code %></td>
