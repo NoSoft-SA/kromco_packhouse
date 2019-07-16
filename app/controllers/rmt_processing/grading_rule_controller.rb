@@ -140,7 +140,7 @@ class  RmtProcessing::GradingRuleController < ApplicationController
   end
 
   def activate_carton_grading_rule(carton_grading_rule_header_id = nil)
-    active  = !is_header_active?
+    active  = is_header_active?
     if active
       condition = "carton_grading_rule_header_id = #{carton_grading_rule_header_id}" if carton_grading_rule_header_id
       condition = "id = #{params[:id]}" if !carton_grading_rule_header_id
