@@ -12,7 +12,7 @@ class MoveLabeledCartons < PDTTransactionState
     get_labeled_buildup_stats
     field_configs = Array.new
     field_configs[field_configs.length] = {:type=>"text_line", :name=>"output", :value=>@moved_cartons_count.to_s + ' labeled cartons moved from ' + @moved_pallets_count.to_s + ' pallets'}
-    field_configs[field_configs.length] = {:type=>'text_box', :name=>'carton_num', :label=>'carton number', :is_required=>'true'}
+    field_configs[field_configs.length] = {:type=>'text_box', :name=>'carton_num', :label=>'carton number', :is_required=>'true', :scan_field => true}
 
     buttons = {:B1Label=>"Submit", :B1Enable=>"false", :B1Submit=>"move_labeled_cartons_submit", :B2Label=>"", :B2Enable=>"false", :B2Submit=>"", :B3Label=>"", :B3Enable=>"false", :B3Submit=>""}
     screen_attributes ={:content_header_caption=>"scan carton", :auto_submit=>"true",:auto_submit_to=>"move_labeled_cartons_submit",:cache_screen => true}#AUTO_SUBMIT

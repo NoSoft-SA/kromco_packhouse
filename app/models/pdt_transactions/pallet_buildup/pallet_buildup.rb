@@ -40,7 +40,7 @@ class PalletBuildup < PDTTransaction
   def build_default_screen
     field_configs = Array.new
     field_configs[field_configs.length] = {:type=>'text_box', :name=>'qty_cartons', :label=>'qty cartons', :is_required=>'true', :required_type=>"number"}
-    field_configs[field_configs.length] = {:type=>'text_box', :name=>'to_pallet', :label=>'to pallet', :is_required=>'true'}
+    field_configs[field_configs.length] = {:type=>'text_box', :name=>'to_pallet', :label=>'to pallet', :is_required=>'true',:scan_field => true}
     field_configs[field_configs.length] = {:type=>'text_box', :name=>'from_pallet_1', :label=>'from pallet 1',:scan_field => true}
     field_configs[field_configs.length] = {:type=>'text_box', :name=>'from_pallet_2', :label=>'from pallet 2',:scan_field => true}
     field_configs[field_configs.length] = {:type=>'text_box', :name=>'from_pallet_3', :label=>'from pallet 3',:scan_field => true}
@@ -294,8 +294,7 @@ class PalletBuildup < PDTTransaction
     end
   end
 
-  def
-  move_unlabeled_cartons_trans
+  def move_unlabeled_cartons_trans
     begin
       to_pallet = Pallet.find_by_pallet_number(@to_pallet_no)
       cart_nums = Array.new

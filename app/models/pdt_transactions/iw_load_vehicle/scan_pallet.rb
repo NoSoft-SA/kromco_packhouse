@@ -30,7 +30,7 @@ class ScanPallet < PDTTransactionState
      field_configs[field_configs.length] = {:type=>"text_line",:name=>"qty_pallets_to_load",:value=>output_value}
      field_configs[field_configs.length] = {:type=>"text_box",:name=>"pallet_number",:is_required=>"true",:scan_field => true}
      field_configs[field_configs.length] = {:type=>"text_box",:name=>"carton_number",:is_required=>"true",:scan_field => true}
-     field_configs[field_configs.length] = {:type=>"text_box",:name=>"qc_barcode",:scan_only=>"false"}
+     field_configs[field_configs.length] = {:type=>"text_box",:name=>"qc_barcode",:scan_only=>"false",:is_required=>"false"}
 
      screen_attributes = {:auto_submit=>"false",:content_header_caption=>"scan pallets",:cache_screen=>true}
      buttons = {"B3Label"=>"Clear" ,"B2Label"=>"Cancel","B1Submit"=>"scan_pallet_submit","B1Label"=>"submit","B1Enable"=>"true","B2Enable"=>"false","B3Enable"=>"false" }

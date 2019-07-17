@@ -252,7 +252,7 @@ class Globals
     "http://172.16.16.14:3000"
   end
   def Globals.pdt_simulator_client_server
-      "http://127.0.0.1:3000"
+      "http://192.168.50.110:3000"
   end
 
   def Globals.get_legacy_db_conn_string
