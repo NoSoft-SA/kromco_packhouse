@@ -15,13 +15,17 @@ class Services::PreSortingController < ApplicationController
     end
   end
 
-  def get_aport_bin_full_rmt_product_code(nom_article, presort_run)
+  def get_aport_bin_rmt_product_code(nom_article, presort_run)
     if (nom_article == "Article 128")
       return "#{presort_run.rmt_variety.commodity_code}_#{presort_run.rmt_variety.rmt_variety_code}_ALL_ALL_#{presort_run.ripe_point.ripe_point_code}_128"
     else
       nom_article_components = nom_article.split('_')
       return "#{presort_run.rmt_variety.commodity_code}_#{presort_run.rmt_variety.rmt_variety_code}_#{nom_article_components[1]}_#{nom_article_components[0]}_#{presort_run.ripe_point.ripe_point_code}_#{nom_article_components[2]}"
     end
+  end
+
+  def get_aport_bin_alt_rmt_product_code(presort_run)
+    "#{presort_run.rmt_variety.commodity_code}_#{presort_run.rmt_variety.rmt_variety_code}_STD_PS_#{presort_run.ripe_point.ripe_point_code}_MIX"
   end
 
 
@@ -49,7 +53,9 @@ class Services::PreSortingController < ApplicationController
         # return
       end
 
-      # results = [{'Nom_article' => "Article 128" , 'Palox_poids' => "", 'Numero_bon_apport' => "23", 'Poids'=>"205", 'Numero_palox'=>'704', 'Numero_lot_max'=>45}]
+      # results = [{'Nom_article' => "Article 128" , 'Palox_poids' => "12", 'Numero_bon_apport' => "23", 'Poids'=>"205", 'Numero_palox'=>@created_bin, 'Numero_lot_max'=>8},
+      #            {'Nom_article' => "D_J_T" , 'Palox_poids' => "20", 'Numero_bon_apport' => "23", 'Poids'=>"45", 'Numero_palox'=>@created_bin, 'Numero_lot_max'=>45},
+      #            {'Nom_article' => "A-Ron_1B_saka" , 'Palox_poids' => "44", 'Numero_bon_apport' => "23", 'Poids'=>"900", 'Numero_palox'=>@created_bin, 'Numero_lot_max'=>76}]
 
       if (results.empty?)
         raise "Presorted Bin:#{@created_bin} not found in View Palox"
@@ -65,7 +71,12 @@ class Services::PreSortingController < ApplicationController
       end
 
       palox_bin_presort_run=get_palox_bin_presort_run(representative_bin)
-      aport_bin_rmt_product_code = get_aport_bin_full_rmt_product_code(representative_bin['Nom_article'], palox_bin_presort_run)
+
+      if(results.map{|r| r['Nom_article']}.uniq.length > 1)
+        aport_bin_rmt_product_code = get_aport_bin_alt_rmt_product_code(palox_bin_presort_run)
+      else
+        aport_bin_rmt_product_code = get_aport_bin_rmt_product_code(representative_bin['Nom_article'], palox_bin_presort_run)
+      end
 
       if (!(rmt_product=RmtProduct.find_by_rmt_product_code(aport_bin_rmt_product_code)))
         raise "Error:Presorted Bin:#{@created_bin}:nom_article:#{representative_bin['Nom_article'].to_s.strip}:  rmt_product_code:'#{aport_bin_rmt_product_code}' does not exist"
