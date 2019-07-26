@@ -79,19 +79,17 @@ class Load < ActiveRecord::Base
       pallets = Pallet.connection.select_all("#{str_sql}")
       returned_pallets=pallets.map { |k| k['pallet_number'] }
       invalid_pallets=[]
-      error=[]
+      error=nil
       if pallets.length != pallet_numbers.length
         if pallets.empty?
-          invalid_pallets = pallet_numbers
+          error= "The following pallets cannot be imported.Pallets do not have cartons:  #{pallet_numbers.join("<BR>")}"
         else
           for num in pallet_numbers
             invalid_pallets << num if !returned_pallets.include?(num)
           end
+          error= "The following pallets cannot be imported.Pallets do not have cartons:  #{invalid_pallets.join("<BR>")}"
         end
-
-        invalid_palletsi=invalid_pallets.join(",")
-
-        raise "Error: These pallets are invalid! #{invalid_palletsi} ,QUERY IS:" + str_sql if !invalid_pallets.empty?
+        raise error if error
       end
       raise "Error: No valid pallets found!. QUERY IS:" + str_sql if pallets.length == 0
       puts "PALLET NUMBERS-ORDER:<BR> #{pallet_numbers.join("<BR>")}"
