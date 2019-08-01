@@ -1,5 +1,7 @@
 class ProcessGradingRuleFile
   require "csv"
+  require 'open-uri'
+
   attr_reader :user_name
 
 
@@ -23,7 +25,6 @@ class ProcessGradingRuleFile
     elsif @object_type == "rebins"
       csv_file_headers_order, csv_file_lines, csv_file_name_first_part, difference, required_cols_order,receivers,pods,pod_receivers,pod_and_receivers,pod_receiver_hash,customers = process_csv_file
     end
-
     return "File must contain columns in the following order and naming:<br> #{required_cols_order.join(',')}" if !difference.empty?
 
 
@@ -38,7 +39,7 @@ class ProcessGradingRuleFile
 
     store_csv_file(file_name,csv_file_lines.join(','))
 
-    apply_grading_rules(csv_file_headers_order, csv_file_lines, file_name, required_cols_order)
+    apply_grading_rules(csv_file_headers_order, csv_file_lines, file_name.split("/").last, required_cols_order)
 
     return @carton_grading_rule_header.id.to_i
   end
@@ -46,7 +47,7 @@ class ProcessGradingRuleFile
   def apply_grading_rules(csv_file_headers_order, csv_file_lines, file_name, required_cols_order)
     ActiveRecord::Base.transaction do
     deactive_active_rule
-    create_carton_grading_rules(csv_file_lines,required_cols_order)
+    create_carton_grading_rules(csv_file_lines,required_cols_order,file_name)
     end
   end
 
@@ -58,13 +59,16 @@ class ProcessGradingRuleFile
     where activated = true;")
   end
 
-  def create_carton_grading_rules(csv_file_lines,required_cols_order)
+  def create_carton_grading_rules(csv_file_lines,required_cols_order,file_name)
     num_of_cols = required_cols_order.length
     @carton_grading_rule_header = CartonGradingRuleHeader.new(
         :deactivated => false,
         :activated => true,
         :activated_at => Time.now,
-        :season_id => @season_id
+        :season_id => @season_id,
+        :file_name => file_name,
+        :activated_by => @user_name
+
     )
     @carton_grading_rule_header.save
     csv_file_lines.each do |line|
@@ -74,9 +78,9 @@ class ProcessGradingRuleFile
       end
       ctn_grading_rule_col_values
       ActiveRecord::Base.connection.execute("
-      INSERT INTO carton_grading_rules(carton_grading_rule_header_id,activated_at,activated,created_by,
+      INSERT INTO carton_grading_rules(carton_grading_rule_header_id,activated_at,activated,created_by,activated_by,created_at,
                                        #{required_cols_order.join(',')})
-                                VALUES(#{@carton_grading_rule_header.id},'#{Time.now}',true,'#{@user_name}',
+                                VALUES(#{@carton_grading_rule_header.id},'#{Time.now}',true,'#{@user_name}','#{@user_name}','#{Time.now}',
                                        #{ctn_grading_rule_col_values.join(',')})
                                  ")
 
@@ -137,6 +141,7 @@ class ProcessGradingRuleFile
 
     csv_file_headers_order, csv_file_lines, qry= get_csv_file_headers_order(csv_file)
 
+    file_name = "#{Globals.get_grading_rule_folder}/#{csv_file_name_first_part[0].to_s}_#{Time.now.strftime("%m_%d_%Y_%H_%M_%S")}.csv"
 
     #verify if column order is correct
     difference = verify_file_columns_order(required_cols_order, csv_file_headers_order, true)
@@ -157,6 +162,7 @@ class ProcessGradingRuleFile
   end
 
   def get_csv_file_headers_order(csv_file)
+
     csv_file_lines = []
     pallet_numbers = []
     required_cols = @csv_file_configs['grading_criteria']['total_required_columns']

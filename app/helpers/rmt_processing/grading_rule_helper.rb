@@ -45,6 +45,7 @@ module RmtProcessing::GradingRuleHelper
                            }}
     column_configs << {:field_type => 'action_collection', :field_name => 'actions', :settings => {:actions => action_configs}}
     column_configs << {:field_type => 'text',:field_name => 'activated',:column_caption=>'active' ,:data_type => 'boolean',:col_width=>65}
+    column_configs << {:field_type => 'text',:field_name => 'file_name' ,:col_width=>200}
     column_configs << {:field_type => 'text',:field_name => 'season' ,:col_width=>70}
     column_configs << {:field_type => 'text',:field_name => 'track_slms_indicator_code' ,:col_width=>130}
     column_configs << {:field_type => 'text',:field_name => 'size' ,:col_width=>60}
@@ -57,10 +58,14 @@ module RmtProcessing::GradingRuleHelper
     column_configs << {:field_type => 'text',:field_name => 'created_at' ,:col_width=>120}
     column_configs << {:field_type => 'text',:field_name => 'created_by' ,:col_width=>120}
     column_configs << {:field_type => 'text',:field_name => 'updated_by' ,:col_width=>120}
-    column_configs << {:field_type => 'text',:field_name => 'updated_at' ,:col_width=>120}
+    column_configs << {:field_type => 'text',:field_name => 'updated_at' ,:col_width=>120
+                       #:settings=>(:null_test => "updated_by != nil")
+    }
     column_configs << {:field_type => 'text',:field_name => 'description' ,:col_width=>120}
-    column_configs << {:field_type => 'text',:field_name => 'deactivated_at' ,:col_width=>130}
     column_configs << {:field_type => 'text',:field_name => 'activated_at' ,:col_width=>120}
+    column_configs << {:field_type => 'text',:field_name => 'activated_by' ,:col_width=>120}
+    column_configs << {:field_type => 'text',:field_name => 'deactivated_at' ,:col_width=>120}
+    column_configs << {:field_type => 'text',:field_name => 'deactivated_by' ,:col_width=>120}
     column_configs << {:field_type => 'text',:field_name => 'id' ,:col_width=>170}
     set_grid_min_height(80)
     set_grid_min_width(300)
@@ -74,7 +79,10 @@ module RmtProcessing::GradingRuleHelper
     column_configs = []
 
     action_configs << {:field_type => 'link_window', :field_name => 'rules',:col_width=>100,
-                       :settings =>{:link_icon => 'rules',:target_action => 'list_grading_rules',:link_text => 'rules',
+                       :settings =>{   :window_width => 2000,
+                                       :window_height => 500,
+                                    :link_icon => 'rules',:target_action => 'list_grading_rules',
+                                    :link_text => 'rules',
                                     :id_column => 'id'}}
 
     action_configs << {:field_type => 'action', :field_name => 'activate', :col_width => 33,
@@ -87,17 +95,19 @@ module RmtProcessing::GradingRuleHelper
 
     column_configs << {:field_type => 'action_collection', :field_name => 'actions', :settings => {:actions => action_configs}}
     column_configs << {:field_type => 'text',:field_name => 'activated',:column_caption=>'active' ,:data_type => 'boolean',:col_width=>80}
+    column_configs << {:field_type => 'text',:field_name => 'file_name' ,:col_width=>200}
     column_configs << {:field_type => 'text',:field_name => 'season' ,:col_width=>80}
+    column_configs << {:field_type => 'text',:field_name => 'description' ,:col_width=>120}
     column_configs << {:field_type => 'text',:field_name => 'created_at' ,:col_width=>170}
     column_configs << {:field_type => 'text',:field_name => 'created_by' ,:col_width=>120}
     column_configs << {:field_type => 'text',:field_name => 'updated_by' ,:col_width=>120}
     column_configs << {:field_type => 'text',:field_name => 'updated_at' ,:col_width=>120}
-    column_configs << {:field_type => 'text',:field_name => 'description' ,:col_width=>120}
-    column_configs << {:field_type => 'text',:field_name => 'deactivated_at' ,:col_width=>120}
     column_configs << {:field_type => 'text',:field_name => 'activated_at' ,:col_width=>120}
+    column_configs << {:field_type => 'text',:field_name => 'activated_by' ,:col_width=>120}
+    column_configs << {:field_type => 'text',:field_name => 'deactivated_at' ,:col_width=>120}
+    column_configs << {:field_type => 'text',:field_name => 'deactivated_by' ,:col_width=>120}
     column_configs << {:field_type => 'text',:field_name => 'deactivated',:hide => true}
     column_configs << {:field_type => 'text',:field_name => 'is_active_header',:hide => true}
-
     column_configs << {:field_type => 'text',:field_name => 'id' ,:col_width=>170}
     set_grid_min_height(80)
     set_grid_min_width(300)

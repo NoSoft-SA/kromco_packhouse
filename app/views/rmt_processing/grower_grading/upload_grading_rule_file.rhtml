@@ -1,11 +1,16 @@
-<% @header_content %>
-<% form_tag '/rmt_processing/grading_rule/submit_grading_file', :multipart => true do -%>
-    <table>
-      <tr><td>Season code:</td><td><%= select_tag "season_id", options_for_select(@seasons) %></td></tr>
-      <tr><td>Choose a file:</td><td><%= file_field_tag :grading_file %></td></tr>
-    </table>
+
+<% @content_header_caption = "Import Grading Rules"%>
+
+<% form_tag @submit, :multipart => true do -%>
+  <table>
+    <tr><td>Season code:</td><td><%= select_tag "season_id", options_for_select(@seasons) %></td></tr>
+    <tr><td>Choose a file:</td><td><%= file_field_tag :csv_file %></td></tr>
+  </table>
+  <p>
     <%= submit_tag 'upload' %>
+  </p>
 <% end -%>
+
 <p>
   The csv file to be imported must have the following columns and in the following order:
 <ul>
