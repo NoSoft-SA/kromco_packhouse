@@ -4,7 +4,13 @@ const crossbeamsRmdScan = (function crossbeamsRmdScan() {
   //
   const publicAPIs = { bypassRules: false };
 
-  const txtShow = document.getElementById('txtShow');
+  // New RMD logging:
+  // const txtShow = document.getElementById('txtShow');
+  // Old RMD logging:
+  const ifrm = window.frameElement; // reference to iframe element container
+  const doc = ifrm.ownerDocument;
+  const txtShow = doc.getElementById('messages'); // OUTER FRAME...
+
   const menu = document.getElementById('rmd_menu');
   const logout = document.getElementById('logout');
   const offlineStatus = document.getElementById('rmd-offline-status');
@@ -161,6 +167,8 @@ const crossbeamsRmdScan = (function crossbeamsRmdScan() {
           publicAPIs.logit(scanPack.error);
           return;
         }
+
+        publicAPIs.logit('scanned', scanPack.value);
         let cnt = 0;
         scannableInputs.forEach((e) => {
           if (e.value === '' && cnt === 0 && (publicAPIs.bypassRules || e.dataset.scanRule === scanPack.scanType)) {
@@ -192,7 +200,10 @@ const crossbeamsRmdScan = (function crossbeamsRmdScan() {
   publicAPIs.logit = (...args) => {
     console.info(...args);
     if (txtShow !== null) {
-      txtShow.insertAdjacentHTML('beforeend', `${Array.from(args).map(a => (typeof (a) === 'string' ? a : JSON.stringify(a))).join(' ')}<br>`);
+      // New RMD logging:
+      // txtShow.insertAdjacentHTML('beforeend', `${Array.from(args).map(a => (typeof (a) === 'string' ? a : JSON.stringify(a))).join(' ')}<br>`);
+      // Old RMD logging:
+      txtShow.value = `${Array.from(args).map(a => (typeof (a) === 'string' ? a : JSON.stringify(a))).join(' ')}\n` + txtShow.value;
     }
   };
 
