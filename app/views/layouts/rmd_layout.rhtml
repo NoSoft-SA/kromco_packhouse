@@ -115,7 +115,6 @@
     </div>
     <% end %>
     <div class="<%= @websocket_scan ? 'inner-container' : 'container' %>">
-
       <% if @camera_scan_device %>
         <button id="cameraScan" type="button" class="scanbutton">
           Scan with camera
@@ -124,7 +123,7 @@
       <%= @content_for_layout %>
 
       <% if @websocket_scan %>
-        <script src="/javascripts/crossbeams-rmd-scan.js?seq=9" type="text/javascript"></script>
+        <script src="/javascripts/crossbeams-rmd-scan.js?seq=10" type="text/javascript"></script>
         <script>
           window.addEventListener('DOMContentLoaded', function() {
             crossbeamsRmdScan.init({}, true);

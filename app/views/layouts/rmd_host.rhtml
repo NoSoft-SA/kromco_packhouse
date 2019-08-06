@@ -23,6 +23,8 @@
         margin: 0;
       }
       #pdt_content_header_caption {
+        display: inline-block;
+        min-width: 170px;
         padding: 0.25rem;
         color: green;
         background-color: lavender;
@@ -77,6 +79,21 @@
       }
       .mobile_web_busy_sinner_css_class td{
         width: 266px;
+      }
+      div#ws-state {
+        display: inline-block;
+        height: 1em;
+        width: 1em;
+        fill: currentColor;
+      }
+      div#ws-state.pending {
+        color: orange;
+      }
+      div#ws-state.connected {
+        color: green;
+      }
+      div#ws-state.disconnected {
+        color: red;
       }
     </style>
   </head>

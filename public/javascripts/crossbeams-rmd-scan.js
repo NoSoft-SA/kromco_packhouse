@@ -16,6 +16,7 @@ const crossbeamsRmdScan = (function crossbeamsRmdScan() {
   const offlineStatus = document.getElementById('rmd-offline-status');
   const scannableInputs = document.querySelectorAll('[data-scanner]');
   const cameraScan = document.getElementById('cameraScan');
+  const wsStateDisplay = doc.getElementById('ws-state');
   let webSocket;
 
   //
@@ -139,25 +140,47 @@ const crossbeamsRmdScan = (function crossbeamsRmdScan() {
     return res;
   };
 
+  // Change the colour of an icon to depict the websocket state.
+  const websocketStateDisplayChange = (connected) => {
+    if (wsStateDisplay === undefined) { return; }
+    wsStateDisplay.classList.remove('pending');
+    if (connected) {
+      wsStateDisplay.classList.add('connected');
+      wsStateDisplay.classList.remove('disconnected');
+    } else {
+      wsStateDisplay.classList.add('disconnected');
+      wsStateDisplay.classList.remove('connected');
+    }
+  };
+
   /**
    * startScanner - set up the websocket connection and its callbacks.
    */
   const startScanner = () => {
     const wsUrl = 'ws://127.0.0.1:2115';
+    let connectedState = false;
 
     if (webSocket !== undefined && webSocket.readyState !== WebSocket.CLOSED) { return; }
     webSocket = new WebSocket(wsUrl);
 
     webSocket.onopen = function onopen() {
+      websocketStateDisplayChange(true);
+      connectedState = true;
       publicAPIs.logit('Connected...');
     };
 
     webSocket.onclose = function onclose() {
+      websocketStateDisplayChange(false);
+      connectedState = false;
       publicAPIs.logit('Connection Closed...');
+      // delay for a second and try again...
+      setTimeout(startScanner, 1000);
     };
 
     webSocket.onerror = function onerror(event) {
-      publicAPIs.logit('Connection ERROR', event);
+      if (connectedState) { // Ignore websocket errors if we are not connected.
+        publicAPIs.logit('Connection ERROR', event);
+      }
     };
 
     webSocket.onmessage = function onmessage(event) {
@@ -223,7 +246,7 @@ const crossbeamsRmdScan = (function crossbeamsRmdScan() {
    * Call startScanner to make the websocket connection.
    *
    * @param {object} rules - the rules for identifying scan values.
-   * @param {boolean} bypassRules - should the rules be ignores (scan any barcode).
+   * @param {boolean} bypassRules - should the rules be ignored (scan any barcode).
    */
   publicAPIs.init = (rules, bypassRules) => {
     this.rules = rules;

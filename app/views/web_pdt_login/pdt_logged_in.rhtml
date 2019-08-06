@@ -6,7 +6,12 @@
 <div style="padding-left:20px;margin-bottom:1em;height:95vh;display:flex;flex-direction:column">
   <%= build_web_pdt_menus(@func_areas) %>
   <div class="<%= session[:pdt_content_container_css_class]%>" style="margin-bottom:1em;height:100%;display:flex;flex-direction:column;flex:1">
-    <div id="pdt_content_header_caption" class="<%= session[:pdt_content_header_css_class] %>" ></div>
+    <div>
+      <div id="ws-state" class="ws-state pending">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>
+      </div>
+      <div id="pdt_content_header_caption" class="<%= session[:pdt_content_header_css_class] %>" ></div>
+    </div>
     <iframe id = "content_frame" src="/services/pdt/handle_pdt_web_request" frameborder = "0" scrolling="yes" onload="stopWebPdtBusySpinner();"
       class="<%=session[:pdt_content_css_class]%>" style="flex:1">
     </iframe>
