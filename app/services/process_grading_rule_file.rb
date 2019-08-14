@@ -30,8 +30,8 @@ class ProcessGradingRuleFile
 
     #todoconfirm if new classes and new sizes should be in master files
     #TODOvaidate other master files
-    # errors = validate_file(csv_file_lines)
-    # return errors if errors
+    errors = validate_file(csv_file_lines)
+    return errors if errors
 
 
     #store file under 'public/uploads/rmt_processing/grower_grading/grading_rules' appending date and time to file name
@@ -71,19 +71,22 @@ class ProcessGradingRuleFile
 
     )
     @carton_grading_rule_header.save
+    vlues = []
     csv_file_lines.each do |line|
       ctn_grading_rule_col_values = []
       for i in 0..num_of_cols-1
         ctn_grading_rule_col_values << "'#{line[i]}'"
       end
-      ctn_grading_rule_col_values
+      vlues
+      if !vlues.include?(ctn_grading_rule_col_values.join(','))
       ActiveRecord::Base.connection.execute("
       INSERT INTO carton_grading_rules(carton_grading_rule_header_id,activated_at,activated,created_by,activated_by,created_at,
                                        #{required_cols_order.join(',')})
                                 VALUES(#{@carton_grading_rule_header.id},'#{Time.now}',true,'#{@user_name}','#{@user_name}','#{Time.now}',
                                        #{ctn_grading_rule_col_values.join(',')})
                                  ")
-
+        end
+      vlues << ctn_grading_rule_col_values.join(',')
     end
 
 
@@ -120,11 +123,11 @@ class ProcessGradingRuleFile
     end
 
     if !invalid_classes.empty? && !invalid_sizes.empty?
-      errors << "Invalid size/s:(#{invalid_sizes.join(',')}) AND invalid classes:(#{invalid_classes.join(',')}):<br>"
+      errors << "These are invalid size/s:(#{invalid_sizes.join(',')}) AND invalid classes:(#{invalid_classes.join(',')}):<br>"
     elsif !invalid_sizes.empty?
-      errors << "Invalid size/s:(#{invalid_sizes.join(',')})"
+      errors << "These are invalid size/s:(#{invalid_sizes.join(',')})"
     elsif !invalid_classes.empty?
-      errors << "Invalid classes:(#{invalid_classes.join(',')}):<br>"
+      errors << "These are invalid classes:(#{invalid_classes.join(',')}):<br>"
     end
 
 

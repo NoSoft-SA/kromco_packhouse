@@ -54,13 +54,14 @@ module RmtProcessing::GradingRuleHelper
     column_configs << {:field_type => 'text',:field_name => 'line_type' ,:col_width=>100}
     column_configs << {:field_type => 'text',:field_name => 'new_class' ,:col_width=>80}
     column_configs << {:field_type => 'text',:field_name => 'new_size' ,:col_width=>80}
-    column_configs << {:field_type => 'text',:field_name => 'product_class_code' ,:column_caption=>'class',:col_width=>70}
+    column_configs << {:field_type => 'text',:field_name => 'class' ,:column_caption=>'class',:col_width=>70}
     column_configs << {:field_type => 'text',:field_name => 'created_at' ,:col_width=>120}
     column_configs << {:field_type => 'text',:field_name => 'created_by' ,:col_width=>120}
     column_configs << {:field_type => 'text',:field_name => 'updated_by' ,:col_width=>120}
     column_configs << {:field_type => 'text',:field_name => 'updated_at' ,:col_width=>120
                        #:settings=>(:null_test => "updated_by != nil")
     }
+    column_configs << {:field_type => 'text',:field_name => 'product_class_code' ,:hide=>true,:col_width=>70}
     column_configs << {:field_type => 'text',:field_name => 'description' ,:col_width=>120}
     column_configs << {:field_type => 'text',:field_name => 'activated_at' ,:col_width=>120}
     column_configs << {:field_type => 'text',:field_name => 'activated_by' ,:col_width=>120}
