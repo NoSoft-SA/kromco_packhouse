@@ -30,8 +30,8 @@ class ProcessGradingRuleFile
 
     #todoconfirm if new classes and new sizes should be in master files
     #TODOvaidate other master files
-    errors = validate_file(csv_file_lines)
-    return errors if errors
+    # errors = validate_file(csv_file_lines)
+    # return errors if errors
 
 
     #store file under 'public/uploads/rmt_processing/grower_grading/grading_rules' appending date and time to file name
