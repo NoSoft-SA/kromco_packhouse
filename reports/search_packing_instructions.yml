@@ -1,0 +1,26 @@
+query: SELECT pi.*, tp.contact_name as trading_partner,st.shift_type_code as shift_type from packing_instructions pi left join trading_partners tp on pi.trading_partner_id=tp.id left join shift_types st on pi.shift_type_id = st.id WHERE(tp.contact_name={tp.contact_name} AND si.shift_type_code={si.shift_type_code} AND pi.pack_date={pi.pack_date} AND pi.ship_date={pi.ship_date} AND pi.pack_priority={pi.pack_priority} )
+main_table_name: packing_instructions
+
+fields:
+  field1:
+    field_name: tp.contact_name
+    caption: trading partner
+    field_type: lookup
+    list: "select distinct contact_name from trading_partners"
+  field2:
+    field_name: si.shift_type_code
+    caption: shift type
+    field_type: lookup
+    list: "select distinct shift_type_code from shift_types"
+  field3:
+    field_name: pi.pack_date
+    caption: pack date
+    field_type: daterange
+  field4:
+    field_name: pi.ship_date
+    caption: ship date
+    field_type: daterange
+  field5:
+    field_name: pi.pack_priority
+    caption: pack priority
+    field_type: text
