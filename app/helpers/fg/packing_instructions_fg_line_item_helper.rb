@@ -54,6 +54,36 @@ module Fg::PackingInstructionsFgLineItemHelper
     get_data_grid(data_set,column_configs,nil,true,grid_command)
   end
 
+  def get_observers(frm)
+    combos_js_for_commodity = gen_combos_clear_js_for_combos(["#{frm}_commodity_code", "#{frm}_marketing_variety_code"])
+    commodity_observer = {:updated_field_id => "marketing_variety_code_cell",
+                          :remote_method => 'store_commodity',
+                          :on_completed_js => combos_js_for_commodity["#{frm}_commodity_code"]}
+
+    combos_js_for_marketing_variety_code = gen_combos_clear_js_for_combos(["#{frm}_marketing_variety_code", "#{frm}_brand_code"])
+    marketing_variety_code_observer = {:updated_field_id => "brand_code_cell",
+                          :remote_method => 'store_marketing_variety_code',
+                          :on_completed_js => combos_js_for_marketing_variety_code["#{frm}_marketing_variety_code"]}
+
+    combos_js_for_brand_code = gen_combos_clear_js_for_combos(["#{frm}_brand_code", "#{frm}_old_pack_code"])
+    brand_code_observer = {:updated_field_id => "old_pack_code_cell",
+                          :remote_method => 'store_brand_code',
+                          :on_completed_js => combos_js_for_brand_code["#{frm}_brand_code"]}
+
+    combos_js_for_old_pack_code = gen_combos_clear_js_for_combos(["#{frm}_old_pack_code", "#{frm}_old_fg_actual_count"])
+    old_pack_code_observer = {:updated_field_id => "actual_count_cell",
+                          :remote_method => 'store_old_pack_code',
+                          :on_completed_js => combos_js_for_old_pack_code["#{frm}_old_pack_code"]}
+
+    combos_js_for_actual_count = gen_combos_clear_js_for_combos(["#{frm}_actual_count", "#{frm}_old_fg_id"])
+    actual_count_observer = {:updated_field_id => "old_fg_id_cell",
+                          :remote_method => 'refresh_old_fg_id',
+                          :on_completed_js => combos_js_for_actual_count["#{frm}_actual_count"]}
+
+    return commodity_observer,marketing_variety_code_observer,brand_code_observer,old_pack_code_observer,actual_count_observer
+
+  end
+
 
   def build_packing_instructions_fg_line_item_form(packing_instructions_fg_line_item,action,caption,is_edit = nil,is_create_retry = nil)
 #  --------------------------------------------------------------------------------------------------
@@ -61,10 +91,22 @@ module Fg::PackingInstructionsFgLineItemHelper
 #  in a composite foreign key
 #  --------------------------------------------------------------------------------------------------
   session[:packing_instructions_fg_line_item_form]= Hash.new
+
+  commodity_observer,marketing_variety_code_observer,brand_code_observer,old_pack_code_observer,actual_count_observer=get_observers("packing_instructions_fg_line_item")
+  mv_extended_fgs = ActiveRecord::Base.connection.select_all("select DISTINCT old_fg_code,id,commodity_code,marketing_variety_code,brand_code,old_pack_code,actual_count
+                     FROM mv_extended_fgs ")
+
+  session[:mv_extended_fgs] = mv_extended_fgs
+
+  commodity_codes         = mv_extended_fgs.map{|x|x['commodity_code']}.delete_if { |e| e ==nil || e=='' }.uniq
+  marketing_variety_codes = mv_extended_fgs.map{|x|x['marketing_variety_code']}.delete_if { |e| e ==nil || e=='' }.uniq
+  brand_codes             = mv_extended_fgs.map{|x|x['brand_code']}.delete_if { |e| e ==nil || e=='' }.uniq
+  old_pack_codes          = mv_extended_fgs.map{|x|x['old_pack_code']}.delete_if { |e| e ==nil || e=='' }.uniq
+  actual_counts           = mv_extended_fgs.map{|x|x['actual_count']}.delete_if { |e| e ==nil || e=='' }.uniq
+  fg_codes                = mv_extended_fgs.map{|g|[g['old_fg_code'],g['id'].to_i]}.uniq
+
   grade_codes = Grade.find_by_sql('select distinct grades.id,grades.grade_code from grades
                                   join extended_fgs on extended_fgs.grade_code=grades.grade_code ').map{|g|[g.grade_code,g.id.to_i]}
-  fg_codes = ActiveRecord::Base.connection.select_all("select distinct extended_fgs.id as old_fg_id,extended_fgs.old_fg_code
-             from extended_fgs where old_fg_code is not null limit 100").map{|g|[g['old_fg_code'],g['old_fg_id'].to_i]}
 
   marketing_orgs = ActiveRecord::Base.connection.select_all("select distinct id ,short_description
                     from organizations ").map{|g|[g['short_description'],g['id'].to_i]}
@@ -89,8 +131,23 @@ module Fg::PackingInstructionsFgLineItemHelper
   field_configs << {:field_type => 'TextField',
                     :field_name => 'retailer_sell_by_code'}
 
-  field_configs << {:field_type => 'DropDownField',
-            :field_name => 'old_fg_id',:settings => {:label_caption=> 'old fg',:list => fg_codes}}
+    field_configs << {:field_type => 'DropDownField', :field_name =>'commodity_code',
+                      :settings => {:label_caption=> 'commodity',:list => commodity_codes},:observer=>commodity_observer}
+
+    field_configs << {:field_type => 'DropDownField', :field_name => 'marketing_variety_code',
+                      :settings => {:label_caption=> 'marketing_variety_code',:list => marketing_variety_codes},:observer=>marketing_variety_code_observer}
+
+    field_configs << {:field_type => 'DropDownField', :field_name => 'brand_code',
+                      :settings => {:label_caption=> 'brand_code',:list => brand_codes},:observer=>brand_code_observer}
+
+    field_configs << {:field_type => 'DropDownField', :field_name => 'old_pack_code',
+                      :settings => {:label_caption=> 'old_pack_code',:list => old_pack_codes},:observer=>old_pack_code_observer}
+
+    field_configs << {:field_type => 'DropDownField', :field_name => 'actual_count',
+                      :settings => {:label_caption=> 'actual_count',:list => actual_counts},:observer=>actual_count_observer}
+
+  field_configs << {:field_type => 'DropDownField', :field_name => 'old_fg_id',
+                    :settings => {:label_caption=> 'old fg',:list => fg_codes}}
 
   field_configs << {:field_type => 'DropDownField',
                     :field_name => 'grade_id',
@@ -107,9 +164,7 @@ module Fg::PackingInstructionsFgLineItemHelper
             :field_name => 'marketing_org_id',:settings => {:list => marketing_orgs}}
 
   construct_form(packing_instructions_fg_line_item,field_configs,action,'packing_instructions_fg_line_item',caption,is_edit)
-
-end
-
+  end
 
  def build_packing_instructions_fg_line_item_search_form(packing_instructions_fg_line_item,action,caption,is_flat_search = nil)
 #  --------------------------------------------------------------------------------------------------
@@ -188,6 +243,11 @@ end
    column_configs << {:field_type => 'text', :field_name => 'inventory_code',:col_width=>150}
    column_configs << {:field_type => 'text', :field_name => 'target_market_code', :column_caption => 'target_market',:col_width=>200}
    column_configs << {:field_type => 'text', :field_name => 'marketing_org_code', :column_caption => 'marketing_org',:col_width=>100}
+   column_configs << {:field_type => 'text', :field_name => 'commodity_code',:col_width=>150}
+   column_configs << {:field_type => 'text', :field_name => 'marketing_variety_code',:col_width=>150}
+   column_configs << {:field_type => 'text', :field_name => 'brand_code',:col_width=>150}
+   column_configs << {:field_type => 'text', :field_name => 'old_pack_code',:col_width=>150}
+   column_configs << {:field_type => 'text', :field_name => 'actual_count',:col_width=>150}
 
   get_data_grid(data_set,column_configs,nil,true,grid_command)
 end
