@@ -16,9 +16,9 @@ class CartonPackStation < ActiveRecord::Base
                 :production_schedule_name,:production_run_number,:carton_setup_code,
                 :additional_groups,:more_groups,:rebin_group,:rmt_product_code,:extended_fg_code,
                 :inventory_code,:target_market,:marking,:diameter,:nett_mass,:order_no,:packing_order,
-                :retailer_sell_by_code,:palletizing, :label_template
+                :retailer_sell_by_code,:palletizing
   
-
+  
   #---------------------------------------------------------------------------------------
   #This static method is used to set outlets for the run- outlets(associated
   #with pack_groups)Each outlet record contains fields outlets1 to 6, the values 
@@ -158,8 +158,7 @@ class CartonPackStation < ActiveRecord::Base
           link = @@carton_links[run_id].find{|f|f.production_run_id == match.production_run_id && f.station_code == self.station_code}
           self.fg_product_code = link.fg_product_code if link
           self.carton_setup_code = link.carton_setup_code if link
-          self.label_template = link.label_template_name if link
-          if link
+          if link 
             
           end
         end
