@@ -96,7 +96,7 @@ class PiOut < TextOutTransformer
         pallet_ids = is_keys.map {|k| k[1] }
 
         pallets    = Pallet.find(:all,
-                     :select => "count(cartons.*) as carton_count,
+                     :select => "count(cartons.*) as carton_count,organizations_target_markets.target_market_region_code,
                       pallets.cpp, cartons.extended_fg_code, cartons.target_market_code, cartons.inventory_code,
                       cartons.puc, cartons.actual_size_count_code, cartons.season_code,pallets.pick_reference_code, cartons.gtin, cartons.sell_by_code,
                       pallets.pallet_number, cartons.organization_code, cartons.commodity_code, cartons.variety_short_long,
@@ -108,13 +108,16 @@ class PiOut < TextOutTransformer
                       join marketing_varieties on marketing_varieties.marketing_variety_code = SUBSTRING(cartons.variety_short_long from 1 for 3)
                       join marks on marks.mark_code = pallets.carton_mark_code
                       join pallet_format_products on pallet_format_products.id = pallets.pallet_format_product_id
+                      join target_markets ON (cartons.target_market_code = target_markets.target_market_code)
+                      join organizations ON (cartons.organization_code = organizations.short_description)
+                      left join organizations_target_markets ON target_markets.id = organizations_target_markets.target_market_id AND organizations.id =  organizations_target_markets.organization_id
                       join pallet_bases on pallet_bases.pallet_base_code = pallet_format_products.pallet_base_code",
                      :group => "cartons.extended_fg_code, cartons.target_market_code, cartons.inventory_code,
                       cartons.puc,cartons.season_code, cartons.actual_size_count_code, pallets.pick_reference_code, cartons.gtin, cartons.sell_by_code,
                       pallets.pallet_number, cartons.organization_code, cartons.commodity_code, cartons.variety_short_long,
                       cartons.old_pack_code, cartons.grade_code, pallets.pt_product_characteristics, commodities.commodity_group_code,
                       marketing_varieties.variety_group_code, marks.brand_code, pallet_bases.edi_out_pallet_base, pallets.cpp, pallets.pallet_format_product_id,
-                      pallets.carton_quantity_actual",
+                      pallets.carton_quantity_actual,organizations_target_markets.target_market_region_code",
                      :conditions => "pallets.id in (#{pallet_ids.join(',')})"
                     ).map {|m| [(m.pallet_number.length < 10 ? m.pallet_number : m.pallet_number[-10, 9]), m, m.carton_count.to_i, ((m.carton_count.to_i / m.carton_quantity_actual.to_f) * 100).to_i, 1]}.sort_by {|p| p[0]}
                     #).map {|m| [(m.pallet_number.length < 10 ? m.pallet_number : m.pallet_number[-10, 9]), m, m.carton_count.to_i, ((m.carton_count.to_i / m.cpp.to_f) * 100).to_i, 1]}.sort_by {|p| p[0]}
@@ -542,6 +545,7 @@ class PiOut < TextOutTransformer
            'pallet_base_type'       => pallet.edi_out_pallet_base,
            'sscc'                   => pallet.pallet_number,
            'orig_account'           => orig_account_code,
+           'target_region'          => pallet.target_market_region_code,
            'waybill_no'             => intake_headers_production.phytowaybill,
            'gtin'                   => pallet.gtin,
            'packh_code'             => phc,

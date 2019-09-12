@@ -15,7 +15,10 @@ defaults: &defaults
   company_short_name: JMT
   company_long_name: J&J Multi-Tier (Pty) Ltd
   system_email_sender: Packhouse System<jmt@unifrutti.co.za>
-  camera_scan_devices: [] # List of ip addresses of mobile devices that use camera to scan
+  camera_scan_devices:
+   - 192.168.50.8
+   - 192.168.50.34
+
 
 kromco:
   <<: *defaults
@@ -24,8 +27,8 @@ kromco:
   company_long_name: KROMCO SOUTH AFRICA (PTY) LTD
   system_email_sender: Kromco system<jmt@kromco.co.za>
   camera_scan_devices:
-    - 192.168.100.241
-    - 192.168.100.242
+    - 192.168.50.8
+    - 192.168.50.34
   jmt_monitoring_rules:
     edi_out:
       ps_token: ruby

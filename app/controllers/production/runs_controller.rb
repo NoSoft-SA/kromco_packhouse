@@ -1492,41 +1492,6 @@ class Production::RunsController < ApplicationController
 
   end
 
-  def set_run_label_template
-    render :inline => %{
-		<% @content_header_caption = "'select run label template'"%>
-		<%= build_set_run_label_template_form(params[:id])%>
-		}, :layout => 'content'
-  end
-
-
-  #--------DELETE--------
-  #--------DELETE--------
-  def return_label_names
-    render :inline=>%{
-      One,Two,Free
-    }
-  end
-
-  def set_run_label_template_submit
-
-    begin
-
-      session[:current_production_run].label_template_name = ((params[:run][:label_template].to_s.strip=='') ? nil : params[:run][:label_template])
-      session[:current_production_run].update
-
-      render :inline=>%{
-          <script>
-            window.close();
-            window.opener.frames[1].location.reload(true);
-          </script>
-      },:layout=>'content'
-
-    rescue
-      handle_error("Production run label_template could not be set")
-    end
-
-  end
 
   def set_current_schedule
     @production_run = ProductionRun.find(params[:id])
@@ -2910,10 +2875,6 @@ class Production::RunsController < ApplicationController
 
         session[:current_pack_station] = @pack_station
 
-        # if(link = CartonLink.find_by_production_run_id_and_station_code(session[:current_production_run].id, session[:current_pack_station].station_code))
-        #   @pack_station.label_template = link.label_template_name
-        # end
-
         render_set_fg_product
       else
         raise "pack station with id: " + params[:id].to_s + " could not be found"
@@ -3020,8 +2981,6 @@ class Production::RunsController < ApplicationController
       puts "cart setup: " + params[:pack_station][:carton_setup_code]
       carton_setup = CartonSetup.find_by_carton_setup_code_and_production_schedule_code(params[:pack_station][:carton_setup_code], session[:current_production_run].production_schedule_name)
 
-
-      link.label_template_name = params[:pack_station][:label_template]
 
       link.carton_setup = carton_setup
       link.carton_label_setup = carton_setup.carton_label_setup
