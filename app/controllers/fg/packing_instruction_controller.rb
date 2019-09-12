@@ -61,11 +61,6 @@ def render_list_packing_instructions
   },:layout => 'content'
 end
 
-def search_packing_instructions_flat
-  return if authorise_for_web(program_name?,'read')== false
-  @is_flat_search = true 
-  render_packing_instruction_search_form
-end
 
 def render_packing_instruction_search_form(is_flat_search = nil)
   session[:is_flat_search] = @is_flat_search
