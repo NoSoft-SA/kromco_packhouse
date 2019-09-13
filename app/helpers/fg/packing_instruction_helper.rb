@@ -15,6 +15,8 @@ module Fg::PackingInstructionHelper
 #  ---------------------------------
    field_configs = []
 
+  field_configs[field_configs.length()] = {:field_type => 'LabelField', :field_name => 'packing_instruction_code'}
+
   field_configs << {:field_type => 'DropDownField',
                     :field_name => 'shift_type_id',
                     :settings => {:list => shift_type_codes}}
@@ -36,6 +38,8 @@ module Fg::PackingInstructionHelper
 #  ----------------------------------------------------------------------------------------------
   field_configs << {:field_type => 'TextField',
             :field_name => 'remarks'}
+
+    field_configs[field_configs.length()] = {:field_type => 'LabelField', :field_name => 'du', :non_db_field => true, :settings => {:is_separator => false, :static_value => '', :css_class => "borderless_label_field"}}
 
     field_configs[field_configs.length()] = {:field_type => 'Screen',
                                              :field_name => "child_form3",
@@ -61,7 +65,7 @@ module Fg::PackingInstructionHelper
                                              }
     } if packing_instruction
     @submit_button_align = "left"
-    set_form_layout "2", nil, 1, 6
+    set_form_layout "2", nil, 1, 8
 
   construct_form(packing_instruction,field_configs,action,'packing_instruction',caption,is_edit)
 
@@ -127,6 +131,7 @@ end
   #action_configs << {:field_type => 'separator'} if can_edit || can_delete
 
   column_configs << {:field_type => 'action_collection', :field_name => 'actions', :settings => {:actions => action_configs}} unless action_configs.empty?
+   column_configs << {:field_type => 'text', :field_name => 'packing_instruction_code', :column_caption => 'Shift type code',:column_width => 200}
    column_configs << {:column_width => 200,:field_type => 'text', :field_name => 'trading_partner', :column_caption => 'Trading partner'}
    column_configs << {:field_type => 'text', :field_name => 'shift_type', :column_caption => 'Shift type'}
   column_configs << {:field_type => 'text', :field_name => 'pack_date', :data_type => 'date', :column_caption => 'Pack date'}

@@ -120,8 +120,16 @@ def new_packing_instruction
   render_new_packing_instruction
 end
 
+def create_packing_instruction_code
+  shift_type_code = ShiftType.find(params[:packing_instruction]['shift_type_id']).shift_type_code
+  #trading_partner =  ActiveRecord::Base.connection.select_one("select contact_name from trading_partners")['contact_name']
+  code = shift_type_code + "_" + params[:packing_instruction]['pack_date'].to_s
+  return code
+end
+
 def create_packing_instruction
    @packing_instruction = PackingInstruction.new(params[:packing_instruction])
+   @packing_instruction.packing_instruction_code = create_packing_instruction_code
    if @packing_instruction.save
      set_active_doc("pi",@packing_instruction.id)
      render :inline => %{<script>
