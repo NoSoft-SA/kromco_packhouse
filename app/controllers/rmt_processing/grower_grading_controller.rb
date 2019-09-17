@@ -46,10 +46,10 @@ class  RmtProcessing::GrowerGradingController < ApplicationController
       end
       changed
     end
-
+    num_of_rules = rule_cartons.length
     render :inline=>%{
       <script>
-        alert("rules applied");
+        alert("#{num_of_rules}:  rules applied");
         window.opener.frames[1].location.href ='/rmt_processing/grower_grading/edit_pool_graded_summary/#{@pool_graded_summary.id}';
         window.close();
       </script>

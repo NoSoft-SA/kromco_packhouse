@@ -254,6 +254,7 @@ class  RmtProcessing::GradingRuleController < ApplicationController
 
   def get_grading_rules(condition=nil)
     @grading_rules = ActiveRecord::Base.connection.select_all(grading_rule_sql(condition))
+    session[:query]=  "ActiveRecord::Base.connection.select_all(\"#{grading_rule_sql(condition)}\")"
   end
 
   def get_grading_rule_headers(condition=nil)
