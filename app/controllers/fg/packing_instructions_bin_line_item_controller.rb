@@ -78,7 +78,7 @@ class Fg::PackingInstructionsBinLineItemController < ApplicationController
 
   def get_bins(bin_where_clause)
     @bins = ActiveRecord::Base.connection.select_all("
-                #{get_bin_select_clause}
+                                                     #{get_bin_select_clause}
                from bins
               left join stock_items on bin_number=stock_items.inventory_reference
               left join seasons on bins.season_id=seasons.id
@@ -96,7 +96,7 @@ class Fg::PackingInstructionsBinLineItemController < ApplicationController
                 select bin_id from packing_instruction_bin_line_item_bins where
                 packing_instruction_bin_line_item_id  = #{session[:active_doc]['bin_line_item']}
                )
-                                       ")#TODO: Remove the comments from sql
+                                       ")
     session[:bins] = @bins
   end
 
@@ -147,7 +147,7 @@ class Fg::PackingInstructionsBinLineItemController < ApplicationController
 
 
   def list_bin_line_item_bins
-    set_active_doc("bin_line_item",params[:id])
+    set_active_doc("bin_line_item", params[:id])
     get_list_bins
     @add = true
     render_line_item_bins_grid
@@ -164,7 +164,7 @@ class Fg::PackingInstructionsBinLineItemController < ApplicationController
   end
 
   def get_bin_select_clause
-      bin_select_clause = "
+    bin_select_clause = "
              select distinct bins.bin_number,bins.id,
               track_slms_indicators.track_slms_indicator_code,
               rmt_products.rmt_product_code,
@@ -183,7 +183,7 @@ class Fg::PackingInstructionsBinLineItemController < ApplicationController
   def get_list_bins
     select_clause = get_bin_select_clause
     @bins = ActiveRecord::Base.connection.select_all("
-              #{select_clause}
+                                                     #{select_clause}
                from bins
               left join stock_items on bin_number=stock_items.inventory_reference
               left join seasons on bins.season_id=seasons.id
@@ -207,7 +207,7 @@ class Fg::PackingInstructionsBinLineItemController < ApplicationController
               c.id=pibli.commodity_id ")
 
 
-    session[:bins]= @bins
+    session[:bins] = @bins
   end
 
   def bin_line_item_list_query(condition)
@@ -602,8 +602,6 @@ class Fg::PackingInstructionsBinLineItemController < ApplicationController
   end
 
   private
-
-
 
 
 #  --------------------------------------------------------------------------------
