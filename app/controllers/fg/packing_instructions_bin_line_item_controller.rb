@@ -87,11 +87,11 @@ class Fg::PackingInstructionsBinLineItemController < ApplicationController
               left join locations on stock_items.location_id=locations.id
               left join packing_instruction_bin_line_item_bins piblibs on piblibs.bin_id = bins.id
               where
-              /*seasons.season=2019 and
+              seasons.season=2019 and
               (stock_items.destroyed IS NULL OR stock_items.destroyed = false) and
                and location_status = ANY (ARRAY['OPEN', 'TEMPORARY', 'LOADING_CA']) and
-              locations.parent_location_code is null */
-                (#{bin_where_clause})
+              locations.parent_location_code is null
+                and (#{bin_where_clause})
                and bins.id not in (
                 select bin_id from packing_instruction_bin_line_item_bins where
                 packing_instruction_bin_line_item_id  = #{session[:active_doc]['bin_line_item']}
@@ -204,12 +204,9 @@ class Fg::PackingInstructionsBinLineItemController < ApplicationController
               s.id=pibli.size_id and
               p.id=pibli.product_class_id and
               treats.id=pibli.treatment_id and
-              c.id=pibli.commodity_id
-              /* and locations.parent_location_code is null
-              and seasons.season=2019 and
-              (stock_items.destroyed IS NULL OR stock_items.destroyed = false) and
-              location_status = ANY (ARRAY['OPEN', 'TEMPORARY', 'LOADING_CA'])*/
-                                                     ") #TODO: Remove the comments from sql
+              c.id=pibli.commodity_id ")
+
+
     session[:bins]= @bins
   end
 
