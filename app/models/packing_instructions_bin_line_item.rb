@@ -19,8 +19,7 @@ class PackingInstructionsBinLineItem < ActiveRecord::Base
      rmt.product_class_id,rmt.product_class_code,
     rmt.size_id,rmt.size_code,rmt.commodity_code,c.id as commodity_id
     from rmt_products rmt
-    left join commodities c on rmt.commodity_code =c.commodity_code
-where rmt.variety_code = 'PLD'")
+    left join commodities c on rmt.commodity_code =c.commodity_code")
   end
 
   def PackingInstructionsBinLineItem.get_commodities
