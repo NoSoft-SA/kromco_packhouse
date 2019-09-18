@@ -8,16 +8,234 @@ class Fg::PackingInstructionsBinLineItemController < ApplicationController
     true
   end
 
-  def refresh_track_slms_indicator
-    commodity_id = get_selected_combo_value(params)
 
-    if commodity_id == nil
+  def remove_selected_bins
+    selected_bins = selected_records?(session[:bins], nil, true)
+    remove_bin_line_item_bins(selected_bins)
+    get_list_bins
+    @add = true
+    flash[:notice] = "bins removed"
+    render_line_item_bins_grid
+    # render_list_bins_grid
+  end
+
+  def remove_bin_line_item_bins(selected_bins)
+    values = []
+    selected_bins.each do |bin|
+      values << "(bin_id = #{bin['id']} and packing_instruction_bin_line_item_id=#{session[:active_doc]['bin_line_item']})"
+    end
+    ActiveRecord::Base.connection.execute("delete from packing_instruction_bin_line_item_bins where #{values.join(' OR ')}")
+
+  end
+
+  def submit_selected_bins
+    selected_bins = selected_records?(session[:bins], nil, true)
+    create_bin_line_item_bins(selected_bins)
+    render :inline => %{<script>
+                              window.close();
+                              window.opener.location.reload(true);
+                            </script>}
+  end
+
+  def create_bin_line_item_bins(selected_bins)
+    values = []
+    selected_bins.each do |bin|
+      values << "(#{bin['id']},#{session[:active_doc]['bin_line_item']})"
+    end
+    values
+    ActiveRecord::Base.connection.execute("insert into
+  packing_instruction_bin_line_item_bins(bin_id,packing_instruction_bin_line_item_id)
+  VALUES #{values.join(',')}")
+  end
+
+  def select_bins
+    bin_line_item = get_bin_line_item
+    bin_where_clause = get_bin_where_clause(bin_line_item)
+    get_bins(bin_where_clause)
+    @add = nil
+    render_list_bins_grid
+  end
+
+  def render_list_bins_grid
+    render :inline => %{
+    <% grid = build_bins_grid(@bins,@add)%>
+    <% grid.caption = ' select bins'%>
+    <% @header_content = grid.build_grid_data %>
+    <%= grid.render_html %>
+    <%= grid.render_grid %>
+  }, :layout => 'content'
+  end
+
+  def get_bin_where_clause(bin_line_item)
+    where = "rmt_products.commodity_code                  #{bin_line_item['commodity_code']} and
+            track_slms_indicators.track_slms_indicator_code                     #{bin_line_item['track_slms_indicator_code']} and
+            rmt_products.variety_code                     #{bin_line_item['variety_code']} and
+            rmt_products.size_code                        #{bin_line_item['size_code']} and
+            rmt_products.product_class_code               #{bin_line_item['product_class_code']} and
+            rmt_products.treatment_code                   #{bin_line_item['treatment_code']} "
+  end
+
+
+  def get_bins(bin_where_clause)
+    @bins = ActiveRecord::Base.connection.select_all("
+                #{get_bin_select_clause}
+               from bins
+              left join stock_items on bin_number=stock_items.inventory_reference
+              left join seasons on bins.season_id=seasons.id
+              left join track_slms_indicators on track_indicator1_id=track_slms_indicators.id
+              left join rmt_products on bins.rmt_product_id=rmt_products.id
+              left join locations on stock_items.location_id=locations.id
+              left join packing_instruction_bin_line_item_bins piblibs on piblibs.bin_id = bins.id
+              where
+              /*seasons.season=2019 and
+              (stock_items.destroyed IS NULL OR stock_items.destroyed = false) and
+              locations.parent_location_code is null and
+              location_status = ANY (ARRAY['OPEN', 'TEMPORARY', 'LOADING_CA']) and */
+               (#{bin_where_clause})
+               and bins.id not in (
+                select bin_id from packing_instruction_bin_line_item_bins where
+                packing_instruction_bin_line_item_id  = #{session[:active_doc]['bin_line_item']}
+               )
+                                       ")#TODO: Remove the comments from sql
+    session[:bins] = @bins
+  end
+
+  def get_bin_line_item
+    bin_line_item_query = bin_line_item_list_query("pibli.id = #{session[:active_doc]['bin_line_item']}")
+    bin_line_item = ActiveRecord::Base.connection.select_all(bin_line_item_query)[0]
+    col_values = {}
+
+    col_values['commodity_code'] = "like '%'"
+    if !bin_line_item['commodity_code'] || bin_line_item['commodity_code'] == ''
+    else
+      col_values['commodity_code'] = "= '#{bin_line_item['commodity_code']}'"
+    end
+
+    col_values['track_slms_indicator_code'] = "like '%'"
+    if !bin_line_item['track_slms_indicator_code'] || bin_line_item['track_slms_indicator_code'] == ''
+    else
+      col_values['track_slms_indicator_code'] = "= '#{bin_line_item['track_slms_indicator_code']}'"
+    end
+
+    col_values['variety_code'] = "like '%'"
+    if !bin_line_item['variety_code'] || bin_line_item['variety_code'] == ''
+    else
+      col_values['variety_code'] = "= '#{bin_line_item['variety_code']}'"
+    end
+
+    col_values['size_code'] = "like '%'"
+    if !bin_line_item['size_code'] || bin_line_item['size_code'] == ''
+    else
+      col_values['size_code'] = "= '#{bin_line_item['size_code']}'"
+    end
+
+    col_values['product_class_code'] = "like '%'"
+    if !bin_line_item['product_class_code'] || bin_line_item['product_class_code'] == ''
+    else
+      col_values['product_class_code'] = "= '#{bin_line_item['product_class_code']}'"
+    end
+
+    col_values['treatment_code'] = "like '%'"
+    if !bin_line_item['treatment_code'] || bin_line_item['treatment_code'] == ''
+    else
+      col_values['treatment_code'] = "= '#{bin_line_item['treatment_code']}'"
+    end
+
+    return col_values
+
+  end
+
+
+  def list_bin_line_item_bins
+    set_active_doc("bin_line_item",params[:id])
+    get_list_bins
+    @add = true
+    render_line_item_bins_grid
+  end
+
+  def render_line_item_bins_grid
+    render :inline => %{
+    <% grid = build_line_item_bins_grid(@bins,@add)%>
+    <% grid.caption = 'line item bins'%>
+    <% @header_content = grid.build_grid_data %>
+    <%= grid.render_html %>
+    <%= grid.render_grid %>
+  }, :layout => 'content'
+  end
+
+  def get_bin_select_clause
+      bin_select_clause = "
+             select distinct bins.bin_number,bins.id,
+              track_slms_indicators.track_slms_indicator_code,
+              rmt_products.rmt_product_code,
+              locations.parent_location_code,
+              stock_type_code,
+              seasons.season,
+              stock_items.location_code,
+              rmt_products.commodity_code,
+              rmt_products.variety_code,
+              rmt_products.size_code,
+              rmt_products.product_class_code,
+              rmt_products.treatment_code
+             "
+  end
+
+  def get_list_bins
+    select_clause = get_bin_select_clause
+    @bins = ActiveRecord::Base.connection.select_all("
+              #{select_clause}
+               from bins
+              left join stock_items on bin_number=stock_items.inventory_reference
+              left join seasons on bins.season_id=seasons.id
+              left join track_slms_indicators on track_indicator1_id=track_slms_indicators.id
+              left join rmt_products on bins.rmt_product_id=rmt_products.id
+              left join locations on stock_items.location_id=locations.id
+              left join varieties v on v.rmt_variety_code =rmt_products.variety_code
+              left join sizes s on s.size_code=rmt_products.size_code
+              left join product_classes p on p.product_class_code=rmt_products.product_class_code
+              left join treatments treats on treats.treatment_code=rmt_products.treatment_code
+              left join commodities c on c.commodity_code=rmt_products.commodity_code
+              join packing_instruction_bin_line_item_bins piblibs on piblibs.bin_id = bins.id
+			        join packing_instructions_bin_line_items pibli on pibli.id = piblibs.packing_instruction_bin_line_item_id
+               where
+              piblibs.packing_instruction_bin_line_item_id =#{session[:active_doc]['bin_line_item']} and
+              track_slms_indicators.id = pibli.track_slms_indicator_id and
+              v.id = pibli.variety_id and
+              s.id=pibli.size_id and
+              p.id=pibli.product_class_id and
+              treats.id=pibli.treatment_id and
+              c.id=pibli.commodity_id
+              /*and seasons.season=2019 and
+              (stock_items.destroyed IS NULL OR stock_items.destroyed = false) and
+              locations.parent_location_code is null and
+              location_status = ANY (ARRAY['OPEN', 'TEMPORARY', 'LOADING_CA'])*/
+                                                     ") #TODO: Remove the comments from sql
+    session[:bins]= @bins
+  end
+
+  def bin_line_item_list_query(condition)
+    list_query = "select pibli.*,t.track_slms_indicator_code,v.rmt_variety_code as variety_code,s.size_code,
+  p.product_class_code,treats.treatment_code,c.commodity_code
+  from packing_instructions_bin_line_items pibli
+  left join track_slms_indicators t on t.id=pibli.track_slms_indicator_id
+  left join varieties v on v.id =pibli.variety_id
+  left join sizes s on s.id=pibli.size_id
+  left join product_classes p on p.id=pibli.product_class_id
+  left join treatments treats on treats.id=pibli.treatment_id
+  left join commodities c on c.id=pibli.commodity_id
+  left join packing_instructions pi on pi.id=pibli.packing_instruction_id
+  where #{condition}"
+  end
+
+  def refresh_track_slms_indicator
+    commodity_code = get_selected_combo_value(params)
+
+    if commodity_code == nil
       @track_slms_indicators = ["<empty>"]
     else
-      @track_slms_indicators = TrackSlmsIndicator.find_by_sql("select distinct tslm.id,track_slms_indicator_code
+      @track_slms_indicators = TrackSlmsIndicator.find_by_sql("select distinct tslm.id,tslm.track_slms_indicator_code
                                   from track_slms_indicators tslm
-                                  join commodities c on tslm.commodity_code = c.commodity_code
-                                   where tslm.track_indicator_type_code='RMI' and c.id= #{commodity_id}").map { |g| [g.track_slms_indicator_code, g.id] }
+                                   where tslm.track_indicator_type_code='RMI' and tslm.commodity_code= '#{commodity_code}'").map { |g| [g.track_slms_indicator_code, g.id] }
 
       @track_slms_indicators.unshift(["<empty>"])
     end
@@ -44,7 +262,7 @@ class Fg::PackingInstructionsBinLineItemController < ApplicationController
       session[:packing_instructions_bin_line_items_page] = nil
     end
 
-    list_query = bin_line_item_list_query
+    list_query = bin_line_item_list_query("pibli.packing_instruction_id = #{session[:active_doc]['pi']}")
     @packing_instructions_bin_line_items = ActiveRecord::Base.connection.select_all(list_query)
     session[:query] = "ActiveRecord::Base.connection.select_all(\"#{list_query}\")"
     render_list_packing_instructions_bin_line_items
@@ -388,19 +606,7 @@ class Fg::PackingInstructionsBinLineItemController < ApplicationController
 
   private
 
-  def bin_line_item_list_query
-    list_query = "select pibli.*,t.track_slms_indicator_code,v.rmt_variety_code as variety_code,s.size_code,
-  p.product_class_code,treats.treatment_code,c.commodity_code
-  from packing_instructions_bin_line_items pibli
-  left join track_slms_indicators t on t.id=pibli.track_slms_indicator_id
-  left join varieties v on v.id =pibli.variety_id
-  left join sizes s on s.id=pibli.size_id
-  left join product_classes p on p.id=pibli.product_class_id
-  left join treatments treats on treats.id=pibli.treatment_id
-  left join commodities c on c.id=pibli.commodity_id
-  left join packing_instructions pi on pi.id=pibli.packing_instruction_id
-  where pibli.packing_instruction_id = #{session[:active_doc]['pi']}"
-  end
+
 
 
 #  --------------------------------------------------------------------------------

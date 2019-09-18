@@ -93,12 +93,12 @@ module Fg::PackingInstructionsFgLineItemHelper
   session[:packing_instructions_fg_line_item_form]= Hash.new
 
   commodity_observer,marketing_variety_code_observer,brand_code_observer,old_pack_code_observer,actual_count_observer=get_observers("packing_instructions_fg_line_item")
-  mv_extended_fgs = ActiveRecord::Base.connection.select_all("select DISTINCT old_fg_code,id,commodity_code,marketing_variety_code,brand_code,old_pack_code,actual_count
+  mv_extended_fgs = ActiveRecord::Base.connection.select_all("select DISTINCT old_fg_code,id,marketing_variety_code,brand_code,old_pack_code,actual_count
                      FROM mv_extended_fgs ")
 
   session[:mv_extended_fgs] = mv_extended_fgs
 
-  commodity_codes         = mv_extended_fgs.map{|x|x['commodity_code']}.delete_if { |e| e ==nil || e=='' }.uniq
+  commodity_codes         = ['AP','PR']
   marketing_variety_codes = mv_extended_fgs.map{|x|x['marketing_variety_code']}.delete_if { |e| e ==nil || e=='' }.uniq
   brand_codes             = mv_extended_fgs.map{|x|x['brand_code']}.delete_if { |e| e ==nil || e=='' }.uniq
   old_pack_codes          = mv_extended_fgs.map{|x|x['old_pack_code']}.delete_if { |e| e ==nil || e=='' }.uniq
@@ -116,7 +116,7 @@ module Fg::PackingInstructionsFgLineItemHelper
                           [g.target_market_name + ":" + " " + " " + g.target_market_description ,g.id.to_i]
                          }
   inventory_codes = ActiveRecord::Base.connection.select_all("select distinct id as inv_code_id,inventory_code,inventory_name
-                    from inventory_codes").map{
+                    from inventory_codes where inventory_code is not null and inventory_name is not null").map{
                         |g|
                            [g['inventory_code'] + ":" + " " + " " + g['inventory_name'],g['inv_code_id'].to_i]
                          }

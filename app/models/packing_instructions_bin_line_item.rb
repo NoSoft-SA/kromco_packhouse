@@ -14,10 +14,13 @@ class PackingInstructionsBinLineItem < ActiveRecord::Base
   belongs_to :track_slms_indicator
 
   def PackingInstructionsBinLineItem.get_rmt_products
-    rmt_products = ActiveRecord::Base.connection.select_all("select distinct rmt.variety_id,rmt.variety_code,rmt.treatment_id,rmt.treatment_code,rmt.product_class_id,rmt.product_class_code,
+    rmt_products = ActiveRecord::Base.connection.select_all("
+    select distinct rmt.variety_id,rmt.variety_code,rmt.treatment_id,rmt.treatment_code,
+     rmt.product_class_id,rmt.product_class_code,
     rmt.size_id,rmt.size_code,rmt.commodity_code,c.id as commodity_id
     from rmt_products rmt
-    left join commodities c on rmt.commodity_code =c.commodity_code")
+    left join commodities c on rmt.commodity_code =c.commodity_code
+where rmt.variety_code = 'PLD'")
   end
 
   def PackingInstructionsBinLineItem.get_commodities

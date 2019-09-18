@@ -16,6 +16,8 @@ class PackingInstruction < ActiveRecord::Base
 #  =====================
 def validate
    is_valid = true
+   is_valid = ModelHelper::Validations.validate_combos([{:shift_type_id => self.shift_type_id}], self) if is_valid
+
    if self.new_record? && is_valid
      validate_uniqueness
    end

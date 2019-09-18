@@ -36,7 +36,7 @@ def list_packing_instructions
                 from packing_instructions pi
                 left join trading_partners tp on pi.trading_partner_id=tp.id
                 left join shift_types st on pi.shift_type_id = st.id
-                order by pi.id desc"
+                order by pi.id desc limit 100"
   @packing_instructions = ActiveRecord::Base.connection.select_all(list_query)
   session[:query] = "ActiveRecord::Base.connection.select_all(\"#{list_query}\")"
 

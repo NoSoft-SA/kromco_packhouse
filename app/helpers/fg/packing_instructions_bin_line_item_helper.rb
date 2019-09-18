@@ -1,16 +1,42 @@
 module Fg::PackingInstructionsBinLineItemHelper
 
+  def build_bins_grid(data_set,add=nil)
+    column_configs                          = Array.new
+    get_bin_columns(column_configs)
+    @multi_select = "submit_selected_bins"
+    get_data_grid(data_set,column_configs,nil,true)
+  end
+
+  def build_line_item_bins_grid(data_set,add=nil)
+
+    column_configs                          = Array.new
+    grid_command =    {:field_type=>'link_window_field',:field_name =>'bins',
+                       :settings =>
+                           {
+                               :host_and_port =>request.host_with_port.to_s,
+                               :controller =>request.path_parameters['controller'].to_s,
+                               :target_action =>'select_bins',
+                               :link_text => 'add bins',
+                               :id_value=>'id'
+                           }}
+    get_bin_columns(column_configs)
+    set_grid_min_width(1200)
+    @multi_select = "remove_selected_bins"
+    get_data_grid(data_set,column_configs,nil,true,grid_command)
+  end
 
   def build_packing_instructions_bin_line_item_form(packing_instructions_bin_line_item, action, caption, is_edit = nil, is_create_retry = nil)
     rmt_products = PackingInstructionsBinLineItem.get_rmt_products
 
-    commodity_codes = rmt_products.map { |x| [x['commodity_code'], x['commodity_id'].to_i] }.uniq
-    treatment_codes = rmt_products.map { |x| [x['treatment_code'], x['treatment_id'].to_i] }.uniq
-    product_class_codes = rmt_products.map { |x| [x['product_class_code'], x['product_class_id'].to_i] }.uniq
-    size_codes = rmt_products.map { |x| [x['size_code'], x['size_id'].to_i] }.uniq
-    varieties = rmt_products.map { |x| [x['variety_code'], x['variety_id'].to_i] }.uniq
+    # commodity_codes = rmt_products.map { |x| [x['commodity_code'], x['commodity_id'].to_i] }.uniq
+    # treatment_codes = rmt_products.map { |x| [x['treatment_code'], x['treatment_id'].to_i] }.uniq
+    # product_class_codes = rmt_products.map { |x| [x['product_class_code'], x['product_class_id'].to_i] }.uniq
+    # size_codes = rmt_products.map { |x| [x['size_code'], x['size_id'].to_i] }.uniq
+   # varieties = rmt_products.map { |x| [x['variety_code'], x['variety_id'].to_i].uniq }
     track_slms_indicator_codes = ["select commodity first"] if !packing_instructions_bin_line_item
     track_slms_indicator_codes = PackingInstructionsBinLineItem.get_track_slms_indicators if packing_instructions_bin_line_item
+
+    commodity_codes, product_class_codes, size_codes, treatment_codes, varieties = get_rmt_product_lists(rmt_products)
 
     field_configs = []
 #  ----------------------------------------------------------------------------------------------
@@ -94,6 +120,17 @@ module Fg::PackingInstructionsBinLineItemHelper
                         }}
     action_configs << {:field_type => 'separator'} if can_edit || can_delete
     column_configs << {:field_type => 'action_collection', :field_name => 'actions', :settings => {:actions => action_configs}} unless action_configs.empty?
+
+    column_configs << {:field_type => 'link_window',:field_name => 'bins',
+                       :column_caption => 'bins',
+                       :settings =>
+                           {:link_text => 'bins',
+                            :link_icon => 'bins',
+                            :width => 1200,
+                            :height => 250,
+                            :target_action => 'list_bin_line_item_bins',
+                            :id_column => 'id'}}
+
     column_configs << {:field_type => 'text', :field_name => 'bin_qty', :data_type => 'integer', :column_caption => 'Bin qty', :col_width => 100}
     column_configs << {:field_type => 'text', :field_name => 'commodity_code', :col_width => 100, :column_caption => 'commodity'}
     column_configs << {:field_type => 'text', :field_name => 'track_slms_indicator_code', :col_width => 140, :column_caption => 'track_slms_indicator'}
@@ -104,6 +141,56 @@ module Fg::PackingInstructionsBinLineItemHelper
     column_configs << {:field_type => 'text', :field_name => 'id'}
 
     get_data_grid(data_set, column_configs, nil, true, grid_command)
+  end
+
+  private
+
+  def get_rmt_product_lists(rmt_products)
+    varieties = []
+    dup_control = []
+    commodity_codes = ['AP','PR']
+    treatment_codes = []
+    product_class_codes = []
+    size_codes = []
+    rmt_products.each do |rec|
+      varieties << [rec['variety_code'], rec['variety_id'].to_i] if !dup_control.include?("#{rec['variety_code']}_#{rec['variety_id'].to_s}")
+      #commodity_codes << [rec['commodity_code'], rec['commodity_id']] if !dup_control.include?("#{rec['commodity_code']}_#{rec['commodity_id'].to_s}")
+      treatment_codes << [rec['treatment_code'], rec['treatment_id']] if !dup_control.include?("#{rec['treatment_code']}_#{rec['treatment_id'].to_s}")
+      product_class_codes << [rec['product_class_code'], rec['product_class_id']] if !dup_control.include?("#{rec['product_class_code']}_#{rec['product_class_id'].to_s}")
+      size_codes = [rec['size_code'], rec['size_id']] if !dup_control.include?("#{rec['size_code']}_#{rec['size_id'].to_s}")
+
+      dup_control << "#{rec['variety_code']}_#{rec['variety_id'].to_s}" if !dup_control.include?("#{rec['variety_code']}_#{rec['variety_id'].to_s}")
+      #dup_control << "#{rec['commodity_code']}_#{rec['commodity_id'].to_s}" if !dup_control.include?("#{rec['commodity_code']}_#{rec['commodity_id'].to_s}")
+      dup_control << "#{rec['treatment_code']}_#{rec['treatment_id'].to_s}" if !dup_control.include?("#{rec['treatment_code']}_#{rec['treatment_id'].to_s}")
+      dup_control << "#{rec['product_class_code']}_#{rec['product_class_id'].to_s}" if !dup_control.include?("#{rec['product_class_code']}_#{rec['product_class_id'].to_s}")
+      dup_control << "#{rec['size_code']}_#{rec['size_id'].to_s}" if !dup_control.include?("#{rec['size_code']}_#{rec['size_id'].to_s}")
+
+    end
+    return commodity_codes, product_class_codes, size_codes, treatment_codes, varieties
+  end
+
+  def get_bin_columns(column_configs)
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'bin_number', :col_width => 114}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'tipped_date_time', :col_width => 126}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'sealed_ca_date_time', :col_width => 150}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'delivery_number', :col_width => 130}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'rmt_product_code', :col_width => 272}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'farm_code', :column_caption => 'farm', :col_width => 100}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'production_run_code', :col_width => 209}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'pack_material_product_code', :col_width => 160}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'bin_receive_date_time', :col_width => 150}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'rebin_status', :col_width => 100}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'rebin_track_indicator_code', :col_width => 160}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'indicator_code1', :col_width => 120}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'indicator_code2', :col_width => 120}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'indicator_code3', :col_width => 120}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'indicator_code4', :col_width => 120}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'indicator_code5', :col_width => 120}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'rebin_date_time', :col_width => 121}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'user_name', :col_width => 105}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'print_number', :column_caption => 'print_num', :col_width => 68}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'exit_reference_date_time', :col_width => 150}
+    column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'id'}
   end
 
 
