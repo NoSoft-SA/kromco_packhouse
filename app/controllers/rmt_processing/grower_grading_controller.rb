@@ -65,9 +65,39 @@ class  RmtProcessing::GrowerGradingController < ApplicationController
               where pgs.id = #{params[:id]}")
     active_rules = get_active_rules
     rule_cartons = {}
+    # #----test---------
+    # pool_graded_ctns_list = pool_graded_cartons.map{ |a|
+    #   "#{a['actual_size_count_code']};#{a['graded_class']};#{a['variety_short_long']};#{a['grade_code']};#{a['line_type']};#{a['season']};#{a['track_slms_indicator_code']}"
+    # }
+    # rules_list = active_rules.map{ |rule|
+    #   "#{rule['size']};#{rule['clasi']};#{rule['variety']};#{rule['grade']};#{rule['line_type']};#{rule['season_code']};#{rule['track_slms_indicator_code']}"
+    # }
+    # unmatched_ctns = []
+    # pool_graded_ctns_list.each do |ctn|
+    #   unmatched_ctns << ctn if !rules_list.include?(ctn)
+    # end
+    # unmatched_ctns_num = unmatched_ctns.length
+    # puts "-----------------CTNS-----------------------------"
+    #      pool_graded_ctns_list.each do |ctn|
+    #        puts "#{ctn}"
+    #      end
+    # puts "--------------------------------------------------"
+    # puts "--------------------------------------------------"
+    # puts "--------------------------------------------------"
+    # puts "--------------------------------------------------"
+    # puts "--------------------------------------------------"
+    # puts "-----------------RULES----------------------------"
+    #      rules_list.each do |rule|
+    #        puts "#{rule}"
+    #      end
+    #
+    #  unmatched_ctns_num
+    #
+    #
+    # # ----------------
     active_rules.each do |rule|
       matched_cartons = pool_graded_cartons.find_all{|a|
-        a['actual_size_count_code']==rule['size'] && a['product_class_code']==rule['clasi'] &&
+        a['actual_size_count_code']==rule['size'] && a['graded_class']==rule['clasi'] &&
         a['variety_short_long']==rule['variety']  && a['grade_code']==rule['grade'] && a['line_type']==rule['line_type'] &&
         a['season']==rule['season_code'] &&  a['track_slms_indicator_code']==rule['track_slms_indicator_code'] }
       rule_cartons[rule] = matched_cartons if !matched_cartons.empty?
