@@ -225,14 +225,15 @@ class Fg::PackingInstructionsBinLineItemController < ApplicationController
   end
 
   def refresh_track_slms_indicator
-    commodity_code = get_selected_combo_value(params)
+    commodity_id = get_selected_combo_value(params)
 
-    if commodity_code == nil
+    if commodity_id == nil
       @track_slms_indicators = ["<empty>"]
     else
-      @track_slms_indicators = TrackSlmsIndicator.find_by_sql("select distinct tslm.id,tslm.track_slms_indicator_code
+      @track_slms_indicators = TrackSlmsIndicator.find_by_sql("select distinct tslm.id,track_slms_indicator_code
                                   from track_slms_indicators tslm
-                                   where tslm.track_indicator_type_code='RMI' and tslm.commodity_code= '#{commodity_code}'").map { |g| [g.track_slms_indicator_code, g.id] }
+                                  join commodities c on tslm.commodity_code = c.commodity_code
+                                   where tslm.track_indicator_type_code='RMI' and c.id= #{commodity_id}").map { |g| [g.track_slms_indicator_code, g.id] }
 
       @track_slms_indicators.unshift(["<empty>"])
     end
@@ -314,7 +315,6 @@ class Fg::PackingInstructionsBinLineItemController < ApplicationController
     end
   end
 
-
   def delete_packing_instructions_bin_line_item
     return if authorise_for_web(program_name?, 'delete') == false
     if params[:page]
@@ -324,10 +324,17 @@ class Fg::PackingInstructionsBinLineItemController < ApplicationController
     end
     id = params[:id]
     if id && packing_instructions_bin_line_item = PackingInstructionsBinLineItem.find(id)
-      packing_instructions_bin_line_item.destroy
-      session[:alert] = ' Record deleted.'
-      # render_list_packing_instructions_bin_line_items
-      redirect_to_last_grid
+      bins = ActiveRecord::Base.connection.select_one("
+                 select count(id) as bins from packing_instruction_bin_line_item_bins where
+                packing_instruction_bin_line_item_id  = #{id}")['bins']
+      if bins.to_i > 0
+        session[:alert] = ' Record cannot be deleted.Remove linked bins first'
+        list_packing_instructions_bin_line_items
+      else
+        packing_instructions_bin_line_item.destroy
+        session[:alert] = ' Record deleted.'
+        redirect_to_last_grid
+      end
     end
   rescue
     handle_error('record could not be deleted')
@@ -602,6 +609,20 @@ class Fg::PackingInstructionsBinLineItemController < ApplicationController
   end
 
   private
+
+  def bin_line_item_list_query(condition)
+    list_query = "select pibli.*,t.track_slms_indicator_code,v.rmt_variety_code as variety_code,s.size_code,
+  p.product_class_code,treats.treatment_code,c.commodity_code
+  from packing_instructions_bin_line_items pibli
+  left join track_slms_indicators t on t.id=pibli.track_slms_indicator_id
+  left join varieties v on v.id =pibli.variety_id
+  left join sizes s on s.id=pibli.size_id
+  left join product_classes p on p.id=pibli.product_class_id
+  left join treatments treats on treats.id=pibli.treatment_id
+  left join commodities c on c.id=pibli.commodity_id
+  left join packing_instructions pi on pi.id=pibli.packing_instruction_id
+  where #{condition}"
+  end
 
 
 #  --------------------------------------------------------------------------------
