@@ -89,8 +89,7 @@ class Fg::PackingInstructionsBinLineItemController < ApplicationController
               where
               seasons.season=2019 and
               (stock_items.destroyed IS NULL OR stock_items.destroyed = false) and
-               location_status = ANY (ARRAY['OPEN', 'TEMPORARY', 'LOADING_CA']) and
-              locations.parent_location_code is null
+               location_status = ANY (ARRAY['OPEN', 'TEMPORARY', 'LOADING_CA'])
                 and (#{bin_where_clause})
                and bins.id not in (
                 select bin_id from packing_instruction_bin_line_item_bins where
