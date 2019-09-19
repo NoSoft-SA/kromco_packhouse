@@ -14,7 +14,7 @@
   <td id="carton_class_<%=key_id%>" class="<%=  %>"><%= carton.product_class_code %></td>
   <td id="carton_gclass_<%=key_id%>" class="<%=  %>">
     <span style="display:none"><%= carton.graded_class %></span>
-    <%= select_tag "cartons[#{key_id}][graded_class]", options_for_select([1,2,3,4], carton.graded_class) %>
+    <%= select_tag "cartons[#{key_id}][graded_class]", options_for_select(['',1,2,3,4], carton.graded_class) %>
   </td>
   <td align="right"><%= sprintf('%0.2f', carton.schedule_weight ) %></td>
   <td><%= carton.fg_code_old %></td>
@@ -47,7 +47,7 @@
     <td id="carton_class_<%=key_id%>" class="<%=  %>"><%= carton.product_class_code %></td>
     <td id="carton_gclass_<%=key_id%>" class="<%=  %>">
       <span style="display:none"><%= carton.graded_class %></span>
-      <%= select_tag "cartons[#{key_id}][graded_class]", options_for_select([1,2,3,4], carton.graded_class) %>
+      <%= select_tag "cartons[#{key_id}][graded_class]", options_for_select(['',1,2,3,4], carton.graded_class) %>
     </td>
     <td align="right"><%= sprintf('%0.2f', carton.schedule_weight ) %></td>
     <td><%= carton.fg_code_old %></td>
