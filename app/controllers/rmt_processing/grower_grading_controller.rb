@@ -37,7 +37,7 @@ class  RmtProcessing::GrowerGradingController < ApplicationController
     changed = {}
     PoolGradedSummary.transaction do
       rule_cartons.each do |rule,cartons|
-        ActiveRecord::Base.connection.select_all("
+        ActiveRecord::Base.connection.execute("
          update pool_graded_cartons set graded_class = '#{rule['new_class']}' ,graded_size = '#{rule['new_size']}',
          grading_applied =true,carton_grading_rule_id=#{rule['carton_grading_rule_id']},rule_applied_at='#{Time.now}',
          rule_applied_by = '#{session[:user_id].user_name}'
@@ -97,7 +97,7 @@ class  RmtProcessing::GrowerGradingController < ApplicationController
     # # ----------------
     active_rules.each do |rule|
       matched_cartons = pool_graded_cartons.find_all{|a|
-        a['actual_size_count_code']==rule['size'] && a['graded_class']==rule['clasi'] &&
+        a['graded_size']==rule['size'] && a['graded_class']==rule['clasi'] &&
         a['variety_short_long']==rule['variety']  && a['grade_code']==rule['grade'] && a['line_type']==rule['line_type'] &&
         a['season']==rule['season_code'] &&  a['track_slms_indicator_code']==rule['track_slms_indicator_code'] }
       rule_cartons[rule] = matched_cartons if !matched_cartons.empty?
