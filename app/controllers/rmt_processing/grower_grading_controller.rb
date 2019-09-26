@@ -67,7 +67,7 @@ class  RmtProcessing::GrowerGradingController < ApplicationController
     rule_cartons = {}
     # #----test---------
     # pool_graded_ctns_list = pool_graded_cartons.map{ |a|
-    #   "#{a['actual_size_count_code']};#{a['graded_class']};#{a['variety_short_long']};#{a['grade_code']};#{a['line_type']};#{a['season']};#{a['track_slms_indicator_code']}"
+    #   "#{a['actual_size_count_code']};#{a['product_class_code']};#{a['variety_short_long']};#{a['grade_code']};#{a['line_type']};#{a['season']};#{a['track_slms_indicator_code']}"
     # }
     # rules_list = active_rules.map{ |rule|
     #   "#{rule['size']};#{rule['clasi']};#{rule['variety']};#{rule['grade']};#{rule['line_type']};#{rule['season_code']};#{rule['track_slms_indicator_code']}"
@@ -97,7 +97,7 @@ class  RmtProcessing::GrowerGradingController < ApplicationController
     # # ----------------
     active_rules.each do |rule|
       matched_cartons = pool_graded_cartons.find_all{|a|
-        a['graded_size']==rule['size'] && a['graded_class']==rule['clasi'] &&
+        a['actual_size_count_code']==rule['size'] && a['product_class_code']==rule['clasi'] &&
         a['variety_short_long']==rule['variety']  && a['grade_code']==rule['grade'] && a['line_type']==rule['line_type'] &&
         a['season']==rule['season_code'] &&  a['track_slms_indicator_code']==rule['track_slms_indicator_code'] }
       rule_cartons[rule] = matched_cartons if !matched_cartons.empty?
