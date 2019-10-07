@@ -2,6 +2,7 @@ require "rubygems"
 require "active_record"
 require "action_mailer"
 require "lib/globals.rb"
+require "config/postgres_adapter_patch"
 
   begin
       gem 'rails-dbi', :require => 'dbi'

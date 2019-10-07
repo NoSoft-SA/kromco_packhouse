@@ -3,6 +3,7 @@
  require "rubygems"
  require "active_record"
  require "action_mailer"
+ require "config/postgres_adapter_patch"
 
 
  $LOAD_PATH.unshift File.expand_path(File.join(File.dirname(__FILE__), '../lib'))

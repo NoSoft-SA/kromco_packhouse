@@ -44,7 +44,9 @@ module EdiSetup
     require "lib/extensions.rb"
     require "lib/globals.rb"
     require "lib/model_helper.rb"
-    require "lib/masterfile_validator"    
+    require "lib/masterfile_validator"
+    puts "overriding old postgres queries" unless silent
+    require "config/postgres_adapter_patch"
   end
 
   # Connect to the database
