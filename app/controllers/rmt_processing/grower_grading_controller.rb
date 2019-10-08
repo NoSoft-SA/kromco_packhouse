@@ -95,19 +95,27 @@ class  RmtProcessing::GrowerGradingController < ApplicationController
     #
     #
     # # ----------------
+    updated_all =[]
     active_rules.each do |rule|
+      updated= []
+
       matched_cartons = pool_graded_cartons.find_all{|a|
-        a['actual_size_count_code']==rule['size'] && a['product_class_code']==rule['clasi'] &&
+        a['actual_size_count_code']==rule['size'] &&
         a['variety_short_long']==rule['variety']  && a['grade_code']==rule['grade'] && a['line_type']==rule['line_type'] &&
-        a['season']==rule['season_code'] &&  a['track_slms_indicator_code']==rule['track_slms_indicator_code'] }
+        a['season']==rule['season_code'] &&  a['track_slms_indicator_code']==rule['track_slms_indicator_code'] &&
+        a['carton_grading_rule_id'].to_s != rule['id'].to_s}
       rule_cartons[rule] = matched_cartons if !matched_cartons.empty?
+
+      get_cartons_where_rule_has_already_been_applied(pool_graded_cartons, rule, updated_all)
     end
     if !rule_cartons.empty?
       apply_grading_rules(rule_cartons)
     else
+      msg = "The active rules already applied to the current cartons" if !updated_all.empty?
+      msg = "NO matching rules where found!" if rule_cartons.empty? && updated_all.empty?
       render :inline=>%{
       <script>
-        alert("NO matching rules where found!");
+        alert('#{msg}');
         window.close();
       </script>
       },:layout=>'content'
@@ -598,6 +606,19 @@ class  RmtProcessing::GrowerGradingController < ApplicationController
     render :inline => %{
       <%= select('pool_graded_summary','production_run_code',@production_run_codes)%>
       }
+  end
+
+  private
+
+  def get_cartons_where_rule_has_already_been_applied(pool_graded_cartons, rule, updated_all)
+    updated = pool_graded_cartons.find_all { |a|
+      a['actual_size_count_code'] == rule['size'] &&
+          a['variety_short_long'] == rule['variety'] && a['grade_code'] == rule['grade'] && a['line_type'] == rule['line_type'] &&
+          a['season'] == rule['season_code'] && a['track_slms_indicator_code'] == rule['track_slms_indicator_code'] &&
+          a['carton_grading_rule_id'].to_s == rule['id'].to_s }
+    updated.each do |ctn|
+      updated_all << ctn
+    end
   end
 
 end

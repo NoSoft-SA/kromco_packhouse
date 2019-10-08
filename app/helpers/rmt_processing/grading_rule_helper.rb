@@ -6,7 +6,7 @@ module RmtProcessing::GradingRuleHelper
     grades     = ActiveRecord::Base.connection.select_all("select grade_code from grades").map{|x|x['grade_code']}
     #varieties  = ActiveRecord::Base.connection.select_all("select distinct variety_short_long from cartons").map{|x|x['variety_short_long']}
     #line_types = ActiveRecord::Base.connection.select_all("select distinct line_code from cartons").map{|x|x['line_code']}
-    classes    = ActiveRecord::Base.connection.select_all("select product_class_code from product_classes").map{|x|x['product_class_code']}
+    #classes    = ActiveRecord::Base.connection.select_all("select product_class_code from product_classes").map{|x|x['product_class_code']}
 
     varieties  = ActiveRecord::Base.connection.select_all("select marketing_variety_code,marketing_variety_description from marketing_varieties
                                              ").map{|b|b['marketing_variety_code'] + "_" + b['marketing_variety_description']}
@@ -21,7 +21,7 @@ module RmtProcessing::GradingRuleHelper
     field_configs[field_configs.length()] = {:field_type=>'DropDownField', :field_name=>'grade', :settings=>{:list=>grades,:show_label=>true}}
     field_configs[field_configs.length()] = {:field_type=>'DropDownField', :field_name=>'variety', :settings=>{:list=>varieties,:show_label=>true}}
     field_configs[field_configs.length()] = {:field_type=>'DropDownField', :field_name=>'line_type', :settings=>{:list=>line_types,:show_label=>true}}
-    field_configs[field_configs.length()] = {:field_type=>'DropDownField', :field_name=>'product_class_code', :settings=>{ :label_caption=> "class",:list=>classes,:show_label=>true}}
+    #field_configs[field_configs.length()] = {:field_type=>'DropDownField', :field_name=>'product_class_code', :settings=>{ :label_caption=> "class",:list=>classes,:show_label=>true}}
     field_configs[field_configs.length()] = {:field_type=>'TextField',:hide => true, :field_name=>'track_slms_indicator_code'} if is_new
     field_configs[field_configs.length()] = {:field_type=>'TextField', :field_name=>'new_class'}
     field_configs[field_configs.length()] = {:field_type=>'TextField', :field_name=>'new_size'}
@@ -54,7 +54,7 @@ module RmtProcessing::GradingRuleHelper
     column_configs << {:field_type => 'text',:field_name => 'line_type' ,:col_width=>100}
     column_configs << {:field_type => 'text',:field_name => 'new_class' ,:col_width=>80}
     column_configs << {:field_type => 'text',:field_name => 'new_size' ,:col_width=>80}
-    column_configs << {:field_type => 'text',:field_name => 'class' ,:column_caption=>'class',:col_width=>70}
+    # column_configs << {:field_type => 'text',:field_name => 'class' ,:column_caption=>'class',:col_width=>70}
     column_configs << {:field_type => 'text',:field_name => 'created_at' ,:col_width=>120}
     column_configs << {:field_type => 'text',:field_name => 'created_by' ,:col_width=>120}
     column_configs << {:field_type => 'text',:field_name => 'updated_by' ,:col_width=>120}
