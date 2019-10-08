@@ -111,23 +111,23 @@ class ProcessGradingRuleFile
     end
 
    sizes   = ActiveRecord::Base.connection.select_all("select size_code from sizes where size_code in (#{new_sizes.uniq.join(',')})").map{|x|x['size_code']}
-   classes = ActiveRecord::Base.connection.select_all("select product_class_code from product_classes where product_class_code in (#{new_classes.uniq.join(',')})").map{|x|x['product_class_code']}
+   #classes = ActiveRecord::Base.connection.select_all("select product_class_code from product_classes where product_class_code in (#{new_classes.uniq.join(',')})").map{|x|x['product_class_code']}
     invalid_classes = []
     invalid_sizes = []
 
     if sizes.length < new_sizes.length
       new_sizes.each do |size| invalid_sizes << size if (!sizes.include?("'#{size}'") || sizes.empty?) end
     end
-    if classes.length < new_classes.length
-      new_classes.each do |clas| invalid_classes << clas if (!classes.include?("'#{clas}'") || classes.empty?) end
-    end
+    # if classes.length < new_classes.length
+    #   new_classes.each do |clas| invalid_classes << clas if (!classes.include?("'#{clas}'") || classes.empty?) end
+    # end
 
     if !invalid_classes.empty? && !invalid_sizes.empty?
       errors << "These are invalid size/s:(#{invalid_sizes.join(',')}) AND invalid classes:(#{invalid_classes.join(',')}):<br>"
     elsif !invalid_sizes.empty?
       errors << "These are invalid size/s:(#{invalid_sizes.join(',')})"
     elsif !invalid_classes.empty?
-      errors << "These are invalid classes:(#{invalid_classes.join(',')}):<br>"
+      #errors << "These are invalid classes:(#{invalid_classes.join(',')}):<br>"
     end
 
 
@@ -173,14 +173,14 @@ class ProcessGradingRuleFile
     if csv_file.respond_to? :tempfile
       CSV.foreach(csv_file.tempfile) do |line|
         csv_file_lines << line #.inspect
-        qry << "pgc.actual_size_count_code ='#{line[0]}' AND pgc.product_class_code = '#{line[1]}' AND pgc.variety_short_long = '#{line[2]}'
-         AND pgc.grade_code = '#{line[3]}' AND pgc.line_type = '#{line[4]}' AND pgf.track_slms_indicator_code = '#{line[5]}' "
+        qry << "pgc.actual_size_count_code ='#{line[0]}'AND pgc.variety_short_long = '#{line[1]}'
+         AND pgc.grade_code = '#{line[2]}' AND pgc.line_type = '#{line[3]}' AND pgf.track_slms_indicator_code = '#{line[4]}' "
       end
     else
       CSV.parse(csv_file.read).each do |line|
         csv_file_lines << line #.inspect
-         qry << "pgc.actual_size_count_code ='#{line[0]}' AND pgc.product_class_code = '#{line[1]}' AND pgc.variety_short_long = '#{line[2]}'
-         AND pgc.grade_code = '#{line[3]}' AND pgc.line_type = '#{line[4]}' AND pgf.track_slms_indicator_code = '#{line[5]}' "
+         qry << "pgc.actual_size_count_code ='#{line[0]}'AND pgc.variety_short_long = '#{line[1]}'
+         AND pgc.grade_code = '#{line[2]}' AND pgc.line_type = '#{line[3]}' AND pgf.track_slms_indicator_code = '#{line[4]}' "
       end
     end
 
