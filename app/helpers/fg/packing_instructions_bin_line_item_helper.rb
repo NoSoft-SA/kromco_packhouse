@@ -154,17 +154,15 @@ module Fg::PackingInstructionsBinLineItemHelper
     product_class_codes = []
     size_codes = []
     rmt_products.each do |rec|
-      varieties << [rec['variety_code'], rec['variety_id'].to_i] if !dup_control.include?("#{rec['variety_code']}_#{rec['variety_id'].to_s}")
-      #commodity_codes << [rec['commodity_code'], rec['commodity_id']] if !dup_control.include?("#{rec['commodity_code']}_#{rec['commodity_id'].to_s}")
-      treatment_codes << [rec['treatment_code'], rec['treatment_id']] if !dup_control.include?("treat_#{rec['treatment_code']}_#{rec['treatment_id'].to_s}")
-      product_class_codes << [rec['product_class_code'], rec['product_class_id']] if !dup_control.include?("class_#{rec['product_class_code']}_#{rec['product_class_id'].to_s}")
-      size_codes << [rec['size_code'], rec['size_id']] if !dup_control.include?("size_#{rec['size_code']}_#{rec['size_id'].to_s}")
+      varieties << [rec['variety_code'], rec['variety_id'].to_i] if !dup_control.include?("#{rec['variety_code']}_#{rec['variety_id'].to_i}")
+      treatment_codes << [rec['treatment_code'], rec['treatment_id'].to_i] if !dup_control.include?("treat_#{rec['treatment_code']}_#{rec['treatment_id'].to_i}")
+      product_class_codes << [rec['product_class_code'], rec['product_class_id'].to_i] if !dup_control.include?("class_#{rec['product_class_code']}_#{rec['product_class_id'].to_i}")
+      size_codes << [rec['size_code'], rec['size_id'].to_i] if !dup_control.include?("size_#{rec['size_code']}_#{rec['size_id'].to_i}")
 
-      dup_control << "#{rec['variety_code']}_#{rec['variety_id'].to_s}" if !dup_control.include?("#{rec['variety_code']}_#{rec['variety_id'].to_s}")
-      #dup_control << "#{rec['commodity_code']}_#{rec['commodity_id'].to_s}" if !dup_control.include?("#{rec['commodity_code']}_#{rec['commodity_id'].to_s}")
-      dup_control << "treat_#{rec['treatment_code']}_#{rec['treatment_id'].to_s}" if !dup_control.include?("treat_#{rec['treatment_code']}_#{rec['treatment_id'].to_s}")
-      dup_control << "class_#{rec['product_class_code']}_#{rec['product_class_id'].to_s}" if !dup_control.include?("class_#{rec['product_class_code']}_#{rec['product_class_id'].to_s}")
-      dup_control << "size_#{rec['size_code']}_#{rec['size_id'].to_s}" if !dup_control.include?("size_#{rec['size_code']}_#{rec['size_id'].to_s}")
+      dup_control << "#{rec['variety_code']}_#{rec['variety_id'].to_i}" if !dup_control.include?("#{rec['variety_code']}_#{rec['variety_id'].to_i}")
+      dup_control << "treat_#{rec['treatment_code']}_#{rec['treatment_id'].to_i}" if !dup_control.include?("treat_#{rec['treatment_code']}_#{rec['treatment_id'].to_i}")
+      dup_control << "class_#{rec['product_class_code']}_#{rec['product_class_id'].to_i}" if !dup_control.include?("class_#{rec['product_class_code']}_#{rec['product_class_id'].to_i}")
+      dup_control << "size_#{rec['size_code']}_#{rec['size_id'].to_i}" if !dup_control.include?("size_#{rec['size_code']}_#{rec['size_id'].to_i}")
 
     end
     return commodity_codes, product_class_codes, size_codes, treatment_codes, varieties

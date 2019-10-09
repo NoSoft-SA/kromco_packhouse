@@ -79,17 +79,17 @@ class Fg::PackingInstructionsBinLineItemController < ApplicationController
   def get_bins(bin_where_clause)
     @bins = ActiveRecord::Base.connection.select_all("
                                                      #{get_bin_select_clause}
-               from bins
-              left join stock_items on bin_number=stock_items.inventory_reference
+              from bins
+              left join packing_instruction_bin_line_item_bins piblibs on piblibs.bin_id = bins.id
+              join stock_items on bins.bin_number=stock_items.inventory_reference
               left join seasons on bins.season_id=seasons.id
               left join track_slms_indicators on track_indicator1_id=track_slms_indicators.id
               left join rmt_products on bins.rmt_product_id=rmt_products.id
               left join locations on stock_items.location_id=locations.id
-              left join packing_instruction_bin_line_item_bins piblibs on piblibs.bin_id = bins.id
-              where
+             where
               seasons.season=2019 and
-              (stock_items.destroyed IS NULL OR stock_items.destroyed = false) and
-               location_status = ANY (ARRAY['OPEN', 'TEMPORARY', 'LOADING_CA'])
+              (stock_items.destroyed IS NULL OR stock_items.destroyed = false)
+               and coalesce('',location_status) in ('OPEN', 'TEMPORARY', 'LOADING_CA', '')
                 and (#{bin_where_clause})
                and bins.id not in (
                 select bin_id from packing_instruction_bin_line_item_bins where
@@ -182,9 +182,11 @@ class Fg::PackingInstructionsBinLineItemController < ApplicationController
   def get_list_bins
     select_clause = get_bin_select_clause
     @bins = ActiveRecord::Base.connection.select_all("
-                                                     #{select_clause}
-               from bins
-              left join stock_items on bin_number=stock_items.inventory_reference
+              #{select_clause}
+              from bins
+              join packing_instruction_bin_line_item_bins piblibs on piblibs.bin_id = bins.id
+			        join packing_instructions_bin_line_items pibli on pibli.id = piblibs.packing_instruction_bin_line_item_id
+              join stock_items on bins.bin_number=stock_items.inventory_reference
               left join seasons on bins.season_id=seasons.id
               left join track_slms_indicators on track_indicator1_id=track_slms_indicators.id
               left join rmt_products on bins.rmt_product_id=rmt_products.id
@@ -194,9 +196,7 @@ class Fg::PackingInstructionsBinLineItemController < ApplicationController
               left join product_classes p on p.product_class_code=rmt_products.product_class_code
               left join treatments treats on treats.treatment_code=rmt_products.treatment_code
               left join commodities c on c.commodity_code=rmt_products.commodity_code
-              join packing_instruction_bin_line_item_bins piblibs on piblibs.bin_id = bins.id
-			        join packing_instructions_bin_line_items pibli on pibli.id = piblibs.packing_instruction_bin_line_item_id
-               where
+              where
               piblibs.packing_instruction_bin_line_item_id =#{session[:active_doc]['bin_line_item']} and
               track_slms_indicators.id = pibli.track_slms_indicator_id and
               v.id = pibli.variety_id and
