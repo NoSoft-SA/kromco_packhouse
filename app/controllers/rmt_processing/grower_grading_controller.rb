@@ -67,10 +67,10 @@ class  RmtProcessing::GrowerGradingController < ApplicationController
     rule_cartons = {}
     # #----test---------
     # pool_graded_ctns_list = pool_graded_cartons.map{ |a|
-    #   "#{a['actual_size_count_code']};#{a['product_class_code']};#{a['variety_short_long']};#{a['grade_code']};#{a['line_type']};#{a['season']};#{a['track_slms_indicator_code']}"
+    #   "#{a['actual_size_count_code']};#{a['variety_short_long']};#{a['grade_code']};#{a['line_type']};#{a['season']};#{a['track_slms_indicator_code']}"
     # }
     # rules_list = active_rules.map{ |rule|
-    #   "#{rule['size']};#{rule['clasi']};#{rule['variety']};#{rule['grade']};#{rule['line_type']};#{rule['season_code']};#{rule['track_slms_indicator_code']}"
+    #   "#{rule['size']};#{rule['variety']};#{rule['grade']};#{rule['line_type']};#{rule['season_code']};#{rule['track_slms_indicator_code']}"
     # }
     # unmatched_ctns = []
     # pool_graded_ctns_list.each do |ctn|
@@ -92,8 +92,8 @@ class  RmtProcessing::GrowerGradingController < ApplicationController
     #      end
     #
     #  unmatched_ctns_num
-    #
-    #
+
+
     # # ----------------
     updated_all =[]
     active_rules.each do |rule|

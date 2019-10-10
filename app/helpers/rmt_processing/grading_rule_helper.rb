@@ -68,6 +68,8 @@ module RmtProcessing::GradingRuleHelper
     column_configs << {:field_type => 'text',:field_name => 'deactivated_at' ,:col_width=>120}
     column_configs << {:field_type => 'text',:field_name => 'deactivated_by' ,:col_width=>120}
     column_configs << {:field_type => 'text',:field_name => 'id' ,:col_width=>170}
+    @multi_select = "submit_rules_to_deactive"
+
     set_grid_min_height(80)
     set_grid_min_width(300)
     hide_grid_client_controls
@@ -93,6 +95,10 @@ module RmtProcessing::GradingRuleHelper
 
     action_configs << {:field_type => 'action', :field_name => 'delete', :col_width => 33,
                        :settings => { :null_test => "['activated'] == 't'", :link_icon => 'delete',:target_action => 'delete_carton_grading_rule_header', :link_text => 'delete', :link_icon => 'delete',:id_column => 'id'}}
+
+    action_configs << {:field_type => 'action', :field_name => 'deactivate', :col_width => 33,
+                       :settings => { :link_icon => 'delete',:target_action => 'deactive_active_rule_header', :link_text => 'deactivate', :link_icon => 'delete',:id_column => 'id'}}
+
 
     column_configs << {:field_type => 'action_collection', :field_name => 'actions', :settings => {:actions => action_configs}}
     column_configs << {:field_type => 'text',:field_name => 'activated',:column_caption=>'active' ,:data_type => 'boolean',:col_width=>80}
