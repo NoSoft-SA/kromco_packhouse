@@ -110,8 +110,9 @@ class ProcessGradingRuleFile
       errors <<  "File contains duplicate records:<br>"
     end
 
-   sizes   = ActiveRecord::Base.connection.select_all("select size_code from sizes where size_code in (#{new_sizes.uniq.join(',')})").map{|x|x['size_code']}
-   #classes = ActiveRecord::Base.connection.select_all("select product_class_code from product_classes where product_class_code in (#{new_classes.uniq.join(',')})").map{|x|x['product_class_code']}
+   sizes   = ActiveRecord::Base.connection.select_all("select distinct actual_count from item_pack_products where actual_count in (#{new_sizes.uniq.join(',')})").map{|x|x['actual_count']}
+
+    #classes = ActiveRecord::Base.connection.select_all("select product_class_code from product_classes where product_class_code in (#{new_classes.uniq.join(',')})").map{|x|x['product_class_code']}
     invalid_classes = []
     invalid_sizes = []
 
