@@ -98,7 +98,7 @@ end
 				:target_action => 'delete_rule',
 				:id_column => 'id'}}
 	end
- return get_data_grid(data_set,column_configs)
+ return get_data_grid(data_set,column_configs,nil,true)
 end
 
  def build_organization_rule_form(organization_rule,action,caption)

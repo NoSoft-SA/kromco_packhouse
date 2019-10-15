@@ -326,8 +326,8 @@ class Fg::PackingInstructionsFgLineItemController < ApplicationController
     id = params[:id]
     if id && packing_instructions_fg_line_item = PackingInstructionsFgLineItem.find(id)
       fg_setups = ActiveRecord::Base.connection.select_one("
-                 select count(id) as setups from fg_setup_for_packing_instructions_lines where
-                packing_instructions_fg_line_item_id  = #{id}")['setups']
+                  select count(id) as setups from fg_setup_for_packing_instructions_lines where
+                  packing_instructions_fg_line_item_id  = #{id}")['setups']
       if fg_setups.to_i > 0
         session[:alert] = ' Record cannot be deleted.Delete fg_setups first'
         redirect_to_last_grid

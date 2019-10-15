@@ -16,6 +16,72 @@ class Production::RunsController < ApplicationController
     true
   end
 
+
+  def active_schedulesOG
+
+    list_production_schedules
+
+  end
+
+  def active_schedules
+    render :inline => %{
+    <% @content_header_caption = "'Select Packing Instruction'"%>
+
+    <%= build_packing_instruction_form(@packing_instruction,'submit_packing_instruction_code','submit')%>
+
+    }, :layout => 'content'
+  end
+
+  def is_valid_packing_instruction_code?(packing_instruction_code)
+    packing_instruction = PackingInstruction.find_by_packing_instruction_code(packing_instruction_code)
+    return nil if !packing_instruction
+    return packing_instruction if packing_instruction
+  end
+
+  def submit_packing_instruction_code
+
+      return if authorise_for_web('runs', 'view') == false
+
+      packing_instruction_code = params[:packing_instruction]['packing_instruction_code']
+      packing_instruction_code = nil if params[:packing_instruction]['packing_instruction_code'] == ""
+
+      if packing_instruction_code
+        if !is_valid_packing_instruction_code?(packing_instruction_code)
+          flash[:error] = "Enter a valid packing_instruction_code"
+          active_schedules
+          return
+        end
+      end
+
+      list_query = get_packing_instruction_list_query(packing_instruction_code)
+      session[:query] = list_query
+      session[:runs_schedules]= list_query
+
+      render_list_production_schedules
+  end
+
+  def get_packing_instruction_list_query(packing_instruction_code)
+    if packing_instruction_code
+
+      query = "
+      select distinct ps.*,pi.packing_instruction_code,pi.id as packing_instruction_id
+      from production_schedules ps
+      join carton_setups cs on cs.production_schedule_id = ps.id
+      join fg_setups fgs on fgs.carton_setup_id = cs.id
+      join fg_setup_for_packing_instructions_lines fgsforpi on fgsforpi.fg_setup_id = fgs.id
+      join packing_instructions_fg_line_items pifgli on fgsforpi.packing_instructions_fg_line_item_id = pifgli.id
+      join packing_instructions pi on pifgli.packing_instruction_id = pi.id
+      where pi.packing_instruction_code = '#{packing_instruction_code}' order by ps.production_schedule_name"
+
+      list_query = "ProductionSchedule.find_by_sql(\"#{query}\") "
+
+    else
+      list_query = "ProductionSchedule.find_all_by_production_schedule_status_code('closed',
+				 :order => 'production_schedule_name')"
+    end
+    list_query
+  end
+
   def view_next_run
     return if authorise_for_web(program_name?, 'production_run_control')==false
     begin
@@ -205,11 +271,6 @@ class Production::RunsController < ApplicationController
     }
   end
 
-  def active_schedules
-
-    list_production_schedules
-
-  end
 
 
   def schedule_search
@@ -908,6 +969,11 @@ class Production::RunsController < ApplicationController
       edit_run_details and return
     end
 
+    packing_instruction_id = PackingInstruction.find_by_packing_instruction_code(params[:production_run]['packing_instruction_id']).id if params[:production_run]['packing_instruction_id']
+    params['production_run']['packing_instruction_id'] = nil  if !packing_instruction_id
+    params['production_run']['packing_instruction_id'] = packing_instruction_id if packing_instruction_id
+
+    packing_instruction_id
 
     #params['production_run'][:rmt_product_type_id]=RmtProductType.find_by_rmt_product_type_code(@production_run.production_schedule.rmt_setup.rmt_product.rmt_product_type_code).id
     #params['production_run'][:commodity_id]= Commodity.find_by_commodity_code(@production_run.production_schedule.rmt_setup.commodity_code).id
@@ -1440,7 +1506,7 @@ class Production::RunsController < ApplicationController
       where  production_runs.production_schedule_id= #{@schedule.id.to_s} and (production_run_status=\'configuring\' or production_run_status=\'reconfiguring\' or production_run_status=\'restored\' ) "
 
       session[:query]="ActiveRecord::Base.connection.select_all(\"#{list_query}\")"
-
+      x =  ActiveRecord::Base.connection.select_all(list_query)
       session[:current_schedule_runs_query]= session[:query]
 
       render_list_editing_runs
@@ -2263,9 +2329,11 @@ class Production::RunsController < ApplicationController
   end
 
   def create_production_run
-
     @production_run = ProductionRun.new(params[:production_run])
-    error =validate_production_run_details_params(@production_run.line_code, params['production_run'])
+    packing_instruction_id = PackingInstruction.find_by_packing_instruction_code(params[:production_run]['packing_instruction_id']).id if params[:production_run]['packing_instruction_id']
+
+
+   error =validate_production_run_details_params(@production_run.line_code, params['production_run'])
     if !error.empty?
       flash[:error] = "record cannot be saved: <BR> #{error.join("<BR>")}"
       edit_run_details and return
@@ -2304,7 +2372,7 @@ class Production::RunsController < ApplicationController
 
         end
 
-
+        @production_run.packing_instruction_id = packing_instruction_id
         @production_run.production_run_status = "configuring"
         if @production_run.save
           session[:current_production_run]= @production_run
@@ -2864,11 +2932,11 @@ class Production::RunsController < ApplicationController
       @pack_station = session[:current_pack_stations].find { |s| s.id.to_s == params[:id] }
       if @pack_station
 
-        if !@pack_station.grade
-          flash[:notice]= "You have not allocated any counts to this station (its drop) "
-          list_pack_stations
-          return
-        end
+        # if !@pack_station.grade
+        #   flash[:notice]= "You have not allocated any counts to this station (its drop) "
+        #   list_pack_stations
+        #   return
+        # end
 
         @pack_station.production_schedule_name = session[:current_closed_schedule].production_schedule_name
         @pack_station.production_run_number = session[:current_production_run].production_run_number
@@ -3989,6 +4057,10 @@ class Production::RunsController < ApplicationController
     carton_setup.fg_setup.set_label_values_for_run(session[:current_production_run], @carton_label_preview)
     render :template => "/production/carton_setup/carton_label.rhtml", :layout => 'content'
   end
+
+  private
+
+
 
 ##========================================================
 
