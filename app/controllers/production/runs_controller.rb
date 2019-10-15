@@ -16,13 +16,6 @@ class Production::RunsController < ApplicationController
     true
   end
 
-
-  def active_schedulesOG
-
-    list_production_schedules
-
-  end
-
   def active_schedules
     render :inline => %{
     <% @content_header_caption = "'Select Packing Instruction'"%>
@@ -1506,7 +1499,6 @@ class Production::RunsController < ApplicationController
       where  production_runs.production_schedule_id= #{@schedule.id.to_s} and (production_run_status=\'configuring\' or production_run_status=\'reconfiguring\' or production_run_status=\'restored\' ) "
 
       session[:query]="ActiveRecord::Base.connection.select_all(\"#{list_query}\")"
-      x =  ActiveRecord::Base.connection.select_all(list_query)
       session[:current_schedule_runs_query]= session[:query]
 
       render_list_editing_runs
@@ -2932,11 +2924,11 @@ class Production::RunsController < ApplicationController
       @pack_station = session[:current_pack_stations].find { |s| s.id.to_s == params[:id] }
       if @pack_station
 
-        # if !@pack_station.grade
-        #   flash[:notice]= "You have not allocated any counts to this station (its drop) "
-        #   list_pack_stations
-        #   return
-        # end
+        if !@pack_station.grade
+          flash[:notice]= "You have not allocated any counts to this station (its drop) "
+          list_pack_stations
+          return
+        end
 
         @pack_station.production_schedule_name = session[:current_closed_schedule].production_schedule_name
         @pack_station.production_run_number = session[:current_production_run].production_run_number
@@ -4057,10 +4049,6 @@ class Production::RunsController < ApplicationController
     carton_setup.fg_setup.set_label_values_for_run(session[:current_production_run], @carton_label_preview)
     render :template => "/production/carton_setup/carton_label.rhtml", :layout => 'content'
   end
-
-  private
-
-
 
 ##========================================================
 
