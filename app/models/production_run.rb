@@ -126,7 +126,8 @@ class ProductionRun < ActiveRecord::Base
   #-------------------------------------------------------------------------------------------------------------
   def auto_complete_fg_allocation
 
-    outlets = PackGroupOutlet.find(:all, :conditions=> "pack_group_outlets.production_run_id = '#{self.id}' and pack_group_outlets.size_code is null",
+    outlets = PackGroupOutlet.find(:all, :conditions=> "pack_group_outlets.production_run_id = '#{self.id}' and
+                                                        pack_group_outlets.size_code is null",
                                    :include         => "pack_group", :order => "pack_group_outlets.id")
 
     #CartonPackStation.set_production_run_id(self.id)

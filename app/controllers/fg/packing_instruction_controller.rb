@@ -32,13 +32,18 @@ def list_packing_instructions
     session[:packing_instructions_page] = nil
   end
 
-  list_query = "select pi.*, tp.contact_name as trading_partner,st.shift_type_code as shift_type
+  list_query = "select pi.id as pi_id ,pi.*, tp.contact_name as trading_partner,st.shift_type_code as shift_type
                 from packing_instructions pi
                 left join trading_partners tp on pi.trading_partner_id=tp.id
                 left join shift_types st on pi.shift_type_id = st.id
                 order by pi.id desc limit 100"
   @packing_instructions = ActiveRecord::Base.connection.select_all(list_query)
   session[:query] = "ActiveRecord::Base.connection.select_all(\"#{list_query}\")"
+  #  ids = @packing_instructions.map{|c|c['id']}
+  # idspi = @packing_instructions.map{|c|c['pi_id']}
+  #
+  # puts "#{ids.join(',')}"
+  # puts "pi ids #{idspi.join(',')}"
 
   render_list_packing_instructions
 end

@@ -253,11 +253,27 @@ class FgSetup < ActiveRecord::Base
 #	
 #	end
 
+  def FgSetup.format_drop_code(drop_code)
+
+      drop = drop_code.gsub("'", '')
+      drop =drop.gsub("\"", '')
+
+    return drop
+  end
 
 
   def FgSetup.fg_codes_for_station_context(run,grade,color_percentage,marketing_variety,count,drop_code)
-  
-   
+
+    drop_code = FgSetup.format_drop_code(drop_code)
+    if color_percentage
+      color_percentage = "public.carton_setups.color_percentage = '#{color_percentage}'" if color_percentage
+    else
+      color_percentage = "public.carton_setups.color_percentage  is null"
+    end
+
+    packing_instruction_id = "pi.id = #{run.packing_instruction_id}  AND  " if run.packing_instruction_id
+    packing_instruction_id = nil if !run.packing_instruction_id
+
    query = "SELECT DISTINCT
               public.fg_setups.fg_product_code
       FROM
@@ -267,24 +283,28 @@ class FgSetup < ActiveRecord::Base
     AND (public.carton_setups.grade_code = public.pack_groups.grade_code)
     INNER JOIN public.pack_group_outlets ON (public.pack_groups.id = public.pack_group_outlets.pack_group_id)
     AND (public.carton_setups.standard_size_count_value = public.pack_group_outlets.standard_size_count_value)
+    LEFT JOIN fg_setup_for_packing_instructions_lines fgsforpi on fgsforpi.fg_setup_id = fg_setups.id
+    LEFT JOIN packing_instructions_fg_line_items pifgli on fgsforpi.packing_instructions_fg_line_item_id = pifgli.id
+    LEFT JOIN packing_instructions pi on pifgli.packing_instruction_id = pi.id
     WHERE
-     (public.carton_setups.color_percentage = '#{color_percentage}') AND 
+     #{packing_instruction_id}
+     (#{color_percentage}) AND
      (public.carton_setups.production_schedule_code = '#{run.production_schedule_name}') AND
      (public.carton_setups.grade_code = '#{grade}') AND 
-     (public.pack_groups.production_run_id = '#{run.id}') AND 
-     ((public.pack_group_outlets.outlet1 = '#{drop_code}') OR 
-     (public.pack_group_outlets.outlet2 = '#{drop_code}') OR 
-     (public.pack_group_outlets.outlet3 = '#{drop_code}') OR 
-     (public.pack_group_outlets.outlet4 = '#{drop_code}') OR 
-     (public.pack_group_outlets.outlet5 = '#{drop_code}') OR 
+     (public.pack_groups.production_run_id = '#{run.id}') AND
+     ((public.pack_group_outlets.outlet1 = '#{drop_code}') OR
+     (public.pack_group_outlets.outlet2 =  '#{drop_code}') OR
+     (public.pack_group_outlets.outlet3 = '#{drop_code}') OR
+     (public.pack_group_outlets.outlet4 = '#{drop_code}') OR
+     (public.pack_group_outlets.outlet5 = '#{drop_code}') OR
      (public.pack_group_outlets.outlet6 = '#{drop_code}') OR
      (public.pack_group_outlets.outlet7 = '#{drop_code}') OR
      (public.pack_group_outlets.outlet8 = '#{drop_code}') OR
      (public.pack_group_outlets.outlet9 = '#{drop_code}') OR
     (public.pack_group_outlets.outlet10 = '#{drop_code}') OR
-      (public.pack_group_outlets.outlet11 = '#{drop_code}') OR     
+      (public.pack_group_outlets.outlet11 = '#{drop_code}') OR
      (public.pack_group_outlets.outlet12 = '#{drop_code}'))"
-     
+
       return FgSetup.find_by_sql(query)
 	
  end

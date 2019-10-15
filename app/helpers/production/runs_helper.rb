@@ -1,4 +1,21 @@
 module Production::RunsHelper
+
+  def build_packing_instruction_form(packing_instruction,action,caption,is_edit = nil,is_create_retry = nil)
+    field_configs = []
+    field_configs[field_configs.length()] = {:field_type => 'LabelField', :field_name => 'edi_docs', :non_db_field => true, :settings => {:non_db_field => true, :static_value => "Packing Instruction is optional, you can click submit and continue without it", :show_label => false}}
+
+    packing_instruction_codes = ActiveRecord::Base.connection.select_all("select packing_instruction_code , id  from packing_instructions order by id desc limit 20").map{|s|s['packing_instruction_code']}
+    field_configs[field_configs.length()] = {:field_type=>'LabelField', :field_name=>'suggested packing_instruction_codes',
+                                             :non_db_field=>true,
+                                             :settings=>{:static_value=>packing_instruction_codes.join("<BR>"), :show_label=>true,
+                                                         :cols=> 25}}
+
+    field_configs << {:field_type => 'TextField',
+                      :field_name => 'packing_instruction_code'}
+    construct_form(packing_instruction,field_configs,action,'packing_instruction',caption,is_edit)
+
+  end
+
   def build_extra_ppec_info_grid(data_set)
 
     column_configs = Array.new
@@ -771,7 +788,36 @@ end
 
 
    end
+   if !production_run
+   packing_instruction_codes = PackingInstruction.get_run_packing_instruction_codes("where ps.id = #{schedule['id']}").map{|s|s['packing_instruction_code']} if schedule
+   packing_instruction_codes = packing_instruction_codes.join(",") if !packing_instruction_codes.empty?
+   field_configs[field_configs.length()] = {:field_type=>'LabelField', :field_name=>'suggested packing_instruction_codes',
+                                            :non_db_field=>true,
+                                            :settings=>{:static_value=>packing_instruction_codes, :show_label=>true,
+                                                        :cols=> 25}}
+   field_configs << {:field_type => 'TextField',
+                     :field_name => 'packing_instruction_id',
+                     :settings => {:label_caption=>'packing instruction code',:show_label=>true}
+   }
+   else
+     packing_instruction_codes = PackingInstruction.get_run_packing_instruction_codes("where ps.id = #{schedule['id']}").map{|s|s['packing_instruction_code']} if schedule
+     packing_instruction_codes = packing_instruction_codes.join(",") if !packing_instruction_codes.empty?
+     field_configs[field_configs.length()] = {:field_type=>'LabelField', :field_name=>'suggested packing_instruction_codes',
+                                              :non_db_field=>true,
+                                              :settings=>{:static_value=>packing_instruction_codes, :show_label=>true,
+                                                          :cols=> 25}}
 
+     packing_instruction_code = PackingInstruction.find(production_run.packing_instruction_id).packing_instruction_code if production_run && production_run.packing_instruction_id
+
+     production_run['packing_instruction_id'] = packing_instruction_code
+     field_configs << {:field_type => 'TextField',
+                       :field_name => 'packing_instruction_id',
+                       :settings => {:label_caption=>'packing instruction code',
+                                     :show_label=>true,:lookup => true,
+                                     :default_values => packing_instruction_code
+                       }}
+
+   end
 
 
   @production_run = production_run if ! @production_run
@@ -945,6 +991,15 @@ end
                     :field_name => 'track_indicator_id',
                     :settings => {:static_value=> track_indicator_code,:show_label=>true,:label_caption=> 'track indicator code'}}
 
+
+  packing_instruction_code = PackingInstruction.find(run.packing_instruction_id).packing_instruction_code if run && run.packing_instruction_id
+
+  field_configs[field_configs.length()] = {:field_type=>'LabelField', :field_name=>'packing_instruction_id',
+                                           :non_db_field=>true,
+                                           :settings=>{:static_value=>packing_instruction_code, :show_label=>true,
+                                                       :cols=> 25,:label_caption => 'packing_instruction_code'}}
+
+
   #--------------------------------------
   	if run && run.production_run_status == "configuring"
   	 field_configs[field_configs.length()] = {:field_type => 'LinkField',:field_name => 'edit_run_details',
@@ -1043,7 +1098,8 @@ end
 	field_configs[field_configs.length()] =  {:field_type => 'LabelField',
 						:field_name => 'applied_sizer_template'}
 
-	#is_edit,nil,nil,nil,CartonSetupPlugins::CartonSetupFormPlugin.new
+
+  set_form_layout "2", nil, 1, 12
 
 	build_form(run,field_configs,action,'production_run','back',nil,nil,nil,nil,RunSetupPlugins::RunSetupFormPlugin.new)
 
@@ -1917,17 +1973,18 @@ end
 	#	----------------------
 #	define action columns
 #	----------------------
-	if can_edit
+	#if can_edit
 		column_configs[column_configs.length()] = {:field_type => 'action',:field_name => 'set_fg_product', :col_width => 77,
 			:settings =>
 				 {:link_text => 'set_fg_product',
 				:target_action => 'set_fg_product',
-				:id_column => 'id',
-				:null_test => "size_count == nil"}}
+				:id_column => 'id'
+				#,:null_test => "size_count == nil"
+         }}
 
 
 
-	end
+	#end
 
 	column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'drop_side_code',:col_width => 30}
 	column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'drop_code',:col_width => 30}

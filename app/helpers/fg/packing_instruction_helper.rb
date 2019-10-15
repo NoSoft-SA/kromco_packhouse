@@ -138,7 +138,9 @@ end
   column_configs << {:field_type => 'text', :field_name => 'ship_date', :data_type => 'date', :column_caption => 'Ship date'}
   column_configs << {:field_type => 'text', :field_name => 'pack_priority', :column_caption => 'Pack priority'}
   column_configs << {:field_type => 'text', :field_name => 'remarks', :column_caption => 'Remarks'}
-   column_configs << {:field_type => 'text', :field_name => 'id',:hidden_id_column=>true}
+   column_configs << {:field_type => 'text', :field_name => 'pi_id'}
+
+   column_configs << {:field_type => 'text', :field_name => 'id'}
 
   get_data_grid(data_set,column_configs,nil,true,grid_command)
 end

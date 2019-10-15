@@ -1,19 +1,24 @@
 class PackingInstruction < ActiveRecord::Base
 
-#  ===========================
-#   Association declarations:
-#  ===========================
-
-
-  belongs_to :trading_partner
+ belongs_to :trading_partner
   belongs_to :shift_type
 
-#  ============================
-#   Validations declarations:
-#  ============================
-#  =====================
-#   Complex validations:
-#  =====================
+ def PackingInstruction.get_run_packing_instruction_codes(where_condition)
+   packing_instructions =  ActiveRecord::Base.connection.select_all("
+        select distinct pi.packing_instruction_code,pi.id as packing_instruction_id
+        from production_schedules ps
+        --join production_runs pr on pr.production_schedule_id = ps.id
+        join carton_setups cs on cs.production_schedule_id = ps.id
+        join fg_setups fgs on fgs.carton_setup_id = cs.id
+        join fg_setup_for_packing_instructions_lines fgsforpi on fgsforpi.fg_setup_id = fgs.id
+        join packing_instructions_fg_line_items pifgli on fgsforpi.packing_instructions_fg_line_item_id = pifgli.id
+        join packing_instructions pi on pifgli.packing_instruction_id = pi.id
+        #{where_condition}
+
+                           ")
+ end
+
+
 def validate
    is_valid = true
    is_valid = ModelHelper::Validations.validate_combos([{:shift_type_id => self.shift_type_id}], self) if is_valid

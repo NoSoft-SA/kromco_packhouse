@@ -100,7 +100,7 @@ module Fg::PackingInstructionsBinLineItemHelper
                               :id_column => 'id'}}
     end
 
-    if can_delete
+    #if can_delete
       action_configs << {:field_type => 'action', :field_name => 'delete packing_instructions_bin_line_item',
                          :column_caption => 'Delete',
                          :settings =>
@@ -108,7 +108,7 @@ module Fg::PackingInstructionsBinLineItemHelper
                               :link_icon => 'delete',
                               :target_action => 'delete_packing_instructions_bin_line_item',
                               :id_column => 'id'}}
-    end
+    #end
     grid_command = {:field_type => 'link_window_field', :field_name => 'packing_instructions_bin_line_item',
                     :settings =>
                         {

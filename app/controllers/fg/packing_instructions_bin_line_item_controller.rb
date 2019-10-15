@@ -315,7 +315,7 @@ class Fg::PackingInstructionsBinLineItemController < ApplicationController
   end
 
   def delete_packing_instructions_bin_line_item
-    return if authorise_for_web(program_name?, 'delete') == false
+    #return if authorise_for_web(program_name?, 'delete') == false
     if params[:page]
       session[:packing_instructions_bin_line_items_page] = params['page']
       render_list_packing_instructions_bin_line_items
@@ -332,7 +332,7 @@ class Fg::PackingInstructionsBinLineItemController < ApplicationController
       else
         packing_instructions_bin_line_item.destroy
         session[:alert] = ' Record deleted.'
-        redirect_to_last_grid
+        list_packing_instructions_bin_line_items
       end
     end
   rescue
