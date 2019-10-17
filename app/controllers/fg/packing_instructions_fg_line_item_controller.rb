@@ -330,11 +330,11 @@ class Fg::PackingInstructionsFgLineItemController < ApplicationController
                   packing_instructions_fg_line_item_id  = #{id}")['setups']
       if fg_setups.to_i > 0
         session[:alert] = ' Record cannot be deleted.Delete fg_setups first'
-        redirect_to_last_grid
+        render_list_packing_instructions_fg_line_items
       else
         packing_instructions_fg_line_item.destroy
         session[:alert] = ' Record deleted.'
-        redirect_to_last_grid
+        render_list_packing_instructions_fg_line_items
       end
     end
   rescue

@@ -108,11 +108,11 @@ def delete_packing_instruction
                      where packing_instruction_id = #{id}")['items']
     if bin_line_items.to_i > 0 || fg_line_items.to_i > 0
       session[:alert] = ' Record cannot be deleted. bin line items and fg line items are depended on it. Delete them first'
-      redirect_to_last_grid
+      render_list_packing_instructions
     else
       packing_instruction.destroy
       session[:alert] = ' Record deleted.'
-      redirect_to_last_grid
+      render_list_packing_instructions
     end
   end
   rescue
