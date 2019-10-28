@@ -40,17 +40,19 @@ class  RmtProcessing::GradingRuleController < ApplicationController
   end
 
   def is_existing_rule?
-    grading_rule = CartonGradingRule.find_by_sql("select * from carton_grading_rules where
+    grading_rule =  ActiveRecord::Base.connection.select_all("
+                    select * from carton_grading_rules where
                     new_size  = '#{params[:grading_rule]['new_size']}'  and
                     new_class = '#{params[:grading_rule]['new_class']}' and
                     grade     = '#{params[:grading_rule]['grade']}'     and
                     variety   = '#{params[:grading_rule]['variety']}'   and
                     line_type = '#{params[:grading_rule]['line_type']}' and
                     size      = '#{params[:grading_rule]['size']}'      and
-                    product_class_code = '#{params[:grading_rule]['product_class_code']}' and
+                    --product_class_code is null and
                     carton_grading_rule_header_id = #{session[:active_doc]['rule_header']} and
                     track_slms_indicator_code     = '#{params[:grading_rule]['track_slms_indicator_code']}'
                    ")
+    grading_rule
 
     return true if !grading_rule.empty?
   end
@@ -246,19 +248,19 @@ class  RmtProcessing::GradingRuleController < ApplicationController
 
   end
 
-  def deactivate_carton_grading_rule(carton_grading_rule_header_id = nil)      ActiveRecord::Base.connection.execute("
-    update carton_grading_rules set deactivated_by = '#{session[:user_id]['user_name']}',activated_by =null
-    ,activated = false,deactivated =true,deactivated_at = '#{Time.now}',activated_at = null
-    where  #{condition};")
-  session[:alert]  = "deactivated"
-  params[:id] = session[:active_doc]['rule_header']
-  list_grading_rules
+  def deactivate_carton_grading_rule(carton_grading_rule_header_id = nil)
     condition = "carton_grading_rule_header_id = #{carton_grading_rule_header_id}" if carton_grading_rule_header_id
     condition = "id = #{params[:id]}" if !carton_grading_rule_header_id
     active = ActiveRecord::Base.connection.select_all("
            select activated from  carton_grading_rules where #{condition}")[0]['activated']
     if active==true || active=="t"
-
+      ActiveRecord::Base.connection.execute("
+    update carton_grading_rules set deactivated_by = '#{session[:user_id]['user_name']}',activated_by =null
+    ,activated = false,deactivated =true,deactivated_at = '#{Time.now}',activated_at = null
+    where  #{condition};")
+      session[:alert]  = "deactivated"
+      params[:id] = session[:active_doc]['rule_header']
+      list_grading_rules
     else
       flash[:error] = "Cannot be deactivated ,not active"
       get_grading_rules("where cgrh.id = #{session[:active_doc]['rule_header']}")
