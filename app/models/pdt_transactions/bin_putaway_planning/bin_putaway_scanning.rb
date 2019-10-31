@@ -2,8 +2,6 @@ class BinPutawayScanning < PDTTransactionState
   def initialize(parent)
     @parent = parent
     @current_scanned_bin_index = 0
-    @qty_bins = @parent.qty_bins.to_s
-    @location_code = nil
     @positions_available = nil
   end
 
@@ -12,8 +10,8 @@ class BinPutawayScanning < PDTTransactionState
     field_configs = Array.new
 
     field_configs[field_configs.length] = {:type => "static_text", :name => "coldroom", :value => @parent.coldroom}
-    field_configs[field_configs.length] = {:type => "static_text", :name => "putaway_location", :value => @location_code}
-    field_configs[field_configs.length] = {:type => "static_text", :name => "qty_bins_to_putaway", :value => @qty_bins}
+    field_configs[field_configs.length] = {:type => "static_text", :name => "putaway_location", :value => @parent.location_code}
+    field_configs[field_configs.length] = {:type => "static_text", :name => "qty_bins_to_putaway", :value => @parent.qty_bins}
     field_configs[field_configs.length] = {:type => "static_text", :name => "bins_scanned", :value => "#{@parent.scanned_bins.length().to_s}"}
     field_configs[field_configs.length] = {:type => "static_text", :name => "space_left", :value => "#{@positions_available}"}
     field_configs[field_configs.length] = {:type => "text_box", :name => "bin_number",
@@ -43,23 +41,26 @@ class BinPutawayScanning < PDTTransactionState
 
     get_locations if bin && @parent.scanned_bins.length == 1
 
-    @spaces_left = Location.get_spaces_in_location(@location_code, @parent.scanned_bins.length) if @location_code
+
+
+    @parent.spaces_left = Location.get_spaces_in_location(@parent.location_code, @parent.scanned_bins.length) if @parent.location_code
+
 
     match_existing_bins if @parent.scanned_bins.length > 1
 
 
-    if !@location_code || (@spaces_left && @spaces_left.to_i <= 0)
+    if !@parent.location_code || (@parent.spaces_left && @parent.spaces_left.to_i <= 0)
       #TODO: display msg on the form
-      #self.parent.clear_active_state
-      next_state = SelectLocation.new(self)
+      @parent.clear_active_state
+      next_state = SelectLocation.new(@parent)
       result_screen = next_state.build_default_screen
-      self.set_active_state(next_state)
+      @parent.set_active_state(next_state)
       return result_screen
     end
 
     #TODO: if no space is left after scanning 1 or more bins
-    if (@spaces_left && @spaces_left <= 0) && @parent.scanned_bins.length > 1
-    elsif @spaces_left && @spaces_left.to_i <= 0
+    if (@parent.spaces_left && @parent.spaces_left <= 0) && @parent.scanned_bins.length > 1
+    elsif @parent.spaces_left && @parent.spaces_left.to_i <= 0
       #TODO: display msg on the form
       @parent.clear_active_state
       next_state = SelectLocation.new(@parent)
@@ -69,20 +70,11 @@ class BinPutawayScanning < PDTTransactionState
     end
 
     @qty_bins = @parent.qty_bins
-    @qty_bins = @spaces_left if @spaces_left.to_i < @parent.qty_bins.to_i
+    @qty_bins = @parent.spaces_left if @parent.spaces_left.to_i < @parent.qty_bins.to_i
 
-    @positions_available = @spaces_left - @parent.scanned_bins.length
+    @positions_available = @parent.spaces_left - @parent.scanned_bins.length
 
-    @quantity_bins_remaining = qty_bins_remaining
-    if @quantity_bins_remaining && @quantity_bins_remaining == 0
-      ActiveRecord::Base.transaction do
-        create_bin_putaway
-        do_move_stock
-      end
-      complete_plan_trans()
-    else
-      build_default_screen
-    end
+    process_scanned_bins
   end
 
   def qty_bins_remaining
@@ -101,6 +93,7 @@ class BinPutawayScanning < PDTTransactionState
 
       result_screen = PDTTransaction.build_msg_screen_definition("unmatched bin", nil, nil, nil)
       return result_screen
+
     end
   end
 
@@ -118,7 +111,7 @@ class BinPutawayScanning < PDTTransactionState
     @bin_putaway_plan.created_on = Time.now
     @bin_putaway_plan.completed = true
     @bin_putaway_plan.updated_at = Time.now.strftime("%Y/%m/%d/%H:%M:%S")
-    @bin_putaway_plan.user_name = self.pdt_screen_def.user
+    @bin_putaway_plan.user_name = @parent.pdt_screen_def.user
     @bin_putaway_plan.save
 
     # self.parent.clear_active_state
@@ -129,16 +122,14 @@ class BinPutawayScanning < PDTTransactionState
   end
 
   def do_move_stock
-    Inventory.move_stock("bin_putaway_planning", @bin_putaway_plan.id, @location_code, @parent.scanned_bins)
+    Inventory.move_stock("bin_putaway_planning", @bin_putaway_plan.id, @parent.location_code, @parent.scanned_bins)
   end
 
   def get_locations
     location = get_matched_bin_location
-    @location_code = location['location_code'] if location
-    @location_id = location['location_id'] if location
+    @parent.location_code = location['location_code'] if location
+    @parent.location_id = location['location_id'] if location
 
-    return nil if !location
-    return location if location
   end
 
 
@@ -168,6 +159,7 @@ class BinPutawayScanning < PDTTransactionState
                   join rmt_products rmt ON b.rmt_product_id = rmt.id
 				          left join farms ON b.farm_id = farms.id
                   where
+                  ((si.destroyed IS NULL) OR (si.destroyed = false)) and
                   l.parent_location_code  = '#{@parent.coldroom}'  and
                   l.loading_out is not true and
                   rmt.commodity_code      = '#{@commodity_code}'  and
@@ -185,6 +177,7 @@ class BinPutawayScanning < PDTTransactionState
                        l.id not in (select si.location_id
                                    from stock_items si join locations  on si.location_id=locations.id
                                    where locations.parent_location_code = '#{@parent.coldroom}')
+                                   and ((si.destroyed IS NULL) OR (si.destroyed = false))
                        order by l.updated_at desc
                   )
                       ) as d
@@ -212,7 +205,7 @@ class BinPutawayScanning < PDTTransactionState
                      JOIN rmt_products rmt ON bins.rmt_product_id = rmt.id
                      LEFT JOIN farms ON bins.farm_id = farms.id
 					           JOIN locations l on si.location_id = l.id
-					  WHERE   #{where_clause}
+					  WHERE  ((si.destroyed IS NULL) OR (si.destroyed = false)) and #{where_clause}
                                                    ")[0]
 
     assign_bin_variables(bin) if bin
@@ -253,6 +246,8 @@ class BinPutawayScanning < PDTTransactionState
   def validate
     scan_bin_number = @parent.pdt_screen_def.get_control_value("bin_number").strip
     bin = Bin.find_by_bin_number(scan_bin_number)
+    @force_complete =  @parent.pdt_screen_def.get_control_value("force_complete").strip
+
 
     if bin == nil
       error = ["Bin number :'#{scan_bin_number}' does not exist "]
@@ -298,8 +293,8 @@ class BinPutawayScanning < PDTTransactionState
     # @parent.set_transaction_complete_flag
 
     self.parent.set_transaction_complete_flag
-    result = ["Bin putaway plan created"]
-    result_screen = PDTTransaction.build_msg_screen_definition(nil, nil, nil, result)
+    result = ["Location:#{@parent.location_code} Bin putaway plan created"]
+    result_screen = PDTTransaction.build_msg_screen_definition(nil, nil, 2, result)
     return result_screen
 
       # @new = true
@@ -309,6 +304,25 @@ class BinPutawayScanning < PDTTransactionState
       # @parent.set_active_state(next_state)
       # return result_screen
   end
+
+
+  def process_scanned_bins
+    @positions_available = @parent.spaces_left - @parent.scanned_bins.length
+
+    @quantity_bins_remaining = qty_bins_remaining
+    if (@quantity_bins_remaining && @quantity_bins_remaining == 0) || @force_complete =="true"
+      ActiveRecord::Base.transaction do
+        create_bin_putaway
+        do_move_stock
+      end
+      complete_plan_trans()
+    else
+      build_default_screen
+    end
+  end
+
+
+
 
 
 end

@@ -1,6 +1,6 @@
 class BinPutawayPlanning < PDTTransaction
 
-  attr_accessor :coldroom, :qty_bins, :scanned_bins, :current_index, :coldroom_id, :current_bins_index, :new
+  attr_accessor :coldroom, :qty_bins, :scanned_bins, :current_index, :coldroom_id,:location_id, :current_bins_index, :new,:location_code,:spaces_left
   # coldroom_location_id
   # putaway_location_id
   # qty_bins_to_putaway
