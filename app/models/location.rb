@@ -18,6 +18,26 @@ class Location < ActiveRecord::Base
 #	============================
   validates_presence_of :location_code
 
+
+  def Location.get_spaces_in_location(location,scanned_bins)
+    units_in_location = 0
+    spaces_left = ActiveRecord::Base.connection.select_one("
+                        select
+                        l.location_maximum_units - (COALESCE(l.units_in_location,0) + COALESCE(bpp.qty_bins_to_putaway,0)) as spaces_left
+                        from  locations l
+                        left join bin_putaway_plans bpp on bpp.putaway_location_id = l.id
+                        where l.location_code = '#{location}'
+                                      ")['spaces_left'] if location
+    if scanned_bins==1
+    else
+      spaces_left = spaces_left.to_i - 1 #scanned_bins if scanned_bins > 1
+    end
+
+    return spaces_left.to_i
+    return units_in_location if  !spaces_left
+  end
+
+
   #def before_update
   #  location_status=Location.find(self.id).location_status
   #  if location_status != "OPEN" && self.location_status == "OPEN"
