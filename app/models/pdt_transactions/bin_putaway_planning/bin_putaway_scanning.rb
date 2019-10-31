@@ -46,7 +46,11 @@ class BinPutawayScanning < PDTTransactionState
     @parent.spaces_left = Location.get_spaces_in_location(@parent.location_code, @parent.scanned_bins.length) if @parent.location_code
 
 
-    match_existing_bins if @parent.scanned_bins.length > 1
+    not_matched = match_existing_bins if @parent.scanned_bins.length > 1
+    if not_matched
+      result_screen = PDTTransaction.build_msg_screen_definition("Bin different from other scanned bins.", nil, nil, nil)
+      return result_screen
+    end
 
 
     if !@parent.location_code || (@parent.spaces_left && @parent.spaces_left.to_i <= 0)
@@ -58,7 +62,6 @@ class BinPutawayScanning < PDTTransactionState
       return result_screen
     end
 
-    #TODO: if no space is left after scanning 1 or more bins
     if (@parent.spaces_left && @parent.spaces_left <= 0) && @parent.scanned_bins.length > 1
     elsif @parent.spaces_left && @parent.spaces_left.to_i <= 0
       #TODO: display msg on the form
@@ -83,19 +86,17 @@ class BinPutawayScanning < PDTTransactionState
 
   def match_existing_bins
     bin = get_bin_type_and_frit_spec("bins.bin_number = '#{@bin_number}' ")
-    if @bin_fruit_spec['stock_type_code'] != bin['stock_type_code'] ||
-        @bin_fruit_spec['commodity'] != bin['commodity_code'] ||
-        @bin_fruit_spec['variety'] != bin['variety_code'] ||
-        @bin_fruit_spec['size'] != bin['size_code'] ||
-        @bin_fruit_spec['class'] != bin['product_class_code'] ||
-        @bin_fruit_spec['treatment'] != bin['treatment_code'] ||
-        @bin_fruit_spec['farm'] != bin['farm_code']
-
-      result_screen = PDTTransaction.build_msg_screen_definition("unmatched bin", nil, nil, nil)
-      return result_screen
-
-    end
-  end
+      error = []
+      error << "error"  if @bin_fruit_spec['stock_type_code'] != bin['stock_type_code']
+      error <<  "error" if @bin_fruit_spec['commodity'] != bin['commodity_code']
+      error <<  "error" if @bin_fruit_spec['variety'] != bin['variety_code']
+      error <<  "error" if @bin_fruit_spec['size'] != bin['size_code']
+      error <<  "error" if @bin_fruit_spec['class'] != bin['product_class_code']
+      error <<  "error" if @bin_fruit_spec['treatment'] != bin['treatment_code']
+      error <<  "error" if @bin_fruit_spec['farm'] != bin['farm_code']
+    return "not matched" if !error.empty?
+    return nil if error.empty?
+   end
 
   def create_bin_putaway
     bin_nums = {}
@@ -176,8 +177,9 @@ class BinPutawayScanning < PDTTransactionState
                        where l.parent_location_code  = '#{@parent.coldroom}' and
                        l.id not in (select si.location_id
                                    from stock_items si join locations  on si.location_id=locations.id
-                                   where locations.parent_location_code = '#{@parent.coldroom}')
-                                   and ((si.destroyed IS NULL) OR (si.destroyed = false))
+                                   where locations.parent_location_code = '#{@parent.coldroom}'
+                                    and ((si.destroyed IS NULL) OR (si.destroyed = false)))
+
                        order by l.updated_at desc
                   )
                       ) as d
@@ -238,8 +240,6 @@ class BinPutawayScanning < PDTTransactionState
                        'variety' => @variety_code, 'size' => @size_code, 'class' => @product_class_code,
                        'treatment' => @treatment_code} if @stock_type_code == 'PRESORT'
 
-    @bin_fruit_spec
-
   end
 
 
@@ -283,26 +283,12 @@ class BinPutawayScanning < PDTTransactionState
 
 
   def complete_plan_trans()
-    "inform user that putaway plan is completed and clear transaction"
-    #self.parent.clear_active_state
-    result = ["Bin putaway plan completed "]
-    #result_screen = PDTTransaction.build_msg_screen_definition(nil, nil, nil, result)
-    #return result_screen
-
-    # @parent.clear_active_state
-    # @parent.set_transaction_complete_flag
 
     self.parent.set_transaction_complete_flag
     result = ["Location:#{@parent.location_code} Bin putaway plan created"]
     result_screen = PDTTransaction.build_msg_screen_definition(nil, nil, 2, result)
     return result_screen
 
-      # @new = true
-      #
-      # next_state = BinPutawayPlanning.new(nil,nil)
-      # result_screen = next_state.create_putaway_plan
-      # @parent.set_active_state(next_state)
-      # return result_screen
   end
 
 

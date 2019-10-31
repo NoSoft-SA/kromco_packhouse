@@ -6,7 +6,7 @@ class SelectLocation < PDTTransactionState
 
   def build_default_screen
     field_configs = Array.new
-  #ield_configs[field_configs.length] = {:type=>"static_text", :name=>"no matching location found OR location is full . Scan new location"}
+    field_configs[field_configs.length] = {:type=>"static_text", :name=>"msg",:value=>"Location not found OR Full"}
 
     field_configs[field_configs.length] = {:type => "text_box", :name => "location_code",
                                            :is_required => "true", :scan_only => "false", :scan_field => true,
@@ -25,7 +25,7 @@ class SelectLocation < PDTTransactionState
 
     location = Location.find_by_location_code(@parent.location_code)
     if !location
-      result_screen = PDTTransaction.build_msg_screen_definition("not a valid location", nil, nil, nil)
+      result_screen = PDTTransaction.build_msg_screen_definition("Not a valid location", nil, nil, nil)
       return result_screen
     end
 
@@ -51,11 +51,11 @@ class SelectLocation < PDTTransactionState
                select parent_location_code from locations where location_code = '#{@parent.location_code}'")['parent_location_code']
 
     if scanned_parent_location.to_s.upcase != @parent.coldroom.to_s.upcase
-      return "location does not belong to selected parent location"
+      return "Location does not belong to selected parent location."
     end
 
      if @parent.spaces_left && @parent.spaces_left.to_i <= 0
-      return  "location does not have enough space"
+      return  "Location does not have enough space."
     end
 
     return nil
