@@ -2,7 +2,6 @@ class BinPutawayScanning < PDTTransactionState
   def initialize(parent)
     @parent = parent
     @current_scanned_bin_index = 0
-    @positions_available = nil
   end
 
   def build_default_screen
@@ -13,7 +12,7 @@ class BinPutawayScanning < PDTTransactionState
     field_configs[field_configs.length] = {:type => "static_text", :name => "putaway_location", :value => @parent.location_code}
     field_configs[field_configs.length] = {:type => "static_text", :name => "qty_bins_to_putaway", :value => @parent.qty_bins}
     field_configs[field_configs.length] = {:type => "static_text", :name => "bins_scanned", :value => "#{@parent.scanned_bins.length().to_s}"}
-    field_configs[field_configs.length] = {:type => "static_text", :name => "space_left", :value => "#{@positions_available}"}
+    field_configs[field_configs.length] = {:type => "static_text", :name => "space_left", :value => "#{@parent.positions_available}"}
     field_configs[field_configs.length] = {:type => "text_box", :name => "bin_number",
                                            :is_required => "true", :scan_only => "false", :scan_field => true,
                                            :submit_form => true}
@@ -37,7 +36,7 @@ class BinPutawayScanning < PDTTransactionState
     end
     @parent.scanned_bins.push(@bin_number)
 
-    bin = get_bin_type_and_frit_spec("bins.bin_number = '#{@bin_number}' and l.parent_location_code = '#{@parent.coldroom}'") if @parent.scanned_bins.length == 1
+    bin = get_bin_type_and_frit_spec("bins.bin_number = '#{@bin_number}' ") if @parent.scanned_bins.length == 1
 
     get_locations if bin && @parent.scanned_bins.length == 1
 
@@ -75,7 +74,7 @@ class BinPutawayScanning < PDTTransactionState
     @qty_bins = @parent.qty_bins
     @qty_bins = @parent.spaces_left if @parent.spaces_left.to_i < @parent.qty_bins.to_i
 
-    @positions_available = @parent.spaces_left - @parent.scanned_bins.length
+    @parent.positions_available = @parent.spaces_left - @parent.scanned_bins.length
 
     process_scanned_bins
   end
@@ -282,33 +281,26 @@ class BinPutawayScanning < PDTTransactionState
   end
 
 
-  def complete_plan_trans()
-
-    self.parent.set_transaction_complete_flag
-    result = ["Location:#{@parent.location_code} Bin putaway plan created"]
-    result_screen = PDTTransaction.build_msg_screen_definition(nil, nil, 2, result)
-    return result_screen
-
-  end
-
-
   def process_scanned_bins
-    @positions_available = @parent.spaces_left - @parent.scanned_bins.length
+    @parent.positions_available = @parent.spaces_left - @parent.scanned_bins.length
 
     @quantity_bins_remaining = qty_bins_remaining
     if (@quantity_bins_remaining && @quantity_bins_remaining == 0) || @force_complete =="true"
-      ActiveRecord::Base.transaction do
         create_bin_putaway
-        do_move_stock
-      end
-      complete_plan_trans()
+        @parent.plan= @bin_putaway_plan
+        return transition_to_bulk_putaway
+        #do_move_stock
     else
       build_default_screen
     end
   end
 
-
-
+  def transition_to_bulk_putaway
+    next_state = BulkPutawayBin.new(self)
+    result_screen = next_state.build_bulk_putaway_screen
+    @parent.set_active_state(next_state)
+    return result_screen
+  end
 
 
 end

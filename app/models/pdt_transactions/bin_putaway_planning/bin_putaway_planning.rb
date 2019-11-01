@@ -1,6 +1,6 @@
 class BinPutawayPlanning < PDTTransaction
 
-  attr_accessor :coldroom, :qty_bins, :scanned_bins, :current_index, :coldroom_id,:location_id, :current_bins_index, :new,:location_code,:spaces_left
+  attr_accessor :plan,:coldroom,:positions_available, :qty_bins, :scanned_bins, :current_index, :coldroom_id,:location_id, :current_bins_index, :new,:location_code,:spaces_left
   # coldroom_location_id
   # putaway_location_id
   # qty_bins_to_putaway
@@ -14,6 +14,7 @@ class BinPutawayPlanning < PDTTransaction
   def initialize(new = nil, index = nil)
     @new = new
     @current_bins_index = index
+    #@bin_putaway_plan = BinPutawayPlan.new
   end
 
 
@@ -44,7 +45,6 @@ class BinPutawayPlanning < PDTTransaction
   end
 
 
-  private
 
   def get_user_latest_planning_plan
     coldroom = nil
