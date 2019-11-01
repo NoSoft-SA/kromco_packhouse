@@ -40,10 +40,7 @@ class BinPutawayScanning < PDTTransactionState
 
     get_locations if bin && @parent.scanned_bins.length == 1
 
-
-
     @parent.spaces_left = Location.get_spaces_in_location(@parent.location_code, @parent.scanned_bins.length) if @parent.location_code
-
 
     not_matched = match_existing_bins if @parent.scanned_bins.length > 1
     if not_matched
@@ -53,7 +50,7 @@ class BinPutawayScanning < PDTTransactionState
 
 
     if !@parent.location_code || (@parent.spaces_left && @parent.spaces_left.to_i <= 0)
-      #TODO: display msg on the form
+      #TODO: display msg on the new form
       @parent.clear_active_state
       next_state = SelectLocation.new(@parent)
       result_screen = next_state.build_default_screen
@@ -63,7 +60,7 @@ class BinPutawayScanning < PDTTransactionState
 
     if (@parent.spaces_left && @parent.spaces_left <= 0) && @parent.scanned_bins.length > 1
     elsif @parent.spaces_left && @parent.spaces_left.to_i <= 0
-      #TODO: display msg on the form
+      #TODO: display msg on the new form
       @parent.clear_active_state
       next_state = SelectLocation.new(@parent)
       result_screen = next_state.build_default_screen
@@ -102,17 +99,19 @@ class BinPutawayScanning < PDTTransactionState
     @parent.scanned_bins.each do |num|
       bin_nums[num] = "'#{num}'"
     end
-    @bin_putaway_plan = BinPutawayPlan.new
-    @bin_putaway_plan.coldroom_location_id = @parent.coldroom_id
-    @bin_putaway_plan.putaway_location_id = @location_id
-    @bin_putaway_plan.qty_bins_to_putaway = @qty_bins.to_i
-    @bin_putaway_plan.bins_to_putaway = bin_nums
-    @bin_putaway_plan.bins_putaway_completed = bin_nums
-    @bin_putaway_plan.created_on = Time.now
-    @bin_putaway_plan.completed = true
-    @bin_putaway_plan.updated_at = Time.now.strftime("%Y/%m/%d/%H:%M:%S")
-    @bin_putaway_plan.user_name = @parent.pdt_screen_def.user
-    @bin_putaway_plan.save
+    bin_putaway_plan = BinPutawayPlan.new
+    bin_putaway_plan.coldroom_location_id = @parent.coldroom_id
+    bin_putaway_plan.putaway_location_id = @location_id
+    bin_putaway_plan.qty_bins_to_putaway = @qty_bins.to_i
+    bin_putaway_plan.bins_to_putaway = bin_nums
+    bin_putaway_plan.bins_putaway_completed = bin_nums
+    bin_putaway_plan.created_on = Time.now
+    bin_putaway_plan.completed = true
+    bin_putaway_plan.updated_at = Time.now.strftime("%Y/%m/%d/%H:%M:%S")
+    bin_putaway_plan.user_name = @parent.pdt_screen_def.user
+    bin_putaway_plan.save
+
+    @parent.bin_putaway_plan_id = bin_putaway_plan.id
 
   end
 
@@ -279,9 +278,7 @@ class BinPutawayScanning < PDTTransactionState
     @quantity_bins_remaining = qty_bins_remaining
     if (@quantity_bins_remaining && @quantity_bins_remaining == 0) || @force_complete =="true"
         create_bin_putaway
-        @parent.plan= @bin_putaway_plan
         return transition_to_bulk_putaway
-        #do_move_stock
     else
       build_default_screen
     end

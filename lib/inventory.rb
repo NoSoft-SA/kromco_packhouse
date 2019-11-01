@@ -190,7 +190,6 @@ module Inventory
     end
 
     def execute
-
     end
 
     def validate
@@ -543,8 +542,13 @@ module Inventory
       #======== Log stock_locations_history=================================
       stock_locations_history = StockLocationsHistory.new({:inventory_transaction_id => @inventory_transaction.id, :stock_item_id => @stock_item_before.id, :inventory_reference => @stock_item_before.inventory_reference,
                                                            :stock_type => @stock_item_before.stock_type_code, :location_id => location_from.id, :units_in_location_before => location_from.units_in_location, :location_code => location_from.location_code})
+
+      location_from.loading_out = true if (location_from.units_in_location.to_i - 1) > 1
+      location_from.loading_out = nil  if (location_from.units_in_location.to_i - 1) == 0
+
       location_from.units_in_location = location_from.units_in_location.to_i - 1
-     # location_from.update
+      location_from.updated_at = Time.now
+      location_from.update #:TODO this was commented out any particular reason
 
       stock_locations_history.units_in_location_after = location_from.units_in_location
       stock_locations_history.save!
@@ -1189,7 +1193,7 @@ module Inventory
 
     stock_ids.each do |stock_item_inventory_reference|
       #	----------------------
-      #	 Define lookup fields
+      #	 Define looku6p fields
       #	----------------------
       stock_item = StockItem.find_by_inventory_reference(stock_item_inventory_reference)
       raise "Validation error: stock_item[" + stock_item_inventory_reference + "] does not exist" if !stock_item

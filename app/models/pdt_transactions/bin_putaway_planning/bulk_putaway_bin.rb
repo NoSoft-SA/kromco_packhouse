@@ -11,7 +11,7 @@ class BulkPutawayBin < PDTTransactionState
     field_configs[field_configs.length] = {:type => "static_text", :name => "coldroom", :value => @parent.coldroom}
     field_configs[field_configs.length] = {:type => "static_text", :name => "putaway_location", :value => @parent.location_code}
     field_configs[field_configs.length] = {:type => "static_text", :name => "positions_available", :value => "#{@parent.positions_available.to_s}"}
-    field_configs[field_configs.length] = {:type => "text_box", :name => "location_code_to",
+    field_configs[field_configs.length] = {:type => "text_box", :name => "location_code",
                                            :is_required => "true", :scan_only => "false", :scan_field => true,
                                            :submit_form => true}
 
@@ -26,7 +26,7 @@ class BulkPutawayBin < PDTTransactionState
   end
 
   def scanned_location_submit
-    @scanned_location = @parent.pdt_screen_def.get_control_value("location_code_to").strip
+    @scanned_location = @parent.pdt_screen_def.get_control_value("location_code").strip
 
     @location_to = Location.find_by_location_code(@scanned_location)
     if !@location_to
@@ -68,13 +68,14 @@ class BulkPutawayBin < PDTTransactionState
   end
 
   def do_bulk_putaway
-    @parent
-    # - copy contents of bins_to_putaway to bins_putaway_completed
-    # @parent.plan.bins_putaway_completed = @bin_putaway_plan.bins_to_putaway
-    # @parent.plan.completed = true
-    # @parent.plan.updated_at = Time.now.strftime("%Y/%m/%d/%H:%M:%S")
-    # @parent.plan.user_name = @parent.pdt_screen_def.user
-    # @parent.plan.update
+    #- copy contents of bins_to_putaway to bins_putaway_completed
+    bin_putway_plan = BinPutawayPlan.find(@parent.bin_putaway_plan_id)
+    bin_putway_plan.bins_putaway_completed = bin_putway_plan.bins_to_putaway
+    bin_putway_plan.completed = true
+    bin_putway_plan.updated_at = Time.now.strftime("%Y/%m/%d/%H:%M:%S")
+    bin_putway_plan.user_name = @parent.pdt_screen_def.user
+    bin_putway_plan.update
+    bin_putway_plan
   end
 
 end

@@ -1,20 +1,10 @@
 class BinPutawayPlanning < PDTTransaction
 
-  attr_accessor :plan,:coldroom,:positions_available, :qty_bins, :scanned_bins, :current_index, :coldroom_id,:location_id, :current_bins_index, :new,:location_code,:spaces_left
-  # coldroom_location_id
-  # putaway_location_id
-  # qty_bins_to_putaway
-  # bins_to_putaway
-  # bins_putaway_completed
-  # created_on
-  # completed_on
-  # updated_at
-  # user_name
+  attr_accessor :bin_putaway_plan_id,:coldroom,:positions_available, :qty_bins, :scanned_bins, :current_index, :coldroom_id,:location_id, :current_bins_index, :new,:location_code,:spaces_left
 
   def initialize(new = nil, index = nil)
     @new = new
     @current_bins_index = index
-    #@bin_putaway_plan = BinPutawayPlan.new
   end
 
 
