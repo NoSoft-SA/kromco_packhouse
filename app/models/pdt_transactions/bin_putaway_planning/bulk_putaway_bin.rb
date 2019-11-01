@@ -11,7 +11,7 @@ class BulkPutawayBin < PDTTransactionState
     field_configs[field_configs.length] = {:type => "static_text", :name => "coldroom", :value => @parent.coldroom}
     field_configs[field_configs.length] = {:type => "static_text", :name => "putaway_location", :value => @parent.location_code}
     field_configs[field_configs.length] = {:type => "static_text", :name => "positions_available", :value => "#{@parent.positions_available.to_s}"}
-    field_configs[field_configs.length] = {:type => "text_box", :name => "location_code",
+    field_configs[field_configs.length] = {:type => "text_box", :name => "scan_location_barcode",
                                            :is_required => "true", :scan_only => "false", :scan_field => true,
                                            :submit_form => true}
 
@@ -26,13 +26,19 @@ class BulkPutawayBin < PDTTransactionState
   end
 
   def scanned_location_submit
-    @scanned_location = @parent.pdt_screen_def.get_control_value("location_code").strip
+    location_barcode = @parent.pdt_screen_def.get_control_value("scan_location_barcode").strip
 
-    @location_to = Location.find_by_location_code(@scanned_location)
-    if !@location_to
-      result_screen = PDTTransaction.build_msg_screen_definition("Not a valid location", nil, nil, nil)
+    location = Location.find_by_location_barcode(location_barcode)
+    if !location
+      result_screen = PDTTransaction.build_msg_screen_definition("Not a valid location barcode", nil, nil, nil)
       return result_screen
     end
+
+
+    @scanned_location_code = location.location_code
+    @location_to_location_maximum_units = location.location_maximum_units
+    @location_to_units_in_location = location.units_in_location
+
 
     error = validate_scanned_location
 
@@ -41,6 +47,7 @@ class BulkPutawayBin < PDTTransactionState
       return result_screen
     else
       do_bulk_putaway
+      do_move_stock
       complete_bin_putaway_plan
     end
   end
@@ -55,12 +62,12 @@ class BulkPutawayBin < PDTTransactionState
 
   def validate_scanned_location
 
-    if @scanned_location.to_s.upcase != @parent.location_code.to_s.upcase
+    if @scanned_location_code.to_s.upcase != @parent.location_code.to_s.upcase
       return "Scanned location different from putaway location."
     end
     #- validate that the scan location has enough space ,
     #  i.e. positions_available must be same or greater that the bin_putaway_plan.bins_to_putaway
-    if (@location_to.location_maximum_units.to_i - @location_to.units_in_location.to_i) < @parent.scanned_bins.length
+    if (@location_to_location_maximum_units.to_i - @location_to_units_in_location.to_i) < @parent.scanned_bins.length
       return "Scanned location has less space than putaway plan."
     end
 
@@ -76,6 +83,10 @@ class BulkPutawayBin < PDTTransactionState
     bin_putway_plan.user_name = @parent.pdt_screen_def.user
     bin_putway_plan.update
     bin_putway_plan
+  end
+
+  def do_move_stock
+    Inventory.move_stock("bin_putaway_planning", @parent.bin_putaway_plan_id, @scanned_location_code, @parent.scanned_bins)
   end
 
 end

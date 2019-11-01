@@ -14,9 +14,9 @@ class BinPutawayScanning < PDTTransactionState
     field_configs[field_configs.length] = {:type => "static_text", :name => "bins_scanned", :value => "#{@parent.scanned_bins.length().to_s}"}
     field_configs[field_configs.length] = {:type => "static_text", :name => "space_left", :value => "#{@parent.positions_available}"}
     field_configs[field_configs.length] = {:type => "text_box", :name => "bin_number",
-                                           :is_required => "true", :scan_only => "false", :scan_field => true,
+                                            :scan_only => "false", :scan_field => true,
                                            :submit_form => true}
-    field_configs[field_configs.length()] = {:type => "check_box", :name => "force_complete"} #,:scan_field => true,:submit_form => true}#,:scan_only=>"true"
+    field_configs[field_configs.length()] = {:type => "check_box", :name => "force_complete",:submit_form => true} #,:scan_field => true,:submit_form => true}#,:scan_only=>"true"
 
     screen_attributes = {:auto_submit => "true", :auto_submit_to => "bin_scanned_submit", :cache_screen => true}
     buttons = {"B3Label" => "", "B2Label" => "", "B1Submit" => "bin_scanned_submit", "B1Label" => "submit", "B1Enable" => "false", "B2Enable" => "false", "B3Enable" => "false"}
@@ -34,7 +34,10 @@ class BinPutawayScanning < PDTTransactionState
       result_screen = PDTTransaction.build_msg_screen_definition(nil, nil, nil, error)
       return result_screen
     end
-    @parent.scanned_bins.push(@bin_number)
+
+    @parent.scanned_bins.push(@bin_number) if @bin_number
+    if @force_complete == "true" && @parent.scanned_bins.length >=1 && !@bin_number
+    else
 
     bin = get_bin_type_and_frit_spec("bins.bin_number = '#{@bin_number}' ") if @parent.scanned_bins.length == 1
 
@@ -72,6 +75,7 @@ class BinPutawayScanning < PDTTransactionState
     @qty_bins = @parent.spaces_left if @parent.spaces_left.to_i < @parent.qty_bins.to_i
 
     @parent.positions_available = @parent.spaces_left - @parent.scanned_bins.length
+    end
 
     process_scanned_bins
   end
@@ -140,10 +144,15 @@ class BinPutawayScanning < PDTTransactionState
 
   def get_matched_bin_location
     location = ActiveRecord::Base.connection.select_all("
-               select distinct location_code , location_id, updated_at
+               select  location_code , location_id, updated_at
                 from (
                   (
-                   select distinct l.location_code , l.id  as location_id,l.updated_at
+                   select distinct l.location_code , l.id  as location_id,l.updated_at,
+                  units_in_location,location_maximum_units,case
+                  when units_in_location=location_maximum_units then '100'
+                  when units_in_location=0 then '1'
+                  when units_in_location<location_maximum_units then '0'
+                  else 'n.a.' end as fullness
                   from locations l
                   join stock_items si on si.location_id = l.id
                   join bins b on si.inventory_reference = b.bin_number
@@ -159,10 +168,16 @@ class BinPutawayScanning < PDTTransactionState
                   rmt.product_class_code  = '#{@product_class_code}'  and
                   rmt.treatment_code      = '#{@treatment_code}'
                   #{@farm_code}
-                  order by l.updated_at desc)
+                  )
                   UNION
                   (
-                       select distinct l.location_code , l.id  as location_id,l.updated_at
+                       select distinct l.location_code , l.id  as location_id,l.updated_at,
+                        units_in_location,location_maximum_units
+                        ,case
+                        when units_in_location=location_maximum_units then '100'
+                        when units_in_location=0 then '1'
+                        when units_in_location<location_maximum_units then '0'
+                        else 'n.a.' end  as fullness
                        from locations l
                        where l.parent_location_code  = '#{@parent.coldroom}' and
                        l.id not in (select si.location_id
@@ -172,8 +187,8 @@ class BinPutawayScanning < PDTTransactionState
 
                        order by l.updated_at desc
                   )
-                      ) as d
-                  order by updated_at desc
+                      ) as sq
+               order by fullness::int ,updated_at desc
                                                         ")[0]
 
     location
@@ -235,11 +250,14 @@ class BinPutawayScanning < PDTTransactionState
 
   def validate
     scan_bin_number = @parent.pdt_screen_def.get_control_value("bin_number").strip
-    bin = Bin.find_by_bin_number(scan_bin_number)
     @force_complete =  @parent.pdt_screen_def.get_control_value("force_complete").strip
 
+    if @force_complete == "true" && @parent.scanned_bins.length >= 1
+      @bin_number = nil
+    else
+      bin = Bin.find_by_bin_number(scan_bin_number)
 
-    if bin == nil
+      if bin == nil
       error = ["Bin number :'#{scan_bin_number}' does not exist "]
       return error
     end
@@ -268,6 +286,7 @@ class BinPutawayScanning < PDTTransactionState
     if on_a_bin_plan
       error = ["Bin can not be received,its on another bin putaway plan "]
       return error
+    end
     end
   end
 
