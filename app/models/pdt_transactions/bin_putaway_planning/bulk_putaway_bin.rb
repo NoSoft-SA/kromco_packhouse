@@ -5,7 +5,6 @@ class BulkPutawayBin < PDTTransactionState
   end
 
   def build_bulk_putaway_screen
-    self.parent.set_cannot_undo
 
     field_configs = Array.new
 
