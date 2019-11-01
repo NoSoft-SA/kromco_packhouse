@@ -548,6 +548,7 @@ module Inventory
 
       location_from.units_in_location = location_from.units_in_location.to_i - 1
       location_from.updated_at = Time.now
+      location_from.updated_by = ActiveRequest.get_active_request.user
       location_from.update #:TODO this was commented out any particular reason
 
       stock_locations_history.units_in_location_after = location_from.units_in_location
@@ -560,6 +561,9 @@ module Inventory
 
 
       location_to = Location.find_by_location_code(@stock_item_after.location_code)
+      location_to.updated_at = Time.now
+      location_to.updated_by = ActiveRequest.get_active_request.user
+      location_to.update
       #======== Log stock_locations_history=================================
       stock_locations_history = StockLocationsHistory.new({:inventory_transaction_id => @inventory_transaction.id, :stock_item_id => @stock_item_after.id, :inventory_reference => @stock_item_after.inventory_reference,
                                                            :stock_type => @stock_item_after.stock_type_code, :location_id => location_to.id, :units_in_location_before => location_to.units_in_location, :location_code => location_to.location_code})

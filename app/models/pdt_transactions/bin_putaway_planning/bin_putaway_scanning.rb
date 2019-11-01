@@ -87,13 +87,13 @@ class BinPutawayScanning < PDTTransactionState
   def match_existing_bins
     bin = get_bin_type_and_frit_spec("bins.bin_number = '#{@bin_number}' ")
       error = []
-      error << "error"  if @bin_fruit_spec['stock_type_code'] != bin['stock_type_code']
+      error << "error"  if @bin_fruit_spec['stock_type'] != bin['stock_type_code']
       error <<  "error" if @bin_fruit_spec['commodity'] != bin['commodity_code']
       error <<  "error" if @bin_fruit_spec['variety'] != bin['variety_code']
       error <<  "error" if @bin_fruit_spec['size'] != bin['size_code']
       error <<  "error" if @bin_fruit_spec['class'] != bin['product_class_code']
       error <<  "error" if @bin_fruit_spec['treatment'] != bin['treatment_code']
-      error <<  "error" if @bin_fruit_spec['farm'] != bin['farm_code']
+      error <<  "error" if (@bin_fruit_spec['farm'] != bin['farm_code']) && (@bin_fruit_spec['farm'] && bin['farm_code'])
     return "not matched" if !error.empty?
     return nil if error.empty?
    end
@@ -143,12 +143,11 @@ class BinPutawayScanning < PDTTransactionState
   end
 
   def get_matched_bin_location
-    location = ActiveRecord::Base.connection.select_all("
-               select  location_code , location_id, updated_at
-                from (
-                  (
-                   select distinct l.location_code , l.id  as location_id,l.updated_at,
-                  units_in_location,location_maximum_units,case
+    location = ActiveRecord::Base.connection.select_one("
+                  select * from (
+                  select distinct l.location_code , l.id  as location_id,l.updated_at,
+                  units_in_location,location_maximum_units,
+                  case
                   when units_in_location=location_maximum_units then '100'
                   when units_in_location=0 then '1'
                   when units_in_location<location_maximum_units then '0'
@@ -167,29 +166,9 @@ class BinPutawayScanning < PDTTransactionState
                   rmt.size_code           = '#{@size_code}'  and
                   rmt.product_class_code  = '#{@product_class_code}'  and
                   rmt.treatment_code      = '#{@treatment_code}'
-                  #{@farm_code}
-                  )
-                  UNION
-                  (
-                       select distinct l.location_code , l.id  as location_id,l.updated_at,
-                        units_in_location,location_maximum_units
-                        ,case
-                        when units_in_location=location_maximum_units then '100'
-                        when units_in_location=0 then '1'
-                        when units_in_location<location_maximum_units then '0'
-                        else 'n.a.' end  as fullness
-                       from locations l
-                       where l.parent_location_code  = '#{@parent.coldroom}' and
-                       l.id not in (select si.location_id
-                                   from stock_items si join locations  on si.location_id=locations.id
-                                   where locations.parent_location_code = '#{@parent.coldroom}'
-                                    and ((si.destroyed IS NULL) OR (si.destroyed = false)))
-
-                       order by l.updated_at desc
-                  )
-                      ) as sq
-               order by fullness::int ,updated_at desc
-                                                        ")[0]
+                  #{@farm_code} ) as sq
+                  order by fullness::int ,updated_at desc limit 1
+                                                        ")
 
     location
 
