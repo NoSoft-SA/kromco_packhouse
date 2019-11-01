@@ -37,5 +37,9 @@ kromco:
     edi_out:
       ps_token: ruby
       cmd_token: run_edi_out_proc
+  bin_putaway_coldrooms:
+    - RA_6TO7_RA_6
+    - CA_CDE
+    - CA_AB
 
 
