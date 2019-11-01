@@ -70,14 +70,11 @@ class BulkPutawayBin < PDTTransactionState
   def do_bulk_putaway
     @parent
     # - copy contents of bins_to_putaway to bins_putaway_completed
-    # @parent.bin_putaway_plan.bins_putaway_completed = @bin_putaway_plan.bins_to_putaway
-    # @parent.bin_putaway_plan.completed = true
-    # @parent.bin_putaway_plan.updated_at = Time.now.strftime("%Y/%m/%d/%H:%M:%S")
-    # @parent.bin_putaway_plan.user_name = @parent.pdt_screen_def.user
-    # @parent.bin_putaway_plan.update
+    # @parent.plan.bins_putaway_completed = @bin_putaway_plan.bins_to_putaway
+    # @parent.plan.completed = true
+    # @parent.plan.updated_at = Time.now.strftime("%Y/%m/%d/%H:%M:%S")
+    # @parent.plan.user_name = @parent.pdt_screen_def.user
+    # @parent.plan.update
   end
 
-  # def do_move_stock
-  #   Inventory.move_stock("bin_putaway_planning", @bin_putaway_plan.id, @parent.location_code, @parent.scanned_bins)
-  # end
 end

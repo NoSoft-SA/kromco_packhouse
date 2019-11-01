@@ -114,16 +114,8 @@ class BinPutawayScanning < PDTTransactionState
     @bin_putaway_plan.user_name = @parent.pdt_screen_def.user
     @bin_putaway_plan.save
 
-    # self.parent.clear_active_state
-    # next_state = BulkPutawayBin.new(@parent)
-    # result_screen = next_state.build_default_screen
-    # @parent.set_active_state(next_state)
-    # return result_screen
   end
 
-  def do_move_stock
-    Inventory.move_stock("bin_putaway_planning", @bin_putaway_plan.id, @parent.location_code, @parent.scanned_bins)
-  end
 
   def get_locations
     location = get_matched_bin_location
@@ -296,7 +288,7 @@ class BinPutawayScanning < PDTTransactionState
   end
 
   def transition_to_bulk_putaway
-    next_state = BulkPutawayBin.new(self)
+    next_state = BulkPutawayBin.new(@parent)
     result_screen = next_state.build_bulk_putaway_screen
     @parent.set_active_state(next_state)
     return result_screen
