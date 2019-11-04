@@ -2,9 +2,10 @@ class BinPutawayPlanning < PDTTransaction
 
   attr_accessor :bin_putaway_plan_id,:coldroom,:positions_available, :qty_bins, :scanned_bins, :current_index, :coldroom_id,:location_id, :current_bins_index, :new,:location_code,:spaces_left
 
-  def initialize(new = nil, index = nil)
+  def initialize(new = nil, index = nil,user = nil)
     @new = new
     @current_bins_index = index
+    @user = user if user
   end
 
 
@@ -39,11 +40,12 @@ class BinPutawayPlanning < PDTTransaction
   def get_user_latest_planning_plan
     coldroom = nil
     qty_bins = nil
+    @user = self.pdt_screen_def.user if !@user
     latest_bin_putaway_plan = ActiveRecord::Base.connection.select_one(
         "select l.location_code ,bpp.coldroom_location_id,bpp.qty_bins_to_putaway
                                   from locations l
                                   join bin_putaway_plans bpp on bpp.coldroom_location_id = l.id
-                                  where bpp.user_name  = '#{self.pdt_screen_def.user}'
+                                  where bpp.user_name  = '#{@user}'
                                   order by bpp.updated_at desc limit 1")
 
     qty_bins = latest_bin_putaway_plan['qty_bins_to_putaway'].to_s.strip if latest_bin_putaway_plan

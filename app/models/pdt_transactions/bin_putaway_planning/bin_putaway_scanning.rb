@@ -45,9 +45,9 @@ class BinPutawayScanning < PDTTransactionState
 
     @parent.spaces_left = Location.get_spaces_in_location(@parent.location_code, @parent.scanned_bins.length) if @parent.location_code
 
-    not_matched = match_existing_bins if @parent.scanned_bins.length > 1
-    if not_matched
-      result_screen = PDTTransaction.build_msg_screen_definition("Bin different from other scanned bins.", nil, nil, nil)
+    matching_error = match_existing_bins if @parent.scanned_bins.length > 1
+    if matching_error
+      result_screen = PDTTransaction.build_msg_screen_definition("#{matching_error}", nil, nil, nil)
       return result_screen
     end
 
@@ -87,14 +87,16 @@ class BinPutawayScanning < PDTTransactionState
   def match_existing_bins
     bin = get_bin_type_and_frit_spec("bins.bin_number = '#{@bin_number}' ")
       error = []
-      error << "error"  if @bin_fruit_spec['stock_type'] != bin['stock_type_code']
-      error <<  "error" if @bin_fruit_spec['commodity'] != bin['commodity_code']
-      error <<  "error" if @bin_fruit_spec['variety'] != bin['variety_code']
-      error <<  "error" if @bin_fruit_spec['size'] != bin['size_code']
-      error <<  "error" if @bin_fruit_spec['class'] != bin['product_class_code']
-      error <<  "error" if @bin_fruit_spec['treatment'] != bin['treatment_code']
-      error <<  "error" if (@bin_fruit_spec['farm'] != bin['farm_code']) && (@bin_fruit_spec['farm'] && bin['farm_code'])
-    return "not matched" if !error.empty?
+      error << "Scanned bin is of different stock type."  if @bin_fruit_spec['stock_type'] != bin['stock_type_code']
+      error <<  "Scanned bin is of different commodity." if @bin_fruit_spec['commodity'] != bin['commodity_code']
+      error <<  "Scanned bin is of different variety." if @bin_fruit_spec['variety'] != bin['variety_code']
+      error <<  "Scanned bin is of different size." if @bin_fruit_spec['size'] != bin['size_code']
+      error <<  "Scanned bin is of different class." if @bin_fruit_spec['class'] != bin['product_class_code']
+      error <<  "Scanned bin is of different treatment." if @bin_fruit_spec['treatment'] != bin['treatment_code']
+      error <<  "Scanned bin is of different farm." if (@bin_fruit_spec['farm'] != bin['farm_code']) && (@bin_fruit_spec['farm'] && bin['farm_code'])
+      error <<  "Scanned bin is of different track_indicator_code." if @bin_fruit_spec['track_indicator_code'] != bin['track_indicator_code']
+
+    return error.join(",") if !error.empty?
     return nil if error.empty?
    end
 
@@ -185,7 +187,8 @@ class BinPutawayScanning < PDTTransactionState
                     rmt.size_code,
                     rmt.product_class_code,
                     rmt.treatment_code,
-                    farms.farm_code
+                    farms.farm_code,
+                    bins.track_indicator1_id
             from bins
                      JOIN stock_items si ON si.inventory_reference=bins.bin_number
                      JOIN rmt_products rmt ON bins.rmt_product_id = rmt.id
@@ -194,7 +197,7 @@ class BinPutawayScanning < PDTTransactionState
 					  WHERE  ((si.destroyed IS NULL) OR (si.destroyed = false)) and #{where_clause}
                                                    ")[0]
 
-    assign_bin_variables(bin) if bin
+    assign_bin_variables(bin) if bin && @parent.scanned_bins.length == 1
     return bin
   end
 
@@ -205,6 +208,7 @@ class BinPutawayScanning < PDTTransactionState
     @size_code = bin['size_code']
     @product_class_code = bin['product_class_code']
     @treatment_code = bin['treatment_code']
+    @track_indicator1_id = bin['track_indicator1_id']
     farm_code = bin['farm_code']
 
 
@@ -218,11 +222,13 @@ class BinPutawayScanning < PDTTransactionState
 
     @bin_fruit_spec = {'stock_type' => @stock_type_code, 'commodity' => @commodity_code,
                        'variety' => @variety_code, 'size' => @size_code, 'class' => @product_class_code,
-                       'treatment' => @treatment_code, 'farm' => farm_code} if @stock_type_code == 'BIN'
+                       'treatment' => @treatment_code, 'farm' => farm_code,'track_indicator1_id'=> @track_indicator1_id} if @stock_type_code == 'BIN'
 
     @bin_fruit_spec = {'stock_type' => @stock_type_code, 'commodity' => @commodity_code,
                        'variety' => @variety_code, 'size' => @size_code, 'class' => @product_class_code,
-                       'treatment' => @treatment_code} if @stock_type_code == 'PRESORT'
+                       'treatment' => @treatment_code,'track_indicator1_id'=> @track_indicator1_id} if @stock_type_code == 'PRESORT'
+
+
 
   end
 

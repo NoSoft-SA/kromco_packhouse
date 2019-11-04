@@ -54,10 +54,11 @@ class BulkPutawayBin < PDTTransactionState
 
   def complete_bin_putaway_plan()
     @parent.set_transaction_complete_flag
-    result = ["Location:#{@parent.location_code} Bin putaway plan created"]
-    result_screen = PDTTransaction.build_msg_screen_definition(nil, nil, 2, result)
-    return result_screen
+    self.parent.clear_active_state
 
+    next_state = BinPutawayPlanning.new(nil,nil,self.pdt_screen_def.user)
+    self.parent.set_active_state(next_state)
+    return next_state.create_putaway_plan
   end
 
   def validate_scanned_location
