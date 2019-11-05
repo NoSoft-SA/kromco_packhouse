@@ -52,6 +52,16 @@ class BulkPutawayBin < PDTTransactionState
     end
   end
 
+  # def complete_bin_putaway_plan()
+  #   @parent.set_transaction_complete_flag
+  #   @parent.clear_active_state
+  #   @parent.clear_pdt_environment
+  #
+  #   next_state = BinPutawayPlanning.new(nil,nil,self.pdt_screen_def.user)
+  #   #self.parent.set_active_state(next_state)
+  #   return next_state.xx
+  # end
+
   def complete_bin_putaway_plan()
     @parent.set_transaction_complete_flag
     self.parent.clear_active_state

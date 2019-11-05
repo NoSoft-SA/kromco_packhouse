@@ -280,7 +280,7 @@ class BinPutawayScanning < PDTTransactionState
     @parent.positions_available = @parent.spaces_left - @parent.scanned_bins.length
 
     @quantity_bins_remaining = qty_bins_remaining
-    if (@quantity_bins_remaining && @quantity_bins_remaining == 0) || @force_complete =="true"
+    if (@quantity_bins_remaining && @quantity_bins_remaining <= 0) || @force_complete =="true"
         create_bin_putaway
         return transition_to_bulk_putaway
     else
