@@ -7,7 +7,7 @@ class BinPutawayPlan < ActiveRecord::Base
     bins_to_putaway  = ActiveRecord::Base.connection.select_all("
                        select bins_putaway_completed from bin_putaway_plans").map{|x|x['bins_putaway_completed']}.delete_if { |e| e == nil}
 
-    if !bins_to_putaway.empty? && bins_to_putaway[0].include?("#{bin_number}")
+    if !bins_to_putaway.empty? && bins_to_putaway.join(",").include?("#{bin_number}")
       return true
     else
       return nil
