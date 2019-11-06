@@ -2,18 +2,7 @@ class BinPutawayPlanning < PDTTransaction
 
   attr_accessor :bin_putaway_plan_id,:coldroom,:positions_available, :qty_bins, :scanned_bins, :current_index, :coldroom_id,:location_id, :current_bins_index, :new,:location_code,:spaces_left
 
-  def will_find_a_name
-    coldroom, qty_bins = get_user_latest_planning_plan
-    @coldroom = coldroom
-    @qty_bins = qty_bins
-    @coldroom_id = ActiveRecord::Base.connection.select_one("select id from locations where location_code = '#{@coldroom}'")['id']
-    @scanned_bins = Array.new
-
-    self.clear_active_state
-    render_next_state
-  end
-
-  def render_next_state
+   def render_next_state
     @scanned_bins = Array.new
 
     next_state = BinPutawayScanning.new(self)
@@ -21,14 +10,11 @@ class BinPutawayPlanning < PDTTransaction
     return next_state.build_default_screen
   end
 
-
-
   def initialize(new = nil, index = nil,user = nil)
     @new = new
     @current_bins_index = index
     @user = user if user
   end
-
 
   def create_putaway_plan(new = nil)
     coldroom, qty_bins = get_user_latest_planning_plan

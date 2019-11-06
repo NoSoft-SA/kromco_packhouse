@@ -4,10 +4,22 @@ class BinPutawayScanning < PDTTransactionState
     @current_scanned_bin_index = 0
   end
 
+  def restart_scanning
+    @parent.bin_putaway_plan_id = nil
+    @parent.positions_available = nil
+    @parent.current_index = nil
+    @parent.current_bins_index = nil
+    @parent.new = nil
+    @parent.location_code = nil
+    @parent.spaces_left = nil
+    @parent.scanned_bins = []
+    @parent.location_id = nil
+    build_default_screen
+  end
+
   def build_default_screen
 
-    field_configs = Array.new
-
+   field_configs = Array.new
     field_configs[field_configs.length] = {:type => "static_text", :name => "coldroom", :value => @parent.coldroom}
     field_configs[field_configs.length] = {:type => "static_text", :name => "putaway_location", :value => @parent.location_code}
     field_configs[field_configs.length] = {:type => "static_text", :name => "qty_bins_to_putaway", :value => @parent.qty_bins}
@@ -63,7 +75,6 @@ class BinPutawayScanning < PDTTransactionState
 
     if (@parent.spaces_left && @parent.spaces_left <= 0) && @parent.scanned_bins.length > 1
     elsif @parent.spaces_left && @parent.spaces_left.to_i <= 0
-      #TODO: display msg on the new form
       @parent.clear_active_state
       next_state = SelectLocation.new(@parent)
       result_screen = next_state.build_default_screen

@@ -564,7 +564,7 @@ module Inventory
       loading_out = true if (location_from.units_in_location.to_i - 1) > 1
 
       ActiveRecord::Base.connection.execute("update locations set loading_out = #{loading_out}
-                                             where id in = #{location_from.id}") if loading_out
+                                             where id = #{location_from.id}") if loading_out
 
       #======== Log stock_locations_history=================================
       stock_locations_history = StockLocationsHistory.new({:inventory_transaction_id => @inventory_transaction.id, :stock_item_id => @stock_item_after.id, :inventory_reference => @stock_item_after.inventory_reference,
