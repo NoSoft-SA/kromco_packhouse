@@ -9,8 +9,8 @@ class UnitTempCapture < PDTTransaction
     field_configs = Array.new
     field_configs[field_configs.length] = {:type=>"drop_down",:name=>'device_type',:list_field=>'temperature_device_type_code',:list=> temp_device_list_str,:is_required=>'true'}
     field_configs[field_configs.length] = {:type=>"drop_down",:name=>'unit_type',:list_field=>'unit_type_code',:get_list=>'get_unit_type_list',:is_required=>'true'}
-    field_configs[field_configs.length] = {:type=>'text_box',:name=>'temperature_device_code',:is_required=>'true'}
-    field_configs[field_configs.length] = {:type=>'text_box',:name=>'unit_id',:is_required=>'true'}
+    field_configs[field_configs.length] = {:type=>'text_box',:name=>'temperature_device_code',:is_required=>'true',:scan_field => true}
+    field_configs[field_configs.length] = {:type=>'text_box',:name=>'unit_id',:is_required=>'true', :scan_field => true}
     field_configs[field_configs.length] = {:type=>'text_box',:name=>'temperature',:is_required=>'true'}
     
     buttons = {:B1Label=>"Submit",:B1Enable=>"true",:B1Submit=>"unit_temp_capture_submit",:B2Label=>"",:B2Enable=>"false",:B2Submit=>"",:B3Label=>"",:B3Enable=>"false",:B3Submit=>""}

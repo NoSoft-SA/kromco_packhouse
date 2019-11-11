@@ -74,7 +74,7 @@ class ReceiveDepotPallets < PDTTransaction
   def build_default_screen
 
     field_configs = Array.new
-      field_configs[field_configs.length] = {:name=>'intake_header_number',:type=>'text_box',:label=>'scan intake header',:is_required=>'true'}
+      field_configs[field_configs.length] = {:name=>'intake_header_number',:type=>'text_box',:label=>'scan intake header',:is_required=>'true',:scan_field => true, :submit_form => true}
 
     
     buttons = {:B1Label=>"Submit",:B1Enable=>"true",:B1Submit=>"receive_depot_pallets_submit",:B2Label=>"",:B2Enable=>"false",:B2Submit=>"",:B3Label=>"",:B3Enable=>"false",:B3Submit=>""}

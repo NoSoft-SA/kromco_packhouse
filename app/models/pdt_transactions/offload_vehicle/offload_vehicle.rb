@@ -88,8 +88,8 @@ class OffloadVehicle < PDTTransaction
   
   def build_default_screen
     field_configs = Array.new
-    field_configs[field_configs.length] = {:type=>"text_box", :name=>"tripsheet_no", :is_required=>"true"}
-    field_configs[field_configs.length] = {:type=>"text_box", :name=>"location", :label=>"scan location", :is_required=>"true"}
+    field_configs[field_configs.length] = {:type=>"text_box", :name=>"tripsheet_no", :is_required=>"true", :scan_field => true}
+    field_configs[field_configs.length] = {:type=>"text_box", :name=>"location", :label=>"scan location", :is_required=>"true", :scan_field => true}
 
     screen_attributes = {:auto_submit=>"false", :content_header_caption=>"offload vehicle"}
     buttons = {"B3Label"=>"Clear", "B2Label"=>"Cancel", "B1Submit"=>"offload_vehicle_submit", "B1Label"=>"Submit", "B1Enable"=>"true", "B2Enable"=>"false", "B3Enable"=>"false"}

@@ -12,7 +12,7 @@ class  AcceptBin < PDTTransaction
 
   def build_default_screen
     field_configs = Array.new
-    field_configs[field_configs.length] = {:type=>"text_box",:name=>"location_barcode",:is_required=>"true"}
+    field_configs[field_configs.length] = {:type=>"text_box",:name=>"location_barcode",:is_required=>"true",:scan_field => true, :submit_form => true}
 
     screen_attributes = {:auto_submit=>"true",:auto_submit_to=>"location_entered",:content_header_caption=>"Scan to Location"}
     buttons = {"B3Label"=>"" ,"B2Label"=>"","B1Submit"=>"location_entered","B1Label"=>"submit","B1Enable"=>"false","B2Enable"=>"false","B3Enable"=>"false" }

@@ -2,7 +2,7 @@ class QcOut < PDTTransaction
 
   def build_default_screen
     field_configs = Array.new
-    field_configs[field_configs.length] = {:type=>'text_box',:name=>'carton_num',:is_required=>'true'}
+    field_configs[field_configs.length] = {:type=>'text_box',:name=>'carton_num',:is_required=>'true',:scan_field => true, :submit_form => true}
 
     screen_attributes = {:auto_submit=>"false",:content_header_caption=>"scan carton"}
     buttons = {"B3Label"=>"" ,"B2Label"=>"","B1Submit"=>"qc_out_submit","B1Label"=>"submit","B1Enable"=>"true","B2Enable"=>"false","B3Enable"=>"false" }

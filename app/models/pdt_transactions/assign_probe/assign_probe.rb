@@ -4,8 +4,8 @@
 class AssignProbe < PDTTransaction
   def build_default_screen
     field_configs = Array.new
-      field_configs[field_configs.length] = {:name=>'probe',:type=>'text_box',:label=>'scan_probe',:is_required=>'true'}
-      field_configs[field_configs.length] = {:name=>'pallet',:type=>'text_box',:label=>'scan_pallet',:is_required=>'true'}
+      field_configs[field_configs.length] = {:name=>'probe',:type=>'text_box',:label=>'scan_probe',:is_required=>'true', :scan_field => true}
+      field_configs[field_configs.length] = {:name=>'pallet',:type=>'text_box',:label=>'scan_pallet',:is_required=>'true', :scan_field => true}
 
     buttons = {:B1Label=>"Submit",:B1Enable=>"false",:B1Submit=>"assign_probe_submit",:B2Label=>"",:B2Enable=>"false",:B2Submit=>"",:B3Label=>"",:B3Enable=>"false",:B3Submit=>""}
     screen_attributes ={:content_header_caption=>"assign probe",:auto_submit=>"true",:auto_submit_to=>"assign_probe_submit"}

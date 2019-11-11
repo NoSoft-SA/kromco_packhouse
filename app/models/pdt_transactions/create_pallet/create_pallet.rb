@@ -10,7 +10,7 @@ class CreatePallet < PDTTransaction
 
   def build_default_screen()
     field_configs = Array.new
-    field_configs[field_configs.length] = {:type=>"text_box",:name=>"scan_carton_or_pallet", :label=>"scan carton or pallet", :is_required=>"true"}
+    field_configs[field_configs.length] = {:type=>"text_box",:name=>"scan_carton_or_pallet", :label=>"scan carton or pallet", :is_required=>"true", :scan_field => true}
     field_configs[field_configs.length] = {:type=>"drop_down",:name=>"pallet_format_product", :list_field=>"pallet_format_product_code", :get_list=>"get_pallet_format_product_codes"}
 
      screen_attributes = {:auto_submit=>"false",:content_header_caption=>"create new pallet"}

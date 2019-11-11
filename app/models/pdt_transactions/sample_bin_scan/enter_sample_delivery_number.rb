@@ -10,7 +10,7 @@ class EnterSampleDeliveryNumber < PDTTransactionState
  #----------------------------------------------
  def build_default_screen
    field_configs = Array.new
-      field_configs[field_configs.length] = {:type=>"text_box",:name=>"delivery_number",:label=>"delivery number",:is_required=>"true",:value=>""}
+      field_configs[field_configs.length] = {:type=>"text_box",:name=>"delivery_number",:label=>"delivery number",:is_required=>"true",:scan_field => true, :submit_form => true}
 
    screen_attributes = {:auto_submit=>"false",:content_header_caption=>"enter delivery number"}
    buttons = {"B3Label"=>"Clear" ,"B2Label"=>"Cancel","B1Submit"=>"enter_sample_delivery_number_submit","B1Label"=>"Submit","B1Enable"=>"true","B2Enable"=>"false","B3Enable"=>"false" }

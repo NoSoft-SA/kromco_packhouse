@@ -7,7 +7,7 @@ class SetPalletRecoolStatus < PDTTransaction
 #                                  :settings=>{:target_control_name=>'store_type_code',:remote_method=>'pallet_entered',:filter_fields=>'pallet'}}
 
     field_configs = Array.new
-      field_configs[field_configs.length] = {:name=>'pallet',:type=>'text_box',:label=>'scan pallet',:is_required=>'true',
+      field_configs[field_configs.length] = {:name=>'pallet',:type=>'text_box',:label=>'scan pallet',:is_required=>'true',:scan_field => true,
                                              :cascades=>{:type=>'replace_control',
                                                          :settings=>{:target_control_name=>'store_type_code',:remote_method=>'pallet_entered',:filter_fields=>'pallet'}}}
       field_configs[field_configs.length] = {:name=>'store_type_code',:type=>'static_text',:value=> '',:is_required=>'true'}

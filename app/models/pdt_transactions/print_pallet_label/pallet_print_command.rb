@@ -38,10 +38,10 @@ class PalletPrintCommand < LabelPrintCommand
         set_print_field(2, word1)
         set_print_field(32, word2)
       else
-
-        marketing_var_code = marketing_variety.marketing_variety_description.to_s.slice(0,10)
+#change form 10 to 15 on slice of first text 27/5/19 GF
+        marketing_var_code = marketing_variety.marketing_variety_description.to_s.slice(0,15)
         set_print_field(2, marketing_var_code)
-        set_print_field(32, marketing_variety.marketing_variety_description.to_s.slice(10,marketing_variety.marketing_variety_description.to_s.length))
+        set_print_field(32, marketing_variety.marketing_variety_description.to_s.slice(15,marketing_variety.marketing_variety_description.to_s.length))
       end
     else
       set_print_field(2, marketing_variety.marketing_variety_description.to_s)
@@ -75,10 +75,12 @@ class PalletPrintCommand < LabelPrintCommand
     set_print_field(8, production_run.batch_code)
 
     # target_market_code
-    set_print_field(9, carton_record.target_market_code)
+    #set_print_field(9, carton_record.target_market_code)
+    set_print_field(9, carton_record.target_market_code.to_s.slice(0,2))
 
     # inventory_code
-    set_print_field(10, carton_record.inventory_code)
+    #set_print_field(10, carton_record.inventory_code)
+    set_print_field(10, carton_record.inventory_code.to_s.slice(0,2))
 
     # pick_reference_code
     set_print_field(11, carton_record.pick_reference)
@@ -157,7 +159,8 @@ class PalletPrintCommand < LabelPrintCommand
     set_print_field(34, "00" + carton_record.pallet_number.to_s)
 
     # field 35
-    set_print_field(35, "(00)" + carton_record.pallet_number.to_s)
+    #set_print_field(35, "(00)" + carton_record.pallet_number.to_s)
+    set_print_field(35, "00" + carton_record.pallet_number.to_s)
 
     # field 36
     gtin = carton_record.get_gtin(mark.brand_code.to_s)
@@ -169,9 +172,11 @@ class PalletPrintCommand < LabelPrintCommand
     set_print_field(37, "(01)" + gtin.to_s + "(10)" + production_run.batch_code.to_s)
 
     set_print_field(38,Time.now.strftime("%Y-%m-%d %H:%M"))
-
-
-
+    #Gerrit 2019/05/21
+    set_print_field(39, "(01)" + gtin.to_s + "(10)" + production_run.batch_code.to_s)
+    set_print_field(40, "(01)" + gtin.to_s + "(10)" + production_run.batch_code.to_s)
+    set_print_field(41, "00" + carton_record.pallet_number.to_s)
+    #Gerrit 2019/05/21
   end
 
 

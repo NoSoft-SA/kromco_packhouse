@@ -27,9 +27,9 @@ class BinLoadScanning < PDTTransactionState
     end
     key_in_bin_number = authorise_scan("2.3.1",'key_in_bin_number',ActiveRequest.get_active_request.user)
     if key_in_bin_number
-      field_configs[field_configs.length]   = {:type=>"text_box", :name=>"bin_number", :is_required=>"true", :scan_only=>"false"}
+      field_configs[field_configs.length]   = {:type=>"text_box", :name=>"bin_number", :is_required=>"true", :scan_only=>"false",:scan_field => true}
     else
-      field_configs[field_configs.length]   = {:type=>"text_box", :name=>"bin_number", :is_required=>"true", :scan_only=>"true"}
+      field_configs[field_configs.length]   = {:type=>"text_box", :name=>"bin_number", :is_required=>"true", :scan_only=>"true", :scan_field => true}
     end
     field_configs[field_configs.length()] = {:type=>"static_text", :name=>"required_product_quantity", :is_required => "false", :value=>self.parent.required_product_quantity()}
     field_configs[field_configs.length()] = {:type=>"static_text", :name=>"product_quantity_remaining", :value =>qty_remaining.to_s}

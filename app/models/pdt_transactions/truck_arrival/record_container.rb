@@ -23,7 +23,7 @@ end
     field_configs[field_configs.length()] = {:type=>"static_text",:name=>"shipping_line",:value=>@parent.shipping_line}
     field_configs[field_configs.length()] = {:type=>"static_text",:name=>"discharge_port",:value=>@parent.discharge_port}
     field_configs[field_configs.length()] = {:type=>"static_text",:name=>"quay_of_discharge_port",:value=>@parent.quay_of_discharge_port.to_s}
-    field_configs[field_configs.length()] = {:type=>"text_box",:name=>"scan_load_bay",:is_required=>"true"}
+    field_configs[field_configs.length()] = {:type=>"text_box",:name=>"scan_load_bay",:is_required=>"true",:scan_field => true}
     field_configs[field_configs.length()] = {:type=>"text_box",:name=>"truck_number",:is_required=>"true"}
     field_configs[field_configs.length()] = {:type=>"text_box",:name=>"seal_number",:is_required=>"true"}
     field_configs[field_configs.length()] = {:type=>"text_box",:name=>"container_number",:is_required=>"true"}

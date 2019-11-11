@@ -8,7 +8,7 @@ class BinLoadPlanning < PDTTransaction
 
   def build_default_screen
     field_configs                       = Array.new
-    field_configs[field_configs.length] = {:type=>"text_box", :name=>"tripsheet_number", :is_required=>"true", :required_type=>"number"}
+    field_configs[field_configs.length] = {:type=>"text_box", :name=>"tripsheet_number", :is_required=>"true", :required_type=>"number", :scan_field => true, :submit_form => true}
 
     screen_attributes                   = {:auto_submit=>"true", :auto_submit_to=>"tripsheet_submit", :content_header_caption=>"enter_tripsheet_number"}
     buttons                             = {"B3Label"=>"", "B2Label"=>"", "B1Submit"=>"tripsheet_submit", "B1Label"=>"submit", "B1Enable"=>"false", "B2Enable"=>"false", "B3Enable"=>"false"}

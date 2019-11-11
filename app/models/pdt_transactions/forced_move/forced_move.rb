@@ -12,8 +12,8 @@
     field_configs = Array.new
 
 
-    field_configs[field_configs.length] = {:type=>"text_box",:name=>"pallet_number",:label=>"scan pallet",:value=>"",:is_required=>true}
-    field_configs[field_configs.length] = {:type=>"text_box",:name=>"scan_location",:label=>"scan location",:value=>"",:is_required=>true}
+    field_configs[field_configs.length] = {:type=>"text_box",:name=>"pallet_number",:label=>"scan pallet",:value=>"",:is_required=>true, :scan_field => true}
+    field_configs[field_configs.length] = {:type=>"text_box",:name=>"scan_location",:label=>"scan location",:value=>"",:is_required=>true, :scan_field => true}
     screen_attributes = {:auto_submit=>"true",:content_header_caption=>"force move",:auto_submit_to=>"force_move_submit"}
     buttons = {"B3Label"=>"Clear" ,"B2Label"=>"Cancel","B1Label"=>"Submit","B1Submit"=>"force_move_submit","B1Enable"=>"false","B2Enable"=>"false","B3Enable"=>"false" }
     plugins = Array.new

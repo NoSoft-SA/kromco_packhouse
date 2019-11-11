@@ -1,8 +1,8 @@
 class QcIn < PDTTransaction
   def build_default_screen
     field_configs = Array.new
-    field_configs[field_configs.length] = {:type=>'text_box',:name=>'carton_num1',:is_required=>'true'}
-    field_configs[field_configs.length] = {:type=>'text_box',:name=>'carton_num2',:is_required=>'true'}
+    field_configs[field_configs.length] = {:type=>'text_box',:name=>'carton_num1',:is_required=>'true',:scan_field => true}
+    field_configs[field_configs.length] = {:type=>'text_box',:name=>'carton_num2',:is_required=>'true',:scan_field => true}
 
     screen_attributes = {:auto_submit=>"false",:content_header_caption=>"scan cartons"}
     buttons = {"B3Label"=>"" ,"B2Label"=>"","B1Submit"=>"qc_in_submit","B1Label"=>"submit","B1Enable"=>"true","B2Enable"=>"false","B3Enable"=>"false" }

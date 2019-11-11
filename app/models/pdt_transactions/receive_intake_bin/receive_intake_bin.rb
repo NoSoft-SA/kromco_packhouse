@@ -14,7 +14,7 @@ class ReceiveIntakeBin < PDTTransaction
 
   def build_default_screen
     field_configs                       = Array.new
-    field_configs[field_configs.length] = {:type=>"text_box", :name=>"delivery_number", :label => "delivery preprinted", :is_required=>"true"}
+    field_configs[field_configs.length] = {:type=>"text_box", :name=>"delivery_number", :label => "delivery preprinted", :is_required=>"true", :scan_field => true, :submit_form => true}
 
     screen_attributes                   = {:auto_submit=>"true", :auto_submit_to=>"delivery_number_submit", :content_header_caption=>"enter_delivery_number"}
     buttons                             = {"B3Label"=>"", "B2Label"=>"", "B1Submit"=>"delivery_number_submit", "B1Label"=>"submit", "B1Enable"=>"false", "B2Enable"=>"false", "B3Enable"=>"false"}

@@ -8,7 +8,7 @@ class PutAwayBin < PDTTransaction
   def build_default_screen
     field_configs = []
     field_configs << {:type => "static_text", :name => "bins_scanned", :value=>@bins.size} if(!@bins.empty?)
-    field_configs << {:type => "text_box", :name => "scanned_bin",:label=>"bin",:is_required => "true"}
+    field_configs << {:type => "text_box", :name => "scanned_bin",:label=>"bin",:is_required => "true", :scan_field => true}
     field_configs << {:type => "check_box", :name => "last_scan",:label=>"last_scan?"}
     screen_attributes = {:auto_submit => "true", :auto_submit_to => "bin_scanned", :content_header_caption => "scan bin"}
     buttons = {"B3Label" => "", "B2Label" => "", "B1Submit" => "bin_scanned", "B1Label" => "submit", "B1Enable" => "false", "B2Enable" => "false", "B3Enable" => "false"}

@@ -3,7 +3,7 @@ class PutAwayBinTripsheet < PDTTransaction
 
   def build_default_screen
     field_configs = []
-    field_configs << {:type => "text_box", :name => "tripsheet", :is_required => "true"}
+    field_configs << {:type => "text_box", :name => "tripsheet", :is_required => "true",:scan_field => true, :submit_form => true}
 
     screen_attributes = {:auto_submit => "true", :auto_submit_to => "tripsheet_entered", :content_header_caption => "scan tripsheet"}
     buttons = {"B3Label" => "", "B2Label" => "", "B1Submit" => "tripsheet_entered", "B1Label" => "submit", "B1Enable" => "false", "B2Enable" => "false", "B3Enable" => "false"}

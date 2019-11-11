@@ -6,7 +6,7 @@ class ResetTripsheet <PDTTransaction
 
   def build_default_screen
     field_configs = Array.new
-    field_configs[field_configs.length] = {:type=>"text_box",:name=>"vehicle_job_no",:label=>"tripsheet",:is_required=>"true"}
+    field_configs[field_configs.length] = {:type=>"text_box",:name=>"vehicle_job_no",:label=>"tripsheet",:is_required=>"true",:scan_field => true, :submit_form => true}
 
     buttons = {:B1Label=>"Submit",:B1Enable=>"true",:B1Submit=>"reset_tripsheet_submit",:B2Label=>"",:B2Enable=>"false",:B2Submit=>"",:B3Label=>"",:B3Enable=>"false",:B3Submit=>""}
     screen_attributes ={:content_header_caption=>"reset tripsheet",:auto_submit=>"false"}

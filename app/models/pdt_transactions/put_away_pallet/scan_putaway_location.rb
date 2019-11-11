@@ -10,7 +10,7 @@ class ScanPutawayLocation < PDTTransactionState
       field_configs[field_configs.length] = {:type=>"text_line",:name=>"static_line", :label=>"",:value=>locn}
     end
     field_configs[field_configs.length] = {:type=>"text_line",:name=>"static_field",:value=>""}
-    field_configs[field_configs.length] = {:type=>"text_box",:name=>"scan_location", :label=>"scan location", :is_required=>"true"}
+    field_configs[field_configs.length] = {:type=>"text_box",:name=>"scan_location", :label=>"scan location", :is_required=>"true",:scan_field => true, :submit_form => true}
 
     screen_attributes = {:auto_submit=>"true",:content_header_caption=>"scan put away location",:auto_submit_to=>'put_away_location_submit'}
     buttons = {"B3Label"=>"Clear" ,"B2Label"=>"Cancel","B1Submit"=>"put_away_location_submit","B1Label"=>"Submit","B1Enable"=>"false","B2Enable"=>"false","B3Enable"=>"false" }

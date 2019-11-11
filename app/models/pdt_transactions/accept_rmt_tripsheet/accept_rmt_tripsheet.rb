@@ -12,8 +12,8 @@ class AcceptRmtTripsheet < PDTTransaction
 
     field_configs                         = Array.new
     field_configs[field_configs.length()] = {:type=>"drop_down", :name=>"transaction_type", :is_required=>"false", :list => transaction_types}
-    field_configs[field_configs.length]   = {:type=>"text_box", :name=>"tripsheet", :is_required=>"true"}
-    field_configs[field_configs.length]   = {:type=>"text_box", :name=>"location_barcode", :is_required=>"true"}
+    field_configs[field_configs.length]   = {:type=>"text_box", :name=>"tripsheet", :is_required=>"true", :scan_field => true}
+    field_configs[field_configs.length]   = {:type=>"text_box", :name=>"location_barcode", :is_required=>"true", :scan_field => true}
 
     screen_attributes                     = {:auto_submit=>"true", :auto_submit_to=>"trip_sheet_entered", :content_header_caption=>"Accept Tripsheets"}
     buttons                               = {"B3Label"=>"", "B2Label"=>"", "B1Submit"=>"trip_sheet_entered", "B1Label"=>"submit", "B1Enable"=>"false", "B2Enable"=>"false", "B3Enable"=>"false"}

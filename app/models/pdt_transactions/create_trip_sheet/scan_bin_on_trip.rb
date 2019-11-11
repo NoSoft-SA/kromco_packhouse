@@ -51,7 +51,7 @@ class ScanBinOnTrip < PDTTransactionState
     if key_in_bin_number
       field_configs[field_configs.length]   = {:type=>"text_box", :name=>"bin_number", :is_required=>"true", :scan_only=>"false"}
     else
-      field_configs[field_configs.length]   = {:type=>"text_box", :name=>"bin_number", :is_required=>"true", :scan_only=>"true"}
+      field_configs[field_configs.length]   = {:type=>"text_box", :name=>"bin_number", :is_required=>"true", :scan_only=>"true", :scan_field => true}
     end
     field_configs[field_configs.length()] = {:type=>"static_text", :name=>"bins_scanned", :value=>@parent.scanned_bins.length().to_s}
 

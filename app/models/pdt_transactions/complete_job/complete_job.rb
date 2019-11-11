@@ -2,7 +2,7 @@ class CompleteJob < PDTTransaction
 
   def build_default_screen
     field_configs = Array.new
-    field_configs[field_configs.length] = {:type=>"text_box", :name=>"location_barcode", :is_required=>"true"}
+    field_configs[field_configs.length] = {:type=>"text_box", :name=>"location_barcode", :is_required=>"true", :scan_field => true, :submit_form => true}
 
     buttons = {"B1Label"=>"submit", "B1Enable"=>"false", "B1Submit"=>"complete_job_submit", "B2Label"=>"", "B2Enable"=>"false", "B3Submit"=>"", "B3Enable"=>"false"}
     screen_attributes = {:content_header_caption=>"complete job", :auto_submit=>"true",:auto_submit_to=>"complete_job_submit"}

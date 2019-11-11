@@ -12,7 +12,7 @@ class PutAwayPallet < PDTTransaction
 
   def build_default_screen()
     field_configs = Array.new
-     field_configs[field_configs.length] = {:type=>"text_box",:name=>"scan_pallet",:is_required=>"true"}
+     field_configs[field_configs.length] = {:type=>"text_box",:name=>"scan_pallet",:is_required=>"true",:scan_field => true, :submit_form => true}
 
      screen_attributes = {:auto_submit=>"true",:content_header_caption=>"scan put away pallet",:auto_submit_to=>'put_away_pallet_submit'}
      buttons = {"B3Label"=>"Clear" ,"B2Label"=>"Cancel","B1Submit"=>"put_away_pallet_submit","B1Label"=>"Submit","B1Enable"=>"false","B2Enable"=>"false","B3Enable"=>"false" }

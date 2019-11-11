@@ -6,7 +6,7 @@ class PalletReceiver < PDTTransactionState
   def build_default_screen
     field_configs = Array.new
       field_configs[field_configs.length] = {:name=>'validated_pallet',:type=>'static_text',:label=>'validated pallets',:value=>self.parent.validated_pallets.to_s + " of " + self.parent.depot_pallets.length().to_s}
-      field_configs[field_configs.length] = {:name=>'received_pallet',:type=>'text_box',:label=>'scan pallet',:is_required=>'true'}
+      field_configs[field_configs.length] = {:name=>'received_pallet',:type=>'text_box',:label=>'scan pallet',:is_required=>'true',:scan_field => true, :submit_form => true}
 
     buttons = {:B1Label=>"Submit",:B1Enable=>"true",:B1Submit=>"pallet_receiver_submit",:B2Label=>"",:B2Enable=>"false",:B2Submit=>"",:B3Label=>"",:B3Enable=>"false",:B3Submit=>""}
     screen_attributes ={:content_header_caption=>"pallet receiver",:auto_submit=>"false"}
