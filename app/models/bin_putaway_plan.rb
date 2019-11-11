@@ -5,7 +5,7 @@ class BinPutawayPlan < ActiveRecord::Base
 
   def BinPutawayPlan.is_on_a_putaway_plan?(bin_number)
     bins_to_putaway  = ActiveRecord::Base.connection.select_all("
-                       select bins_putaway_completed from bin_putaway_plans").map{|x|x['bins_putaway_completed']}.delete_if { |e| e == nil}
+                       select bins_to_putaway from bin_putaway_plans where completed is not true").map{|x|x['bins_putaway_completed']}.delete_if { |e| e == nil}
 
     if !bins_to_putaway.empty? && bins_to_putaway.join(",").include?("#{bin_number}")
       return true
