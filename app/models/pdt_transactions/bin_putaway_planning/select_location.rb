@@ -29,6 +29,7 @@ class SelectLocation < PDTTransactionState
     end
 
     @parent.location_code = location.location_code
+    @parent.location_id = location.id
 
     @parent.spaces_left = Location.get_spaces_in_location(@parent.location_code, @parent.scanned_bins.length) if @parent.location_code
 

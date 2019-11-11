@@ -117,7 +117,7 @@ class BinPutawayScanning < PDTTransactionState
     end
     bin_putaway_plan = BinPutawayPlan.new
     bin_putaway_plan.coldroom_location_id = @parent.coldroom_id
-    bin_putaway_plan.putaway_location_id = @location_id
+    bin_putaway_plan.putaway_location_id = @parent.location_id
     bin_putaway_plan.qty_bins_to_putaway = @parent.qty_bins.to_i
     bin_putaway_plan.bins_to_putaway = bin_nums
     bin_putaway_plan.bins_putaway_completed = bin_nums
