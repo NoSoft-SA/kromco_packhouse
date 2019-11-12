@@ -24,7 +24,12 @@ class SelectLocation < PDTTransactionState
     location_barcode = self.pdt_screen_def.get_control_value("scan_location_barcode").strip
     location = Location.find_by_location_barcode(location_barcode)
     if !location
-      result_screen = PDTTransaction.build_msg_screen_definition("Not a valid location barcode", nil, nil, nil)
+      result_screen = PDTTransaction.build_msg_screen_definition("Not a valid location barcode.", nil, nil, nil)
+      return result_screen
+    end
+
+    if location.loading_out
+      result_screen = PDTTransaction.build_msg_screen_definition("Location is in a loading_out state.", nil, nil, nil)
       return result_screen
     end
 
