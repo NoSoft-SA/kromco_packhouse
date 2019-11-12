@@ -543,8 +543,12 @@ module Inventory
       stock_locations_history = StockLocationsHistory.new({:inventory_transaction_id => @inventory_transaction.id, :stock_item_id => @stock_item_before.id, :inventory_reference => @stock_item_before.inventory_reference,
                                                            :stock_type => @stock_item_before.stock_type_code, :location_id => location_from.id, :units_in_location_before => location_from.units_in_location, :location_code => location_from.location_code})
 
+      loading_out = true if (location_from.units_in_location.to_i - 1) > 1
 
       location_from.units_in_location = location_from.units_in_location.to_i - 1
+
+      loading_out = false if location_from.units_in_location.to_i = 0
+
 
       stock_locations_history.units_in_location_after = location_from.units_in_location
       stock_locations_history.save!
@@ -561,9 +565,7 @@ module Inventory
       ActiveRecord::Base.connection.execute("update locations set updated_at = '#{Time.now}'
                                              where id in (#{location_from.id},#{location_to.id})")
 
-      loading_out = true if (location_from.units_in_location.to_i - 1) > 1
-
-      ActiveRecord::Base.connection.execute("update locations set loading_out = #{loading_out}
+       ActiveRecord::Base.connection.execute("update locations set loading_out = #{loading_out}
                                              where id = #{location_from.id}") if loading_out
 
       #======== Log stock_locations_history=================================
