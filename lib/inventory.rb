@@ -547,8 +547,7 @@ module Inventory
 
       location_from.units_in_location = location_from.units_in_location.to_i - 1
 
-      loading_out = false if location_from.units_in_location.to_i = 0
-
+      loading_out = false if location_from.units_in_location.to_i == 0
 
       stock_locations_history.units_in_location_after = location_from.units_in_location
       stock_locations_history.save!
