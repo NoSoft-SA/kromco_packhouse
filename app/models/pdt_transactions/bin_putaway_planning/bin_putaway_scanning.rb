@@ -179,9 +179,8 @@ class BinPutawayScanning < PDTTransactionState
                   rmt.product_class_code  = '#{@product_class_code}'  and
                   rmt.treatment_code      = '#{@treatment_code}'
                   #{@farm_code} ) as sq
-                  order by fullness::int ,updated_at desc limit 1
+                  order by fullness ,updated_at desc limit 1
                                                         ")
-
     location
 
   end
