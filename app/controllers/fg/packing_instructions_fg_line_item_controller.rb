@@ -8,6 +8,70 @@ class Fg::PackingInstructionsFgLineItemController < ApplicationController
     true
   end
 
+  def unlink_packing_instructions_fg_line_item
+
+  end
+
+  def submit_selected_fg_line_items
+    selected_fg_line_items = selected_records?(session[:fg_line_items], nil, true)
+    unselected_fg_line_items = []
+    session[:fg_line_items].each do |li|
+      unselected_fg_line_items << li['id'] if li['packing_instruction_bin_line_item_id'] && !selected_fg_line_items.map{|x|x['id']}.include?(li['id'])
+    end
+
+    selected_now = selected_fg_line_items.map{|x|x['id']} - session[:selected_fg_line_item_ids]
+
+    ActiveRecord::Base.connection.execute("update packing_instructions_fg_line_items
+                                           set packing_instruction_bin_line_item_id = #{session[:active_doc]['fg_line_item_id']}
+                                           where packing_instructions_fg_line_items.id in (#{selected_now.join(',')})") if !selected_now.empty?
+
+    ActiveRecord::Base.connection.execute("update packing_instructions_fg_line_items
+                                           set packing_instruction_bin_line_item_id = null
+                                           where packing_instructions_fg_line_items.id in (#{unselected_fg_line_items.join(',')})") if !unselected_fg_line_items.empty?
+
+
+
+    render :inline =>
+               %{
+            "<script>
+                 alert("fg_line_items linked");
+                 window.close();
+                 window.opener.frames[0].location.reload(true);
+             </script>"
+     }, :layout => "content"
+  end
+
+  def render_related_fg_line_items
+    list_query = bin_fg_line_item_list_query()
+    @multi_select = "submit_selected_fg_line_items"
+    @packing_instructions_fg_line_items = ActiveRecord::Base.connection.select_all(list_query)
+    @grid_selected_rows = []
+    session[:selected_fg_line_item_ids] = []
+    @packing_instructions_fg_line_items.map do |x|
+      @grid_selected_rows << x if x['packing_instruction_bin_line_item_id']
+      session[:selected_fg_line_item_ids] << x['id'] if x['packing_instruction_bin_line_item_id']
+    end
+    session[:query] = "ActiveRecord::Base.connection.select_all(\"#{list_query}\")"
+    session[:fg_line_items] = @packing_instructions_fg_line_items
+    render_list_packing_instructions_fg_line_items
+  end
+
+  def bin_fg_line_item_list_query()
+    list_query = " select pifgi.*,g.grade_code,exf.old_fg_code,o.short_description as marketing_org_code,
+                 tm.target_market_name || ':' || tm.target_market_description as target_market_code,
+                 inv.inventory_code || ':' || inv.inventory_name as inventory_code
+                 from packing_instructions_fg_line_items pifgi
+                 left join grades g on pifgi.grade_id = g.id
+                 left join extended_fgs exf on pifgi.old_fg_id = exf.id
+                 left join organizations o on pifgi.marketing_org_id = o.id
+                 left join target_markets tm on pifgi.target_market_id = tm.id
+                 left join inventory_codes inv on pifgi.inventory_id = inv.id
+                 left join packing_instructions pi on pi.id=pifgi.packing_instruction_id
+                 where pi.id = #{session[:active_doc]['pi']} and
+                 (pifgi.packing_instruction_bin_line_item_id is null OR
+                  pifgi.packing_instruction_bin_line_item_id = #{session[:active_doc]['fg_line_item_id']}) "
+  end
+
   def refresh_old_fg_id
     actual_count = get_selected_combo_value(params)
 
@@ -258,7 +322,7 @@ class Fg::PackingInstructionsFgLineItemController < ApplicationController
 
   end
 
-  def list_packing_instructions_fg_line_items
+  def list_packing_instructions_fg_line_items(condition = nil)
     return if authorise_for_web(program_name?, 'read') == false
     store_last_grid_url
 
@@ -273,8 +337,8 @@ class Fg::PackingInstructionsFgLineItemController < ApplicationController
       session[:packing_instructions_fg_line_items_page] = nil
     end
 
-    list_query = fg_line_item_list_query
-
+    list_query = fg_line_item_list_query("pi.id = #{session[:active_doc]['pi']}")
+    @multi_select = nil
     @packing_instructions_fg_line_items = ActiveRecord::Base.connection.select_all(list_query)
     session[:query] = "ActiveRecord::Base.connection.select_all(\"#{list_query}\")"
     render_list_packing_instructions_fg_line_items
@@ -289,7 +353,7 @@ class Fg::PackingInstructionsFgLineItemController < ApplicationController
     @current_page = params['page'] ||= session[:packing_instructions_fg_line_items_page]
     @packing_instructions_fg_line_items = eval(session[:query]) if !@packing_instructions_fg_line_items
     render :inline => %{
-    <% grid = build_packing_instructions_fg_line_item_grid(@packing_instructions_fg_line_items,@can_edit,@can_delete)%>
+    <% grid = build_packing_instructions_fg_line_item_grid(@packing_instructions_fg_line_items,@can_edit,@can_delete,@multi_select)%>
     <% grid.caption = 'List of all packing_instructions_fg_line_items'%>
     <% @header_content = grid.build_grid_data %>
 
@@ -470,9 +534,8 @@ class Fg::PackingInstructionsFgLineItemController < ApplicationController
     }, :layout => 'content'
   end
 
-  private
 
-  def fg_line_item_list_query
+  def fg_line_item_list_query(condition = nil)
     list_query = " select pifgi.*,g.grade_code,exf.old_fg_code,o.short_description as marketing_org_code,
                  tm.target_market_name || ':' || tm.target_market_description as target_market_code,
                  inv.inventory_code || ':' || inv.inventory_name as inventory_code
@@ -483,7 +546,7 @@ class Fg::PackingInstructionsFgLineItemController < ApplicationController
                  left join target_markets tm on pifgi.target_market_id = tm.id
                  left join inventory_codes inv on pifgi.inventory_id = inv.id
                  left join packing_instructions pi on pi.id=pifgi.packing_instruction_id
-                  where pi.id = #{session[:active_doc]['pi']} "
+                  where #{condition} "
   end
 
 

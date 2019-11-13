@@ -8,6 +8,10 @@ class Fg::PackingInstructionsBinLineItemController < ApplicationController
     true
   end
 
+  def list_related_fg_line_items
+    set_active_doc("fg_line_item_id" ,params[:id])
+    redirect_to :controller => 'fg/packing_instructions_fg_line_item', :action => 'render_related_fg_line_items'
+  end
 
   def remove_selected_bins
     selected_bins = selected_records?(session[:bins], nil, true)

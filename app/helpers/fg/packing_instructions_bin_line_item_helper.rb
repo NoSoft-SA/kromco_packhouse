@@ -121,6 +121,18 @@ module Fg::PackingInstructionsBinLineItemHelper
     action_configs << {:field_type => 'separator'} if can_edit || can_delete
     column_configs << {:field_type => 'action_collection', :field_name => 'actions', :settings => {:actions => action_configs}} unless action_configs.empty?
 
+
+    column_configs << {:field_type => 'link_window',:field_name => 'related_fg_line_items',
+                       :column_caption => 'related_fg_line_items',:col_width => 120,
+                       :width => 1200,
+                       :settings =>
+                           {:link_text => 'related_fg_line_items',
+                            #:link_icon => 'bins',
+                            :width => 1200,
+                            :height => 250,
+                            :target_action => 'list_related_fg_line_items',
+                            :id_column => 'id'}}
+
     column_configs << {:field_type => 'link_window',:field_name => 'bins',
                        :column_caption => 'bins',
                        :settings =>

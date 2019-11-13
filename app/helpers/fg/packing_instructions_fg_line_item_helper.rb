@@ -188,13 +188,15 @@ end
 
 
 
- def build_packing_instructions_fg_line_item_grid(data_set,can_edit,can_delete)
+ def build_packing_instructions_fg_line_item_grid(data_set,can_edit,can_delete,multi_select=nil)
 
   column_configs = []
   action_configs = []
 #  ----------------------
 #  define action columns
 #  ----------------------
+   grid_command = nil
+   if !multi_select
    grid_command =    {:field_type=>'link_window_field',:field_name =>'packing_instructions_fg_line_item',
                       :settings =>
                           {
@@ -232,9 +234,16 @@ end
                            :link_icon => 'fg_setups',
                            :target_action => 'list_fg_setup_for_packing_instructions_lines',
                            :id_column => 'id'}}
+   else
+     # action_configs << {:field_type => 'action',:field_name => 'unlink',
+     #                    :column_caption => 'Unlink',
+     #                    :settings =>
+     #                        {:link_text => 'unlink',
+     #                         :link_icon => 'delete',
+     #                         :target_action => 'unlink_packing_instructions_fg_line_item',
+     #                         :id_column => 'id'}}
 
-
-  #action_configs << {:field_type => 'separator'} if can_edit || can_delete
+    end
 
    column_configs << {:field_type => 'text', :field_name => 'pallet_qty',:col_width=>80, :data_type => 'integer', :column_caption => 'pallet_qty'}
    column_configs << {:field_type => 'text', :field_name => 'retailer_sell_by_code',:col_width=>150}
@@ -248,6 +257,10 @@ end
    column_configs << {:field_type => 'text', :field_name => 'brand_code',:col_width=>150}
    column_configs << {:field_type => 'text', :field_name => 'old_pack_code',:col_width=>150}
    column_configs << {:field_type => 'text', :field_name => 'actual_count',:col_width=>150}
+   column_configs << {:field_type => 'text', :field_name => 'packing_instruction_bin_line_item_id',:hide=>true,:col_width=>150}
+   column_configs << {:field_type => 'text', :field_name => 'id',:hide=> true}
+
+   @multi_select = multi_select
 
   get_data_grid(data_set,column_configs,nil,true,grid_command)
 end
