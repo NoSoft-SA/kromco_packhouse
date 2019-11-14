@@ -23,9 +23,13 @@ class BinPutawayScanning < PDTTransactionState
    field_configs = Array.new
     field_configs[field_configs.length] = {:type => "static_text", :name => "coldroom", :value => @parent.coldroom}
     field_configs[field_configs.length] = {:type => "static_text", :name => "putaway_location", :value => @parent.location_code}
-    field_configs[field_configs.length] = {:type => "static_text", :name => "qty_bins_to_putaway", :value => @parent.qty_bins}
+    if @adjusted_qty
+      field_configs[field_configs.length] = {:type => "static_text", :name => "qty_bins_to_putaway", :value => @parent.qty_bins.to_s + " " + @adjusted_qty}
+    else
+      field_configs[field_configs.length] = {:type => "static_text", :name => "qty_bins_to_putaway", :value => @parent.qty_bins}
+    end
     field_configs[field_configs.length] = {:type => "static_text", :name => "bins_scanned", :value => "#{@parent.scanned_bins.length().to_s}"}
-    field_configs[field_configs.length] = {:type => "static_text", :name => "space_left", :value => "#{@parent.positions_available}"}
+    #field_configs[field_configs.length] = {:type => "static_text", :name => "space_left", :value => "#{@parent.spaces_left}"}
     field_configs[field_configs.length] = {:type => "text_box", :name => "bin_number",
                                             :scan_only => "false", :scan_field => true,
                                            :submit_form => true}
@@ -54,9 +58,14 @@ class BinPutawayScanning < PDTTransactionState
 
     bin = get_bin_type_and_frit_spec("bins.bin_number = '#{@bin_number}' ") if @parent.scanned_bins.length == 1
 
-    get_locations if bin && @parent.scanned_bins.length == 1
+    get_locations if bin && @parent.scanned_bins.lenfgth == 1
 
     @parent.spaces_left = Location.get_spaces_in_location(@parent.location_code, @parent.scanned_bins.length) if @parent.location_code
+
+    if @parent.spaces_left && @parent.scanned_bins.length == 1 && (@parent.spaces_left.to_i < @parent.qty_bins.to_i)
+      @parent.qty_bins = @parent.spaces_left + 1
+      @adjusted_qty =  "( adjusted to spaces available)"
+    end
 
     matching_error = match_existing_bins if @parent.scanned_bins.length > 1
     if matching_error
@@ -65,7 +74,7 @@ class BinPutawayScanning < PDTTransactionState
     end
 
 
-    if !@parent.location_code || (@parent.spaces_left && @parent.spaces_left.to_i <= 0)
+    if !@parent.location_code || ((@parent.spaces_left && @parent.spaces_left.to_i == 0) && (@parent.scanned_bins.length < qty_bins_remaining))
       @parent.clear_active_state
       next_state = SelectLocation.new(@parent)
       result_screen = next_state.build_default_screen
@@ -74,7 +83,7 @@ class BinPutawayScanning < PDTTransactionState
     end
 
     if (@parent.spaces_left && @parent.spaces_left <= 0) && @parent.scanned_bins.length > 1
-    elsif @parent.spaces_left && @parent.spaces_left.to_i <= 0
+    elsif ( @parent.spaces_left &&  @parent.spaces_left.to_i == 0 && (@parent.scanned_bins.length < qty_bins_remaining))
       @parent.clear_active_state
       next_state = SelectLocation.new(@parent)
       result_screen = next_state.build_default_screen
@@ -82,9 +91,6 @@ class BinPutawayScanning < PDTTransactionState
       return result_screen
     end
 
-    @parent.qty_bins = @parent.spaces_left if @parent.spaces_left.to_i < @parent.qty_bins.to_i
-
-    @parent.positions_available = @parent.spaces_left - @parent.scanned_bins.length
     end
 
     process_scanned_bins
@@ -286,7 +292,8 @@ class BinPutawayScanning < PDTTransactionState
 
 
   def process_scanned_bins
-    @parent.positions_available = @parent.spaces_left - @parent.scanned_bins.length
+    #@parent.positions_available = @parent.spaces_left #- @parent.scanned_bins.length
+
 
     @quantity_bins_remaining = qty_bins_remaining
     if (@quantity_bins_remaining && @quantity_bins_remaining <= 0) || @force_complete =="true"
@@ -298,10 +305,21 @@ class BinPutawayScanning < PDTTransactionState
   end
 
   def transition_to_bulk_putaway
+    get_location_positions_availabe
+
     next_state = BulkPutawayBin.new(@parent)
     result_screen = next_state.build_bulk_putaway_screen
     @parent.set_active_state(next_state)
     return result_screen
+  end
+
+  def get_location_positions_availabe
+    @parent.positions_available = ActiveRecord::Base.connection.select_one("
+                        select
+                        l.location_maximum_units - COALESCE(l.units_in_location,0) as positions_available
+                        from  locations l
+                        where l.location_code = '#{@parent.location_code}'
+                                      ")['positions_available']
   end
 
 

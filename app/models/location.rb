@@ -20,7 +20,6 @@ class Location < ActiveRecord::Base
 
 
   def Location.get_spaces_in_location(location,scanned_bins)
-    units_in_location = 0
     spaces_left = ActiveRecord::Base.connection.select_one("
                         select
                         l.location_maximum_units - (COALESCE(l.units_in_location,0) + COALESCE(bpp.qty_bins_to_putaway,0)) as spaces_left
@@ -29,12 +28,13 @@ class Location < ActiveRecord::Base
                         where l.location_code = '#{location}'
                                       ")['spaces_left'] if location
     if scanned_bins==1
+      spaces_left = spaces_left.to_i - 1
     else
-      spaces_left = spaces_left.to_i - 1 #scanned_bins if scanned_bins > 1
+      spaces_left = spaces_left.to_i - scanned_bins
     end
 
     return spaces_left.to_i
-    return units_in_location if  !spaces_left
+    return nil if !spaces_left
   end
 
 
