@@ -9,8 +9,8 @@ class BulkPutawayBin < PDTTransactionState
     field_configs = Array.new
 
     field_configs[field_configs.length] = {:type => "static_text", :name => "coldroom", :value => @parent.coldroom}
-    field_configs[field_configs.length] = {:type => "static_text", :name => "putaway_location", :value => @parent.location_code}
-    field_configs[field_configs.length] = {:type => "static_text", :name => "positions_available", :value => "#{@parent.positions_available.to_s}"}
+    field_configs[field_configs.length] = {:type => "static_text", :name => "putaway_loc", :value => @parent.location_code}
+    field_configs[field_configs.length] = {:type => "static_text", :name => "avail_spaces", :value => "#{@parent.positions_available.to_s}"}
     field_configs[field_configs.length] = {:type => "text_box", :name => "scan_location_barcode",
                                            :is_required => "true", :scan_only => "false", :scan_field => true,
                                            :submit_form => true}

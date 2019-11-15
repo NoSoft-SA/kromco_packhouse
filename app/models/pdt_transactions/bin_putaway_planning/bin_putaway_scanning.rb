@@ -22,11 +22,11 @@ class BinPutawayScanning < PDTTransactionState
 
    field_configs = Array.new
     field_configs[field_configs.length] = {:type => "static_text", :name => "coldroom", :value => @parent.coldroom}
-    field_configs[field_configs.length] = {:type => "static_text", :name => "putaway_location", :value => @parent.location_code}
+    field_configs[field_configs.length] = {:type => "static_text", :name => "putaway_loc", :value => @parent.location_code}
     if @adjusted_qty
-      field_configs[field_configs.length] = {:type => "static_text", :name => "qty_bins_to_putaway", :value => @parent.qty_bins.to_s + " " + @adjusted_qty}
+      field_configs[field_configs.length] = {:type => "static_text", :name => "qty_bins", :value => @parent.qty_bins.to_s + " " + @adjusted_qty}
     else
-      field_configs[field_configs.length] = {:type => "static_text", :name => "qty_bins_to_putaway", :value => @parent.qty_bins}
+      field_configs[field_configs.length] = {:type => "static_text", :name => "qty_bins", :value => @parent.qty_bins}
     end
     field_configs[field_configs.length] = {:type => "static_text", :name => "bins_scanned", :value => "#{@parent.scanned_bins.length().to_s}"}
     #field_configs[field_configs.length] = {:type => "static_text", :name => "space_left", :value => "#{@parent.spaces_left}"}
@@ -58,13 +58,13 @@ class BinPutawayScanning < PDTTransactionState
 
     bin = get_bin_type_and_frit_spec("bins.bin_number = '#{@bin_number}' ") if @parent.scanned_bins.length == 1
 
-    get_locations if bin && @parent.scanned_bins.lenfgth == 1
+    get_locations if bin && @parent.scanned_bins.length == 1
 
     @parent.spaces_left = Location.get_spaces_in_location(@parent.location_code, @parent.scanned_bins.length) if @parent.location_code
 
     if @parent.spaces_left && @parent.scanned_bins.length == 1 && (@parent.spaces_left.to_i < @parent.qty_bins.to_i)
       @parent.qty_bins = @parent.spaces_left + 1
-      @adjusted_qty =  "( adjusted to spaces available)"
+      @adjusted_qty =  "(adjusted to space)"
     end
 
     matching_error = match_existing_bins if @parent.scanned_bins.length > 1
