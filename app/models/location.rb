@@ -24,8 +24,8 @@ class Location < ActiveRecord::Base
                         select
                         l.location_maximum_units - (COALESCE(l.units_in_location,0) + COALESCE(bpp.qty_bins_to_putaway,0)) as spaces_left
                         from  locations l
-                        left join bin_putaway_plans bpp on bpp.putaway_location_id = l.id
-                        where l.location_code = '#{location}' and bpp.completed is not true
+                        left join bin_putaway_plans bpp on bpp.putaway_location_id = l.id and bpp.completed is not true
+                        where l.location_code = '#{location}'
                                       ")['spaces_left'] if location
     if scanned_bins==1
       spaces_left = spaces_left.to_i - 1
