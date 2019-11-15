@@ -116,7 +116,7 @@ class BinPutawayScanning < PDTTransactionState
       error <<  "Scanned bin is of different class." if @parent.bin_fruit_spec['class'] != bin['product_class_code']
       error <<  "Scanned bin is of different treatment." if @parent.bin_fruit_spec['treatment'] != bin['treatment_code']
       error <<  "Scanned bin is of different farm." if (@parent.bin_fruit_spec['farm'] != bin['farm_code']) && (@parent.bin_fruit_spec['farm'] && bin['farm_code'])
-      error <<  "Scanned bin is of different track_indicator_code." if @parent.bin_fruit_spec['track_indicator_code'] != bin['track_indicator_code']
+      error <<  "Scanned bin is of different track_indicator_code." if @parent.bin_fruit_spec['track_indicator1_id'] != bin['track_indicator1_id']
 
     return error.join(",") if !error.empty?
     return nil if error.empty?
@@ -189,7 +189,8 @@ class BinPutawayScanning < PDTTransactionState
                   rmt.variety_code        = '#{@variety_code}'  and
                   rmt.size_code           = '#{@size_code}'  and
                   rmt.product_class_code  = '#{@product_class_code}'  and
-                  rmt.treatment_code      = '#{@treatment_code}'
+                  rmt.treatment_code      = '#{@treatment_code}' and
+                  b.track_indicator1_id   = #{@track_indicator1_id}
                   #{@farm_code} ) as sq
                   order by fullness ,updated_at desc limit 1
                                                         ")
