@@ -63,8 +63,14 @@ class BinPutawayScanning < PDTTransactionState
     @parent.spaces_left = Location.get_spaces_in_location(@parent.location_code, @parent.scanned_bins.length) if @parent.location_code
 
     if @parent.spaces_left && @parent.scanned_bins.length == 1 && (@parent.spaces_left.to_i < @parent.qty_bins.to_i)
-      @parent.qty_bins = @parent.spaces_left + 1
-      @adjusted_qty =  "(adjusted to space)"
+      if @parent.spaces_left < 0
+        result_screen = PDTTransaction.build_msg_screen_definition("Location does not have enough space.", nil, nil, nil)
+        return result_screen
+      else
+        @parent.qty_bins = @parent.spaces_left + 1
+        @adjusted_qty =  "(adjusted to space)"
+      end
+
     end
 
     matching_error = match_existing_bins if @parent.scanned_bins.length > 1
