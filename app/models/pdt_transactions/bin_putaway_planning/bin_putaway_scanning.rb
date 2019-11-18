@@ -21,12 +21,12 @@ class BinPutawayScanning < PDTTransactionState
   def build_default_screen
 
    field_configs = Array.new
-    field_configs[field_configs.length] = {:type => "static_text", :name => "coldroom", :value => @parent.coldroom}
+    field_configs[field_configs.length] = {:type => "static_text", :name => "room", :value => @parent.coldroom}
     field_configs[field_configs.length] = {:type => "static_text", :name => "putaway_loc", :value => @parent.location_code}
     if @adjusted_qty
-      field_configs[field_configs.length] = {:type => "static_text", :name => "qty_bins", :value => @parent.qty_bins.to_s + " " + @adjusted_qty}
+      field_configs[field_configs.length] = {:type => "static_text", :name => "qty", :value => @parent.qty_bins.to_s + " " + @adjusted_qty}
     else
-      field_configs[field_configs.length] = {:type => "static_text", :name => "qty_bins", :value => @parent.qty_bins}
+      field_configs[field_configs.length] = {:type => "static_text", :name => "qty", :value => @parent.qty_bins}
     end
     field_configs[field_configs.length] = {:type => "static_text", :name => "bins_scanned", :value => "#{@parent.scanned_bins.length().to_s}"}
     #field_configs[field_configs.length] = {:type => "static_text", :name => "space_left", :value => "#{@parent.spaces_left}"}
