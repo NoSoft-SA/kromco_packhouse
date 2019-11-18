@@ -20,8 +20,8 @@ class BinPutawayPlanning < PDTTransaction
     coldroom, qty_bins = get_user_latest_planning_plan
 
     field_configs = Array.new
-    field_configs[field_configs.length] = {:type => "drop_down", :name => "coldroom", :is_required => "true", :list => ClientSettings.bin_putaway_coldrooms.join(","), :value => coldroom}
-    field_configs[field_configs.length] = {:type => "text_box", :name => "qty_bins", :is_required => "true", :value => qty_bins}
+    field_configs[field_configs.length] = {:type => "drop_down", :name => "room", :is_required => "true", :list => ClientSettings.bin_putaway_coldrooms.join(","), :value => coldroom}
+    field_configs[field_configs.length] = {:type => "text_box", :name => "qty", :is_required => "true", :value => qty_bins}
 
     screen_attributes = {:auto_submit => "false", :content_header_caption => "create bin putaway plan"}
     buttons = {"B3Label" => "Clear", "B2Label" => "Cancel", "B1Submit" => "create_putaway_plan_submit", "B1Label" => "Submit", "B1Enable" => "true", "B2Enable" => "false", "B3Enable" => "false"}
@@ -32,8 +32,8 @@ class BinPutawayPlanning < PDTTransaction
   end
 
   def create_putaway_plan_submit
-    @coldroom = self.pdt_screen_def.get_control_value("coldroom").to_s.strip
-    @qty_bins = self.pdt_screen_def.get_control_value("qty_bins").to_s.strip
+    @coldroom = self.pdt_screen_def.get_control_value("room").to_s.strip
+    @qty_bins = self.pdt_screen_def.get_control_value("qty").to_s.strip
     @coldroom_id = ActiveRecord::Base.connection.select_one("select id from locations where location_code = '#{@coldroom}'")['id']
     return render_next_state
   end
