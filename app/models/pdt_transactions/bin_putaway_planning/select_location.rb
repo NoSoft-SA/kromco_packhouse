@@ -58,11 +58,11 @@ class SelectLocation < PDTTransactionState
                select parent_location_code from locations where location_code = '#{@parent.location_code}'")['parent_location_code']
 
     if scanned_parent_location.to_s.upcase != @parent.coldroom.to_s.upcase
-      return "Location does not belong to selected parent location."
+      return "Location does not belong to selected parent location.,UNDO and scan another location"
     end
 
      if @parent.spaces_left && @parent.spaces_left.to_i <= 0
-      return  "Location does not have enough space."
+      return  "Location does not have enough space,UNDO and scan another location"
     end
 
     return nil

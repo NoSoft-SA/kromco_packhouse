@@ -64,7 +64,11 @@ class BinPutawayScanning < PDTTransactionState
 
     if @parent.spaces_left && @parent.scanned_bins.length == 1 && (@parent.spaces_left.to_i < @parent.qty_bins.to_i)
       if @parent.spaces_left < 0
-        result_screen = PDTTransaction.build_msg_screen_definition("Location does not have enough space.", nil, nil, nil)
+
+        @parent.clear_active_state
+        next_state = SelectLocation.new(@parent)
+        result_screen = next_state.build_default_screen
+        @parent.set_active_state(next_state)
         return result_screen
       else
         @parent.qty_bins = @parent.spaces_left + 1
@@ -190,7 +194,8 @@ class BinPutawayScanning < PDTTransactionState
                   rmt.size_code           = '#{@size_code}'  and
                   rmt.product_class_code  = '#{@product_class_code}'  and
                   rmt.treatment_code      = '#{@treatment_code}' and
-                  b.track_indicator1_id   = #{@track_indicator1_id}
+                  b.track_indicator1_id   = #{@track_indicator1_id} and
+                  l.units_in_location < l.location_maximum_units
                   #{@farm_code} ) as sq
                   order by fullness ,updated_at desc limit 1
                                                         ")
