@@ -190,6 +190,7 @@ class BinPutawayScanning < PDTTransactionState
                   where
                   ((si.destroyed IS NULL) OR (si.destroyed = false)) and
                   l.parent_location_code  = '#{@parent.coldroom}'  and
+                  l.loading_out is not true and
                   case
                        when ( '#{@size_code}' in ('UNDERS') or '#{@product_class_code}'  in ('CL2.5','3','1Z','CL3') )
                        then    TRUE
@@ -206,15 +207,11 @@ class BinPutawayScanning < PDTTransactionState
                   order by fullness ,updated_at desc limit 1
                                                         ")
 
-    if location && (location['loading_out']== true || location['loading_out']== "t")
-      @parent.error_str = "#{location.location_code} is loading out."
-      return nil
-    else
-      @parent.error_str = "location not matched."
-      return location
-    end
+          @parent.error_str = "no matched location" if !location
 
-  end
+    return location
+
+ end
 
   def get_bin_type_and_frit_spec(where_clause)
     bin = ActiveRecord::Base.connection.select_all("
