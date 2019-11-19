@@ -58,18 +58,15 @@ class BinPutawayScanning < PDTTransactionState
 
     bin = get_bin_type_and_frit_spec("bins.bin_number = '#{@bin_number}' ") if @parent.scanned_bins.length == 1
 
+
     get_locations if bin && @parent.scanned_bins.length == 1
 
     @parent.spaces_left = Location.get_spaces_in_location(@parent.location_code, @parent.scanned_bins.length) if @parent.location_code
 
     if @parent.spaces_left && @parent.scanned_bins.length == 1 && (@parent.spaces_left.to_i < @parent.qty_bins.to_i)
       if @parent.spaces_left < 0
-
-        @parent.clear_active_state
-        next_state = SelectLocation.new(@parent)
-        result_screen = next_state.build_default_screen
-        @parent.set_active_state(next_state)
-        return result_screen
+        @parent.error_str  = "inadequate space."
+        return render_select_location_state
       else
         @parent.qty_bins = @parent.spaces_left + 1
         @adjusted_qty =  "(adjusted to space)"
@@ -83,27 +80,32 @@ class BinPutawayScanning < PDTTransactionState
       return result_screen
     end
 
-
-    if !@parent.location_code || ((@parent.spaces_left && @parent.spaces_left.to_i == 0) && (@parent.scanned_bins.length < qty_bins_remaining))
-      @parent.clear_active_state
-      next_state = SelectLocation.new(@parent)
-      result_screen = next_state.build_default_screen
-      @parent.set_active_state(next_state)
-      return result_screen
+    if !@parent.location_code
+      return render_select_location_state
+    elsif (@parent.spaces_left && @parent.spaces_left.to_i == 0) && (@parent.scanned_bins.length < qty_bins_remaining)
+      @parent.error_str = "inadequate space"
+      return render_select_location_state
     end
 
     if (@parent.spaces_left && @parent.spaces_left <= 0) && @parent.scanned_bins.length > 1
+      @parent.error_str = "inadequate space."
+      return render_select_location_state
     elsif ( @parent.spaces_left &&  @parent.spaces_left.to_i == 0 && (@parent.scanned_bins.length < qty_bins_remaining))
-      @parent.clear_active_state
-      next_state = SelectLocation.new(@parent)
-      result_screen = next_state.build_default_screen
-      @parent.set_active_state(next_state)
-      return result_screen
+      @parent.error_str = "inadequate space."
+      return render_select_location_state
     end
 
     end
 
     process_scanned_bins
+  end
+
+  def render_select_location_state
+    @parent.clear_active_state
+    next_state = SelectLocation.new(@parent)
+    result_screen = next_state.build_default_screen
+    @parent.set_active_state(next_state)
+    return result_screen
   end
 
   def qty_bins_remaining
@@ -113,14 +115,14 @@ class BinPutawayScanning < PDTTransactionState
   def match_existing_bins
     bin = get_bin_type_and_frit_spec("bins.bin_number = '#{@bin_number}' ")
       error = []
-      error << "Scanned bin is of different stock type."  if @parent.bin_fruit_spec['stock_type'] != bin['stock_type_code']
-      error <<  "Scanned bin is of different commodity." if @parent.bin_fruit_spec['commodity'] != bin['commodity_code']
-      error <<  "Scanned bin is of different variety." if @parent.bin_fruit_spec['variety'] != bin['variety_code']
-      error <<  "Scanned bin is of different size." if @parent.bin_fruit_spec['size'] != bin['size_code']
-      error <<  "Scanned bin is of different class." if @parent.bin_fruit_spec['class'] != bin['product_class_code']
-      error <<  "Scanned bin is of different treatment." if @parent.bin_fruit_spec['treatment'] != bin['treatment_code']
-      error <<  "Scanned bin is of different farm." if (@parent.bin_fruit_spec['farm'] != bin['farm_code']) && (@parent.bin_fruit_spec['farm'] && bin['farm_code'])
-      error <<  "Scanned bin is of different track_indicator_code." if @parent.bin_fruit_spec['track_indicator1_id'] != bin['track_indicator1_id']
+      error << " Scanned bin is of different stock type.Undo and scan another bin"  if @parent.bin_fruit_spec['stock_type'] != bin['stock_type_code']
+      error <<  "Scanned bin is of different commodity.Undo and scan another bin" if @parent.bin_fruit_spec['commodity'] != bin['commodity_code']
+      error <<  "Scanned bin is of different variety.Undo and scan another bin" if @parent.bin_fruit_spec['variety'] != bin['variety_code']
+      error <<  "Scanned bin is of different size.Undo and scan another bin" if @parent.bin_fruit_spec['size'] != bin['size_code']
+      error <<  "Scanned bin is of different class.Undo and scan another bin" if @parent.bin_fruit_spec['class'] != bin['product_class_code']
+      error <<  "Scanned bin is of different treatment.Undo and scan another bin" if @parent.bin_fruit_spec['treatment'] != bin['treatment_code']
+      error <<  "Scanned bin is of different farm.Undo and scan another bin" if (@parent.bin_fruit_spec['farm'] != bin['farm_code']) && (@parent.bin_fruit_spec['farm'] && bin['farm_code'])
+      error <<  "Scanned bin is of different track_indicator_code.Undo and scan another bin" if @parent.bin_fruit_spec['track_indicator1_id'] != bin['track_indicator1_id']
 
     return error.join(",") if !error.empty?
     return nil if error.empty?
@@ -174,7 +176,7 @@ class BinPutawayScanning < PDTTransactionState
     location = ActiveRecord::Base.connection.select_one("
                   select * from (
                   select distinct l.location_code , l.id  as location_id,l.updated_at,
-                  units_in_location,location_maximum_units,
+                  units_in_location,location_maximum_units,l.loading_out,l.location_code,
                   case
                   when units_in_location=location_maximum_units then '100'
                   when units_in_location=0 then '1'
@@ -188,18 +190,29 @@ class BinPutawayScanning < PDTTransactionState
                   where
                   ((si.destroyed IS NULL) OR (si.destroyed = false)) and
                   l.parent_location_code  = '#{@parent.coldroom}'  and
-                  l.loading_out is not true and
-                  rmt.commodity_code      = '#{@commodity_code}'  and
-                  rmt.variety_code        = '#{@variety_code}'  and
-                  rmt.size_code           = '#{@size_code}'  and
-                  rmt.product_class_code  = '#{@product_class_code}'  and
-                  rmt.treatment_code      = '#{@treatment_code}' and
-                  b.track_indicator1_id   = #{@track_indicator1_id} and
+                  case
+                       when ( '#{@size_code}' in ('UNDERS') or '#{@product_class_code}'  in ('CL2.5','3','1Z','CL3') )
+                       then    TRUE
+                  else
+                    rmt.commodity_code      = '#{@commodity_code}'  and
+                    rmt.variety_code        = '#{@variety_code}'  and
+                    rmt.size_code           = '#{@size_code}'  and
+                    rmt.product_class_code  = '#{@product_class_code}'  and
+                    rmt.treatment_code      = '#{@treatment_code}' and
+                    b.track_indicator1_id   = #{@track_indicator1_id}
+                  END and
                   l.units_in_location < l.location_maximum_units
                   #{@farm_code} ) as sq
                   order by fullness ,updated_at desc limit 1
                                                         ")
-    location
+
+    if location && (location['loading_out']== true || location['loading_out']== "t")
+      @parent.error_str = "#{location.location_code} is loading out."
+      return nil
+    else
+      @parent.error_str = "location not matched."
+      return location
+    end
 
   end
 

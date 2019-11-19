@@ -6,7 +6,7 @@ class SelectLocation < PDTTransactionState
 
   def build_default_screen
     field_configs = Array.new
-    field_configs[field_configs.length] = {:type=>"static_text", :name=>"msg",:value=>"Location not found OR Full"}
+    field_configs[field_configs.length] = {:type=>"static_text", :name=>"msg",:value=>@parent.error_str}
 
     field_configs[field_configs.length] = {:type => "text_box", :name => "scan_location_barcode",
                                            :is_required => "true", :scan_only => "false", :scan_field => true,
@@ -29,7 +29,7 @@ class SelectLocation < PDTTransactionState
     end
 
     if location.loading_out
-      result_screen = PDTTransaction.build_msg_screen_definition("Location is in a loading_out state.", nil, nil, nil)
+      result_screen = PDTTransaction.build_msg_screen_definition("Location is loading_out.Scan another one.", nil, nil, nil)
       return result_screen
     end
 
@@ -58,11 +58,11 @@ class SelectLocation < PDTTransactionState
                select parent_location_code from locations where location_code = '#{@parent.location_code}'")['parent_location_code']
 
     if scanned_parent_location.to_s.upcase != @parent.coldroom.to_s.upcase
-      return "Location does not belong to selected parent location.,UNDO and scan another location"
+      return "Location does not belong to selected parent location,UNDO and scan another location."
     end
 
      if @parent.spaces_left && @parent.spaces_left.to_i <= 0
-      return  "Location does not have enough space,UNDO and scan another location"
+      return  "Location does not have enough space,UNDO and scan another location."
     end
 
     return nil

@@ -488,6 +488,7 @@ module Inventory::FacilitiesHelper
                                                      {:target_action => 'control_location_availability',
                                                       :id_column     => 'id'}}
     end
+    column_configs[column_configs.length()] = {:field_type => 'text', :data_type => 'boolean', :field_name => 'loading_out',:col_width=>90}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'location_code',:col_width=>145}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'location_type_code',:col_width=>140}
     column_configs[column_configs.length()] = {:field_type => 'text', :field_name => 'bay_code',:col_width=>100}

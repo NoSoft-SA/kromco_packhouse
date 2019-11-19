@@ -1,6 +1,6 @@
 class BinPutawayPlanning < PDTTransaction
 
-  attr_accessor :bin_fruit_spec,:bin_putaway_plan_id,:coldroom,:positions_available, :qty_bins, :scanned_bins, :current_index, :coldroom_id,:location_id, :current_bins_index, :new,:location_code,:spaces_left
+  attr_accessor :error_str,:bin_fruit_spec,:bin_putaway_plan_id,:coldroom,:positions_available, :qty_bins, :scanned_bins, :current_index, :coldroom_id,:location_id, :current_bins_index, :new,:location_code,:spaces_left
 
    def render_next_state
     @scanned_bins = Array.new
