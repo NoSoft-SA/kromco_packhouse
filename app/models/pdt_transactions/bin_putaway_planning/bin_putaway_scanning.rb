@@ -186,15 +186,15 @@ class BinPutawayScanning < PDTTransactionState
                   join stock_items si on si.location_id = l.id
                   join bins b on si.inventory_reference = b.bin_number
                   join rmt_products rmt ON b.rmt_product_id = rmt.id
-				          left join farms ON b.farm_id = farms.id
+                  left join farms ON b.farm_id = farms.id
                   where
                   ((si.destroyed IS NULL) OR (si.destroyed = false)) and
                   l.parent_location_code  = '#{@parent.coldroom}'  and
                   l.loading_out is not true and
                   case
-                       when ( '#{@size_code}' in ('UNDERS') or '#{@product_class_code}'  in ('CL2.5','3','1Z','CL3') )
-                       then    TRUE
-                  else
+                       when ('#{@size_code}' in ('UNDERS') or '#{@product_class_code}' in ('CL2.5','3','1Z','CL3') )  and si.stock_type_code='REBIN' then  rmt.variety_code = '#{@variety_code}'
+                       when ('#{@size_code}' in ('UNDERS') or '#{@product_class_code}' in ('CL2.5','3','1Z','CL3') ) and si.stock_type_code='PRESORT'  then  rmt.variety_code = '#{@variety_code}' and  rmt.product_class_code = '#{@product_class_code}'
+                    else
                     rmt.commodity_code      = '#{@commodity_code}'  and
                     rmt.variety_code        = '#{@variety_code}'  and
                     rmt.size_code           = '#{@size_code}'  and
@@ -207,7 +207,8 @@ class BinPutawayScanning < PDTTransactionState
                   order by fullness ,updated_at desc limit 1
                                                         ")
 
-          @parent.error_str = "no matched location" if !location
+
+    @parent.error_str = "no matched location" if !location
 
     return location
 
@@ -249,21 +250,21 @@ class BinPutawayScanning < PDTTransactionState
     farm_code = bin['farm_code']
 
 
-    if @stock_type_code == 'BIN'
-      @farm_code = "and  farms.farm_code like '%'"
-      if !farm_code
-      else
+    # if @stock_type_code == 'BIN'  #assign farm variable always
+    #   @farm_code = "and  farms.farm_code like '%'"
+    #   if !farm_code
+    #   else
         @farm_code = "and  farms.farm_code = '#{farm_code}'"
-      end
-    end
+    #   end
+    # end
 
     @parent.bin_fruit_spec = {'stock_type' => @stock_type_code, 'commodity' => @commodity_code,
                        'variety' => @variety_code, 'size' => @size_code, 'class' => @product_class_code,
-                       'treatment' => @treatment_code, 'farm' => farm_code,'track_indicator1_id'=> @track_indicator1_id} if @stock_type_code == 'BIN'
+                       'treatment' => @treatment_code, 'farm' => farm_code,'track_indicator1_id'=> @track_indicator1_id} #if @stock_type_code == 'BIN'
 
-    @parent.bin_fruit_spec = {'stock_type' => @stock_type_code, 'commodity' => @commodity_code,
-                       'variety' => @variety_code, 'size' => @size_code, 'class' => @product_class_code,
-                       'treatment' => @treatment_code,'track_indicator1_id'=> @track_indicator1_id} if @stock_type_code == 'PRESORT'
+    # @parent.bin_fruit_spec = {'stock_type' => @stock_type_code, 'commodity' => @commodity_code,
+    #                    'variety' => @variety_code, 'size' => @size_code, 'class' => @product_class_code,
+    #                    'treatment' => @treatment_code,'track_indicator1_id'=> @track_indicator1_id} if @stock_type_code == 'PRESORT'
 
 
 
