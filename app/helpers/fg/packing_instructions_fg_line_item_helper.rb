@@ -1,5 +1,15 @@
 module Fg::PackingInstructionsFgLineItemHelper
 
+  def build_import_fgs_form(fg_line_item, action, caption, is_edit=nil, is_create_retry=nil)
+    field_configs = Array.new
+    field_configs[field_configs.length()] = {:field_type=>'TextArea', :field_name=>'fgs',
+                                             :settings =>{
+                                                 :cols=> 40,
+                                                 :rows=> 20}}
+
+    build_form(fg_line_item, field_configs, action, 'fg_line_item', caption, is_edit)
+  end
+
   def build_list_fg_setup_grid(data_set,can_edit,can_delete,add)
 
     column_configs = []

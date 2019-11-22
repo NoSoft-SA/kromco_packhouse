@@ -39,7 +39,15 @@ module Fg::PackingInstructionHelper
   field_configs << {:field_type => 'TextField',
             :field_name => 'remarks'}
 
-    field_configs[field_configs.length()] = {:field_type => 'LabelField', :field_name => 'du', :non_db_field => true, :settings => {:is_separator => false, :static_value => '', :css_class => "borderless_label_field"}}
+    #field_configs[field_configs.length()] = {:field_type => 'LabelField', :field_name => 'du', :non_db_field => true, :settings => {:is_separator => false, :static_value => '', :css_class => "borderless_label_field"}}
+    field_configs[field_configs.length()] = {:field_type => 'LinkWindowField',
+                                             :field_name => '',
+                                             :settings => {
+                                                 :controller => 'fg/packing_instructions_fg_line_item',
+                                                 :target_action => 'create_multi_fg_line_items',
+                                                 :link_text => "create fg line items",
+                                                 :id_value => packing_instruction.id
+                                             }}
 
     field_configs[field_configs.length()] = {:field_type => 'Screen',
                                              :field_name => "child_form3",

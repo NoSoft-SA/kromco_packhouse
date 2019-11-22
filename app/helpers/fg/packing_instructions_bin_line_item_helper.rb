@@ -50,6 +50,11 @@ module Fg::PackingInstructionsBinLineItemHelper
                           :remote_method => 'refresh_track_slms_indicator',
                           :on_completed_js => combos_js_for_commodity["packing_instructions_bin_line_item_commodity_id"]}
 
+    combos_js_for_variety = gen_combos_clear_js_for_combos(["packing_instructions_bin_line_item_variety", "packing_instructions_bin_line_item_variety_id"])
+    variety_observer = {:updated_field_id => "treatment_id_cell",
+                          :remote_method => 'variety_changed',
+                          :on_completed_js => combos_js_for_variety["packing_instructions_bin_line_item_variety_id"]}
+
     field_configs[field_configs.length()] = {:field_type => 'DropDownField',
                                              :field_name => 'commodity_id',
                                              :settings => {
@@ -59,12 +64,8 @@ module Fg::PackingInstructionsBinLineItemHelper
                                              :observer => commodity_observer}
 
     field_configs << {:field_type => 'DropDownField',
-                      :field_name => 'track_slms_indicator_id',
-                      :settings => {:list => track_slms_indicator_codes}}
-
-    field_configs << {:field_type => 'DropDownField',
                       :field_name => 'variety_id',
-                      :settings => {:list => varieties}}
+                      :settings => {:list => varieties},:observer=> variety_observer}
 
     field_configs << {:field_type => 'DropDownField',
                       :field_name => 'size_id',
@@ -77,6 +78,12 @@ module Fg::PackingInstructionsBinLineItemHelper
     field_configs << {:field_type => 'DropDownField',
                       :field_name => 'treatment_id',
                       :settings => {:list => treatment_codes}}
+
+
+    field_configs << {:field_type => 'DropDownField',
+                      :field_name => 'track_slms_indicator_id',
+                      :settings => {:list => track_slms_indicator_codes}}
+
 
     construct_form(packing_instructions_bin_line_item, field_configs, action, 'packing_instructions_bin_line_item', caption, is_edit)
 
@@ -144,12 +151,13 @@ module Fg::PackingInstructionsBinLineItemHelper
                             :id_column => 'id'}}
 
     column_configs << {:field_type => 'text', :field_name => 'bin_qty', :data_type => 'integer', :column_caption => 'Bin qty', :col_width => 100}
+    column_configs << {:field_type => 'text', :field_name => 'bin_line_item_code', :col_width => 140}
     column_configs << {:field_type => 'text', :field_name => 'commodity_code', :col_width => 100, :column_caption => 'commodity'}
-    column_configs << {:field_type => 'text', :field_name => 'track_slms_indicator_code', :col_width => 140, :column_caption => 'track_slms_indicator'}
     column_configs << {:field_type => 'text', :field_name => 'variety_code', :col_width => 100, :column_caption => 'variety'}
     column_configs << {:field_type => 'text', :field_name => 'size_code', :col_width => 100, :column_caption => 'size'}
     column_configs << {:field_type => 'text', :field_name => 'product_class_code', :col_width => 130, :column_caption => 'product_class'}
     column_configs << {:field_type => 'text', :field_name => 'treatment_code', :col_width => 100, :column_caption => 'treatment'}
+    column_configs << {:field_type => 'text', :field_name => 'track_slms_indicator_code', :col_width => 140, :column_caption => 'track_slms_indicator'}
     column_configs << {:field_type => 'text', :field_name => 'id'}
 
     get_data_grid(data_set, column_configs, nil, true, grid_command)
