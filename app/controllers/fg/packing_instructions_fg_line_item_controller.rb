@@ -27,12 +27,16 @@ class Fg::PackingInstructionsFgLineItemController < ApplicationController
   def submit_fgs
      recs = params[:fg_line_item]['fgs'].split(/\n/)
      grades, grades_list, insert_values, old_fgs, old_fgs_list, tms, tms_list = get_fg_line_item_lists
+     assign_fg_line_item_values(grades, old_fgs, recs, tms)
      if grades.empty? && old_fgs.empty? && tms.empty?
        flash[:error]= "List not formatted correctly; old_fgs,grades and tms not found"
        redirect_to :controller => 'fg/packing_instructions_fg_line_item', :action => 'create_multi_fg_line_items', :id => session[:active_doc]['pi']
        return
+     elsif old_fgs.empty?
+       flash[:error]= "old_fg_code is require"
+       redirect_to :controller => 'fg/packing_instructions_fg_line_item', :action => 'create_multi_fg_line_items', :id => session[:active_doc]['pi']
+       return
      end
-     assign_fg_line_item_values(grades, old_fgs, recs, tms)
      grades_list, old_fgs_list, tms_list = populate_fg_line_item_lists(grades, old_fgs, tms)
 
      structure_insert_fg_line_item_values_script(grades_list, insert_values, old_fgs_list, recs, tms_list)

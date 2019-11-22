@@ -2,6 +2,28 @@ module Fg::PackingInstructionsFgLineItemHelper
 
   def build_import_fgs_form(fg_line_item, action, caption, is_edit=nil, is_create_retry=nil)
     field_configs = Array.new
+    field_configs[field_configs.length()] = {:field_type => 'LabelField',
+                                             :field_name => '',
+                                             :settings => {
+                                                 :is_seperator => false,
+                                                 :static_value => "
+                                                 PASTE old_fg_code , grade_code , target_market  in this order.<BR>
+                                                 old_fg_code is required.<BR>                                                                                             "
+                                             }
+    }
+    field_configs[field_configs.length()] = {:field_type => 'LabelField',
+                                             :field_name => '',
+                                             :settings => {
+                                                 :is_seperator => false,
+                                                 :static_value => "
+                                                 EXAMPLE <BR>
+                                                 AP GDL ASDA S147 100	,SF	,T1 (old_fg_code , grade_code , target_market)<BR>
+                                                 PR PTR GMI NPP7 96	  ,1A	(old_fg_code , grade_code )<BR>
+                                                 PR PTR GMI IPP7 90	,	     ,CH (old_fg_code ,  , target_market)<BR>
+                                                 PR RSM KANGR M12T 38 (old_fg_code)
+                                                 "
+                                             }
+    }
     field_configs[field_configs.length()] = {:field_type=>'TextArea', :field_name=>'fgs',
                                              :settings =>{
                                                  :cols=> 40,
