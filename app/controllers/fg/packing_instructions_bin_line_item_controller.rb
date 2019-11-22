@@ -8,6 +8,29 @@ class Fg::PackingInstructionsBinLineItemController < ApplicationController
     true
   end
 
+  def variety_changed
+      variety_id = get_selected_combo_value(params)
+
+      if variety_id == nil
+        @treatments = ["<empty>"]
+      else
+        @treatments =Treatment.find_by_sql("select distinct treatments.id,treatments.treatment_code
+                                   from treatments
+                                   join rmt_products on rmt_products.treatment_id=treatments.id
+                                   join varieties on rmt_products.variety_id=varieties.id
+                                   join rmt_varieties on   varieties.rmt_variety_id=rmt_varieties.id
+                                   where rmt_varieties.id='#{variety_id}'
+                                   order by treatment_code").map{|p|[p.treatment_code,p.id]}
+        @treatments.unshift(["<empty>"])
+      end
+      render :inline => %{
+      <%treatment_id_content     = select('production_run','treatment_id',@treatments) %>
+      <script>
+          <%= update_element_function("treatment_id_cell", :action => :update,:content => treatment_id_content) %>
+       </script>
+   }
+  end
+
   def list_related_fg_line_items
     set_active_doc("fg_line_item_id" ,params[:id])
     redirect_to :controller => 'fg/packing_instructions_fg_line_item', :action => 'render_related_fg_line_items'
@@ -104,7 +127,8 @@ class Fg::PackingInstructionsBinLineItemController < ApplicationController
   end
 
   def get_bin_line_item
-    bin_line_item_query = bin_line_item_list_query("pibli.id = #{session[:active_doc]['bin_line_item']}")
+    bin_line_item_query = PackingInstructionsBinLineItem.bin_line_item_list_query("where pibli.id = #{session[:active_doc]['bin_line_item']}")
+
     bin_line_item = ActiveRecord::Base.connection.select_all(bin_line_item_query)[0]
     col_values = {}
 
@@ -213,19 +237,6 @@ class Fg::PackingInstructionsBinLineItemController < ApplicationController
     session[:bins] = @bins
   end
 
-  def bin_line_item_list_query(condition)
-    list_query = "select pibli.*,t.track_slms_indicator_code,v.rmt_variety_code as variety_code,s.size_code,
-  p.product_class_code,treats.treatment_code,c.commodity_code
-  from packing_instructions_bin_line_items pibli
-  left join track_slms_indicators t on t.id=pibli.track_slms_indicator_id
-  left join varieties v on v.id =pibli.variety_id
-  left join sizes s on s.id=pibli.size_id
-  left join product_classes p on p.id=pibli.product_class_id
-  left join treatments treats on treats.id=pibli.treatment_id
-  left join commodities c on c.id=pibli.commodity_id
-  left join packing_instructions pi on pi.id=pibli.packing_instruction_id
-  where #{condition}"
-  end
 
   def refresh_track_slms_indicator
     commodity_id = get_selected_combo_value(params)
@@ -263,7 +274,7 @@ class Fg::PackingInstructionsBinLineItemController < ApplicationController
       session[:packing_instructions_bin_line_items_page] = nil
     end
 
-    list_query = bin_line_item_list_query("pibli.packing_instruction_id = #{session[:active_doc]['pi']}")
+    list_query = PackingInstructionsBinLineItem.bin_line_item_list_query("where pibli.packing_instruction_id = #{session[:active_doc]['pi']}")
     @packing_instructions_bin_line_items = ActiveRecord::Base.connection.select_all(list_query)
     session[:query] = "ActiveRecord::Base.connection.select_all(\"#{list_query}\")"
     render_list_packing_instructions_bin_line_items
@@ -353,6 +364,7 @@ class Fg::PackingInstructionsBinLineItemController < ApplicationController
     @packing_instructions_bin_line_item = PackingInstructionsBinLineItem.new(params[:packing_instructions_bin_line_item])
     @packing_instructions_bin_line_item.packing_instruction_id = session[:active_doc]['pi']
     if @packing_instructions_bin_line_item.save
+
       render :inline =>
                  %{
             "<script>
@@ -383,9 +395,22 @@ class Fg::PackingInstructionsBinLineItemController < ApplicationController
   def edit_packing_instructions_bin_line_item
     return if authorise_for_web(program_name?, 'edit') == false
     id = params[:id]
-    if id && @packing_instructions_bin_line_item = PackingInstructionsBinLineItem.find(id)
-      render_edit_packing_instructions_bin_line_item
+
+    production_runs = ActiveRecord::Base.connection.select_one("
+                      select count(id) as runs from production_runs where bin_order_line_item_id = #{id}")['runs']
+    if production_runs.to_i > 0
+      #flash[:notice] = "Line item is referenced by a run"
+      render :inline => %{
+                          <script>
+                          alert("Line item is cannot be edited, it is referenced by a run");
+                          window.close();
+                        </script>} and return
+    else
+      if id && @packing_instructions_bin_line_item = PackingInstructionsBinLineItem.find(id)
+        render_edit_packing_instructions_bin_line_item
+      end
     end
+
   end
 
 
@@ -611,21 +636,7 @@ class Fg::PackingInstructionsBinLineItemController < ApplicationController
 
   end
 
-  private
 
-  def bin_line_item_list_query(condition)
-    list_query = "select pibli.*,t.track_slms_indicator_code,v.rmt_variety_code as variety_code,s.size_code,
-  p.product_class_code,treats.treatment_code,c.commodity_code
-  from packing_instructions_bin_line_items pibli
-  left join track_slms_indicators t on t.id=pibli.track_slms_indicator_id
-  left join varieties v on v.id =pibli.variety_id
-  left join sizes s on s.id=pibli.size_id
-  left join product_classes p on p.id=pibli.product_class_id
-  left join treatments treats on treats.id=pibli.treatment_id
-  left join commodities c on c.id=pibli.commodity_id
-  left join packing_instructions pi on pi.id=pibli.packing_instruction_id
-  where #{condition}"
-  end
 
 
 #  --------------------------------------------------------------------------------
