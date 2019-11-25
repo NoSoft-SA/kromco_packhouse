@@ -202,8 +202,8 @@ class BinPutawayScanning < PDTTransactionState
                     rmt.treatment_code      = '#{@treatment_code}' and
                     b.track_indicator1_id   = #{@track_indicator1_id}
                   END and
-                  l.units_in_location < l.location_maximum_units
-                  #{@farm_code} ) as sq
+                  l.units_in_location < l.location_maximum_units and
+                  b.farm_code = '#{@farm_code}' ) as sq
                   order by fullness ,updated_at desc limit 1
                                                         ")
 
@@ -247,20 +247,20 @@ class BinPutawayScanning < PDTTransactionState
     @product_class_code = bin['product_class_code']
     @treatment_code = bin['treatment_code']
     @track_indicator1_id = bin['track_indicator1_id']
-    farm_code = bin['farm_code']
+    #farm_code = bin['farm_code']
 
 
     # if @stock_type_code == 'BIN'  #assign farm variable always
     #   @farm_code = "and  farms.farm_code like '%'"
     #   if !farm_code
     #   else
-        @farm_code = "and  farms.farm_code = '#{farm_code}'"
+        @farm_code = bin['farm_code']
     #   end
     # end
 
     @parent.bin_fruit_spec = {'stock_type' => @stock_type_code, 'commodity' => @commodity_code,
                        'variety' => @variety_code, 'size' => @size_code, 'class' => @product_class_code,
-                       'treatment' => @treatment_code, 'farm' => farm_code,'track_indicator1_id'=> @track_indicator1_id} #if @stock_type_code == 'BIN'
+                       'treatment' => @treatment_code, 'farm' => @farm_code,'track_indicator1_id'=> @track_indicator1_id} #if @stock_type_code == 'BIN'
 
     # @parent.bin_fruit_spec = {'stock_type' => @stock_type_code, 'commodity' => @commodity_code,
     #                    'variety' => @variety_code, 'size' => @size_code, 'class' => @product_class_code,
