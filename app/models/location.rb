@@ -28,7 +28,7 @@ class Location < ActiveRecord::Base
                         where l.location_code = '#{location}'
                                       ")['spaces_left'] if location
     if scanned_bins==1
-      spaces_left = spaces_left.to_i - 1
+      #spaces_left = spaces_left.to_i - 1
     else
       spaces_left = spaces_left.to_i - scanned_bins
     end
