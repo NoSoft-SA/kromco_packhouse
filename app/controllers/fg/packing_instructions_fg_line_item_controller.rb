@@ -35,10 +35,10 @@ class Fg::PackingInstructionsFgLineItemController < ApplicationController
 
   def assign_fg_line_item_values(extended_fgs, inventories, tms,sell_bys, recs)
     recs.each do |rec|
-      extended_fg  = rec.split(",")[0].strip if rec.split(",")[0] && rec.split(",")[0].length > 0
-      inventory    = rec.split(",")[1].strip if rec.split(",")[1] && rec.split(",")[1].length > 0
-      tm           = rec.split(",")[2].strip if rec.split(",")[2] && rec.split(",")[2].length > 0
-      sell_by      = rec.split(",")[3].strip if rec.split(",")[3] && rec.split(",")[3].length > 0
+      extended_fg  = rec.split("\t")[0].strip if rec.split("\t")[0] && rec.split("\t")[0].length > 0
+      inventory    = rec.split("\t")[1].strip if rec.split("\t")[1] && rec.split("\t")[1].length > 0
+      tm           = rec.split("\t")[2].strip if rec.split("\t")[2] && rec.split("\t")[2].length > 0
+      sell_by      = rec.split("\t")[3].strip if rec.split("\t")[3] && rec.split("\t")[3].length > 0
 
 
       extended_fgs  << "'#{extended_fg}'" if extended_fg && extended_fg.length > 0
@@ -107,10 +107,10 @@ class Fg::PackingInstructionsFgLineItemController < ApplicationController
   def structure_insert_fg_line_item_values_script(extended_fg_list,inventory_list,tms_list,sell_by_list, insert_values, recs)
     duplicate_control = []
     recs.each do |rec|
-      extended_fg_code = rec.split(",")[0].strip if rec.split(",")[0]
-      inventory   = rec.split(",")[1].strip if rec.split(",")[1]
-      tm          = rec.split(",")[2].strip if rec.split(",")[2]
-      sell_by     = rec.split(",")[3].strip if rec.split(",")[3]
+      extended_fg_code = rec.split("\t")[0].strip if rec.split("\t")[0]
+      inventory        = rec.split("\t")[1].strip if rec.split("\t")[1]
+      tm               = rec.split("\t")[2].strip if rec.split("\t")[2]
+      sell_by          = rec.split("\t")[3].strip if rec.split("\t")[3]
 
       actual_count, commodity_code, grade_id, inventory_id, marketing_org_id, marketing_variety_code, old_fg_code, sell_by_code, tm_id = initialise_insert_values
 
@@ -149,35 +149,6 @@ class Fg::PackingInstructionsFgLineItemController < ApplicationController
     end
     insert_values
   end
-
-
-  def structure_insert(grades_list, insert_values, old_fgs_list, recs, tms_list)
-    duplicate_control = []
-    recs.each do |rec|
-      old_fg = rec.split(",")[0].strip if rec.split(",")[0]
-      grade = rec.split(",")[1].strip if rec.split(",")[1]
-      tm = rec.split(",")[2].strip if rec.split(",")[2]
-
-      old_fg_id = old_fgs_list.find_all { |x| x['old_fg_code'] == old_fg }[0] if (old_fg && old_fg.length > 0) && !old_fgs_list.empty?
-      old_fg_id = old_fg_id['id'] if old_fg_id
-
-      grade_id = grades_list.find_all { |x| x['grade_code'] == grade }[0] if (grade  && grade.length > 0)&& !grades_list.empty?
-      grade_id = grade_id['id'] if grade_id
-
-      tm_id = tms_list.find_all { |x| x['target_market_name'] == tm }[0] if (tm && tm.length > 0 ) && !tms_list.empty?
-      tm_id =tm_id['id'] if tm_id
-
-
-
-      old_fg_id = "null" if !old_fg_id
-      grade_id = "null" if !grade_id
-      tm_id = "null" if !tm_id
-
-      insert_values << "(#{old_fg_id},#{grade_id},#{tm_id},#{session[:active_doc]['pi']})" if !duplicate_control.include?("#{old_fg_id}_#{grade}_#{tm_id}")
-      duplicate_control << "#{old_fg_id}_#{grade}_#{tm_id}" if !duplicate_control.include?("#{old_fg_id}_#{grade}_#{tm_id}")
-    end
-  end
-
 
   def get_fg_line_item_lists
     extended_fg_list = []
@@ -220,7 +191,7 @@ class Fg::PackingInstructionsFgLineItemController < ApplicationController
 
   def render_import_fgs_form
     render :inline => %{
-  		<% @content_header_caption = "'Enter fg_old_code,grade_code,target_market'"%>
+  		<% @content_header_caption = "'Enter Extended_fg_code,inventory_code,target_market_code and retailer_sell_by_code'"%>
 
   		<%= build_import_fgs_form(@fg_line_item,'submit_fg_line_item_params','submit',false,@is_create_retry)%>
 
