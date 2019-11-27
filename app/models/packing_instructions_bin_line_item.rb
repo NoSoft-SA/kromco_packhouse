@@ -13,6 +13,34 @@ class PackingInstructionsBinLineItem < ActiveRecord::Base
   belongs_to :size
   belongs_to :track_slms_indicator
 
+  def after_save
+    if self.new_record?
+      self.bin_line_item_code = calc_bin_line_item_code
+      self.update
+    end
+  end
+
+  def calc_bin_line_item_code
+    bin_line_item_query = PackingInstructionsBinLineItem.bin_line_item_list_query("where pibli.id = #{self.id}")
+    bin_line_item = ActiveRecord::Base.connection.select_all(bin_line_item_query)[0]
+    bin_line_item_code = "#{bin_line_item['commodity_code']}_#{bin_line_item['variety_code']}_#{bin_line_item['size_code']}_#{bin_line_item['product_class_code']}_#{bin_line_item['treatment_code']}_#{bin_line_item['track_slms_indicator_code']}"
+    return bin_line_item_code.to_s
+  end
+
+  def PackingInstructionsBinLineItem.bin_line_item_list_query(condition = nil)
+    list_query = "select pibli.*,t.track_slms_indicator_code,v.rmt_variety_code as variety_code,s.size_code,
+  p.product_class_code,treats.treatment_code,c.commodity_code
+  from packing_instructions_bin_line_items pibli
+  left join track_slms_indicators t on t.id=pibli.track_slms_indicator_id
+  left join varieties v on v.id =pibli.variety_id
+  left join sizes s on s.id=pibli.size_id
+  left join product_classes p on p.id=pibli.product_class_id
+  left join treatments treats on treats.id=pibli.treatment_id
+  left join commodities c on c.id=pibli.commodity_id
+  left join packing_instructions pi on pi.id=pibli.packing_instruction_id
+   #{condition}"
+  end
+
   def PackingInstructionsBinLineItem.get_rmt_products
     rmt_products = ActiveRecord::Base.connection.select_all("
     select distinct rmt.variety_id,rmt.variety_code,rmt.treatment_id,rmt.treatment_code,
@@ -67,7 +95,7 @@ class PackingInstructionsBinLineItem < ActiveRecord::Base
 
 #  first check whether combo fields have been selected
     is_valid = true
-    validate_uniqueness
+    validate_uniqueness if self.new_record? && is_valid
 #  if is_valid
 #    is_valid = ModelHelper::Validations.validate_combos([{:treatment_type_code => self.treatment_type_code},{:treatment_code => self.treatment_code}],self)
 # end

@@ -3,7 +3,7 @@ class PackingInstruction < ActiveRecord::Base
  belongs_to :trading_partner
   belongs_to :shift_type
 
- def PackingInstruction.get_run_packing_instruction_codes(where_condition)
+ def PackingInstruction.get_run_packing_instruction_codes(where_condition = nil)
    packing_instructions =  ActiveRecord::Base.connection.select_all("
         select distinct pi.packing_instruction_code,pi.id as packing_instruction_id
         from production_schedules ps
@@ -13,9 +13,10 @@ class PackingInstruction < ActiveRecord::Base
         join fg_setup_for_packing_instructions_lines fgsforpi on fgsforpi.fg_setup_id = fgs.id
         join packing_instructions_fg_line_items pifgli on fgsforpi.packing_instructions_fg_line_item_id = pifgli.id
         join packing_instructions pi on pifgli.packing_instruction_id = pi.id
-        #{where_condition}
+        #{where_condition} ")
 
-                           ")
+
+   packing_instructions
  end
 
 
