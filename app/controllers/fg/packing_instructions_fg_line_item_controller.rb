@@ -8,14 +8,94 @@ class Fg::PackingInstructionsFgLineItemController < ApplicationController
     true
   end
 
-  def get_old_fgs_list(old_fgs)
-    old_fgs_list = ActiveRecord::Base.connection.select_all("
-                  select id,old_fg_code from extended_fgs where old_fg_code in (#{old_fgs.join(',')})")
+  def submit_fg_line_item_params
+    recs = params[:fg_line_item]['fgs'].split(/\n/)
+    extended_fgs,extended_fg_list,inventories,inventory_list,tms,tms_list,sell_bys,sell_by_list,insert_values = get_fg_line_item_lists
+    assign_fg_line_item_values(extended_fgs, inventories, tms,sell_bys, recs)
+    extended_fg_list,inventory_list,  tms_list ,sell_by_list= populate_fg_line_item_lists(extended_fgs, inventories, tms,sell_bys)
+
+    # if extended_fg_list.empty? && inventory_list.empty? && tms_list.empty? && sell_bys.empty?
+    #   flash[:error]= "List not formatted correctly; extended_fgs,inventories,tms and sell by not found"
+    #   redirect_to :controller => 'fg/packing_instructions_fg_line_item', :action => 'create_multi_fg_line_items', :id => session[:active_doc]['pi']
+    #   return
+    if extended_fg_list.empty?
+      flash[:error]= "extended_fg_code is required"
+      redirect_to :controller => 'fg/packing_instructions_fg_line_item', :action => 'create_multi_fg_line_items', :id => session[:active_doc]['pi']
+      return
+    else
+      structure_insert_fg_line_item_values_script(extended_fg_list,inventory_list,tms_list,sell_by_list, insert_values, recs)
+
+         ActiveRecord::Base.connection.execute("
+         insert into packing_instructions_fg_line_items(packing_instruction_id,old_fg_code,marketing_org_id,grade_id,target_market_id,inventory_id,commodity_code,actual_count,marketing_variety_code,retailer_sell_by_code)
+         VALUES #{insert_values.join(',')}") if !insert_values.empty?
+
+      reload_packing_instruction_form
+      end
   end
 
-  def get_grades_list(grades)
-    grades_list = ActiveRecord::Base.connection.select_all("
-                  select id,grade_code from grades where grade_code in (#{grades.join(',')})")
+  def assign_fg_line_item_values(extended_fgs, inventories, tms,sell_bys, recs)
+    recs.each do |rec|
+      extended_fg  = rec.split(",")[0].strip if rec.split(",")[0] && rec.split(",")[0].length > 0
+      inventory    = rec.split(",")[1].strip if rec.split(",")[1] && rec.split(",")[1].length > 0
+      tm           = rec.split(",")[2].strip if rec.split(",")[2] && rec.split(",")[2].length > 0
+      sell_by      = rec.split(",")[3].strip if rec.split(",")[3] && rec.split(",")[3].length > 0
+
+
+      extended_fgs  << "'#{extended_fg}'" if extended_fg && extended_fg.length > 0
+      inventories   << "'#{inventory}'" if inventory && inventory.length > 0
+      tms           << "'#{tm}'" if tm && tm.length > 0
+      sell_bys      << "'#{sell_by}'" if sell_by && sell_by.length > 0
+    end
+  end
+
+  def sell_by_list(sell_buys)
+    sell_buy_list = []
+    sell_buys.each do |sellbuycode|
+        sell_buy_code = sellbuycode.gsub("'", '')
+        sell_buy_code =sell_buy_code.gsub("\"", '')
+      sell_buy_list << {'sell_by_retailer_code' => sell_buy_code}
+    end
+    return sell_buy_list
+  end
+
+
+  def populate_fg_line_item_lists(extended_fgs= [], inventories = [] , tms = [],sell_bys=[])
+    extended_fg_list = []
+    inventory_list = []
+    tms_list  = []
+    sell_by_list = []
+
+    extended_fg_list = get_extended_fg_list(extended_fgs) if !extended_fgs.empty?
+    tms_list         = get_tms_list(tms) if !tms.empty?
+    inventory_list   = get_inventory_list(inventories) if !inventories.empty?
+    sell_by_list     = sell_by_list(sell_bys) if !sell_bys.empty?
+    return extended_fg_list,inventory_list, tms_list ,sell_by_list
+  end
+
+  def get_extended_fg_list(extended_fgs)
+    extended_fgs = ActiveRecord::Base.connection.select_all("
+                  select
+                  exf.id as extended_fg_id,
+                  exf.extended_fg_code,
+                  exf.old_fg_code,
+                  o.id as marketing_org_id ,
+                  g.id as grade_id,
+                  exf.commodity_code,
+                  ipp.actual_count,
+                  ipp.marketing_variety_code
+                  from extended_fgs exf
+                  left join grades g on exf.grade_code = g.grade_code
+                  left join organizations o on exf.marketing_org_code = o.short_description
+                  left join fg_products fg on exf.fg_code = fg.fg_product_code
+                  left join item_pack_products ipp on fg.item_pack_product_code = ipp.item_pack_product_code
+                  where exf.extended_fg_code in (#{extended_fgs.join(',')})
+                                                            ")
+    extended_fgs
+  end
+
+  def get_inventory_list(inventories)
+    inventory_list = ActiveRecord::Base.connection.select_all("
+                  select id,inventory_code from inventory_codes where inventory_code in (#{inventories.join(',')})")
   end
 
   def get_tms_list(tms)
@@ -24,42 +104,106 @@ class Fg::PackingInstructionsFgLineItemController < ApplicationController
                   from target_markets where target_market_name in (#{tms.join(',')})")
   end
 
-  def submit_fgs
-     recs = params[:fg_line_item]['fgs'].split(/\n/)
-     grades, grades_list, insert_values, old_fgs, old_fgs_list, tms, tms_list = get_fg_line_item_lists
-     assign_fg_line_item_values(grades, old_fgs, recs, tms)
-     if grades.empty? && old_fgs.empty? && tms.empty?
-       flash[:error]= "List not formatted correctly; old_fgs,grades and tms not found"
-       redirect_to :controller => 'fg/packing_instructions_fg_line_item', :action => 'create_multi_fg_line_items', :id => session[:active_doc]['pi']
-       return
-     elsif old_fgs.empty?
-       flash[:error]= "old_fg_code is require"
-       redirect_to :controller => 'fg/packing_instructions_fg_line_item', :action => 'create_multi_fg_line_items', :id => session[:active_doc]['pi']
-       return
-     end
-     grades_list, old_fgs_list, tms_list = populate_fg_line_item_lists(grades, old_fgs, tms)
+  def structure_insert_fg_line_item_values_script(extended_fg_list,inventory_list,tms_list,sell_by_list, insert_values, recs)
+    duplicate_control = []
+    recs.each do |rec|
+      extended_fg_code = rec.split(",")[0].strip if rec.split(",")[0]
+      inventory   = rec.split(",")[1].strip if rec.split(",")[1]
+      tm          = rec.split(",")[2].strip if rec.split(",")[2]
+      sell_by     = rec.split(",")[3].strip if rec.split(",")[3]
 
-     structure_insert_fg_line_item_values_script(grades_list, insert_values, old_fgs_list, recs, tms_list)
+      actual_count, commodity_code, grade_id, inventory_id, marketing_org_id, marketing_variety_code, old_fg_code, sell_by_code, tm_id = initialise_insert_values
 
-     ActiveRecord::Base.connection.execute("
-       insert into packing_instructions_fg_line_items(old_fg_id,grade_id,target_market_id,packing_instruction_id)
-       VALUES #{insert_values.join(',')}") if !insert_values.empty?
 
-     reload_packing_instruction_form
- end
+      extendend_fg = extended_fg_list.find_all{ |x| x['extended_fg_code'] == "#{extended_fg_code}" }[0] if (extended_fg_code && extended_fg_code.length > 0) && !extended_fg_list.empty?
+      old_fg_code            = extendend_fg['old_fg_code']            if extendend_fg
+      marketing_org_id       = extendend_fg['marketing_org_id']       if extendend_fg
+      grade_id               = extendend_fg['grade_id']               if extendend_fg
+      commodity_code         = extendend_fg['commodity_code']         if extendend_fg
+      actual_count           = extendend_fg['actual_count']           if extendend_fg
+      marketing_variety_code = extendend_fg['marketing_variety_code'] if extendend_fg
 
-  def assign_fg_line_item_values(grades, old_fgs, recs, tms)
+      tm_id = tms_list.find_all { |x| x['target_market_name'] == tm }[0] if (tm && tm.length > 0 ) && !tms_list.empty?
+      tm_id =tm_id['id'] if tm_id
+
+      inventory_id = inventory_list.find_all { |x| x['inventory_code'] == inventory }[0] if (inventory && inventory.length > 0 ) && !inventory_list.empty?
+      inventory_id =inventory_id['id'] if inventory_id
+
+      sell_by_code = sell_by_list.find_all { |x| x['sell_by_retailer_code'] == sell_by }[0] if (sell_by && sell_by.length > 0 ) && !sell_by_list.empty?
+      sell_by_code = sell_by_code['sell_by_retailer_code'] if sell_by_code
+
+      insert_string = " (#{session[:active_doc]['pi']},
+                      #{old_fg_code ? :"'#{old_fg_code}'" : :null},
+                      #{marketing_org_id ? :"#{marketing_org_id}" : :null},
+                      #{grade_id ? :"#{grade_id}" : :null},
+                      #{tm_id ? :"#{tm_id}" : :null},
+                      #{inventory_id ? :"#{inventory_id}" : :null},
+                      #{commodity_code ? :"'#{commodity_code}'" : :null},
+                      #{actual_count ? :"'#{actual_count}'" : :null},
+                      #{marketing_variety_code ? :"'#{marketing_variety_code}'" : :null},
+                      #{sell_by_code ? :"'#{sell_by_code}'" : :null})
+                    "
+
+      insert_values <<  insert_string if  !duplicate_control.include?("#{session[:active_doc]['pi']}_'#{old_fg_code}'_#{marketing_org_id}_#{grade_id}_#{tm_id}_#{inventory_id}_'#{commodity_code}'_'#{actual_count}'_'#{marketing_variety_code}'_'#{sell_by_code}'")
+      duplicate_control << "#{session[:active_doc]['pi']}_'#{old_fg_code}'_#{marketing_org_id}_#{grade_id}_#{tm_id}_#{inventory_id}_'#{commodity_code}'_'#{actual_count}'_'#{marketing_variety_code}'_'#{sell_by_code}'" if !duplicate_control.include?("#{session[:active_doc]['pi']}_'#{old_fg_code}'_#{marketing_org_id}_#{grade_id}_#{tm_id}_#{inventory_id}_'#{commodity_code}'_'#{actual_count}'_'#{marketing_variety_code}'_'#{sell_by_code}'")
+    end
+    insert_values
+  end
+
+
+  def structure_insert(grades_list, insert_values, old_fgs_list, recs, tms_list)
+    duplicate_control = []
     recs.each do |rec|
       old_fg = rec.split(",")[0].strip if rec.split(",")[0]
       grade = rec.split(",")[1].strip if rec.split(",")[1]
       tm = rec.split(",")[2].strip if rec.split(",")[2]
 
-      old_fgs << "'#{old_fg}'" if old_fg
-      grades << "'#{grade}'" if grade
-      tms << "'#{tm}'" if tm
+      old_fg_id = old_fgs_list.find_all { |x| x['old_fg_code'] == old_fg }[0] if (old_fg && old_fg.length > 0) && !old_fgs_list.empty?
+      old_fg_id = old_fg_id['id'] if old_fg_id
 
+      grade_id = grades_list.find_all { |x| x['grade_code'] == grade }[0] if (grade  && grade.length > 0)&& !grades_list.empty?
+      grade_id = grade_id['id'] if grade_id
+
+      tm_id = tms_list.find_all { |x| x['target_market_name'] == tm }[0] if (tm && tm.length > 0 ) && !tms_list.empty?
+      tm_id =tm_id['id'] if tm_id
+
+
+
+      old_fg_id = "null" if !old_fg_id
+      grade_id = "null" if !grade_id
+      tm_id = "null" if !tm_id
+
+      insert_values << "(#{old_fg_id},#{grade_id},#{tm_id},#{session[:active_doc]['pi']})" if !duplicate_control.include?("#{old_fg_id}_#{grade}_#{tm_id}")
+      duplicate_control << "#{old_fg_id}_#{grade}_#{tm_id}" if !duplicate_control.include?("#{old_fg_id}_#{grade}_#{tm_id}")
     end
   end
+
+
+  def get_fg_line_item_lists
+    extended_fg_list = []
+    inventory_list = []
+    tms_list = []
+    sell_by_list = []
+
+
+    insert_values = []
+    extended_fgs = []
+    inventories = []
+    tms = []
+    sell_by = []
+
+    return extended_fgs,extended_fg_list,inventories,inventory_list,tms,tms_list,sell_by,sell_by_list,insert_values
+  end
+
+
+#----------------------------------------------------------------------------------------------------------------------
+
+
+  def get_grades_list(grades)
+    grades_list = ActiveRecord::Base.connection.select_all("
+                  select id,grade_code from grades where grade_code in (#{grades.join(',')})")
+  end
+
 
   def reload_packing_instruction_form
     render :inline => %{<script>
@@ -78,7 +222,7 @@ class Fg::PackingInstructionsFgLineItemController < ApplicationController
     render :inline => %{
   		<% @content_header_caption = "'Enter fg_old_code,grade_code,target_market'"%>
 
-  		<%= build_import_fgs_form(@fg_line_item,'submit_fgs','submit',false,@is_create_retry)%>
+  		<%= build_import_fgs_form(@fg_line_item,'submit_fg_line_item_params','submit',false,@is_create_retry)%>
 
   		}, :layout => 'content'
   end
@@ -156,7 +300,8 @@ class Fg::PackingInstructionsFgLineItemController < ApplicationController
       session[:actual_count] = actual_count
       @old_fgs = ActiveRecord::Base.connection.select_all(
           "
-      select DISTINCT old_fg_code,id FROM mv_extended_fgs
+      select DISTINCT old_fg_code,id
+       FROM mv_extended_fgs
       where commodity_code='#{session[:commodity_code]}' and marketing_variety_code='#{session[:marketing_variety_code]}'
       and brand_code ='#{session[:brand_code]}'
       and old_pack_code='#{session[:old_pack_code]}'
@@ -611,7 +756,7 @@ class Fg::PackingInstructionsFgLineItemController < ApplicationController
 
 
   def fg_line_item_list_query(condition = nil)
-    list_query = " select pifgi.*,g.grade_code,exf.old_fg_code,o.short_description as marketing_org_code,
+    list_query = " select pifgi.*,g.grade_code,pifgi.old_fg_code,o.short_description as marketing_org_code,
                  tm.target_market_name || ':' || tm.target_market_description as target_market_code,
                  inv.inventory_code || ':' || inv.inventory_name as inventory_code
                  from packing_instructions_fg_line_items pifgi
@@ -625,50 +770,19 @@ class Fg::PackingInstructionsFgLineItemController < ApplicationController
                 order by pifgi.id desc"
   end
 
-  def structure_insert_fg_line_item_values_script(grades_list, insert_values, old_fgs_list, recs, tms_list)
-    duplicate_control = []
-    recs.each do |rec|
-      old_fg = rec.split(",")[0].strip if rec.split(",")[0]
-      grade = rec.split(",")[1].strip if rec.split(",")[1]
-      tm = rec.split(",")[2].strip if rec.split(",")[2]
+  private
 
-      old_fg_id = old_fgs_list.find_all { |x| x['old_fg_code'] == old_fg }[0] if (old_fg && old_fg.length > 0) && !old_fgs_list.empty?
-      old_fg_id = old_fg_id['id'] if old_fg_id
-
-      grade_id = grades_list.find_all { |x| x['grade_code'] == grade }[0] if (grade  && grade.length > 0)&& !grades_list.empty?
-      grade_id = grade_id['id'] if grade_id
-
-      tm_id = tms_list.find_all { |x| x['target_market_name'] == tm }[0] if (tm && tm.length > 0 ) && !tms_list.empty?
-      tm_id =tm_id['id'] if tm_id
-
-
-
-      old_fg_id = "null" if !old_fg_id
-      grade_id = "null" if !grade_id
-      tm_id = "null" if !tm_id
-
-      insert_values << "(#{old_fg_id},#{grade_id},#{tm_id},#{session[:active_doc]['pi']})" if !duplicate_control.include?("#{old_fg_id}_#{grade}_#{tm_id}")
-      duplicate_control << "#{old_fg_id}_#{grade}_#{tm_id}" if !duplicate_control.include?("#{old_fg_id}_#{grade}_#{tm_id}")
-    end
-  end
-
-  def populate_fg_line_item_lists(grades, old_fgs, tms)
-    old_fgs_list = get_old_fgs_list(old_fgs) if !old_fgs.empty?
-    grades_list = get_grades_list(grades) if !grades.empty?
-    tms_list = get_tms_list(tms) if !tms.empty?
-    return grades_list, old_fgs_list, tms_list
-  end
-
-  def get_fg_line_item_lists
-    old_fgs_list = []
-    grades_list = []
-    tms_list = []
-
-    insert_values = []
-    old_fgs = []
-    grades = []
-    tms = []
-    return grades, grades_list, insert_values, old_fgs, old_fgs_list, tms, tms_list
+  def initialise_insert_values
+    old_fg_code = nil
+    marketing_org_id = nil
+    grade_id = nil
+    commodity_code = nil
+    actual_count = nil
+    marketing_variety_code = nil
+    tm_id = nil
+    inventory_id = nil
+    sell_by_code = nil
+    return actual_count, commodity_code, grade_id, inventory_id, marketing_org_id, marketing_variety_code, old_fg_code, sell_by_code, tm_id
   end
 
 

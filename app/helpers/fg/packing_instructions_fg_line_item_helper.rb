@@ -7,8 +7,8 @@ module Fg::PackingInstructionsFgLineItemHelper
                                              :settings => {
                                                  :is_seperator => false,
                                                  :static_value => "
-                                                 PASTE old_fg_code , grade_code , target_market  in this order.<BR>
-                                                 old_fg_code is required.<BR>                                                                                             "
+                                                 PASTE extended_fg_code,inventory_code,target_market,retailer_sell_by_code  in this order.<BR>
+                                                 Extended_fg_code Is Required.<BR>                                                                                             "
                                              }
     }
     field_configs[field_configs.length()] = {:field_type => 'LabelField',
@@ -16,17 +16,16 @@ module Fg::PackingInstructionsFgLineItemHelper
                                              :settings => {
                                                  :is_seperator => false,
                                                  :static_value => "
-                                                 EXAMPLE <BR>
-                                                 AP GDL ASDA S147 100	,SF	,T1 (old_fg_code , grade_code , target_market)<BR>
-                                                 PR PTR GMI NPP7 96	  ,1A	(old_fg_code , grade_code )<BR>
-                                                 PR PTR GMI IPP7 90	,	     ,CH (old_fg_code ,  , target_market)<BR>
-                                                 PR RSM KANGR M12T 38 (old_fg_code)
-                                                 "
-                                             }
+     EXAMPLE <BR>
+     AC_HCT_CI_1A_90_M2_UL_L_*T5.4**_CM2D104_GM_NONE_NONE_GEN_KRF	,S,CH	,ZVO (extended_fg_code,inventory_code ,target_market,retailer_sell_by_code)<BR>
+     AC_HCT_CI_1A_90_M2_UL_L_*T5.4**_CM2D104_GM_NONE_NONE_GEN_KRF,S	         (extended_fg_code,inventory_code )<BR>
+     AC_HCT_CI_1A_90_M2_UL_L_*T5.4**_CM2D104_GM_NONE_NONE_GEN_KRF	,	         ,CH (extended_fg_code ,  , target_market)<BR>
+     AC_HCT_CI_1A_90_M2_UL_L_*T5.4**_CM2D104_GM_NONE_NONE_GEN_KRF	,       ,       ,ZVO   (extended_fg_code ,  , , retailer_sell_by_code)<BR>
+     AC_HCT_CI_1A_90_M2_UL_L_*T5.4**_CM2D104_GM_NONE_NONE_GEN_KRF	           (extended_fg_code)<BR>"}
     }
     field_configs[field_configs.length()] = {:field_type=>'TextArea', :field_name=>'fgs',
                                              :settings =>{
-                                                 :cols=> 40,
+                                                 :cols=> 100,
                                                  :rows=> 20}}
 
     build_form(fg_line_item, field_configs, action, 'fg_line_item', caption, is_edit)

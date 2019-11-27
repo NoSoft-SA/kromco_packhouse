@@ -46,7 +46,9 @@ module Fg::PackingInstructionHelper
                                                  :controller => 'fg/packing_instructions_fg_line_item',
                                                  :target_action => 'create_multi_fg_line_items',
                                                  :link_text => "create fg line items",
-                                                 :id_value => packing_instruction.id
+                                                 :id_value => packing_instruction.id,
+                                                 :window_height => 1000,
+                                                 :window_width => 1800,
                                              }}
 
     field_configs[field_configs.length()] = {:field_type => 'Screen',
