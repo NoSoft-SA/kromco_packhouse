@@ -40,6 +40,7 @@ module Fg::PackingInstructionHelper
             :field_name => 'remarks'}
 
     #field_configs[field_configs.length()] = {:field_type => 'LabelField', :field_name => 'du', :non_db_field => true, :settings => {:is_separator => false, :static_value => '', :css_class => "borderless_label_field"}}
+    if packing_instruction
     field_configs[field_configs.length()] = {:field_type => 'LinkWindowField',
                                              :field_name => '',
                                              :settings => {
@@ -50,6 +51,7 @@ module Fg::PackingInstructionHelper
                                                  :window_height => 1000,
                                                  :window_width => 1800,
                                              }}
+    end
 
     field_configs[field_configs.length()] = {:field_type => 'Screen',
                                              :field_name => "child_form3",
