@@ -1,7 +1,7 @@
 class Fg::PackingInstructionsBinLineItemController < ApplicationController
 
   def program_name?
-    "order"
+    "packing_instruction"
   end
 
   def bypass_generic_security?

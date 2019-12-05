@@ -1,7 +1,7 @@
 class  Fg::PackingInstructionController < ApplicationController
 
 def program_name?
-  "order"
+  "packing_instruction"
 end
 
 def bypass_generic_security?
@@ -137,10 +137,11 @@ def create_packing_instruction
    @packing_instruction.packing_instruction_code = create_packing_instruction_code
    if @packing_instruction.save
      set_active_doc("pi",@packing_instruction.id)
+
      render :inline => %{<script>
                           alert('packing instruction created');
                           window.close();
-                         window.parent.opener.frames[1].location.href = '/fg/packing_instruction/list_packing_instructions';
+                         window.parent.opener.frames[1].location.href = '/fg/packing_instruction/edit_packing_instruction';
                         </script>}, :layout=>"content"
   else
     @is_create_retry = true
