@@ -21,9 +21,9 @@ class ProcessGradingRuleFile
 
   def call
     if @object_type == "cartons"
-      csv_file_headers_order, csv_file_lines, csv_file_name_first_part, difference, required_cols_order,receivers,pods,pod_receivers,pod_and_receivers,pod_receiver_hash,customers = process_carton_grading_csv_file
+      csv_file_headers_order, csv_file_lines, csv_file_name_first_part, difference, required_cols_order,receivers,required_col_names = process_carton_grading_csv_file
     elsif @object_type == "rebins"
-      csv_file_headers_order, csv_file_lines, csv_file_name_first_part, difference, required_cols_order,receivers,pods,pod_receivers,pod_and_receivers,pod_receiver_hash,customers = process_csv_file
+      csv_file_headers_order, csv_file_lines, csv_file_name_first_part, difference, required_cols_order,receivers,required_col_names = process_csv_file
     end
     return "File must contain columns in the following order and naming:<br> #{required_cols_order.join(',')}" if !difference.empty?
 
@@ -39,15 +39,16 @@ class ProcessGradingRuleFile
 
     store_csv_file(file_name,csv_file_lines.join(','))
 
-    apply_grading_rules(csv_file_headers_order, csv_file_lines, file_name.split("/").last, required_cols_order)
+
+    apply_grading_rules(csv_file_headers_order, csv_file_lines, file_name.split("/").last, required_cols_order,required_col_names)
 
     return @carton_grading_rule_header.id.to_i
   end
 
-  def apply_grading_rules(csv_file_headers_order, csv_file_lines, file_name, required_cols_order)
+  def apply_grading_rules(csv_file_headers_order, csv_file_lines, file_name, required_cols_order,required_col_names)
     ActiveRecord::Base.transaction do
     deactive_active_rule
-    create_carton_grading_rules(csv_file_lines,required_cols_order,file_name)
+    create_carton_grading_rules(csv_file_lines,required_cols_order,file_name,required_col_names)
     end
   end
 
@@ -59,7 +60,7 @@ class ProcessGradingRuleFile
     where activated = true;")
   end
 
-  def create_carton_grading_rules(csv_file_lines,required_cols_order,file_name)
+  def create_carton_grading_rules(csv_file_lines,required_cols_order,file_name,required_col_names)
     num_of_cols = required_cols_order.length
     @carton_grading_rule_header = CartonGradingRuleHeader.new(
         :deactivated => false,
@@ -75,23 +76,20 @@ class ProcessGradingRuleFile
     csv_file_lines.each do |line|
       ctn_grading_rule_col_values = []
       for i in 0..num_of_cols-1
-        ctn_grading_rule_col_values << "'#{line[i]}'"
+        ctn_grading_rule_col_values << "'#{line[i].gsub(/'/,'').gsub(/`/,'')}'"
       end
       vlues
       if !vlues.include?(ctn_grading_rule_col_values.join(','))
       ActiveRecord::Base.connection.execute("
       INSERT INTO carton_grading_rules(carton_grading_rule_header_id,activated_at,activated,created_by,activated_by,created_at,
-                                       #{required_cols_order.join(',')})
+                                       #{required_col_names.join(',')})
                                 VALUES(#{@carton_grading_rule_header.id},'#{Time.now}',true,'#{@user_name}','#{@user_name}','#{Time.now}',
                                        #{ctn_grading_rule_col_values.join(',')})
                                  ")
         end
       vlues << ctn_grading_rule_col_values.join(',')
     end
-
-
   end
-
 
   def validate_file(csv_file_lines)
     comparison_array = []
@@ -110,7 +108,7 @@ class ProcessGradingRuleFile
       errors <<  "File contains duplicate records:<br>"
     end
 
-   sizes   = ActiveRecord::Base.connection.select_all("select distinct actual_count from item_pack_products where actual_count in (#{new_sizes.uniq.join(',')})").map{|x|x['actual_count']}
+   sizes   = ActiveRecord::Base.connection.select_all("select distinct standard_size_count_value from item_pack_products where standard_size_count_value in (#{new_sizes.uniq.join(',')})").map{|x|x['standard_size_count_value']}
 
     #classes = ActiveRecord::Base.connection.select_all("select product_class_code from product_classes where product_class_code in (#{new_classes.uniq.join(',')})").map{|x|x['product_class_code']}
     invalid_classes = []
@@ -140,7 +138,7 @@ class ProcessGradingRuleFile
     @csv_file_configs = YAML.load(File.read("#{Globals.get_grading_csv_file_configs_folder}/carton_grading_rule_file_configs.yml"))
 
 
-    csv_file,  csv_file_name_first_part, required_cols_order = get_csv_file_configs()
+    csv_file,  csv_file_name_first_part, required_cols_order,required_col_names = get_csv_file_configs()
 
 
     csv_file_headers_order, csv_file_lines, qry= get_csv_file_headers_order(csv_file)
@@ -149,7 +147,7 @@ class ProcessGradingRuleFile
 
     #verify if column order is correct
     difference = verify_file_columns_order(required_cols_order, csv_file_headers_order, true)
-    return csv_file_headers_order, csv_file_lines, csv_file_name_first_part, difference, required_cols_order, qry
+    return csv_file_headers_order, csv_file_lines, csv_file_name_first_part, difference, required_cols_order, qry,required_col_names
   end
 
   def get_csv_file_configs()
@@ -159,10 +157,14 @@ class ProcessGradingRuleFile
 
 
     required_cols_order = @csv_file_configs['grading_criteria']['required_columns'].split(',')
+    required_col_names = []
+    required_cols_order.each do |col|
+      required_col_names << @csv_file_configs['grading_criteria']['field_name_mappings'][col]
+    end
     primary_look_up_field = @csv_file_configs['grading_criteria']['primary_look_up_field'].split(',')
     @primary_look_up_field_index = get_primary_look_up_field_index(required_cols_order, primary_look_up_field)
     @total_required_columns = @csv_file_configs['grading_criteria']['total_required_columns']
-    return csv_file,  csv_file_name_first_part, required_cols_order
+    return csv_file,  csv_file_name_first_part, required_cols_order,required_col_names
   end
 
   def get_csv_file_headers_order(csv_file)
@@ -174,13 +176,13 @@ class ProcessGradingRuleFile
     if csv_file.respond_to? :tempfile
       CSV.foreach(csv_file.tempfile) do |line|
         csv_file_lines << line #.inspect
-        qry << "pgc.actual_size_count_code ='#{line[0]}'AND pgc.variety_short_long = '#{line[1]}'
+        qry << "pgc.standard_size_count_value ='#{line[0]}'AND pgc.variety_short_long = '#{line[1]}'
          AND pgc.grade_code = '#{line[2]}' AND pgc.line_type = '#{line[3]}' AND pgf.track_slms_indicator_code = '#{line[4]}' "
       end
     else
       CSV.parse(csv_file.read).each do |line|
         csv_file_lines << line #.inspect
-         qry << "pgc.actual_size_count_code ='#{line[0]}'AND pgc.variety_short_long = '#{line[1]}'
+         qry << "pgc.standard_size_count_value ='#{line[0]}'AND pgc.variety_short_long = '#{line[1]}'
          AND pgc.grade_code = '#{line[2]}' AND pgc.line_type = '#{line[3]}' AND pgf.track_slms_indicator_code = '#{line[4]}' "
       end
     end
