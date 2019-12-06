@@ -94,15 +94,17 @@ class  RmtProcessing::GrowerGradingController < ApplicationController
     #  unmatched_ctns_num
 
 
-    # # ----------------
+
+    # ----------------
     updated_all =[]
     active_rules.each do |rule|
       updated= []
 
       matched_cartons = pool_graded_cartons.find_all{|a|
-        a['actual_size_count_code']==rule['size'] &&
-        a['variety_short_long']==rule['variety']  && a['grade_code']==rule['grade'] && a['line_type']==rule['line_type'] &&
-        a['season']==rule['season_code'] &&  a['track_slms_indicator_code']==rule['track_slms_indicator_code'] &&
+        a['standard_size_count_value']==rule['standard_size_count_value'] &&
+        a['variety_short_long'].gsub(/'/,'').gsub(/`/,'')==rule['variety'].gsub(/'/,'').gsub(/`/,'') &&
+        a['grade_code']==rule['grade'] && a['line_type']==rule['line_type'] &&
+        a['season_code']==rule['season'] &&  a['track_slms_indicator_code']==rule['track_slms_indicator_code'] &&
         a['carton_grading_rule_id'].to_s != rule['id'].to_s}
       rule_cartons[rule] = matched_cartons if !matched_cartons.empty?
 
@@ -125,7 +127,7 @@ class  RmtProcessing::GrowerGradingController < ApplicationController
 
   def get_active_rules
     active_rules = ActiveRecord::Base.connection.select_all("
-    select distinct s.season_code as season,cgr.size,cgr.grade,cgr.variety,cgr.track_slms_indicator_code,
+    select distinct s.season_code as season,cgr.standard_size_count_value,cgr.grade,cgr.variety,cgr.track_slms_indicator_code,
      cgr.line_type,cgr.updated_by,cgr.updated_at,cgr.deactivated_at,cgr.activated,cgr.class as clasi,cgr.id as carton_grading_rule_id,
      cgr.id,cgr.new_class,cgr.new_size,cgr.deactivated ,cgrh.activated as is_active_header,cgr.created_at,cgr.created_by
      from carton_grading_rule_headers cgrh
@@ -612,7 +614,7 @@ class  RmtProcessing::GrowerGradingController < ApplicationController
 
   def get_cartons_where_rule_has_already_been_applied(pool_graded_cartons, rule, updated_all)
     updated = pool_graded_cartons.find_all { |a|
-      a['actual_size_count_code'] == rule['size'] &&
+      a['standard_size_count_value'] == rule['standard_size_count_value'] &&
           a['variety_short_long'] == rule['variety'] && a['grade_code'] == rule['grade'] && a['line_type'] == rule['line_type'] &&
           a['season'] == rule['season_code'] && a['track_slms_indicator_code'] == rule['track_slms_indicator_code'] &&
           a['carton_grading_rule_id'].to_s == rule['id'].to_s }

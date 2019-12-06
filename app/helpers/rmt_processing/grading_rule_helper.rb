@@ -2,14 +2,10 @@ module RmtProcessing::GradingRuleHelper
 
   def build_carton_grading_rule_form(grading_rule, action, caption, is_edit = nil, is_new = nil)
     field_configs = Array.new
-    sizes      = ActiveRecord::Base.connection.select_all("select size_code from sizes").map{|x|x['size_code']}
-    grades     = ActiveRecord::Base.connection.select_all("select grade_code from grades").map{|x|x['grade_code']}
-    #varieties  = ActiveRecord::Base.connection.select_all("select distinct variety_short_long from cartons").map{|x|x['variety_short_long']}
-    #line_types = ActiveRecord::Base.connection.select_all("select distinct line_code from cartons").map{|x|x['line_code']}
-    #classes    = ActiveRecord::Base.connection.select_all("select product_class_code from product_classes").map{|x|x['product_class_code']}
-
+    sizes      = ActiveRecord::Base.connection.select_all("select distinct standard_size_count_value from item_pack_products order by standard_size_count_value  ").map{|x|x['standard_size_count_value'].to_i}
+    grades     = ActiveRecord::Base.connection.select_all("select grade_code from grades order by grade_code ").map{|x|x['grade_code']}
     varieties  = ActiveRecord::Base.connection.select_all("select marketing_variety_code,marketing_variety_description from marketing_varieties
-                                             ").map{|b|b['marketing_variety_code'] + "_" + b['marketing_variety_description']}
+                                             order by marketing_variety_code,marketing_variety_description").map{|b|b['marketing_variety_code'] + "_" + b['marketing_variety_description']}
     line_types = ["","Primary Line","Secondary Line"]
 
 
@@ -17,7 +13,8 @@ module RmtProcessing::GradingRuleHelper
 
     field_configs[field_configs.length()] = {:field_type=>'LabelField', :field_name=>'season'} if is_edit
     field_configs[field_configs.length()] = {:field_type=>'LabelField', :field_name=>'track_slms_indicator_code'} if is_edit
-    field_configs[field_configs.length()] = {:field_type=>'DropDownField', :field_name=>'size', :settings=>{:list=>sizes,:show_label=>true}}
+    field_configs[field_configs.length()] = {:field_type=>'DropDownField',:field_name=>'standard_size_count_value',
+                                             :settings=>{:list=>sizes,:show_label=>true ,:label_caption => 'std size'}}
     field_configs[field_configs.length()] = {:field_type=>'DropDownField', :field_name=>'grade', :settings=>{:list=>grades,:show_label=>true}}
     field_configs[field_configs.length()] = {:field_type=>'DropDownField', :field_name=>'variety', :settings=>{:list=>varieties,:show_label=>true}}
     field_configs[field_configs.length()] = {:field_type=>'DropDownField', :field_name=>'line_type', :settings=>{:list=>line_types,:show_label=>true}}
@@ -48,7 +45,7 @@ module RmtProcessing::GradingRuleHelper
     column_configs << {:field_type => 'text',:field_name => 'file_name' ,:col_width=>200}
     column_configs << {:field_type => 'text',:field_name => 'season' ,:col_width=>70}
     column_configs << {:field_type => 'text',:field_name => 'track_slms_indicator_code' ,:col_width=>130}
-    column_configs << {:field_type => 'text',:field_name => 'size' ,:col_width=>60}
+    column_configs << {:field_type => 'text',:field_name => 'standard_size_count_value' ,:column_caption=>'std_size',:col_width=>60}
     column_configs << {:field_type => 'text',:field_name => 'grade' ,:col_width=>60}
     column_configs << {:field_type => 'text',:field_name => 'variety' ,:col_width=>120}
     column_configs << {:field_type => 'text',:field_name => 'line_type' ,:col_width=>100}

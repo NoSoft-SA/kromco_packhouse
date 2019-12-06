@@ -47,7 +47,7 @@ class  RmtProcessing::GradingRuleController < ApplicationController
                     grade     = '#{params[:grading_rule]['grade']}'     and
                     variety   = '#{params[:grading_rule]['variety']}'   and
                     line_type = '#{params[:grading_rule]['line_type']}' and
-                    size      = '#{params[:grading_rule]['size']}'      and
+                    standard_size_count_value      = '#{params[:grading_rule]['standard_size_count_value']}'      and
                     --product_class_code is null and
                     carton_grading_rule_header_id = #{session[:active_doc]['rule_header']} and
                     track_slms_indicator_code     = '#{params[:grading_rule]['track_slms_indicator_code']}'
@@ -76,7 +76,7 @@ class  RmtProcessing::GradingRuleController < ApplicationController
                                            :product_class_code => params[:grading_rule]['product_class_code'],
                                            :variety => params[:grading_rule]['variety'],
                                            :line_type => params[:grading_rule]['line_type'],
-                                           :size => params[:grading_rule]['size'],
+                                           :standard_size_count_value => params[:grading_rule]['standard_size_count_value'],
                                            :carton_grading_rule_header_id => session[:active_doc]['rule_header'],
                                            :created_by =>  "'#{session[:user_id]['user_name']}'" ,
                                            :created_at => "'#{Time.now}'" ,
@@ -131,7 +131,7 @@ class  RmtProcessing::GradingRuleController < ApplicationController
                                            :product_class_code => params[:grading_rule]['product_class_code'],
                                            :variety => params[:grading_rule]['variety'],
                                            :line_type => params[:grading_rule]['line_type'],
-                                           :size => params[:grading_rule]['size'])
+                                           :standard_size_count_value => params[:grading_rule]['standard_size_count_value'])
           @grading_rule
           flash[:notice] = 'record saved'
           render :inline => %{<script>
@@ -280,7 +280,7 @@ class  RmtProcessing::GradingRuleController < ApplicationController
   end
 
   def grading_rule_sql(condition=nil)
-    grading_rule_sql = "select cgrh.file_name,s.season_code as season,cgr.size,cgr.grade,cgr.variety,cgr.track_slms_indicator_code,
+    grading_rule_sql = "select cgrh.file_name,s.season_code as season,cgr.standard_size_count_value,cgr.grade,cgr.variety,cgr.track_slms_indicator_code,
      cgr.line_type,cgr.updated_by,cgr.updated_at,cgr.deactivated_at,cgr.activated,cgr.product_class_code,
      cgr.id,cgr.new_class,cgr.new_size,cgr.deactivated ,cgrh.activated as is_active_header,cgr.created_at,cgr.created_by
      ,cgr.deactivated_by ,cgr.activated_by,cgr.activated_at,cgr.class,cgr.class as product_class_code

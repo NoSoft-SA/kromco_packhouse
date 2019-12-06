@@ -69,7 +69,8 @@ class PoolGradedCarton < ActiveRecord::Base
   # Create PoolGradedCarton instances and associate them with PoolGradedSummary.
   def self.make_cartons( pool_graded_summary, cartons )
     cartons.each do |carton|
-      pool_graded_carton = PoolGradedCarton.new(:actual_size_count_code => carton.actual_size_count_code,
+      pool_graded_carton = PoolGradedCarton.new(
+                                   :actual_size_count_code => carton.actual_size_count_code,
                                    :product_class_code     => carton.product_class_code,
                                    :fg_code_old            => carton.fg_code_old,
                                    :variety_short_long     => carton.variety_short_long,
@@ -86,7 +87,8 @@ class PoolGradedCarton < ActiveRecord::Base
                                    :graded_class           => carton.product_class_code[/\d/], # Grab the first digit in the string, else nil
                                    :qty_not_inspected      => carton.cartons_quantity.to_i - carton.qty_inspected.to_i,
                                    :qty_inspected          => carton.qty_inspected,
-                                   :qty_failed             => carton.qty_failed
+                                   :qty_failed             => carton.qty_failed,
+                                   :standard_size_count_value =>  carton.standard_size_count_value
                                   )
       pool_graded_summary.pool_graded_cartons << pool_graded_carton
     end
