@@ -283,7 +283,7 @@ class  RmtProcessing::GradingRuleController < ApplicationController
     grading_rule_sql = "select cgrh.file_name,s.season_code as season,cgr.standard_size_count_value,cgr.grade,cgr.variety,cgr.track_slms_indicator_code,
      cgr.line_type,cgr.updated_by,cgr.updated_at,cgr.deactivated_at,cgr.activated,cgr.product_class_code,
      cgr.id,cgr.new_class,cgr.new_size,cgr.deactivated ,cgrh.activated as is_active_header,cgr.created_at,cgr.created_by
-     ,cgr.deactivated_by ,cgr.activated_by,cgr.activated_at,cgr.class,cgr.class as product_class_code
+     ,cgr.deactivated_by ,cgr.activated_by,cgr.activated_at,cgr.class,cgr.class as product_class_code,cgr.commodity_code
      from carton_grading_rule_headers cgrh
      join carton_grading_rules cgr on cgr.carton_grading_rule_header_id = cgrh.id
      join seasons s on cgrh.season_id = s.id #{condition}"

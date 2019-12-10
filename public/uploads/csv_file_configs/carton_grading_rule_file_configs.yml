@@ -1,15 +1,16 @@
 grading_criteria:
    primary_look_up_field: size
    model_name: PoolGradingSummary
-   required_columns: std_size,grade,variety,line_type,track_slms_indicator_code,new_size,new_class
+   required_columns: std_size,grade,variety,line_type,track_slms_indicator_code,commodity,new_size,new_class
    csv_header_lines: 0
-   total_required_columns: 7
+   total_required_columns: 8
    field_name_mappings:
       std_size:  standard_size_count_value
       grade: grade
       variety: variety
       line_type: line_type
       track_slms_indicator_code: track_slms_indicator_code
+      commodity: commodity_code
       new_size: new_size
       new_class: new_class
 

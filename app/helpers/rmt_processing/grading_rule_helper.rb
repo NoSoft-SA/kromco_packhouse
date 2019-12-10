@@ -4,8 +4,8 @@ module RmtProcessing::GradingRuleHelper
     field_configs = Array.new
     sizes      = ActiveRecord::Base.connection.select_all("select distinct standard_size_count_value from item_pack_products order by standard_size_count_value  ").map{|x|x['standard_size_count_value'].to_i}
     grades     = ActiveRecord::Base.connection.select_all("select grade_code from grades order by grade_code ").map{|x|x['grade_code']}
-    varieties  = ActiveRecord::Base.connection.select_all("select marketing_variety_code,marketing_variety_description from marketing_varieties
-                                             order by marketing_variety_code,marketing_variety_description").map{|b|b['marketing_variety_code'] + "_" + b['marketing_variety_description']}
+    varieties  = ActiveRecord::Base.connection.select_all("select distinct  marketing_variety_code from item_pack_products
+                                             order by marketing_variety_code").map{|b|b['marketing_variety_code']}
     line_types = ["","Primary Line","Secondary Line"]
 
 
@@ -18,7 +18,6 @@ module RmtProcessing::GradingRuleHelper
     field_configs[field_configs.length()] = {:field_type=>'DropDownField', :field_name=>'grade', :settings=>{:list=>grades,:show_label=>true}}
     field_configs[field_configs.length()] = {:field_type=>'DropDownField', :field_name=>'variety', :settings=>{:list=>varieties,:show_label=>true}}
     field_configs[field_configs.length()] = {:field_type=>'DropDownField', :field_name=>'line_type', :settings=>{:list=>line_types,:show_label=>true}}
-    #field_configs[field_configs.length()] = {:field_type=>'DropDownField', :field_name=>'product_class_code', :settings=>{ :label_caption=> "class",:list=>classes,:show_label=>true}}
     field_configs[field_configs.length()] = {:field_type=>'TextField',:hide => true, :field_name=>'track_slms_indicator_code'} if is_new
     field_configs[field_configs.length()] = {:field_type=>'TextField', :field_name=>'new_class'}
     field_configs[field_configs.length()] = {:field_type=>'TextField', :field_name=>'new_size'}
@@ -49,6 +48,7 @@ module RmtProcessing::GradingRuleHelper
     column_configs << {:field_type => 'text',:field_name => 'grade' ,:col_width=>60}
     column_configs << {:field_type => 'text',:field_name => 'variety' ,:col_width=>120}
     column_configs << {:field_type => 'text',:field_name => 'line_type' ,:col_width=>100}
+    column_configs << {:field_type => 'text',:field_name => 'commodity_code' ,:column_caption=>'commodity',:col_width=>100}
     column_configs << {:field_type => 'text',:field_name => 'new_class' ,:col_width=>80}
     column_configs << {:field_type => 'text',:field_name => 'new_size' ,:col_width=>80}
     # column_configs << {:field_type => 'text',:field_name => 'class' ,:column_caption=>'class',:col_width=>70}
