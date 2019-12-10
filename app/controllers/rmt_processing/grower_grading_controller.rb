@@ -35,6 +35,7 @@ class  RmtProcessing::GrowerGradingController < ApplicationController
   def apply_grading_rules(rule_cartons)
     @pool_graded_summary = PoolGradedSummary.find(params[:id])
     changed = {}
+    carton_nums = []
     PoolGradedSummary.transaction do
       rule_cartons.each do |rule,cartons|
         ActiveRecord::Base.connection.execute("
@@ -43,13 +44,16 @@ class  RmtProcessing::GrowerGradingController < ApplicationController
          rule_applied_by = '#{session[:user_id].user_name}'
          where id in (#{cartons.map{|x|x['id']}.join(',')})")
         changed[cartons.map{|x|x['id']}.join(",")] = [rule['new_class'],rule['new_size']]
+        cartons.each do |c|
+          carton_nums << c['id'] if !carton_nums.include?(c['id'])
+        end
       end
       changed
     end
     num_of_rules = rule_cartons.length
     render :inline=>%{
       <script>
-        alert("#{num_of_rules}:  rules applied");
+        alert("#{num_of_rules}:  rules applied to #{carton_nums.length} cartons");
         window.opener.frames[1].location.href ='/rmt_processing/grower_grading/edit_pool_graded_summary/#{@pool_graded_summary.id}';
         window.close();
       </script>
