@@ -58,10 +58,15 @@ class  RmtProcessing::GrowerGradingController < ApplicationController
 
   def get_matched_cartons
     pool_graded_cartons = ActiveRecord::Base.connection.select_all("
-              select distinct pgs.season_code,pgf.track_slms_indicator_code,pgc.*
-              from pool_graded_summaries pgs
-              left join pool_graded_farms pgf on pgf.pool_graded_summary_id = pgs.id
-              join pool_graded_cartons pgc on pgc.pool_graded_summary_id = pgs.id
+         select distinct item_pack_products.marketing_variety_code,pgs.season_code,pgf.track_slms_indicator_code,pgc.*
+        from pool_graded_summaries pgs
+        left join pool_graded_farms pgf on pgf.pool_graded_summary_id = pgs.id
+        join pool_graded_cartons pgc on pgc.pool_graded_summary_id = pgs.id
+        join production_runs pr on pgs.production_run_id = pr.id
+        join cartons on cartons.production_run_code=pr.production_run_code
+        join extended_fgs on extended_fgs.extended_fg_code=cartons.extended_fg_code
+        join fg_products on fg_products.fg_product_code =extended_fgs.fg_code
+        join item_pack_products on item_pack_products.item_pack_product_code = fg_products.item_pack_product_code
               where pgs.id = #{params[:id]}")
     active_rules = get_active_rules
     rule_cartons = {}
@@ -102,7 +107,7 @@ class  RmtProcessing::GrowerGradingController < ApplicationController
 
       matched_cartons = pool_graded_cartons.find_all{|a|
         a['standard_size_count_value']==rule['standard_size_count_value'] &&
-        a['variety_short_long'].gsub(/'/,'').gsub(/`/,'')==rule['variety'].gsub(/'/,'').gsub(/`/,'') &&
+        a['marketing_variety_code'].gsub(/'/,'').gsub(/`/,'')==rule['variety'].gsub(/'/,'').gsub(/`/,'') &&
         a['grade_code']==rule['grade'] && a['line_type']==rule['line_type'] &&
         a['season_code']==rule['season'] &&  a['track_slms_indicator_code']==rule['track_slms_indicator_code'] &&
         a['carton_grading_rule_id'].to_s != rule['id'].to_s}
