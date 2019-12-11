@@ -34,8 +34,11 @@ class  RmtProcessing::GrowerGradingController < ApplicationController
 
   def apply_grading_rules(rule_cartons)
     @pool_graded_summary = PoolGradedSummary.find(params[:id])
+    pool_graded_cartons = ActiveRecord::Base.connection.select_one("select count(distinct id ) as num_of_ctns from pool_graded_cartons
+                         where pool_graded_summary_id= #{params[:id]}")['num_of_ctns']
     changed = {}
-    carton_nums = []
+    updated_carton_nums = []
+    rules = []
     PoolGradedSummary.transaction do
       rule_cartons.each do |rule,cartons|
         ActiveRecord::Base.connection.execute("
@@ -45,15 +48,20 @@ class  RmtProcessing::GrowerGradingController < ApplicationController
          where id in (#{cartons.map{|x|x['id']}.join(',')})")
         changed[cartons.map{|x|x['id']}.join(",")] = [rule['new_class'],rule['new_size']]
         cartons.each do |c|
-          carton_nums << c['id'] if !carton_nums.include?(c['id'])
+          updated_carton_nums << c['id'] if !updated_carton_nums.include?(c['id'])
         end
+        rules << rule['id'] if !rules.include?(rule['id'])
       end
       changed
     end
-    flash[:notice] = "No rules applied" if rule_cartons.length ==0
-
+     if updated_carton_nums.length < pool_graded_cartons.to_i
+       msg = "#{updated_carton_nums.length} cartons updated out of #{pool_graded_cartons}"
+     else
+       msg = "updated"
+     end
     render :inline=>%{
       <script>
+        alert("#{msg}");
         window.opener.frames[1].location.href ='/rmt_processing/grower_grading/edit_pool_graded_summary/#{@pool_graded_summary.id}';
         window.close();
       </script>
@@ -377,7 +385,7 @@ class  RmtProcessing::GrowerGradingController < ApplicationController
     #                                                 fg_code_old, variety_short_long, grade_code, line_type')
     #
     @pool_graded_cartons = PoolGradedCarton.find_by_sql("select (DATE(rule_applied_at) -  DATE(updated_at)) as auto_rule_age ,* from pool_graded_cartons where  pool_graded_summary_id =#{@pool_graded_summary.id}
-                           order by actual_size_count_code, product_class_code,fg_code_old, variety_short_long, grade_code, line_type")
+                           order by actual_size_count_code,standard_size_count_value, product_class_code,fg_code_old, variety_short_long, grade_code, line_type")
     @summary = {}
     @pool_graded_cartons.each do |carton|
       key = "#{carton.organization_code}, #{carton.grade_code}"

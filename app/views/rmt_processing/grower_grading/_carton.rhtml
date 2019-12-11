@@ -7,6 +7,7 @@
     <%= carton.actual_size_count_code %>
     <%= hidden_field_tag "cartons[#{key_id}][grading_applied]", carton.grading_applied %>
   </td>
+  <td>carton.standard_size_count_value</td>
   <td id="carton_gsize_<%=key_id%>" class="<%=  %>">
     <span style="display:none"><%= carton.graded_size %></span>
     <%= text_field_tag "cartons[#{key_id}][graded_size]", carton.graded_size, :size => 3 %>
@@ -40,6 +41,7 @@
       <%= carton.actual_size_count_code %>
       <%= hidden_field_tag "cartons[#{key_id}][grading_applied]", carton.grading_applied %>
     </td>
+    <td><%= carton.standard_size_count_value %></td>
     <td id="carton_gsize_<%=key_id%>" class="<%=  %>">
       <span style="display:none"><%= carton.graded_size %></span>
       <%= text_field_tag "cartons[#{key_id}][graded_size]", carton.graded_size, :size => 3 %>
