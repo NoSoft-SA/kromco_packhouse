@@ -31,6 +31,7 @@ class PoolGradedCarton < ActiveRecord::Base
 
   def self.get_cartons( production_run_code)
     query = " SELECT cartons.actual_size_count_code, cartons.product_class_code, cartons.fg_code_old,
+             item_pack_products.marketing_variety_code,
              cartons.variety_short_long, cartons.grade_code, cartons.old_pack_code, cartons.organization_code,
              cartons.inspection_type_code, cartons.target_market_code, cartons.inventory_code,
              item_pack_products.standard_size_count_value,
