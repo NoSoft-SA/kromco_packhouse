@@ -16,6 +16,63 @@ class Production::RunsController < ApplicationController
     true
   end
 
+  def bin_order_line_item_changed
+    bin_order_line_item=session[:bin_order_line_item].find_all { |p| p['id'].to_i==get_selected_combo_value(params).to_i }[0]
+
+    @treatment_codes =[[bin_order_line_item['treatment_code'],bin_order_line_item['treatment_id'].to_i]]
+    @size_codes = [[bin_order_line_item['size_code'],bin_order_line_item['size_id'].to_i]]
+    @track_indicator_codes =[ [bin_order_line_item['track_slms_indicator_code'],bin_order_line_item['track_slms_indicator_id'].to_i]]
+    @product_classes = [[bin_order_line_item['product_class_code'],bin_order_line_item['product_class_id'].to_i]]
+    #@ripe_point_codes = [session[:bin_order_line_item]['ripe_point_code'],session[:bin_order_line_item]['ripe_point_id']]
+
+    session[:bin_order_line_item]
+    render :inline => %{
+    <%= treatment_content = select('production_run','treatment_id',@treatment_codes)%>
+    <%= size_content =select('production_run','size_id',@size_codes)%>
+    <%= product_class_content =select('production_run','product_class_id',@product_classes)%>
+    <%= track_indicator_codes_content =select('production_run','track_indicator_id',@track_indicator_codes)%>
+
+    <script>
+    <%= update_element_function(
+    "size_id_cell", :action => :update,
+    :content => size_content) %>
+
+    <%= update_element_function(
+    "product_class_id_cell", :action => :update,
+    :content => product_class_content) %>
+
+    <%= update_element_function(
+    "treatment_id_cell", :action => :update,
+    :content => treatment_content) %>
+
+    </script>
+    }
+
+    # <%= update_element_function(
+    # "track_indicator_id_cell", :action => :update,
+    #     :content => track_indicator_codes_content) %>
+
+
+  end
+
+  def packing_instruction_changed
+    if get_selected_combo_value(params)
+      bin_line_item_query = PackingInstructionsBinLineItem.bin_line_item_list_query("where pi.id = #{get_selected_combo_value(params)}")
+      bin_line_items = ActiveRecord::Base.connection.select_all(bin_line_item_query)
+      @bin_line_items = bin_line_items.map{|x|[x['bin_line_item_code'],x['id']]}
+      @bin_line_items.unshift("<empty>")
+      session[:bin_order_line_item] = bin_line_items
+    else
+      @bin_line_items = []
+    end
+
+    render :inline => %{
+    <%= select('production_run','bin_order_line_item_id',@bin_line_items)%>
+    <%= refresh_combo_observer_no_img('production_run_bin_order_line_item_id', 'treatment_id_cell', 'bin_order_line_item_changed') %>
+    }
+
+  end
+
   def active_schedules
     render :inline => %{
     <% @content_header_caption = "'Select Packing Instruction'"%>
@@ -181,7 +238,7 @@ class Production::RunsController < ApplicationController
     end
 
     render :inline => %{
-    <%= select('production_run','line_code',@farm_codes)%>
+    <%= select('production_run','farm_code',@farm_codes)%>
 
 		}
   end
@@ -962,11 +1019,10 @@ class Production::RunsController < ApplicationController
       edit_run_details and return
     end
 
-    packing_instruction_id = PackingInstruction.find_by_packing_instruction_code(params[:production_run]['packing_instruction_id']).id if params[:production_run]['packing_instruction_id']
-    params['production_run']['packing_instruction_id'] = nil  if !packing_instruction_id
-    params['production_run']['packing_instruction_id'] = packing_instruction_id if packing_instruction_id
+    # packing_instruction_id = PackingInstruction.find_by_packing_instruction_code(params[:production_run]['packing_instruction_id']).id if params[:production_run]['packing_instruction_id']
+    # params['production_run']['packing_instruction_id'] = nil  if !packing_instruction_id
+    # params['production_run']['packing_instruction_id'] = packing_instruction_id if packing_instruction_id
 
-    packing_instruction_id
 
     #params['production_run'][:rmt_product_type_id]=RmtProductType.find_by_rmt_product_type_code(@production_run.production_schedule.rmt_setup.rmt_product.rmt_product_type_code).id
     #params['production_run'][:commodity_id]= Commodity.find_by_commodity_code(@production_run.production_schedule.rmt_setup.commodity_code).id
@@ -1488,7 +1544,9 @@ class Production::RunsController < ApplicationController
 
       list_query =
           "select
-      production_runs.*,pc_codes.pc_name , treatments.treatment_code,sizes.size_code,ripe_points.ripe_point_code,track_indicators.track_indicator_code,product_classes.product_class_code
+      production_runs.*,pc_codes.pc_name , treatments.treatment_code,sizes.size_code,ripe_points.ripe_point_code
+     ,track_indicators.track_indicator_code,product_classes.product_class_code,production_schedules.variety_code,
+     c.commodity_code
       from production_runs
       left join ripe_points on ripe_points.id=production_runs.ripe_point_id
       left join  pc_codes on  ripe_points.pc_code_id=pc_codes.id
@@ -1496,6 +1554,9 @@ class Production::RunsController < ApplicationController
       left join  sizes on sizes.id= production_runs.size_id
       left join  track_indicators on  track_indicators.id = production_runs.track_indicator_id
       left join  product_classes  on  product_classes.id= production_runs.product_class_id
+      left join varieties v on v.id  = production_runs.variety_id
+      left join commodities c on c.id = production_runs.commodity_id
+      join production_schedules on production_runs.production_schedule_id = production_schedules.id
       where  production_runs.production_schedule_id= #{@schedule.id.to_s} and (production_run_status=\'configuring\' or production_run_status=\'reconfiguring\' or production_run_status=\'restored\' ) "
 
       session[:query]="ActiveRecord::Base.connection.select_all(\"#{list_query}\")"
@@ -2322,7 +2383,7 @@ class Production::RunsController < ApplicationController
 
   def create_production_run
     @production_run = ProductionRun.new(params[:production_run])
-    packing_instruction_id = PackingInstruction.find_by_packing_instruction_code(params[:production_run]['packing_instruction_id']).id if params[:production_run]['packing_instruction_id']
+    #packing_instruction_id = PackingInstruction.find_by_packing_instruction_code(params[:production_run]['packing_instruction_id']).id if params[:production_run]['packing_instruction_id']
 
 
    error =validate_production_run_details_params(@production_run.line_code, params['production_run'])
@@ -2364,13 +2425,14 @@ class Production::RunsController < ApplicationController
 
         end
 
-        @production_run.packing_instruction_id = packing_instruction_id
+        #@production_run.packing_instruction_id = packing_instruction_id
         @production_run.production_run_status = "configuring"
         if @production_run.save
           session[:current_production_run]= @production_run
           @production_run.set_status("configuring", session[:user_id])
           flash[:notice] = "new run created successfully"
-          render_list_production_schedules
+          params[:id] = session[:current_closed_schedule]['id']
+          editing_runs
         else
           @is_create_retry = true
           render_new_production_run(session[:current_closed_schedule])

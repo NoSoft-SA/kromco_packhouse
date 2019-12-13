@@ -95,7 +95,7 @@ def delete_packing_instruction
   return if authorise_for_web(program_name?,'delete')== false
   if params[:page]
     session[:packing_instructions_page] = params['page']
-    render_list_packing_instructions
+    list_packing_instructions
     return
   end
   id = params[:id]
@@ -108,11 +108,11 @@ def delete_packing_instruction
                      where packing_instruction_id = #{id}")['items']
     if bin_line_items.to_i > 0 || fg_line_items.to_i > 0
       session[:alert] = ' Record cannot be deleted. bin line items and fg line items are depended on it. Delete them first'
-      render_list_packing_instructions
+      list_packing_instructions
     else
       packing_instruction.destroy
       session[:alert] = ' Record deleted.'
-      render_list_packing_instructions
+      list_packing_instructions
     end
   end
   rescue

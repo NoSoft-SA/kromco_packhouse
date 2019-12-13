@@ -292,18 +292,20 @@ class FgSetup < ActiveRecord::Base
      (public.carton_setups.production_schedule_code = '#{run.production_schedule_name}') AND
      (public.carton_setups.grade_code = '#{grade}') AND 
      (public.pack_groups.production_run_id = '#{run.id}') AND
-     ((public.pack_group_outlets.outlet1 = '#{drop_code}') OR
-     (public.pack_group_outlets.outlet2 =  '#{drop_code}') OR
-     (public.pack_group_outlets.outlet3 = '#{drop_code}') OR
-     (public.pack_group_outlets.outlet4 = '#{drop_code}') OR
-     (public.pack_group_outlets.outlet5 = '#{drop_code}') OR
-     (public.pack_group_outlets.outlet6 = '#{drop_code}') OR
-     (public.pack_group_outlets.outlet7 = '#{drop_code}') OR
-     (public.pack_group_outlets.outlet8 = '#{drop_code}') OR
-     (public.pack_group_outlets.outlet9 = '#{drop_code}') OR
-    (public.pack_group_outlets.outlet10 = '#{drop_code}') OR
+     (
+      (public.pack_group_outlets.outlet1 = '#{drop_code}') OR
+      (public.pack_group_outlets.outlet2 =  '#{drop_code}') OR
+      (public.pack_group_outlets.outlet3 = '#{drop_code}') OR
+      (public.pack_group_outlets.outlet4 = '#{drop_code}') OR
+      (public.pack_group_outlets.outlet5 = '#{drop_code}') OR
+      (public.pack_group_outlets.outlet6 = '#{drop_code}') OR
+      (public.pack_group_outlets.outlet7 = '#{drop_code}') OR
+      (public.pack_group_outlets.outlet8 = '#{drop_code}') OR
+      (public.pack_group_outlets.outlet9 = '#{drop_code}') OR
+      (public.pack_group_outlets.outlet10 = '#{drop_code}') OR
       (public.pack_group_outlets.outlet11 = '#{drop_code}') OR
-     (public.pack_group_outlets.outlet12 = '#{drop_code}'))"
+      (public.pack_group_outlets.outlet12 = '#{drop_code}')
+    )"
 
       return FgSetup.find_by_sql(query)
 	

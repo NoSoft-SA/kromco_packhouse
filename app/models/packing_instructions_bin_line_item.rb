@@ -13,12 +13,12 @@ class PackingInstructionsBinLineItem < ActiveRecord::Base
   belongs_to :size
   belongs_to :track_slms_indicator
 
-  def after_save
-    if self.new_record?
-      self.bin_line_item_code = calc_bin_line_item_code
-      self.update
-    end
-  end
+  # def after_save
+  #   if self.new_record?
+  #     self.bin_line_item_code = calc_bin_line_item_code
+  #     self.update
+  #   end
+  # end
 
   def calc_bin_line_item_code
     bin_line_item_query = PackingInstructionsBinLineItem.bin_line_item_list_query("where pibli.id = #{self.id}")

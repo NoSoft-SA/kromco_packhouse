@@ -199,7 +199,17 @@ class Fg::PackingInstructionsFgLineItemController < ApplicationController
   end
 
   def unlink_packing_instructions_fg_line_item
-
+    #linked_fgs = get_linked_fg_setups(params[:id])
+     ActiveRecord::Base.connection.execute("update packing_instructions_fg_line_items
+     set packing_instruction_bin_line_item_id = null
+     where id = #{params[:id]} ")
+     render :inline =>
+                %{
+            "<script>
+                 alert("fg_line_items unlinked");
+                 window.location.href= "/fg/packing_instructions_fg_line_item/render_related_fg_line_items/<%=#{session[:active_doc]['fg_line_item_id']}.to_s%>";
+             </script>"
+     }, :layout => "content"
   end
 
   def submit_selected_fg_line_items

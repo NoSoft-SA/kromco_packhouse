@@ -50,7 +50,7 @@ module Fg::PackingInstructionsBinLineItemHelper
                           :remote_method => 'refresh_track_slms_indicator',
                           :on_completed_js => combos_js_for_commodity["packing_instructions_bin_line_item_commodity_id"]}
 
-    combos_js_for_variety = gen_combos_clear_js_for_combos(["packing_instructions_bin_line_item_variety", "packing_instructions_bin_line_item_variety_id"])
+    combos_js_for_variety = gen_combos_clear_js_for_combos(["packing_instructions_bin_line_item_variety_id", "packing_instructions_bin_line_item_variety_id"])
     variety_observer = {:updated_field_id => "treatment_id_cell",
                           :remote_method => 'variety_changed',
                           :on_completed_js => combos_js_for_variety["packing_instructions_bin_line_item_variety_id"]}

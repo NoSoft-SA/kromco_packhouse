@@ -228,7 +228,7 @@ end
 #  define action columns
 #  ----------------------
    grid_command = nil
-   if !multi_select
+   if multi_select != "submit_selected_fg_line_items"
    grid_command =    {:field_type=>'link_window_field',:field_name =>'packing_instructions_fg_line_item',
                       :settings =>
                           {
@@ -238,25 +238,24 @@ end
                               :link_text => 'new_packing_instructions_fg_line_item',
                               :id_value=>'id'
                           }}
-  if can_edit
-    action_configs << {:field_type => 'link_window',:field_name => 'edit packing_instructions_fg_line_item',
-      :column_caption => 'Edit',
-      :settings =>
-         {:link_text => 'edit',
-        :link_icon => 'edit',
-        :target_action => 'edit_packing_instructions_fg_line_item',
-        :id_column => 'id'}}
-  end
 
-  if can_delete
-    action_configs << {:field_type => 'action',:field_name => 'delete packing_instructions_fg_line_item',
+      action_configs << {:field_type => 'link_window',:field_name => 'edit packing_instructions_fg_line_item',
+        :column_caption => 'Edit',
+        :settings =>
+           {:link_text => 'edit',
+          :link_icon => 'edit',
+          :target_action => 'edit_packing_instructions_fg_line_item',
+          :id_column => 'id'}} if can_edit
+
+
+   action_configs << {:field_type => 'action',:field_name => 'delete packing_instructions_fg_line_item',
       :column_caption => 'Delete',
       :settings =>
          {:link_text => 'delete',
         :link_icon => 'delete',
         :target_action => 'delete_packing_instructions_fg_line_item',
-        :id_column => 'id'}}
-  end
+        :id_column => 'id'}} if can_delete
+
    column_configs << {:field_type => 'action_collection', :field_name => 'actions', :settings => {:actions => action_configs}} unless action_configs.empty?
 
    column_configs << {:field_type => 'link_window',:field_name => 'fg_setup_for_packing_instructions_lines',
@@ -267,13 +266,14 @@ end
                            :target_action => 'list_fg_setup_for_packing_instructions_lines',
                            :id_column => 'id'}}
    else
-     # action_configs << {:field_type => 'action',:field_name => 'unlink',
-     #                    :column_caption => 'Unlink',
-     #                    :settings =>
-     #                        {:link_text => 'unlink',
-     #                         :link_icon => 'delete',
-     #                         :target_action => 'unlink_packing_instructions_fg_line_item',
-     #                         :id_column => 'id'}}
+     column_configs << {:field_type => 'action',:field_name => 'unlink',
+                        :column_caption => 'Unlink',
+                        :settings =>
+                            {:link_text => 'unlink',
+                             :link_icon => 'delete',
+                             :target_action => 'unlink_packing_instructions_fg_line_item',
+                             :id_column => 'id',
+                             :null_test => "['packing_instruction_bin_line_item_id'] == nil "}}
 
     end
 

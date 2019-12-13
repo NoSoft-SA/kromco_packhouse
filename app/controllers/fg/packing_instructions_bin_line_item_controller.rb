@@ -364,7 +364,8 @@ class Fg::PackingInstructionsBinLineItemController < ApplicationController
     @packing_instructions_bin_line_item = PackingInstructionsBinLineItem.new(params[:packing_instructions_bin_line_item])
     @packing_instructions_bin_line_item.packing_instruction_id = session[:active_doc]['pi']
     if @packing_instructions_bin_line_item.save
-
+      @packing_instructions_bin_line_item.bin_line_item_code = @packing_instructions_bin_line_item.calc_bin_line_item_code
+      @packing_instructions_bin_line_item.update
       render :inline =>
                  %{
             "<script>
@@ -396,20 +397,19 @@ class Fg::PackingInstructionsBinLineItemController < ApplicationController
     return if authorise_for_web(program_name?, 'edit') == false
     id = params[:id]
 
-    production_runs = ActiveRecord::Base.connection.select_one("
-                      select count(id) as runs from production_runs where bin_order_line_item_id = #{id}")['runs']
-    if production_runs.to_i > 0
-      #flash[:notice] = "Line item is referenced by a run"
-      render :inline => %{
-                          <script>
-                          alert("Line item is cannot be edited, it is referenced by a run");
-                          window.close();
-                        </script>} and return
-    else
+    # production_runs = ActiveRecord::Base.connection.select_one("
+    #                   select count(id) as runs from production_runs where bin_order_line_item_id = #{id}")['runs']
+    # if production_runs.to_i > 0
+    #   render :inline => %{
+    #                       <script>
+    #                       alert("Line item is cannot be edited, it is referenced by a run");
+    #                       window.close();
+    #                     </script>} and return
+    # else
       if id && @packing_instructions_bin_line_item = PackingInstructionsBinLineItem.find(id)
         render_edit_packing_instructions_bin_line_item
       end
-    end
+    # end
 
   end
 
@@ -424,19 +424,50 @@ class Fg::PackingInstructionsBinLineItemController < ApplicationController
     }, :layout => 'content'
   end
 
+  def get_chnged_fields
+    error = nil
+    if @packing_instructions_bin_line_item.size_id != params[:packing_instructions_bin_line_item]['size_id'] ||
+       @packing_instructions_bin_line_item.product_class_id != params[:packing_instructions_bin_line_item]['product_class_id'] ||
+       @packing_instructions_bin_line_item.treatment_id != params[:packing_instructions_bin_line_item]['treatment_id']
+       error = "You cannot change size,product_class or treatment; they are referenced by a production run"
+    end
+  end
+
+  def get_production_runs
+    production_runs = ActiveRecord::Base.connection.select_one("select COUNT(distinct id) as runs from production_runs
+                       where bin_order_line_item_id= #{@packing_instructions_bin_line_item.id}")['runs']
+  end
+
   def update_packing_instructions_bin_line_item
     id = params[:packing_instructions_bin_line_item][:id]
     if id && @packing_instructions_bin_line_item = PackingInstructionsBinLineItem.find(id)
-      if @packing_instructions_bin_line_item.update_attributes(params[:packing_instructions_bin_line_item])
-        pi = @packing_instructions_bin_line_item.packing_instruction_id
-        render :inline => %{
+       production_runs = get_production_runs
+       changed_msg = get_chnged_fields if production_runs.to_i > 0
+       if changed_msg
+         flash[:notice] = changed_msg
+         render :inline => %{
+                          <script>
+                          alert("#{changed_msg}");
+                          window.close();
+                        </script>} and return
+         render :inline => %{
                           <script>
                           window.close();
                          window.parent.opener.frames[0].location.href = '/fg/packing_instructions_bin_line_item/list_packing_instructions_bin_line_items';
                         </script>} and return
-      else
-        render_edit_packing_instructions_bin_line_item
-      end
+       else
+         if @packing_instructions_bin_line_item.update_attributes(params[:packing_instructions_bin_line_item])
+           bin_line_item_code = @packing_instructions_bin_line_item.calc_bin_line_item_code
+           @packing_instructions_bin_line_item.update if bin_line_item_code != @packing_instructions_bin_line_item.bin_line_item_code
+           render :inline => %{
+                          <script>
+                          window.close();
+                         window.parent.opener.frames[0].location.href = '/fg/packing_instructions_bin_line_item/list_packing_instructions_bin_line_items';
+                        </script>} and return
+         else
+           render_edit_packing_instructions_bin_line_item
+         end
+       end
     end
   rescue
     handle_error('record could not be saved')

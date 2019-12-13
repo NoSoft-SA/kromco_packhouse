@@ -5,7 +5,7 @@ module Production::RunsHelper
     field_configs[field_configs.length()] = {:field_type => 'LabelField', :field_name => 'edi_docs', :non_db_field => true, :settings => {:non_db_field => true, :static_value => "Packing Instruction is optional, you can click submit and continue without it", :show_label => false}}
 
     packing_instruction_codes = ActiveRecord::Base.connection.select_all("select packing_instruction_code , id  from packing_instructions order by id desc limit 20").map{|s|s['packing_instruction_code']}
-    field_configs[field_configs.length()] = {:field_type=>'LabelField', :field_name=>'suggested packing_instruction_codes',
+    field_configs[field_configs.length()] = {:field_type=>'LabelField', :field_name=>'suggested_packing_instruction_codes',
                                              :non_db_field=>true,
                                              :settings=>{:static_value=>packing_instruction_codes.join("<BR>"), :show_label=>true,
                                                          :cols=> 25}}
@@ -548,21 +548,14 @@ end
    session[:production_run_form]= Hash.new
    lines = Line.lines_for_packhouse(Facility.active_pack_house.facility_code)
 
-   combos_js_for_lines = gen_combos_clear_js_for_combos(["production_run_line_code","production_run_farm_code"])
-   lines_observer  = {:updated_field_id => "farm_code_cell",
-                     :remote_method => 'production_line_code_changed',
-                     :on_completed_js => combos_js_for_lines["production_run_line_code"]}
+   farm_observer, lines_observer, packing_instruction_observer,bin_order_line_item_observer = get_production_run_form_observers
+   bin_line_items = []
+   bin_line_item_query = PackingInstructionsBinLineItem.bin_line_item_list_query("where pi.id = #{production_run.packing_instruction_id}") if production_run && production_run.packing_instruction_id
+   bin_line_item_query = PackingInstructionsBinLineItem.bin_line_item_list_query if !production_run
+   bin_line_items = ActiveRecord::Base.connection.select_all(bin_line_item_query).map{|x|[x['bin_line_item_code'],x['id']]} if bin_line_item_query
 
-   combos_js = gen_combos_clear_js_for_combos(["production_run_farm_code","production_run_parent_run_code"])
-
-	#Observers for combos representing the key fields of fkey table: carton_setup_id
-	farm_observer  = {:updated_field_id => "parent_run_code_cell",
-					 :remote_method => 'production_run_farm_code_changed',
-					 :on_completed_js => combos_js["production_run_farm_code"]}
-
-
-	farm_codes = FarmGroup.find_by_farm_group_code(schedule.farm_group_code).farms.map{|f|f.farm_code}
-	farm_codes.unshift "<empty>"
+   farm_codes = FarmGroup.find_by_farm_group_code(schedule.farm_group_code).farms.map{|f|f.farm_code}
+	 farm_codes.unshift "<empty>"
 
    farm_code = "like '%'"
    farm_code = "= '" + production_run.farm_code + "'" if production_run && production_run.farm_code
@@ -586,20 +579,72 @@ end
     production_run.production_schedule_name = schedule.production_schedule_name
 
    field_configs = Array.new
-   field_configs[0] = {:field_type => 'LabelField',
+   field_configs << {:field_type => 'LabelField',
 						:field_name => 'production_schedule_name'}
 
-  field_configs[1] = {:field_type => 'LabelField',
+  field_configs << {:field_type => 'LabelField',
 						:field_name => 'production_run_code'}
 
+   if !production_run
+     packing_instruction_codes = PackingInstruction.get_run_packing_instruction_codes.map{|s|s['packing_instruction_code']}
+     #TODO :packing_instruction_codes with a condition
+     packing_instruction_codes = PackingInstruction.get_run_packing_instruction_codes("where ps.id = #{schedule['id']}") if schedule
+     packing_instruction_codes_list  = packing_instruction_codes.map { |s| [s['packing_instruction_code'], s['packing_instruction_id']] }
+     packing_instruction_codes_string = packing_instruction_codes.map { |s| s['packing_instruction_code'] }.join(",") if !packing_instruction_codes.empty?
+
+     field_configs[field_configs.length()] = {:field_type=>'LabelField', :field_name=>'suggested_packing_instruction_codes',
+                                              :non_db_field=>true,
+                                              :settings=>{:non_db_field=>true,:static_value=>packing_instruction_codes_string, :show_label=>true,
+                                                          :cols=> 25}}
+     # field_configs << {:field_type => 'TextField',
+     #                   :field_name => 'packing_instruction_id',
+     #                   :settings => {:label_caption=>'packing instruction code',:show_label=>true}
+     # }
+     field_configs <<  {:field_type => 'DropDownField',
+                        :field_name => 'packing_instruction_id',
+                        :settings => {:label_caption => 'packing instruction code',:list => packing_instruction_codes_list},:observer=> lines_observer}
+
+   else
+     packing_instruction_codes = PackingInstruction.get_run_packing_instruction_codes
+     #TODO :packing_instruction_codes with a condition
+     #packing_instruction_codes = PackingInstruction.get_run_packing_instruction_codes("where ps.id = #{schedule['id']}") if schedule
+     packing_instruction_code_list = packing_instruction_codes.map{ |s| [s['packing_instruction_code'], s['packing_instruction_id']] }
+     packing_instruction_codes_string = packing_instruction_codes.map{ |s| s['packing_instruction_code'] }.join(",") if !packing_instruction_codes.empty?
+     production_run['suggested_packing_instruction_codes'] = nil
+     field_configs[field_configs.length()] = {:field_type=>'LabelField', :field_name=>'suggested_packing_instruction_codes',
+                                              :non_db_field=>true,
+                                              :settings=>{:non_db_field=>true,:static_value=>packing_instruction_codes_string, :show_label=>true,
+                                                          :cols=> 25}}
+
+     packing_instruction_code = PackingInstruction.find(production_run.packing_instruction_id).packing_instruction_code if production_run && production_run.packing_instruction_id
+
+     # production_run['packing_instruction_id'] = packing_instruction_code
+     # field_configs << {:field_type => 'TextField',
+     #                   :field_name => 'packing_instruction_id',
+     #                   :settings => {:label_caption=>'packing instruction code',
+     #                                 :show_label=>true,:lookup => true,
+     #                                 :default_values => packing_instruction_code
+     #                   }}
+
+     field_configs <<  {:field_type => 'DropDownField',
+                        :field_name => 'packing_instruction_id',
+                        :settings => {:label_caption => 'packing instruction code',:list => packing_instruction_code_list},
+                        :observer=> packing_instruction_observer}
+
+     field_configs <<  {:field_type => 'DropDownField',
+                        :field_name => 'bin_order_line_item_id',
+                        :settings => {:label_caption => 'bin order line item',:list => bin_line_items},:observer => bin_order_line_item_observer}
+
+   end
+
   if production_run.new_record?
-   field_configs[2] =  {:field_type => 'DropDownField',
+   field_configs <<  {:field_type => 'DropDownField',
 						:field_name => 'line_code?required',
 						:settings => {:list => lines},:observer=> lines_observer}
 
 
   else
-   field_configs[2] = {:field_type => 'LabelField',
+   field_configs << {:field_type => 'LabelField',
 						:field_name => 'line_code?required'}
 
   end
@@ -662,6 +707,8 @@ end
    field_configs[field_configs.length()] =  {:field_type => 'DropDownField',
 						:field_name => 'parent_run_code',
 						:settings => {:list => parent_runs}}
+
+
 
    field_configs << {:field_type => 'LabelField',
                      :field_name => 'rmt_product_type_id?',
@@ -788,36 +835,7 @@ end
 
 
    end
-   if !production_run
-   packing_instruction_codes = PackingInstruction.get_run_packing_instruction_codes("where ps.id = #{schedule['id']}").map{|s|s['packing_instruction_code']} if schedule
-   packing_instruction_codes = packing_instruction_codes.join(",") if !packing_instruction_codes.empty?
-   field_configs[field_configs.length()] = {:field_type=>'LabelField', :field_name=>'suggested packing_instruction_codes',
-                                            :non_db_field=>true,
-                                            :settings=>{:static_value=>packing_instruction_codes, :show_label=>true,
-                                                        :cols=> 25}}
-   field_configs << {:field_type => 'TextField',
-                     :field_name => 'packing_instruction_id',
-                     :settings => {:label_caption=>'packing instruction code',:show_label=>true}
-   }
-   else
-     packing_instruction_codes = PackingInstruction.get_run_packing_instruction_codes("where ps.id = #{schedule['id']}").map{|s|s['packing_instruction_code']} if schedule
-     packing_instruction_codes = packing_instruction_codes.join(",") if !packing_instruction_codes.empty?
-     field_configs[field_configs.length()] = {:field_type=>'LabelField', :field_name=>'suggested packing_instruction_codes',
-                                              :non_db_field=>true,
-                                              :settings=>{:static_value=>packing_instruction_codes, :show_label=>true,
-                                                          :cols=> 25}}
 
-     packing_instruction_code = PackingInstruction.find(production_run.packing_instruction_id).packing_instruction_code if production_run && production_run.packing_instruction_id
-
-     production_run['packing_instruction_id'] = packing_instruction_code
-     field_configs << {:field_type => 'TextField',
-                       :field_name => 'packing_instruction_id',
-                       :settings => {:label_caption=>'packing instruction code',
-                                     :show_label=>true,:lookup => true,
-                                     :default_values => packing_instruction_code
-                       }}
-
-   end
 
 
   @production_run = production_run if ! @production_run
@@ -828,8 +846,6 @@ end
 
 
  def build_new_template_form(action,caption,template_names_list,active_template = nil)
-
-
 
     on_complete_js = "\n img = document.getElementById('img_templ_template_names');"
 	on_complete_js += "\n if(img != null)img.style.display = 'none';"
@@ -964,7 +980,7 @@ end
   treatment_code=Treatment.find_by_sql("select  id,treatment_code from treatments where id = #{run.treatment_id} ")[0].treatment_code  if run.treatment_id
   size_code=Size.find_by_sql("select id,size_code  from sizes where id = #{run.size_id}")[0].size_code  if run.size_id
   ripe_point_code=RipePoint.find_by_sql("select   id,ripe_point_code from ripe_points where id = #{run.ripe_point_id}")[0].ripe_point_code  if run.ripe_point_id
-  track_indicator_code = TrackIndicator.find_by_sql("select  id,track_indicator_code from track_indicators where id = #{run.track_indicator_id} ")[0].track_indicator_code  if run.track_indicator_id
+  track_indicator_code = TrackIndicator.find_by_sql("select  id,track_indicator_code from track_indicators where id = #{run.track_indicator_id} ")[0].track_indicator_code  if run && run.track_indicator_id
   product_class_code=ProductClass.find_by_sql("select distinct product_classes.id,product_classes.product_class_code from product_classes   where id = #{run.product_class_id}")[0].product_class_code if   run.product_class_id
 
   field_configs << {:field_type => 'LabelField',
@@ -1605,14 +1621,16 @@ def build_production_run_grid(data_set,can_edit,is_active_runs_grid = nil,run_ty
 
 	column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'production_run_code',:col_width => 162}
   column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'rank',:editor => :text,:col_width =>50}  if editing_runs
-  column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'puc_code',:col_width => 70}
-  column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'farm_code',:col_width => 60}
-  column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'pc_code'}
-  column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'treatment_code'}
-  column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'size_code',}
-  column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'ripe_point_code'}
-  column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'product_class_code'}
-  column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'track_indicator_code'}
+  column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'puc_code',:column_caption=>'puc',:col_width => 50}
+  column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'farm_code',:column_caption=>'farm',:col_width => 60}
+  column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'pc_code',:col_width => 70}
+  column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'commodity_code',:column_caption=>'commodity',:col_width => 90}
+  column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'variety_code',:column_caption=>'variety',:col_width =>70 }
+  column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'size_code',:column_caption=>'size',:col_width =>50}
+  column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'product_class_code',:column_caption=>'class',:col_width =>70}
+  column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'treatment_code',:column_caption=>'treatment',:col_width =>70}
+  column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'track_indicator_code',:column_caption=>'track_indicator',:col_width =>100}
+  column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'ripe_point_code',:column_caption=>'ripe_point'}
   column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'parent_run_code',:column_caption => "parent",:col_width => 162}
   column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'child_run_code',:column_caption => "child",:col_width => 162}
 	column_configs[column_configs.length()] = {:field_type => 'text',:field_name => 'account_code',:col_width => 70}
@@ -2247,6 +2265,33 @@ end
 
 end
 
+
+  def get_production_run_form_observers
+    combos_js_for_lines = gen_combos_clear_js_for_combos(["production_run_line_code", "production_run_farm_code"])
+    lines_observer = {:updated_field_id => "farm_code_cell",
+                      :remote_method => 'production_line_code_changed',
+                      :on_completed_js => combos_js_for_lines["production_run_line_code"]}
+
+    combos_js = gen_combos_clear_js_for_combos(["production_run_farm_code", "production_run_parent_run_code"])
+
+    farm_observer = {:updated_field_id => "parent_run_code_cell",
+                     :remote_method => 'production_run_farm_code_changed',
+                     :on_completed_js => combos_js["production_run_farm_code"]}
+
+    combos_js_for_packing_instruction = gen_combos_clear_js_for_combos(["production_run_packing_instruction_id", "production_run_bin_order_line_item_id"])
+    packing_instruction_observer = {:updated_field_id => "bin_order_line_item_id_cell",
+                      :remote_method => 'packing_instruction_changed',
+                      :on_completed_js => combos_js_for_packing_instruction["production_run_packing_instruction_id"]}
+
+    combos_js_for_bin_order_line_item = gen_combos_clear_js_for_combos(["production_run_bin_order_line_item", "production_run_treatment_id"])
+    bin_order_line_item_observer = {:updated_field_id => "treatment_id_cell",
+                                   :remote_method => 'bin_order_line_item_changed',
+                                   :on_completed_js => combos_js_for_bin_order_line_item["production_run_bin_order_line_item"]}
+
+
+
+    return farm_observer, lines_observer, packing_instruction_observer,bin_order_line_item_observer
+  end
 
 
 end
