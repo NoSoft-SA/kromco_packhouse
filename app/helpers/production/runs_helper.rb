@@ -585,6 +585,7 @@ end
   field_configs << {:field_type => 'LabelField',
 						:field_name => 'production_run_code'}
 
+   packing_instruction_codes_list = []
    if !production_run
      packing_instruction_codes = PackingInstruction.get_run_packing_instruction_codes.map{|s|s['packing_instruction_code']}
      #TODO :packing_instruction_codes with a condition
@@ -596,13 +597,15 @@ end
                                               :non_db_field=>true,
                                               :settings=>{:non_db_field=>true,:static_value=>packing_instruction_codes_string, :show_label=>true,
                                                           :cols=> 25}}
-     # field_configs << {:field_type => 'TextField',
-     #                   :field_name => 'packing_instruction_id',
-     #                   :settings => {:label_caption=>'packing instruction code',:show_label=>true}
-     # }
+
+     bin_line_items = []  if packing_instruction_codes_list.empty?
      field_configs <<  {:field_type => 'DropDownField',
                         :field_name => 'packing_instruction_id',
                         :settings => {:label_caption => 'packing instruction code',:list => packing_instruction_codes_list},:observer=> lines_observer}
+
+     field_configs <<  {:field_type => 'DropDownField',
+                        :field_name => 'bin_order_line_item_id',
+                        :settings => {:label_caption => 'bin order line item',:list => bin_line_items},:observer => bin_order_line_item_observer}
 
    else
      packing_instruction_codes = PackingInstruction.get_run_packing_instruction_codes
@@ -616,21 +619,12 @@ end
                                               :settings=>{:non_db_field=>true,:static_value=>packing_instruction_codes_string, :show_label=>true,
                                                           :cols=> 25}}
 
-     packing_instruction_code = PackingInstruction.find(production_run.packing_instruction_id).packing_instruction_code if production_run && production_run.packing_instruction_id
-
-     # production_run['packing_instruction_id'] = packing_instruction_code
-     # field_configs << {:field_type => 'TextField',
-     #                   :field_name => 'packing_instruction_id',
-     #                   :settings => {:label_caption=>'packing instruction code',
-     #                                 :show_label=>true,:lookup => true,
-     #                                 :default_values => packing_instruction_code
-     #                   }}
-
      field_configs <<  {:field_type => 'DropDownField',
                         :field_name => 'packing_instruction_id',
                         :settings => {:label_caption => 'packing instruction code',:list => packing_instruction_code_list},
                         :observer=> packing_instruction_observer}
 
+     bin_line_items = []  if packing_instruction_codes_list.empty?
      field_configs <<  {:field_type => 'DropDownField',
                         :field_name => 'bin_order_line_item_id',
                         :settings => {:label_caption => 'bin order line item',:list => bin_line_items},:observer => bin_order_line_item_observer}
@@ -708,8 +702,6 @@ end
 						:field_name => 'parent_run_code',
 						:settings => {:list => parent_runs}}
 
-
-
    field_configs << {:field_type => 'LabelField',
                      :field_name => 'rmt_product_type_id?',
                      :settings => {:static_value=> rmt_product_type_code,:label_caption=>'rmt product type code',:show_label=>true}}
@@ -736,18 +728,6 @@ end
        field_configs << {:field_type => 'DropDownField',
                          :field_name => 'ripe_point_id',
                          :settings => {:list =>ripe_point_codes,:label_caption=>'ripe point code'},:observer => ripe_point_code_observer}
-       #if pc_code
-       #
-       #  field_configs << {:field_type => 'LabelField',
-       #                    :field_name => 'pc_code_id',
-       #                    :settings => {:label_caption=>'pc code',:static_value=> pc_code,:show_label=>true}}
-       #else
-       #
-       #  field_configs << {:field_type => 'LabelField',
-       #                    :field_name => 'pc_code_id',
-       #                    :settings => {:label_caption=>'pc code'}}
-       #end
-
 
        field_configs << {:field_type => 'DropDownField',
                          :field_name => 'pc_code_id',
