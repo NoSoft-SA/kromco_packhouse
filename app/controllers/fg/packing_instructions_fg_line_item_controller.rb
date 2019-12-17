@@ -378,7 +378,7 @@ class Fg::PackingInstructionsFgLineItemController < ApplicationController
     selected_fg_setups = selected_records?(session[:fg_setups], nil, true)
     remove_fg_line_item_fg_setups(selected_fg_setups)
     fg_setup_for_packing_instructions_lines
-    @add = true
+    @add = nil
     session[:alert] = "fg setup removed"
     render_fg_setup_grid
   end
@@ -396,7 +396,6 @@ class Fg::PackingInstructionsFgLineItemController < ApplicationController
     create_fg_line_item_fg_setups(selected_fg_setups)
     session[:fg_setups]
     render :inline => %{<script>
-                             //window.location.href= "/rmt_processing/bin_load/edit_order_load/<%=@bin_load_id.to_s%>";
                               window.close();
                               window.opener.location.reload(true);
                             </script>}
@@ -416,6 +415,7 @@ class Fg::PackingInstructionsFgLineItemController < ApplicationController
     set_active_doc("fg_line_item", params[:id])
     fg_setup_for_packing_instructions_lines
     @add = true
+    @grid_caption = "'Linked Fg Setups'"
     render_fg_setup_grid
   end
 
@@ -434,13 +434,14 @@ class Fg::PackingInstructionsFgLineItemController < ApplicationController
     fg_setups_where_clause = get_fg_setup_where_clause(fg_line_item)
     get_fg_setups(fg_setups_where_clause)
     @add = true
+    @grid_caption = "'Select Fg Setups'"
     render_list_fg_setup_grid
   end
 
   def render_list_fg_setup_grid
     render :inline => %{
     <% grid = build_list_fg_setup_grid(@fg_setups,@can_edit,@can_delete,@add)%>
-    <% grid.caption = 'fg setups'%>
+    <% grid.caption = @grid_caption %>
     <% @header_content = grid.build_grid_data %>
     <%= grid.render_html %>
     <%= grid.render_grid %>
@@ -451,7 +452,7 @@ class Fg::PackingInstructionsFgLineItemController < ApplicationController
   def render_fg_setup_grid
     render :inline => %{
     <% grid = build_fg_setup_grid(@fg_setups,@can_edit,@can_delete,@add)%>
-    <% grid.caption = 'fg setups'%>
+    <% grid.caption = @grid_caption%>
     <% @header_content = grid.build_grid_data %>
     <%= grid.render_html %>
     <%= grid.render_grid %>
