@@ -18,6 +18,23 @@ class Location < ActiveRecord::Base
 #	============================
   validates_presence_of :location_code
 
+  def Location.check_location_status(location_barcode)
+    location_status= Location.find_by_sql("select locations.location_status from locations
+                                          where location_barcode='#{location_barcode}' and location_code like '%CA%' ")
+    if !location_status.empty?
+      location_status=location_status[0].location_status
+      if location_status && location_status.upcase.index("SEALED")
+        return  location_status
+      elsif location_status && location_status.upcase.index("GAS")
+        return  location_status
+      else
+        return nil
+      end
+    else
+      return nil
+    end
+  end
+
 
   def Location.get_spaces_in_location(location,scanned_bins)
     spaces_left = ActiveRecord::Base.connection.select_one("

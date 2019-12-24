@@ -59,7 +59,13 @@ class BinPutawayScanning < PDTTransactionState
     bin = get_bin_type_and_frit_spec("bins.bin_number = '#{@bin_number}' ") if @parent.scanned_bins.length == 1
 
 
+
     get_locations if bin && @parent.scanned_bins.length == 1
+
+    if !@parent.location_code
+      return render_select_location_state
+    else
+
 
     @parent.spaces_left = Location.get_spaces_in_location(@parent.location_code, @parent.scanned_bins.length) if @parent.location_code
 
@@ -94,7 +100,7 @@ class BinPutawayScanning < PDTTransactionState
       @parent.error_str = "inadequate space."
       return render_select_location_state
     end
-
+end
     end
 
     process_scanned_bins
@@ -114,17 +120,21 @@ class BinPutawayScanning < PDTTransactionState
 
   def match_existing_bins
     bin = get_bin_type_and_frit_spec("bins.bin_number = '#{@bin_number}' ")
-      error = []
-      error << " Scanned bin is of different stock type.Undo and scan another bin"  if @parent.bin_fruit_spec['stock_type'] != bin['stock_type_code']
-      error <<  "Scanned bin is of different commodity.Undo and scan another bin" if @parent.bin_fruit_spec['commodity'] != bin['commodity_code']
-      error <<  "Scanned bin is of different variety.Undo and scan another bin" if @parent.bin_fruit_spec['variety'] != bin['variety_code']
-      error <<  "Scanned bin is of different size.Undo and scan another bin" if @parent.bin_fruit_spec['size'] != bin['size_code']
-      error <<  "Scanned bin is of different class.Undo and scan another bin" if @parent.bin_fruit_spec['class'] != bin['product_class_code']
-      error <<  "Scanned bin is of different treatment.Undo and scan another bin" if @parent.bin_fruit_spec['treatment'] != bin['treatment_code']
-      error <<  "Scanned bin is of different farm.Undo and scan another bin" if (@parent.bin_fruit_spec['farm'] != bin['farm_code']) && (@parent.bin_fruit_spec['farm'] && bin['farm_code'])
-      error <<  "Scanned bin is of different track_indicator_code.Undo and scan another bin" if @parent.bin_fruit_spec['track_indicator1_id'] != bin['track_indicator1_id']
+    error = []
 
-    return error.join(",") if !error.empty?
+    error << " stock_type"  if @parent.bin_fruit_spec['stock_type'] != bin['stock_type_code']
+    error <<  "commodity" if @parent.bin_fruit_spec['commodity_code'] != bin['commodity_code']
+    error <<  "variety" if @parent.bin_fruit_spec['variety_code'] != bin['variety_code']
+    error <<  "size" if @parent.bin_fruit_spec['size_code'] != bin['size_code']
+    error <<  "class" if @parent.bin_fruit_spec['product_class_code'] != bin['product_class_code']
+    error <<  "treatment" if @parent.bin_fruit_spec['treatment_code'] != bin['treatment_code']
+    error <<  "farm" if (@parent.bin_fruit_spec['farm_code'] != bin['farm_code']) && (@parent.bin_fruit_spec['farm'] && bin['farm_code'])
+    error <<  "track_indicator_code" if @parent.bin_fruit_spec['track_indicator1_id'] != bin['track_indicator1_id']
+
+    error.unshift("Scanned bin is of different: ") if !error.empty?
+    error.push("UNDO and Scan another bin. ") if !error.empty?
+
+    return error.join("<BR>") if !error.empty?
     return nil if error.empty?
    end
 
@@ -176,7 +186,7 @@ class BinPutawayScanning < PDTTransactionState
     location = ActiveRecord::Base.connection.select_one("
                   select * from (
                   select distinct l.location_code , l.id  as location_id,l.updated_at,
-                  units_in_location,location_maximum_units,l.loading_out,l.location_code,
+                  units_in_location,location_maximum_units,l.loading_out,l.location_code,l.location_barcode,
                   case
                   when units_in_location=location_maximum_units then '100'
                   when units_in_location=0 then '1'
@@ -209,10 +219,27 @@ class BinPutawayScanning < PDTTransactionState
                                                         ")
 
           @parent.error_str = "no matched location" if !location
+          location_status(location) if location
 
-    return location
 
- end
+  end
+
+  def location_status(location)
+    location_status = Location.check_location_status(location.location_barcode)
+    if  location_status  != nil
+      if location_status == "SEALED"
+        error = "Location is SEALED "
+      elsif location_status == "GAS"
+        error = "Location status:GAS "
+      end
+      if error
+        @parent.error_str  = error
+        return render_select_location_state
+      else
+        return location
+      end
+    end
+  end
 
   def get_bin_type_and_frit_spec(where_clause)
     bin = ActiveRecord::Base.connection.select_all("

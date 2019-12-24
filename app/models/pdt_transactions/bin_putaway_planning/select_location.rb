@@ -28,22 +28,15 @@ class SelectLocation < PDTTransactionState
       return result_screen
     end
 
-    if location.loading_out
-      result_screen = PDTTransaction.build_msg_screen_definition("Location is loading_out.Scan another one.", nil, nil, nil)
-      return result_screen
-    end
-
-    @parent.location_code = location.location_code
-    @parent.location_id = location.id
-
-    @parent.spaces_left = Location.get_spaces_in_location(@parent.location_code, @parent.scanned_bins.length) if @parent.location_code
-
-    error = validate_location
-
+    error = validate_location(location)
     if error
       result_screen = PDTTransaction.build_msg_screen_definition(error, nil, nil, nil)
       return result_screen
     else
+      @parent.location_code = location.location_code
+      @parent.location_id = location.id
+      @parent.spaces_left = Location.get_spaces_in_location(@parent.location_code, @parent.scanned_bins.length) if @parent.location_code
+
       self.parent.clear_active_state
       next_state = BinPutawayScanning.new(@parent)
       self.parent.set_active_state(next_state)
@@ -53,7 +46,7 @@ class SelectLocation < PDTTransactionState
 
   end
 
-  def validate_location
+  def validate_location(location)
     scanned_parent_location = ActiveRecord::Base.connection.select_one("
                select parent_location_code from locations where location_code = '#{@parent.location_code}'")['parent_location_code']
 
@@ -63,6 +56,20 @@ class SelectLocation < PDTTransactionState
 
      if @parent.spaces_left && @parent.spaces_left.to_i <= 0
       return  "Location does not have enough space,UNDO and scan another location."
+     end
+
+    if location.loading_out
+      return "Location is loading_out.Scan another one."
+    end
+
+    location_status = Location.check_location_status(location.location_barcode)
+    if  location_status  != nil
+      if location_status == "SEALED"
+        error = "Location is SEALED "
+      elsif location_status == "GAS"
+        error = "Location status is: GAS "
+      end
+      return error if error
     end
 
     return nil

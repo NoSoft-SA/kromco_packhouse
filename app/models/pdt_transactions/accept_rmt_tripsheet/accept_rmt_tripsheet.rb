@@ -236,7 +236,7 @@ def tripsheet_in_std_move?
       end
     end
 
-    location_status =  check_location_status(location.location_barcode)
+    location_status =  Location.check_location_status(location.location_barcode)
       if  location_status  != nil
           error = ["Bins cannot be moved to location '#{location.location_code}'.Status is: SEALED "]
            return error

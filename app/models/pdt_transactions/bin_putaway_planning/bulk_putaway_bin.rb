@@ -41,7 +41,7 @@ class BulkPutawayBin < PDTTransactionState
     @location_to_units_in_location = location.units_in_location
 
 
-    error = validate_scanned_location
+    error = validate_scanned_location(location)
 
     if error
       result_screen = PDTTransaction.build_msg_screen_definition(error, nil, nil, nil)
@@ -60,7 +60,7 @@ class BulkPutawayBin < PDTTransactionState
     return result_screen
   end
 
-  def validate_scanned_location
+  def validate_scanned_location(location)
 
     if @scanned_location_code.to_s.upcase != @parent.location_code.to_s.upcase
       return "Scanned location different from putaway location."
@@ -69,6 +69,16 @@ class BulkPutawayBin < PDTTransactionState
     #  i.e. positions_available must be same or greater that the bin_putaway_plan.bins_to_putaway
     if (@location_to_location_maximum_units.to_i - @location_to_units_in_location.to_i) < @parent.scanned_bins.length
       return "Scanned location has less space than putaway plan."
+    end
+
+    location_status = Location.check_location_status(location.location_barcode)
+    if  location_status  != nil
+      if location_status == "SEALED"
+        error = "Location is SEALED "
+      elsif location_status == "GAS"
+        error = "Location status is: GAS "
+      end
+      return error if error
     end
 
     return nil
