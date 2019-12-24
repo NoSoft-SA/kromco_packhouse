@@ -59,9 +59,9 @@ class ScanLoadPallet < PDTTransactionState
         end
     end
 
-    #if pallet.qc_result_status!="PASSED"
-    #  return PDTTransaction.build_msg_screen_definition("#{pallet_num }:QC RESULT STATUS  is not PASSED", nil, nil, nil)
-    #end
+    if pallet.qc_result_status!="PASSED"
+     return PDTTransaction.build_msg_screen_definition("#{pallet_num }:QC RESULT STATUS  is not PASSED", nil, nil, nil)
+    end
 
     if @parent.scanned_pallets.include?(pallet_num.to_s)
       return PDTTransaction.build_msg_screen_definition("pallet #{pallet_num.to_s} already scanned!!!! ", nil, nil, nil)
