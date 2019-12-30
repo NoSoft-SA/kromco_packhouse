@@ -122,13 +122,13 @@ end
     bin = get_bin_type_and_frit_spec("bins.bin_number = '#{@bin_number}' ")
     error = []
 
-    error << " stock_type"  if @parent.bin_fruit_spec['stock_type'] != bin['stock_type_code']
+    error << " stock_type"  if @parent.bin_fruit_spec['stock_type_code'] != bin['stock_type_code']
     error <<  "commodity" if @parent.bin_fruit_spec['commodity_code'] != bin['commodity_code']
     error <<  "variety" if @parent.bin_fruit_spec['variety_code'] != bin['variety_code']
     error <<  "size" if @parent.bin_fruit_spec['size_code'] != bin['size_code']
     error <<  "class" if @parent.bin_fruit_spec['product_class_code'] != bin['product_class_code']
     error <<  "treatment" if @parent.bin_fruit_spec['treatment_code'] != bin['treatment_code']
-    error <<  "farm" if (@parent.bin_fruit_spec['farm_code'] != bin['farm_code']) && (@parent.bin_fruit_spec['farm'] && bin['farm_code'])
+    error <<  "farm" if (@parent.bin_fruit_spec['farm_code'] != bin['farm_code']) && (@parent.bin_fruit_spec['farm_code'] && bin['farm_code'])
     error <<  "track_indicator_code" if @parent.bin_fruit_spec['track_indicator1_id'] != bin['track_indicator1_id']
 
     error.unshift("Scanned bin is of different: ") if !error.empty?
@@ -218,8 +218,12 @@ end
                   order by fullness ,updated_at desc limit 1
                                                         ")
 
-          @parent.error_str = "no matched location" if !location
-          location_status(location) if location
+    if !location
+      @parent.error_str = "no matched location"
+      return render_select_location_state
+    else
+      location_status(location)
+    end
 
 
   end
@@ -238,6 +242,8 @@ end
       else
         return location
       end
+    else
+      return location
     end
   end
 
@@ -285,14 +291,13 @@ end
       end
     end
 
-    @parent.bin_fruit_spec = {'stock_type' => @stock_type_code, 'commodity' => @commodity_code,
-                       'variety' => @variety_code, 'size' => @size_code, 'class' => @product_class_code,
-                       'treatment' => @treatment_code, 'farm' => farm_code,'track_indicator1_id'=> @track_indicator1_id} if @stock_type_code == 'BIN'
+    @parent.bin_fruit_spec = {'stock_type_code' => @stock_type_code, 'commodity_code' => @commodity_code,
+                       'variety_code' => @variety_code, 'size_code' => @size_code, 'product_class_code' => @product_class_code,
+                       'treatment_code' => @treatment_code, 'farm_code' => farm_code,'track_indicator1_id'=> @track_indicator1_id} if @stock_type_code == 'BIN'
 
-    @parent.bin_fruit_spec = {'stock_type' => @stock_type_code, 'commodity' => @commodity_code,
-                       'variety' => @variety_code, 'size' => @size_code, 'class' => @product_class_code,
-                       'treatment' => @treatment_code,'track_indicator1_id'=> @track_indicator1_id} if @stock_type_code == 'PRESORT'
-
+    @parent.bin_fruit_spec = {'stock_type_code' => @stock_type_code, 'commodity_code' => @commodity_code,
+                       'variety_code' => @variety_code, 'size_code' => @size_code, 'product_class_code' => @product_class_code,
+                       'treatment_code' => @treatment_code,'track_indicator1_id'=> @track_indicator1_id} if @stock_type_code == 'PRESORT'
 
 
   end
