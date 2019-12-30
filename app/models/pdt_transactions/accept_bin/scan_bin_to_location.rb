@@ -156,14 +156,20 @@ class ScanBinToLocation < PDTTransactionState
                                                           join stock_items on stock_items.location_id=locations.id
                                                           join bins on stock_items.inventory_reference=bins.bin_number
                                                           where bins.bin_number='#{@bin_number}'")
-   if !bin_location.empty?
+
+    if !bin_location.empty?
+      error = nil
      location_bar_code =bin_location['location_barcode']
      location_code =bin_location['location_code']
-    location_status =  @parent.check_location_status(location_bar_code)
-      if  location_status  != nil
-          error = ["Bin is in location #{location_code}. Status is: SEALED "]
-           return error
-      end
+     location_status =  Location.check_location_status(location_bar_code)
+     if  location_status  != nil
+       if location_status == "SEALED"
+         error = ["Bin is in location #{location_code}. Status is: SEALED "]
+       elsif location_status == "GAS"
+         error = ["Bin is in location #{location_code}. Status is: GAS "]
+       end
+       return error
+     end
   end
   end
 
