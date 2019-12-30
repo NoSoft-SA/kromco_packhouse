@@ -48,7 +48,8 @@ class SelectLocation < PDTTransactionState
 
   def validate_location(location)
     scanned_parent_location = ActiveRecord::Base.connection.select_one("
-               select parent_location_code from locations where location_code = '#{@parent.location_code}'")['parent_location_code']
+               select parent_location_code from locations
+               where location_code = '#{location.location_code}'")['parent_location_code']
 
     if scanned_parent_location.to_s.upcase != @parent.coldroom.to_s.upcase
       return "Location does not belong to selected parent location,UNDO and scan another location."
