@@ -328,6 +328,7 @@ end
     on_a_tripsheet = Bin.is_on_tripsheet?(scan_bin_number)
     if on_a_tripsheet
       error = ["Bin number :'#{scan_bin_number}' is already on tripsheet: #{on_a_tripsheet} "]
+      return error
     end
 
     inv_reference = bin.bin_number.to_s

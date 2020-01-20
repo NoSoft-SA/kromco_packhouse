@@ -1,1201 +1,3 @@
-        var selected_label
-        
-        //----------------------------------------------------------------------
-        //''Labels'' should be populated from the rails runtime app context
-        //----------------------------------------------------------------------
-        labels = new Array;
-        //labels[0] = "commodity";
-        //labels[1] = "variety";
-        //labels[2] = "pc_code";
-        
-        function nothing()
-        {
-        }
-        
-        //----------------------------------------------------------------------------
-        //'a' is the selected hyperlink which text holds the name of a label field
-        //---------------------------------------------------------------------------
-        
-        function set_selected_style(e)
-        {
-             e.style.borderRight = "gray thin solid";
-             e.style.borderLeft = "gray thin solid";
-             e.style.borderTop = "gray thin solid";
-             e.style.borderBottom = "gray thin solid"; 
-             e.style.backgroundColor = "whitesmoke";
-        
-        }
-        
-        //-------------------------------------------------------
-        //This method updates the hidden field ''label_sequences'
-        //with the complete current sequence
-        //-------------------------------------------------------
-        function set_sequence()
-        {
-            hidden_field = document.getElementById("label_sequences_hidden_field");
-            seq = "[";
-            for(i = 0;i < labels.length ; i ++)
-            {
-              if(i == labels.length - 1)
-                seq += "'" + labels[i] + "']";   
-              else
-                seq += "'" + labels[i] + "',"; 
-              
-              hidden_field.value = seq;
-            }
-        
-        }
-        
-         function set_unselected_style(e)
-        {
-             e.style.borderRight = "none";
-             e.style.borderLeft = "none";
-             e.style.borderTop = "none";
-             e.style.borderBottom = "none"; 
-             e.style.backgroundColor = "white";
-        
-        }
-        
-        function select(a)
-        {
-        
-           if(selected_label != null)
-                //selected_label.parentNode.style.backgroundColor = "white";
-                set_unselected_style(selected_label.parentNode)
-                selected_label = a
-                //a.parentNode.style.backgroundColor = "whitesmoke";
-                set_selected_style(a.parentNode);
-                
-        
-        }
-       
-       function find_label_index()
-       {
-            for(i = 0;i < labels.length;i++)
-             {
-                if(labels[i] == selected_label.innerHTML)
-                    return i
-             }
-             
-             alert('error: label not found in labels array');
-       }
-       
-        function go_up()
-        {
-           //swap the selected label with one with one index lower
-           curr_index = find_label_index();
-           
-            //1)find the 'a' with text of index one less than this one and
-            //set its text to the label with 'curr_index'
-            //2)Set the selected link to text
-            //   of label with 'curr_index - 1'
-            table = document.getElementById('label_fields');
-            fields = table.getElementsByTagName("a");
-            
-            for(i = 0;i < fields.length;i ++)
-            {
-                if(fields[i].innerHTML == labels[curr_index - 1])
-                {
-                    fields[i].innerHTML = selected_label.innerHTML;
-                    selected_label.innerHTML = labels[curr_index - 1]; 
-                    //now swap the contents of the labels collection
-                    temp = labels[curr_index - 1]
-                    labels[curr_index - 1] = labels[curr_index]
-                    labels[curr_index] = temp
-                    //move the selection cursor with the moved label
-                    //selected_label.parentNode.style.backgroundColor = "white";
-                    set_unselected_style(selected_label.parentNode)
-                    
-                    //fields[i].parentNode.style.backgroundColor = "whitesmoke";
-                    selected_label = fields[i];
-                    set_selected_style(fields[i].parentNode)
-                    set_sequence();
-                 }   
-            }        
-        
-        }
-    
-        function go_down()
-        {
-           //swap the selected label with one with one index lower
-           curr_index = find_label_index();
-           
-            //1)find the 'a' with text of index one less than this one and
-            //set its text to the label with 'curr_index'
-            //2)Set the selected link to text
-            //   of label with 'curr_index - 1'
-            table = document.getElementById('label_fields');
-            fields = table.getElementsByTagName("a");
-            
-            for(i = 0;i < fields.length;i ++)
-            {
-                if(fields[i].innerHTML == labels[curr_index + 1])
-                {
-                    fields[i].innerHTML = selected_label.innerHTML;
-                    selected_label.innerHTML = labels[curr_index + 1]; 
-                    //now swap the contents of the labels collection
-                    temp = labels[curr_index + 1]
-                    labels[curr_index + 1] = labels[curr_index]
-                    labels[curr_index] = temp
-                    //selected_label.parentNode.style.backgroundColor = "white";
-                     set_unselected_style(selected_label.parentNode)
-                    //fields[i].parentNode.style.backgroundColor = "whitesmoke";
-                   
-                    selected_label = fields[i];
-                     set_selected_style(fields[i].parentNode)
-                     set_sequence();
-                    
-                 }   
-            }        
-        
-        }
- var separators = new Array;
- var separator_states = new Array;
- var n_separators;
- var input_fields = new Array;
-
-
- function get_row_end_pos(text)
- {
-   i = 5;
-  
-   found = false;
-   while(!found)
-   {
-     
-     if(text[i - 5] + text[i -4] + text[i - 3] + text[i - 2] + text[i - 1] == "</tr>")
-        found = true;
-     else
-       i ++;
-     
-     
-   }
-   
-   
-   return i;
-   
- }
- 
-
-
-  function get_start_pos(text,start_pos,matcher)
- {
-   i = start_pos;
-   found = false;
-   chars = matcher.length
-   
-   while(!found)
-   {
-     word = "";
-     for(c = chars ; c > 0; c--){
-      word += text[i - c];
-     }
-     
-      if(word == matcher)
-        found = true;
-     else
-       i --;
-     
-   }
-   
-   return i;
-   
- }
- 
-  
-  function get_form_htm()
-  {
-     form = document.getElementById('applet_container').innerHTML;
-    sep1_start = form.indexOf('separator1');
-    
-    sep1_clean_start = get_start_pos(form,sep1_start,"<tr>")
-    //alert("form: " + form.substring(0,sep1_clean_start - 4));
-    return form.substring(0,sep1_clean_start - 4);
-  }
-  
-  function get_form_end_htm()
-  {
-    form = document.getElementById('applet_container').innerHTML;
-    form_end_start = form.indexOf("submit_button");
-    form_end_clean_start = get_start_pos(form,form_end_start,"</tr>")
-    form_end_htm = form.substring(form_end_clean_start,form.length -1);
-   
-    return form_end_htm;
-  
-  }
-  
-  function get_collapsed_separator(separator_id)
-  {
-    form = document.getElementById('applet_container').innerHTML;
-    this_sep_start = form.indexOf(separator_id);
-    
-    this_sep_clean_start = get_start_pos(form,this_sep_start,"<tr>") -4
-    
-     rest_htm = form.substring(this_sep_clean_start,form.length);
-     
-     
-     this_sep_end = get_row_end_pos(rest_htm)
-     
-     return rest_htm.substring(0,this_sep_end) + "</tr>"
-  
-  
-  }
-  
-  
-  function get_separator_htm(separator_id)
-  {
-    //get start_pos - that is clean start pos (starting with <tr>)
-    //get end pos: it is the clean starting pos of the next separator - 1
-    //if the next separator does not exist, then this is the bottom one,
-    // in which case the end is '<input type='submit''
-    
-    form = document.getElementById('applet_container').innerHTML;
-    this_sep_start = form.indexOf(separator_id);
-    
-    this_sep_clean_start = get_start_pos(form,this_sep_start,"<tr>") -4
-    
-    next_sep_id = ""
-    next_sep_val = parseInt(separator_id[separator_id.length -1]) + 1;
-    next_sep_id = "separator" + next_sep_val.toString();
-    
-    next_sep_start = form.indexOf(next_sep_id);
-    
-    if(next_sep_start != -1)
-    {
-      next_sep_clean_start = get_start_pos(form,next_sep_start,"<tr>")
-    
-      this_sep_htm = form.substring(this_sep_clean_start, next_sep_clean_start - 4);
-    }
-    else
-    {   
-      
-        form_end_start = form.indexOf("submit_button");
-        
-        form_end_clean_start = get_start_pos(form,form_end_start,"</tr>")
-        this_sep_htm = form.substring(this_sep_clean_start, form_end_clean_start);
-    }
-    
-    
-    return this_sep_htm;
-  
-  
-  }
-  
-  
- function collapse_all()
- {
-    store_control_values();
-    
-     for(f = 1; f <= n_separators; f++)
-    {
-       id = "separator" + f.toString();
-       //alert(id + ": " + separator_states[id]);
-       if (separator_states[id] == null)
-        separator_states[id]= true; //expanded
-    }
-    
-    
-    //write all seps to memory that you can
-    for(b = 1; b <= n_separators; b++)
-    {
-       //alert("loop");
-        id = "separator" + b.toString();
-        
-         
-        el = document.getElementById(id);
-       // alert("cid: " + id);
-        if(separator_states[id] == true)
-        {
-           
-            separators[id] = get_separator_htm(id);
-            
-         
-        }
-    }
-    
-    //set states to collapsed
-     for(b = 1; b <= n_separators; b++)
-    {
-       id = "separator" + b.toString();
-       //alert(id + ": " + separator_states[id]);
-       separator_states[id] = false;
-       
-    }
-    
-    //rebuild form in collapsed state
-    new_form = get_form_htm();
-    
-    for(d = 1; d <= n_separators; d++)
-    {
-        id = "separator" + d.toString();
-       // alert(id);
-        el = document.getElementById(id);
-    
-          if(separator_states[id] == true)
-          {
-            new_form += separators[id];
-            //alert(separators[id]);
-          }
-          else
-          {
-            new_form += get_collapsed_separator(id)
-          }
-   
-    }
-    //alert(get_form_end_htm());
-    new_form += get_form_end_htm();
-    document.getElementById('applet_container').innerHTML = new_form;
-    
-    set_images();
-    
-    
- 
- }
- 
- function expand_all()
- {
-     store_control_values();
-     
-     for(f = 1; f <= n_separators; f++)
-    {
-       id = "separator" + f.toString();
-       //alert(id + ": " + separator_states[id]);
-       if (separator_states[id] == null)
-        separator_states[id]= true; //expanded
-    }
-    
-    
-    //write all seps to memory that you can
-    for(b = 1; b <= n_separators; b++)
-    {
-       //alert("loop");
-        id = "separator" + b.toString();
-        
-         
-        el = document.getElementById(id);
-       // alert("cid: " + id);
-        if(separator_states[id] == true)
-        {
-           
-            separators[id] = get_separator_htm(id);
-            
-         
-        }
-    }
-    
-    //set states to expanded
-     for(b = 1; b <= n_separators; b++)
-    {
-       id = "separator" + b.toString();
-       //alert(id + ": " + separator_states[id]);
-       separator_states[id] = true;
-       
-    }
-    
-    //rebuild form in collapsed state
-    new_form = get_form_htm();
-    
-    for(d = 1; d <= n_separators; d++)
-    {
-        id = "separator" + d.toString();
-       // alert(id);
-        el = document.getElementById(id);
-    
-          if(separator_states[id] == true)
-          {
-            new_form += separators[id];
-            //alert(separators[id]);
-          }
-          else
-          {
-            new_form += get_collapsed_separator(id)
-          }
-   
-    }
-    //alert(get_form_end_htm());
-    new_form += get_form_end_htm();
-    document.getElementById('applet_container').innerHTML = new_form;
-    
-    set_images();
-    
-    restore_control_values();
-    
-    return true;
- 
- }
- 
- function set_images()
- {
-    for(x = 1; x <= n_separators; x++)
-    {
-       id = "separator" + x.toString();
-       img_id = id + "_img";
-       //alert(id + ": " + separator_states[id]);
-       if (separator_states[id]== true)
-         document.getElementById(img_id).src = "/images/expanded.png";
-       else
-         document.getElementById(img_id).src = "/images/collapsed.png";
-       
-     
-    }
-    
-   
- }
- 
- function set_observer_for_reworks_carton_edit()
- {
- 
-  //el = document.getElementById("ajax_distributor_cell")
- 
-   //alert((el == null).toString());
-  //-----------------------
-   //CARTON EDIT FORM
-   //-----------------------
-   if(document.getElementById('carton_edit_carton_pack_product_code'))
-   {
-     new Form.Element.EventObserver('carton_edit_carton_pack_product_code', function(element, value) {new Ajax.Updater('calculated_mass_cell', '/production/reworks/cpc_changed', {asynchronous:true, evalScripts:true, onComplete:function(request){
-     img = document.getElementById('img_carton_edit_carton_pack_product_code');
-     if(img != null)img.style.display = 'none';}, onLoading:function(request){show_element('img_carton_edit_carton_pack_product_code');}, parameters:value})})
-   }
-   
-   if(document.getElementById('carton_edit_item_pack_product_code'))
-   {
-    new Form.Element.EventObserver('carton_edit_item_pack_product_code', function(element, value) {new Ajax.Updater('calculated_mass_cell', '/production/reworks/ipc_changed', {asynchronous:true, evalScripts:true, onComplete:function(request){
-    img = document.getElementById('img_carton_edit_item_pack_product_code');
-    if(img != null)img.style.display = 'none';}, onLoading:function(request){show_element('img_carton_edit_item_pack_product_code');}, parameters:value})})
-   }
-   
-   if(document.getElementById('carton_edit_items_per_unit'))
-   {
-      new Form.Element.EventObserver('carton_edit_items_per_unit', function(element, value) {new Ajax.Updater('calculated_mass_cell', '/production/reworks/items_per_unit_changed', {asynchronous:true, evalScripts:true, onComplete:function(request){
-      img = document.getElementById('img_carton_edit_items_per_unit');
-      if(img != null)img.style.display = 'none';}, onLoading:function(request){show_element('img_carton_edit_items_per_unit');}, parameters:value})})
-   }
-   
-   if(document.getElementById('carton_edit_units_per_carton'))
-   {
-      new Form.Element.EventObserver('carton_edit_units_per_carton', function(element, value) {new Ajax.Updater('calculated_mass_cell', '/production/reworks/units_per_carton_changed', {asynchronous:true, evalScripts:true, onComplete:function(request){
-      img = document.getElementById('img_carton_edit_units_per_carton');
-      if(img != null)img.style.display = 'none';}, onLoading:function(request){show_element('img_carton_edit_units_per_carton');}, parameters:value})})
-    }
-    
-   if(document.getElementById('carton_edit_organization_code'))
-   { 
-      new Form.Element.EventObserver('carton_edit_organization_code', function(element, value) {new Ajax.Updater('target_market_short_cell', '/production/reworks/marketer_org_combo_changed', {asynchronous:true, evalScripts:true, onComplete:function(request){
-      img = document.getElementById('img_carton_edit_organization_code');
-      if(img != null)img.style.display = 'none';}, onLoading:function(request){show_element('img_carton_edit_organization_code');}, parameters:value})})
-  
-   }
- }
- 
- 
- function set_observer()
- {
-  
-   
-   //---------------------------------------
-   //PACK MATERIALS FORM
-   //---------------------------------------
-   if(document.getElementById('pack_material_product_commodity_group_code'))
-   {
-     new Form.Element.EventObserver('pack_material_product_commodity_group_code', function(element, value) {new Ajax.Updater('commodity_code_cell', '/products/pack_material_product/pack_material_product_commodity_group_code_changed', {asynchronous:true, evalScripts:true, onComplete:function(request){to_clears = [['pack_material_product_marketing_variety_code','pack_material_product_commodity_code']];
-     clear_combos(to_clears);
-     img = document.getElementById('img_pack_material_product_commodity_group_code');
-     if(img != null)img.style.display = 'none';}, onLoading:function(request){show_element('img_pack_material_product_commodity_group_code');}, parameters:value})});
-     
-     if(document.getElementById('pack_material_product_marketing_variety_code'))
-     {
-        new Form.Element.EventObserver('pack_material_product_commodity_code', function(element, value) {new Ajax.Updater('marketing_variety_code_cell', '/products/pack_material_product/pack_material_product_commodity_code_changed', {asynchronous:true, evalScripts:true, onComplete:function(request){
-        img = document.getElementById('img_pack_material_product_commodity_code');
-        if(img != null)img.style.display = 'none';}, onLoading:function(request){show_element('img_pack_material_product_commodity_code');}, parameters:value})});
-    }
-   }
-  }
- 
- function restore_control_values()
- {
-  
-   for(key in input_fields)
-   {
-     stored_control = input_fields[key];
-    
-    //if (!stored_control.id)alert(stored_control.name);
-    
-    if(stored_control.id )
-      active_control = document.getElementById(stored_control.id);
-    else{
-      if(stored_control.name)
-      {
-        if(stored_control.type == "select-one")
-        {
-           active_control = document.getElementsByName(stored_control.name)[0] 
-        }
-        else
-        {
-            active_controls = document.getElementsByName(stored_control.name);
-            if(active_controls.length > 1)
-                active_control = active_controls[1];
-         }
-      }
-    }
-    
-     if(active_control)
-     {
-        //active_control = stored_control;
-       // alert (active_control.type);
-        if(active_control.type == "select-one")
-         {
-            if(stored_control.options)
-            {
-              for(y = 0;y < stored_control.options.length;y++)
-              {
-              
-                 active_control.options[y].selected = stored_control.options[y].selected;
-                 active_control.options[y].value = stored_control.options[y].value;
-                 active_control.options[y].text = stored_control.options[y].text;
-             }
-            }
-          }
-        else if(active_control.type == "text")
-          active_control.value = stored_control.value;
-          
-        else if(active_control.type == "checkbox"){
-          //alert(active_control.type);
-          active_control.value = stored_control.value;
-          active_control.checked = stored_control.checked;
-          }
-          
-        else if(active_control.type == "textarea"){
-           active_control.childNodes[0] = stored_control.childNodes[0];
-           }
-        
-         else if(active_control.type == "hidden"){
-           active_control.value = stored_control.value;
-           }
-          
-      }
-          
-   }
-    
-   comm_group_dropdown = document.getElementById('pack_material_product_commodity_group_code');
-   if(comm_group_dropdown)
-    set_observer();
-    
-    //reworks_carton_code
-    set_observer_for_reworks_carton_edit();
- 
- }
- 
-  
- 
- function store_control_values()
- {
-   
-   inputs = document.forms[0].getElementsByTagName("input");
-  
-   for(j = 0; j < inputs.length; j++)
-   {
-     if(inputs[j].id)
-      input_fields[inputs[j].id]= inputs[j];
-     
-     else if(inputs[j].name)
-       input_fields[inputs[j].name]= inputs[j];
-     // alert(inputs[j].type + ":" + inputs[j].name);
-      
-     input_fields[inputs[j].id]= inputs[j];
-      
-   }
-   
-   inputs = document.forms[0].getElementsByTagName("select");
-   
-    for(j = 0; j < inputs.length; j++){
-   //if(inputs[j].id)
-   // alert("sel id " + inputs[j].id);
-   //else
-   // alert("sel name " + inputs[j].name);
-   
-     id = ""
-     if(inputs[j].id)
-      id = inputs[j].id
-     else
-      id = inputs[j].name
-      
-     input_fields[id]= inputs[j];  
-   }
-   
-   inputs = document.forms[0].getElementsByTagName("textarea");
-  
-   for(j = 0; j < inputs.length; j++)
-   {
-     input_fields[inputs[j].id]= inputs[j];
-     //alert(inputs[j].id);    
-   }
-   
-  
- }
- 
- 
- 
-  //--------------------------------------------------------------------------------
-  // This method has to toggle (show or hide) the clicked separator which represents
-  // a group of fields.
-  // processing:
-  // 1) build a list of all separators: 
-  //   --> see if you can find the separator id, if not, it means the separator is hidden
-  //       and you can assume that it's htm is stored in memory (separators array)
-  // 2) rebuild the entire form, if you get to the selected separator, see if you can
-  //      find it in the form, If not, it means it is currently collapsed, o you must
-  //      expand it by adding it to the building process- get it's htm from memory(stored when collapsed previously)
-  //      If found, it means it is currently expanded, and you must collapse it by not
-  //      adding it to the building process- BUT before doing so you must add it's
-  //      htm to the separators collection
-  //------------------------------------------------------------------------------
-  
- 
-  
-  function hide_separator(sep)
-  {
-     store_control_values();
-     
-    for(x = 1; x <= n_separators; x++)
-    {
-       id = "separator" + x.toString();
-       //alert(id + ": " + separator_states[id]);
-       if (separator_states[id] == null)
-        separator_states[id]= true; //expanded
-    }
-    
-    
-    //write all seps to memory that you can
-    for(b = 1; b <= n_separators; b++)
-    {
-       //alert("loop");
-        id = "separator" + b.toString();
-        
-         
-        el = document.getElementById(id);
-       // alert("cid: " + id);
-        if(separator_states[id] == true)
-        {
-           
-            separators[id] = get_separator_htm(id);
-         
-        }
-    }
-    
-   
-    //alert("loop exited");
-    //rebuild form
-    new_form = get_form_htm();
-    //alert("new form: " + new_form);
-    for(d = 1; d <= n_separators; d++)
-    {
-        id = "separator" + d.toString();
-       // alert(id);
-        el = document.getElementById(id);
-        
-        if (id == sep.id)
-        {
-          //alert(" sep: " + separators[id]);
-          if(separator_states[id] == false)//we need to add it to building process
-          {
-            
-            new_form += separators[id];
-             //alert(id + ":" + separators[id]);
-          }
-          else //we need to add just the ' collapsed separator'
-          {
-            new_form += get_collapsed_separator(id)
-            //alert("collapsed: " + get_collapsed_separator(id));
-          }
-        }
-        else
-        {
-          
-          if(separator_states[id] == true)
-          {
-            new_form += separators[id];
-            //alert(id + ":" + separators[id]);
-          }
-          else
-          {
-            new_form += get_collapsed_separator(id)
-          }
-   
-        }
-    }
-    //alert(get_form_end_htm());
-    new_form += get_form_end_htm();
-    document.getElementById('applet_container').innerHTML = new_form;
-    separator_states[sep.id] = !separator_states[sep.id];
-    set_images();
-    
-    restore_control_values();
-   
-  }
-
-
-function update_form()
-{
-
-
-   try
-   {
-    var frames = window.opener.frames;
-    var input_values_changed = this.document.getElementById("applet_container");
-    var selection_values =  input_values_changed.getElementsByTagName("option");
-    var input_length =    input_values_changed.getElementsByTagName("input");
-    var popupwindow_obj =  document.getElementById("popupwindow_kromco_1");
-    var select_length =    input_values_changed.getElementsByTagName("select");
-   
-    for(select = 0 ; select < select_length.length ; select++)
-     {
-      var option = select_length[select].getElementsByTagName("option");
-      for(i =0 ; i < option.length ; i++)
-        {
-         if(option[i].selected == true )
-            {
-              try
-              {
-             
-             //option[i].selected == true;
-             //option[i].value == 
-            
-          if(document.getElementById(select_length[select].id).value.length > 0 )
-          {
-              frames[1].document.getElementById(select_length[select].id).value = document.getElementById(select_length[select].id).value;
-           }  
-          
-            //   addeditem.name = "load_values_for_fields["+changed_name+"]";
-            //   addeditem.value = option[i].value;
-             
-              }
-              catch(error_mesg)
-             {
-               alert(error_mesg+" error_loc_1");
-             }  
-          }
-       }
-     } 
-       
-    for(itemsadded = 0 ; itemsadded < input_length.length ;itemsadded++ )
-    {
-      if((input_length[itemsadded].type  == "text") & (document.getElementById(input_length[itemsadded].id).value.length > 0 ) )
-      {
-       frames[1].document.getElementById(input_length[itemsadded].id).value = document.getElementById(input_length[itemsadded].id).value;
-
-     }
-      if((input_length[itemsadded].type  == "checkbox" ) )
-       {
-       frames[1].document.getElementById(input_length[itemsadded].id).value = document.getElementById(input_length[itemsadded].id).value;
-      
-      //   var   addeditem = document.createElement("input");
-      //   addeditem.id = "created_field_"+input_length[itemsadded].name;
-      //   addeditem.type = "hidden";
-      //    var changed_name =change_input_name(input_length[itemsadded].name);
-      //    addeditem.name = "load_values_for_fields["+changed_name+"]";
-      //    addeditem.value = input_length[itemsadded].value;
-      //    popupwindow_obj.appendChild(addeditem);
-         }
-    }
-   
-   //var input_values_changed = this.document.getElementById("applet_container");
-   //var input_length =    input_values_changed.getElementsByTagName("input");
-   // headerstext_count =   frames[1].global_js_grid.getColumnCount();
-    }
-    catch(messageerror)
-    {
-    alert(messageerror+" error_loc_2");
-    }
-
-
-  //alert(document.getElementById("treatment_treatment_code").value )
- //  var frames = window.opener.frames
- //  frames[1].document.getElementById("treatment_treatment_code").value = document.getElementById("treatment_treatment_code").value 
-//  alert("Here we can do the updating")
-alert("The data have been moved");
-window.close();
-}
-
-function get_data_for_form_update()
-{
- 
-  var app_container =  document.getElementById("applet_container");
-  form_innerhml = app_container.childNodes[1].innerHTML;
-  app_container.innerHTML ="<form id='popupwindow_kromco_1'  onSubmit='javascript:update_form();'  method='post' >"+form_innerhml +"</form>";
-
-}
-
-function open_window_link(url)
-{
-
-  refined_url  = [];
-  count = 0;
-
-
-  //code to split out width and height from url string- width and height are enclosed with !..!
-    dimension_parts = ["800","380"];
-    url_parts =   url.split("!");
-    if(url_parts.length > 1)
-    {
-        url_parts.each( function(u) {
-          if (u.indexOf(':') > -1) {
-            dimension_parts = u.split(":");
-          }
-        });
-    }
-
-  url = url_parts[0];
-
-  currentstring ="";
-  for( i = 0 ; i < url.length ; i++)
-  {
-
-    if(url[i] == '%' | i == url.length-1)
-    {
-      if(i == url.length-1)
-      {
-        currentstring += url[i];
-      }
-      refined_url[count] = currentstring;
-      currentstring ="";
-      count ++;
-    }
-    else
-    {
-      currentstring += url[i];
-    }
-  }
-
-  if (refined_url[1] !== undefined)
-  {
-
-    window_created = window.parent.open("http://"+refined_url[0]+"/"+refined_url[1]+"", "",
-        "menubar=0,location=0,resizable=1,scrollbars=1,status=0,width=" + dimension_parts[0] + ",height=" + dimension_parts[1]);
-
-    //    netscape.security.PrivilegeManager.
-    //   enablePrivilege("UniversalBrowserWrite");
-    //window_created.locationbar.visible=
-    //    !window_created.locationbar.visible;
-    //  alert(window_created.locationbar.visible = 'false');
-
-    //sleep(1);
-      setTimeout(function() {
-    window_created.resizeTo (dimension_parts[0], dimension_parts[1]); // Chrome doesn't always respect width & height parameters...
-    window_created.moveTo (225,225);
-      }, 100);
-    // window.parent.id = "parent_window_id";
-    // this.window.id ="popup_1"
-  }
-  else
-  {
-    //    "menubar=yes,location=yes,resizable=yes,scrollbars=yes,status=yes"
-    // "menubar=yes,location=yes,resizable=yes,scrollbars=yes,status=yes,width=800,height=380"
-    //window_created = window.parent.open('http://'+refined_url[0]+'', '',
-    window_created = window.parent.open('http://'+refined_url[0], '',
-        'menubar=1,resizable=1,scrollbars=1,status=1,width=' + dimension_parts[0] + ',height=' + dimension_parts[1]); // Chrome seems to work if location not mentioned....
-        //'menubar=yes,location=no,resizable=yes,scrollbars=yes,status=yes,width=800,height=380'); // Chrome seems to need location=no !!!!!
-        //'menubar=yes,location=yes,resizable=yes,scrollbars=yes,status=yes,width=800,height=380,left=0,top=0');
-    //window.open(filename,"","width="+winwidth+",height="+winheight+",scrollbars=yes ,menubar=no,location=no,left=0,top=0");
-
-    //sleep(1);
-      setTimeout(function() {
-    window_created.resizeTo (dimension_parts[0], dimension_parts[1]); // Chrome doesn't always respect width & height parameters...
-    window_created.moveTo (225,225);
-      }, 100);
-    //FIRE_window_id
-    // window.parent.id = "parent_window_id";
-    //  this.window.id ="popup_1"
-  }
-
-}
-//***************************************************
-function imdone()
-{
-  var app_container =  window.self.document.getElementById("applet_container");
-  form_innerhml = app_container.childNodes[1].innerHTML;
-  app_container.innerHTML ="<form id='popupwindow_kromco_1' action= /raw_materials/treatment/update_treatment method='post' onSubmit='javascript:yay();' >"+form_innerhml +"</form>";
-
-
-}
-//***************************************************
-function change_input_name(name)
-{
-  var new_name ="";
-  for(char_index = 0 ; char_index < name.length ; char_index++)
-    {
-     if(name[char_index]  == "[" | name[char_index] == "]")
-      {
-       if(name[char_index] == "[")
-         {
-           new_name += "$";
-         }
-         else
-          {
-            new_name += "?";
-          }
-       }
-       else
-       {
-        new_name += name[char_index];
-       }
-  }
-
-return new_name;
-}
-//************************************************************
-function yay()
-{
-
-   try
-   {
-      var frames = window.opener.frames;
-    var input_values_changed = this.document.getElementById("applet_container");
-    var selection_values =  input_values_changed.getElementsByTagName("option");
-    var input_length =    input_values_changed.getElementsByTagName("input");
-    var popupwindow_obj =  document.getElementById("popupwindow_kromco_1");
-    var select_length =    input_values_changed.getElementsByTagName("select");
-   
-    for(select = 0 ; select < select_length.length ; select++)
-     {
-      var option = select_length[select].getElementsByTagName("option");
-      for(i =0 ; i < option.length ; i++)
-        {
-         if(option[i].selected == true )
-            {
-              try
-              {
-               var   addeditem = document.createElement("input");
-               addeditem.id = "created_field_"+option[i].value;
-               addeditem.type = "hidden";
-               var changed_name =change_input_name(select_length[select].name);
-               addeditem.name = "load_values_for_fields["+changed_name+"]";
-               addeditem.value = option[i].value;
-               popupwindow_obj.appendChild(addeditem);
-              }
-              catch(error_mesg)
-             {
-               alert(error_msg+" error_loc_1"); 
-             }  
-          }
-       }
-     } 
-       
-    for(itemsadded = 0 ; itemsadded < input_length.length ;itemsadded++ )
-    {
-    
-       if(input_length[itemsadded].type  == "text")
-         {
-          var   addeditem = document.createElement("input");
-          addeditem.id = "created_field_"+input_length[itemsadded].name;
-          addeditem.type = "hidden";
-          var changed_name =change_input_name(input_length[itemsadded].name);
-          addeditem.name = "load_values_for_fields["+changed_name+"]";
-          addeditem.value = input_length[itemsadded].value;
-          popupwindow_obj.appendChild(addeditem);
-         }
-          if(input_length[itemsadded].type  == "checkbox")
-            {
-             var   addeditem = document.createElement("input");
-             addeditem.id = "created_field_"+input_length[itemsadded].name;
-             addeditem.type = "hidden";
-             var changed_name =change_input_name(input_length[itemsadded].name);
-             addeditem.name = "load_values_for_fields["+changed_name+"]";
-             addeditem.value = input_length[itemsadded].value;
-             popupwindow_obj.appendChild(addeditem);
-            }
-    }
-   
-    var input_values_changed = this.document.getElementById("applet_container");
-    var input_length =    input_values_changed.getElementsByTagName("input");
-    headerstext_count =   frames[1].global_js_grid.getColumnCount();
-    }
-    catch(messageerror)
-    {
-    alert(messageerror+" error_loc_2");
-    }
-}
-//**************************************************************************************
-function get_table_row(ruby_id)
-{
-// to get the row number it will run through the column headings and search for the with 
-// the name 'id' , when it has founded the 'id' column it will start running throught 
-// the rows insearch of the ruby id that it received
-
- try
- {
-  var frames = window.opener.frames;
-  //Gets the number of columns
-  var column_count =   parseInt(frames[1].global_js_grid.getColumnCount());
-  for(column_nr  = 0 ;column_nr < column_count ; column_nr++ )
-  {
-  // tests if it id
-   if(frames[1].global_js_grid.getHeaderText(column_nr) == "id")
-   {
-   // iterates through the  rows
-   for(row_nr =  0 ; row_nr <  parseInt(frames[1].global_js_grid.getRowCount());row_nr++)
-   {
-     try
-     {
-      var text_in_selected_cell =  frames[1].global_js_grid.getCellText(column_nr,row_nr );
-      var x = parseInt(text_in_selected_cell);
-     }
-     catch(x)
-         {
-           alert(x+" error_loc_3");
-         }
-     try
-     {
-     //tests if the id's are the same'
-      if((x) == (parseInt(ruby_id)) )
-        {
-         return  row_nr;
-        }
-     }
-      catch(x)
-      {
-       alert(x+" error_loc_4");
-      }
-   }
-}
-
-}
-}
-catch(x)
-{
-alert(x+ "error_loc_5");
-}
-}
-// receives the updated data with the ruby id
-function get_ruby_id(new_values)
-{
-
-    try
-    {
-        var  array_update = new_values.split(",");
-
-        for(updated_item = 0 ; updated_item < array_update.length ;updated_item++ )
-           {
-            var update_array_detail = array_update[updated_item].split("#");
-            var update_key = update_array_detail[0];
-            var update_value = update_array_detail[1];
-            if (update_key == "id")
-              {
-                return  update_value;
-              }
-           }
-    }
-    catch(x)
-    {
-        alert(x);
-    }
-}
-//************************************************************************************
-// updates the grid 
-// 
-
-function update_js_grid(array,new_values)
-{
-
-
- var frames = window.opener.frames;
- var column_count =  parseInt(frames[1].global_js_grid.getColumnCount());
- parseInt(frames[1].global_js_grid.setColumnCount(column_count+1));
- var ruby_object_id = get_ruby_id(new_values);
- var table_row_nr =  get_table_row(ruby_object_id);
-
- try
- {
- // breaks the strings up into arrays 
-  changed_values  = new Array();
-  changed_values = new_values.split(",");
-  load_values = new Array();
-  load_values = array.split(",");
-  
-  for(load_item = 0 ; load_item < changed_values.length ; load_item ++)
-  {
-  // seperates the key from the value  'the new values, the updated values'
-   var updated  = changed_values[load_item].split("#");
-   var key_update  =  updated[0];
-   var value_update =  updated[1];
-    
-    for(start_item = 0 ; start_item < load_values.length ; start_item ++  )
-    {
-    // seperates the key from the value 'values at load'
-     var ini_values = load_values[start_item].split("?");
-     var load_key  = ini_values[0].split("$");
-     var load_value  = ini_values[1].split("_");
-      //if the key of the new and old values are the same and the heading of the column corresond to the 
-      // 'key_update value' then the cell wil be updated with the new values
-     if(key_update == load_key[1])
-       {
-        for(column_nr = 0 ; column_nr  < column_count ;column_nr++)
-         {
-          if(frames[1].global_js_grid.getHeaderText(column_nr) == key_update )
-           {
-
-            frames[1].global_js_grid.setCellText(value_update,column_nr,table_row_nr  );
-           }
-         }
-      }
-    }
-  }
-  }
-  catch(x)
-  {
-   alert(x);
-  }
-  alert("You have updated the grid");
- this.window.close();
-}
-
-function getLeft(el) {
-    var tmp = el.offsetLeft;
-    el = el.offsetParent;
-    while(el) {
-       tmp += el.offsetLeft;
-       el = el.offsetParent;
-    }
-    return tmp;
- }
-
-function getTop(el) {
-   var tmp = el.offsetTop;
-   el = el.offsetParent;
-   while(el) {
-     tmp += el.offsetTop;
-     el = el.offsetParent;
-   }
-   return tmp;
-}
-
-
-function show_column_detail(row_col_id)
-{
-   
-    var recordDiv = document.getElementById("record_div");
-   recordDiv.style.display = '';
-   recordDiv.style.left = "60px"; //the_left + 'px';
-   recordDiv.style.top =  "50px"; //the_top + 'px'; 
-
-   recordDiv.style.width = "445px";
-   recordDiv.style.height = "250px";
-   recordDiv.style.paddingLeft = "7px";
-   var innHtml = "<div id=\"record_caption\" style=\"height:20px; width:100%; background-color:#D8D6D4;\"><table border=\"0\" width=\"100%\" style=\"font-size:12pt; font-weight:bold;\"><tr><td style=\"text-align:right; height:15px;\"><img id=\"read_msg_img\" alt=\"close\" src=\"/images/form_close.PNG\" onclick=\"hide_div();\" /></td></tr></table></div><br />";
-   innHtml += "<textarea id=\"record_field\" readonly=\"readonly\" style=\"width:435; height:200px;\" wrap=\"virtual\"></textarea>";
-   
-   recordDiv.innerHTML = innHtml;
-   
-   recordDiv.style.border = "1px black solid";
-
-   recordDiv.scrollIntoView();
-     
-    new Ajax.Updater('record_field', '/development_tools/data/show_column_detail/' + row_col_id, {asynchronous:true, evalScripts:true});
-}
-  
-function hide_div() {
-   document.getElementById("record_div").style.display = "none";
-}
 /*  Prototype JavaScript framework, version 1.6.0.3
  *  (c) 2005-2008 Sam Stephenson
  *
@@ -5574,2110 +4376,1205 @@ var Scriptaculous = {
   }
 };
 
-Scriptaculous.load();// script.aculo.us effects.js v1.8.2, Tue Nov 18 18:30:58 +0100 2008
-
-// Copyright (c) 2005-2008 Thomas Fuchs (http://script.aculo.us, http://mir.aculo.us)
-// Contributors:
-//  Justin Palmer (http://encytemedia.com/)
-//  Mark Pilgrim (http://diveintomark.org/)
-//  Martin Bialasinki
-//
-// script.aculo.us is freely distributable under the terms of an MIT-style license.
-// For details, see the script.aculo.us web site: http://script.aculo.us/
-
-// converts rgb() and #xxx to #xxxxxx format,
-// returns self (or first argument) if not convertable
-String.prototype.parseColor = function() {
-  var color = '#';
-  if (this.slice(0,4) == 'rgb(') {
-    var cols = this.slice(4,this.length-1).split(',');
-    var i=0; do { color += parseInt(cols[i]).toColorPart() } while (++i<3);
-  } else {
-    if (this.slice(0,1) == '#') {
-      if (this.length==4) for(var i=1;i<4;i++) color += (this.charAt(i) + this.charAt(i)).toLowerCase();
-      if (this.length==7) color = this.toLowerCase();
-    }
-  }
-  return (color.length==7 ? color : (arguments[0] || this));
-};
-
-/*--------------------------------------------------------------------------*/
-
-Element.collectTextNodes = function(element) {
-  return $A($(element).childNodes).collect( function(node) {
-    return (node.nodeType==3 ? node.nodeValue :
-      (node.hasChildNodes() ? Element.collectTextNodes(node) : ''));
-  }).flatten().join('');
-};
-
-Element.collectTextNodesIgnoreClass = function(element, className) {
-  return $A($(element).childNodes).collect( function(node) {
-    return (node.nodeType==3 ? node.nodeValue :
-      ((node.hasChildNodes() && !Element.hasClassName(node,className)) ?
-        Element.collectTextNodesIgnoreClass(node, className) : ''));
-  }).flatten().join('');
-};
-
-Element.setContentZoom = function(element, percent) {
-  element = $(element);
-  element.setStyle({fontSize: (percent/100) + 'em'});
-  if (Prototype.Browser.WebKit) window.scrollBy(0,0);
-  return element;
-};
-
-Element.getInlineOpacity = function(element){
-  return $(element).style.opacity || '';
-};
-
-Element.forceRerendering = function(element) {
-  try {
-    element = $(element);
-    var n = document.createTextNode(' ');
-    element.appendChild(n);
-    element.removeChild(n);
-  } catch(e) { }
-};
-
-/*--------------------------------------------------------------------------*/
-
-var Effect = {
-  _elementDoesNotExistError: {
-    name: 'ElementDoesNotExistError',
-    message: 'The specified DOM element does not exist, but is required for this effect to operate'
-  },
-  Transitions: {
-    linear: Prototype.K,
-    sinoidal: function(pos) {
-      return (-Math.cos(pos*Math.PI)/2) + .5;
-    },
-    reverse: function(pos) {
-      return 1-pos;
-    },
-    flicker: function(pos) {
-      var pos = ((-Math.cos(pos*Math.PI)/4) + .75) + Math.random()/4;
-      return pos > 1 ? 1 : pos;
-    },
-    wobble: function(pos) {
-      return (-Math.cos(pos*Math.PI*(9*pos))/2) + .5;
-    },
-    pulse: function(pos, pulses) {
-      return (-Math.cos((pos*((pulses||5)-.5)*2)*Math.PI)/2) + .5;
-    },
-    spring: function(pos) {
-      return 1 - (Math.cos(pos * 4.5 * Math.PI) * Math.exp(-pos * 6));
-    },
-    none: function(pos) {
-      return 0;
-    },
-    full: function(pos) {
-      return 1;
-    }
-  },
-  DefaultOptions: {
-    duration:   1.0,   // seconds
-    fps:        100,   // 100= assume 66fps max.
-    sync:       false, // true for combining
-    from:       0.0,
-    to:         1.0,
-    delay:      0.0,
-    queue:      'parallel'
-  },
-  tagifyText: function(element) {
-    var tagifyStyle = 'position:relative';
-    if (Prototype.Browser.IE) tagifyStyle += ';zoom:1';
-
-    element = $(element);
-    $A(element.childNodes).each( function(child) {
-      if (child.nodeType==3) {
-        child.nodeValue.toArray().each( function(character) {
-          element.insertBefore(
-            new Element('span', {style: tagifyStyle}).update(
-              character == ' ' ? String.fromCharCode(160) : character),
-              child);
-        });
-        Element.remove(child);
-      }
-    });
-  },
-  multiple: function(element, effect) {
-    var elements;
-    if (((typeof element == 'object') ||
-        Object.isFunction(element)) &&
-       (element.length))
-      elements = element;
-    else
-      elements = $(element).childNodes;
-
-    var options = Object.extend({
-      speed: 0.1,
-      delay: 0.0
-    }, arguments[2] || { });
-    var masterDelay = options.delay;
-
-    $A(elements).each( function(element, index) {
-      new effect(element, Object.extend(options, { delay: index * options.speed + masterDelay }));
-    });
-  },
-  PAIRS: {
-    'slide':  ['SlideDown','SlideUp'],
-    'blind':  ['BlindDown','BlindUp'],
-    'appear': ['Appear','Fade']
-  },
-  toggle: function(element, effect) {
-    element = $(element);
-    effect = (effect || 'appear').toLowerCase();
-    var options = Object.extend({
-      queue: { position:'end', scope:(element.id || 'global'), limit: 1 }
-    }, arguments[2] || { });
-    Effect[element.visible() ?
-      Effect.PAIRS[effect][1] : Effect.PAIRS[effect][0]](element, options);
-  }
-};
-
-Effect.DefaultOptions.transition = Effect.Transitions.sinoidal;
-
-/* ------------- core effects ------------- */
-
-Effect.ScopedQueue = Class.create(Enumerable, {
-  initialize: function() {
-    this.effects  = [];
-    this.interval = null;
-  },
-  _each: function(iterator) {
-    this.effects._each(iterator);
-  },
-  add: function(effect) {
-    var timestamp = new Date().getTime();
-
-    var position = Object.isString(effect.options.queue) ?
-      effect.options.queue : effect.options.queue.position;
-
-    switch(position) {
-      case 'front':
-        // move unstarted effects after this effect
-        this.effects.findAll(function(e){ return e.state=='idle' }).each( function(e) {
-            e.startOn  += effect.finishOn;
-            e.finishOn += effect.finishOn;
-          });
-        break;
-      case 'with-last':
-        timestamp = this.effects.pluck('startOn').max() || timestamp;
-        break;
-      case 'end':
-        // start effect after last queued effect has finished
-        timestamp = this.effects.pluck('finishOn').max() || timestamp;
-        break;
-    }
-
-    effect.startOn  += timestamp;
-    effect.finishOn += timestamp;
-
-    if (!effect.options.queue.limit || (this.effects.length < effect.options.queue.limit))
-      this.effects.push(effect);
-
-    if (!this.interval)
-      this.interval = setInterval(this.loop.bind(this), 15);
-  },
-  remove: function(effect) {
-    this.effects = this.effects.reject(function(e) { return e==effect });
-    if (this.effects.length == 0) {
-      clearInterval(this.interval);
-      this.interval = null;
-    }
-  },
-  loop: function() {
-    var timePos = new Date().getTime();
-    for(var i=0, len=this.effects.length;i<len;i++)
-      this.effects[i] && this.effects[i].loop(timePos);
-  }
-});
-
-Effect.Queues = {
-  instances: $H(),
-  get: function(queueName) {
-    if (!Object.isString(queueName)) return queueName;
-
-    return this.instances.get(queueName) ||
-      this.instances.set(queueName, new Effect.ScopedQueue());
-  }
-};
-Effect.Queue = Effect.Queues.get('global');
-
-Effect.Base = Class.create({
-  position: null,
-  start: function(options) {
-    function codeForEvent(options,eventName){
-      return (
-        (options[eventName+'Internal'] ? 'this.options.'+eventName+'Internal(this);' : '') +
-        (options[eventName] ? 'this.options.'+eventName+'(this);' : '')
-      );
-    }
-    if (options && options.transition === false) options.transition = Effect.Transitions.linear;
-    this.options      = Object.extend(Object.extend({ },Effect.DefaultOptions), options || { });
-    this.currentFrame = 0;
-    this.state        = 'idle';
-    this.startOn      = this.options.delay*1000;
-    this.finishOn     = this.startOn+(this.options.duration*1000);
-    this.fromToDelta  = this.options.to-this.options.from;
-    this.totalTime    = this.finishOn-this.startOn;
-    this.totalFrames  = this.options.fps*this.options.duration;
-
-    this.render = (function() {
-      function dispatch(effect, eventName) {
-        if (effect.options[eventName + 'Internal'])
-          effect.options[eventName + 'Internal'](effect);
-        if (effect.options[eventName])
-          effect.options[eventName](effect);
-      }
-
-      return function(pos) {
-        if (this.state === "idle") {
-          this.state = "running";
-          dispatch(this, 'beforeSetup');
-          if (this.setup) this.setup();
-          dispatch(this, 'afterSetup');
+Scriptaculous.load();        var selected_label
+        
+        //----------------------------------------------------------------------
+        //''Labels'' should be populated from the rails runtime app context
+        //----------------------------------------------------------------------
+        labels = new Array;
+        //labels[0] = "commodity";
+        //labels[1] = "variety";
+        //labels[2] = "pc_code";
+        
+        function nothing()
+        {
         }
-        if (this.state === "running") {
-          pos = (this.options.transition(pos) * this.fromToDelta) + this.options.from;
-          this.position = pos;
-          dispatch(this, 'beforeUpdate');
-          if (this.update) this.update(pos);
-          dispatch(this, 'afterUpdate');
+        
+        //----------------------------------------------------------------------------
+        //'a' is the selected hyperlink which text holds the name of a label field
+        //---------------------------------------------------------------------------
+        
+        function set_selected_style(e)
+        {
+             e.style.borderRight = "gray thin solid";
+             e.style.borderLeft = "gray thin solid";
+             e.style.borderTop = "gray thin solid";
+             e.style.borderBottom = "gray thin solid"; 
+             e.style.backgroundColor = "whitesmoke";
+        
         }
-      };
-    })();
-
-    this.event('beforeStart');
-    if (!this.options.sync)
-      Effect.Queues.get(Object.isString(this.options.queue) ?
-        'global' : this.options.queue.scope).add(this);
-  },
-  loop: function(timePos) {
-    if (timePos >= this.startOn) {
-      if (timePos >= this.finishOn) {
-        this.render(1.0);
-        this.cancel();
-        this.event('beforeFinish');
-        if (this.finish) this.finish();
-        this.event('afterFinish');
-        return;
-      }
-      var pos   = (timePos - this.startOn) / this.totalTime,
-          frame = (pos * this.totalFrames).round();
-      if (frame > this.currentFrame) {
-        this.render(pos);
-        this.currentFrame = frame;
-      }
-    }
-  },
-  cancel: function() {
-    if (!this.options.sync)
-      Effect.Queues.get(Object.isString(this.options.queue) ?
-        'global' : this.options.queue.scope).remove(this);
-    this.state = 'finished';
-  },
-  event: function(eventName) {
-    if (this.options[eventName + 'Internal']) this.options[eventName + 'Internal'](this);
-    if (this.options[eventName]) this.options[eventName](this);
-  },
-  inspect: function() {
-    var data = $H();
-    for(property in this)
-      if (!Object.isFunction(this[property])) data.set(property, this[property]);
-    return '#<Effect:' + data.inspect() + ',options:' + $H(this.options).inspect() + '>';
-  }
-});
-
-Effect.Parallel = Class.create(Effect.Base, {
-  initialize: function(effects) {
-    this.effects = effects || [];
-    this.start(arguments[1]);
-  },
-  update: function(position) {
-    this.effects.invoke('render', position);
-  },
-  finish: function(position) {
-    this.effects.each( function(effect) {
-      effect.render(1.0);
-      effect.cancel();
-      effect.event('beforeFinish');
-      if (effect.finish) effect.finish(position);
-      effect.event('afterFinish');
-    });
-  }
-});
-
-Effect.Tween = Class.create(Effect.Base, {
-  initialize: function(object, from, to) {
-    object = Object.isString(object) ? $(object) : object;
-    var args = $A(arguments), method = args.last(),
-      options = args.length == 5 ? args[3] : null;
-    this.method = Object.isFunction(method) ? method.bind(object) :
-      Object.isFunction(object[method]) ? object[method].bind(object) :
-      function(value) { object[method] = value };
-    this.start(Object.extend({ from: from, to: to }, options || { }));
-  },
-  update: function(position) {
-    this.method(position);
-  }
-});
-
-Effect.Event = Class.create(Effect.Base, {
-  initialize: function() {
-    this.start(Object.extend({ duration: 0 }, arguments[0] || { }));
-  },
-  update: Prototype.emptyFunction
-});
-
-Effect.Opacity = Class.create(Effect.Base, {
-  initialize: function(element) {
-    this.element = $(element);
-    if (!this.element) throw(Effect._elementDoesNotExistError);
-    // make this work on IE on elements without 'layout'
-    if (Prototype.Browser.IE && (!this.element.currentStyle.hasLayout))
-      this.element.setStyle({zoom: 1});
-    var options = Object.extend({
-      from: this.element.getOpacity() || 0.0,
-      to:   1.0
-    }, arguments[1] || { });
-    this.start(options);
-  },
-  update: function(position) {
-    this.element.setOpacity(position);
-  }
-});
-
-Effect.Move = Class.create(Effect.Base, {
-  initialize: function(element) {
-    this.element = $(element);
-    if (!this.element) throw(Effect._elementDoesNotExistError);
-    var options = Object.extend({
-      x:    0,
-      y:    0,
-      mode: 'relative'
-    }, arguments[1] || { });
-    this.start(options);
-  },
-  setup: function() {
-    this.element.makePositioned();
-    this.originalLeft = parseFloat(this.element.getStyle('left') || '0');
-    this.originalTop  = parseFloat(this.element.getStyle('top')  || '0');
-    if (this.options.mode == 'absolute') {
-      this.options.x = this.options.x - this.originalLeft;
-      this.options.y = this.options.y - this.originalTop;
-    }
-  },
-  update: function(position) {
-    this.element.setStyle({
-      left: (this.options.x  * position + this.originalLeft).round() + 'px',
-      top:  (this.options.y  * position + this.originalTop).round()  + 'px'
-    });
-  }
-});
-
-// for backwards compatibility
-Effect.MoveBy = function(element, toTop, toLeft) {
-  return new Effect.Move(element,
-    Object.extend({ x: toLeft, y: toTop }, arguments[3] || { }));
-};
-
-Effect.Scale = Class.create(Effect.Base, {
-  initialize: function(element, percent) {
-    this.element = $(element);
-    if (!this.element) throw(Effect._elementDoesNotExistError);
-    var options = Object.extend({
-      scaleX: true,
-      scaleY: true,
-      scaleContent: true,
-      scaleFromCenter: false,
-      scaleMode: 'box',        // 'box' or 'contents' or { } with provided values
-      scaleFrom: 100.0,
-      scaleTo:   percent
-    }, arguments[2] || { });
-    this.start(options);
-  },
-  setup: function() {
-    this.restoreAfterFinish = this.options.restoreAfterFinish || false;
-    this.elementPositioning = this.element.getStyle('position');
-
-    this.originalStyle = { };
-    ['top','left','width','height','fontSize'].each( function(k) {
-      this.originalStyle[k] = this.element.style[k];
-    }.bind(this));
-
-    this.originalTop  = this.element.offsetTop;
-    this.originalLeft = this.element.offsetLeft;
-
-    var fontSize = this.element.getStyle('font-size') || '100%';
-    ['em','px','%','pt'].each( function(fontSizeType) {
-      if (fontSize.indexOf(fontSizeType)>0) {
-        this.fontSize     = parseFloat(fontSize);
-        this.fontSizeType = fontSizeType;
-      }
-    }.bind(this));
-
-    this.factor = (this.options.scaleTo - this.options.scaleFrom)/100;
-
-    this.dims = null;
-    if (this.options.scaleMode=='box')
-      this.dims = [this.element.offsetHeight, this.element.offsetWidth];
-    if (/^content/.test(this.options.scaleMode))
-      this.dims = [this.element.scrollHeight, this.element.scrollWidth];
-    if (!this.dims)
-      this.dims = [this.options.scaleMode.originalHeight,
-                   this.options.scaleMode.originalWidth];
-  },
-  update: function(position) {
-    var currentScale = (this.options.scaleFrom/100.0) + (this.factor * position);
-    if (this.options.scaleContent && this.fontSize)
-      this.element.setStyle({fontSize: this.fontSize * currentScale + this.fontSizeType });
-    this.setDimensions(this.dims[0] * currentScale, this.dims[1] * currentScale);
-  },
-  finish: function(position) {
-    if (this.restoreAfterFinish) this.element.setStyle(this.originalStyle);
-  },
-  setDimensions: function(height, width) {
-    var d = { };
-    if (this.options.scaleX) d.width = width.round() + 'px';
-    if (this.options.scaleY) d.height = height.round() + 'px';
-    if (this.options.scaleFromCenter) {
-      var topd  = (height - this.dims[0])/2;
-      var leftd = (width  - this.dims[1])/2;
-      if (this.elementPositioning == 'absolute') {
-        if (this.options.scaleY) d.top = this.originalTop-topd + 'px';
-        if (this.options.scaleX) d.left = this.originalLeft-leftd + 'px';
-      } else {
-        if (this.options.scaleY) d.top = -topd + 'px';
-        if (this.options.scaleX) d.left = -leftd + 'px';
-      }
-    }
-    this.element.setStyle(d);
-  }
-});
-
-Effect.Highlight = Class.create(Effect.Base, {
-  initialize: function(element) {
-    this.element = $(element);
-    if (!this.element) throw(Effect._elementDoesNotExistError);
-    var options = Object.extend({ startcolor: '#ffff99' }, arguments[1] || { });
-    this.start(options);
-  },
-  setup: function() {
-    // Prevent executing on elements not in the layout flow
-    if (this.element.getStyle('display')=='none') { this.cancel(); return; }
-    // Disable background image during the effect
-    this.oldStyle = { };
-    if (!this.options.keepBackgroundImage) {
-      this.oldStyle.backgroundImage = this.element.getStyle('background-image');
-      this.element.setStyle({backgroundImage: 'none'});
-    }
-    if (!this.options.endcolor)
-      this.options.endcolor = this.element.getStyle('background-color').parseColor('#ffffff');
-    if (!this.options.restorecolor)
-      this.options.restorecolor = this.element.getStyle('background-color');
-    // init color calculations
-    this._base  = $R(0,2).map(function(i){ return parseInt(this.options.startcolor.slice(i*2+1,i*2+3),16) }.bind(this));
-    this._delta = $R(0,2).map(function(i){ return parseInt(this.options.endcolor.slice(i*2+1,i*2+3),16)-this._base[i] }.bind(this));
-  },
-  update: function(position) {
-    this.element.setStyle({backgroundColor: $R(0,2).inject('#',function(m,v,i){
-      return m+((this._base[i]+(this._delta[i]*position)).round().toColorPart()); }.bind(this)) });
-  },
-  finish: function() {
-    this.element.setStyle(Object.extend(this.oldStyle, {
-      backgroundColor: this.options.restorecolor
-    }));
-  }
-});
-
-Effect.ScrollTo = function(element) {
-  var options = arguments[1] || { },
-  scrollOffsets = document.viewport.getScrollOffsets(),
-  elementOffsets = $(element).cumulativeOffset();
-
-  if (options.offset) elementOffsets[1] += options.offset;
-
-  return new Effect.Tween(null,
-    scrollOffsets.top,
-    elementOffsets[1],
-    options,
-    function(p){ scrollTo(scrollOffsets.left, p.round()); }
-  );
-};
-
-/* ------------- combination effects ------------- */
-
-Effect.Fade = function(element) {
-  element = $(element);
-  var oldOpacity = element.getInlineOpacity();
-  var options = Object.extend({
-    from: element.getOpacity() || 1.0,
-    to:   0.0,
-    afterFinishInternal: function(effect) {
-      if (effect.options.to!=0) return;
-      effect.element.hide().setStyle({opacity: oldOpacity});
-    }
-  }, arguments[1] || { });
-  return new Effect.Opacity(element,options);
-};
-
-Effect.Appear = function(element) {
-  element = $(element);
-  var options = Object.extend({
-  from: (element.getStyle('display') == 'none' ? 0.0 : element.getOpacity() || 0.0),
-  to:   1.0,
-  // force Safari to render floated elements properly
-  afterFinishInternal: function(effect) {
-    effect.element.forceRerendering();
-  },
-  beforeSetup: function(effect) {
-    effect.element.setOpacity(effect.options.from).show();
-  }}, arguments[1] || { });
-  return new Effect.Opacity(element,options);
-};
-
-Effect.Puff = function(element) {
-  element = $(element);
-  var oldStyle = {
-    opacity: element.getInlineOpacity(),
-    position: element.getStyle('position'),
-    top:  element.style.top,
-    left: element.style.left,
-    width: element.style.width,
-    height: element.style.height
-  };
-  return new Effect.Parallel(
-   [ new Effect.Scale(element, 200,
-      { sync: true, scaleFromCenter: true, scaleContent: true, restoreAfterFinish: true }),
-     new Effect.Opacity(element, { sync: true, to: 0.0 } ) ],
-     Object.extend({ duration: 1.0,
-      beforeSetupInternal: function(effect) {
-        Position.absolutize(effect.effects[0].element);
-      },
-      afterFinishInternal: function(effect) {
-         effect.effects[0].element.hide().setStyle(oldStyle); }
-     }, arguments[1] || { })
-   );
-};
-
-Effect.BlindUp = function(element) {
-  element = $(element);
-  element.makeClipping();
-  return new Effect.Scale(element, 0,
-    Object.extend({ scaleContent: false,
-      scaleX: false,
-      restoreAfterFinish: true,
-      afterFinishInternal: function(effect) {
-        effect.element.hide().undoClipping();
-      }
-    }, arguments[1] || { })
-  );
-};
-
-Effect.BlindDown = function(element) {
-  element = $(element);
-  var elementDimensions = element.getDimensions();
-  return new Effect.Scale(element, 100, Object.extend({
-    scaleContent: false,
-    scaleX: false,
-    scaleFrom: 0,
-    scaleMode: {originalHeight: elementDimensions.height, originalWidth: elementDimensions.width},
-    restoreAfterFinish: true,
-    afterSetup: function(effect) {
-      effect.element.makeClipping().setStyle({height: '0px'}).show();
-    },
-    afterFinishInternal: function(effect) {
-      effect.element.undoClipping();
-    }
-  }, arguments[1] || { }));
-};
-
-Effect.SwitchOff = function(element) {
-  element = $(element);
-  var oldOpacity = element.getInlineOpacity();
-  return new Effect.Appear(element, Object.extend({
-    duration: 0.4,
-    from: 0,
-    transition: Effect.Transitions.flicker,
-    afterFinishInternal: function(effect) {
-      new Effect.Scale(effect.element, 1, {
-        duration: 0.3, scaleFromCenter: true,
-        scaleX: false, scaleContent: false, restoreAfterFinish: true,
-        beforeSetup: function(effect) {
-          effect.element.makePositioned().makeClipping();
-        },
-        afterFinishInternal: function(effect) {
-          effect.element.hide().undoClipping().undoPositioned().setStyle({opacity: oldOpacity});
+        
+        //-------------------------------------------------------
+        //This method updates the hidden field ''label_sequences'
+        //with the complete current sequence
+        //-------------------------------------------------------
+        function set_sequence()
+        {
+            hidden_field = document.getElementById("label_sequences_hidden_field");
+            seq = "[";
+            for(i = 0;i < labels.length ; i ++)
+            {
+              if(i == labels.length - 1)
+                seq += "'" + labels[i] + "']";   
+              else
+                seq += "'" + labels[i] + "',"; 
+              
+              hidden_field.value = seq;
+            }
+        
         }
-      });
-    }
-  }, arguments[1] || { }));
-};
-
-Effect.DropOut = function(element) {
-  element = $(element);
-  var oldStyle = {
-    top: element.getStyle('top'),
-    left: element.getStyle('left'),
-    opacity: element.getInlineOpacity() };
-  return new Effect.Parallel(
-    [ new Effect.Move(element, {x: 0, y: 100, sync: true }),
-      new Effect.Opacity(element, { sync: true, to: 0.0 }) ],
-    Object.extend(
-      { duration: 0.5,
-        beforeSetup: function(effect) {
-          effect.effects[0].element.makePositioned();
-        },
-        afterFinishInternal: function(effect) {
-          effect.effects[0].element.hide().undoPositioned().setStyle(oldStyle);
+        
+         function set_unselected_style(e)
+        {
+             e.style.borderRight = "none";
+             e.style.borderLeft = "none";
+             e.style.borderTop = "none";
+             e.style.borderBottom = "none"; 
+             e.style.backgroundColor = "white";
+        
         }
-      }, arguments[1] || { }));
-};
-
-Effect.Shake = function(element) {
-  element = $(element);
-  var options = Object.extend({
-    distance: 20,
-    duration: 0.5
-  }, arguments[1] || {});
-  var distance = parseFloat(options.distance);
-  var split = parseFloat(options.duration) / 10.0;
-  var oldStyle = {
-    top: element.getStyle('top'),
-    left: element.getStyle('left') };
-    return new Effect.Move(element,
-      { x:  distance, y: 0, duration: split, afterFinishInternal: function(effect) {
-    new Effect.Move(effect.element,
-      { x: -distance*2, y: 0, duration: split*2,  afterFinishInternal: function(effect) {
-    new Effect.Move(effect.element,
-      { x:  distance*2, y: 0, duration: split*2,  afterFinishInternal: function(effect) {
-    new Effect.Move(effect.element,
-      { x: -distance*2, y: 0, duration: split*2,  afterFinishInternal: function(effect) {
-    new Effect.Move(effect.element,
-      { x:  distance*2, y: 0, duration: split*2,  afterFinishInternal: function(effect) {
-    new Effect.Move(effect.element,
-      { x: -distance, y: 0, duration: split, afterFinishInternal: function(effect) {
-        effect.element.undoPositioned().setStyle(oldStyle);
-  }}); }}); }}); }}); }}); }});
-};
-
-Effect.SlideDown = function(element) {
-  element = $(element).cleanWhitespace();
-  // SlideDown need to have the content of the element wrapped in a container element with fixed height!
-  var oldInnerBottom = element.down().getStyle('bottom');
-  var elementDimensions = element.getDimensions();
-  return new Effect.Scale(element, 100, Object.extend({
-    scaleContent: false,
-    scaleX: false,
-    scaleFrom: window.opera ? 0 : 1,
-    scaleMode: {originalHeight: elementDimensions.height, originalWidth: elementDimensions.width},
-    restoreAfterFinish: true,
-    afterSetup: function(effect) {
-      effect.element.makePositioned();
-      effect.element.down().makePositioned();
-      if (window.opera) effect.element.setStyle({top: ''});
-      effect.element.makeClipping().setStyle({height: '0px'}).show();
-    },
-    afterUpdateInternal: function(effect) {
-      effect.element.down().setStyle({bottom:
-        (effect.dims[0] - effect.element.clientHeight) + 'px' });
-    },
-    afterFinishInternal: function(effect) {
-      effect.element.undoClipping().undoPositioned();
-      effect.element.down().undoPositioned().setStyle({bottom: oldInnerBottom}); }
-    }, arguments[1] || { })
-  );
-};
-
-Effect.SlideUp = function(element) {
-  element = $(element).cleanWhitespace();
-  var oldInnerBottom = element.down().getStyle('bottom');
-  var elementDimensions = element.getDimensions();
-  return new Effect.Scale(element, window.opera ? 0 : 1,
-   Object.extend({ scaleContent: false,
-    scaleX: false,
-    scaleMode: 'box',
-    scaleFrom: 100,
-    scaleMode: {originalHeight: elementDimensions.height, originalWidth: elementDimensions.width},
-    restoreAfterFinish: true,
-    afterSetup: function(effect) {
-      effect.element.makePositioned();
-      effect.element.down().makePositioned();
-      if (window.opera) effect.element.setStyle({top: ''});
-      effect.element.makeClipping().show();
-    },
-    afterUpdateInternal: function(effect) {
-      effect.element.down().setStyle({bottom:
-        (effect.dims[0] - effect.element.clientHeight) + 'px' });
-    },
-    afterFinishInternal: function(effect) {
-      effect.element.hide().undoClipping().undoPositioned();
-      effect.element.down().undoPositioned().setStyle({bottom: oldInnerBottom});
-    }
-   }, arguments[1] || { })
-  );
-};
-
-// Bug in opera makes the TD containing this element expand for a instance after finish
-Effect.Squish = function(element) {
-  return new Effect.Scale(element, window.opera ? 1 : 0, {
-    restoreAfterFinish: true,
-    beforeSetup: function(effect) {
-      effect.element.makeClipping();
-    },
-    afterFinishInternal: function(effect) {
-      effect.element.hide().undoClipping();
-    }
-  });
-};
-
-Effect.Grow = function(element) {
-  element = $(element);
-  var options = Object.extend({
-    direction: 'center',
-    moveTransition: Effect.Transitions.sinoidal,
-    scaleTransition: Effect.Transitions.sinoidal,
-    opacityTransition: Effect.Transitions.full
-  }, arguments[1] || { });
-  var oldStyle = {
-    top: element.style.top,
-    left: element.style.left,
-    height: element.style.height,
-    width: element.style.width,
-    opacity: element.getInlineOpacity() };
-
-  var dims = element.getDimensions();
-  var initialMoveX, initialMoveY;
-  var moveX, moveY;
-
-  switch (options.direction) {
-    case 'top-left':
-      initialMoveX = initialMoveY = moveX = moveY = 0;
-      break;
-    case 'top-right':
-      initialMoveX = dims.width;
-      initialMoveY = moveY = 0;
-      moveX = -dims.width;
-      break;
-    case 'bottom-left':
-      initialMoveX = moveX = 0;
-      initialMoveY = dims.height;
-      moveY = -dims.height;
-      break;
-    case 'bottom-right':
-      initialMoveX = dims.width;
-      initialMoveY = dims.height;
-      moveX = -dims.width;
-      moveY = -dims.height;
-      break;
-    case 'center':
-      initialMoveX = dims.width / 2;
-      initialMoveY = dims.height / 2;
-      moveX = -dims.width / 2;
-      moveY = -dims.height / 2;
-      break;
-  }
-
-  return new Effect.Move(element, {
-    x: initialMoveX,
-    y: initialMoveY,
-    duration: 0.01,
-    beforeSetup: function(effect) {
-      effect.element.hide().makeClipping().makePositioned();
-    },
-    afterFinishInternal: function(effect) {
-      new Effect.Parallel(
-        [ new Effect.Opacity(effect.element, { sync: true, to: 1.0, from: 0.0, transition: options.opacityTransition }),
-          new Effect.Move(effect.element, { x: moveX, y: moveY, sync: true, transition: options.moveTransition }),
-          new Effect.Scale(effect.element, 100, {
-            scaleMode: { originalHeight: dims.height, originalWidth: dims.width },
-            sync: true, scaleFrom: window.opera ? 1 : 0, transition: options.scaleTransition, restoreAfterFinish: true})
-        ], Object.extend({
-             beforeSetup: function(effect) {
-               effect.effects[0].element.setStyle({height: '0px'}).show();
-             },
-             afterFinishInternal: function(effect) {
-               effect.effects[0].element.undoClipping().undoPositioned().setStyle(oldStyle);
+        
+        function select(a)
+        {
+        
+           if(selected_label != null)
+                //selected_label.parentNode.style.backgroundColor = "white";
+                set_unselected_style(selected_label.parentNode)
+                selected_label = a
+                //a.parentNode.style.backgroundColor = "whitesmoke";
+                set_selected_style(a.parentNode);
+                
+        
+        }
+       
+       function find_label_index()
+       {
+            for(i = 0;i < labels.length;i++)
+             {
+                if(labels[i] == selected_label.innerHTML)
+                    return i
              }
-           }, options)
-      );
-    }
-  });
-};
+             
+             alert('error: label not found in labels array');
+       }
+       
+        function go_up()
+        {
+           //swap the selected label with one with one index lower
+           curr_index = find_label_index();
+           
+            //1)find the 'a' with text of index one less than this one and
+            //set its text to the label with 'curr_index'
+            //2)Set the selected link to text
+            //   of label with 'curr_index - 1'
+            table = document.getElementById('label_fields');
+            fields = table.getElementsByTagName("a");
+            
+            for(i = 0;i < fields.length;i ++)
+            {
+                if(fields[i].innerHTML == labels[curr_index - 1])
+                {
+                    fields[i].innerHTML = selected_label.innerHTML;
+                    selected_label.innerHTML = labels[curr_index - 1]; 
+                    //now swap the contents of the labels collection
+                    temp = labels[curr_index - 1]
+                    labels[curr_index - 1] = labels[curr_index]
+                    labels[curr_index] = temp
+                    //move the selection cursor with the moved label
+                    //selected_label.parentNode.style.backgroundColor = "white";
+                    set_unselected_style(selected_label.parentNode)
+                    
+                    //fields[i].parentNode.style.backgroundColor = "whitesmoke";
+                    selected_label = fields[i];
+                    set_selected_style(fields[i].parentNode)
+                    set_sequence();
+                 }   
+            }        
+        
+        }
+    
+        function go_down()
+        {
+           //swap the selected label with one with one index lower
+           curr_index = find_label_index();
+           
+            //1)find the 'a' with text of index one less than this one and
+            //set its text to the label with 'curr_index'
+            //2)Set the selected link to text
+            //   of label with 'curr_index - 1'
+            table = document.getElementById('label_fields');
+            fields = table.getElementsByTagName("a");
+            
+            for(i = 0;i < fields.length;i ++)
+            {
+                if(fields[i].innerHTML == labels[curr_index + 1])
+                {
+                    fields[i].innerHTML = selected_label.innerHTML;
+                    selected_label.innerHTML = labels[curr_index + 1]; 
+                    //now swap the contents of the labels collection
+                    temp = labels[curr_index + 1]
+                    labels[curr_index + 1] = labels[curr_index]
+                    labels[curr_index] = temp
+                    //selected_label.parentNode.style.backgroundColor = "white";
+                     set_unselected_style(selected_label.parentNode)
+                    //fields[i].parentNode.style.backgroundColor = "whitesmoke";
+                   
+                    selected_label = fields[i];
+                     set_selected_style(fields[i].parentNode)
+                     set_sequence();
+                    
+                 }   
+            }        
+        
+        }
+ var separators = new Array;
+ var separator_states = new Array;
+ var n_separators;
+ var input_fields = new Array;
 
-Effect.Shrink = function(element) {
-  element = $(element);
-  var options = Object.extend({
-    direction: 'center',
-    moveTransition: Effect.Transitions.sinoidal,
-    scaleTransition: Effect.Transitions.sinoidal,
-    opacityTransition: Effect.Transitions.none
-  }, arguments[1] || { });
-  var oldStyle = {
-    top: element.style.top,
-    left: element.style.left,
-    height: element.style.height,
-    width: element.style.width,
-    opacity: element.getInlineOpacity() };
 
-  var dims = element.getDimensions();
-  var moveX, moveY;
+ function get_row_end_pos(text)
+ {
+   i = 5;
+  
+   found = false;
+   while(!found)
+   {
+     
+     if(text[i - 5] + text[i -4] + text[i - 3] + text[i - 2] + text[i - 1] == "</tr>")
+        found = true;
+     else
+       i ++;
+     
+     
+   }
+   
+   
+   return i;
+   
+ }
+ 
 
-  switch (options.direction) {
-    case 'top-left':
-      moveX = moveY = 0;
-      break;
-    case 'top-right':
-      moveX = dims.width;
-      moveY = 0;
-      break;
-    case 'bottom-left':
-      moveX = 0;
-      moveY = dims.height;
-      break;
-    case 'bottom-right':
-      moveX = dims.width;
-      moveY = dims.height;
-      break;
-    case 'center':
-      moveX = dims.width / 2;
-      moveY = dims.height / 2;
-      break;
+
+  function get_start_pos(text,start_pos,matcher)
+ {
+   i = start_pos;
+   found = false;
+   chars = matcher.length
+   
+   while(!found)
+   {
+     word = "";
+     for(c = chars ; c > 0; c--){
+      word += text[i - c];
+     }
+     
+      if(word == matcher)
+        found = true;
+     else
+       i --;
+     
+   }
+   
+   return i;
+   
+ }
+ 
+  
+  function get_form_htm()
+  {
+     form = document.getElementById('applet_container').innerHTML;
+    sep1_start = form.indexOf('separator1');
+    
+    sep1_clean_start = get_start_pos(form,sep1_start,"<tr>")
+    //alert("form: " + form.substring(0,sep1_clean_start - 4));
+    return form.substring(0,sep1_clean_start - 4);
   }
-
-  return new Effect.Parallel(
-    [ new Effect.Opacity(element, { sync: true, to: 0.0, from: 1.0, transition: options.opacityTransition }),
-      new Effect.Scale(element, window.opera ? 1 : 0, { sync: true, transition: options.scaleTransition, restoreAfterFinish: true}),
-      new Effect.Move(element, { x: moveX, y: moveY, sync: true, transition: options.moveTransition })
-    ], Object.extend({
-         beforeStartInternal: function(effect) {
-           effect.effects[0].element.makePositioned().makeClipping();
-         },
-         afterFinishInternal: function(effect) {
-           effect.effects[0].element.hide().undoClipping().undoPositioned().setStyle(oldStyle); }
-       }, options)
-  );
-};
-
-Effect.Pulsate = function(element) {
-  element = $(element);
-  var options    = arguments[1] || { },
-    oldOpacity = element.getInlineOpacity(),
-    transition = options.transition || Effect.Transitions.linear,
-    reverser   = function(pos){
-      return 1 - transition((-Math.cos((pos*(options.pulses||5)*2)*Math.PI)/2) + .5);
-    };
-
-  return new Effect.Opacity(element,
-    Object.extend(Object.extend({  duration: 2.0, from: 0,
-      afterFinishInternal: function(effect) { effect.element.setStyle({opacity: oldOpacity}); }
-    }, options), {transition: reverser}));
-};
-
-Effect.Fold = function(element) {
-  element = $(element);
-  var oldStyle = {
-    top: element.style.top,
-    left: element.style.left,
-    width: element.style.width,
-    height: element.style.height };
-  element.makeClipping();
-  return new Effect.Scale(element, 5, Object.extend({
-    scaleContent: false,
-    scaleX: false,
-    afterFinishInternal: function(effect) {
-    new Effect.Scale(element, 1, {
-      scaleContent: false,
-      scaleY: false,
-      afterFinishInternal: function(effect) {
-        effect.element.hide().undoClipping().setStyle(oldStyle);
-      } });
-  }}, arguments[1] || { }));
-};
-
-Effect.Morph = Class.create(Effect.Base, {
-  initialize: function(element) {
-    this.element = $(element);
-    if (!this.element) throw(Effect._elementDoesNotExistError);
-    var options = Object.extend({
-      style: { }
-    }, arguments[1] || { });
-
-    if (!Object.isString(options.style)) this.style = $H(options.style);
-    else {
-      if (options.style.include(':'))
-        this.style = options.style.parseStyle();
-      else {
-        this.element.addClassName(options.style);
-        this.style = $H(this.element.getStyles());
-        this.element.removeClassName(options.style);
-        var css = this.element.getStyles();
-        this.style = this.style.reject(function(style) {
-          return style.value == css[style.key];
-        });
-        options.afterFinishInternal = function(effect) {
-          effect.element.addClassName(effect.options.style);
-          effect.transforms.each(function(transform) {
-            effect.element.style[transform.style] = '';
-          });
-        };
+  
+  function get_form_end_htm()
+  {
+    form = document.getElementById('applet_container').innerHTML;
+    form_end_start = form.indexOf("submit_button");
+    form_end_clean_start = get_start_pos(form,form_end_start,"</tr>")
+    form_end_htm = form.substring(form_end_clean_start,form.length -1);
+   
+    return form_end_htm;
+  
+  }
+  
+  function get_collapsed_separator(separator_id)
+  {
+    form = document.getElementById('applet_container').innerHTML;
+    this_sep_start = form.indexOf(separator_id);
+    
+    this_sep_clean_start = get_start_pos(form,this_sep_start,"<tr>") -4
+    
+     rest_htm = form.substring(this_sep_clean_start,form.length);
+     
+     
+     this_sep_end = get_row_end_pos(rest_htm)
+     
+     return rest_htm.substring(0,this_sep_end) + "</tr>"
+  
+  
+  }
+  
+  
+  function get_separator_htm(separator_id)
+  {
+    //get start_pos - that is clean start pos (starting with <tr>)
+    //get end pos: it is the clean starting pos of the next separator - 1
+    //if the next separator does not exist, then this is the bottom one,
+    // in which case the end is '<input type='submit''
+    
+    form = document.getElementById('applet_container').innerHTML;
+    this_sep_start = form.indexOf(separator_id);
+    
+    this_sep_clean_start = get_start_pos(form,this_sep_start,"<tr>") -4
+    
+    next_sep_id = ""
+    next_sep_val = parseInt(separator_id[separator_id.length -1]) + 1;
+    next_sep_id = "separator" + next_sep_val.toString();
+    
+    next_sep_start = form.indexOf(next_sep_id);
+    
+    if(next_sep_start != -1)
+    {
+      next_sep_clean_start = get_start_pos(form,next_sep_start,"<tr>")
+    
+      this_sep_htm = form.substring(this_sep_clean_start, next_sep_clean_start - 4);
+    }
+    else
+    {   
+      
+        form_end_start = form.indexOf("submit_button");
+        
+        form_end_clean_start = get_start_pos(form,form_end_start,"</tr>")
+        this_sep_htm = form.substring(this_sep_clean_start, form_end_clean_start);
+    }
+    
+    
+    return this_sep_htm;
+  
+  
+  }
+  
+  
+ function collapse_all()
+ {
+    store_control_values();
+    
+     for(f = 1; f <= n_separators; f++)
+    {
+       id = "separator" + f.toString();
+       //alert(id + ": " + separator_states[id]);
+       if (separator_states[id] == null)
+        separator_states[id]= true; //expanded
+    }
+    
+    
+    //write all seps to memory that you can
+    for(b = 1; b <= n_separators; b++)
+    {
+       //alert("loop");
+        id = "separator" + b.toString();
+        
+         
+        el = document.getElementById(id);
+       // alert("cid: " + id);
+        if(separator_states[id] == true)
+        {
+           
+            separators[id] = get_separator_htm(id);
+            
+         
+        }
+    }
+    
+    //set states to collapsed
+     for(b = 1; b <= n_separators; b++)
+    {
+       id = "separator" + b.toString();
+       //alert(id + ": " + separator_states[id]);
+       separator_states[id] = false;
+       
+    }
+    
+    //rebuild form in collapsed state
+    new_form = get_form_htm();
+    
+    for(d = 1; d <= n_separators; d++)
+    {
+        id = "separator" + d.toString();
+       // alert(id);
+        el = document.getElementById(id);
+    
+          if(separator_states[id] == true)
+          {
+            new_form += separators[id];
+            //alert(separators[id]);
+          }
+          else
+          {
+            new_form += get_collapsed_separator(id)
+          }
+   
+    }
+    //alert(get_form_end_htm());
+    new_form += get_form_end_htm();
+    document.getElementById('applet_container').innerHTML = new_form;
+    
+    set_images();
+    
+    
+ 
+ }
+ 
+ function expand_all()
+ {
+     store_control_values();
+     
+     for(f = 1; f <= n_separators; f++)
+    {
+       id = "separator" + f.toString();
+       //alert(id + ": " + separator_states[id]);
+       if (separator_states[id] == null)
+        separator_states[id]= true; //expanded
+    }
+    
+    
+    //write all seps to memory that you can
+    for(b = 1; b <= n_separators; b++)
+    {
+       //alert("loop");
+        id = "separator" + b.toString();
+        
+         
+        el = document.getElementById(id);
+       // alert("cid: " + id);
+        if(separator_states[id] == true)
+        {
+           
+            separators[id] = get_separator_htm(id);
+            
+         
+        }
+    }
+    
+    //set states to expanded
+     for(b = 1; b <= n_separators; b++)
+    {
+       id = "separator" + b.toString();
+       //alert(id + ": " + separator_states[id]);
+       separator_states[id] = true;
+       
+    }
+    
+    //rebuild form in collapsed state
+    new_form = get_form_htm();
+    
+    for(d = 1; d <= n_separators; d++)
+    {
+        id = "separator" + d.toString();
+       // alert(id);
+        el = document.getElementById(id);
+    
+          if(separator_states[id] == true)
+          {
+            new_form += separators[id];
+            //alert(separators[id]);
+          }
+          else
+          {
+            new_form += get_collapsed_separator(id)
+          }
+   
+    }
+    //alert(get_form_end_htm());
+    new_form += get_form_end_htm();
+    document.getElementById('applet_container').innerHTML = new_form;
+    
+    set_images();
+    
+    restore_control_values();
+    
+    return true;
+ 
+ }
+ 
+ function set_images()
+ {
+    for(x = 1; x <= n_separators; x++)
+    {
+       id = "separator" + x.toString();
+       img_id = id + "_img";
+       //alert(id + ": " + separator_states[id]);
+       if (separator_states[id]== true)
+         document.getElementById(img_id).src = "/images/expanded.png";
+       else
+         document.getElementById(img_id).src = "/images/collapsed.png";
+       
+     
+    }
+    
+   
+ }
+ 
+ function set_observer_for_reworks_carton_edit()
+ {
+ 
+  //el = document.getElementById("ajax_distributor_cell")
+ 
+   //alert((el == null).toString());
+  //-----------------------
+   //CARTON EDIT FORM
+   //-----------------------
+   if(document.getElementById('carton_edit_carton_pack_product_code'))
+   {
+     new Form.Element.EventObserver('carton_edit_carton_pack_product_code', function(element, value) {new Ajax.Updater('calculated_mass_cell', '/production/reworks/cpc_changed', {asynchronous:true, evalScripts:true, onComplete:function(request){
+     img = document.getElementById('img_carton_edit_carton_pack_product_code');
+     if(img != null)img.style.display = 'none';}, onLoading:function(request){show_element('img_carton_edit_carton_pack_product_code');}, parameters:value})})
+   }
+   
+   if(document.getElementById('carton_edit_item_pack_product_code'))
+   {
+    new Form.Element.EventObserver('carton_edit_item_pack_product_code', function(element, value) {new Ajax.Updater('calculated_mass_cell', '/production/reworks/ipc_changed', {asynchronous:true, evalScripts:true, onComplete:function(request){
+    img = document.getElementById('img_carton_edit_item_pack_product_code');
+    if(img != null)img.style.display = 'none';}, onLoading:function(request){show_element('img_carton_edit_item_pack_product_code');}, parameters:value})})
+   }
+   
+   if(document.getElementById('carton_edit_items_per_unit'))
+   {
+      new Form.Element.EventObserver('carton_edit_items_per_unit', function(element, value) {new Ajax.Updater('calculated_mass_cell', '/production/reworks/items_per_unit_changed', {asynchronous:true, evalScripts:true, onComplete:function(request){
+      img = document.getElementById('img_carton_edit_items_per_unit');
+      if(img != null)img.style.display = 'none';}, onLoading:function(request){show_element('img_carton_edit_items_per_unit');}, parameters:value})})
+   }
+   
+   if(document.getElementById('carton_edit_units_per_carton'))
+   {
+      new Form.Element.EventObserver('carton_edit_units_per_carton', function(element, value) {new Ajax.Updater('calculated_mass_cell', '/production/reworks/units_per_carton_changed', {asynchronous:true, evalScripts:true, onComplete:function(request){
+      img = document.getElementById('img_carton_edit_units_per_carton');
+      if(img != null)img.style.display = 'none';}, onLoading:function(request){show_element('img_carton_edit_units_per_carton');}, parameters:value})})
+    }
+    
+   if(document.getElementById('carton_edit_organization_code'))
+   { 
+      new Form.Element.EventObserver('carton_edit_organization_code', function(element, value) {new Ajax.Updater('target_market_short_cell', '/production/reworks/marketer_org_combo_changed', {asynchronous:true, evalScripts:true, onComplete:function(request){
+      img = document.getElementById('img_carton_edit_organization_code');
+      if(img != null)img.style.display = 'none';}, onLoading:function(request){show_element('img_carton_edit_organization_code');}, parameters:value})})
+  
+   }
+ }
+ 
+ 
+ function set_observer()
+ {
+  
+   
+   //---------------------------------------
+   //PACK MATERIALS FORM
+   //---------------------------------------
+   if(document.getElementById('pack_material_product_commodity_group_code'))
+   {
+     new Form.Element.EventObserver('pack_material_product_commodity_group_code', function(element, value) {new Ajax.Updater('commodity_code_cell', '/products/pack_material_product/pack_material_product_commodity_group_code_changed', {asynchronous:true, evalScripts:true, onComplete:function(request){to_clears = [['pack_material_product_marketing_variety_code','pack_material_product_commodity_code']];
+     clear_combos(to_clears);
+     img = document.getElementById('img_pack_material_product_commodity_group_code');
+     if(img != null)img.style.display = 'none';}, onLoading:function(request){show_element('img_pack_material_product_commodity_group_code');}, parameters:value})});
+     
+     if(document.getElementById('pack_material_product_marketing_variety_code'))
+     {
+        new Form.Element.EventObserver('pack_material_product_commodity_code', function(element, value) {new Ajax.Updater('marketing_variety_code_cell', '/products/pack_material_product/pack_material_product_commodity_code_changed', {asynchronous:true, evalScripts:true, onComplete:function(request){
+        img = document.getElementById('img_pack_material_product_commodity_code');
+        if(img != null)img.style.display = 'none';}, onLoading:function(request){show_element('img_pack_material_product_commodity_code');}, parameters:value})});
+    }
+   }
+  }
+ 
+ function restore_control_values()
+ {
+  
+   for(key in input_fields)
+   {
+     stored_control = input_fields[key];
+    
+    //if (!stored_control.id)alert(stored_control.name);
+    
+    if(stored_control.id )
+      active_control = document.getElementById(stored_control.id);
+    else{
+      if(stored_control.name)
+      {
+        if(stored_control.type == "select-one")
+        {
+           active_control = document.getElementsByName(stored_control.name)[0] 
+        }
+        else
+        {
+            active_controls = document.getElementsByName(stored_control.name);
+            if(active_controls.length > 1)
+                active_control = active_controls[1];
+         }
       }
     }
-    this.start(options);
-  },
-
-  setup: function(){
-    function parseColor(color){
-      if (!color || ['rgba(0, 0, 0, 0)','transparent'].include(color)) color = '#ffffff';
-      color = color.parseColor();
-      return $R(0,2).map(function(i){
-        return parseInt( color.slice(i*2+1,i*2+3), 16 );
-      });
-    }
-    this.transforms = this.style.map(function(pair){
-      var property = pair[0], value = pair[1], unit = null;
-
-      if (value.parseColor('#zzzzzz') != '#zzzzzz') {
-        value = value.parseColor();
-        unit  = 'color';
-      } else if (property == 'opacity') {
-        value = parseFloat(value);
-        if (Prototype.Browser.IE && (!this.element.currentStyle.hasLayout))
-          this.element.setStyle({zoom: 1});
-      } else if (Element.CSS_LENGTH.test(value)) {
-          var components = value.match(/^([\+\-]?[0-9\.]+)(.*)$/);
-          value = parseFloat(components[1]);
-          unit = (components.length == 3) ? components[2] : null;
+    
+     if(active_control)
+     {
+        //active_control = stored_control;
+       // alert (active_control.type);
+        if(active_control.type == "select-one")
+         {
+            if(stored_control.options)
+            {
+              for(y = 0;y < stored_control.options.length;y++)
+              {
+              
+                 active_control.options[y].selected = stored_control.options[y].selected;
+                 active_control.options[y].value = stored_control.options[y].value;
+                 active_control.options[y].text = stored_control.options[y].text;
+             }
+            }
+          }
+        else if(active_control.type == "text")
+          active_control.value = stored_control.value;
+          
+        else if(active_control.type == "checkbox"){
+          //alert(active_control.type);
+          active_control.value = stored_control.value;
+          active_control.checked = stored_control.checked;
+          }
+          
+        else if(active_control.type == "textarea"){
+           active_control.childNodes[0] = stored_control.childNodes[0];
+           }
+        
+         else if(active_control.type == "hidden"){
+           active_control.value = stored_control.value;
+           }
+          
       }
-
-      var originalValue = this.element.getStyle(property);
-      return {
-        style: property.camelize(),
-        originalValue: unit=='color' ? parseColor(originalValue) : parseFloat(originalValue || 0),
-        targetValue: unit=='color' ? parseColor(value) : value,
-        unit: unit
-      };
-    }.bind(this)).reject(function(transform){
-      return (
-        (transform.originalValue == transform.targetValue) ||
-        (
-          transform.unit != 'color' &&
-          (isNaN(transform.originalValue) || isNaN(transform.targetValue))
-        )
-      );
-    });
-  },
-  update: function(position) {
-    var style = { }, transform, i = this.transforms.length;
-    while(i--)
-      style[(transform = this.transforms[i]).style] =
-        transform.unit=='color' ? '#'+
-          (Math.round(transform.originalValue[0]+
-            (transform.targetValue[0]-transform.originalValue[0])*position)).toColorPart() +
-          (Math.round(transform.originalValue[1]+
-            (transform.targetValue[1]-transform.originalValue[1])*position)).toColorPart() +
-          (Math.round(transform.originalValue[2]+
-            (transform.targetValue[2]-transform.originalValue[2])*position)).toColorPart() :
-        (transform.originalValue +
-          (transform.targetValue - transform.originalValue) * position).toFixed(3) +
-            (transform.unit === null ? '' : transform.unit);
-    this.element.setStyle(style, true);
+          
+   }
+    
+   comm_group_dropdown = document.getElementById('pack_material_product_commodity_group_code');
+   if(comm_group_dropdown)
+    set_observer();
+    
+    //reworks_carton_code
+    set_observer_for_reworks_carton_edit();
+ 
+ }
+ 
+  
+ 
+ function store_control_values()
+ {
+   
+   inputs = document.forms[0].getElementsByTagName("input");
+  
+   for(j = 0; j < inputs.length; j++)
+   {
+     if(inputs[j].id)
+      input_fields[inputs[j].id]= inputs[j];
+     
+     else if(inputs[j].name)
+       input_fields[inputs[j].name]= inputs[j];
+     // alert(inputs[j].type + ":" + inputs[j].name);
+      
+     input_fields[inputs[j].id]= inputs[j];
+      
+   }
+   
+   inputs = document.forms[0].getElementsByTagName("select");
+   
+    for(j = 0; j < inputs.length; j++){
+   //if(inputs[j].id)
+   // alert("sel id " + inputs[j].id);
+   //else
+   // alert("sel name " + inputs[j].name);
+   
+     id = ""
+     if(inputs[j].id)
+      id = inputs[j].id
+     else
+      id = inputs[j].name
+      
+     input_fields[id]= inputs[j];  
+   }
+   
+   inputs = document.forms[0].getElementsByTagName("textarea");
+  
+   for(j = 0; j < inputs.length; j++)
+   {
+     input_fields[inputs[j].id]= inputs[j];
+     //alert(inputs[j].id);    
+   }
+   
+  
+ }
+ 
+ 
+ 
+  //--------------------------------------------------------------------------------
+  // This method has to toggle (show or hide) the clicked separator which represents
+  // a group of fields.
+  // processing:
+  // 1) build a list of all separators: 
+  //   --> see if you can find the separator id, if not, it means the separator is hidden
+  //       and you can assume that it's htm is stored in memory (separators array)
+  // 2) rebuild the entire form, if you get to the selected separator, see if you can
+  //      find it in the form, If not, it means it is currently collapsed, o you must
+  //      expand it by adding it to the building process- get it's htm from memory(stored when collapsed previously)
+  //      If found, it means it is currently expanded, and you must collapse it by not
+  //      adding it to the building process- BUT before doing so you must add it's
+  //      htm to the separators collection
+  //------------------------------------------------------------------------------
+  
+ 
+  
+  function hide_separator(sep)
+  {
+     store_control_values();
+     
+    for(x = 1; x <= n_separators; x++)
+    {
+       id = "separator" + x.toString();
+       //alert(id + ": " + separator_states[id]);
+       if (separator_states[id] == null)
+        separator_states[id]= true; //expanded
+    }
+    
+    
+    //write all seps to memory that you can
+    for(b = 1; b <= n_separators; b++)
+    {
+       //alert("loop");
+        id = "separator" + b.toString();
+        
+         
+        el = document.getElementById(id);
+       // alert("cid: " + id);
+        if(separator_states[id] == true)
+        {
+           
+            separators[id] = get_separator_htm(id);
+         
+        }
+    }
+    
+   
+    //alert("loop exited");
+    //rebuild form
+    new_form = get_form_htm();
+    //alert("new form: " + new_form);
+    for(d = 1; d <= n_separators; d++)
+    {
+        id = "separator" + d.toString();
+       // alert(id);
+        el = document.getElementById(id);
+        
+        if (id == sep.id)
+        {
+          //alert(" sep: " + separators[id]);
+          if(separator_states[id] == false)//we need to add it to building process
+          {
+            
+            new_form += separators[id];
+             //alert(id + ":" + separators[id]);
+          }
+          else //we need to add just the ' collapsed separator'
+          {
+            new_form += get_collapsed_separator(id)
+            //alert("collapsed: " + get_collapsed_separator(id));
+          }
+        }
+        else
+        {
+          
+          if(separator_states[id] == true)
+          {
+            new_form += separators[id];
+            //alert(id + ":" + separators[id]);
+          }
+          else
+          {
+            new_form += get_collapsed_separator(id)
+          }
+   
+        }
+    }
+    //alert(get_form_end_htm());
+    new_form += get_form_end_htm();
+    document.getElementById('applet_container').innerHTML = new_form;
+    separator_states[sep.id] = !separator_states[sep.id];
+    set_images();
+    
+    restore_control_values();
+   
   }
-});
 
-Effect.Transform = Class.create({
-  initialize: function(tracks){
-    this.tracks  = [];
-    this.options = arguments[1] || { };
-    this.addTracks(tracks);
-  },
-  addTracks: function(tracks){
-    tracks.each(function(track){
-      track = $H(track);
-      var data = track.values().first();
-      this.tracks.push($H({
-        ids:     track.keys().first(),
-        effect:  Effect.Morph,
-        options: { style: data }
-      }));
-    }.bind(this));
-    return this;
-  },
-  play: function(){
-    return new Effect.Parallel(
-      this.tracks.map(function(track){
-        var ids = track.get('ids'), effect = track.get('effect'), options = track.get('options');
-        var elements = [$(ids) || $$(ids)].flatten();
-        return elements.map(function(e){ return new effect(e, Object.extend({ sync:true }, options)) });
-      }).flatten(),
-      this.options
-    );
-  }
-});
 
-Element.CSS_PROPERTIES = $w(
-  'backgroundColor backgroundPosition borderBottomColor borderBottomStyle ' +
-  'borderBottomWidth borderLeftColor borderLeftStyle borderLeftWidth ' +
-  'borderRightColor borderRightStyle borderRightWidth borderSpacing ' +
-  'borderTopColor borderTopStyle borderTopWidth bottom clip color ' +
-  'fontSize fontWeight height left letterSpacing lineHeight ' +
-  'marginBottom marginLeft marginRight marginTop markerOffset maxHeight '+
-  'maxWidth minHeight minWidth opacity outlineColor outlineOffset ' +
-  'outlineWidth paddingBottom paddingLeft paddingRight paddingTop ' +
-  'right textIndent top width wordSpacing zIndex');
+function update_form()
+{
 
-Element.CSS_LENGTH = /^(([\+\-]?[0-9\.]+)(em|ex|px|in|cm|mm|pt|pc|\%))|0$/;
 
-String.__parseStyleElement = document.createElement('div');
-String.prototype.parseStyle = function(){
-  var style, styleRules = $H();
-  if (Prototype.Browser.WebKit)
-    style = new Element('div',{style:this}).style;
-  else {
-    String.__parseStyleElement.innerHTML = '<div style="' + this + '"></div>';
-    style = String.__parseStyleElement.childNodes[0].style;
-  }
+   try
+   {
+    var frames = window.opener.frames;
+    var input_values_changed = this.document.getElementById("applet_container");
+    var selection_values =  input_values_changed.getElementsByTagName("option");
+    var input_length =    input_values_changed.getElementsByTagName("input");
+    var popupwindow_obj =  document.getElementById("popupwindow_kromco_1");
+    var select_length =    input_values_changed.getElementsByTagName("select");
+   
+    for(select = 0 ; select < select_length.length ; select++)
+     {
+      var option = select_length[select].getElementsByTagName("option");
+      for(i =0 ; i < option.length ; i++)
+        {
+         if(option[i].selected == true )
+            {
+              try
+              {
+             
+             //option[i].selected == true;
+             //option[i].value == 
+            
+          if(document.getElementById(select_length[select].id).value.length > 0 )
+          {
+              frames[1].document.getElementById(select_length[select].id).value = document.getElementById(select_length[select].id).value;
+           }  
+          
+            //   addeditem.name = "load_values_for_fields["+changed_name+"]";
+            //   addeditem.value = option[i].value;
+             
+              }
+              catch(error_mesg)
+             {
+               alert(error_mesg+" error_loc_1");
+             }  
+          }
+       }
+     } 
+       
+    for(itemsadded = 0 ; itemsadded < input_length.length ;itemsadded++ )
+    {
+      if((input_length[itemsadded].type  == "text") & (document.getElementById(input_length[itemsadded].id).value.length > 0 ) )
+      {
+       frames[1].document.getElementById(input_length[itemsadded].id).value = document.getElementById(input_length[itemsadded].id).value;
 
-  Element.CSS_PROPERTIES.each(function(property){
-    if (style[property]) styleRules.set(property, style[property]);
-  });
+     }
+      if((input_length[itemsadded].type  == "checkbox" ) )
+       {
+       frames[1].document.getElementById(input_length[itemsadded].id).value = document.getElementById(input_length[itemsadded].id).value;
+      
+      //   var   addeditem = document.createElement("input");
+      //   addeditem.id = "created_field_"+input_length[itemsadded].name;
+      //   addeditem.type = "hidden";
+      //    var changed_name =change_input_name(input_length[itemsadded].name);
+      //    addeditem.name = "load_values_for_fields["+changed_name+"]";
+      //    addeditem.value = input_length[itemsadded].value;
+      //    popupwindow_obj.appendChild(addeditem);
+         }
+    }
+   
+   //var input_values_changed = this.document.getElementById("applet_container");
+   //var input_length =    input_values_changed.getElementsByTagName("input");
+   // headerstext_count =   frames[1].global_js_grid.getColumnCount();
+    }
+    catch(messageerror)
+    {
+    alert(messageerror+" error_loc_2");
+    }
 
-  if (Prototype.Browser.IE && this.include('opacity'))
-    styleRules.set('opacity', this.match(/opacity:\s*((?:0|1)?(?:\.\d*)?)/)[1]);
 
-  return styleRules;
-};
-
-if (document.defaultView && document.defaultView.getComputedStyle) {
-  Element.getStyles = function(element) {
-    var css = document.defaultView.getComputedStyle($(element), null);
-    return Element.CSS_PROPERTIES.inject({ }, function(styles, property) {
-      styles[property] = css[property];
-      return styles;
-    });
-  };
-} else {
-  Element.getStyles = function(element) {
-    element = $(element);
-    var css = element.currentStyle, styles;
-    styles = Element.CSS_PROPERTIES.inject({ }, function(results, property) {
-      results[property] = css[property];
-      return results;
-    });
-    if (!styles.opacity) styles.opacity = element.getOpacity();
-    return styles;
-  };
+  //alert(document.getElementById("treatment_treatment_code").value )
+ //  var frames = window.opener.frames
+ //  frames[1].document.getElementById("treatment_treatment_code").value = document.getElementById("treatment_treatment_code").value 
+//  alert("Here we can do the updating")
+alert("The data have been moved");
+window.close();
 }
 
-Effect.Methods = {
-  morph: function(element, style) {
-    element = $(element);
-    new Effect.Morph(element, Object.extend({ style: style }, arguments[2] || { }));
-    return element;
-  },
-  visualEffect: function(element, effect, options) {
-    element = $(element);
-    var s = effect.dasherize().camelize(), klass = s.charAt(0).toUpperCase() + s.substring(1);
-    new Effect[klass](element, options);
-    return element;
-  },
-  highlight: function(element, options) {
-    element = $(element);
-    new Effect.Highlight(element, options);
-    return element;
-  }
-};
+function get_data_for_form_update()
+{
+ 
+  var app_container =  document.getElementById("applet_container");
+  form_innerhml = app_container.childNodes[1].innerHTML;
+  app_container.innerHTML ="<form id='popupwindow_kromco_1'  onSubmit='javascript:update_form();'  method='post' >"+form_innerhml +"</form>";
 
-$w('fade appear grow shrink fold blindUp blindDown slideUp slideDown '+
-  'pulsate shake puff squish switchOff dropOut').each(
-  function(effect) {
-    Effect.Methods[effect] = function(element, options){
-      element = $(element);
-      Effect[effect.charAt(0).toUpperCase() + effect.substring(1)](element, options);
-      return element;
-    };
-  }
-);
+}
 
-$w('getInlineOpacity forceRerendering setContentZoom collectTextNodes collectTextNodesIgnoreClass getStyles').each(
-  function(f) { Effect.Methods[f] = Element[f]; }
-);
+function open_window_link(url)
+{
 
-Element.addMethods(Effect.Methods);// script.aculo.us dragdrop.js v1.8.2, Tue Nov 18 18:30:58 +0100 2008
+  refined_url  = [];
+  count = 0;
 
-// Copyright (c) 2005-2008 Thomas Fuchs (http://script.aculo.us, http://mir.aculo.us)
-//           (c) 2005-2008 Sammi Williams (http://www.oriontransfer.co.nz, sammi@oriontransfer.co.nz)
-//
-// script.aculo.us is freely distributable under the terms of an MIT-style license.
-// For details, see the script.aculo.us web site: http://script.aculo.us/
 
-if(Object.isUndefined(Effect))
-  throw("dragdrop.js requires including script.aculo.us' effects.js library");
-
-var Droppables = {
-  drops: [],
-
-  remove: function(element) {
-    this.drops = this.drops.reject(function(d) { return d.element==$(element) });
-  },
-
-  add: function(element) {
-    element = $(element);
-    var options = Object.extend({
-      greedy:     true,
-      hoverclass: null,
-      tree:       false
-    }, arguments[1] || { });
-
-    // cache containers
-    if(options.containment) {
-      options._containers = [];
-      var containment = options.containment;
-      if(Object.isArray(containment)) {
-        containment.each( function(c) { options._containers.push($(c)) });
-      } else {
-        options._containers.push($(containment));
-      }
-    }
-
-    if(options.accept) options.accept = [options.accept].flatten();
-
-    Element.makePositioned(element); // fix IE
-    options.element = element;
-
-    this.drops.push(options);
-  },
-
-  findDeepestChild: function(drops) {
-    deepest = drops[0];
-
-    for (i = 1; i < drops.length; ++i)
-      if (Element.isParent(drops[i].element, deepest.element))
-        deepest = drops[i];
-
-    return deepest;
-  },
-
-  isContained: function(element, drop) {
-    var containmentNode;
-    if(drop.tree) {
-      containmentNode = element.treeNode;
-    } else {
-      containmentNode = element.parentNode;
-    }
-    return drop._containers.detect(function(c) { return containmentNode == c });
-  },
-
-  isAffected: function(point, element, drop) {
-    return (
-      (drop.element!=element) &&
-      ((!drop._containers) ||
-        this.isContained(element, drop)) &&
-      ((!drop.accept) ||
-        (Element.classNames(element).detect(
-          function(v) { return drop.accept.include(v) } ) )) &&
-      Position.within(drop.element, point[0], point[1]) );
-  },
-
-  deactivate: function(drop) {
-    if(drop.hoverclass)
-      Element.removeClassName(drop.element, drop.hoverclass);
-    this.last_active = null;
-  },
-
-  activate: function(drop) {
-    if(drop.hoverclass)
-      Element.addClassName(drop.element, drop.hoverclass);
-    this.last_active = drop;
-  },
-
-  show: function(point, element) {
-    if(!this.drops.length) return;
-    var drop, affected = [];
-
-    this.drops.each( function(drop) {
-      if(Droppables.isAffected(point, element, drop))
-        affected.push(drop);
-    });
-
-    if(affected.length>0)
-      drop = Droppables.findDeepestChild(affected);
-
-    if(this.last_active && this.last_active != drop) this.deactivate(this.last_active);
-    if (drop) {
-      Position.within(drop.element, point[0], point[1]);
-      if(drop.onHover)
-        drop.onHover(element, drop.element, Position.overlap(drop.overlap, drop.element));
-
-      if (drop != this.last_active) Droppables.activate(drop);
-    }
-  },
-
-  fire: function(event, element) {
-    if(!this.last_active) return;
-    Position.prepare();
-
-    if (this.isAffected([Event.pointerX(event), Event.pointerY(event)], element, this.last_active))
-      if (this.last_active.onDrop) {
-        this.last_active.onDrop(element, this.last_active.element, event);
-        return true;
-      }
-  },
-
-  reset: function() {
-    if(this.last_active)
-      this.deactivate(this.last_active);
-  }
-};
-
-var Draggables = {
-  drags: [],
-  observers: [],
-
-  register: function(draggable) {
-    if(this.drags.length == 0) {
-      this.eventMouseUp   = this.endDrag.bindAsEventListener(this);
-      this.eventMouseMove = this.updateDrag.bindAsEventListener(this);
-      this.eventKeypress  = this.keyPress.bindAsEventListener(this);
-
-      Event.observe(document, "mouseup", this.eventMouseUp);
-      Event.observe(document, "mousemove", this.eventMouseMove);
-      Event.observe(document, "keypress", this.eventKeypress);
-    }
-    this.drags.push(draggable);
-  },
-
-  unregister: function(draggable) {
-    this.drags = this.drags.reject(function(d) { return d==draggable });
-    if(this.drags.length == 0) {
-      Event.stopObserving(document, "mouseup", this.eventMouseUp);
-      Event.stopObserving(document, "mousemove", this.eventMouseMove);
-      Event.stopObserving(document, "keypress", this.eventKeypress);
-    }
-  },
-
-  activate: function(draggable) {
-    if(draggable.options.delay) {
-      this._timeout = setTimeout(function() {
-        Draggables._timeout = null;
-        window.focus();
-        Draggables.activeDraggable = draggable;
-      }.bind(this), draggable.options.delay);
-    } else {
-      window.focus(); // allows keypress events if window isn't currently focused, fails for Safari
-      this.activeDraggable = draggable;
-    }
-  },
-
-  deactivate: function() {
-    this.activeDraggable = null;
-  },
-
-  updateDrag: function(event) {
-    if(!this.activeDraggable) return;
-    var pointer = [Event.pointerX(event), Event.pointerY(event)];
-    // Mozilla-based browsers fire successive mousemove events with
-    // the same coordinates, prevent needless redrawing (moz bug?)
-    if(this._lastPointer && (this._lastPointer.inspect() == pointer.inspect())) return;
-    this._lastPointer = pointer;
-
-    this.activeDraggable.updateDrag(event, pointer);
-  },
-
-  endDrag: function(event) {
-    if(this._timeout) {
-      clearTimeout(this._timeout);
-      this._timeout = null;
-    }
-    if(!this.activeDraggable) return;
-    this._lastPointer = null;
-    this.activeDraggable.endDrag(event);
-    this.activeDraggable = null;
-  },
-
-  keyPress: function(event) {
-    if(this.activeDraggable)
-      this.activeDraggable.keyPress(event);
-  },
-
-  addObserver: function(observer) {
-    this.observers.push(observer);
-    this._cacheObserverCallbacks();
-  },
-
-  removeObserver: function(element) {  // element instead of observer fixes mem leaks
-    this.observers = this.observers.reject( function(o) { return o.element==element });
-    this._cacheObserverCallbacks();
-  },
-
-  notify: function(eventName, draggable, event) {  // 'onStart', 'onEnd', 'onDrag'
-    if(this[eventName+'Count'] > 0)
-      this.observers.each( function(o) {
-        if(o[eventName]) o[eventName](eventName, draggable, event);
-      });
-    if(draggable.options[eventName]) draggable.options[eventName](draggable, event);
-  },
-
-  _cacheObserverCallbacks: function() {
-    ['onStart','onEnd','onDrag'].each( function(eventName) {
-      Draggables[eventName+'Count'] = Draggables.observers.select(
-        function(o) { return o[eventName]; }
-      ).length;
-    });
-  }
-};
-
-/*--------------------------------------------------------------------------*/
-
-var Draggable = Class.create({
-  initialize: function(element) {
-    var defaults = {
-      handle: false,
-      reverteffect: function(element, top_offset, left_offset) {
-        var dur = Math.sqrt(Math.abs(top_offset^2)+Math.abs(left_offset^2))*0.02;
-        new Effect.Move(element, { x: -left_offset, y: -top_offset, duration: dur,
-          queue: {scope:'_draggable', position:'end'}
-        });
-      },
-      endeffect: function(element) {
-        var toOpacity = Object.isNumber(element._opacity) ? element._opacity : 1.0;
-        new Effect.Opacity(element, {duration:0.2, from:0.7, to:toOpacity,
-          queue: {scope:'_draggable', position:'end'},
-          afterFinish: function(){
-            Draggable._dragging[element] = false
-          }
-        });
-      },
-      zindex: 1000,
-      revert: false,
-      quiet: false,
-      scroll: false,
-      scrollSensitivity: 20,
-      scrollSpeed: 15,
-      snap: false,  // false, or xy or [x,y] or function(x,y){ return [x,y] }
-      delay: 0
-    };
-
-    if(!arguments[1] || Object.isUndefined(arguments[1].endeffect))
-      Object.extend(defaults, {
-        starteffect: function(element) {
-          element._opacity = Element.getOpacity(element);
-          Draggable._dragging[element] = true;
-          new Effect.Opacity(element, {duration:0.2, from:element._opacity, to:0.7});
+  //code to split out width and height from url string- width and height are enclosed with !..!
+    dimension_parts = ["800","380"];
+    url_parts =   url.split("!");
+    if(url_parts.length > 1)
+    {
+      url_parts.forEach(function(element) { // Will not work in IE8 and earlier!
+        if (element.indexOf(':') > -1) {
+          dimension_parts = element.split(":");
         }
       });
-
-    var options = Object.extend(defaults, arguments[1] || { });
-
-    this.element = $(element);
-
-    if(options.handle && Object.isString(options.handle))
-      this.handle = this.element.down('.'+options.handle, 0);
-
-    if(!this.handle) this.handle = $(options.handle);
-    if(!this.handle) this.handle = this.element;
-
-    if(options.scroll && !options.scroll.scrollTo && !options.scroll.outerHTML) {
-      options.scroll = $(options.scroll);
-      this._isScrollChild = Element.childOf(this.element, options.scroll);
     }
 
-    Element.makePositioned(this.element); // fix IE
+  url = url_parts[0];
 
-    this.options  = options;
-    this.dragging = false;
+  currentstring ="";
+  for( i = 0 ; i < url.length ; i++)
+  {
 
-    this.eventMouseDown = this.initDrag.bindAsEventListener(this);
-    Event.observe(this.handle, "mousedown", this.eventMouseDown);
-
-    Draggables.register(this);
-  },
-
-  destroy: function() {
-    Event.stopObserving(this.handle, "mousedown", this.eventMouseDown);
-    Draggables.unregister(this);
-  },
-
-  currentDelta: function() {
-    return([
-      parseInt(Element.getStyle(this.element,'left') || '0'),
-      parseInt(Element.getStyle(this.element,'top') || '0')]);
-  },
-
-  initDrag: function(event) {
-    if(!Object.isUndefined(Draggable._dragging[this.element]) &&
-      Draggable._dragging[this.element]) return;
-    if(Event.isLeftClick(event)) {
-      // abort on form elements, fixes a Firefox issue
-      var src = Event.element(event);
-      if((tag_name = src.tagName.toUpperCase()) && (
-        tag_name=='INPUT' ||
-        tag_name=='SELECT' ||
-        tag_name=='OPTION' ||
-        tag_name=='BUTTON' ||
-        tag_name=='TEXTAREA')) return;
-
-      var pointer = [Event.pointerX(event), Event.pointerY(event)];
-      var pos     = Position.cumulativeOffset(this.element);
-      this.offset = [0,1].map( function(i) { return (pointer[i] - pos[i]) });
-
-      Draggables.activate(this);
-      Event.stop(event);
-    }
-  },
-
-  startDrag: function(event) {
-    this.dragging = true;
-    if(!this.delta)
-      this.delta = this.currentDelta();
-
-    if(this.options.zindex) {
-      this.originalZ = parseInt(Element.getStyle(this.element,'z-index') || 0);
-      this.element.style.zIndex = this.options.zindex;
-    }
-
-    if(this.options.ghosting) {
-      this._clone = this.element.cloneNode(true);
-      this._originallyAbsolute = (this.element.getStyle('position') == 'absolute');
-      if (!this._originallyAbsolute)
-        Position.absolutize(this.element);
-      this.element.parentNode.insertBefore(this._clone, this.element);
-    }
-
-    if(this.options.scroll) {
-      if (this.options.scroll == window) {
-        var where = this._getWindowScroll(this.options.scroll);
-        this.originalScrollLeft = where.left;
-        this.originalScrollTop = where.top;
-      } else {
-        this.originalScrollLeft = this.options.scroll.scrollLeft;
-        this.originalScrollTop = this.options.scroll.scrollTop;
+    if(url[i] == '%' | i == url.length-1)
+    {
+      if(i == url.length-1)
+      {
+        currentstring += url[i];
       }
+      refined_url[count] = currentstring;
+      currentstring ="";
+      count ++;
     }
-
-    Draggables.notify('onStart', this, event);
-
-    if(this.options.starteffect) this.options.starteffect(this.element);
-  },
-
-  updateDrag: function(event, pointer) {
-    if(!this.dragging) this.startDrag(event);
-
-    if(!this.options.quiet){
-      Position.prepare();
-      Droppables.show(pointer, this.element);
-    }
-
-    Draggables.notify('onDrag', this, event);
-
-    this.draw(pointer);
-    if(this.options.change) this.options.change(this);
-
-    if(this.options.scroll) {
-      this.stopScrolling();
-
-      var p;
-      if (this.options.scroll == window) {
-        with(this._getWindowScroll(this.options.scroll)) { p = [ left, top, left+width, top+height ]; }
-      } else {
-        p = Position.page(this.options.scroll);
-        p[0] += this.options.scroll.scrollLeft + Position.deltaX;
-        p[1] += this.options.scroll.scrollTop + Position.deltaY;
-        p.push(p[0]+this.options.scroll.offsetWidth);
-        p.push(p[1]+this.options.scroll.offsetHeight);
-      }
-      var speed = [0,0];
-      if(pointer[0] < (p[0]+this.options.scrollSensitivity)) speed[0] = pointer[0]-(p[0]+this.options.scrollSensitivity);
-      if(pointer[1] < (p[1]+this.options.scrollSensitivity)) speed[1] = pointer[1]-(p[1]+this.options.scrollSensitivity);
-      if(pointer[0] > (p[2]-this.options.scrollSensitivity)) speed[0] = pointer[0]-(p[2]-this.options.scrollSensitivity);
-      if(pointer[1] > (p[3]-this.options.scrollSensitivity)) speed[1] = pointer[1]-(p[3]-this.options.scrollSensitivity);
-      this.startScrolling(speed);
-    }
-
-    // fix AppleWebKit rendering
-    if(Prototype.Browser.WebKit) window.scrollBy(0,0);
-
-    Event.stop(event);
-  },
-
-  finishDrag: function(event, success) {
-    this.dragging = false;
-
-    if(this.options.quiet){
-      Position.prepare();
-      var pointer = [Event.pointerX(event), Event.pointerY(event)];
-      Droppables.show(pointer, this.element);
-    }
-
-    if(this.options.ghosting) {
-      if (!this._originallyAbsolute)
-        Position.relativize(this.element);
-      delete this._originallyAbsolute;
-      Element.remove(this._clone);
-      this._clone = null;
-    }
-
-    var dropped = false;
-    if(success) {
-      dropped = Droppables.fire(event, this.element);
-      if (!dropped) dropped = false;
-    }
-    if(dropped && this.options.onDropped) this.options.onDropped(this.element);
-    Draggables.notify('onEnd', this, event);
-
-    var revert = this.options.revert;
-    if(revert && Object.isFunction(revert)) revert = revert(this.element);
-
-    var d = this.currentDelta();
-    if(revert && this.options.reverteffect) {
-      if (dropped == 0 || revert != 'failure')
-        this.options.reverteffect(this.element,
-          d[1]-this.delta[1], d[0]-this.delta[0]);
-    } else {
-      this.delta = d;
-    }
-
-    if(this.options.zindex)
-      this.element.style.zIndex = this.originalZ;
-
-    if(this.options.endeffect)
-      this.options.endeffect(this.element);
-
-    Draggables.deactivate(this);
-    Droppables.reset();
-  },
-
-  keyPress: function(event) {
-    if(event.keyCode!=Event.KEY_ESC) return;
-    this.finishDrag(event, false);
-    Event.stop(event);
-  },
-
-  endDrag: function(event) {
-    if(!this.dragging) return;
-    this.stopScrolling();
-    this.finishDrag(event, true);
-    Event.stop(event);
-  },
-
-  draw: function(point) {
-    var pos = Position.cumulativeOffset(this.element);
-    if(this.options.ghosting) {
-      var r   = Position.realOffset(this.element);
-      pos[0] += r[0] - Position.deltaX; pos[1] += r[1] - Position.deltaY;
-    }
-
-    var d = this.currentDelta();
-    pos[0] -= d[0]; pos[1] -= d[1];
-
-    if(this.options.scroll && (this.options.scroll != window && this._isScrollChild)) {
-      pos[0] -= this.options.scroll.scrollLeft-this.originalScrollLeft;
-      pos[1] -= this.options.scroll.scrollTop-this.originalScrollTop;
-    }
-
-    var p = [0,1].map(function(i){
-      return (point[i]-pos[i]-this.offset[i])
-    }.bind(this));
-
-    if(this.options.snap) {
-      if(Object.isFunction(this.options.snap)) {
-        p = this.options.snap(p[0],p[1],this);
-      } else {
-      if(Object.isArray(this.options.snap)) {
-        p = p.map( function(v, i) {
-          return (v/this.options.snap[i]).round()*this.options.snap[i] }.bind(this));
-      } else {
-        p = p.map( function(v) {
-          return (v/this.options.snap).round()*this.options.snap }.bind(this));
-      }
-    }}
-
-    var style = this.element.style;
-    if((!this.options.constraint) || (this.options.constraint=='horizontal'))
-      style.left = p[0] + "px";
-    if((!this.options.constraint) || (this.options.constraint=='vertical'))
-      style.top  = p[1] + "px";
-
-    if(style.visibility=="hidden") style.visibility = ""; // fix gecko rendering
-  },
-
-  stopScrolling: function() {
-    if(this.scrollInterval) {
-      clearInterval(this.scrollInterval);
-      this.scrollInterval = null;
-      Draggables._lastScrollPointer = null;
-    }
-  },
-
-  startScrolling: function(speed) {
-    if(!(speed[0] || speed[1])) return;
-    this.scrollSpeed = [speed[0]*this.options.scrollSpeed,speed[1]*this.options.scrollSpeed];
-    this.lastScrolled = new Date();
-    this.scrollInterval = setInterval(this.scroll.bind(this), 10);
-  },
-
-  scroll: function() {
-    var current = new Date();
-    var delta = current - this.lastScrolled;
-    this.lastScrolled = current;
-    if(this.options.scroll == window) {
-      with (this._getWindowScroll(this.options.scroll)) {
-        if (this.scrollSpeed[0] || this.scrollSpeed[1]) {
-          var d = delta / 1000;
-          this.options.scroll.scrollTo( left + d*this.scrollSpeed[0], top + d*this.scrollSpeed[1] );
-        }
-      }
-    } else {
-      this.options.scroll.scrollLeft += this.scrollSpeed[0] * delta / 1000;
-      this.options.scroll.scrollTop  += this.scrollSpeed[1] * delta / 1000;
-    }
-
-    Position.prepare();
-    Droppables.show(Draggables._lastPointer, this.element);
-    Draggables.notify('onDrag', this);
-    if (this._isScrollChild) {
-      Draggables._lastScrollPointer = Draggables._lastScrollPointer || $A(Draggables._lastPointer);
-      Draggables._lastScrollPointer[0] += this.scrollSpeed[0] * delta / 1000;
-      Draggables._lastScrollPointer[1] += this.scrollSpeed[1] * delta / 1000;
-      if (Draggables._lastScrollPointer[0] < 0)
-        Draggables._lastScrollPointer[0] = 0;
-      if (Draggables._lastScrollPointer[1] < 0)
-        Draggables._lastScrollPointer[1] = 0;
-      this.draw(Draggables._lastScrollPointer);
-    }
-
-    if(this.options.change) this.options.change(this);
-  },
-
-  _getWindowScroll: function(w) {
-    var T, L, W, H;
-    with (w.document) {
-      if (w.document.documentElement && documentElement.scrollTop) {
-        T = documentElement.scrollTop;
-        L = documentElement.scrollLeft;
-      } else if (w.document.body) {
-        T = body.scrollTop;
-        L = body.scrollLeft;
-      }
-      if (w.innerWidth) {
-        W = w.innerWidth;
-        H = w.innerHeight;
-      } else if (w.document.documentElement && documentElement.clientWidth) {
-        W = documentElement.clientWidth;
-        H = documentElement.clientHeight;
-      } else {
-        W = body.offsetWidth;
-        H = body.offsetHeight;
-      }
-    }
-    return { top: T, left: L, width: W, height: H };
-  }
-});
-
-Draggable._dragging = { };
-
-/*--------------------------------------------------------------------------*/
-
-var SortableObserver = Class.create({
-  initialize: function(element, observer) {
-    this.element   = $(element);
-    this.observer  = observer;
-    this.lastValue = Sortable.serialize(this.element);
-  },
-
-  onStart: function() {
-    this.lastValue = Sortable.serialize(this.element);
-  },
-
-  onEnd: function() {
-    Sortable.unmark();
-    if(this.lastValue != Sortable.serialize(this.element))
-      this.observer(this.element)
-  }
-});
-
-var Sortable = {
-  SERIALIZE_RULE: /^[^_\-](?:[A-Za-z0-9\-\_]*)[_](.*)$/,
-
-  sortables: { },
-
-  _findRootElement: function(element) {
-    while (element.tagName.toUpperCase() != "BODY") {
-      if(element.id && Sortable.sortables[element.id]) return element;
-      element = element.parentNode;
-    }
-  },
-
-  options: function(element) {
-    element = Sortable._findRootElement($(element));
-    if(!element) return;
-    return Sortable.sortables[element.id];
-  },
-
-  destroy: function(element){
-    element = $(element);
-    var s = Sortable.sortables[element.id];
-
-    if(s) {
-      Draggables.removeObserver(s.element);
-      s.droppables.each(function(d){ Droppables.remove(d) });
-      s.draggables.invoke('destroy');
-
-      delete Sortable.sortables[s.element.id];
-    }
-  },
-
-  create: function(element) {
-    element = $(element);
-    var options = Object.extend({
-      element:     element,
-      tag:         'li',       // assumes li children, override with tag: 'tagname'
-      dropOnEmpty: false,
-      tree:        false,
-      treeTag:     'ul',
-      overlap:     'vertical', // one of 'vertical', 'horizontal'
-      constraint:  'vertical', // one of 'vertical', 'horizontal', false
-      containment: element,    // also takes array of elements (or id's); or false
-      handle:      false,      // or a CSS class
-      only:        false,
-      delay:       0,
-      hoverclass:  null,
-      ghosting:    false,
-      quiet:       false,
-      scroll:      false,
-      scrollSensitivity: 20,
-      scrollSpeed: 15,
-      format:      this.SERIALIZE_RULE,
-
-      // these take arrays of elements or ids and can be
-      // used for better initialization performance
-      elements:    false,
-      handles:     false,
-
-      onChange:    Prototype.emptyFunction,
-      onUpdate:    Prototype.emptyFunction
-    }, arguments[1] || { });
-
-    // clear any old sortable with same element
-    this.destroy(element);
-
-    // build options for the draggables
-    var options_for_draggable = {
-      revert:      true,
-      quiet:       options.quiet,
-      scroll:      options.scroll,
-      scrollSpeed: options.scrollSpeed,
-      scrollSensitivity: options.scrollSensitivity,
-      delay:       options.delay,
-      ghosting:    options.ghosting,
-      constraint:  options.constraint,
-      handle:      options.handle };
-
-    if(options.starteffect)
-      options_for_draggable.starteffect = options.starteffect;
-
-    if(options.reverteffect)
-      options_for_draggable.reverteffect = options.reverteffect;
     else
-      if(options.ghosting) options_for_draggable.reverteffect = function(element) {
-        element.style.top  = 0;
-        element.style.left = 0;
-      };
-
-    if(options.endeffect)
-      options_for_draggable.endeffect = options.endeffect;
-
-    if(options.zindex)
-      options_for_draggable.zindex = options.zindex;
-
-    // build options for the droppables
-    var options_for_droppable = {
-      overlap:     options.overlap,
-      containment: options.containment,
-      tree:        options.tree,
-      hoverclass:  options.hoverclass,
-      onHover:     Sortable.onHover
-    };
-
-    var options_for_tree = {
-      onHover:      Sortable.onEmptyHover,
-      overlap:      options.overlap,
-      containment:  options.containment,
-      hoverclass:   options.hoverclass
-    };
-
-    // fix for gecko engine
-    Element.cleanWhitespace(element);
-
-    options.draggables = [];
-    options.droppables = [];
-
-    // drop on empty handling
-    if(options.dropOnEmpty || options.tree) {
-      Droppables.add(element, options_for_tree);
-      options.droppables.push(element);
-    }
-
-    (options.elements || this.findElements(element, options) || []).each( function(e,i) {
-      var handle = options.handles ? $(options.handles[i]) :
-        (options.handle ? $(e).select('.' + options.handle)[0] : e);
-      options.draggables.push(
-        new Draggable(e, Object.extend(options_for_draggable, { handle: handle })));
-      Droppables.add(e, options_for_droppable);
-      if(options.tree) e.treeNode = element;
-      options.droppables.push(e);
-    });
-
-    if(options.tree) {
-      (Sortable.findTreeElements(element, options) || []).each( function(e) {
-        Droppables.add(e, options_for_tree);
-        e.treeNode = element;
-        options.droppables.push(e);
-      });
-    }
-
-    // keep reference
-    this.sortables[element.id] = options;
-
-    // for onupdate
-    Draggables.addObserver(new SortableObserver(element, options.onUpdate));
-
-  },
-
-  // return all suitable-for-sortable elements in a guaranteed order
-  findElements: function(element, options) {
-    return Element.findChildren(
-      element, options.only, options.tree ? true : false, options.tag);
-  },
-
-  findTreeElements: function(element, options) {
-    return Element.findChildren(
-      element, options.only, options.tree ? true : false, options.treeTag);
-  },
-
-  onHover: function(element, dropon, overlap) {
-    if(Element.isParent(dropon, element)) return;
-
-    if(overlap > .33 && overlap < .66 && Sortable.options(dropon).tree) {
-      return;
-    } else if(overlap>0.5) {
-      Sortable.mark(dropon, 'before');
-      if(dropon.previousSibling != element) {
-        var oldParentNode = element.parentNode;
-        element.style.visibility = "hidden"; // fix gecko rendering
-        dropon.parentNode.insertBefore(element, dropon);
-        if(dropon.parentNode!=oldParentNode)
-          Sortable.options(oldParentNode).onChange(element);
-        Sortable.options(dropon.parentNode).onChange(element);
-      }
-    } else {
-      Sortable.mark(dropon, 'after');
-      var nextElement = dropon.nextSibling || null;
-      if(nextElement != element) {
-        var oldParentNode = element.parentNode;
-        element.style.visibility = "hidden"; // fix gecko rendering
-        dropon.parentNode.insertBefore(element, nextElement);
-        if(dropon.parentNode!=oldParentNode)
-          Sortable.options(oldParentNode).onChange(element);
-        Sortable.options(dropon.parentNode).onChange(element);
-      }
-    }
-  },
-
-  onEmptyHover: function(element, dropon, overlap) {
-    var oldParentNode = element.parentNode;
-    var droponOptions = Sortable.options(dropon);
-
-    if(!Element.isParent(dropon, element)) {
-      var index;
-
-      var children = Sortable.findElements(dropon, {tag: droponOptions.tag, only: droponOptions.only});
-      var child = null;
-
-      if(children) {
-        var offset = Element.offsetSize(dropon, droponOptions.overlap) * (1.0 - overlap);
-
-        for (index = 0; index < children.length; index += 1) {
-          if (offset - Element.offsetSize (children[index], droponOptions.overlap) >= 0) {
-            offset -= Element.offsetSize (children[index], droponOptions.overlap);
-          } else if (offset - (Element.offsetSize (children[index], droponOptions.overlap) / 2) >= 0) {
-            child = index + 1 < children.length ? children[index + 1] : null;
-            break;
-          } else {
-            child = children[index];
-            break;
-          }
-        }
-      }
-
-      dropon.insertBefore(element, child);
-
-      Sortable.options(oldParentNode).onChange(element);
-      droponOptions.onChange(element);
-    }
-  },
-
-  unmark: function() {
-    if(Sortable._marker) Sortable._marker.hide();
-  },
-
-  mark: function(dropon, position) {
-    // mark on ghosting only
-    var sortable = Sortable.options(dropon.parentNode);
-    if(sortable && !sortable.ghosting) return;
-
-    if(!Sortable._marker) {
-      Sortable._marker =
-        ($('dropmarker') || Element.extend(document.createElement('DIV'))).
-          hide().addClassName('dropmarker').setStyle({position:'absolute'});
-      document.getElementsByTagName("body").item(0).appendChild(Sortable._marker);
-    }
-    var offsets = Position.cumulativeOffset(dropon);
-    Sortable._marker.setStyle({left: offsets[0]+'px', top: offsets[1] + 'px'});
-
-    if(position=='after')
-      if(sortable.overlap == 'horizontal')
-        Sortable._marker.setStyle({left: (offsets[0]+dropon.clientWidth) + 'px'});
-      else
-        Sortable._marker.setStyle({top: (offsets[1]+dropon.clientHeight) + 'px'});
-
-    Sortable._marker.show();
-  },
-
-  _tree: function(element, options, parent) {
-    var children = Sortable.findElements(element, options) || [];
-
-    for (var i = 0; i < children.length; ++i) {
-      var match = children[i].id.match(options.format);
-
-      if (!match) continue;
-
-      var child = {
-        id: encodeURIComponent(match ? match[1] : null),
-        element: element,
-        parent: parent,
-        children: [],
-        position: parent.children.length,
-        container: $(children[i]).down(options.treeTag)
-      };
-
-      /* Get the element containing the children and recurse over it */
-      if (child.container)
-        this._tree(child.container, options, child);
-
-      parent.children.push (child);
-    }
-
-    return parent;
-  },
-
-  tree: function(element) {
-    element = $(element);
-    var sortableOptions = this.options(element);
-    var options = Object.extend({
-      tag: sortableOptions.tag,
-      treeTag: sortableOptions.treeTag,
-      only: sortableOptions.only,
-      name: element.id,
-      format: sortableOptions.format
-    }, arguments[1] || { });
-
-    var root = {
-      id: null,
-      parent: null,
-      children: [],
-      container: element,
-      position: 0
-    };
-
-    return Sortable._tree(element, options, root);
-  },
-
-  /* Construct a [i] index for a particular node */
-  _constructIndex: function(node) {
-    var index = '';
-    do {
-      if (node.id) index = '[' + node.position + ']' + index;
-    } while ((node = node.parent) != null);
-    return index;
-  },
-
-  sequence: function(element) {
-    element = $(element);
-    var options = Object.extend(this.options(element), arguments[1] || { });
-
-    return $(this.findElements(element, options) || []).map( function(item) {
-      return item.id.match(options.format) ? item.id.match(options.format)[1] : '';
-    });
-  },
-
-  setSequence: function(element, new_sequence) {
-    element = $(element);
-    var options = Object.extend(this.options(element), arguments[2] || { });
-
-    var nodeMap = { };
-    this.findElements(element, options).each( function(n) {
-        if (n.id.match(options.format))
-            nodeMap[n.id.match(options.format)[1]] = [n, n.parentNode];
-        n.parentNode.removeChild(n);
-    });
-
-    new_sequence.each(function(ident) {
-      var n = nodeMap[ident];
-      if (n) {
-        n[1].appendChild(n[0]);
-        delete nodeMap[ident];
-      }
-    });
-  },
-
-  serialize: function(element) {
-    element = $(element);
-    var options = Object.extend(Sortable.options(element), arguments[1] || { });
-    var name = encodeURIComponent(
-      (arguments[1] && arguments[1].name) ? arguments[1].name : element.id);
-
-    if (options.tree) {
-      return Sortable.tree(element, arguments[1]).children.map( function (item) {
-        return [name + Sortable._constructIndex(item) + "[id]=" +
-                encodeURIComponent(item.id)].concat(item.children.map(arguments.callee));
-      }).flatten().join('&');
-    } else {
-      return Sortable.sequence(element, arguments[1]).map( function(item) {
-        return name + "[]=" + encodeURIComponent(item);
-      }).join('&');
+    {
+      currentstring += url[i];
     }
   }
-};
 
-// Returns true if child is contained within element
-Element.isParent = function(child, element) {
-  if (!child.parentNode || child == element) return false;
-  if (child.parentNode == element) return true;
-  return Element.isParent(child.parentNode, element);
-};
+  if (refined_url[1] !== undefined)
+  {
 
-Element.findChildren = function(element, only, recursive, tagName) {
-  if(!element.hasChildNodes()) return null;
-  tagName = tagName.toUpperCase();
-  if(only) only = [only].flatten();
-  var elements = [];
-  $A(element.childNodes).each( function(e) {
-    if(e.tagName && e.tagName.toUpperCase()==tagName &&
-      (!only || (Element.classNames(e).detect(function(v) { return only.include(v) }))))
-        elements.push(e);
-    if(recursive) {
-      var grandchildren = Element.findChildren(e, only, recursive, tagName);
-      if(grandchildren) elements.push(grandchildren);
+    window_created = window.parent.open("http://"+refined_url[0]+"/"+refined_url[1]+"", "",
+        "menubar=0,location=0,resizable=1,scrollbars=1,status=0,width=" + dimension_parts[0] + ",height=" + dimension_parts[1]);
+
+    //    netscape.security.PrivilegeManager.
+    //   enablePrivilege("UniversalBrowserWrite");
+    //window_created.locationbar.visible=
+    //    !window_created.locationbar.visible;
+    //  alert(window_created.locationbar.visible = 'false');
+
+    //sleep(1);
+      setTimeout(function() {
+    window_created.resizeTo (dimension_parts[0], dimension_parts[1]); // Chrome doesn't always respect width & height parameters...
+    window_created.moveTo (225,225);
+      }, 100);
+    // window.parent.id = "parent_window_id";
+    // this.window.id ="popup_1"
+  }
+  else
+  {
+    //    "menubar=yes,location=yes,resizable=yes,scrollbars=yes,status=yes"
+    // "menubar=yes,location=yes,resizable=yes,scrollbars=yes,status=yes,width=800,height=380"
+    //window_created = window.parent.open('http://'+refined_url[0]+'', '',
+    window_created = window.parent.open('http://'+refined_url[0], '',
+        'menubar=1,resizable=1,scrollbars=1,status=1,width=' + dimension_parts[0] + ',height=' + dimension_parts[1]); // Chrome seems to work if location not mentioned....
+        //'menubar=yes,location=no,resizable=yes,scrollbars=yes,status=yes,width=800,height=380'); // Chrome seems to need location=no !!!!!
+        //'menubar=yes,location=yes,resizable=yes,scrollbars=yes,status=yes,width=800,height=380,left=0,top=0');
+    //window.open(filename,"","width="+winwidth+",height="+winheight+",scrollbars=yes ,menubar=no,location=no,left=0,top=0");
+
+    //sleep(1);
+      setTimeout(function() {
+    window_created.resizeTo (dimension_parts[0], dimension_parts[1]); // Chrome doesn't always respect width & height parameters...
+    window_created.moveTo (225,225);
+      }, 100);
+    //FIRE_window_id
+    // window.parent.id = "parent_window_id";
+    //  this.window.id ="popup_1"
+  }
+
+}
+//***************************************************
+function imdone()
+{
+  var app_container =  window.self.document.getElementById("applet_container");
+  form_innerhml = app_container.childNodes[1].innerHTML;
+  app_container.innerHTML ="<form id='popupwindow_kromco_1' action= /raw_materials/treatment/update_treatment method='post' onSubmit='javascript:yay();' >"+form_innerhml +"</form>";
+
+
+}
+//***************************************************
+function change_input_name(name)
+{
+  var new_name ="";
+  for(char_index = 0 ; char_index < name.length ; char_index++)
+    {
+     if(name[char_index]  == "[" | name[char_index] == "]")
+      {
+       if(name[char_index] == "[")
+         {
+           new_name += "$";
+         }
+         else
+          {
+            new_name += "?";
+          }
+       }
+       else
+       {
+        new_name += name[char_index];
+       }
+  }
+
+return new_name;
+}
+//************************************************************
+function yay()
+{
+
+   try
+   {
+      var frames = window.opener.frames;
+    var input_values_changed = this.document.getElementById("applet_container");
+    var selection_values =  input_values_changed.getElementsByTagName("option");
+    var input_length =    input_values_changed.getElementsByTagName("input");
+    var popupwindow_obj =  document.getElementById("popupwindow_kromco_1");
+    var select_length =    input_values_changed.getElementsByTagName("select");
+   
+    for(select = 0 ; select < select_length.length ; select++)
+     {
+      var option = select_length[select].getElementsByTagName("option");
+      for(i =0 ; i < option.length ; i++)
+        {
+         if(option[i].selected == true )
+            {
+              try
+              {
+               var   addeditem = document.createElement("input");
+               addeditem.id = "created_field_"+option[i].value;
+               addeditem.type = "hidden";
+               var changed_name =change_input_name(select_length[select].name);
+               addeditem.name = "load_values_for_fields["+changed_name+"]";
+               addeditem.value = option[i].value;
+               popupwindow_obj.appendChild(addeditem);
+              }
+              catch(error_mesg)
+             {
+               alert(error_msg+" error_loc_1"); 
+             }  
+          }
+       }
+     } 
+       
+    for(itemsadded = 0 ; itemsadded < input_length.length ;itemsadded++ )
+    {
+    
+       if(input_length[itemsadded].type  == "text")
+         {
+          var   addeditem = document.createElement("input");
+          addeditem.id = "created_field_"+input_length[itemsadded].name;
+          addeditem.type = "hidden";
+          var changed_name =change_input_name(input_length[itemsadded].name);
+          addeditem.name = "load_values_for_fields["+changed_name+"]";
+          addeditem.value = input_length[itemsadded].value;
+          popupwindow_obj.appendChild(addeditem);
+         }
+          if(input_length[itemsadded].type  == "checkbox")
+            {
+             var   addeditem = document.createElement("input");
+             addeditem.id = "created_field_"+input_length[itemsadded].name;
+             addeditem.type = "hidden";
+             var changed_name =change_input_name(input_length[itemsadded].name);
+             addeditem.name = "load_values_for_fields["+changed_name+"]";
+             addeditem.value = input_length[itemsadded].value;
+             popupwindow_obj.appendChild(addeditem);
+            }
     }
-  });
+   
+    var input_values_changed = this.document.getElementById("applet_container");
+    var input_length =    input_values_changed.getElementsByTagName("input");
+    headerstext_count =   frames[1].global_js_grid.getColumnCount();
+    }
+    catch(messageerror)
+    {
+    alert(messageerror+" error_loc_2");
+    }
+}
+//**************************************************************************************
+function get_table_row(ruby_id)
+{
+// to get the row number it will run through the column headings and search for the with 
+// the name 'id' , when it has founded the 'id' column it will start running throught 
+// the rows insearch of the ruby id that it received
 
-  return (elements.length>0 ? elements.flatten() : []);
-};
+ try
+ {
+  var frames = window.opener.frames;
+  //Gets the number of columns
+  var column_count =   parseInt(frames[1].global_js_grid.getColumnCount());
+  for(column_nr  = 0 ;column_nr < column_count ; column_nr++ )
+  {
+  // tests if it id
+   if(frames[1].global_js_grid.getHeaderText(column_nr) == "id")
+   {
+   // iterates through the  rows
+   for(row_nr =  0 ; row_nr <  parseInt(frames[1].global_js_grid.getRowCount());row_nr++)
+   {
+     try
+     {
+      var text_in_selected_cell =  frames[1].global_js_grid.getCellText(column_nr,row_nr );
+      var x = parseInt(text_in_selected_cell);
+     }
+     catch(x)
+         {
+           alert(x+" error_loc_3");
+         }
+     try
+     {
+     //tests if the id's are the same'
+      if((x) == (parseInt(ruby_id)) )
+        {
+         return  row_nr;
+        }
+     }
+      catch(x)
+      {
+       alert(x+" error_loc_4");
+      }
+   }
+}
 
-Element.offsetSize = function (element, type) {
-  return element['offset' + ((type=='vertical' || type=='height') ? 'Height' : 'Width')];
-};// JScript File
+}
+}
+catch(x)
+{
+alert(x+ "error_loc_5");
+}
+}
+// receives the updated data with the ruby id
+function get_ruby_id(new_values)
+{
+
+    try
+    {
+        var  array_update = new_values.split(",");
+
+        for(updated_item = 0 ; updated_item < array_update.length ;updated_item++ )
+           {
+            var update_array_detail = array_update[updated_item].split("#");
+            var update_key = update_array_detail[0];
+            var update_value = update_array_detail[1];
+            if (update_key == "id")
+              {
+                return  update_value;
+              }
+           }
+    }
+    catch(x)
+    {
+        alert(x);
+    }
+}
+//************************************************************************************
+// updates the grid 
+// 
+
+function update_js_grid(array,new_values)
+{
+
+
+ var frames = window.opener.frames;
+ var column_count =  parseInt(frames[1].global_js_grid.getColumnCount());
+ parseInt(frames[1].global_js_grid.setColumnCount(column_count+1));
+ var ruby_object_id = get_ruby_id(new_values);
+ var table_row_nr =  get_table_row(ruby_object_id);
+
+ try
+ {
+ // breaks the strings up into arrays 
+  changed_values  = new Array();
+  changed_values = new_values.split(",");
+  load_values = new Array();
+  load_values = array.split(",");
+  
+  for(load_item = 0 ; load_item < changed_values.length ; load_item ++)
+  {
+  // seperates the key from the value  'the new values, the updated values'
+   var updated  = changed_values[load_item].split("#");
+   var key_update  =  updated[0];
+   var value_update =  updated[1];
+    
+    for(start_item = 0 ; start_item < load_values.length ; start_item ++  )
+    {
+    // seperates the key from the value 'values at load'
+     var ini_values = load_values[start_item].split("?");
+     var load_key  = ini_values[0].split("$");
+     var load_value  = ini_values[1].split("_");
+      //if the key of the new and old values are the same and the heading of the column corresond to the 
+      // 'key_update value' then the cell wil be updated with the new values
+     if(key_update == load_key[1])
+       {
+        for(column_nr = 0 ; column_nr  < column_count ;column_nr++)
+         {
+          if(frames[1].global_js_grid.getHeaderText(column_nr) == key_update )
+           {
+
+            frames[1].global_js_grid.setCellText(value_update,column_nr,table_row_nr  );
+           }
+         }
+      }
+    }
+  }
+  }
+  catch(x)
+  {
+   alert(x);
+  }
+  alert("You have updated the grid");
+ this.window.close();
+}
+
+function getLeft(el) {
+    var tmp = el.offsetLeft;
+    el = el.offsetParent;
+    while(el) {
+       tmp += el.offsetLeft;
+       el = el.offsetParent;
+    }
+    return tmp;
+ }
+
+function getTop(el) {
+   var tmp = el.offsetTop;
+   el = el.offsetParent;
+   while(el) {
+     tmp += el.offsetTop;
+     el = el.offsetParent;
+   }
+   return tmp;
+}
+
+
+function show_column_detail(row_col_id)
+{
+   
+    var recordDiv = document.getElementById("record_div");
+   recordDiv.style.display = '';
+   recordDiv.style.left = "60px"; //the_left + 'px';
+   recordDiv.style.top =  "50px"; //the_top + 'px'; 
+
+   recordDiv.style.width = "445px";
+   recordDiv.style.height = "250px";
+   recordDiv.style.paddingLeft = "7px";
+   var innHtml = "<div id=\"record_caption\" style=\"height:20px; width:100%; background-color:#D8D6D4;\"><table border=\"0\" width=\"100%\" style=\"font-size:12pt; font-weight:bold;\"><tr><td style=\"text-align:right; height:15px;\"><img id=\"read_msg_img\" alt=\"close\" src=\"/images/form_close.PNG\" onclick=\"hide_div();\" /></td></tr></table></div><br />";
+   innHtml += "<textarea id=\"record_field\" readonly=\"readonly\" style=\"width:435; height:200px;\" wrap=\"virtual\"></textarea>";
+   
+   recordDiv.innerHTML = innHtml;
+   
+   recordDiv.style.border = "1px black solid";
+
+   recordDiv.scrollIntoView();
+     
+    new Ajax.Updater('record_field', '/development_tools/data/show_column_detail/' + row_col_id, {asynchronous:true, evalScripts:true});
+}
+  
+function hide_div() {
+   document.getElementById("record_div").style.display = "none";
+}
+// JScript File
 // VERSION 1 27/06/2008
 //=======================================================================
 //global variables or settings
@@ -8004,9 +5901,9 @@ function hidden_program_list_level3_button_clicked()
     }
 
     // hidden_program_list_level3_button_clicked
-    status = document.getElementById("hidden_program_list_level3_div").style.visibility;
+    vstatus = document.getElementById("hidden_program_list_level3_div").style.visibility;
     // test if any of the other divisions are visible if so they wil be closed
-    if(status == "hidden")
+    if(vstatus == "hidden")
     {
        
         window.parent.document.getElementById("hidden_program_list_level3_div").style.visibility = "visible";
@@ -8059,9 +5956,9 @@ function program_button_clicked_l2 (button)
     }
       
   
-    status = document.getElementById("hidden_program_list_level2_div").style.visibility;
+    vstatus = document.getElementById("hidden_program_list_level2_div").style.visibility;
      
-    if(status == "hidden")
+    if(vstatus == "hidden")
     {
         slide_down("hidden_program_list_level2_div");
     //   uncommnent the line below if you want to remove sliding effect and comment the line abbove
@@ -8073,6 +5970,8 @@ function program_button_clicked_l2 (button)
     //   uncommnent the line below if you want to remove sliding effect and comment the line abbove
     //    window.parent.document.getElementById("hidden_program_list_level2_div").style.visibility = "hidden";
     }
+
+    //FIXME: HERE BE DRAGONS - if statements that assign values to the variables they check. Not sure what effect will be if this is fixed!
     status_foreighn = document.getElementById("hidden_program_list_div");
     if(status_foreighn ="vissible ")
     {
@@ -8190,9 +6089,9 @@ function program_button_clicked ()
         document.getElementById("hidden_program_list_level2_button").style.visibility = "hidden";
     }
     
-    status = document.getElementById("hidden_program_list_div").style.visibility;
+    vstatus = document.getElementById("hidden_program_list_div").style.visibility;
      
-    if (status== "hidden")
+    if (vstatus== "hidden")
     {
         slide_down("hidden_program_list_div");
     //   uncommnent the line below if you want to remove sliding effect and comment the line abbove
@@ -8493,7 +6392,7 @@ function contentFrame_loaded()
       //cell.style.backgroundColor = level3_tab_selected_color
       active_l3_menu_image.parentNode.style.backgroundColor = level3_tab_selected_color;
     }
-    //If the status variable is not empty, set the caption of the
+    //If the vstatus variable is not empty, set the caption of the
     //content_header frame to the caption
     if (window.frames.length > 1)
     {
@@ -8572,10 +6471,10 @@ function menu_styling(cell,selected,clicked)
  
 }
 // (Henry) Will change the positions  of the elements(outer and innertab and the level3 menu tab  ) when the header is hidden
-function  adjust_menu(status)
+function  adjust_menu(vstatus)
 {
 
-    if(status == "hidden")
+    if(vstatus == "hidden")
     {
         document.getElementById("tableOuter").style.top = "8.2%";
         document.getElementById("hidden_program_list_button").style.top = "8.0%";
@@ -9857,10 +7756,10 @@ function level3_bad_programs_clicked(a,progname)
 // Checks if the div is visible if it is it will be hidden
 function change_l3_div_visibility()
 {
-    var status = document.getElementById("hidden_program_list_level3_div").style.visibility;
-    if(status == "visible")
+    var vstatus = document.getElementById("hidden_program_list_level3_div").style.visibility;
+    if(vstatus == "visible")
     {
-        status = document.getElementById("hidden_program_list_level3_div").style.visibility = "hidden";
+        vstatus = document.getElementById("hidden_program_list_level3_div").style.visibility = "hidden";
         document.getElementById("level3_bad_programslist").innerHTML = "<img  src ='/images/bullet_arrow_up_level3.png'</img>";
     }
 }
@@ -11084,911 +8983,6 @@ $.extend($.ui.multiselect, {
 
 
 })(jQuery);
-;(function($){
-/**
- * jqGrid English Translation
- * Tony Tomov tony@trirand.com
- * http://trirand.com/blog/ 
- * Dual licensed under the MIT and GPL licenses:
- * http://www.opensource.org/licenses/mit-license.php
- * http://www.gnu.org/licenses/gpl.html
-**/
-$.jgrid = $.jgrid || {};
-$.extend($.jgrid,{
-	defaults : {
-		recordtext: "View {0} - {1} of {2}",
-		emptyrecords: "No records to view",
-		loadtext: "Loading...",
-		pgtext : "Page {0} of {1}"
-	},
-	search : {
-		caption: "Search...",
-		Find: "Find",
-		Reset: "Reset",
-		odata : ['equal', 'not equal', 'less', 'less or equal','greater','greater or equal', 'begins with','does not begin with','is in','is not in','ends with','does not end with','contains','does not contain'],
-		groupOps: [	{ op: "AND", text: "all" },	{ op: "OR",  text: "any" }	],
-		matchText: " match",
-		rulesText: " rules"
-	},
-	edit : {
-		addCaption: "Add Record",
-		editCaption: "Edit Record",
-		bSubmit: "Submit",
-		bCancel: "Cancel",
-		bClose: "Close",
-		saveData: "Data has been changed! Save changes?",
-		bYes : "Yes",
-		bNo : "No",
-		bExit : "Cancel",
-		msg: {
-			required:"Field is required",
-			number:"Please, enter valid number",
-			minValue:"value must be greater than or equal to ",
-			maxValue:"value must be less than or equal to",
-			email: "is not a valid e-mail",
-			integer: "Please, enter valid integer value",
-			date: "Please, enter valid date value",
-			url: "is not a valid URL. Prefix required ('http://' or 'https://')",
-			nodefined : " is not defined!",
-			novalue : " return value is required!",
-			customarray : "Custom function should return array!",
-			customfcheck : "Custom function should be present in case of custom checking!"
-			
-		}
-	},
-	view : {
-		caption: "View Record",
-		bClose: "Close"
-	},
-	del : {
-		caption: "Delete",
-		msg: "Delete selected record(s)?",
-		bSubmit: "Delete",
-		bCancel: "Cancel"
-	},
-	nav : {
-		edittext: "",
-		edittitle: "Edit selected row",
-		addtext:"",
-		addtitle: "Add new row",
-		deltext: "",
-		deltitle: "Delete selected row",
-		searchtext: "",
-		searchtitle: "Find records",
-		refreshtext: "",
-		refreshtitle: "Reload Grid",
-		alertcap: "Warning",
-		alerttext: "Please, select row",
-		viewtext: "",
-		viewtitle: "View selected row"
-	},
-	col : {
-		caption: "Select columns",
-		bSubmit: "Ok",
-		bCancel: "Cancel"
-	},
-	errors : {
-		errcap : "Error",
-		nourl : "No url is set",
-		norecords: "No records to process",
-		model : "Length of colNames <> colModel!"
-	},
-	formatter : {
-		integer : {thousandsSeparator: ",", defaultValue: '0'},
-		number : {decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2, defaultValue: '0.00'},
-		currency : {decimalSeparator:".", thousandsSeparator: ",", decimalPlaces: 2, prefix: "", suffix:"", defaultValue: '0.00'},
-		date : {
-			dayNames:   [
-				"Sun", "Mon", "Tue", "Wed", "Thr", "Fri", "Sat",
-				"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
-			],
-			monthNames: [
-				"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-				"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"
-			],
-			AmPm : ["am","pm","AM","PM"],
-			S: function (j) {return j < 11 || j > 13 ? ['st', 'nd', 'rd', 'th'][Math.min((j - 1) % 10, 3)] : 'th';},
-			srcformat: 'Y-m-d',
-			newformat: 'n/j/Y',
-			masks : {
-				// see http://php.net/manual/en/function.date.php for PHP format used in jqGrid
-				// and see http://docs.jquery.com/UI/Datepicker/formatDate
-				// and https://github.com/jquery/globalize#dates for alternative formats used frequently
-				// one can find on https://github.com/jquery/globalize/tree/master/lib/cultures many
-				// information about date, time, numbers and currency formats used in different countries
-				// one should just convert the information in PHP format
-				ISO8601Long:"Y-m-d H:i:s",
-				ISO8601Short:"Y-m-d",
-				// short date:
-				//    n - Numeric representation of a month, without leading zeros
-				//    j - Day of the month without leading zeros
-				//    Y - A full numeric representation of a year, 4 digits
-				// example: 3/1/2012 which means 1 March 2012
-				ShortDate: "n/j/Y", // in jQuery UI Datepicker: "M/d/yyyy"
-				// long date:
-				//    l - A full textual representation of the day of the week
-				//    F - A full textual representation of a month
-				//    d - Day of the month, 2 digits with leading zeros
-				//    Y - A full numeric representation of a year, 4 digits
-				LongDate: "l, F d, Y", // in jQuery UI Datepicker: "dddd, MMMM dd, yyyy"
-				// long date with long time:
-				//    l - A full textual representation of the day of the week
-				//    F - A full textual representation of a month
-				//    d - Day of the month, 2 digits with leading zeros
-				//    Y - A full numeric representation of a year, 4 digits
-				//    g - 12-hour format of an hour without leading zeros
-				//    i - Minutes with leading zeros
-				//    s - Seconds, with leading zeros
-				//    A - Uppercase Ante meridiem and Post meridiem (AM or PM)
-				FullDateTime: "l, F d, Y g:i:s A", // in jQuery UI Datepicker: "dddd, MMMM dd, yyyy h:mm:ss tt"
-				// month day:
-				//    F - A full textual representation of a month
-				//    d - Day of the month, 2 digits with leading zeros
-				MonthDay: "F d", // in jQuery UI Datepicker: "MMMM dd"
-				// short time (without seconds)
-				//    g - 12-hour format of an hour without leading zeros
-				//    i - Minutes with leading zeros
-				//    A - Uppercase Ante meridiem and Post meridiem (AM or PM)
-				ShortTime: "g:i A", // in jQuery UI Datepicker: "h:mm tt"
-				// long time (with seconds)
-				//    g - 12-hour format of an hour without leading zeros
-				//    i - Minutes with leading zeros
-				//    s - Seconds, with leading zeros
-				//    A - Uppercase Ante meridiem and Post meridiem (AM or PM)
-				LongTime: "g:i:s A", // in jQuery UI Datepicker: "h:mm:ss tt"
-				SortableDateTime: "Y-m-d\\TH:i:s",
-				UniversalSortableDateTime: "Y-m-d H:i:sO",
-				// month with year
-				//    Y - A full numeric representation of a year, 4 digits
-				//    F - A full textual representation of a month
-				YearMonth: "F, Y" // in jQuery UI Datepicker: "MMMM, yyyy"
-			},
-			reformatAfterEdit : false
-		},
-		baseLinkUrl: '',
-		showAction: '',
-		target: '',
-		checkbox : {disabled:true},
-		idName : 'id'
-	}
-});
-})(jQuery);
-// Small js file to include before loading jqGrid, but after loading grid language files.
-jQuery.jgrid.no_legacy_api = true;
-/* 
-* jqGrid  4.4.1 - jQuery Grid 
-* Copyright (c) 2008, Tony Tomov, tony@trirand.com 
-* Dual licensed under the MIT and GPL licenses 
-* http://www.opensource.org/licenses/mit-license.php 
-* http://www.gnu.org/licenses/gpl-2.0.html 
-* Date:2012-08-28 
-* Modules: grid.base.js; jquery.fmatter.js; grid.custom.js; grid.common.js; grid.formedit.js; grid.filter.js; grid.inlinedit.js; grid.celledit.js; jqModal.js; jqDnR.js; grid.subgrid.js; grid.grouping.js; grid.treegrid.js; grid.import.js; JsonXml.js; grid.tbltogrid.js; grid.jqueryui.js; 
-*/
-(function(b){b.jgrid=b.jgrid||{};b.extend(b.jgrid,{version:"4.4.1",htmlDecode:function(b){return b&&("&nbsp;"==b||"&#160;"==b||1===b.length&&160===b.charCodeAt(0))?"":!b?b:(""+b).replace(/&gt;/g,">").replace(/&lt;/g,"<").replace(/&quot;/g,'"').replace(/&amp;/g,"&")},htmlEncode:function(b){return!b?b:(""+b).replace(/&/g,"&amp;").replace(/\"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;")},format:function(f){var e=b.makeArray(arguments).slice(1);void 0===f&&(f="");return f.replace(/\{(\d+)\}/g,
-function(b,d){return e[d]})},getCellIndex:function(f){f=b(f);if(f.is("tr"))return-1;f=(!f.is("td")&&!f.is("th")?f.closest("td,th"):f)[0];return b.browser.msie?b.inArray(f,f.parentNode.cells):f.cellIndex},stripHtml:function(b){var b=b+"",e=/<("[^"]*"|'[^']*'|[^'">])*>/gi;return b?(b=b.replace(e,""))&&"&nbsp;"!==b&&"&#160;"!==b?b.replace(/\"/g,"'"):"":b},stripPref:function(f,e){var c=b.type(f);if("string"==c||"number"==c)f=""+f,e=""!==f?(""+e).replace(""+f,""):e;return e},stringToDoc:function(b){var e;
-if("string"!==typeof b)return b;try{e=(new DOMParser).parseFromString(b,"text/xml")}catch(c){e=new ActiveXObject("Microsoft.XMLDOM"),e.async=!1,e.loadXML(b)}return e&&e.documentElement&&"parsererror"!=e.documentElement.tagName?e:null},parse:function(f){"while(1);"==f.substr(0,9)&&(f=f.substr(9));"/*"==f.substr(0,2)&&(f=f.substr(2,f.length-4));f||(f="{}");return!0===b.jgrid.useJSON&&"object"===typeof JSON&&"function"===typeof JSON.parse?JSON.parse(f):eval("("+f+")")},parseDate:function(f,e){var c=
-{m:1,d:1,y:1970,h:0,i:0,s:0,u:0},d,a,g;d=/[\\\/:_;.,\t\T\s-]/;if(e&&null!==e&&void 0!==e){e=b.trim(e);e=e.split(d);void 0!==b.jgrid.formatter.date.masks[f]&&(f=b.jgrid.formatter.date.masks[f]);var f=f.split(d),h=b.jgrid.formatter.date.monthNames,i=b.jgrid.formatter.date.AmPm,j=function(a,b){0===a?12===b&&(b=0):12!==b&&(b+=12);return b};d=0;for(a=f.length;d<a;d++)"M"==f[d]&&(g=b.inArray(e[d],h),-1!==g&&12>g&&(e[d]=g+1,c.m=e[d])),"F"==f[d]&&(g=b.inArray(e[d],h),-1!==g&&11<g&&(e[d]=g+1-12,c.m=e[d])),
-"a"==f[d]&&(g=b.inArray(e[d],i),-1!==g&&(2>g&&e[d]==i[g])&&(e[d]=g,c.h=j(e[d],c.h))),"A"==f[d]&&(g=b.inArray(e[d],i),-1!==g&&(1<g&&e[d]==i[g])&&(e[d]=g-2,c.h=j(e[d],c.h))),"g"===f[d]&&(c.h=parseInt(e[d],10)),void 0!==e[d]&&(c[f[d].toLowerCase()]=parseInt(e[d],10));c.m=parseInt(c.m,10)-1;d=c.y;70<=d&&99>=d?c.y=1900+c.y:0<=d&&69>=d&&(c.y=2E3+c.y);void 0!==c.j&&(c.d=c.j);void 0!==c.n&&(c.m=parseInt(c.n,10)-1)}return new Date(c.y,c.m,c.d,c.h,c.i,c.s,c.u)},jqID:function(b){return(""+b).replace(/[!"#$%&'()*+,.\/:;<=>?@\[\\\]\^`{|}~]/g,
-"\\$&")},guid:1,uidPref:"jqg",randId:function(f){return(f?f:b.jgrid.uidPref)+b.jgrid.guid++},getAccessor:function(b,e){var c,d,a=[],g;if("function"===typeof e)return e(b);c=b[e];if(void 0===c)try{if("string"===typeof e&&(a=e.split(".")),g=a.length)for(c=b;c&&g--;)d=a.shift(),c=c[d]}catch(h){}return c},getXmlData:function(f,e,c){var d="string"===typeof e?e.match(/^(.*)\[(\w+)\]$/):null;if("function"===typeof e)return e(f);if(d&&d[2])return d[1]?b(d[1],f).attr(d[2]):b(f).attr(d[2]);f=b(e,f);return c?
-f:0<f.length?b(f).text():void 0},cellWidth:function(){var f=b("<div class='ui-jqgrid' style='left:10000px'><table class='ui-jqgrid-btable' style='width:5px;'><tr class='jqgrow'><td style='width:5px;'></td></tr></table></div>"),e=f.appendTo("body").find("td").width();f.remove();return 5!==e},ajaxOptions:{},from:function(f){return new function(e,c){"string"==typeof e&&(e=b.data(e));var d=this,a=e,g=!0,f=!1,i=c,j=/[\$,%]/g,l=null,k=null,m=0,o=!1,p="",v=[],u=!0;if("object"==typeof e&&e.push)0<e.length&&
-(u="object"!=typeof e[0]?!1:!0);else throw"data provides is not an array";this._hasData=function(){return null===a?!1:0===a.length?!1:!0};this._getStr=function(a){var b=[];f&&b.push("jQuery.trim(");b.push("String("+a+")");f&&b.push(")");g||b.push(".toLowerCase()");return b.join("")};this._strComp=function(a){return"string"==typeof a?".toString()":""};this._group=function(a,b){return{field:a.toString(),unique:b,items:[]}};this._toStr=function(a){f&&(a=b.trim(a));a=a.toString().replace(/\\/g,"\\\\").replace(/\"/g,
-'\\"');return g?a:a.toLowerCase()};this._funcLoop=function(d){var c=[];b.each(a,function(a,b){c.push(d(b))});return c};this._append=function(a){var b;i=null===i?"":i+(""===p?" && ":p);for(b=0;b<m;b++)i+="(";o&&(i+="!");i+="("+a+")";o=!1;p="";m=0};this._setCommand=function(a,b){l=a;k=b};this._resetNegate=function(){o=!1};this._repeatCommand=function(a,b){return null===l?d:null!==a&&null!==b?l(a,b):null===k||!u?l(a):l(k,a)};this._equals=function(a,b){return 0===d._compare(a,b,1)};this._compare=function(a,
-b,d){var c=Object.prototype.toString;void 0===d&&(d=1);void 0===a&&(a=null);void 0===b&&(b=null);if(null===a&&null===b)return 0;if(null===a&&null!==b)return 1;if(null!==a&&null===b)return-1;if("[object Date]"===c.call(a)&&"[object Date]"===c.call(b))return a<b?-d:a>b?d:0;!g&&("number"!==typeof a&&"number"!==typeof b)&&(a=(""+a).toLowerCase(),b=(""+b).toLowerCase());return a<b?-d:a>b?d:0};this._performSort=function(){0!==v.length&&(a=d._doSort(a,0))};this._doSort=function(a,b){var c=v[b].by,f=v[b].dir,
-g=v[b].type,e=v[b].datefmt;if(b==v.length-1)return d._getOrder(a,c,f,g,e);b++;c=d._getGroup(a,c,f,g,e);f=[];for(g=0;g<c.length;g++)for(var e=d._doSort(c[g].items,b),h=0;h<e.length;h++)f.push(e[h]);return f};this._getOrder=function(a,c,f,g,e){var h=[],i=[],l="a"==f?1:-1,k,m;void 0===g&&(g="text");m="float"==g||"number"==g||"currency"==g||"numeric"==g?function(a){a=parseFloat((""+a).replace(j,""));return isNaN(a)?0:a}:"int"==g||"integer"==g?function(a){return a?parseFloat((""+a).replace(j,"")):0}:"date"==
-g||"datetime"==g?function(a){return b.jgrid.parseDate(e,a).getTime()}:b.isFunction(g)?g:function(a){a||(a="");return b.trim((""+a).toUpperCase())};b.each(a,function(a,d){k=""!==c?b.jgrid.getAccessor(d,c):d;void 0===k&&(k="");k=m(k,d);i.push({vSort:k,index:a})});i.sort(function(a,b){a=a.vSort;b=b.vSort;return d._compare(a,b,l)});for(var g=0,o=a.length;g<o;)f=i[g].index,h.push(a[f]),g++;return h};this._getGroup=function(a,c,g,f,e){var h=[],i=null,j=null,k;b.each(d._getOrder(a,c,g,f,e),function(a,g){k=
-b.jgrid.getAccessor(g,c);void 0===k&&(k="");d._equals(j,k)||(j=k,null!==i&&h.push(i),i=d._group(c,k));i.items.push(g)});null!==i&&h.push(i);return h};this.ignoreCase=function(){g=!1;return d};this.useCase=function(){g=!0;return d};this.trim=function(){f=!0;return d};this.noTrim=function(){f=!1;return d};this.execute=function(){var c=i,g=[];if(null===c)return d;b.each(a,function(){eval(c)&&g.push(this)});a=g;return d};this.data=function(){return a};this.select=function(c){d._performSort();if(!d._hasData())return[];
-d.execute();if(b.isFunction(c)){var g=[];b.each(a,function(a,b){g.push(c(b))});return g}return a};this.hasMatch=function(){if(!d._hasData())return!1;d.execute();return 0<a.length};this.andNot=function(a,b,c){o=!o;return d.and(a,b,c)};this.orNot=function(a,b,c){o=!o;return d.or(a,b,c)};this.not=function(a,b,c){return d.andNot(a,b,c)};this.and=function(a,b,c){p=" && ";return void 0===a?d:d._repeatCommand(a,b,c)};this.or=function(a,b,c){p=" || ";return void 0===a?d:d._repeatCommand(a,b,c)};this.orBegin=
-function(){m++;return d};this.orEnd=function(){null!==i&&(i+=")");return d};this.isNot=function(a){o=!o;return d.is(a)};this.is=function(a){d._append("this."+a);d._resetNegate();return d};this._compareValues=function(a,c,g,f,e){var h;h=u?"jQuery.jgrid.getAccessor(this,'"+c+"')":"this";void 0===g&&(g=null);var i=g,k=void 0===e.stype?"text":e.stype;if(null!==g)switch(k){case "int":case "integer":i=isNaN(Number(i))||""===i?"0":i;h="parseInt("+h+",10)";i="parseInt("+i+",10)";break;case "float":case "number":case "numeric":i=
-(""+i).replace(j,"");i=isNaN(Number(i))||""===i?"0":i;h="parseFloat("+h+")";i="parseFloat("+i+")";break;case "date":case "datetime":i=""+b.jgrid.parseDate(e.newfmt||"Y-m-d",i).getTime();h='jQuery.jgrid.parseDate("'+e.srcfmt+'",'+h+").getTime()";break;default:h=d._getStr(h),i=d._getStr('"'+d._toStr(i)+'"')}d._append(h+" "+f+" "+i);d._setCommand(a,c);d._resetNegate();return d};this.equals=function(a,b,c){return d._compareValues(d.equals,a,b,"==",c)};this.notEquals=function(a,b,c){return d._compareValues(d.equals,
-a,b,"!==",c)};this.isNull=function(a,b,c){return d._compareValues(d.equals,a,null,"===",c)};this.greater=function(a,b,c){return d._compareValues(d.greater,a,b,">",c)};this.less=function(a,b,c){return d._compareValues(d.less,a,b,"<",c)};this.greaterOrEquals=function(a,b,c){return d._compareValues(d.greaterOrEquals,a,b,">=",c)};this.lessOrEquals=function(a,b,c){return d._compareValues(d.lessOrEquals,a,b,"<=",c)};this.startsWith=function(a,c){var g=void 0===c||null===c?a:c,g=f?b.trim(g.toString()).length:
-g.toString().length;u?d._append(d._getStr("jQuery.jgrid.getAccessor(this,'"+a+"')")+".substr(0,"+g+") == "+d._getStr('"'+d._toStr(c)+'"')):(g=f?b.trim(c.toString()).length:c.toString().length,d._append(d._getStr("this")+".substr(0,"+g+") == "+d._getStr('"'+d._toStr(a)+'"')));d._setCommand(d.startsWith,a);d._resetNegate();return d};this.endsWith=function(a,c){var g=void 0===c||null===c?a:c,g=f?b.trim(g.toString()).length:g.toString().length;u?d._append(d._getStr("jQuery.jgrid.getAccessor(this,'"+a+
-"')")+".substr("+d._getStr("jQuery.jgrid.getAccessor(this,'"+a+"')")+".length-"+g+","+g+') == "'+d._toStr(c)+'"'):d._append(d._getStr("this")+".substr("+d._getStr("this")+'.length-"'+d._toStr(a)+'".length,"'+d._toStr(a)+'".length) == "'+d._toStr(a)+'"');d._setCommand(d.endsWith,a);d._resetNegate();return d};this.contains=function(a,b){u?d._append(d._getStr("jQuery.jgrid.getAccessor(this,'"+a+"')")+'.indexOf("'+d._toStr(b)+'",0) > -1'):d._append(d._getStr("this")+'.indexOf("'+d._toStr(a)+'",0) > -1');
-d._setCommand(d.contains,a);d._resetNegate();return d};this.groupBy=function(b,c,g,f){return!d._hasData()?null:d._getGroup(a,b,c,g,f)};this.orderBy=function(a,c,g,f){c=void 0===c||null===c?"a":b.trim(c.toString().toLowerCase());if(null===g||void 0===g)g="text";if(null===f||void 0===f)f="Y-m-d";if("desc"==c||"descending"==c)c="d";if("asc"==c||"ascending"==c)c="a";v.push({by:a,dir:c,type:g,datefmt:f});return d};return d}(f,null)},extend:function(f){b.extend(b.fn.jqGrid,f);this.no_legacy_api||b.fn.extend(f)}});
-b.fn.jqGrid=function(f){if("string"==typeof f){var e=b.jgrid.getAccessor(b.fn.jqGrid,f);if(!e)throw"jqGrid - No such method: "+f;var c=b.makeArray(arguments).slice(1);return e.apply(this,c)}return this.each(function(){if(!this.grid){var d=b.extend(!0,{url:"",height:150,page:1,rowNum:20,rowTotal:null,records:0,pager:"",pgbuttons:!0,pginput:!0,colModel:[],rowList:[],colNames:[],sortorder:"asc",sortname:"",datatype:"xml",mtype:"GET",altRows:!1,selarrrow:[],savedRow:[],shrinkToFit:!0,xmlReader:{},jsonReader:{},
-subGrid:!1,subGridModel:[],reccount:0,lastpage:0,lastsort:0,selrow:null,beforeSelectRow:null,onSelectRow:null,onSortCol:null,ondblClickRow:null,onRightClickRow:null,onPaging:null,onSelectAll:null,loadComplete:null,gridComplete:null,loadError:null,loadBeforeSend:null,afterInsertRow:null,beforeRequest:null,beforeProcessing:null,onHeaderClick:null,viewrecords:!1,loadonce:!1,multiselect:!1,multikey:!1,editurl:null,search:!1,caption:"",hidegrid:!0,hiddengrid:!1,postData:{},userData:{},treeGrid:!1,treeGridModel:"nested",
-treeReader:{},treeANode:-1,ExpandColumn:null,tree_root_level:0,prmNames:{page:"page",rows:"rows",sort:"sidx",order:"sord",search:"_search",nd:"nd",id:"id",oper:"oper",editoper:"edit",addoper:"add",deloper:"del",subgridid:"id",npage:null,totalrows:"totalrows"},forceFit:!1,gridstate:"visible",cellEdit:!1,cellsubmit:"remote",nv:0,loadui:"enable",toolbar:[!1,""],scroll:!1,multiboxonly:!1,deselectAfterSort:!0,scrollrows:!1,autowidth:!1,scrollOffset:18,cellLayout:5,subGridWidth:20,multiselectWidth:20,gridview:!1,
-rownumWidth:25,rownumbers:!1,pagerpos:"center",recordpos:"right",footerrow:!1,userDataOnFooter:!1,hoverrows:!0,altclass:"ui-priority-secondary",viewsortcols:[!1,"vertical",!0],resizeclass:"",autoencode:!1,remapColumns:[],ajaxGridOptions:{},direction:"ltr",toppager:!1,headertitles:!1,scrollTimeout:40,data:[],_index:{},grouping:!1,groupingView:{groupField:[],groupOrder:[],groupText:[],groupColumnShow:[],groupSummary:[],showSummaryOnHide:!1,sortitems:[],sortnames:[],summary:[],summaryval:[],plusicon:"ui-icon-circlesmall-plus",
-minusicon:"ui-icon-circlesmall-minus"},ignoreCase:!1,cmTemplate:{},idPrefix:""},b.jgrid.defaults,f||{}),a=this,c={headers:[],cols:[],footers:[],dragStart:function(c,e,f){this.resizing={idx:c,startX:e.clientX,sOL:f[0]};this.hDiv.style.cursor="col-resize";this.curGbox=b("#rs_m"+b.jgrid.jqID(d.id),"#gbox_"+b.jgrid.jqID(d.id));this.curGbox.css({display:"block",left:f[0],top:f[1],height:f[2]});b(a).triggerHandler("jqGridResizeStart",[e,c]);b.isFunction(d.resizeStart)&&d.resizeStart.call(this,e,c);document.onselectstart=
-function(){return!1}},dragMove:function(a){if(this.resizing){var b=a.clientX-this.resizing.startX,a=this.headers[this.resizing.idx],c="ltr"===d.direction?a.width+b:a.width-b,e;33<c&&(this.curGbox.css({left:this.resizing.sOL+b}),!0===d.forceFit?(e=this.headers[this.resizing.idx+d.nv],b="ltr"===d.direction?e.width-b:e.width+b,33<b&&(a.newWidth=c,e.newWidth=b)):(this.newWidth="ltr"===d.direction?d.tblwidth+b:d.tblwidth-b,a.newWidth=c))}},dragEnd:function(){this.hDiv.style.cursor="default";if(this.resizing){var c=
-this.resizing.idx,e=this.headers[c].newWidth||this.headers[c].width,e=parseInt(e,10);this.resizing=!1;b("#rs_m"+b.jgrid.jqID(d.id)).css("display","none");d.colModel[c].width=e;this.headers[c].width=e;this.headers[c].el.style.width=e+"px";this.cols[c].style.width=e+"px";0<this.footers.length&&(this.footers[c].style.width=e+"px");!0===d.forceFit?(e=this.headers[c+d.nv].newWidth||this.headers[c+d.nv].width,this.headers[c+d.nv].width=e,this.headers[c+d.nv].el.style.width=e+"px",this.cols[c+d.nv].style.width=
-e+"px",0<this.footers.length&&(this.footers[c+d.nv].style.width=e+"px"),d.colModel[c+d.nv].width=e):(d.tblwidth=this.newWidth||d.tblwidth,b("table:first",this.bDiv).css("width",d.tblwidth+"px"),b("table:first",this.hDiv).css("width",d.tblwidth+"px"),this.hDiv.scrollLeft=this.bDiv.scrollLeft,d.footerrow&&(b("table:first",this.sDiv).css("width",d.tblwidth+"px"),this.sDiv.scrollLeft=this.bDiv.scrollLeft));b(a).triggerHandler("jqGridResizeStop",[e,c]);b.isFunction(d.resizeStop)&&d.resizeStop.call(this,
-e,c)}this.curGbox=null;document.onselectstart=function(){return!0}},populateVisible:function(){c.timer&&clearTimeout(c.timer);c.timer=null;var a=b(c.bDiv).height();if(a){var e=b("table:first",c.bDiv),f,I;if(e[0].rows.length)try{I=(f=e[0].rows[1])?b(f).outerHeight()||c.prevRowHeight:c.prevRowHeight}catch(h){I=c.prevRowHeight}if(I){c.prevRowHeight=I;var i=d.rowNum;f=c.scrollTop=c.bDiv.scrollTop;var j=Math.round(e.position().top)-f,k=j+e.height();I*=i;var y,z,B;if(k<a&&0>=j&&(void 0===d.lastpage||parseInt((k+
-f+I-1)/I,10)<=d.lastpage))z=parseInt((a-k+I-1)/I,10),0<=k||2>z||!0===d.scroll?(y=Math.round((k+f)/I)+1,j=-1):j=1;0<j&&(y=parseInt(f/I,10)+1,z=parseInt((f+a)/I,10)+2-y,B=!0);if(z&&!(d.lastpage&&y>d.lastpage||1==d.lastpage||y===d.page&&y===d.lastpage))c.hDiv.loading?c.timer=setTimeout(c.populateVisible,d.scrollTimeout):(d.page=y,B&&(c.selectionPreserver(e[0]),c.emptyRows.call(e[0],!1,!1)),c.populate(z))}}},scrollGrid:function(a){if(d.scroll){var b=c.bDiv.scrollTop;void 0===c.scrollTop&&(c.scrollTop=
-0);b!=c.scrollTop&&(c.scrollTop=b,c.timer&&clearTimeout(c.timer),c.timer=setTimeout(c.populateVisible,d.scrollTimeout))}c.hDiv.scrollLeft=c.bDiv.scrollLeft;d.footerrow&&(c.sDiv.scrollLeft=c.bDiv.scrollLeft);a&&a.stopPropagation()},selectionPreserver:function(a){var c=a.p,d=c.selrow,e=c.selarrrow?b.makeArray(c.selarrrow):null,f=a.grid.bDiv.scrollLeft,g=function(){var h;c.selrow=null;c.selarrrow=[];if(c.multiselect&&e&&0<e.length)for(h=0;h<e.length;h++)e[h]!=d&&b(a).jqGrid("setSelection",e[h],!1,null);
-d&&b(a).jqGrid("setSelection",d,!1,null);a.grid.bDiv.scrollLeft=f;b(a).unbind(".selectionPreserver",g)};b(a).bind("jqGridGridComplete.selectionPreserver",g)}};if("TABLE"!=this.tagName.toUpperCase())alert("Element is not a table");else if(void 0!==document.documentMode&&5>=document.documentMode)alert("Grid can not be used in this ('quirks') mode!");else{b(this).empty().attr("tabindex","1");this.p=d;this.p.useProp=!!b.fn.prop;var e,i;if(0===this.p.colNames.length)for(e=0;e<this.p.colModel.length;e++)this.p.colNames[e]=
-this.p.colModel[e].label||this.p.colModel[e].name;if(this.p.colNames.length!==this.p.colModel.length)alert(b.jgrid.errors.model);else{var j=b("<div class='ui-jqgrid-view'></div>"),l,k=b.browser.msie?!0:!1;a.p.direction=b.trim(a.p.direction.toLowerCase());-1==b.inArray(a.p.direction,["ltr","rtl"])&&(a.p.direction="ltr");i=a.p.direction;b(j).insertBefore(this);b(this).appendTo(j).removeClass("scroll");var m=b("<div class='ui-jqgrid ui-widget ui-widget-content ui-corner-all'></div>");b(m).insertBefore(j).attr({id:"gbox_"+
-this.id,dir:i});b(j).appendTo(m).attr("id","gview_"+this.id);l=k&&6>=b.browser.version?'<iframe style="display:block;position:absolute;z-index:-1;filter:Alpha(Opacity=\'0\');" src="javascript:false;"></iframe>':"";b("<div class='ui-widget-overlay jqgrid-overlay' id='lui_"+this.id+"'></div>").append(l).insertBefore(j);b("<div class='loading ui-state-default ui-state-active' id='load_"+this.id+"'>"+this.p.loadtext+"</div>").insertBefore(j);b(this).attr({cellspacing:"0",cellpadding:"0",border:"0",role:"grid",
-"aria-multiselectable":!!this.p.multiselect,"aria-labelledby":"gbox_"+this.id});var o=function(a,b){a=parseInt(a,10);return isNaN(a)?b?b:0:a},p=function(d,e,f,h,i,j){var k=a.p.colModel[d],l=k.align,y='style="',z=k.classes,B=k.name,r=[];l&&(y=y+("text-align:"+l+";"));k.hidden===true&&(y=y+"display:none;");if(e===0)y=y+("width: "+c.headers[d].width+"px;");else if(k.cellattr&&b.isFunction(k.cellattr))if((d=k.cellattr.call(a,i,f,h,k,j))&&typeof d==="string"){d=d.replace(/style/i,"style").replace(/title/i,
-"title");if(d.indexOf("title")>-1)k.title=false;d.indexOf("class")>-1&&(z=void 0);r=d.split("style");if(r.length===2){r[1]=b.trim(r[1].replace("=",""));if(r[1].indexOf("'")===0||r[1].indexOf('"')===0)r[1]=r[1].substring(1);y=y+r[1].replace(/'/gi,'"')}else y=y+'"'}if(!r.length){r[0]="";y=y+'"'}y=y+((z!==void 0?' class="'+z+'"':"")+(k.title&&f?' title="'+b.jgrid.stripHtml(f)+'"':""));y=y+(' aria-describedby="'+a.p.id+"_"+B+'"');return y+r[0]},v=function(c){return c===void 0||c===null||c===""?"&#160;":
-a.p.autoencode?b.jgrid.htmlEncode(c):c+""},u=function(c,d,e,f,g){var h=a.p.colModel[e];if(typeof h.formatter!=="undefined"){c={rowId:c,colModel:h,gid:a.p.id,pos:e};d=b.isFunction(h.formatter)?h.formatter.call(a,d,c,f,g):b.fmatter?b.fn.fmatter.call(a,h.formatter,d,c,f,g):v(d)}else d=v(d);return d},L=function(a,b,c,d,e){b=u(a,b,c,e,"add");return'<td role="gridcell" '+p(c,d,b,e,a,true)+">"+b+"</td>"},E=function(b,c,d,e){e='<input role="checkbox" type="checkbox" id="jqg_'+a.p.id+"_"+b+'" class="cbox" name="jqg_'+
-a.p.id+"_"+b+'"'+(e?'checked="checked"':"")+"/>";return'<td role="gridcell" '+p(c,d,"",null,b,true)+">"+e+"</td>"},Y=function(a,b,c,d){c=(parseInt(c,10)-1)*parseInt(d,10)+1+b;return'<td role="gridcell" class="ui-state-default jqgrid-rownum" '+p(a,b,c,null,b,true)+">"+c+"</td>"},T=function(b){var c,d=[],e=0,f;for(f=0;f<a.p.colModel.length;f++){c=a.p.colModel[f];if(c.name!=="cb"&&c.name!=="subgrid"&&c.name!=="rn"){d[e]=b=="local"?c.name:b=="xml"||b==="xmlstring"?c.xmlmap||c.name:c.jsonmap||c.name;e++}}return d},
-U=function(c){var d=a.p.remapColumns;if(!d||!d.length)d=b.map(a.p.colModel,function(a,b){return b});c&&(d=b.map(d,function(a){return a<c?null:a-c}));return d},M=function(a,c){var d;if(this.p.deepempty)b(this.rows).slice(1).remove();else{d=this.rows.length>0?this.rows[0]:null;b(this.firstChild).empty().append(d)}if(a&&this.p.scroll){b(this.grid.bDiv.firstChild).css({height:"auto"});b(this.grid.bDiv.firstChild.firstChild).css({height:0,display:"none"});if(this.grid.bDiv.scrollTop!==0)this.grid.bDiv.scrollTop=
-0}if(c===true&&this.p.treeGrid){this.p.data=[];this.p._index={}}},Q=function(){var c=a.p.data.length,d,e,f;d=a.p.rownumbers===true?1:0;e=a.p.multiselect===true?1:0;f=a.p.subGrid===true?1:0;d=a.p.keyIndex===false||a.p.loadonce===true?a.p.localReader.id:a.p.colModel[a.p.keyIndex+e+f+d].name;for(e=0;e<c;e++){f=b.jgrid.getAccessor(a.p.data[e],d);a.p._index[f]=e}},N=function(c,d,e,f,g,h){var i="-1",j="",k,d=d?"display:none;":"",e="ui-widget-content jqgrow ui-row-"+a.p.direction+e+(h?" ui-state-highlight":
-""),f=b.isFunction(a.p.rowattr)?a.p.rowattr.call(a,f,g):{};if(!b.isEmptyObject(f)){if(f.hasOwnProperty("id")){c=f.id;delete f.id}if(f.hasOwnProperty("tabindex")){i=f.tabindex;delete f.tabindex}if(f.hasOwnProperty("style")){d=d+f.style;delete f.style}if(f.hasOwnProperty("class")){e=e+(" "+f["class"]);delete f["class"]}try{delete f.role}catch(z){}for(k in f)f.hasOwnProperty(k)&&(j=j+(" "+k+"="+f[k]))}return'<tr role="row" id="'+c+'" tabindex="'+i+'" class="'+e+'"'+(d===""?"":' style="'+d+'"')+j+">"},
-Z=function(c,d,e,f,g){var h=new Date,i=a.p.datatype!="local"&&a.p.loadonce||a.p.datatype=="xmlstring",j=a.p.xmlReader,k=a.p.datatype=="local"?"local":"xml";if(i){a.p.data=[];a.p._index={};a.p.localReader.id="_id_"}a.p.reccount=0;if(b.isXMLDoc(c)){if(a.p.treeANode===-1&&!a.p.scroll){M.call(a,false,true);e=1}else e=e>1?e:1;var z,B,r=0,l,s=a.p.multiselect===true?1:0,O=a.p.subGrid===true?1:0,m=a.p.rownumbers===true?1:0,o,p=[],u,n={},q,w,C=[],v=a.p.altRows===true?" "+a.p.altclass:"",A;j.repeatitems||(p=
-T(k));o=a.p.keyIndex===false?b.isFunction(j.id)?j.id.call(a,c):j.id:a.p.keyIndex;if(p.length>0&&!isNaN(o)){a.p.remapColumns&&a.p.remapColumns.length&&(o=b.inArray(o,a.p.remapColumns));o=p[o]}k=(o+"").indexOf("[")===-1?p.length?function(a,c){return b(o,a).text()||c}:function(a,c){return b(j.cell,a).eq(o).text()||c}:function(a,b){return a.getAttribute(o.replace(/[\[\]]/g,""))||b};a.p.userData={};a.p.page=b.jgrid.getXmlData(c,j.page)||a.p.page||0;a.p.lastpage=b.jgrid.getXmlData(c,j.total);if(a.p.lastpage===
-void 0)a.p.lastpage=1;a.p.records=b.jgrid.getXmlData(c,j.records)||0;b.isFunction(j.userdata)?a.p.userData=j.userdata.call(a,c)||{}:b.jgrid.getXmlData(c,j.userdata,true).each(function(){a.p.userData[this.getAttribute("name")]=b(this).text()});c=b.jgrid.getXmlData(c,j.root,true);(c=b.jgrid.getXmlData(c,j.row,true))||(c=[]);var t=c.length,F=0,R=[],x=parseInt(a.p.rowNum,10);if(t>0&&a.p.page<=0)a.p.page=1;if(c&&t){var D=a.p.scroll?b.jgrid.randId():1;g&&(x=x*(g+1));for(var g=b.isFunction(a.p.afterInsertRow),
-H=a.p.grouping&&a.p.groupingView.groupCollapse===true;F<t;){q=c[F];w=k(q,D+F);w=a.p.idPrefix+w;z=e===0?0:e+1;A=(z+F)%2==1?v:"";var G=C.length;C.push("");m&&C.push(Y(0,F,a.p.page,a.p.rowNum));s&&C.push(E(w,m,F,false));O&&C.push(b(a).jqGrid("addSubGridCell",s+m,F+e));if(j.repeatitems){u||(u=U(s+O+m));var J=b.jgrid.getXmlData(q,j.cell,true);b.each(u,function(b){var c=J[this];if(!c)return false;l=c.textContent||c.text;n[a.p.colModel[b+s+O+m].name]=l;C.push(L(w,l,b+s+O+m,F+e,q))})}else for(z=0;z<p.length;z++){l=
-b.jgrid.getXmlData(q,p[z]);n[a.p.colModel[z+s+O+m].name]=l;C.push(L(w,l,z+s+O+m,F+e,q))}C[G]=N(w,H,A,n,q,false);C.push("</tr>");if(a.p.grouping){R=b(a).jqGrid("groupingPrepare",C,R,n,F);C=[]}if(i||a.p.treeGrid===true){n._id_=w;a.p.data.push(n);a.p._index[w]=a.p.data.length-1}if(a.p.gridview===false){b("tbody:first",d).append(C.join(""));b(a).triggerHandler("jqGridAfterInsertRow",[w,n,q]);g&&a.p.afterInsertRow.call(a,w,n,q);C=[]}n={};r++;F++;if(r==x)break}}if(a.p.gridview===true){B=a.p.treeANode>-1?
-a.p.treeANode:0;if(a.p.grouping){b(a).jqGrid("groupingRender",R,a.p.colModel.length);R=null}else a.p.treeGrid===true&&B>0?b(a.rows[B]).after(C.join("")):b("tbody:first",d).append(C.join(""))}if(a.p.subGrid===true)try{b(a).jqGrid("addSubGrid",s+m)}catch(P){}a.p.totaltime=new Date-h;if(r>0&&a.p.records===0)a.p.records=t;C=null;if(a.p.treeGrid===true)try{b(a).jqGrid("setTreeNode",B+1,r+B+1)}catch(Q){}if(!a.p.treeGrid&&!a.p.scroll)a.grid.bDiv.scrollTop=0;a.p.reccount=r;a.p.treeANode=-1;a.p.userDataOnFooter&&
-b(a).jqGrid("footerData","set",a.p.userData,true);if(i){a.p.records=t;a.p.lastpage=Math.ceil(t/x)}f||a.updatepager(false,true);if(i)for(;r<t;){q=c[r];w=k(q,r+D);w=a.p.idPrefix+w;if(j.repeatitems){u||(u=U(s+O+m));var K=b.jgrid.getXmlData(q,j.cell,true);b.each(u,function(b){var c=K[this];if(!c)return false;l=c.textContent||c.text;n[a.p.colModel[b+s+O+m].name]=l})}else for(z=0;z<p.length;z++){l=b.jgrid.getXmlData(q,p[z]);n[a.p.colModel[z+s+O+m].name]=l}n._id_=w;a.p.data.push(n);a.p._index[w]=a.p.data.length-
-1;n={};r++}}},$=function(c,d,e,f,g){d=new Date;if(c){if(a.p.treeANode===-1&&!a.p.scroll){M.call(a,false,true);e=1}else e=e>1?e:1;var h,i,j=a.p.datatype!="local"&&a.p.loadonce||a.p.datatype=="jsonstring";if(j){a.p.data=[];a.p._index={};a.p.localReader.id="_id_"}a.p.reccount=0;if(a.p.datatype=="local"){h=a.p.localReader;i="local"}else{h=a.p.jsonReader;i="json"}var k=0,l,B,r=[],m,s=a.p.multiselect?1:0,o=a.p.subGrid?1:0,p=a.p.rownumbers===true?1:0,n,u,t={},v,q,w=[],C=a.p.altRows===true?" "+a.p.altclass:
-"",A;a.p.page=b.jgrid.getAccessor(c,h.page)||a.p.page||0;n=b.jgrid.getAccessor(c,h.total);a.p.lastpage=n===void 0?1:n;a.p.records=b.jgrid.getAccessor(c,h.records)||0;a.p.userData=b.jgrid.getAccessor(c,h.userdata)||{};h.repeatitems||(m=r=T(i));i=a.p.keyIndex===false?b.isFunction(h.id)?h.id.call(a,c):h.id:a.p.keyIndex;if(r.length>0&&!isNaN(i)){a.p.remapColumns&&a.p.remapColumns.length&&(i=b.inArray(i,a.p.remapColumns));i=r[i]}(u=b.jgrid.getAccessor(c,h.root))||(u=[]);n=u.length;c=0;if(n>0&&a.p.page<=
-0)a.p.page=1;var x=parseInt(a.p.rowNum,10),D=a.p.scroll?b.jgrid.randId():1,F=false,R;g&&(x=x*(g+1));a.p.datatype==="local"&&!a.p.deselectAfterSort&&(F=true);for(var H=b.isFunction(a.p.afterInsertRow),G=[],J=a.p.grouping&&a.p.groupingView.groupCollapse===true;c<n;){g=u[c];q=b.jgrid.getAccessor(g,i);if(q===void 0){q=D+c;if(r.length===0&&h.cell){l=b.jgrid.getAccessor(g,h.cell);q=l!==void 0?l[i]||q:q}}q=a.p.idPrefix+q;l=e===1?0:e;A=(l+c)%2==1?C:"";F&&(R=a.p.multiselect?b.inArray(q,a.p.selarrrow)!==-1:
-q===a.p.selrow);var K=w.length;w.push("");p&&w.push(Y(0,c,a.p.page,a.p.rowNum));s&&w.push(E(q,p,c,R));o&&w.push(b(a).jqGrid("addSubGridCell",s+p,c+e));if(h.repeatitems){h.cell&&(g=b.jgrid.getAccessor(g,h.cell));m||(m=U(s+o+p))}for(B=0;B<m.length;B++){l=b.jgrid.getAccessor(g,m[B]);w.push(L(q,l,B+s+o+p,c+e,g));t[a.p.colModel[B+s+o+p].name]=l}w[K]=N(q,J,A,t,g,R);w.push("</tr>");if(a.p.grouping){G=b(a).jqGrid("groupingPrepare",w,G,t,c);w=[]}if(j||a.p.treeGrid===true){t._id_=q;a.p.data.push(t);a.p._index[q]=
-a.p.data.length-1}if(a.p.gridview===false){b("#"+b.jgrid.jqID(a.p.id)+" tbody:first").append(w.join(""));b(a).triggerHandler("jqGridAfterInsertRow",[q,t,g]);H&&a.p.afterInsertRow.call(a,q,t,g);w=[]}t={};k++;c++;if(k==x)break}if(a.p.gridview===true){v=a.p.treeANode>-1?a.p.treeANode:0;a.p.grouping?b(a).jqGrid("groupingRender",G,a.p.colModel.length):a.p.treeGrid===true&&v>0?b(a.rows[v]).after(w.join("")):b("#"+b.jgrid.jqID(a.p.id)+" tbody:first").append(w.join(""))}if(a.p.subGrid===true)try{b(a).jqGrid("addSubGrid",
-s+p)}catch(P){}a.p.totaltime=new Date-d;if(k>0&&a.p.records===0)a.p.records=n;if(a.p.treeGrid===true)try{b(a).jqGrid("setTreeNode",v+1,k+v+1)}catch(Q){}if(!a.p.treeGrid&&!a.p.scroll)a.grid.bDiv.scrollTop=0;a.p.reccount=k;a.p.treeANode=-1;a.p.userDataOnFooter&&b(a).jqGrid("footerData","set",a.p.userData,true);if(j){a.p.records=n;a.p.lastpage=Math.ceil(n/x)}f||a.updatepager(false,true);if(j)for(;k<n&&u[k];){g=u[k];q=b.jgrid.getAccessor(g,i);if(q===void 0){q=D+k;r.length===0&&h.cell&&(q=b.jgrid.getAccessor(g,
-h.cell)[i]||q)}if(g){q=a.p.idPrefix+q;if(h.repeatitems){h.cell&&(g=b.jgrid.getAccessor(g,h.cell));m||(m=U(s+o+p))}for(B=0;B<m.length;B++){l=b.jgrid.getAccessor(g,m[B]);t[a.p.colModel[B+s+o+p].name]=l}t._id_=q;a.p.data.push(t);a.p._index[q]=a.p.data.length-1;t={}}k++}}},la=function(){function c(d){var e=0,g,h,i,j,S;if(d.groups!==void 0){(h=d.groups.length&&d.groupOp.toString().toUpperCase()==="OR")&&s.orBegin();for(g=0;g<d.groups.length;g++){e>0&&h&&s.or();try{c(d.groups[g])}catch(k){alert(k)}e++}h&&
-s.orEnd()}if(d.rules!==void 0){if(e>0){h=s.select();s=b.jgrid.from(h);a.p.ignoreCase&&(s=s.ignoreCase())}try{(i=d.rules.length&&d.groupOp.toString().toUpperCase()==="OR")&&s.orBegin();for(g=0;g<d.rules.length;g++){S=d.rules[g];j=d.groupOp.toString().toUpperCase();if(o[S.op]&&S.field){e>0&&(j&&j==="OR")&&(s=s.or());s=o[S.op](s,j)(S.field,S.data,f[S.field])}e++}i&&s.orEnd()}catch(ma){alert(ma)}}}var d,e=false,f={},g=[],h=[],i,j,k;if(b.isArray(a.p.data)){var l=a.p.grouping?a.p.groupingView:false,m,r;
-b.each(a.p.colModel,function(){j=this.sorttype||"text";if(j=="date"||j=="datetime"){if(this.formatter&&typeof this.formatter==="string"&&this.formatter=="date"){i=this.formatoptions&&this.formatoptions.srcformat?this.formatoptions.srcformat:b.jgrid.formatter.date.srcformat;k=this.formatoptions&&this.formatoptions.newformat?this.formatoptions.newformat:b.jgrid.formatter.date.newformat}else i=k=this.datefmt||"Y-m-d";f[this.name]={stype:j,srcfmt:i,newfmt:k}}else f[this.name]={stype:j,srcfmt:"",newfmt:""};
-if(a.p.grouping){r=0;for(m=l.groupField.length;r<m;r++)if(this.name==l.groupField[r]){var c=this.name;if(typeof this.index!="undefined")c=this.index;g[r]=f[c];h[r]=c}}if(!e&&(this.index==a.p.sortname||this.name==a.p.sortname)){d=this.name;e=true}});if(a.p.treeGrid)b(a).jqGrid("SortTree",d,a.p.sortorder,f[d].stype,f[d].srcfmt);else{var o={eq:function(a){return a.equals},ne:function(a){return a.notEquals},lt:function(a){return a.less},le:function(a){return a.lessOrEquals},gt:function(a){return a.greater},
-ge:function(a){return a.greaterOrEquals},cn:function(a){return a.contains},nc:function(a,b){return b==="OR"?a.orNot().contains:a.andNot().contains},bw:function(a){return a.startsWith},bn:function(a,b){return b==="OR"?a.orNot().startsWith:a.andNot().startsWith},en:function(a,b){return b==="OR"?a.orNot().endsWith:a.andNot().endsWith},ew:function(a){return a.endsWith},ni:function(a,b){return b==="OR"?a.orNot().equals:a.andNot().equals},"in":function(a){return a.equals},nu:function(a){return a.isNull},
-nn:function(a,b){return b==="OR"?a.orNot().isNull:a.andNot().isNull}},s=b.jgrid.from(a.p.data);a.p.ignoreCase&&(s=s.ignoreCase());if(a.p.search===true){var n=a.p.postData.filters;if(n){typeof n=="string"&&(n=b.jgrid.parse(n));c(n)}else try{s=o[a.p.postData.searchOper](s)(a.p.postData.searchField,a.p.postData.searchString,f[a.p.postData.searchField])}catch(p){}}if(a.p.grouping)for(r=0;r<m;r++)s.orderBy(h[r],l.groupOrder[r],g[r].stype,g[r].srcfmt);d&&(a.p.sortorder&&e)&&(a.p.sortorder.toUpperCase()==
-"DESC"?s.orderBy(a.p.sortname,"d",f[d].stype,f[d].srcfmt):s.orderBy(a.p.sortname,"a",f[d].stype,f[d].srcfmt));var n=s.select(),u=parseInt(a.p.rowNum,10),t=n.length,v=parseInt(a.p.page,10),x=Math.ceil(t/u),q={},n=n.slice((v-1)*u,v*u),f=s=null;q[a.p.localReader.total]=x;q[a.p.localReader.page]=v;q[a.p.localReader.records]=t;q[a.p.localReader.root]=n;q[a.p.localReader.userdata]=a.p.userData;n=null;return q}}},ba=function(){a.grid.hDiv.loading=true;if(!a.p.hiddengrid)switch(a.p.loadui){case "enable":b("#load_"+
-b.jgrid.jqID(a.p.id)).show();break;case "block":b("#lui_"+b.jgrid.jqID(a.p.id)).show();b("#load_"+b.jgrid.jqID(a.p.id)).show()}},K=function(){a.grid.hDiv.loading=false;switch(a.p.loadui){case "enable":b("#load_"+b.jgrid.jqID(a.p.id)).hide();break;case "block":b("#lui_"+b.jgrid.jqID(a.p.id)).hide();b("#load_"+b.jgrid.jqID(a.p.id)).hide()}},G=function(c){if(!a.grid.hDiv.loading){var d=a.p.scroll&&c===false,e={},f,g=a.p.prmNames;if(a.p.page<=0)a.p.page=1;if(g.search!==null)e[g.search]=a.p.search;g.nd!==
-null&&(e[g.nd]=(new Date).getTime());if(g.rows!==null)e[g.rows]=a.p.rowNum;if(g.page!==null)e[g.page]=a.p.page;if(g.sort!==null)e[g.sort]=a.p.sortname;if(g.order!==null)e[g.order]=a.p.sortorder;if(a.p.rowTotal!==null&&g.totalrows!==null)e[g.totalrows]=a.p.rowTotal;var h=b.isFunction(a.p.loadComplete),i=h?a.p.loadComplete:null,j=0,c=c||1;if(c>1)if(g.npage!==null){e[g.npage]=c;j=c-1;c=1}else i=function(b){a.p.page++;a.grid.hDiv.loading=false;h&&a.p.loadComplete.call(a,b);G(c-1)};else g.npage!==null&&
-delete a.p.postData[g.npage];if(a.p.grouping){b(a).jqGrid("groupingSetup");var k=a.p.groupingView,l,m="";for(l=0;l<k.groupField.length;l++){var r=k.groupField[l];b.each(a.p.colModel,function(a,b){if(b.name==r&&b.index)r=b.index});m=m+(r+" "+k.groupOrder[l]+", ")}e[g.sort]=m+e[g.sort]}b.extend(a.p.postData,e);var n=!a.p.scroll?1:a.rows.length-1,e=b(a).triggerHandler("jqGridBeforeRequest");if(!(e===false||e==="stop"))if(b.isFunction(a.p.datatype))a.p.datatype.call(a,a.p.postData,"load_"+a.p.id);else{if(b.isFunction(a.p.beforeRequest)){e=
-a.p.beforeRequest.call(a);e===void 0&&(e=true);if(e===false)return}f=a.p.datatype.toLowerCase();switch(f){case "json":case "jsonp":case "xml":case "script":b.ajax(b.extend({url:a.p.url,type:a.p.mtype,dataType:f,data:b.isFunction(a.p.serializeGridData)?a.p.serializeGridData.call(a,a.p.postData):a.p.postData,success:function(e,g,h){if(b.isFunction(a.p.beforeProcessing)&&a.p.beforeProcessing.call(a,e,g,h)===false)K();else{f==="xml"?Z(e,a.grid.bDiv,n,c>1,j):$(e,a.grid.bDiv,n,c>1,j);b(a).triggerHandler("jqGridLoadComplete",
-[e]);i&&i.call(a,e);b(a).triggerHandler("jqGridAfterLoadComplete",[e]);d&&a.grid.populateVisible();if(a.p.loadonce||a.p.treeGrid)a.p.datatype="local";c===1&&K()}},error:function(d,e,f){b.isFunction(a.p.loadError)&&a.p.loadError.call(a,d,e,f);c===1&&K()},beforeSend:function(c,d){var e=true;b.isFunction(a.p.loadBeforeSend)&&(e=a.p.loadBeforeSend.call(a,c,d));e===void 0&&(e=true);if(e===false)return false;ba()}},b.jgrid.ajaxOptions,a.p.ajaxGridOptions));break;case "xmlstring":ba();e=b.jgrid.stringToDoc(a.p.datastr);
-Z(e,a.grid.bDiv);b(a).triggerHandler("jqGridLoadComplete",[e]);h&&a.p.loadComplete.call(a,e);b(a).triggerHandler("jqGridAfterLoadComplete",[e]);a.p.datatype="local";a.p.datastr=null;K();break;case "jsonstring":ba();e=typeof a.p.datastr=="string"?b.jgrid.parse(a.p.datastr):a.p.datastr;$(e,a.grid.bDiv);b(a).triggerHandler("jqGridLoadComplete",[e]);h&&a.p.loadComplete.call(a,e);b(a).triggerHandler("jqGridAfterLoadComplete",[e]);a.p.datatype="local";a.p.datastr=null;K();break;case "local":case "clientside":ba();
-a.p.datatype="local";e=la();$(e,a.grid.bDiv,n,c>1,j);b(a).triggerHandler("jqGridLoadComplete",[e]);i&&i.call(a,e);b(a).triggerHandler("jqGridAfterLoadComplete",[e]);d&&a.grid.populateVisible();K()}}}},ca=function(c){b("#cb_"+b.jgrid.jqID(a.p.id),a.grid.hDiv)[a.p.useProp?"prop":"attr"]("checked",c);if(a.p.frozenColumns&&a.p.id+"_frozen")b("#cb_"+b.jgrid.jqID(a.p.id),a.grid.fhDiv)[a.p.useProp?"prop":"attr"]("checked",c)};l=function(c,e){var d="",f="<table cellspacing='0' cellpadding='0' border='0' style='table-layout:auto;' class='ui-pg-table'><tbody><tr>",
-g="",h,j,k,l,m=function(c){var e;b.isFunction(a.p.onPaging)&&(e=a.p.onPaging.call(a,c));a.p.selrow=null;if(a.p.multiselect){a.p.selarrrow=[];ca(false)}a.p.savedRow=[];return e=="stop"?false:true},c=c.substr(1),e=e+("_"+c);h="pg_"+c;j=c+"_left";k=c+"_center";l=c+"_right";b("#"+b.jgrid.jqID(c)).append("<div id='"+h+"' class='ui-pager-control' role='group'><table cellspacing='0' cellpadding='0' border='0' class='ui-pg-table' style='width:100%;table-layout:fixed;height:100%;' role='row'><tbody><tr><td id='"+
-j+"' align='left'></td><td id='"+k+"' align='center' style='white-space:pre;'></td><td id='"+l+"' align='right'></td></tr></tbody></table></div>").attr("dir","ltr");if(a.p.rowList.length>0){g="<td dir='"+i+"'>";g=g+"<select class='ui-pg-selbox' role='listbox'>";for(j=0;j<a.p.rowList.length;j++)g=g+('<option role="option" value="'+a.p.rowList[j]+'"'+(a.p.rowNum==a.p.rowList[j]?' selected="selected"':"")+">"+a.p.rowList[j]+"</option>");g=g+"</select></td>"}i=="rtl"&&(f=f+g);a.p.pginput===true&&(d="<td dir='"+
-i+"'>"+b.jgrid.format(a.p.pgtext||"","<input class='ui-pg-input' type='text' size='2' maxlength='7' value='0' role='textbox'/>","<span id='sp_1_"+b.jgrid.jqID(c)+"'></span>")+"</td>");if(a.p.pgbuttons===true){j=["first"+e,"prev"+e,"next"+e,"last"+e];i=="rtl"&&j.reverse();f=f+("<td id='"+j[0]+"' class='ui-pg-button ui-corner-all'><span class='ui-icon ui-icon-seek-first'></span></td>");f=f+("<td id='"+j[1]+"' class='ui-pg-button ui-corner-all'><span class='ui-icon ui-icon-seek-prev'></span></td>");
-f=f+(d!==""?"<td class='ui-pg-button ui-state-disabled' style='width:4px;'><span class='ui-separator'></span></td>"+d+"<td class='ui-pg-button ui-state-disabled' style='width:4px;'><span class='ui-separator'></span></td>":"")+("<td id='"+j[2]+"' class='ui-pg-button ui-corner-all'><span class='ui-icon ui-icon-seek-next'></span></td>");f=f+("<td id='"+j[3]+"' class='ui-pg-button ui-corner-all'><span class='ui-icon ui-icon-seek-end'></span></td>")}else d!==""&&(f=f+d);i=="ltr"&&(f=f+g);f=f+"</tr></tbody></table>";
-a.p.viewrecords===true&&b("td#"+c+"_"+a.p.recordpos,"#"+h).append("<div dir='"+i+"' style='text-align:"+a.p.recordpos+"' class='ui-paging-info'></div>");b("td#"+c+"_"+a.p.pagerpos,"#"+h).append(f);g=b(".ui-jqgrid").css("font-size")||"11px";b(document.body).append("<div id='testpg' class='ui-jqgrid ui-widget ui-widget-content' style='font-size:"+g+";visibility:hidden;' ></div>");f=b(f).clone().appendTo("#testpg").width();b("#testpg").remove();if(f>0){d!==""&&(f=f+50);b("td#"+c+"_"+a.p.pagerpos,"#"+
-h).width(f)}a.p._nvtd=[];a.p._nvtd[0]=f?Math.floor((a.p.width-f)/2):Math.floor(a.p.width/3);a.p._nvtd[1]=0;f=null;b(".ui-pg-selbox","#"+h).bind("change",function(){a.p.page=Math.round(a.p.rowNum*(a.p.page-1)/this.value-0.5)+1;a.p.rowNum=this.value;a.p.pager&&b(".ui-pg-selbox",a.p.pager).val(this.value);a.p.toppager&&b(".ui-pg-selbox",a.p.toppager).val(this.value);if(!m("records"))return false;G();return false});if(a.p.pgbuttons===true){b(".ui-pg-button","#"+h).hover(function(){if(b(this).hasClass("ui-state-disabled"))this.style.cursor=
-"default";else{b(this).addClass("ui-state-hover");this.style.cursor="pointer"}},function(){if(!b(this).hasClass("ui-state-disabled")){b(this).removeClass("ui-state-hover");this.style.cursor="default"}});b("#first"+b.jgrid.jqID(e)+", #prev"+b.jgrid.jqID(e)+", #next"+b.jgrid.jqID(e)+", #last"+b.jgrid.jqID(e)).click(function(){var b=o(a.p.page,1),c=o(a.p.lastpage,1),d=false,f=true,g=true,h=true,i=true;if(c===0||c===1)i=h=g=f=false;else if(c>1&&b>=1)if(b===1)g=f=false;else{if(b===c)i=h=false}else if(c>
-1&&b===0){i=h=false;b=c-1}if(this.id==="first"+e&&f){a.p.page=1;d=true}if(this.id==="prev"+e&&g){a.p.page=b-1;d=true}if(this.id==="next"+e&&h){a.p.page=b+1;d=true}if(this.id==="last"+e&&i){a.p.page=c;d=true}if(d){if(!m(this.id))return false;G()}return false})}a.p.pginput===true&&b("input.ui-pg-input","#"+h).keypress(function(c){if((c.charCode?c.charCode:c.keyCode?c.keyCode:0)==13){a.p.page=b(this).val()>0?b(this).val():a.p.page;if(!m("user"))return false;G();return false}return this})};var ia=function(c,
-e,d,f){if(a.p.colModel[e].sortable&&!(a.p.savedRow.length>0)){if(!d){if(a.p.lastsort==e)if(a.p.sortorder=="asc")a.p.sortorder="desc";else{if(a.p.sortorder=="desc")a.p.sortorder="asc"}else a.p.sortorder=a.p.colModel[e].firstsortorder||"asc";a.p.page=1}if(f){if(a.p.lastsort==e&&a.p.sortorder==f&&!d)return;a.p.sortorder=f}d=a.grid.headers[a.p.lastsort].el;f=a.grid.headers[e].el;b("span.ui-grid-ico-sort",d).addClass("ui-state-disabled");b(d).attr("aria-selected","false");b("span.ui-icon-"+a.p.sortorder,
-f).removeClass("ui-state-disabled");b(f).attr("aria-selected","true");if(!a.p.viewsortcols[0]&&a.p.lastsort!=e){b("span.s-ico",d).hide();b("span.s-ico",f).show()}c=c.substring(5+a.p.id.length+1);a.p.sortname=a.p.colModel[e].index||c;d=a.p.sortorder;if(b(a).triggerHandler("jqGridSortCol",[c,e,d])==="stop")a.p.lastsort=e;else if(b.isFunction(a.p.onSortCol)&&a.p.onSortCol.call(a,c,e,d)=="stop")a.p.lastsort=e;else{if(a.p.datatype=="local")a.p.deselectAfterSort&&b(a).jqGrid("resetSelection");else{a.p.selrow=
-null;a.p.multiselect&&ca(false);a.p.selarrrow=[];a.p.savedRow=[]}if(a.p.scroll){d=a.grid.bDiv.scrollLeft;M.call(a,true,false);a.grid.hDiv.scrollLeft=d}a.p.subGrid&&a.p.datatype=="local"&&b("td.sgexpanded","#"+b.jgrid.jqID(a.p.id)).each(function(){b(this).trigger("click")});G();a.p.lastsort=e;if(a.p.sortname!=c&&e)a.p.lastsort=e}}},na=function(c){var e,d={},f=b.jgrid.cellWidth()?0:a.p.cellLayout;for(e=d[0]=d[1]=d[2]=0;e<=c;e++)a.p.colModel[e].hidden===false&&(d[0]=d[0]+(a.p.colModel[e].width+f));a.p.direction==
-"rtl"&&(d[0]=a.p.width-d[0]);d[0]=d[0]-a.grid.bDiv.scrollLeft;b(a.grid.cDiv).is(":visible")&&(d[1]=d[1]+(b(a.grid.cDiv).height()+parseInt(b(a.grid.cDiv).css("padding-top"),10)+parseInt(b(a.grid.cDiv).css("padding-bottom"),10)));if(a.p.toolbar[0]===true&&(a.p.toolbar[1]=="top"||a.p.toolbar[1]=="both"))d[1]=d[1]+(b(a.grid.uDiv).height()+parseInt(b(a.grid.uDiv).css("border-top-width"),10)+parseInt(b(a.grid.uDiv).css("border-bottom-width"),10));a.p.toppager&&(d[1]=d[1]+(b(a.grid.topDiv).height()+parseInt(b(a.grid.topDiv).css("border-bottom-width"),
-10)));d[2]=d[2]+(b(a.grid.bDiv).height()+b(a.grid.hDiv).height());return d},ja=function(c){var d,e=a.grid.headers,f=b.jgrid.getCellIndex(c);for(d=0;d<e.length;d++)if(c===e[d].el){f=d;break}return f};this.p.id=this.id;-1==b.inArray(a.p.multikey,["shiftKey","altKey","ctrlKey"])&&(a.p.multikey=!1);a.p.keyIndex=!1;for(e=0;e<a.p.colModel.length;e++)a.p.colModel[e]=b.extend(!0,{},a.p.cmTemplate,a.p.colModel[e].template||{},a.p.colModel[e]),!1===a.p.keyIndex&&!0===a.p.colModel[e].key&&(a.p.keyIndex=e);a.p.sortorder=
-a.p.sortorder.toLowerCase();!0===a.p.grouping&&(a.p.scroll=!1,a.p.rownumbers=!1,a.p.treeGrid=!1,a.p.gridview=!0);if(!0===this.p.treeGrid){try{b(this).jqGrid("setTreeGrid")}catch(pa){}"local"!=a.p.datatype&&(a.p.localReader={id:"_id_"})}if(this.p.subGrid)try{b(a).jqGrid("setSubGrid")}catch(qa){}this.p.multiselect&&(this.p.colNames.unshift("<input role='checkbox' id='cb_"+this.p.id+"' class='cbox' type='checkbox'/>"),this.p.colModel.unshift({name:"cb",width:b.jgrid.cellWidth()?a.p.multiselectWidth+
-a.p.cellLayout:a.p.multiselectWidth,sortable:!1,resizable:!1,hidedlg:!0,search:!1,align:"center",fixed:!0}));this.p.rownumbers&&(this.p.colNames.unshift(""),this.p.colModel.unshift({name:"rn",width:a.p.rownumWidth,sortable:!1,resizable:!1,hidedlg:!0,search:!1,align:"center",fixed:!0}));a.p.xmlReader=b.extend(!0,{root:"rows",row:"row",page:"rows>page",total:"rows>total",records:"rows>records",repeatitems:!0,cell:"cell",id:"[id]",userdata:"userdata",subgrid:{root:"rows",row:"row",repeatitems:!0,cell:"cell"}},
-a.p.xmlReader);a.p.jsonReader=b.extend(!0,{root:"rows",page:"page",total:"total",records:"records",repeatitems:!0,cell:"cell",id:"id",userdata:"userdata",subgrid:{root:"rows",repeatitems:!0,cell:"cell"}},a.p.jsonReader);a.p.localReader=b.extend(!0,{root:"rows",page:"page",total:"total",records:"records",repeatitems:!1,cell:"cell",id:"id",userdata:"userdata",subgrid:{root:"rows",repeatitems:!0,cell:"cell"}},a.p.localReader);a.p.scroll&&(a.p.pgbuttons=!1,a.p.pginput=!1,a.p.rowList=[]);a.p.data.length&&
-Q();var x="<thead><tr class='ui-jqgrid-labels' role='rowheader'>",ka,J,da,aa,ea,A,n,V;J=V="";if(!0===a.p.shrinkToFit&&!0===a.p.forceFit)for(e=a.p.colModel.length-1;0<=e;e--)if(!a.p.colModel[e].hidden){a.p.colModel[e].resizable=!1;break}"horizontal"==a.p.viewsortcols[1]&&(V=" ui-i-asc",J=" ui-i-desc");ka=k?"class='ui-th-div-ie'":"";V="<span class='s-ico' style='display:none'><span sort='asc' class='ui-grid-ico-sort ui-icon-asc"+V+" ui-state-disabled ui-icon ui-icon-triangle-1-n ui-sort-"+i+"'></span>"+
-("<span sort='desc' class='ui-grid-ico-sort ui-icon-desc"+J+" ui-state-disabled ui-icon ui-icon-triangle-1-s ui-sort-"+i+"'></span></span>");for(e=0;e<this.p.colNames.length;e++)J=a.p.headertitles?' title="'+b.jgrid.stripHtml(a.p.colNames[e])+'"':"",x+="<th id='"+a.p.id+"_"+a.p.colModel[e].name+"' role='columnheader' class='ui-state-default ui-th-column ui-th-"+i+"'"+J+">",J=a.p.colModel[e].index||a.p.colModel[e].name,x+="<div id='jqgh_"+a.p.id+"_"+a.p.colModel[e].name+"' "+ka+">"+a.p.colNames[e],
-a.p.colModel[e].width=a.p.colModel[e].width?parseInt(a.p.colModel[e].width,10):150,"boolean"!==typeof a.p.colModel[e].title&&(a.p.colModel[e].title=!0),J==a.p.sortname&&(a.p.lastsort=e),x+=V+"</div></th>";V=null;b(this).append(x+"</tr></thead>");b("thead tr:first th",this).hover(function(){b(this).addClass("ui-state-hover")},function(){b(this).removeClass("ui-state-hover")});if(this.p.multiselect){var fa=[],W;b("#cb_"+b.jgrid.jqID(a.p.id),this).bind("click",function(){a.p.selarrrow=[];var c=a.p.frozenColumns===
-true?a.p.id+"_frozen":"";if(this.checked){b(a.rows).each(function(d){if(d>0&&!b(this).hasClass("ui-subgrid")&&!b(this).hasClass("jqgroup")&&!b(this).hasClass("ui-state-disabled")){b("#jqg_"+b.jgrid.jqID(a.p.id)+"_"+b.jgrid.jqID(this.id))[a.p.useProp?"prop":"attr"]("checked",true);b(this).addClass("ui-state-highlight").attr("aria-selected","true");a.p.selarrrow.push(this.id);a.p.selrow=this.id;if(c){b("#jqg_"+b.jgrid.jqID(a.p.id)+"_"+b.jgrid.jqID(this.id),a.grid.fbDiv)[a.p.useProp?"prop":"attr"]("checked",
-true);b("#"+b.jgrid.jqID(this.id),a.grid.fbDiv).addClass("ui-state-highlight")}}});W=true;fa=[]}else{b(a.rows).each(function(d){if(d>0&&!b(this).hasClass("ui-subgrid")&&!b(this).hasClass("ui-state-disabled")){b("#jqg_"+b.jgrid.jqID(a.p.id)+"_"+b.jgrid.jqID(this.id))[a.p.useProp?"prop":"attr"]("checked",false);b(this).removeClass("ui-state-highlight").attr("aria-selected","false");fa.push(this.id);if(c){b("#jqg_"+b.jgrid.jqID(a.p.id)+"_"+b.jgrid.jqID(this.id),a.grid.fbDiv)[a.p.useProp?"prop":"attr"]("checked",
-false);b("#"+b.jgrid.jqID(this.id),a.grid.fbDiv).removeClass("ui-state-highlight")}}});a.p.selrow=null;W=false}b(a).triggerHandler("jqGridSelectAll",[W?a.p.selarrrow:fa,W]);b.isFunction(a.p.onSelectAll)&&a.p.onSelectAll.call(a,W?a.p.selarrrow:fa,W)})}!0===a.p.autowidth&&(x=b(m).innerWidth(),a.p.width=0<x?x:"nw");(function(){var d=0,e=b.jgrid.cellWidth()?0:o(a.p.cellLayout,0),f=0,h,i=o(a.p.scrollOffset,0),j,k=false,l,m=0,n=0,p;b.each(a.p.colModel,function(){if(typeof this.hidden==="undefined")this.hidden=
-false;this.widthOrg=j=o(this.width,0);if(this.hidden===false){d=d+(j+e);this.fixed?m=m+(j+e):f++;n++}});if(isNaN(a.p.width))a.p.width=d+(a.p.shrinkToFit===false&&!isNaN(a.p.height)?i:0);c.width=a.p.width;a.p.tblwidth=d;if(a.p.shrinkToFit===false&&a.p.forceFit===true)a.p.forceFit=false;if(a.p.shrinkToFit===true&&f>0){l=c.width-e*f-m;if(!isNaN(a.p.height)){l=l-i;k=true}d=0;b.each(a.p.colModel,function(b){if(this.hidden===false&&!this.fixed){this.width=j=Math.round(l*this.width/(a.p.tblwidth-e*f-m));
-d=d+j;h=b}});p=0;k?c.width-m-(d+e*f)!==i&&(p=c.width-m-(d+e*f)-i):!k&&Math.abs(c.width-m-(d+e*f))!==1&&(p=c.width-m-(d+e*f));a.p.colModel[h].width=a.p.colModel[h].width+p;a.p.tblwidth=d+p+e*f+m;if(a.p.tblwidth>a.p.width){a.p.colModel[h].width=a.p.colModel[h].width-(a.p.tblwidth-parseInt(a.p.width,10));a.p.tblwidth=a.p.width}}})();b(m).css("width",c.width+"px").append("<div class='ui-jqgrid-resize-mark' id='rs_m"+a.p.id+"'>&#160;</div>");b(j).css("width",c.width+"px");var x=b("thead:first",a).get(0),
-P="";a.p.footerrow&&(P+="<table role='grid' style='width:"+a.p.tblwidth+"px' class='ui-jqgrid-ftable' cellspacing='0' cellpadding='0' border='0'><tbody><tr role='row' class='ui-widget-content footrow footrow-"+i+"'>");var j=b("tr:first",x),X="<tr class='jqgfirstrow' role='row' style='height:auto'>";a.p.disableClick=!1;b("th",j).each(function(d){da=a.p.colModel[d].width;if(typeof a.p.colModel[d].resizable==="undefined")a.p.colModel[d].resizable=true;if(a.p.colModel[d].resizable){aa=document.createElement("span");
-b(aa).html("&#160;").addClass("ui-jqgrid-resize ui-jqgrid-resize-"+i);b.browser.opera||b(aa).css("cursor","col-resize");b(this).addClass(a.p.resizeclass)}else aa="";b(this).css("width",da+"px").prepend(aa);var e="";if(a.p.colModel[d].hidden){b(this).css("display","none");e="display:none;"}X=X+("<td role='gridcell' style='height:0px;width:"+da+"px;"+e+"'></td>");c.headers[d]={width:da,el:this};ea=a.p.colModel[d].sortable;if(typeof ea!=="boolean")ea=a.p.colModel[d].sortable=true;e=a.p.colModel[d].name;
-e=="cb"||(e=="subgrid"||e=="rn")||a.p.viewsortcols[2]&&b(">div",this).addClass("ui-jqgrid-sortable");if(ea)if(a.p.viewsortcols[0]){b("div span.s-ico",this).show();d==a.p.lastsort&&b("div span.ui-icon-"+a.p.sortorder,this).removeClass("ui-state-disabled")}else if(d==a.p.lastsort){b("div span.s-ico",this).show();b("div span.ui-icon-"+a.p.sortorder,this).removeClass("ui-state-disabled")}a.p.footerrow&&(P=P+("<td role='gridcell' "+p(d,0,"",null,"",false)+">&#160;</td>"))}).mousedown(function(d){if(b(d.target).closest("th>span.ui-jqgrid-resize").length==
-1){var e=ja(this);if(a.p.forceFit===true){var f=a.p,h=e,i;for(i=e+1;i<a.p.colModel.length;i++)if(a.p.colModel[i].hidden!==true){h=i;break}f.nv=h-e}c.dragStart(e,d,na(e));return false}}).click(function(c){if(a.p.disableClick)return a.p.disableClick=false;var d="th>div.ui-jqgrid-sortable",e,f;a.p.viewsortcols[2]||(d="th>div>span>span.ui-grid-ico-sort");c=b(c.target).closest(d);if(c.length==1){d=ja(this);if(!a.p.viewsortcols[2]){e=true;f=c.attr("sort")}ia(b("div",this)[0].id,d,e,f);return false}});if(a.p.sortable&&
-b.fn.sortable)try{b(a).jqGrid("sortableColumns",j)}catch(ra){}a.p.footerrow&&(P+="</tr></tbody></table>");X+="</tr>";this.appendChild(document.createElement("tbody"));b(this).addClass("ui-jqgrid-btable").append(X);var X=null,j=b("<table class='ui-jqgrid-htable' style='width:"+a.p.tblwidth+"px' role='grid' aria-labelledby='gbox_"+this.id+"' cellspacing='0' cellpadding='0' border='0'></table>").append(x),D=a.p.caption&&!0===a.p.hiddengrid?!0:!1;e=b("<div class='ui-jqgrid-hbox"+("rtl"==i?"-rtl":"")+
-"'></div>");x=null;c.hDiv=document.createElement("div");b(c.hDiv).css({width:c.width+"px"}).addClass("ui-state-default ui-jqgrid-hdiv").append(e);b(e).append(j);j=null;D&&b(c.hDiv).hide();a.p.pager&&("string"==typeof a.p.pager?"#"!=a.p.pager.substr(0,1)&&(a.p.pager="#"+a.p.pager):a.p.pager="#"+b(a.p.pager).attr("id"),b(a.p.pager).css({width:c.width+"px"}).appendTo(m).addClass("ui-state-default ui-jqgrid-pager ui-corner-bottom"),D&&b(a.p.pager).hide(),l(a.p.pager,""));!1===a.p.cellEdit&&!0===a.p.hoverrows&&
-b(a).bind("mouseover",function(a){n=b(a.target).closest("tr.jqgrow");b(n).attr("class")!=="ui-subgrid"&&b(n).addClass("ui-state-hover")}).bind("mouseout",function(a){n=b(a.target).closest("tr.jqgrow");b(n).removeClass("ui-state-hover")});var t,H,ga;b(a).before(c.hDiv).click(function(c){A=c.target;n=b(A,a.rows).closest("tr.jqgrow");if(b(n).length===0||n[0].className.indexOf("ui-state-disabled")>-1||(b(A,a).closest("table.ui-jqgrid-btable").attr("id")||"").replace("_frozen","")!==a.id)return this;var d=
-b(A).hasClass("cbox"),e=b(a).triggerHandler("jqGridBeforeSelectRow",[n[0].id,c]);(e=e===false||e==="stop"?false:true)&&b.isFunction(a.p.beforeSelectRow)&&(e=a.p.beforeSelectRow.call(a,n[0].id,c));if(!(A.tagName=="A"||(A.tagName=="INPUT"||A.tagName=="TEXTAREA"||A.tagName=="OPTION"||A.tagName=="SELECT")&&!d)&&e===true){t=n[0].id;H=b.jgrid.getCellIndex(A);ga=b(A).closest("td,th").html();b(a).triggerHandler("jqGridCellSelect",[t,H,ga,c]);b.isFunction(a.p.onCellSelect)&&a.p.onCellSelect.call(a,t,H,ga,
-c);if(a.p.cellEdit===true)if(a.p.multiselect&&d)b(a).jqGrid("setSelection",t,true,c);else{t=n[0].rowIndex;try{b(a).jqGrid("editCell",t,H,true)}catch(f){}}else if(a.p.multikey)if(c[a.p.multikey])b(a).jqGrid("setSelection",t,true,c);else{if(a.p.multiselect&&d){d=b("#jqg_"+b.jgrid.jqID(a.p.id)+"_"+t).is(":checked");b("#jqg_"+b.jgrid.jqID(a.p.id)+"_"+t)[a.p.useProp?"prop":"attr"]("checked",d)}}else{if(a.p.multiselect&&a.p.multiboxonly&&!d){var g=a.p.frozenColumns?a.p.id+"_frozen":"";b(a.p.selarrrow).each(function(c,
-d){var e=a.rows.namedItem(d);b(e).removeClass("ui-state-highlight");b("#jqg_"+b.jgrid.jqID(a.p.id)+"_"+b.jgrid.jqID(d))[a.p.useProp?"prop":"attr"]("checked",false);if(g){b("#"+b.jgrid.jqID(d),"#"+b.jgrid.jqID(g)).removeClass("ui-state-highlight");b("#jqg_"+b.jgrid.jqID(a.p.id)+"_"+b.jgrid.jqID(d),"#"+b.jgrid.jqID(g))[a.p.useProp?"prop":"attr"]("checked",false)}});a.p.selarrrow=[]}b(a).jqGrid("setSelection",t,true,c)}}}).bind("reloadGrid",function(c,d){if(a.p.treeGrid===true)a.p.datatype=a.p.treedatatype;
-d&&d.current&&a.grid.selectionPreserver(a);if(a.p.datatype=="local"){b(a).jqGrid("resetSelection");a.p.data.length&&Q()}else if(!a.p.treeGrid){a.p.selrow=null;if(a.p.multiselect){a.p.selarrrow=[];ca(false)}a.p.savedRow=[]}a.p.scroll&&M.call(a,true,false);if(d&&d.page){var e=d.page;if(e>a.p.lastpage)e=a.p.lastpage;e<1&&(e=1);a.p.page=e;a.grid.bDiv.scrollTop=a.grid.prevRowHeight?(e-1)*a.grid.prevRowHeight*a.p.rowNum:0}if(a.grid.prevRowHeight&&a.p.scroll){delete a.p.lastpage;a.grid.populateVisible()}else a.grid.populate();
-a.p._inlinenav===true&&b(a).jqGrid("showAddEditButtons");return false}).dblclick(function(c){A=c.target;n=b(A,a.rows).closest("tr.jqgrow");if(b(n).length!==0){t=n[0].rowIndex;H=b.jgrid.getCellIndex(A);b(a).triggerHandler("jqGridDblClickRow",[b(n).attr("id"),t,H,c]);b.isFunction(this.p.ondblClickRow)&&a.p.ondblClickRow.call(a,b(n).attr("id"),t,H,c)}}).bind("contextmenu",function(c){A=c.target;n=b(A,a.rows).closest("tr.jqgrow");if(b(n).length!==0){a.p.multiselect||b(a).jqGrid("setSelection",n[0].id,
-true,c);t=n[0].rowIndex;H=b.jgrid.getCellIndex(A);b(a).triggerHandler("jqGridRightClickRow",[b(n).attr("id"),t,H,c]);b.isFunction(this.p.onRightClickRow)&&a.p.onRightClickRow.call(a,b(n).attr("id"),t,H,c)}});c.bDiv=document.createElement("div");k&&"auto"===(""+a.p.height).toLowerCase()&&(a.p.height="100%");b(c.bDiv).append(b('<div style="position:relative;'+(k&&8>b.browser.version?"height:0.01%;":"")+'"></div>').append("<div></div>").append(this)).addClass("ui-jqgrid-bdiv").css({height:a.p.height+
-(isNaN(a.p.height)?"":"px"),width:c.width+"px"}).scroll(c.scrollGrid);b("table:first",c.bDiv).css({width:a.p.tblwidth+"px"});k?(2==b("tbody",this).length&&b("tbody:gt(0)",this).remove(),a.p.multikey&&b(c.bDiv).bind("selectstart",function(){return false})):a.p.multikey&&b(c.bDiv).bind("mousedown",function(){return false});D&&b(c.bDiv).hide();c.cDiv=document.createElement("div");var ha=!0===a.p.hidegrid?b("<a role='link' href='javascript:void(0)'/>").addClass("ui-jqgrid-titlebar-close HeaderButton").hover(function(){ha.addClass("ui-state-hover")},
-function(){ha.removeClass("ui-state-hover")}).append("<span class='ui-icon ui-icon-circle-triangle-n'></span>").css("rtl"==i?"left":"right","0px"):"";b(c.cDiv).append(ha).append("<span class='ui-jqgrid-title"+("rtl"==i?"-rtl":"")+"'>"+a.p.caption+"</span>").addClass("ui-jqgrid-titlebar ui-widget-header ui-corner-top ui-helper-clearfix");b(c.cDiv).insertBefore(c.hDiv);a.p.toolbar[0]&&(c.uDiv=document.createElement("div"),"top"==a.p.toolbar[1]?b(c.uDiv).insertBefore(c.hDiv):"bottom"==a.p.toolbar[1]&&
-b(c.uDiv).insertAfter(c.hDiv),"both"==a.p.toolbar[1]?(c.ubDiv=document.createElement("div"),b(c.uDiv).insertBefore(c.hDiv).addClass("ui-userdata ui-state-default").attr("id","t_"+this.id),b(c.ubDiv).insertAfter(c.hDiv).addClass("ui-userdata ui-state-default").attr("id","tb_"+this.id),D&&b(c.ubDiv).hide()):b(c.uDiv).width(c.width).addClass("ui-userdata ui-state-default").attr("id","t_"+this.id),D&&b(c.uDiv).hide());a.p.toppager&&(a.p.toppager=b.jgrid.jqID(a.p.id)+"_toppager",c.topDiv=b("<div id='"+
-a.p.toppager+"'></div>")[0],a.p.toppager="#"+a.p.toppager,b(c.topDiv).insertBefore(c.hDiv).addClass("ui-state-default ui-jqgrid-toppager").width(c.width),l(a.p.toppager,"_t"));a.p.footerrow&&(c.sDiv=b("<div class='ui-jqgrid-sdiv'></div>")[0],e=b("<div class='ui-jqgrid-hbox"+("rtl"==i?"-rtl":"")+"'></div>"),b(c.sDiv).append(e).insertAfter(c.hDiv).width(c.width),b(e).append(P),c.footers=b(".ui-jqgrid-ftable",c.sDiv)[0].rows[0].cells,a.p.rownumbers&&(c.footers[0].className="ui-state-default jqgrid-rownum"),
-D&&b(c.sDiv).hide());e=null;if(a.p.caption){var oa=a.p.datatype;!0===a.p.hidegrid&&(b(".ui-jqgrid-titlebar-close",c.cDiv).click(function(d){var e=b.isFunction(a.p.onHeaderClick),f=".ui-jqgrid-bdiv, .ui-jqgrid-hdiv, .ui-jqgrid-pager, .ui-jqgrid-sdiv",h,i=this;if(a.p.toolbar[0]===true){a.p.toolbar[1]=="both"&&(f=f+(", #"+b(c.ubDiv).attr("id")));f=f+(", #"+b(c.uDiv).attr("id"))}h=b(f,"#gview_"+b.jgrid.jqID(a.p.id)).length;a.p.gridstate=="visible"?b(f,"#gbox_"+b.jgrid.jqID(a.p.id)).slideUp("fast",function(){h--;
-if(h===0){b("span",i).removeClass("ui-icon-circle-triangle-n").addClass("ui-icon-circle-triangle-s");a.p.gridstate="hidden";b("#gbox_"+b.jgrid.jqID(a.p.id)).hasClass("ui-resizable")&&b(".ui-resizable-handle","#gbox_"+b.jgrid.jqID(a.p.id)).hide();b(a).triggerHandler("jqGridHeaderClick",[a.p.gridstate,d]);e&&(D||a.p.onHeaderClick.call(a,a.p.gridstate,d))}}):a.p.gridstate=="hidden"&&b(f,"#gbox_"+b.jgrid.jqID(a.p.id)).slideDown("fast",function(){h--;if(h===0){b("span",i).removeClass("ui-icon-circle-triangle-s").addClass("ui-icon-circle-triangle-n");
-if(D){a.p.datatype=oa;G();D=false}a.p.gridstate="visible";b("#gbox_"+b.jgrid.jqID(a.p.id)).hasClass("ui-resizable")&&b(".ui-resizable-handle","#gbox_"+b.jgrid.jqID(a.p.id)).show();b(a).triggerHandler("jqGridHeaderClick",[a.p.gridstate,d]);e&&(D||a.p.onHeaderClick.call(a,a.p.gridstate,d))}});return false}),D&&(a.p.datatype="local",b(".ui-jqgrid-titlebar-close",c.cDiv).trigger("click")))}else b(c.cDiv).hide();b(c.hDiv).after(c.bDiv).mousemove(function(a){if(c.resizing){c.dragMove(a);return false}});
-b(".ui-jqgrid-labels",c.hDiv).bind("selectstart",function(){return false});b(document).mouseup(function(){if(c.resizing){c.dragEnd();return false}return true});a.formatCol=p;a.sortData=ia;a.updatepager=function(c,d){var e,f,g,h,i,j,k,l="",m=a.p.pager?"_"+b.jgrid.jqID(a.p.pager.substr(1)):"",n=a.p.toppager?"_"+a.p.toppager.substr(1):"";g=parseInt(a.p.page,10)-1;g<0&&(g=0);g=g*parseInt(a.p.rowNum,10);i=g+a.p.reccount;if(a.p.scroll){e=b("tbody:first > tr:gt(0)",a.grid.bDiv);g=i-e.length;a.p.reccount=
-e.length;if(f=e.outerHeight()||a.grid.prevRowHeight){e=g*f;f=parseInt(a.p.records,10)*f;b(">div:first",a.grid.bDiv).css({height:f}).children("div:first").css({height:e,display:e?"":"none"})}a.grid.bDiv.scrollLeft=a.grid.hDiv.scrollLeft}l=a.p.pager?a.p.pager:"";if(l=l+(a.p.toppager?l?","+a.p.toppager:a.p.toppager:"")){k=b.jgrid.formatter.integer||{};e=o(a.p.page);f=o(a.p.lastpage);b(".selbox",l)[this.p.useProp?"prop":"attr"]("disabled",false);if(a.p.pginput===true){b(".ui-pg-input",l).val(a.p.page);
-h=a.p.toppager?"#sp_1"+m+",#sp_1"+n:"#sp_1"+m;b(h).html(b.fmatter?b.fmatter.util.NumberFormat(a.p.lastpage,k):a.p.lastpage)}if(a.p.viewrecords)if(a.p.reccount===0)b(".ui-paging-info",l).html(a.p.emptyrecords);else{h=g+1;j=a.p.records;if(b.fmatter){h=b.fmatter.util.NumberFormat(h,k);i=b.fmatter.util.NumberFormat(i,k);j=b.fmatter.util.NumberFormat(j,k)}b(".ui-paging-info",l).html(b.jgrid.format(a.p.recordtext,h,i,j))}if(a.p.pgbuttons===true){e<=0&&(e=f=0);if(e==1||e===0){b("#first"+m+", #prev"+m).addClass("ui-state-disabled").removeClass("ui-state-hover");
-a.p.toppager&&b("#first_t"+n+", #prev_t"+n).addClass("ui-state-disabled").removeClass("ui-state-hover")}else{b("#first"+m+", #prev"+m).removeClass("ui-state-disabled");a.p.toppager&&b("#first_t"+n+", #prev_t"+n).removeClass("ui-state-disabled")}if(e==f||e===0){b("#next"+m+", #last"+m).addClass("ui-state-disabled").removeClass("ui-state-hover");a.p.toppager&&b("#next_t"+n+", #last_t"+n).addClass("ui-state-disabled").removeClass("ui-state-hover")}else{b("#next"+m+", #last"+m).removeClass("ui-state-disabled");
-a.p.toppager&&b("#next_t"+n+", #last_t"+n).removeClass("ui-state-disabled")}}}c===true&&a.p.rownumbers===true&&b("td.jqgrid-rownum",a.rows).each(function(a){b(this).html(g+1+a)});d&&a.p.jqgdnd&&b(a).jqGrid("gridDnD","updateDnD");b(a).triggerHandler("jqGridGridComplete");b.isFunction(a.p.gridComplete)&&a.p.gridComplete.call(a);b(a).triggerHandler("jqGridAfterGridComplete")};a.refreshIndex=Q;a.setHeadCheckBox=ca;a.constructTr=N;a.formatter=function(a,b,c,d,e){return u(a,b,c,d,e)};b.extend(c,{populate:G,
-emptyRows:M});this.grid=c;a.addXmlData=function(b){Z(b,a.grid.bDiv)};a.addJSONData=function(b){$(b,a.grid.bDiv)};this.grid.cols=this.rows[0].cells;G();a.p.hiddengrid=!1}}}})};b.jgrid.extend({getGridParam:function(b){var e=this[0];if(e&&e.grid)return b?"undefined"!=typeof e.p[b]?e.p[b]:null:e.p},setGridParam:function(f){return this.each(function(){this.grid&&"object"===typeof f&&b.extend(!0,this.p,f)})},getDataIDs:function(){var f=[],e=0,c,d=0;this.each(function(){if((c=this.rows.length)&&0<c)for(;e<
-c;)b(this.rows[e]).hasClass("jqgrow")&&(f[d]=this.rows[e].id,d++),e++});return f},setSelection:function(f,e,c){return this.each(function(){var d,a,g,h,i,j;if(void 0!==f&&(e=!1===e?!1:!0,(a=this.rows.namedItem(f+""))&&a.className&&!(-1<a.className.indexOf("ui-state-disabled"))))(!0===this.p.scrollrows&&(g=this.rows.namedItem(f).rowIndex,0<=g&&(d=b(this.grid.bDiv)[0].clientHeight,h=b(this.grid.bDiv)[0].scrollTop,i=b(this.rows[g]).position().top,g=this.rows[g].clientHeight,i+g>=d+h?b(this.grid.bDiv)[0].scrollTop=
-i-(d+h)+g+h:i<d+h&&i<h&&(b(this.grid.bDiv)[0].scrollTop=i))),!0===this.p.frozenColumns&&(j=this.p.id+"_frozen"),this.p.multiselect)?(this.setHeadCheckBox(!1),this.p.selrow=a.id,h=b.inArray(this.p.selrow,this.p.selarrrow),-1===h?("ui-subgrid"!==a.className&&b(a).addClass("ui-state-highlight").attr("aria-selected","true"),d=!0,this.p.selarrrow.push(this.p.selrow)):("ui-subgrid"!==a.className&&b(a).removeClass("ui-state-highlight").attr("aria-selected","false"),d=!1,this.p.selarrrow.splice(h,1),i=this.p.selarrrow[0],
-this.p.selrow=void 0===i?null:i),b("#jqg_"+b.jgrid.jqID(this.p.id)+"_"+b.jgrid.jqID(a.id))[this.p.useProp?"prop":"attr"]("checked",d),j&&(-1===h?b("#"+b.jgrid.jqID(f),"#"+b.jgrid.jqID(j)).addClass("ui-state-highlight"):b("#"+b.jgrid.jqID(f),"#"+b.jgrid.jqID(j)).removeClass("ui-state-highlight"),b("#jqg_"+b.jgrid.jqID(this.p.id)+"_"+b.jgrid.jqID(f),"#"+b.jgrid.jqID(j))[this.p.useProp?"prop":"attr"]("checked",d)),b(this).triggerHandler("jqGridSelectRow",[a.id,d,c]),this.p.onSelectRow&&e&&this.p.onSelectRow.call(this,
-a.id,d,c)):"ui-subgrid"!==a.className&&(this.p.selrow!=a.id?(b(this.rows.namedItem(this.p.selrow)).removeClass("ui-state-highlight").attr({"aria-selected":"false",tabindex:"-1"}),b(a).addClass("ui-state-highlight").attr({"aria-selected":"true",tabindex:"0"}),j&&(b("#"+b.jgrid.jqID(this.p.selrow),"#"+b.jgrid.jqID(j)).removeClass("ui-state-highlight"),b("#"+b.jgrid.jqID(f),"#"+b.jgrid.jqID(j)).addClass("ui-state-highlight")),d=!0):d=!1,this.p.selrow=a.id,b(this).triggerHandler("jqGridSelectRow",[a.id,
-d,c]),this.p.onSelectRow&&e&&this.p.onSelectRow.call(this,a.id,d,c))})},resetSelection:function(f){return this.each(function(){var e=this,c,d,a;!0===e.p.frozenColumns&&(a=e.p.id+"_frozen");if("undefined"!==typeof f){d=f===e.p.selrow?e.p.selrow:f;b("#"+b.jgrid.jqID(e.p.id)+" tbody:first tr#"+b.jgrid.jqID(d)).removeClass("ui-state-highlight").attr("aria-selected","false");a&&b("#"+b.jgrid.jqID(d),"#"+b.jgrid.jqID(a)).removeClass("ui-state-highlight");if(e.p.multiselect){b("#jqg_"+b.jgrid.jqID(e.p.id)+
-"_"+b.jgrid.jqID(d),"#"+b.jgrid.jqID(e.p.id))[e.p.useProp?"prop":"attr"]("checked",!1);if(a)b("#jqg_"+b.jgrid.jqID(e.p.id)+"_"+b.jgrid.jqID(d),"#"+b.jgrid.jqID(a))[e.p.useProp?"prop":"attr"]("checked",!1);e.setHeadCheckBox(!1)}d=null}else e.p.multiselect?(b(e.p.selarrrow).each(function(d,f){c=e.rows.namedItem(f);b(c).removeClass("ui-state-highlight").attr("aria-selected","false");b("#jqg_"+b.jgrid.jqID(e.p.id)+"_"+b.jgrid.jqID(f))[e.p.useProp?"prop":"attr"]("checked",!1);a&&(b("#"+b.jgrid.jqID(f),
-"#"+b.jgrid.jqID(a)).removeClass("ui-state-highlight"),b("#jqg_"+b.jgrid.jqID(e.p.id)+"_"+b.jgrid.jqID(f),"#"+b.jgrid.jqID(a))[e.p.useProp?"prop":"attr"]("checked",!1))}),e.setHeadCheckBox(!1),e.p.selarrrow=[]):e.p.selrow&&(b("#"+b.jgrid.jqID(e.p.id)+" tbody:first tr#"+b.jgrid.jqID(e.p.selrow)).removeClass("ui-state-highlight").attr("aria-selected","false"),a&&b("#"+b.jgrid.jqID(e.p.selrow),"#"+b.jgrid.jqID(a)).removeClass("ui-state-highlight"),e.p.selrow=null);!0===e.p.cellEdit&&(0<=parseInt(e.p.iCol,
-10)&&0<=parseInt(e.p.iRow,10))&&(b("td:eq("+e.p.iCol+")",e.rows[e.p.iRow]).removeClass("edit-cell ui-state-highlight"),b(e.rows[e.p.iRow]).removeClass("selected-row ui-state-hover"));e.p.savedRow=[]})},getRowData:function(f){var e={},c,d=!1,a,g=0;this.each(function(){var h=this,i,j;if("undefined"==typeof f)d=!0,c=[],a=h.rows.length;else{j=h.rows.namedItem(f);if(!j)return e;a=2}for(;g<a;)d&&(j=h.rows[g]),b(j).hasClass("jqgrow")&&(b('td[role="gridcell"]',j).each(function(a){i=h.p.colModel[a].name;if("cb"!==
-i&&"subgrid"!==i&&"rn"!==i)if(!0===h.p.treeGrid&&i==h.p.ExpandColumn)e[i]=b.jgrid.htmlDecode(b("span:first",this).html());else try{e[i]=b.unformat.call(h,this,{rowId:j.id,colModel:h.p.colModel[a]},a)}catch(c){e[i]=b.jgrid.htmlDecode(b(this).html())}}),d&&(c.push(e),e={})),g++});return c?c:e},delRowData:function(f){var e=!1,c,d;this.each(function(){if(c=this.rows.namedItem(f)){if(b(c).remove(),this.p.records--,this.p.reccount--,this.updatepager(!0,!1),e=!0,this.p.multiselect&&(d=b.inArray(f,this.p.selarrrow),
--1!=d&&this.p.selarrrow.splice(d,1)),f==this.p.selrow)this.p.selrow=null}else return!1;if("local"==this.p.datatype){var a=this.p._index[b.jgrid.stripPref(this.p.idPrefix,f)];"undefined"!=typeof a&&(this.p.data.splice(a,1),this.refreshIndex())}if(!0===this.p.altRows&&e){var g=this.p.altclass;b(this.rows).each(function(a){1==a%2?b(this).addClass(g):b(this).removeClass(g)})}});return e},setRowData:function(f,e,c){var d,a=!0,g;this.each(function(){if(!this.grid)return!1;var h=this,i,j,l=typeof c,k={};
-j=h.rows.namedItem(f);if(!j)return!1;if(e)try{if(b(this.p.colModel).each(function(a){d=this.name;void 0!==e[d]&&(k[d]=this.formatter&&"string"===typeof this.formatter&&"date"==this.formatter?b.unformat.date.call(h,e[d],this):e[d],i=h.formatter(f,e[d],a,e,"edit"),g=this.title?{title:b.jgrid.stripHtml(i)}:{},!0===h.p.treeGrid&&d==h.p.ExpandColumn?b("td:eq("+a+") > span:first",j).html(i).attr(g):b("td:eq("+a+")",j).html(i).attr(g))}),"local"==h.p.datatype){var m=b.jgrid.stripPref(h.p.idPrefix,f),o=h.p._index[m];
-if(h.p.treeGrid)for(var p in h.p.treeReader)k.hasOwnProperty(h.p.treeReader[p])&&delete k[h.p.treeReader[p]];"undefined"!=typeof o&&(h.p.data[o]=b.extend(!0,h.p.data[o],k));k=null}}catch(v){a=!1}a&&("string"===l?b(j).addClass(c):"object"===l&&b(j).css(c),b(h).triggerHandler("jqGridAfterGridComplete"))});return a},addRowData:function(f,e,c,d){c||(c="last");var a=!1,g,h,i,j,l,k,m,o,p="",v,u,L,E,Y,T;e&&(b.isArray(e)?(v=!0,c="last",u=f):(e=[e],v=!1),this.each(function(){var U=e.length;l=this.p.rownumbers===
-true?1:0;i=this.p.multiselect===true?1:0;j=this.p.subGrid===true?1:0;if(!v)if(typeof f!="undefined")f=f+"";else{f=b.jgrid.randId();if(this.p.keyIndex!==false){u=this.p.colModel[this.p.keyIndex+i+j+l].name;typeof e[0][u]!="undefined"&&(f=e[0][u])}}L=this.p.altclass;for(var M=0,Q="",N={},Z=b.isFunction(this.p.afterInsertRow)?true:false;M<U;){E=e[M];h=[];if(v){try{f=E[u]}catch($){f=b.jgrid.randId()}Q=this.p.altRows===true?(this.rows.length-1)%2===0?L:"":""}T=f;f=this.p.idPrefix+f;if(l){p=this.formatCol(0,
-1,"",null,f,true);h[h.length]='<td role="gridcell" class="ui-state-default jqgrid-rownum" '+p+">0</td>"}if(i){o='<input role="checkbox" type="checkbox" id="jqg_'+this.p.id+"_"+f+'" class="cbox"/>';p=this.formatCol(l,1,"",null,f,true);h[h.length]='<td role="gridcell" '+p+">"+o+"</td>"}j&&(h[h.length]=b(this).jqGrid("addSubGridCell",i+l,1));for(m=i+j+l;m<this.p.colModel.length;m++){Y=this.p.colModel[m];g=Y.name;N[g]=E[g];o=this.formatter(f,b.jgrid.getAccessor(E,g),m,E);p=this.formatCol(m,1,o,E,f,true);
-h[h.length]='<td role="gridcell" '+p+">"+o+"</td>"}h.unshift(this.constructTr(f,false,Q,N,E,false));h[h.length]="</tr>";if(this.rows.length===0)b("table:first",this.grid.bDiv).append(h.join(""));else switch(c){case "last":b(this.rows[this.rows.length-1]).after(h.join(""));k=this.rows.length-1;break;case "first":b(this.rows[0]).after(h.join(""));k=1;break;case "after":(k=this.rows.namedItem(d))&&(b(this.rows[k.rowIndex+1]).hasClass("ui-subgrid")?b(this.rows[k.rowIndex+1]).after(h):b(k).after(h.join("")));
-k++;break;case "before":if(k=this.rows.namedItem(d)){b(k).before(h.join(""));k=k.rowIndex}k--}this.p.subGrid===true&&b(this).jqGrid("addSubGrid",i+l,k);this.p.records++;this.p.reccount++;b(this).triggerHandler("jqGridAfterInsertRow",[f,E,E]);Z&&this.p.afterInsertRow.call(this,f,E,E);M++;if(this.p.datatype=="local"){N[this.p.localReader.id]=T;this.p._index[T]=this.p.data.length;this.p.data.push(N);N={}}}this.p.altRows===true&&!v&&(c=="last"?(this.rows.length-1)%2==1&&b(this.rows[this.rows.length-1]).addClass(L):
-b(this.rows).each(function(a){a%2==1?b(this).addClass(L):b(this).removeClass(L)}));this.updatepager(true,true);a=true}));return a},footerData:function(f,e,c){function d(a){for(var b in a)if(a.hasOwnProperty(b))return!1;return!0}var a,g=!1,h={},i;"undefined"==typeof f&&(f="get");"boolean"!=typeof c&&(c=!0);f=f.toLowerCase();this.each(function(){var j=this,l;if(!j.grid||!j.p.footerrow||"set"==f&&d(e))return!1;g=!0;b(this.p.colModel).each(function(d){a=this.name;"set"==f?void 0!==e[a]&&(l=c?j.formatter("",
-e[a],d,e,"edit"):e[a],i=this.title?{title:b.jgrid.stripHtml(l)}:{},b("tr.footrow td:eq("+d+")",j.grid.sDiv).html(l).attr(i),g=!0):"get"==f&&(h[a]=b("tr.footrow td:eq("+d+")",j.grid.sDiv).html())})});return"get"==f?h:g},showHideCol:function(f,e){return this.each(function(){var c=this,d=!1,a=b.jgrid.cellWidth()?0:c.p.cellLayout,g;if(c.grid){"string"===typeof f&&(f=[f]);e="none"!=e?"":"none";var h=""===e?!0:!1,i=c.p.groupHeader&&("object"===typeof c.p.groupHeader||b.isFunction(c.p.groupHeader));i&&b(c).jqGrid("destroyGroupHeader",
-!1);b(this.p.colModel).each(function(i){if(-1!==b.inArray(this.name,f)&&this.hidden===h){if(!0===c.p.frozenColumns&&!0===this.frozen)return!0;b("tr",c.grid.hDiv).each(function(){b(this.cells[i]).css("display",e)});b(c.rows).each(function(){b(this).hasClass("jqgroup")||b(this.cells[i]).css("display",e)});c.p.footerrow&&b("tr.footrow td:eq("+i+")",c.grid.sDiv).css("display",e);g=parseInt(this.width,10);c.p.tblwidth="none"===e?c.p.tblwidth-(g+a):c.p.tblwidth+(g+a);this.hidden=!h;d=!0;b(c).triggerHandler("jqGridShowHideCol",
-[h,this.name,i])}});!0===d&&(!0===c.p.shrinkToFit&&!isNaN(c.p.height)&&(c.p.tblwidth+=parseInt(c.p.scrollOffset,10)),b(c).jqGrid("setGridWidth",!0===c.p.shrinkToFit?c.p.tblwidth:c.p.width));i&&b(c).jqGrid("setGroupHeaders",c.p.groupHeader)}})},hideCol:function(f){return this.each(function(){b(this).jqGrid("showHideCol",f,"none")})},showCol:function(f){return this.each(function(){b(this).jqGrid("showHideCol",f,"")})},remapColumns:function(f,e,c){function d(a){var c;c=a.length?b.makeArray(a):b.extend({},
-a);b.each(f,function(b){a[b]=c[this]})}function a(a,c){b(">tr"+(c||""),a).each(function(){var a=this,c=b.makeArray(a.cells);b.each(f,function(){var b=c[this];b&&a.appendChild(b)})})}var g=this.get(0);d(g.p.colModel);d(g.p.colNames);d(g.grid.headers);a(b("thead:first",g.grid.hDiv),c&&":not(.ui-jqgrid-labels)");e&&a(b("#"+b.jgrid.jqID(g.p.id)+" tbody:first"),".jqgfirstrow, tr.jqgrow, tr.jqfoot");g.p.footerrow&&a(b("tbody:first",g.grid.sDiv));g.p.remapColumns&&(g.p.remapColumns.length?d(g.p.remapColumns):
-g.p.remapColumns=b.makeArray(f));g.p.lastsort=b.inArray(g.p.lastsort,f);g.p.treeGrid&&(g.p.expColInd=b.inArray(g.p.expColInd,f));b(g).triggerHandler("jqGridRemapColumns",[f,e,c])},setGridWidth:function(f,e){return this.each(function(){if(this.grid){var c=this,d,a=0,g=b.jgrid.cellWidth()?0:c.p.cellLayout,h,i=0,j=!1,l=c.p.scrollOffset,k,m=0,o=0,p;"boolean"!=typeof e&&(e=c.p.shrinkToFit);if(!isNaN(f)){f=parseInt(f,10);c.grid.width=c.p.width=f;b("#gbox_"+b.jgrid.jqID(c.p.id)).css("width",f+"px");b("#gview_"+
-b.jgrid.jqID(c.p.id)).css("width",f+"px");b(c.grid.bDiv).css("width",f+"px");b(c.grid.hDiv).css("width",f+"px");c.p.pager&&b(c.p.pager).css("width",f+"px");c.p.toppager&&b(c.p.toppager).css("width",f+"px");!0===c.p.toolbar[0]&&(b(c.grid.uDiv).css("width",f+"px"),"both"==c.p.toolbar[1]&&b(c.grid.ubDiv).css("width",f+"px"));c.p.footerrow&&b(c.grid.sDiv).css("width",f+"px");!1===e&&!0===c.p.forceFit&&(c.p.forceFit=!1);if(!0===e){b.each(c.p.colModel,function(){if(this.hidden===false){d=this.widthOrg;
-a=a+(d+g);this.fixed?m=m+(d+g):i++;o++}});if(0===i)return;c.p.tblwidth=a;k=f-g*i-m;if(!isNaN(c.p.height)&&(b(c.grid.bDiv)[0].clientHeight<b(c.grid.bDiv)[0].scrollHeight||1===c.rows.length))j=!0,k-=l;var a=0,v=0<c.grid.cols.length;b.each(c.p.colModel,function(b){if(this.hidden===false&&!this.fixed){d=this.widthOrg;d=Math.round(k*d/(c.p.tblwidth-g*i-m));if(!(d<0)){this.width=d;a=a+d;c.grid.headers[b].width=d;c.grid.headers[b].el.style.width=d+"px";if(c.p.footerrow)c.grid.footers[b].style.width=d+"px";
-if(v)c.grid.cols[b].style.width=d+"px";h=b}}});if(!h)return;p=0;j?f-m-(a+g*i)!==l&&(p=f-m-(a+g*i)-l):1!==Math.abs(f-m-(a+g*i))&&(p=f-m-(a+g*i));c.p.colModel[h].width+=p;c.p.tblwidth=a+p+g*i+m;c.p.tblwidth>f?(j=c.p.tblwidth-parseInt(f,10),c.p.tblwidth=f,d=c.p.colModel[h].width-=j):d=c.p.colModel[h].width;c.grid.headers[h].width=d;c.grid.headers[h].el.style.width=d+"px";v&&(c.grid.cols[h].style.width=d+"px");c.p.footerrow&&(c.grid.footers[h].style.width=d+"px")}c.p.tblwidth&&(b("table:first",c.grid.bDiv).css("width",
-c.p.tblwidth+"px"),b("table:first",c.grid.hDiv).css("width",c.p.tblwidth+"px"),c.grid.hDiv.scrollLeft=c.grid.bDiv.scrollLeft,c.p.footerrow&&b("table:first",c.grid.sDiv).css("width",c.p.tblwidth+"px"))}}})},setGridHeight:function(f){return this.each(function(){if(this.grid){var e=b(this.grid.bDiv);e.css({height:f+(isNaN(f)?"":"px")});!0===this.p.frozenColumns&&b("#"+b.jgrid.jqID(this.p.id)+"_frozen").parent().height(e.height()-16);this.p.height=f;this.p.scroll&&this.grid.populateVisible()}})},setCaption:function(f){return this.each(function(){this.p.caption=
-f;b("span.ui-jqgrid-title, span.ui-jqgrid-title-rtl",this.grid.cDiv).html(f);b(this.grid.cDiv).show()})},setLabel:function(f,e,c,d){return this.each(function(){var a=-1;if(this.grid&&"undefined"!=typeof f&&(b(this.p.colModel).each(function(b){if(this.name==f)return a=b,!1}),0<=a)){var g=b("tr.ui-jqgrid-labels th:eq("+a+")",this.grid.hDiv);if(e){var h=b(".s-ico",g);b("[id^=jqgh_]",g).empty().html(e).append(h);this.p.colNames[a]=e}c&&("string"===typeof c?b(g).addClass(c):b(g).css(c));"object"===typeof d&&
-b(g).attr(d)}})},setCell:function(f,e,c,d,a,g){return this.each(function(){var h=-1,i,j;if(this.grid&&(isNaN(e)?b(this.p.colModel).each(function(a){if(this.name==e)return h=a,!1}):h=parseInt(e,10),0<=h&&(i=this.rows.namedItem(f)))){var l=b("td:eq("+h+")",i);if(""!==c||!0===g)i=this.formatter(f,c,h,i,"edit"),j=this.p.colModel[h].title?{title:b.jgrid.stripHtml(i)}:{},this.p.treeGrid&&0<b(".tree-wrap",b(l)).length?b("span",b(l)).html(i).attr(j):b(l).html(i).attr(j),"local"==this.p.datatype&&(i=this.p.colModel[h],
-c=i.formatter&&"string"===typeof i.formatter&&"date"==i.formatter?b.unformat.date.call(this,c,i):c,j=this.p._index[f],"undefined"!=typeof j&&(this.p.data[j][i.name]=c));"string"===typeof d?b(l).addClass(d):d&&b(l).css(d);"object"===typeof a&&b(l).attr(a)}})},getCell:function(f,e){var c=!1;this.each(function(){var d=-1;if(this.grid&&(isNaN(e)?b(this.p.colModel).each(function(a){if(this.name===e)return d=a,!1}):d=parseInt(e,10),0<=d)){var a=this.rows.namedItem(f);if(a)try{c=b.unformat.call(this,b("td:eq("+
-d+")",a),{rowId:a.id,colModel:this.p.colModel[d]},d)}catch(g){c=b.jgrid.htmlDecode(b("td:eq("+d+")",a).html())}}});return c},getCol:function(f,e,c){var d=[],a,g=0,h,i,j,e="boolean"!=typeof e?!1:e;"undefined"==typeof c&&(c=!1);this.each(function(){var l=-1;if(this.grid&&(isNaN(f)?b(this.p.colModel).each(function(a){if(this.name===f)return l=a,!1}):l=parseInt(f,10),0<=l)){var k=this.rows.length,m=0;if(k&&0<k){for(;m<k;){if(b(this.rows[m]).hasClass("jqgrow")){try{a=b.unformat.call(this,b(this.rows[m].cells[l]),
-{rowId:this.rows[m].id,colModel:this.p.colModel[l]},l)}catch(o){a=b.jgrid.htmlDecode(this.rows[m].cells[l].innerHTML)}c?(j=parseFloat(a),g+=j,void 0===i&&(i=h=j),h=Math.min(h,j),i=Math.max(i,j)):e?d.push({id:this.rows[m].id,value:a}):d.push(a)}m++}if(c)switch(c.toLowerCase()){case "sum":d=g;break;case "avg":d=g/k;break;case "count":d=k;break;case "min":d=h;break;case "max":d=i}}}});return d},clearGridData:function(f){return this.each(function(){if(this.grid){"boolean"!=typeof f&&(f=!1);if(this.p.deepempty)b("#"+
-b.jgrid.jqID(this.p.id)+" tbody:first tr:gt(0)").remove();else{var e=b("#"+b.jgrid.jqID(this.p.id)+" tbody:first tr:first")[0];b("#"+b.jgrid.jqID(this.p.id)+" tbody:first").empty().append(e)}this.p.footerrow&&f&&b(".ui-jqgrid-ftable td",this.grid.sDiv).html("&#160;");this.p.selrow=null;this.p.selarrrow=[];this.p.savedRow=[];this.p.records=0;this.p.page=1;this.p.lastpage=0;this.p.reccount=0;this.p.data=[];this.p._index={};this.updatepager(!0,!1)}})},getInd:function(b,e){var c=!1,d;this.each(function(){(d=
-this.rows.namedItem(b))&&(c=!0===e?d:d.rowIndex)});return c},bindKeys:function(f){var e=b.extend({onEnter:null,onSpace:null,onLeftKey:null,onRightKey:null,scrollingRows:!0},f||{});return this.each(function(){var c=this;b("body").is("[role]")||b("body").attr("role","application");c.p.scrollrows=e.scrollingRows;b(c).keydown(function(d){var a=b(c).find("tr[tabindex=0]")[0],f,h,i,j=c.p.treeReader.expanded_field;if(a)if(i=c.p._index[a.id],37===d.keyCode||38===d.keyCode||39===d.keyCode||40===d.keyCode){if(38===
-d.keyCode){h=a.previousSibling;f="";if(h)if(b(h).is(":hidden"))for(;h;){if(h=h.previousSibling,!b(h).is(":hidden")&&b(h).hasClass("jqgrow")){f=h.id;break}}else f=h.id;b(c).jqGrid("setSelection",f,!0,d);d.preventDefault()}if(40===d.keyCode){h=a.nextSibling;f="";if(h)if(b(h).is(":hidden"))for(;h;){if(h=h.nextSibling,!b(h).is(":hidden")&&b(h).hasClass("jqgrow")){f=h.id;break}}else f=h.id;b(c).jqGrid("setSelection",f,!0,d);d.preventDefault()}37===d.keyCode&&(c.p.treeGrid&&c.p.data[i][j]&&b(a).find("div.treeclick").trigger("click"),
-b(c).triggerHandler("jqGridKeyLeft",[c.p.selrow]),b.isFunction(e.onLeftKey)&&e.onLeftKey.call(c,c.p.selrow));39===d.keyCode&&(c.p.treeGrid&&!c.p.data[i][j]&&b(a).find("div.treeclick").trigger("click"),b(c).triggerHandler("jqGridKeyRight",[c.p.selrow]),b.isFunction(e.onRightKey)&&e.onRightKey.call(c,c.p.selrow))}else 13===d.keyCode?(b(c).triggerHandler("jqGridKeyEnter",[c.p.selrow]),b.isFunction(e.onEnter)&&e.onEnter.call(c,c.p.selrow)):32===d.keyCode&&(b(c).triggerHandler("jqGridKeySpace",[c.p.selrow]),
-b.isFunction(e.onSpace)&&e.onSpace.call(c,c.p.selrow))})})},unbindKeys:function(){return this.each(function(){b(this).unbind("keydown")})},getLocalRow:function(b){var e=!1,c;this.each(function(){"undefined"!==typeof b&&(c=this.p._index[b],0<=c&&(e=this.p.data[c]))});return e}})})(jQuery);
-(function(c){c.fmatter={};c.extend(c.fmatter,{isBoolean:function(a){return"boolean"===typeof a},isObject:function(a){return a&&("object"===typeof a||c.isFunction(a))||!1},isString:function(a){return"string"===typeof a},isNumber:function(a){return"number"===typeof a&&isFinite(a)},isNull:function(a){return null===a},isUndefined:function(a){return"undefined"===typeof a},isValue:function(a){return this.isObject(a)||this.isString(a)||this.isNumber(a)||this.isBoolean(a)},isEmpty:function(a){if(!this.isString(a)&&
-this.isValue(a))return!1;if(!this.isValue(a))return!0;a=c.trim(a).replace(/\&nbsp\;/ig,"").replace(/\&#160\;/ig,"");return""===a}});c.fn.fmatter=function(a,b,f,d,e){var g=b,f=c.extend({},c.jgrid.formatter,f);try{g=c.fn.fmatter[a].call(this,b,f,d,e)}catch(h){}return g};c.fmatter.util={NumberFormat:function(a,b){c.fmatter.isNumber(a)||(a*=1);if(c.fmatter.isNumber(a)){var f=0>a,d=a+"",e=b.decimalSeparator?b.decimalSeparator:".",g;if(c.fmatter.isNumber(b.decimalPlaces)){var h=b.decimalPlaces,d=Math.pow(10,
-h),d=Math.round(a*d)/d+"";g=d.lastIndexOf(".");if(0<h){0>g?(d+=e,g=d.length-1):"."!==e&&(d=d.replace(".",e));for(;d.length-1-g<h;)d+="0"}}if(b.thousandsSeparator){h=b.thousandsSeparator;g=d.lastIndexOf(e);g=-1<g?g:d.length;for(var e=d.substring(g),i=-1,j=g;0<j;j--){i++;if(0===i%3&&j!==g&&(!f||1<j))e=h+e;e=d.charAt(j-1)+e}d=e}d=b.prefix?b.prefix+d:d;return d=b.suffix?d+b.suffix:d}return a},DateFormat:function(a,b,f,d){var e=/^\/Date\((([-+])?[0-9]+)(([-+])([0-9]{2})([0-9]{2}))?\)\/$/,g="string"===
-typeof b?b.match(e):null,e=function(a,b){a=""+a;for(b=parseInt(b,10)||2;a.length<b;)a="0"+a;return a},h={m:1,d:1,y:1970,h:0,i:0,s:0,u:0},i=0,j,k=["i18n"];k.i18n={dayNames:d.dayNames,monthNames:d.monthNames};a in d.masks&&(a=d.masks[a]);if(!isNaN(b-0)&&"u"==(""+a).toLowerCase())i=new Date(1E3*parseFloat(b));else if(b.constructor===Date)i=b;else if(null!==g)i=new Date(parseInt(g[1],10)),g[3]&&(a=60*Number(g[5])+Number(g[6]),a*="-"==g[4]?1:-1,a-=i.getTimezoneOffset(),i.setTime(Number(Number(i)+6E4*a)));
-else{b=(""+b).split(/[\\\/:_;.,\t\T\s-]/);a=a.split(/[\\\/:_;.,\t\T\s-]/);g=0;for(j=a.length;g<j;g++)"M"==a[g]&&(i=c.inArray(b[g],k.i18n.monthNames),-1!==i&&12>i&&(b[g]=i+1)),"F"==a[g]&&(i=c.inArray(b[g],k.i18n.monthNames),-1!==i&&11<i&&(b[g]=i+1-12)),b[g]&&(h[a[g].toLowerCase()]=parseInt(b[g],10));h.f&&(h.m=h.f);if(0===h.m&&0===h.y&&0===h.d)return"&#160;";h.m=parseInt(h.m,10)-1;i=h.y;70<=i&&99>=i?h.y=1900+h.y:0<=i&&69>=i&&(h.y=2E3+h.y);i=new Date(h.y,h.m,h.d,h.h,h.i,h.s,h.u)}f in d.masks?f=d.masks[f]:
-f||(f="Y-m-d");a=i.getHours();b=i.getMinutes();h=i.getDate();g=i.getMonth()+1;j=i.getTimezoneOffset();var l=i.getSeconds(),r=i.getMilliseconds(),n=i.getDay(),m=i.getFullYear(),o=(n+6)%7+1,p=(new Date(m,g-1,h)-new Date(m,0,1))/864E5,q={d:e(h),D:k.i18n.dayNames[n],j:h,l:k.i18n.dayNames[n+7],N:o,S:d.S(h),w:n,z:p,W:5>o?Math.floor((p+o-1)/7)+1:Math.floor((p+o-1)/7)||(4>((new Date(m-1,0,1)).getDay()+6)%7?53:52),F:k.i18n.monthNames[g-1+12],m:e(g),M:k.i18n.monthNames[g-1],n:g,t:"?",L:"?",o:"?",Y:m,y:(""+
-m).substring(2),a:12>a?d.AmPm[0]:d.AmPm[1],A:12>a?d.AmPm[2]:d.AmPm[3],B:"?",g:a%12||12,G:a,h:e(a%12||12),H:e(a),i:e(b),s:e(l),u:r,e:"?",I:"?",O:(0<j?"-":"+")+e(100*Math.floor(Math.abs(j)/60)+Math.abs(j)%60,4),P:"?",T:((""+i).match(/\b(?:[PMCEA][SDP]T|(?:Pacific|Mountain|Central|Eastern|Atlantic) (?:Standard|Daylight|Prevailing) Time|(?:GMT|UTC)(?:[-+]\d{4})?)\b/g)||[""]).pop().replace(/[^-+\dA-Z]/g,""),Z:"?",c:"?",r:"?",U:Math.floor(i/1E3)};return f.replace(/\\.|[dDjlNSwzWFmMntLoYyaABgGhHisueIOPTZcrU]/g,
-function(a){return a in q?q[a]:a.substring(1)})}};c.fn.fmatter.defaultFormat=function(a,b){return c.fmatter.isValue(a)&&""!==a?a:b.defaultValue?b.defaultValue:"&#160;"};c.fn.fmatter.email=function(a,b){return c.fmatter.isEmpty(a)?c.fn.fmatter.defaultFormat(a,b):'<a href="mailto:'+a+'">'+a+"</a>"};c.fn.fmatter.checkbox=function(a,b){var f=c.extend({},b.checkbox),d;void 0!==b.colModel&&!c.fmatter.isUndefined(b.colModel.formatoptions)&&(f=c.extend({},f,b.colModel.formatoptions));d=!0===f.disabled?'disabled="disabled"':
-"";if(c.fmatter.isEmpty(a)||c.fmatter.isUndefined(a))a=c.fn.fmatter.defaultFormat(a,f);a=(a+"").toLowerCase();return'<input type="checkbox" '+(0>a.search(/(false|0|no|off)/i)?" checked='checked' ":"")+' value="'+a+'" offval="no" '+d+"/>"};c.fn.fmatter.link=function(a,b){var f={target:b.target},d="";void 0!==b.colModel&&!c.fmatter.isUndefined(b.colModel.formatoptions)&&(f=c.extend({},f,b.colModel.formatoptions));f.target&&(d="target="+f.target);return!c.fmatter.isEmpty(a)?"<a "+d+' href="'+a+'">'+
-a+"</a>":c.fn.fmatter.defaultFormat(a,b)};c.fn.fmatter.showlink=function(a,b){var f={baseLinkUrl:b.baseLinkUrl,showAction:b.showAction,addParam:b.addParam||"",target:b.target,idName:b.idName},d="";void 0!==b.colModel&&!c.fmatter.isUndefined(b.colModel.formatoptions)&&(f=c.extend({},f,b.colModel.formatoptions));f.target&&(d="target="+f.target);f=f.baseLinkUrl+f.showAction+"?"+f.idName+"="+b.rowId+f.addParam;return c.fmatter.isString(a)||c.fmatter.isNumber(a)?"<a "+d+' href="'+f+'">'+a+"</a>":c.fn.fmatter.defaultFormat(a,
-b)};c.fn.fmatter.integer=function(a,b){var f=c.extend({},b.integer);void 0!==b.colModel&&!c.fmatter.isUndefined(b.colModel.formatoptions)&&(f=c.extend({},f,b.colModel.formatoptions));return c.fmatter.isEmpty(a)?f.defaultValue:c.fmatter.util.NumberFormat(a,f)};c.fn.fmatter.number=function(a,b){var f=c.extend({},b.number);void 0!==b.colModel&&!c.fmatter.isUndefined(b.colModel.formatoptions)&&(f=c.extend({},f,b.colModel.formatoptions));return c.fmatter.isEmpty(a)?f.defaultValue:c.fmatter.util.NumberFormat(a,
-f)};c.fn.fmatter.currency=function(a,b){var f=c.extend({},b.currency);void 0!==b.colModel&&!c.fmatter.isUndefined(b.colModel.formatoptions)&&(f=c.extend({},f,b.colModel.formatoptions));return c.fmatter.isEmpty(a)?f.defaultValue:c.fmatter.util.NumberFormat(a,f)};c.fn.fmatter.date=function(a,b,f,d){f=c.extend({},b.date);void 0!==b.colModel&&!c.fmatter.isUndefined(b.colModel.formatoptions)&&(f=c.extend({},f,b.colModel.formatoptions));return!f.reformatAfterEdit&&"edit"==d||c.fmatter.isEmpty(a)?c.fn.fmatter.defaultFormat(a,
-b):c.fmatter.util.DateFormat(f.srcformat,a,f.newformat,f)};c.fn.fmatter.select=function(a,b){var a=a+"",f=!1,d=[],e,g;c.fmatter.isUndefined(b.colModel.formatoptions)?c.fmatter.isUndefined(b.colModel.editoptions)||(f=b.colModel.editoptions.value,e=void 0===b.colModel.editoptions.separator?":":b.colModel.editoptions.separator,g=void 0===b.colModel.editoptions.delimiter?";":b.colModel.editoptions.delimiter):(f=b.colModel.formatoptions.value,e=void 0===b.colModel.formatoptions.separator?":":b.colModel.formatoptions.separator,
-g=void 0===b.colModel.formatoptions.delimiter?";":b.colModel.formatoptions.delimiter);if(f){var h=!0===b.colModel.editoptions.multiple?!0:!1,i=[];h&&(i=a.split(","),i=c.map(i,function(a){return c.trim(a)}));if(c.fmatter.isString(f))for(var j=f.split(g),k=0,l=0;l<j.length;l++)if(g=j[l].split(e),2<g.length&&(g[1]=c.map(g,function(a,b){if(b>0)return a}).join(e)),h)-1<c.inArray(g[0],i)&&(d[k]=g[1],k++);else{if(c.trim(g[0])==c.trim(a)){d[0]=g[1];break}}else c.fmatter.isObject(f)&&(h?d=c.map(i,function(a){return f[a]}):
-d[0]=f[a]||"")}a=d.join(", ");return""===a?c.fn.fmatter.defaultFormat(a,b):a};c.fn.fmatter.rowactions=function(a,b,f,d){var e={keys:!1,onEdit:null,onSuccess:null,afterSave:null,onError:null,afterRestore:null,extraparam:{},url:null,restoreAfterError:!0,mtype:"POST",delOptions:{},editOptions:{}},a=c.jgrid.jqID(a),b=c.jgrid.jqID(b),d=c("#"+b)[0].p.colModel[d];c.fmatter.isUndefined(d.formatoptions)||(e=c.extend(e,d.formatoptions));c.fmatter.isUndefined(c("#"+b)[0].p.editOptions)||(e.editOptions=c("#"+
-b)[0].p.editOptions);c.fmatter.isUndefined(c("#"+b)[0].p.delOptions)||(e.delOptions=c("#"+b)[0].p.delOptions);var g=c("#"+b)[0],d=function(d){c.isFunction(e.afterRestore)&&e.afterRestore.call(g,d);c("tr#"+a+" div.ui-inline-edit, tr#"+a+" div.ui-inline-del","#"+b+".ui-jqgrid-btable:first").show();c("tr#"+a+" div.ui-inline-save, tr#"+a+" div.ui-inline-cancel","#"+b+".ui-jqgrid-btable:first").hide()};if(c("#"+a,"#"+b).hasClass("jqgrid-new-row")){var h=g.p.prmNames;e.extraparam[h.oper]=h.addoper}h={keys:e.keys,
-oneditfunc:e.onEdit,successfunc:e.onSuccess,url:e.url,extraparam:e.extraparam,aftersavefunc:function(d,f){c.isFunction(e.afterSave)&&e.afterSave.call(g,d,f);c("tr#"+a+" div.ui-inline-edit, tr#"+a+" div.ui-inline-del","#"+b+".ui-jqgrid-btable:first").show();c("tr#"+a+" div.ui-inline-save, tr#"+a+" div.ui-inline-cancel","#"+b+".ui-jqgrid-btable:first").hide()},errorfunc:e.onError,afterrestorefunc:d,restoreAfterError:e.restoreAfterError,mtype:e.mtype};switch(f){case "edit":c("#"+b).jqGrid("editRow",
-a,h);c("tr#"+a+" div.ui-inline-edit, tr#"+a+" div.ui-inline-del","#"+b+".ui-jqgrid-btable:first").hide();c("tr#"+a+" div.ui-inline-save, tr#"+a+" div.ui-inline-cancel","#"+b+".ui-jqgrid-btable:first").show();c(g).triggerHandler("jqGridAfterGridComplete");break;case "save":c("#"+b).jqGrid("saveRow",a,h)&&(c("tr#"+a+" div.ui-inline-edit, tr#"+a+" div.ui-inline-del","#"+b+".ui-jqgrid-btable:first").show(),c("tr#"+a+" div.ui-inline-save, tr#"+a+" div.ui-inline-cancel","#"+b+".ui-jqgrid-btable:first").hide(),
-c(g).triggerHandler("jqGridAfterGridComplete"));break;case "cancel":c("#"+b).jqGrid("restoreRow",a,d);c("tr#"+a+" div.ui-inline-edit, tr#"+a+" div.ui-inline-del","#"+b+".ui-jqgrid-btable:first").show();c("tr#"+a+" div.ui-inline-save, tr#"+a+" div.ui-inline-cancel","#"+b+".ui-jqgrid-btable:first").hide();c(g).triggerHandler("jqGridAfterGridComplete");break;case "del":c("#"+b).jqGrid("delGridRow",a,e.delOptions);break;case "formedit":c("#"+b).jqGrid("setSelection",a),c("#"+b).jqGrid("editGridRow",a,
-e.editOptions)}};c.fn.fmatter.actions=function(a,b){var f={keys:!1,editbutton:!0,delbutton:!0,editformbutton:!1};c.fmatter.isUndefined(b.colModel.formatoptions)||(f=c.extend(f,b.colModel.formatoptions));var d=b.rowId,e="",g;if("undefined"==typeof d||c.fmatter.isEmpty(d))return"";f.editformbutton?(g="onclick=jQuery.fn.fmatter.rowactions('"+d+"','"+b.gid+"','formedit',"+b.pos+"); onmouseover=jQuery(this).addClass('ui-state-hover'); onmouseout=jQuery(this).removeClass('ui-state-hover'); ",e=e+"<div title='"+
-c.jgrid.nav.edittitle+"' style='float:left;cursor:pointer;' class='ui-pg-div ui-inline-edit' "+g+"><span class='ui-icon ui-icon-pencil'></span></div>"):f.editbutton&&(g="onclick=jQuery.fn.fmatter.rowactions('"+d+"','"+b.gid+"','edit',"+b.pos+"); onmouseover=jQuery(this).addClass('ui-state-hover'); onmouseout=jQuery(this).removeClass('ui-state-hover') ",e=e+"<div title='"+c.jgrid.nav.edittitle+"' style='float:left;cursor:pointer;' class='ui-pg-div ui-inline-edit' "+g+"><span class='ui-icon ui-icon-pencil'></span></div>");
-f.delbutton&&(g="onclick=jQuery.fn.fmatter.rowactions('"+d+"','"+b.gid+"','del',"+b.pos+"); onmouseover=jQuery(this).addClass('ui-state-hover'); onmouseout=jQuery(this).removeClass('ui-state-hover'); ",e=e+"<div title='"+c.jgrid.nav.deltitle+"' style='float:left;margin-left:5px;' class='ui-pg-div ui-inline-del' "+g+"><span class='ui-icon ui-icon-trash'></span></div>");g="onclick=jQuery.fn.fmatter.rowactions('"+d+"','"+b.gid+"','save',"+b.pos+"); onmouseover=jQuery(this).addClass('ui-state-hover'); onmouseout=jQuery(this).removeClass('ui-state-hover'); ";
-e=e+"<div title='"+c.jgrid.edit.bSubmit+"' style='float:left;display:none' class='ui-pg-div ui-inline-save' "+g+"><span class='ui-icon ui-icon-disk'></span></div>";g="onclick=jQuery.fn.fmatter.rowactions('"+d+"','"+b.gid+"','cancel',"+b.pos+"); onmouseover=jQuery(this).addClass('ui-state-hover'); onmouseout=jQuery(this).removeClass('ui-state-hover'); ";e=e+"<div title='"+c.jgrid.edit.bCancel+"' style='float:left;display:none;margin-left:5px;' class='ui-pg-div ui-inline-cancel' "+g+"><span class='ui-icon ui-icon-cancel'></span></div>";
-return"<div style='margin-left:8px;'>"+e+"</div>"};c.unformat=function(a,b,f,d){var e,g=b.colModel.formatter,h=b.colModel.formatoptions||{},i=/([\.\*\_\'\(\)\{\}\+\?\\])/g,j=b.colModel.unformat||c.fn.fmatter[g]&&c.fn.fmatter[g].unformat;if("undefined"!==typeof j&&c.isFunction(j))e=j.call(this,c(a).text(),b,a);else if(!c.fmatter.isUndefined(g)&&c.fmatter.isString(g))switch(e=c.jgrid.formatter||{},g){case "integer":h=c.extend({},e.integer,h);b=h.thousandsSeparator.replace(i,"\\$1");b=RegExp(b,"g");
-e=c(a).text().replace(b,"");break;case "number":h=c.extend({},e.number,h);b=h.thousandsSeparator.replace(i,"\\$1");b=RegExp(b,"g");e=c(a).text().replace(b,"").replace(h.decimalSeparator,".");break;case "currency":h=c.extend({},e.currency,h);b=h.thousandsSeparator.replace(i,"\\$1");b=RegExp(b,"g");e=c(a).text();h.prefix&&h.prefix.length&&(e=e.substr(h.prefix.length));h.suffix&&h.suffix.length&&(e=e.substr(0,e.length-h.suffix.length));e=e.replace(b,"").replace(h.decimalSeparator,".");break;case "checkbox":h=
-b.colModel.editoptions?b.colModel.editoptions.value.split(":"):["Yes","No"];e=c("input",a).is(":checked")?h[0]:h[1];break;case "select":e=c.unformat.select(a,b,f,d);break;case "actions":return"";default:e=c(a).text()}return void 0!==e?e:!0===d?c(a).text():c.jgrid.htmlDecode(c(a).html())};c.unformat.select=function(a,b,f,d){f=[];a=c(a).text();if(!0===d)return a;var d=c.extend({},!c.fmatter.isUndefined(b.colModel.formatoptions)?b.colModel.formatoptions:b.colModel.editoptions),b=void 0===d.separator?
-":":d.separator,e=void 0===d.delimiter?";":d.delimiter;if(d.value){var g=d.value,d=!0===d.multiple?!0:!1,h=[];d&&(h=a.split(","),h=c.map(h,function(a){return c.trim(a)}));if(c.fmatter.isString(g))for(var i=g.split(e),j=0,k=0;k<i.length;k++)if(e=i[k].split(b),2<e.length&&(e[1]=c.map(e,function(a,b){if(b>0)return a}).join(b)),d)-1<c.inArray(e[1],h)&&(f[j]=e[0],j++);else{if(c.trim(e[1])==c.trim(a)){f[0]=e[0];break}}else if(c.fmatter.isObject(g)||c.isArray(g))d||(h[0]=a),f=c.map(h,function(a){var b;c.each(g,
-function(c,d){if(d==a){b=c;return false}});if(typeof b!="undefined")return b});return f.join(", ")}return a||""};c.unformat.date=function(a,b){var f=c.jgrid.formatter.date||{};c.fmatter.isUndefined(b.formatoptions)||(f=c.extend({},f,b.formatoptions));return!c.fmatter.isEmpty(a)?c.fmatter.util.DateFormat(f.newformat,a,f.srcformat,f):c.fn.fmatter.defaultFormat(a,b)}})(jQuery);
-(function(a){a.jgrid.extend({getColProp:function(a){var d={},c=this[0];if(!c.grid)return!1;for(var c=c.p.colModel,e=0;e<c.length;e++)if(c[e].name==a){d=c[e];break}return d},setColProp:function(b,d){return this.each(function(){if(this.grid&&d)for(var c=this.p.colModel,e=0;e<c.length;e++)if(c[e].name==b){a.extend(this.p.colModel[e],d);break}})},sortGrid:function(a,d,c){return this.each(function(){var e=-1;if(this.grid){a||(a=this.p.sortname);for(var h=0;h<this.p.colModel.length;h++)if(this.p.colModel[h].index==
-a||this.p.colModel[h].name==a){e=h;break}-1!=e&&(h=this.p.colModel[e].sortable,"boolean"!==typeof h&&(h=!0),"boolean"!==typeof d&&(d=!1),h&&this.sortData("jqgh_"+this.p.id+"_"+a,e,d,c))}})},clearBeforeUnload:function(){return this.each(function(){var b=this.grid;b.emptyRows.call(this,!0,!0);a(b.hDiv).unbind("mousemove");a(this).unbind();b.dragEnd=null;b.dragMove=null;b.dragStart=null;b.emptyRows=null;b.populate=null;b.populateVisible=null;b.scrollGrid=null;b.selectionPreserver=null;b.bDiv=null;b.cDiv=
-null;b.hDiv=null;b.cols=null;var d,c=b.headers.length;for(d=0;d<c;d++)b.headers[d].el=null;this.addJSONData=this.addXmlData=this.formatter=this.constructTr=this.setHeadCheckBox=this.refreshIndex=this.updatepager=this.sortData=this.formatCol=null})},GridDestroy:function(){return this.each(function(){if(this.grid){this.p.pager&&a(this.p.pager).remove();try{a(this).jqGrid("clearBeforeUnload"),a("#gbox_"+a.jgrid.jqID(this.id)).remove()}catch(b){}}})},GridUnload:function(){return this.each(function(){if(this.grid){var b=
-a(this).attr("id"),d=a(this).attr("class");this.p.pager&&a(this.p.pager).empty().removeClass("ui-state-default ui-jqgrid-pager corner-bottom");var c=document.createElement("table");a(c).attr({id:b});c.className=d;b=a.jgrid.jqID(this.id);a(c).removeClass("ui-jqgrid-btable");1===a(this.p.pager).parents("#gbox_"+b).length?(a(c).insertBefore("#gbox_"+b).show(),a(this.p.pager).insertBefore("#gbox_"+b)):a(c).insertBefore("#gbox_"+b).show();a(this).jqGrid("clearBeforeUnload");a("#gbox_"+b).remove()}})},
-setGridState:function(b){return this.each(function(){this.grid&&("hidden"==b?(a(".ui-jqgrid-bdiv, .ui-jqgrid-hdiv","#gview_"+a.jgrid.jqID(this.p.id)).slideUp("fast"),this.p.pager&&a(this.p.pager).slideUp("fast"),this.p.toppager&&a(this.p.toppager).slideUp("fast"),!0===this.p.toolbar[0]&&("both"==this.p.toolbar[1]&&a(this.grid.ubDiv).slideUp("fast"),a(this.grid.uDiv).slideUp("fast")),this.p.footerrow&&a(".ui-jqgrid-sdiv","#gbox_"+a.jgrid.jqID(this.p.id)).slideUp("fast"),a(".ui-jqgrid-titlebar-close span",
-this.grid.cDiv).removeClass("ui-icon-circle-triangle-n").addClass("ui-icon-circle-triangle-s"),this.p.gridstate="hidden"):"visible"==b&&(a(".ui-jqgrid-hdiv, .ui-jqgrid-bdiv","#gview_"+a.jgrid.jqID(this.p.id)).slideDown("fast"),this.p.pager&&a(this.p.pager).slideDown("fast"),this.p.toppager&&a(this.p.toppager).slideDown("fast"),!0===this.p.toolbar[0]&&("both"==this.p.toolbar[1]&&a(this.grid.ubDiv).slideDown("fast"),a(this.grid.uDiv).slideDown("fast")),this.p.footerrow&&a(".ui-jqgrid-sdiv","#gbox_"+
-a.jgrid.jqID(this.p.id)).slideDown("fast"),a(".ui-jqgrid-titlebar-close span",this.grid.cDiv).removeClass("ui-icon-circle-triangle-s").addClass("ui-icon-circle-triangle-n"),this.p.gridstate="visible"))})},filterToolbar:function(b){b=a.extend({autosearch:!0,searchOnEnter:!0,beforeSearch:null,afterSearch:null,beforeClear:null,afterClear:null,searchurl:"",stringResult:!1,groupOp:"AND",defaultSearch:"bw"},b||{});return this.each(function(){function d(b,c){var d=a(b);d[0]&&jQuery.each(c,function(){void 0!==
-this.data?d.bind(this.type,this.data,this.fn):d.bind(this.type,this.fn)})}var c=this;if(!this.ftoolbar){var e=function(){var d={},j=0,g,f,h={},m;a.each(c.p.colModel,function(){f=this.index||this.name;m=this.searchoptions&&this.searchoptions.sopt?this.searchoptions.sopt[0]:"select"==this.stype?"eq":b.defaultSearch;if(g=a("#gs_"+a.jgrid.jqID(this.name),!0===this.frozen&&!0===c.p.frozenColumns?c.grid.fhDiv:c.grid.hDiv).val())d[f]=g,h[f]=m,j++;else try{delete c.p.postData[f]}catch(e){}});var e=0<j?!0:
-!1;if(!0===b.stringResult||"local"==c.p.datatype){var k='{"groupOp":"'+b.groupOp+'","rules":[',l=0;a.each(d,function(a,b){0<l&&(k+=",");k+='{"field":"'+a+'",';k+='"op":"'+h[a]+'",';k+='"data":"'+(b+"").replace(/\\/g,"\\\\").replace(/\"/g,'\\"')+'"}';l++});k+="]}";a.extend(c.p.postData,{filters:k});a.each(["searchField","searchString","searchOper"],function(a,b){c.p.postData.hasOwnProperty(b)&&delete c.p.postData[b]})}else a.extend(c.p.postData,d);var p;c.p.searchurl&&(p=c.p.url,a(c).jqGrid("setGridParam",
-{url:c.p.searchurl}));var r="stop"===a(c).triggerHandler("jqGridToolbarBeforeSearch")?!0:!1;!r&&a.isFunction(b.beforeSearch)&&(r=b.beforeSearch.call(c));r||a(c).jqGrid("setGridParam",{search:e}).trigger("reloadGrid",[{page:1}]);p&&a(c).jqGrid("setGridParam",{url:p});a(c).triggerHandler("jqGridToolbarAfterSearch");a.isFunction(b.afterSearch)&&b.afterSearch.call(c)},h=a("<tr class='ui-search-toolbar' role='rowheader'></tr>"),g;a.each(c.p.colModel,function(){var i=this,j,q,f,n;q=a("<th role='columnheader' class='ui-state-default ui-th-column ui-th-"+
-c.p.direction+"'></th>");j=a("<div style='width:100%;position:relative;height:100%;padding-right:0.3em;'></div>");!0===this.hidden&&a(q).css("display","none");this.search=!1===this.search?!1:!0;"undefined"==typeof this.stype&&(this.stype="text");f=a.extend({},this.searchoptions||{});if(this.search)switch(this.stype){case "select":if(n=this.surl||f.dataUrl)a.ajax(a.extend({url:n,dataType:"html",success:function(c){if(f.buildSelect!==void 0)(c=f.buildSelect(c))&&a(j).append(c);else a(j).append(c);f.defaultValue!==
-void 0&&a("select",j).val(f.defaultValue);a("select",j).attr({name:i.index||i.name,id:"gs_"+i.name});f.attr&&a("select",j).attr(f.attr);a("select",j).css({width:"100%"});f.dataInit!==void 0&&f.dataInit(a("select",j)[0]);f.dataEvents!==void 0&&d(a("select",j)[0],f.dataEvents);b.autosearch===true&&a("select",j).change(function(){e();return false});c=null}},a.jgrid.ajaxOptions,c.p.ajaxSelectOptions||{}));else{var m,o,k;i.searchoptions?(m=void 0===i.searchoptions.value?"":i.searchoptions.value,o=void 0===
-i.searchoptions.separator?":":i.searchoptions.separator,k=void 0===i.searchoptions.delimiter?";":i.searchoptions.delimiter):i.editoptions&&(m=void 0===i.editoptions.value?"":i.editoptions.value,o=void 0===i.editoptions.separator?":":i.editoptions.separator,k=void 0===i.editoptions.delimiter?";":i.editoptions.delimiter);if(m){n=document.createElement("select");n.style.width="100%";a(n).attr({name:i.index||i.name,id:"gs_"+i.name});var l;if("string"===typeof m){m=m.split(k);for(var p=0;p<m.length;p++)l=
-m[p].split(o),k=document.createElement("option"),k.value=l[0],k.innerHTML=l[1],n.appendChild(k)}else if("object"===typeof m)for(l in m)m.hasOwnProperty(l)&&(k=document.createElement("option"),k.value=l,k.innerHTML=m[l],n.appendChild(k));void 0!==f.defaultValue&&a(n).val(f.defaultValue);f.attr&&a(n).attr(f.attr);void 0!==f.dataInit&&f.dataInit(n);void 0!==f.dataEvents&&d(n,f.dataEvents);a(j).append(n);!0===b.autosearch&&a(n).change(function(){e();return false})}}break;case "text":o=void 0!==f.defaultValue?
-f.defaultValue:"",a(j).append("<input type='text' style='width:95%;padding:0px;' name='"+(i.index||i.name)+"' id='gs_"+i.name+"' value='"+o+"'/>"),f.attr&&a("input",j).attr(f.attr),void 0!==f.dataInit&&f.dataInit(a("input",j)[0]),void 0!==f.dataEvents&&d(a("input",j)[0],f.dataEvents),!0===b.autosearch&&(b.searchOnEnter?a("input",j).keypress(function(a){if((a.charCode?a.charCode:a.keyCode?a.keyCode:0)==13){e();return false}return this}):a("input",j).keydown(function(a){switch(a.which){case 13:return false;
-case 9:case 16:case 37:case 38:case 39:case 40:case 27:break;default:g&&clearTimeout(g);g=setTimeout(function(){e()},500)}}))}a(q).append(j);a(h).append(q)});a("table thead",c.grid.hDiv).append(h);this.ftoolbar=!0;this.triggerToolbar=e;this.clearToolbar=function(d){var j={},g=0,f,d="boolean"!=typeof d?!0:d;a.each(c.p.colModel,function(){var b;this.searchoptions&&void 0!==this.searchoptions.defaultValue&&(b=this.searchoptions.defaultValue);f=this.index||this.name;switch(this.stype){case "select":a("#gs_"+
-a.jgrid.jqID(this.name)+" option",!0===this.frozen&&!0===c.p.frozenColumns?c.grid.fhDiv:c.grid.hDiv).each(function(c){if(c===0)this.selected=true;if(a(this).val()==b){this.selected=true;return false}});if(void 0!==b)j[f]=b,g++;else try{delete c.p.postData[f]}catch(d){}break;case "text":if(a("#gs_"+a.jgrid.jqID(this.name),!0===this.frozen&&!0===c.p.frozenColumns?c.grid.fhDiv:c.grid.hDiv).val(b),void 0!==b)j[f]=b,g++;else try{delete c.p.postData[f]}catch(e){}}});var h=0<g?!0:!1;if(!0===b.stringResult||
-"local"==c.p.datatype){var e='{"groupOp":"'+b.groupOp+'","rules":[',o=0;a.each(j,function(a,b){0<o&&(e+=",");e+='{"field":"'+a+'",';e+='"op":"eq",';e+='"data":"'+(b+"").replace(/\\/g,"\\\\").replace(/\"/g,'\\"')+'"}';o++});e+="]}";a.extend(c.p.postData,{filters:e});a.each(["searchField","searchString","searchOper"],function(a,b){c.p.postData.hasOwnProperty(b)&&delete c.p.postData[b]})}else a.extend(c.p.postData,j);var k;c.p.searchurl&&(k=c.p.url,a(c).jqGrid("setGridParam",{url:c.p.searchurl}));var l=
-"stop"===a(c).triggerHandler("jqGridToolbarBeforeClear")?!0:!1;!l&&a.isFunction(b.beforeClear)&&(l=b.beforeClear.call(c));l||d&&a(c).jqGrid("setGridParam",{search:h}).trigger("reloadGrid",[{page:1}]);k&&a(c).jqGrid("setGridParam",{url:k});a(c).triggerHandler("jqGridToolbarAfterClear");a.isFunction(b.afterClear)&&b.afterClear()};this.toggleToolbar=function(){var b=a("tr.ui-search-toolbar",c.grid.hDiv),d=!0===c.p.frozenColumns?a("tr.ui-search-toolbar",c.grid.fhDiv):!1;"none"==b.css("display")?(b.show(),
-d&&d.show()):(b.hide(),d&&d.hide())}}})},destroyGroupHeader:function(b){"undefined"==typeof b&&(b=!0);return this.each(function(){var d,c,e,h,g,i;c=this.grid;var j=a("table.ui-jqgrid-htable thead",c.hDiv),q=this.p.colModel;if(c){a(this).unbind(".setGroupHeaders");d=a("<tr>",{role:"rowheader"}).addClass("ui-jqgrid-labels");h=c.headers;c=0;for(e=h.length;c<e;c++){g=q[c].hidden?"none":"";g=a(h[c].el).width(h[c].width).css("display",g);try{g.removeAttr("rowSpan")}catch(f){g.attr("rowSpan",1)}d.append(g);
-i=g.children("span.ui-jqgrid-resize");0<i.length&&(i[0].style.height="");g.children("div")[0].style.top=""}a(j).children("tr.ui-jqgrid-labels").remove();a(j).prepend(d);!0===b&&a(this).jqGrid("setGridParam",{groupHeader:null})}})},setGroupHeaders:function(b){b=a.extend({useColSpanStyle:!1,groupHeaders:[]},b||{});return this.each(function(){this.p.groupHeader=b;var d,c,e=0,h,g,i,j,q,f=this.p.colModel,n=f.length,m=this.grid.headers,o=a("table.ui-jqgrid-htable",this.grid.hDiv),k=o.children("thead").children("tr.ui-jqgrid-labels:last").addClass("jqg-second-row-header");
-h=o.children("thead");var l=o.find(".jqg-first-row-header");void 0===l[0]?l=a("<tr>",{role:"row","aria-hidden":"true"}).addClass("jqg-first-row-header").css("height","auto"):l.empty();var p,r=function(a,b){for(var c=0,d=b.length;c<d;c++)if(b[c].startColumnName===a)return c;return-1};a(this).prepend(h);h=a("<tr>",{role:"rowheader"}).addClass("ui-jqgrid-labels jqg-third-row-header");for(d=0;d<n;d++)if(i=m[d].el,j=a(i),c=f[d],g={height:"0px",width:m[d].width+"px",display:c.hidden?"none":""},a("<th>",
-{role:"gridcell"}).css(g).addClass("ui-first-th-"+this.p.direction).appendTo(l),i.style.width="",g=r(c.name,b.groupHeaders),0<=g){g=b.groupHeaders[g];e=g.numberOfColumns;q=g.titleText;for(g=c=0;g<e&&d+g<n;g++)f[d+g].hidden||c++;g=a("<th>").attr({role:"columnheader"}).addClass("ui-state-default ui-th-column-header ui-th-"+this.p.direction).css({height:"22px","border-top":"0px none"}).html(q);0<c&&g.attr("colspan",""+c);this.p.headertitles&&g.attr("title",g.text());0===c&&g.hide();j.before(g);h.append(i);
-e-=1}else 0===e?b.useColSpanStyle?j.attr("rowspan","2"):(a("<th>",{role:"columnheader"}).addClass("ui-state-default ui-th-column-header ui-th-"+this.p.direction).css({display:c.hidden?"none":"","border-top":"0px none"}).insertBefore(j),h.append(i)):(h.append(i),e--);f=a(this).children("thead");f.prepend(l);h.insertAfter(k);o.append(f);b.useColSpanStyle&&(o.find("span.ui-jqgrid-resize").each(function(){var b=a(this).parent();b.is(":visible")&&(this.style.cssText="height: "+b.height()+"px !important; cursor: col-resize;")}),
-o.find("div.ui-jqgrid-sortable").each(function(){var b=a(this),c=b.parent();c.is(":visible")&&c.is(":has(span.ui-jqgrid-resize)")&&b.css("top",(c.height()-b.outerHeight())/2+"px")}));p=f.find("tr.jqg-first-row-header");a(this).bind("jqGridResizeStop.setGroupHeaders",function(a,b,c){p.find("th").eq(c).width(b)})})},setFrozenColumns:function(){return this.each(function(){if(this.grid){var b=this,d=b.p.colModel,c=0,e=d.length,h=-1,g=!1;if(!(!0===b.p.subGrid||!0===b.p.treeGrid||!0===b.p.cellEdit||b.p.sortable||
-b.p.scroll||b.p.grouping)){b.p.rownumbers&&c++;for(b.p.multiselect&&c++;c<e;){if(!0===d[c].frozen)g=!0,h=c;else break;c++}if(0<=h&&g){d=b.p.caption?a(b.grid.cDiv).outerHeight():0;c=a(".ui-jqgrid-htable","#gview_"+a.jgrid.jqID(b.p.id)).height();b.p.toppager&&(d+=a(b.grid.topDiv).outerHeight());!0===b.p.toolbar[0]&&"bottom"!=b.p.toolbar[1]&&(d+=a(b.grid.uDiv).outerHeight());b.grid.fhDiv=a('<div style="position:absolute;left:0px;top:'+d+"px;height:"+c+'px;" class="frozen-div ui-state-default ui-jqgrid-hdiv"></div>');
-b.grid.fbDiv=a('<div style="position:absolute;left:0px;top:'+(parseInt(d,10)+parseInt(c,10)+1)+'px;overflow-y:hidden" class="frozen-bdiv ui-jqgrid-bdiv"></div>');a("#gview_"+a.jgrid.jqID(b.p.id)).append(b.grid.fhDiv);d=a(".ui-jqgrid-htable","#gview_"+a.jgrid.jqID(b.p.id)).clone(!0);if(b.p.groupHeader){a("tr.jqg-first-row-header, tr.jqg-third-row-header",d).each(function(){a("th:gt("+h+")",this).remove()});var i=-1,j=-1;a("tr.jqg-second-row-header th",d).each(function(){var b=parseInt(a(this).attr("colspan"),
-10);b&&(i+=b,j++);if(i===h)return!1});i!==h&&(j=h);a("tr.jqg-second-row-header",d).each(function(){a("th:gt("+j+")",this).remove()})}else a("tr",d).each(function(){a("th:gt("+h+")",this).remove()});a(d).width(1);a(b.grid.fhDiv).append(d).mousemove(function(a){if(b.grid.resizing)return b.grid.dragMove(a),!1});a(b).bind("jqGridResizeStop.setFrozenColumns",function(c,d,e){c=a(".ui-jqgrid-htable",b.grid.fhDiv);a("th:eq("+e+")",c).width(d);c=a(".ui-jqgrid-btable",b.grid.fbDiv);a("tr:first td:eq("+e+")",
-c).width(d)});a(b).bind("jqGridOnSortCol.setFrozenColumns",function(c,d){var e=a("tr.ui-jqgrid-labels:last th:eq("+b.p.lastsort+")",b.grid.fhDiv),g=a("tr.ui-jqgrid-labels:last th:eq("+d+")",b.grid.fhDiv);a("span.ui-grid-ico-sort",e).addClass("ui-state-disabled");a(e).attr("aria-selected","false");a("span.ui-icon-"+b.p.sortorder,g).removeClass("ui-state-disabled");a(g).attr("aria-selected","true");!b.p.viewsortcols[0]&&b.p.lastsort!=d&&(a("span.s-ico",e).hide(),a("span.s-ico",g).show())});a("#gview_"+
-a.jgrid.jqID(b.p.id)).append(b.grid.fbDiv);jQuery(b.grid.bDiv).scroll(function(){jQuery(b.grid.fbDiv).scrollTop(jQuery(this).scrollTop())});!0===b.p.hoverrows&&a("#"+a.jgrid.jqID(b.p.id)).unbind("mouseover").unbind("mouseout");a(b).bind("jqGridAfterGridComplete.setFrozenColumns",function(){a("#"+a.jgrid.jqID(b.p.id)+"_frozen").remove();jQuery(b.grid.fbDiv).height(jQuery(b.grid.bDiv).height()-16);var c=a("#"+a.jgrid.jqID(b.p.id)).clone(!0);a("tr",c).each(function(){a("td:gt("+h+")",this).remove()});
-a(c).width(1).attr("id",b.p.id+"_frozen");a(b.grid.fbDiv).append(c);!0===b.p.hoverrows&&(a("tr.jqgrow",c).hover(function(){a(this).addClass("ui-state-hover");a("#"+a.jgrid.jqID(this.id),"#"+a.jgrid.jqID(b.p.id)).addClass("ui-state-hover")},function(){a(this).removeClass("ui-state-hover");a("#"+a.jgrid.jqID(this.id),"#"+a.jgrid.jqID(b.p.id)).removeClass("ui-state-hover")}),a("tr.jqgrow","#"+a.jgrid.jqID(b.p.id)).hover(function(){a(this).addClass("ui-state-hover");a("#"+a.jgrid.jqID(this.id),"#"+a.jgrid.jqID(b.p.id)+
-"_frozen").addClass("ui-state-hover")},function(){a(this).removeClass("ui-state-hover");a("#"+a.jgrid.jqID(this.id),"#"+a.jgrid.jqID(b.p.id)+"_frozen").removeClass("ui-state-hover")}));c=null});b.p.frozenColumns=!0}}}})},destroyFrozenColumns:function(){return this.each(function(){if(this.grid&&!0===this.p.frozenColumns){a(this.grid.fhDiv).remove();a(this.grid.fbDiv).remove();this.grid.fhDiv=null;this.grid.fbDiv=null;a(this).unbind(".setFrozenColumns");if(!0===this.p.hoverrows){var b;a("#"+a.jgrid.jqID(this.p.id)).bind("mouseover",
-function(d){b=a(d.target).closest("tr.jqgrow");"ui-subgrid"!==a(b).attr("class")&&a(b).addClass("ui-state-hover")}).bind("mouseout",function(d){b=a(d.target).closest("tr.jqgrow");a(b).removeClass("ui-state-hover")})}this.p.frozenColumns=!1}})}})})(jQuery);
-(function(a){a.extend(a.jgrid,{showModal:function(a){a.w.show()},closeModal:function(a){a.w.hide().attr("aria-hidden","true");a.o&&a.o.remove()},hideModal:function(d,b){b=a.extend({jqm:!0,gb:""},b||{});if(b.onClose){var c=b.onClose(d);if("boolean"==typeof c&&!c)return}if(a.fn.jqm&&!0===b.jqm)a(d).attr("aria-hidden","true").jqmHide();else{if(""!==b.gb)try{a(".jqgrid-overlay:first",b.gb).hide()}catch(f){}a(d).hide().attr("aria-hidden","true")}},findPos:function(a){var b=0,c=0;if(a.offsetParent){do b+=
-a.offsetLeft,c+=a.offsetTop;while(a=a.offsetParent)}return[b,c]},createModal:function(d,b,c,f,g,h,i){var c=a.extend(!0,a.jgrid.jqModal||{},c),e=document.createElement("div"),l,j=this,i=a.extend({},i||{});l="rtl"==a(c.gbox).attr("dir")?!0:!1;e.className="ui-widget ui-widget-content ui-corner-all ui-jqdialog";e.id=d.themodal;var k=document.createElement("div");k.className="ui-jqdialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix";k.id=d.modalhead;a(k).append("<span class='ui-jqdialog-title'>"+
-c.caption+"</span>");var n=a("<a href='javascript:void(0)' class='ui-jqdialog-titlebar-close ui-corner-all'></a>").hover(function(){n.addClass("ui-state-hover")},function(){n.removeClass("ui-state-hover")}).append("<span class='ui-icon ui-icon-closethick'></span>");a(k).append(n);l?(e.dir="rtl",a(".ui-jqdialog-title",k).css("float","right"),a(".ui-jqdialog-titlebar-close",k).css("left","0.3em")):(e.dir="ltr",a(".ui-jqdialog-title",k).css("float","left"),a(".ui-jqdialog-titlebar-close",k).css("right",
-"0.3em"));var m=document.createElement("div");a(m).addClass("ui-jqdialog-content ui-widget-content").attr("id",d.modalcontent);a(m).append(b);e.appendChild(m);a(e).prepend(k);!0===h?a("body").append(e):"string"==typeof h?a(h).append(e):a(e).insertBefore(f);a(e).css(i);"undefined"===typeof c.jqModal&&(c.jqModal=!0);b={};if(a.fn.jqm&&!0===c.jqModal)0===c.left&&(0===c.top&&c.overlay)&&(i=[],i=a.jgrid.findPos(g),c.left=i[0]+4,c.top=i[1]+4),b.top=c.top+"px",b.left=c.left;else if(0!==c.left||0!==c.top)b.left=
-c.left,b.top=c.top+"px";a("a.ui-jqdialog-titlebar-close",k).click(function(){var b=a("#"+a.jgrid.jqID(d.themodal)).data("onClose")||c.onClose,e=a("#"+a.jgrid.jqID(d.themodal)).data("gbox")||c.gbox;j.hideModal("#"+a.jgrid.jqID(d.themodal),{gb:e,jqm:c.jqModal,onClose:b});return false});if(0===c.width||!c.width)c.width=300;if(0===c.height||!c.height)c.height=200;c.zIndex||(f=a(f).parents("*[role=dialog]").filter(":first").css("z-index"),c.zIndex=f?parseInt(f,10)+2:950);f=0;l&&(b.left&&!h)&&(f=a(c.gbox).width()-
-(!isNaN(c.width)?parseInt(c.width,10):0)-8,b.left=parseInt(b.left,10)+parseInt(f,10));b.left&&(b.left+="px");a(e).css(a.extend({width:isNaN(c.width)?"auto":c.width+"px",height:isNaN(c.height)?"auto":c.height+"px",zIndex:c.zIndex,overflow:"hidden"},b)).attr({tabIndex:"-1",role:"dialog","aria-labelledby":d.modalhead,"aria-hidden":"true"});"undefined"==typeof c.drag&&(c.drag=!0);"undefined"==typeof c.resize&&(c.resize=!0);if(c.drag)if(a(k).css("cursor","move"),a.fn.jqDrag)a(e).jqDrag(k);else try{a(e).draggable({handle:a("#"+
-a.jgrid.jqID(k.id))})}catch(o){}if(c.resize)if(a.fn.jqResize)a(e).append("<div class='jqResize ui-resizable-handle ui-resizable-se ui-icon ui-icon-gripsmall-diagonal-se ui-icon-grip-diagonal-se'></div>"),a("#"+a.jgrid.jqID(d.themodal)).jqResize(".jqResize",d.scrollelm?"#"+a.jgrid.jqID(d.scrollelm):!1);else try{a(e).resizable({handles:"se, sw",alsoResize:d.scrollelm?"#"+a.jgrid.jqID(d.scrollelm):!1})}catch(p){}!0===c.closeOnEscape&&a(e).keydown(function(b){if(b.which==27){b=a("#"+a.jgrid.jqID(d.themodal)).data("onClose")||
-c.onClose;j.hideModal(this,{gb:c.gbox,jqm:c.jqModal,onClose:b})}})},viewModal:function(d,b){b=a.extend({toTop:!0,overlay:10,modal:!1,overlayClass:"ui-widget-overlay",onShow:a.jgrid.showModal,onHide:a.jgrid.closeModal,gbox:"",jqm:!0,jqM:!0},b||{});if(a.fn.jqm&&!0===b.jqm)b.jqM?a(d).attr("aria-hidden","false").jqm(b).jqmShow():a(d).attr("aria-hidden","false").jqmShow();else{""!==b.gbox&&(a(".jqgrid-overlay:first",b.gbox).show(),a(d).data("gbox",b.gbox));a(d).show().attr("aria-hidden","false");try{a(":input:visible",
-d)[0].focus()}catch(c){}}},info_dialog:function(d,b,c,f){var g={width:290,height:"auto",dataheight:"auto",drag:!0,resize:!1,caption:"<b>"+d+"</b>",left:250,top:170,zIndex:1E3,jqModal:!0,modal:!1,closeOnEscape:!0,align:"center",buttonalign:"center",buttons:[]};a.extend(g,f||{});var h=g.jqModal,i=this;a.fn.jqm&&!h&&(h=!1);d="";if(0<g.buttons.length)for(f=0;f<g.buttons.length;f++)"undefined"==typeof g.buttons[f].id&&(g.buttons[f].id="info_button_"+f),d+="<a href='javascript:void(0)' id='"+g.buttons[f].id+
-"' class='fm-button ui-state-default ui-corner-all'>"+g.buttons[f].text+"</a>";f=isNaN(g.dataheight)?g.dataheight:g.dataheight+"px";b="<div id='info_id'>"+("<div id='infocnt' style='margin:0px;padding-bottom:1em;width:100%;overflow:auto;position:relative;height:"+f+";"+("text-align:"+g.align+";")+"'>"+b+"</div>");b+=c?"<div class='ui-widget-content ui-helper-clearfix' style='text-align:"+g.buttonalign+";padding-bottom:0.8em;padding-top:0.5em;background-image: none;border-width: 1px 0 0 0;'><a href='javascript:void(0)' id='closedialog' class='fm-button ui-state-default ui-corner-all'>"+
-c+"</a>"+d+"</div>":""!==d?"<div class='ui-widget-content ui-helper-clearfix' style='text-align:"+g.buttonalign+";padding-bottom:0.8em;padding-top:0.5em;background-image: none;border-width: 1px 0 0 0;'>"+d+"</div>":"";b+="</div>";try{"false"==a("#info_dialog").attr("aria-hidden")&&a.jgrid.hideModal("#info_dialog",{jqm:h}),a("#info_dialog").remove()}catch(e){}a.jgrid.createModal({themodal:"info_dialog",modalhead:"info_head",modalcontent:"info_content",scrollelm:"infocnt"},b,g,"","",!0);d&&a.each(g.buttons,
-function(b){a("#"+a.jgrid.jqID(this.id),"#info_id").bind("click",function(){g.buttons[b].onClick.call(a("#info_dialog"));return!1})});a("#closedialog","#info_id").click(function(){i.hideModal("#info_dialog",{jqm:h});return!1});a(".fm-button","#info_dialog").hover(function(){a(this).addClass("ui-state-hover")},function(){a(this).removeClass("ui-state-hover")});a.isFunction(g.beforeOpen)&&g.beforeOpen();a.jgrid.viewModal("#info_dialog",{onHide:function(a){a.w.hide().remove();a.o&&a.o.remove()},modal:g.modal,
-jqm:h});a.isFunction(g.afterOpen)&&g.afterOpen();try{a("#info_dialog").focus()}catch(l){}},createEl:function(d,b,c,f,g){function h(b,d){a.isFunction(d.dataInit)&&d.dataInit.call(l,b);d.dataEvents&&a.each(d.dataEvents,function(){void 0!==this.data?a(b).bind(this.type,this.data,this.fn):a(b).bind(this.type,this.fn)});return d}function i(b,d,c){var e="dataInit dataEvents dataUrl buildSelect sopt searchhidden defaultValue attr".split(" ");"undefined"!=typeof c&&a.isArray(c)&&a.merge(e,c);a.each(d,function(d,
-c){-1===a.inArray(d,e)&&a(b).attr(d,c)});d.hasOwnProperty("id")||a(b).attr("id",a.jgrid.randId())}var e="",l=this;switch(d){case "textarea":e=document.createElement("textarea");f?b.cols||a(e).css({width:"98%"}):b.cols||(b.cols=20);b.rows||(b.rows=2);if("&nbsp;"==c||"&#160;"==c||1==c.length&&160==c.charCodeAt(0))c="";e.value=c;i(e,b);b=h(e,b);a(e).attr({role:"textbox",multiline:"true"});break;case "checkbox":e=document.createElement("input");e.type="checkbox";b.value?(d=b.value.split(":"),c===d[0]&&
-(e.checked=!0,e.defaultChecked=!0),e.value=d[0],a(e).attr("offval",d[1])):(d=c.toLowerCase(),0>d.search(/(false|0|no|off|undefined)/i)&&""!==d?(e.checked=!0,e.defaultChecked=!0,e.value=c):e.value="on",a(e).attr("offval","off"));i(e,b,["value"]);b=h(e,b);a(e).attr("role","checkbox");break;case "select":e=document.createElement("select");e.setAttribute("role","select");f=[];!0===b.multiple?(d=!0,e.multiple="multiple",a(e).attr("aria-multiselectable","true")):d=!1;if("undefined"!=typeof b.dataUrl)a.ajax(a.extend({url:b.dataUrl,
-type:"GET",dataType:"html",context:{elem:e,options:b,vl:c},success:function(d){var b=[],c=this.elem,e=this.vl,f=a.extend({},this.options),g=f.multiple===true;a.isFunction(f.buildSelect)&&(d=f.buildSelect.call(l,d));if(d=a(d).html()){a(c).append(d);i(c,f);f=h(c,f);if(typeof f.size==="undefined")f.size=g?3:1;if(g){b=e.split(",");b=a.map(b,function(b){return a.trim(b)})}else b[0]=a.trim(e);setTimeout(function(){a("option",c).each(function(d){if(d===0&&c.multiple)this.selected=false;a(this).attr("role",
-"option");if(a.inArray(a.trim(a(this).text()),b)>-1||a.inArray(a.trim(a(this).val()),b)>-1)this.selected="selected"})},0)}}},g||{}));else if(b.value){var j;"undefined"===typeof b.size&&(b.size=d?3:1);d&&(f=c.split(","),f=a.map(f,function(b){return a.trim(b)}));"function"===typeof b.value&&(b.value=b.value());var k,n,m=void 0===b.separator?":":b.separator,g=void 0===b.delimiter?";":b.delimiter;if("string"===typeof b.value){k=b.value.split(g);for(j=0;j<k.length;j++){n=k[j].split(m);2<n.length&&(n[1]=
-a.map(n,function(a,b){if(b>0)return a}).join(m));g=document.createElement("option");g.setAttribute("role","option");g.value=n[0];g.innerHTML=n[1];e.appendChild(g);if(!d&&(a.trim(n[0])==a.trim(c)||a.trim(n[1])==a.trim(c)))g.selected="selected";if(d&&(-1<a.inArray(a.trim(n[1]),f)||-1<a.inArray(a.trim(n[0]),f)))g.selected="selected"}}else if("object"===typeof b.value)for(j in m=b.value,m)if(m.hasOwnProperty(j)){g=document.createElement("option");g.setAttribute("role","option");g.value=j;g.innerHTML=
-m[j];e.appendChild(g);if(!d&&(a.trim(j)==a.trim(c)||a.trim(m[j])==a.trim(c)))g.selected="selected";if(d&&(-1<a.inArray(a.trim(m[j]),f)||-1<a.inArray(a.trim(j),f)))g.selected="selected"}i(e,b,["value"]);b=h(e,b)}break;case "text":case "password":case "button":j="button"==d?"button":"textbox";e=document.createElement("input");e.type=d;e.value=c;i(e,b);b=h(e,b);"button"!=d&&(f?b.size||a(e).css({width:"98%"}):b.size||(b.size=20));a(e).attr("role",j);break;case "image":case "file":e=document.createElement("input");
-e.type=d;i(e,b);b=h(e,b);break;case "custom":e=document.createElement("span");try{if(a.isFunction(b.custom_element))if(m=b.custom_element.call(l,c,b))m=a(m).addClass("customelement").attr({id:b.id,name:b.name}),a(e).empty().append(m);else throw"e2";else throw"e1";}catch(o){"e1"==o&&a.jgrid.info_dialog(a.jgrid.errors.errcap,"function 'custom_element' "+a.jgrid.edit.msg.nodefined,a.jgrid.edit.bClose),"e2"==o?a.jgrid.info_dialog(a.jgrid.errors.errcap,"function 'custom_element' "+a.jgrid.edit.msg.novalue,
-a.jgrid.edit.bClose):a.jgrid.info_dialog(a.jgrid.errors.errcap,"string"===typeof o?o:o.message,a.jgrid.edit.bClose)}}return e},checkDate:function(a,b){var c={},f,a=a.toLowerCase();f=-1!=a.indexOf("/")?"/":-1!=a.indexOf("-")?"-":-1!=a.indexOf(".")?".":"/";a=a.split(f);b=b.split(f);if(3!=b.length)return!1;f=-1;for(var g,h=-1,i=-1,e=0;e<a.length;e++)g=isNaN(b[e])?0:parseInt(b[e],10),c[a[e]]=g,g=a[e],-1!=g.indexOf("y")&&(f=e),-1!=g.indexOf("m")&&(i=e),-1!=g.indexOf("d")&&(h=e);g="y"==a[f]||"yyyy"==a[f]?
-4:"yy"==a[f]?2:-1;var e=function(a){for(var b=1;b<=a;b++){this[b]=31;if(4==b||6==b||9==b||11==b)this[b]=30;2==b&&(this[b]=29)}return this}(12),l;if(-1===f)return!1;l=c[a[f]].toString();2==g&&1==l.length&&(g=1);if(l.length!=g||0===c[a[f]]&&"00"!=b[f]||-1===i)return!1;l=c[a[i]].toString();if(1>l.length||(1>c[a[i]]||12<c[a[i]])||-1===h)return!1;l=c[a[h]].toString();return 1>l.length||1>c[a[h]]||31<c[a[h]]||2==c[a[i]]&&c[a[h]]>(0===c[a[f]]%4&&(0!==c[a[f]]%100||0===c[a[f]]%400)?29:28)||c[a[h]]>e[c[a[i]]]?
-!1:!0},isEmpty:function(a){return a.match(/^\s+$/)||""===a?!0:!1},checkTime:function(d){var b=/^(\d{1,2}):(\d{2})([ap]m)?$/;if(!a.jgrid.isEmpty(d))if(d=d.match(b)){if(d[3]){if(1>d[1]||12<d[1])return!1}else if(23<d[1])return!1;if(59<d[2])return!1}else return!1;return!0},checkValues:function(d,b,c,f,g){var h,i;if("undefined"===typeof f)if("string"==typeof b){f=0;for(g=c.p.colModel.length;f<g;f++)if(c.p.colModel[f].name==b){h=c.p.colModel[f].editrules;b=f;try{i=c.p.colModel[f].formoptions.label}catch(e){}break}}else 0<=
-b&&(h=c.p.colModel[b].editrules);else h=f,i=void 0===g?"_":g;if(h){i||(i=c.p.colNames[b]);if(!0===h.required&&a.jgrid.isEmpty(d))return[!1,i+": "+a.jgrid.edit.msg.required,""];f=!1===h.required?!1:!0;if(!0===h.number&&!(!1===f&&a.jgrid.isEmpty(d))&&isNaN(d))return[!1,i+": "+a.jgrid.edit.msg.number,""];if("undefined"!=typeof h.minValue&&!isNaN(h.minValue)&&parseFloat(d)<parseFloat(h.minValue))return[!1,i+": "+a.jgrid.edit.msg.minValue+" "+h.minValue,""];if("undefined"!=typeof h.maxValue&&!isNaN(h.maxValue)&&
-parseFloat(d)>parseFloat(h.maxValue))return[!1,i+": "+a.jgrid.edit.msg.maxValue+" "+h.maxValue,""];if(!0===h.email&&!(!1===f&&a.jgrid.isEmpty(d))&&(g=/^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?$/i,
-!g.test(d)))return[!1,i+": "+a.jgrid.edit.msg.email,""];if(!0===h.integer&&!(!1===f&&a.jgrid.isEmpty(d))&&(isNaN(d)||0!==d%1||-1!=d.indexOf(".")))return[!1,i+": "+a.jgrid.edit.msg.integer,""];if(!0===h.date&&!(!1===f&&a.jgrid.isEmpty(d))&&(b=c.p.colModel[b].formatoptions&&c.p.colModel[b].formatoptions.newformat?c.p.colModel[b].formatoptions.newformat:c.p.colModel[b].datefmt||"Y-m-d",!a.jgrid.checkDate(b,d)))return[!1,i+": "+a.jgrid.edit.msg.date+" - "+b,""];if(!0===h.time&&!(!1===f&&a.jgrid.isEmpty(d))&&
-!a.jgrid.checkTime(d))return[!1,i+": "+a.jgrid.edit.msg.date+" - hh:mm (am/pm)",""];if(!0===h.url&&!(!1===f&&a.jgrid.isEmpty(d))&&(g=/^(((https?)|(ftp)):\/\/([\-\w]+\.)+\w{2,3}(\/[%\-\w]+(\.\w{2,})?)*(([\w\-\.\?\\\/+@&#;`~=%!]*)(\.\w{2,})?)*\/?)/i,!g.test(d)))return[!1,i+": "+a.jgrid.edit.msg.url,""];if(!0===h.custom&&!(!1===f&&a.jgrid.isEmpty(d)))return a.isFunction(h.custom_func)?(d=h.custom_func.call(c,d,i),a.isArray(d)?d:[!1,a.jgrid.edit.msg.customarray,""]):[!1,a.jgrid.edit.msg.customfcheck,
-""]}return[!0,"",""]}})})(jQuery);
-(function(a){var c={};a.jgrid.extend({searchGrid:function(c){c=a.extend({recreateFilter:!1,drag:!0,sField:"searchField",sValue:"searchString",sOper:"searchOper",sFilter:"filters",loadDefaults:!0,beforeShowSearch:null,afterShowSearch:null,onInitializeSearch:null,afterRedraw:null,afterChange:null,closeAfterSearch:!1,closeAfterReset:!1,closeOnEscape:!1,searchOnEnter:!1,multipleSearch:!1,multipleGroup:!1,top:0,left:0,jqModal:!0,modal:!1,resize:!0,width:450,height:"auto",dataheight:"auto",showQuery:!1,
-errorcheck:!0,sopt:null,stringResult:void 0,onClose:null,onSearch:null,onReset:null,toTop:!0,overlay:30,columns:[],tmplNames:null,tmplFilters:null,tmplLabel:" Template: ",showOnLoad:!1,layer:null},a.jgrid.search,c||{});return this.each(function(){function d(b){r=a(e).triggerHandler("jqGridFilterBeforeShow",[b]);"undefined"===typeof r&&(r=!0);r&&a.isFunction(c.beforeShowSearch)&&(r=c.beforeShowSearch.call(e,b));r&&(a.jgrid.viewModal("#"+a.jgrid.jqID(u.themodal),{gbox:"#gbox_"+a.jgrid.jqID(n),jqm:c.jqModal,
-modal:c.modal,overlay:c.overlay,toTop:c.toTop}),a(e).triggerHandler("jqGridFilterAfterShow",[b]),a.isFunction(c.afterShowSearch)&&c.afterShowSearch.call(e,b))}var e=this;if(e.grid){var n="fbox_"+e.p.id,r=!0,u={themodal:"searchmod"+n,modalhead:"searchhd"+n,modalcontent:"searchcnt"+n,scrollelm:n},t=e.p.postData[c.sFilter];"string"===typeof t&&(t=a.jgrid.parse(t));!0===c.recreateFilter&&a("#"+a.jgrid.jqID(u.themodal)).remove();if(void 0!==a("#"+a.jgrid.jqID(u.themodal))[0])d(a("#fbox_"+a.jgrid.jqID(+e.p.id)));
-else{var l=a("<div><div id='"+n+"' class='searchFilter' style='overflow:auto'></div></div>").insertBefore("#gview_"+a.jgrid.jqID(e.p.id)),g="left",f="";"rtl"==e.p.direction&&(g="right",f=" style='text-align:left'",l.attr("dir","rtl"));var p=a.extend([],e.p.colModel),w="<a href='javascript:void(0)' id='"+n+"_search' class='fm-button ui-state-default ui-corner-all fm-button-icon-right ui-reset'><span class='ui-icon ui-icon-search'></span>"+c.Find+"</a>",b="<a href='javascript:void(0)' id='"+n+"_reset' class='fm-button ui-state-default ui-corner-all fm-button-icon-left ui-search'><span class='ui-icon ui-icon-arrowreturnthick-1-w'></span>"+
-c.Reset+"</a>",s="",h="",j,i=!1,q=-1;c.showQuery&&(s="<a href='javascript:void(0)' id='"+n+"_query' class='fm-button ui-state-default ui-corner-all fm-button-icon-left'><span class='ui-icon ui-icon-comment'></span>Query</a>");c.columns.length?p=c.columns:a.each(p,function(a,b){if(!b.label)b.label=e.p.colNames[a];if(!i){var c=typeof b.search==="undefined"?true:b.search,d=b.hidden===true;if(b.searchoptions&&b.searchoptions.searchhidden===true&&c||c&&!d){i=true;j=b.index||b.name;q=a}}});if(!t&&j||!1===
-c.multipleSearch){var y="eq";0<=q&&p[q].searchoptions&&p[q].searchoptions.sopt?y=p[q].searchoptions.sopt[0]:c.sopt&&c.sopt.length&&(y=c.sopt[0]);t={groupOp:"AND",rules:[{field:j,op:y,data:""}]}}i=!1;c.tmplNames&&c.tmplNames.length&&(i=!0,h=c.tmplLabel,h+="<select class='ui-template'>",h+="<option value='default'>Default</option>",a.each(c.tmplNames,function(a,b){h=h+("<option value='"+a+"'>"+b+"</option>")}),h+="</select>");g="<table class='EditTable' style='border:0px none;margin-top:5px' id='"+
-n+"_2'><tbody><tr><td colspan='2'><hr class='ui-widget-content' style='margin:1px'/></td></tr><tr><td class='EditButton' style='text-align:"+g+"'>"+b+h+"</td><td class='EditButton' "+f+">"+s+w+"</td></tr></tbody></table>";n=a.jgrid.jqID(n);a("#"+n).jqFilter({columns:p,filter:c.loadDefaults?t:null,showQuery:c.showQuery,errorcheck:c.errorcheck,sopt:c.sopt,groupButton:c.multipleGroup,ruleButtons:c.multipleSearch,afterRedraw:c.afterRedraw,_gridsopt:a.jgrid.search.odata,ajaxSelectOptions:e.p.ajaxSelectOptions,
-groupOps:c.groupOps,onChange:function(){this.p.showQuery&&a(".query",this).html(this.toUserFriendlyString());a.isFunction(c.afterChange)&&c.afterChange.call(e,a("#"+n),c)},direction:e.p.direction});l.append(g);i&&(c.tmplFilters&&c.tmplFilters.length)&&a(".ui-template",l).bind("change",function(){var b=a(this).val();b=="default"?a("#"+n).jqFilter("addFilter",t):a("#"+n).jqFilter("addFilter",c.tmplFilters[parseInt(b,10)]);return false});!0===c.multipleGroup&&(c.multipleSearch=!0);a(e).triggerHandler("jqGridFilterInitialize",
-[a("#"+n)]);a.isFunction(c.onInitializeSearch)&&c.onInitializeSearch.call(e,a("#"+n));c.gbox="#gbox_"+n;c.layer?a.jgrid.createModal(u,l,c,"#gview_"+a.jgrid.jqID(e.p.id),a("#gbox_"+a.jgrid.jqID(e.p.id))[0],"#"+a.jgrid.jqID(c.layer),{position:"relative"}):a.jgrid.createModal(u,l,c,"#gview_"+a.jgrid.jqID(e.p.id),a("#gbox_"+a.jgrid.jqID(e.p.id))[0]);(c.searchOnEnter||c.closeOnEscape)&&a("#"+a.jgrid.jqID(u.themodal)).keydown(function(b){var d=a(b.target);if(c.searchOnEnter&&b.which===13&&!d.hasClass("add-group")&&
-!d.hasClass("add-rule")&&!d.hasClass("delete-group")&&!d.hasClass("delete-rule")&&(!d.hasClass("fm-button")||!d.is("[id$=_query]"))){a("#"+n+"_search").focus().click();return false}if(c.closeOnEscape&&b.which===27){a("#"+a.jgrid.jqID(u.modalhead)).find(".ui-jqdialog-titlebar-close").focus().click();return false}});s&&a("#"+n+"_query").bind("click",function(){a(".queryresult",l).toggle();return false});void 0===c.stringResult&&(c.stringResult=c.multipleSearch);a("#"+n+"_search").bind("click",function(){var b=
-a("#"+n),d={},h,f=b.jqFilter("filterData");if(c.errorcheck){b[0].hideError();c.showQuery||b.jqFilter("toSQLString");if(b[0].p.error){b[0].showError();return false}}if(c.stringResult){try{h=xmlJsonClass.toJson(f,"","",false)}catch(g){try{h=JSON.stringify(f)}catch(j){}}if(typeof h==="string"){d[c.sFilter]=h;a.each([c.sField,c.sValue,c.sOper],function(){d[this]=""})}}else if(c.multipleSearch){d[c.sFilter]=f;a.each([c.sField,c.sValue,c.sOper],function(){d[this]=""})}else{d[c.sField]=f.rules[0].field;
-d[c.sValue]=f.rules[0].data;d[c.sOper]=f.rules[0].op;d[c.sFilter]=""}e.p.search=true;a.extend(e.p.postData,d);a(e).triggerHandler("jqGridFilterSearch");a.isFunction(c.onSearch)&&c.onSearch.call(e);a(e).trigger("reloadGrid",[{page:1}]);c.closeAfterSearch&&a.jgrid.hideModal("#"+a.jgrid.jqID(u.themodal),{gb:"#gbox_"+a.jgrid.jqID(e.p.id),jqm:c.jqModal,onClose:c.onClose});return false});a("#"+n+"_reset").bind("click",function(){var b={},d=a("#"+n);e.p.search=false;c.multipleSearch===false?b[c.sField]=
-b[c.sValue]=b[c.sOper]="":b[c.sFilter]="";d[0].resetFilter();i&&a(".ui-template",l).val("default");a.extend(e.p.postData,b);a(e).triggerHandler("jqGridFilterReset");a.isFunction(c.onReset)&&c.onReset.call(e);a(e).trigger("reloadGrid",[{page:1}]);return false});d(a("#"+n));a(".fm-button:not(.ui-state-disabled)",l).hover(function(){a(this).addClass("ui-state-hover")},function(){a(this).removeClass("ui-state-hover")})}}})},editGridRow:function(o,d){d=a.extend({top:0,left:0,width:300,height:"auto",dataheight:"auto",
-modal:!1,overlay:30,drag:!0,resize:!0,url:null,mtype:"POST",clearAfterAdd:!0,closeAfterEdit:!1,reloadAfterSubmit:!0,onInitializeForm:null,beforeInitData:null,beforeShowForm:null,afterShowForm:null,beforeSubmit:null,afterSubmit:null,onclickSubmit:null,afterComplete:null,onclickPgButtons:null,afterclickPgButtons:null,editData:{},recreateForm:!1,jqModal:!0,closeOnEscape:!1,addedrow:"first",topinfo:"",bottominfo:"",saveicon:[],closeicon:[],savekey:[!1,13],navkeys:[!1,38,40],checkOnSubmit:!1,checkOnUpdate:!1,
-_savedData:{},processing:!1,onClose:null,ajaxEditOptions:{},serializeEditData:null,viewPagerButtons:!0},a.jgrid.edit,d||{});c[a(this)[0].p.id]=d;return this.each(function(){function e(){a(i+" > tbody > tr > td > .FormElement").each(function(){var c=a(".customelement",this);if(c.length){var d=a(c[0]).attr("name");a.each(b.p.colModel,function(){if(this.name===d&&this.editoptions&&a.isFunction(this.editoptions.custom_value)){try{if(k[d]=this.editoptions.custom_value.call(b,a("#"+a.jgrid.jqID(d),i),"get"),
-void 0===k[d])throw"e1";}catch(c){"e1"===c?a.jgrid.info_dialog(jQuery.jgrid.errors.errcap,"function 'custom_value' "+a.jgrid.edit.msg.novalue,jQuery.jgrid.edit.bClose):a.jgrid.info_dialog(jQuery.jgrid.errors.errcap,c.message,jQuery.jgrid.edit.bClose)}return!0}})}else{switch(a(this).get(0).type){case "checkbox":a(this).is(":checked")?k[this.name]=a(this).val():(c=a(this).attr("offval"),k[this.name]=c);break;case "select-one":k[this.name]=a("option:selected",this).val();B[this.name]=a("option:selected",
-this).text();break;case "select-multiple":k[this.name]=a(this).val();k[this.name]=k[this.name]?k[this.name].join(","):"";var e=[];a("option:selected",this).each(function(b,c){e[b]=a(c).text()});B[this.name]=e.join(",");break;case "password":case "text":case "textarea":case "button":k[this.name]=a(this).val()}b.p.autoencode&&(k[this.name]=a.jgrid.htmlEncode(k[this.name]))}});return!0}function n(d,e,h,k){var f,g,m,j=0,i,q,l,n=[],v=!1,p="",o;for(o=1;o<=k;o++)p+="<td class='CaptionTD'>&#160;</td><td class='DataTD'>&#160;</td>";
-"_empty"!=d&&(v=a(e).jqGrid("getInd",d));a(e.p.colModel).each(function(o){f=this.name;q=(g=this.editrules&&!0===this.editrules.edithidden?!1:!0===this.hidden?!0:!1)?"style='display:none'":"";if("cb"!==f&&"subgrid"!==f&&!0===this.editable&&"rn"!==f){if(!1===v)i="";else if(f==e.p.ExpandColumn&&!0===e.p.treeGrid)i=a("td:eq("+o+")",e.rows[v]).text();else{try{i=a.unformat.call(e,a("td:eq("+o+")",e.rows[v]),{rowId:d,colModel:this},o)}catch(s){i=this.edittype&&"textarea"==this.edittype?a("td:eq("+o+")",
-e.rows[v]).text():a("td:eq("+o+")",e.rows[v]).html()}if(!i||"&nbsp;"==i||"&#160;"==i||1==i.length&&160==i.charCodeAt(0))i=""}var r=a.extend({},this.editoptions||{},{id:f,name:f}),t=a.extend({},{elmprefix:"",elmsuffix:"",rowabove:!1,rowcontent:""},this.formoptions||{}),u=parseInt(t.rowpos,10)||j+1,y=parseInt(2*(parseInt(t.colpos,10)||1),10);"_empty"==d&&r.defaultValue&&(i=a.isFunction(r.defaultValue)?r.defaultValue.call(b):r.defaultValue);this.edittype||(this.edittype="text");b.p.autoencode&&(i=a.jgrid.htmlDecode(i));
-l=a.jgrid.createEl.call(b,this.edittype,r,i,!1,a.extend({},a.jgrid.ajaxOptions,e.p.ajaxSelectOptions||{}));""===i&&"checkbox"==this.edittype&&(i=a(l).attr("offval"));""===i&&"select"==this.edittype&&(i=a("option:eq(0)",l).text());if(c[b.p.id].checkOnSubmit||c[b.p.id].checkOnUpdate)c[b.p.id]._savedData[f]=i;a(l).addClass("FormElement");("text"==this.edittype||"textarea"==this.edittype)&&a(l).addClass("ui-widget-content ui-corner-all");m=a(h).find("tr[rowpos="+u+"]");t.rowabove&&(r=a("<tr><td class='contentinfo' colspan='"+
-2*k+"'>"+t.rowcontent+"</td></tr>"),a(h).append(r),r[0].rp=u);0===m.length&&(m=a("<tr "+q+" rowpos='"+u+"'></tr>").addClass("FormData").attr("id","tr_"+f),a(m).append(p),a(h).append(m),m[0].rp=u);a("td:eq("+(y-2)+")",m[0]).html("undefined"===typeof t.label?e.p.colNames[o]:t.label);a("td:eq("+(y-1)+")",m[0]).append(t.elmprefix).append(l).append(t.elmsuffix);n[j]=o;j++}});if(0<j&&(o=a("<tr class='FormData' style='display:none'><td class='CaptionTD'></td><td colspan='"+(2*k-1)+"' class='DataTD'><input class='FormElement' id='id_g' type='text' name='"+
-e.p.id+"_id' value='"+d+"'/></td></tr>"),o[0].rp=j+999,a(h).append(o),c[b.p.id].checkOnSubmit||c[b.p.id].checkOnUpdate))c[b.p.id]._savedData[e.p.id+"_id"]=d;return n}function r(d,e,h){var f,k=0,g,m,j,q,l;if(c[b.p.id].checkOnSubmit||c[b.p.id].checkOnUpdate)c[b.p.id]._savedData={},c[b.p.id]._savedData[e.p.id+"_id"]=d;var o=e.p.colModel;if("_empty"==d)a(o).each(function(){f=this.name;j=a.extend({},this.editoptions||{});if((m=a("#"+a.jgrid.jqID(f),"#"+h))&&m.length&&null!==m[0])if(q="",j.defaultValue?
-(q=a.isFunction(j.defaultValue)?j.defaultValue.call(b):j.defaultValue,"checkbox"==m[0].type?(l=q.toLowerCase(),0>l.search(/(false|0|no|off|undefined)/i)&&""!==l?(m[0].checked=!0,m[0].defaultChecked=!0,m[0].value=q):(m[0].checked=!1,m[0].defaultChecked=!1)):m.val(q)):"checkbox"==m[0].type?(m[0].checked=!1,m[0].defaultChecked=!1,q=a(m).attr("offval")):m[0].type&&"select"==m[0].type.substr(0,6)?m[0].selectedIndex=0:m.val(q),!0===c[b.p.id].checkOnSubmit||c[b.p.id].checkOnUpdate)c[b.p.id]._savedData[f]=
-q}),a("#id_g","#"+h).val(d);else{var n=a(e).jqGrid("getInd",d,!0);n&&(a('td[role="gridcell"]',n).each(function(m){f=o[m].name;if("cb"!==f&&"subgrid"!==f&&"rn"!==f&&!0===o[m].editable){if(f==e.p.ExpandColumn&&!0===e.p.treeGrid)g=a(this).text();else try{g=a.unformat.call(e,a(this),{rowId:d,colModel:o[m]},m)}catch(i){g="textarea"==o[m].edittype?a(this).text():a(this).html()}b.p.autoencode&&(g=a.jgrid.htmlDecode(g));if(!0===c[b.p.id].checkOnSubmit||c[b.p.id].checkOnUpdate)c[b.p.id]._savedData[f]=g;f=
-a.jgrid.jqID(f);switch(o[m].edittype){case "password":case "text":case "button":case "image":case "textarea":if("&nbsp;"==g||"&#160;"==g||1==g.length&&160==g.charCodeAt(0))g="";a("#"+f,"#"+h).val(g);break;case "select":var j=g.split(","),j=a.map(j,function(b){return a.trim(b)});a("#"+f+" option","#"+h).each(function(){this.selected=!o[m].editoptions.multiple&&(a.trim(g)==a.trim(a(this).text())||j[0]==a.trim(a(this).text())||j[0]==a.trim(a(this).val()))?!0:o[m].editoptions.multiple?-1<a.inArray(a.trim(a(this).text()),
-j)||-1<a.inArray(a.trim(a(this).val()),j)?!0:!1:!1});break;case "checkbox":g+="";o[m].editoptions&&o[m].editoptions.value?o[m].editoptions.value.split(":")[0]==g?(a("#"+f,"#"+h)[b.p.useProp?"prop":"attr"]("checked",!0),a("#"+f,"#"+h)[b.p.useProp?"prop":"attr"]("defaultChecked",!0)):(a("#"+f,"#"+h)[b.p.useProp?"prop":"attr"]("checked",!1),a("#"+f,"#"+h)[b.p.useProp?"prop":"attr"]("defaultChecked",!1)):(g=g.toLowerCase(),0>g.search(/(false|0|no|off|undefined)/i)&&""!==g?(a("#"+f,"#"+h)[b.p.useProp?
-"prop":"attr"]("checked",!0),a("#"+f,"#"+h)[b.p.useProp?"prop":"attr"]("defaultChecked",!0)):(a("#"+f,"#"+h)[b.p.useProp?"prop":"attr"]("checked",!1),a("#"+f,"#"+h)[b.p.useProp?"prop":"attr"]("defaultChecked",!1)));break;case "custom":try{if(o[m].editoptions&&a.isFunction(o[m].editoptions.custom_value))o[m].editoptions.custom_value.call(b,a("#"+f,"#"+h),"set",g);else throw"e1";}catch(q){"e1"==q?a.jgrid.info_dialog(jQuery.jgrid.errors.errcap,"function 'custom_value' "+a.jgrid.edit.msg.nodefined,jQuery.jgrid.edit.bClose):
-a.jgrid.info_dialog(jQuery.jgrid.errors.errcap,q.message,jQuery.jgrid.edit.bClose)}}k++}}),0<k&&a("#id_g",i).val(d))}}function u(){a.each(b.p.colModel,function(a,b){b.editoptions&&!0===b.editoptions.NullIfEmpty&&k.hasOwnProperty(b.name)&&""===k[b.name]&&(k[b.name]="null")})}function t(){var e,f=[!0,"",""],m={},g=b.p.prmNames,j,o,l,n,v,p=a(b).triggerHandler("jqGridAddEditBeforeCheckValues",[a("#"+h),z]);p&&"object"===typeof p&&(k=p);a.isFunction(c[b.p.id].beforeCheckValues)&&(p=c[b.p.id].beforeCheckValues.call(b,
-k,a("#"+h),"_empty"==k[b.p.id+"_id"]?g.addoper:g.editoper))&&"object"===typeof p&&(k=p);for(l in k)if(k.hasOwnProperty(l)&&(f=a.jgrid.checkValues.call(b,k[l],l,b),!1===f[0]))break;u();f[0]&&(m=a(b).triggerHandler("jqGridAddEditClickSubmit",[c[b.p.id],k,z]),void 0===m&&a.isFunction(c[b.p.id].onclickSubmit)&&(m=c[b.p.id].onclickSubmit.call(b,c[b.p.id],k)||{}),f=a(b).triggerHandler("jqGridAddEditBeforeSubmit",[k,a("#"+h),z]),void 0===f&&(f=[!0,"",""]),f[0]&&a.isFunction(c[b.p.id].beforeSubmit)&&(f=c[b.p.id].beforeSubmit.call(b,
-k,a("#"+h))));if(f[0]&&!c[b.p.id].processing){c[b.p.id].processing=!0;a("#sData",i+"_2").addClass("ui-state-active");o=g.oper;j=g.id;k[o]="_empty"==a.trim(k[b.p.id+"_id"])?g.addoper:g.editoper;k[o]!=g.addoper?k[j]=k[b.p.id+"_id"]:void 0===k[j]&&(k[j]=k[b.p.id+"_id"]);delete k[b.p.id+"_id"];k=a.extend(k,c[b.p.id].editData,m);if(!0===b.p.treeGrid)for(v in k[o]==g.addoper&&(n=a(b).jqGrid("getGridParam","selrow"),k["adjacency"==b.p.treeGridModel?b.p.treeReader.parent_id_field:"parent_id"]=n),b.p.treeReader)b.p.treeReader.hasOwnProperty(v)&&
-(m=b.p.treeReader[v],k.hasOwnProperty(m)&&!(k[o]==g.addoper&&"parent_id_field"===v)&&delete k[m]);k[j]=a.jgrid.stripPref(b.p.idPrefix,k[j]);v=a.extend({url:c[b.p.id].url?c[b.p.id].url:a(b).jqGrid("getGridParam","editurl"),type:c[b.p.id].mtype,data:a.isFunction(c[b.p.id].serializeEditData)?c[b.p.id].serializeEditData.call(b,k):k,complete:function(m,l){k[j]=b.p.idPrefix+k[j];if(l!="success"){f[0]=false;f[1]=a(b).triggerHandler("jqGridAddEditErrorTextFormat",[m,z]);f[1]=a.isFunction(c[b.p.id].errorTextFormat)?
-c[b.p.id].errorTextFormat.call(b,m):l+" Status: '"+m.statusText+"'. Error code: "+m.status}else{f=a(b).triggerHandler("jqGridAddEditAfterSubmit",[m,k,z]);f===void 0&&(f=[true,"",""]);f[0]&&a.isFunction(c[b.p.id].afterSubmit)&&(f=c[b.p.id].afterSubmit.call(b,m,k))}if(f[0]===false){a("#FormError>td",i).html(f[1]);a("#FormError",i).show()}else{a.each(b.p.colModel,function(){if(B[this.name]&&this.formatter&&this.formatter=="select")try{delete B[this.name]}catch(a){}});k=a.extend(k,B);b.p.autoencode&&
-a.each(k,function(b,d){k[b]=a.jgrid.htmlDecode(d)});if(k[o]==g.addoper){f[2]||(f[2]=a.jgrid.randId());k[j]=f[2];if(c[b.p.id].closeAfterAdd){if(c[b.p.id].reloadAfterSubmit)a(b).trigger("reloadGrid");else if(b.p.treeGrid===true)a(b).jqGrid("addChildNode",f[2],n,k);else{a(b).jqGrid("addRowData",f[2],k,d.addedrow);a(b).jqGrid("setSelection",f[2])}a.jgrid.hideModal("#"+a.jgrid.jqID(q.themodal),{gb:"#gbox_"+a.jgrid.jqID(s),jqm:d.jqModal,onClose:c[b.p.id].onClose})}else if(c[b.p.id].clearAfterAdd){c[b.p.id].reloadAfterSubmit?
-a(b).trigger("reloadGrid"):b.p.treeGrid===true?a(b).jqGrid("addChildNode",f[2],n,k):a(b).jqGrid("addRowData",f[2],k,d.addedrow);r("_empty",b,h)}else c[b.p.id].reloadAfterSubmit?a(b).trigger("reloadGrid"):b.p.treeGrid===true?a(b).jqGrid("addChildNode",f[2],n,k):a(b).jqGrid("addRowData",f[2],k,d.addedrow)}else{if(c[b.p.id].reloadAfterSubmit){a(b).trigger("reloadGrid");c[b.p.id].closeAfterEdit||setTimeout(function(){a(b).jqGrid("setSelection",k[j])},1E3)}else b.p.treeGrid===true?a(b).jqGrid("setTreeRow",
-k[j],k):a(b).jqGrid("setRowData",k[j],k);c[b.p.id].closeAfterEdit&&a.jgrid.hideModal("#"+a.jgrid.jqID(q.themodal),{gb:"#gbox_"+a.jgrid.jqID(s),jqm:d.jqModal,onClose:c[b.p.id].onClose})}if(a.isFunction(c[b.p.id].afterComplete)){e=m;setTimeout(function(){a(b).triggerHandler("jqGridAddEditAfterComplete",[e,k,a("#"+h),z]);c[b.p.id].afterComplete.call(b,e,k,a("#"+h));e=null},500)}if(c[b.p.id].checkOnSubmit||c[b.p.id].checkOnUpdate){a("#"+h).data("disabled",false);if(c[b.p.id]._savedData[b.p.id+"_id"]!=
-"_empty")for(var v in c[b.p.id]._savedData)k[v]&&(c[b.p.id]._savedData[v]=k[v])}}c[b.p.id].processing=false;a("#sData",i+"_2").removeClass("ui-state-active");try{a(":input:visible","#"+h)[0].focus()}catch(p){}}},a.jgrid.ajaxOptions,c[b.p.id].ajaxEditOptions);!v.url&&!c[b.p.id].useDataProxy&&(a.isFunction(b.p.dataProxy)?c[b.p.id].useDataProxy=!0:(f[0]=!1,f[1]+=" "+a.jgrid.errors.nourl));f[0]&&(c[b.p.id].useDataProxy?(m=b.p.dataProxy.call(b,v,"set_"+b.p.id),"undefined"==typeof m&&(m=[!0,""]),!1===m[0]?
-(f[0]=!1,f[1]=m[1]||"Error deleting the selected row!"):(v.data.oper==g.addoper&&c[b.p.id].closeAfterAdd&&a.jgrid.hideModal("#"+a.jgrid.jqID(q.themodal),{gb:"#gbox_"+a.jgrid.jqID(s),jqm:d.jqModal,onClose:c[b.p.id].onClose}),v.data.oper==g.editoper&&c[b.p.id].closeAfterEdit&&a.jgrid.hideModal("#"+a.jgrid.jqID(q.themodal),{gb:"#gbox_"+a.jgrid.jqID(s),jqm:d.jqModal,onClose:c[b.p.id].onClose}))):a.ajax(v))}!1===f[0]&&(a("#FormError>td",i).html(f[1]),a("#FormError",i).show())}function l(a,b){var d=!1,
-c;for(c in a)if(a[c]!=b[c]){d=!0;break}return d}function g(){var d=!0;a("#FormError",i).hide();if(c[b.p.id].checkOnUpdate&&(k={},B={},e(),F=a.extend({},k,B),M=l(F,c[b.p.id]._savedData)))a("#"+h).data("disabled",!0),a(".confirm","#"+q.themodal).show(),d=!1;return d}function f(){if("_empty"!==o&&"undefined"!==typeof b.p.savedRow&&0<b.p.savedRow.length&&a.isFunction(a.fn.jqGrid.restoreRow))for(var d=0;d<b.p.savedRow.length;d++)if(b.p.savedRow[d].id==o){a(b).jqGrid("restoreRow",o);break}}function p(b,
-d){0===b?a("#pData",i+"_2").addClass("ui-state-disabled"):a("#pData",i+"_2").removeClass("ui-state-disabled");b==d?a("#nData",i+"_2").addClass("ui-state-disabled"):a("#nData",i+"_2").removeClass("ui-state-disabled")}function w(){var d=a(b).jqGrid("getDataIDs"),c=a("#id_g",i).val();return[a.inArray(c,d),d]}var b=this;if(b.grid&&o){var s=b.p.id,h="FrmGrid_"+s,j="TblGrid_"+s,i="#"+a.jgrid.jqID(j),q={themodal:"editmod"+s,modalhead:"edithd"+s,modalcontent:"editcnt"+s,scrollelm:h},y=a.isFunction(c[b.p.id].beforeShowForm)?
-c[b.p.id].beforeShowForm:!1,A=a.isFunction(c[b.p.id].afterShowForm)?c[b.p.id].afterShowForm:!1,x=a.isFunction(c[b.p.id].beforeInitData)?c[b.p.id].beforeInitData:!1,m=a.isFunction(c[b.p.id].onInitializeForm)?c[b.p.id].onInitializeForm:!1,v=!0,E=1,H=0,k,B,F,M,z,h=a.jgrid.jqID(h);"new"===o?(o="_empty",z="add",d.caption=c[b.p.id].addCaption):(d.caption=c[b.p.id].editCaption,z="edit");!0===d.recreateForm&&void 0!==a("#"+a.jgrid.jqID(q.themodal))[0]&&a("#"+a.jgrid.jqID(q.themodal)).remove();var I=!0;d.checkOnUpdate&&
-(d.jqModal&&!d.modal)&&(I=!1);if(void 0!==a("#"+a.jgrid.jqID(q.themodal))[0]){v=a(b).triggerHandler("jqGridAddEditBeforeInitData",[a("#"+a.jgrid.jqID(h)),z]);"undefined"==typeof v&&(v=!0);v&&x&&(v=x.call(b,a("#"+h)));if(!1===v)return;f();a(".ui-jqdialog-title","#"+a.jgrid.jqID(q.modalhead)).html(d.caption);a("#FormError",i).hide();c[b.p.id].topinfo?(a(".topinfo",i).html(c[b.p.id].topinfo),a(".tinfo",i).show()):a(".tinfo",i).hide();c[b.p.id].bottominfo?(a(".bottominfo",i+"_2").html(c[b.p.id].bottominfo),
-a(".binfo",i+"_2").show()):a(".binfo",i+"_2").hide();r(o,b,h);"_empty"==o||!c[b.p.id].viewPagerButtons?a("#pData, #nData",i+"_2").hide():a("#pData, #nData",i+"_2").show();!0===c[b.p.id].processing&&(c[b.p.id].processing=!1,a("#sData",i+"_2").removeClass("ui-state-active"));!0===a("#"+h).data("disabled")&&(a(".confirm","#"+a.jgrid.jqID(q.themodal)).hide(),a("#"+h).data("disabled",!1));a(b).triggerHandler("jqGridAddEditBeforeShowForm",[a("#"+h),z]);y&&y.call(b,a("#"+h));a("#"+a.jgrid.jqID(q.themodal)).data("onClose",
-c[b.p.id].onClose);a.jgrid.viewModal("#"+a.jgrid.jqID(q.themodal),{gbox:"#gbox_"+a.jgrid.jqID(s),jqm:d.jqModal,jqM:!1,overlay:d.overlay,modal:d.modal});I||a(".jqmOverlay").click(function(){if(!g())return false;a.jgrid.hideModal("#"+a.jgrid.jqID(q.themodal),{gb:"#gbox_"+a.jgrid.jqID(s),jqm:d.jqModal,onClose:c[b.p.id].onClose});return false});a(b).triggerHandler("jqGridAddEditAfterShowForm",[a("#"+h),z]);A&&A.call(b,a("#"+h))}else{var G=isNaN(d.dataheight)?d.dataheight:d.dataheight+"px",G=a("<form name='FormPost' id='"+
-h+"' class='FormGrid' onSubmit='return false;' style='width:100%;overflow:auto;position:relative;height:"+G+";'></form>").data("disabled",!1),C=a("<table id='"+j+"' class='EditTable' cellspacing='0' cellpadding='0' border='0'><tbody></tbody></table>"),v=a(b).triggerHandler("jqGridAddEditBeforeInitData",[a("#"+h),z]);"undefined"==typeof v&&(v=!0);v&&x&&(v=x.call(b,a("#"+h)));if(!1===v)return;f();a(b.p.colModel).each(function(){var a=this.formoptions;E=Math.max(E,a?a.colpos||0:0);H=Math.max(H,a?a.rowpos||
-0:0)});a(G).append(C);x=a("<tr id='FormError' style='display:none'><td class='ui-state-error' colspan='"+2*E+"'></td></tr>");x[0].rp=0;a(C).append(x);x=a("<tr style='display:none' class='tinfo'><td class='topinfo' colspan='"+2*E+"'>"+c[b.p.id].topinfo+"</td></tr>");x[0].rp=0;a(C).append(x);var v=(x="rtl"==b.p.direction?!0:!1)?"nData":"pData",D=x?"pData":"nData";n(o,b,C,E);var v="<a href='javascript:void(0)' id='"+v+"' class='fm-button ui-state-default ui-corner-left'><span class='ui-icon ui-icon-triangle-1-w'></span></a>",
-D="<a href='javascript:void(0)' id='"+D+"' class='fm-button ui-state-default ui-corner-right'><span class='ui-icon ui-icon-triangle-1-e'></span></a>",J="<a href='javascript:void(0)' id='sData' class='fm-button ui-state-default ui-corner-all'>"+d.bSubmit+"</a>",K="<a href='javascript:void(0)' id='cData' class='fm-button ui-state-default ui-corner-all'>"+d.bCancel+"</a>",j="<table border='0' cellspacing='0' cellpadding='0' class='EditTable' id='"+j+"_2'><tbody><tr><td colspan='2'><hr class='ui-widget-content' style='margin:1px'/></td></tr><tr id='Act_Buttons'><td class='navButton'>"+
-(x?D+v:v+D)+"</td><td class='EditButton'>"+J+K+"</td></tr>"+("<tr style='display:none' class='binfo'><td class='bottominfo' colspan='2'>"+c[b.p.id].bottominfo+"</td></tr>"),j=j+"</tbody></table>";if(0<H){var L=[];a.each(a(C)[0].rows,function(a,b){L[a]=b});L.sort(function(a,b){return a.rp>b.rp?1:a.rp<b.rp?-1:0});a.each(L,function(b,d){a("tbody",C).append(d)})}d.gbox="#gbox_"+a.jgrid.jqID(s);var N=!1;!0===d.closeOnEscape&&(d.closeOnEscape=!1,N=!0);j=a("<span></span>").append(G).append(j);a.jgrid.createModal(q,
-j,d,"#gview_"+a.jgrid.jqID(b.p.id),a("#gbox_"+a.jgrid.jqID(b.p.id))[0]);x&&(a("#pData, #nData",i+"_2").css("float","right"),a(".EditButton",i+"_2").css("text-align","left"));c[b.p.id].topinfo&&a(".tinfo",i).show();c[b.p.id].bottominfo&&a(".binfo",i+"_2").show();j=j=null;a("#"+a.jgrid.jqID(q.themodal)).keydown(function(e){var f=e.target;if(a("#"+h).data("disabled")===true)return false;if(c[b.p.id].savekey[0]===true&&e.which==c[b.p.id].savekey[1]&&f.tagName!="TEXTAREA"){a("#sData",i+"_2").trigger("click");
-return false}if(e.which===27){if(!g())return false;N&&a.jgrid.hideModal(this,{gb:d.gbox,jqm:d.jqModal,onClose:c[b.p.id].onClose});return false}if(c[b.p.id].navkeys[0]===true){if(a("#id_g",i).val()=="_empty")return true;if(e.which==c[b.p.id].navkeys[1]){a("#pData",i+"_2").trigger("click");return false}if(e.which==c[b.p.id].navkeys[2]){a("#nData",i+"_2").trigger("click");return false}}});d.checkOnUpdate&&(a("a.ui-jqdialog-titlebar-close span","#"+a.jgrid.jqID(q.themodal)).removeClass("jqmClose"),a("a.ui-jqdialog-titlebar-close",
-"#"+a.jgrid.jqID(q.themodal)).unbind("click").click(function(){if(!g())return false;a.jgrid.hideModal("#"+a.jgrid.jqID(q.themodal),{gb:"#gbox_"+a.jgrid.jqID(s),jqm:d.jqModal,onClose:c[b.p.id].onClose});return false}));d.saveicon=a.extend([!0,"left","ui-icon-disk"],d.saveicon);d.closeicon=a.extend([!0,"left","ui-icon-close"],d.closeicon);!0===d.saveicon[0]&&a("#sData",i+"_2").addClass("right"==d.saveicon[1]?"fm-button-icon-right":"fm-button-icon-left").append("<span class='ui-icon "+d.saveicon[2]+
-"'></span>");!0===d.closeicon[0]&&a("#cData",i+"_2").addClass("right"==d.closeicon[1]?"fm-button-icon-right":"fm-button-icon-left").append("<span class='ui-icon "+d.closeicon[2]+"'></span>");if(c[b.p.id].checkOnSubmit||c[b.p.id].checkOnUpdate)J="<a href='javascript:void(0)' id='sNew' class='fm-button ui-state-default ui-corner-all' style='z-index:1002'>"+d.bYes+"</a>",D="<a href='javascript:void(0)' id='nNew' class='fm-button ui-state-default ui-corner-all' style='z-index:1002'>"+d.bNo+"</a>",K="<a href='javascript:void(0)' id='cNew' class='fm-button ui-state-default ui-corner-all' style='z-index:1002'>"+
-d.bExit+"</a>",j=d.zIndex||999,j++,a("<div class='ui-widget-overlay jqgrid-overlay confirm' style='z-index:"+j+";display:none;'>&#160;"+(a.browser.msie&&6==a.browser.version?'<iframe style="display:block;position:absolute;z-index:-1;filter:Alpha(Opacity=\'0\');" src="javascript:false;"></iframe>':"")+"</div><div class='confirm ui-widget-content ui-jqconfirm' style='z-index:"+(j+1)+"'>"+d.saveData+"<br/><br/>"+J+D+K+"</div>").insertAfter("#"+h),a("#sNew","#"+a.jgrid.jqID(q.themodal)).click(function(){t();
-a("#"+h).data("disabled",false);a(".confirm","#"+a.jgrid.jqID(q.themodal)).hide();return false}),a("#nNew","#"+a.jgrid.jqID(q.themodal)).click(function(){a(".confirm","#"+a.jgrid.jqID(q.themodal)).hide();a("#"+h).data("disabled",false);setTimeout(function(){a(":input","#"+h)[0].focus()},0);return false}),a("#cNew","#"+a.jgrid.jqID(q.themodal)).click(function(){a(".confirm","#"+a.jgrid.jqID(q.themodal)).hide();a("#"+h).data("disabled",false);a.jgrid.hideModal("#"+a.jgrid.jqID(q.themodal),{gb:"#gbox_"+
-a.jgrid.jqID(s),jqm:d.jqModal,onClose:c[b.p.id].onClose});return false});a(b).triggerHandler("jqGridAddEditInitializeForm",[a("#"+h),z]);m&&m.call(b,a("#"+h));"_empty"==o||!c[b.p.id].viewPagerButtons?a("#pData,#nData",i+"_2").hide():a("#pData,#nData",i+"_2").show();a(b).triggerHandler("jqGridAddEditBeforeShowForm",[a("#"+h),z]);y&&y.call(b,a("#"+h));a("#"+a.jgrid.jqID(q.themodal)).data("onClose",c[b.p.id].onClose);a.jgrid.viewModal("#"+a.jgrid.jqID(q.themodal),{gbox:"#gbox_"+a.jgrid.jqID(s),jqm:d.jqModal,
-overlay:d.overlay,modal:d.modal});I||a(".jqmOverlay").click(function(){if(!g())return false;a.jgrid.hideModal("#"+a.jgrid.jqID(q.themodal),{gb:"#gbox_"+a.jgrid.jqID(s),jqm:d.jqModal,onClose:c[b.p.id].onClose});return false});a(b).triggerHandler("jqGridAddEditAfterShowForm",[a("#"+h),z]);A&&A.call(b,a("#"+h));a(".fm-button","#"+a.jgrid.jqID(q.themodal)).hover(function(){a(this).addClass("ui-state-hover")},function(){a(this).removeClass("ui-state-hover")});a("#sData",i+"_2").click(function(){k={};B=
-{};a("#FormError",i).hide();e();if(k[b.p.id+"_id"]=="_empty")t();else if(d.checkOnSubmit===true){F=a.extend({},k,B);if(M=l(F,c[b.p.id]._savedData)){a("#"+h).data("disabled",true);a(".confirm","#"+a.jgrid.jqID(q.themodal)).show()}else t()}else t();return false});a("#cData",i+"_2").click(function(){if(!g())return false;a.jgrid.hideModal("#"+a.jgrid.jqID(q.themodal),{gb:"#gbox_"+a.jgrid.jqID(s),jqm:d.jqModal,onClose:c[b.p.id].onClose});return false});a("#nData",i+"_2").click(function(){if(!g())return false;
-a("#FormError",i).hide();var c=w();c[0]=parseInt(c[0],10);if(c[0]!=-1&&c[1][c[0]+1]){a(b).triggerHandler("jqGridAddEditClickPgButtons",["next",a("#"+h),c[1][c[0]]]);var e=true;if(a.isFunction(d.onclickPgButtons)){e=d.onclickPgButtons.call(b,"next",a("#"+h),c[1][c[0]]);if(e!==void 0&&e===false)return false}if(a("#"+a.jgrid.jqID(c[1][c[0]+1])).hasClass("ui-state-disabled"))return false;r(c[1][c[0]+1],b,h);a(b).jqGrid("setSelection",c[1][c[0]+1]);a(b).triggerHandler("jqGridAddEditAfterClickPgButtons",
-["next",a("#"+h),c[1][c[0]]]);a.isFunction(d.afterclickPgButtons)&&d.afterclickPgButtons.call(b,"next",a("#"+h),c[1][c[0]+1]);p(c[0]+1,c[1].length-1)}return false});a("#pData",i+"_2").click(function(){if(!g())return false;a("#FormError",i).hide();var c=w();if(c[0]!=-1&&c[1][c[0]-1]){a(b).triggerHandler("jqGridAddEditClickPgButtons",["prev",a("#"+h),c[1][c[0]]]);var e=true;if(a.isFunction(d.onclickPgButtons)){e=d.onclickPgButtons.call(b,"prev",a("#"+h),c[1][c[0]]);if(e!==void 0&&e===false)return false}if(a("#"+
-a.jgrid.jqID(c[1][c[0]-1])).hasClass("ui-state-disabled"))return false;r(c[1][c[0]-1],b,h);a(b).jqGrid("setSelection",c[1][c[0]-1]);a(b).triggerHandler("jqGridAddEditAfterClickPgButtons",["prev",a("#"+h),c[1][c[0]]]);a.isFunction(d.afterclickPgButtons)&&d.afterclickPgButtons.call(b,"prev",a("#"+h),c[1][c[0]-1]);p(c[0]-1,c[1].length-1)}return false})}y=w();p(y[0],y[1].length-1)}})},viewGridRow:function(o,d){d=a.extend({top:0,left:0,width:0,height:"auto",dataheight:"auto",modal:!1,overlay:30,drag:!0,
-resize:!0,jqModal:!0,closeOnEscape:!1,labelswidth:"30%",closeicon:[],navkeys:[!1,38,40],onClose:null,beforeShowForm:null,beforeInitData:null,viewPagerButtons:!0},a.jgrid.view,d||{});c[a(this)[0].p.id]=d;return this.each(function(){function e(){(!0===c[l.p.id].closeOnEscape||!0===c[l.p.id].navkeys[0])&&setTimeout(function(){a(".ui-jqdialog-titlebar-close","#"+a.jgrid.jqID(s.modalhead)).focus()},0)}function n(b,c,e,f){for(var g,h,j,i=0,o,q,l=[],n=!1,p="<td class='CaptionTD form-view-label ui-widget-content' width='"+
-d.labelswidth+"'>&#160;</td><td class='DataTD form-view-data ui-helper-reset ui-widget-content'>&#160;</td>",r="",t=["integer","number","currency"],s=0,u=0,y,x,w,A=1;A<=f;A++)r+=1==A?p:"<td class='CaptionTD form-view-label ui-widget-content'>&#160;</td><td class='DataTD form-view-data ui-widget-content'>&#160;</td>";a(c.p.colModel).each(function(){h=this.editrules&&!0===this.editrules.edithidden?!1:!0===this.hidden?!0:!1;!h&&"right"===this.align&&(this.formatter&&-1!==a.inArray(this.formatter,t)?
-s=Math.max(s,parseInt(this.width,10)):u=Math.max(u,parseInt(this.width,10)))});y=0!==s?s:0!==u?u:0;n=a(c).jqGrid("getInd",b);a(c.p.colModel).each(function(b){g=this.name;x=!1;q=(h=this.editrules&&!0===this.editrules.edithidden?!1:!0===this.hidden?!0:!1)?"style='display:none'":"";w="boolean"!=typeof this.viewable?!0:this.viewable;if("cb"!==g&&"subgrid"!==g&&"rn"!==g&&w){o=!1===n?"":g==c.p.ExpandColumn&&!0===c.p.treeGrid?a("td:eq("+b+")",c.rows[n]).text():a("td:eq("+b+")",c.rows[n]).html();x="right"===
-this.align&&0!==y?!0:!1;var d=a.extend({},{rowabove:!1,rowcontent:""},this.formoptions||{}),m=parseInt(d.rowpos,10)||i+1,p=parseInt(2*(parseInt(d.colpos,10)||1),10);if(d.rowabove){var s=a("<tr><td class='contentinfo' colspan='"+2*f+"'>"+d.rowcontent+"</td></tr>");a(e).append(s);s[0].rp=m}j=a(e).find("tr[rowpos="+m+"]");0===j.length&&(j=a("<tr "+q+" rowpos='"+m+"'></tr>").addClass("FormData").attr("id","trv_"+g),a(j).append(r),a(e).append(j),j[0].rp=m);a("td:eq("+(p-2)+")",j[0]).html("<b>"+("undefined"===
-typeof d.label?c.p.colNames[b]:d.label)+"</b>");a("td:eq("+(p-1)+")",j[0]).append("<span>"+o+"</span>").attr("id","v_"+g);x&&a("td:eq("+(p-1)+") span",j[0]).css({"text-align":"right",width:y+"px"});l[i]=b;i++}});0<i&&(b=a("<tr class='FormData' style='display:none'><td class='CaptionTD'></td><td colspan='"+(2*f-1)+"' class='DataTD'><input class='FormElement' id='id_g' type='text' name='id' value='"+b+"'/></td></tr>"),b[0].rp=i+99,a(e).append(b));return l}function r(b,c){var d,e,f=0,g,h;if(h=a(c).jqGrid("getInd",
-b,!0))a("td",h).each(function(b){d=c.p.colModel[b].name;e=c.p.colModel[b].editrules&&!0===c.p.colModel[b].editrules.edithidden?!1:!0===c.p.colModel[b].hidden?!0:!1;"cb"!==d&&("subgrid"!==d&&"rn"!==d)&&(g=d==c.p.ExpandColumn&&!0===c.p.treeGrid?a(this).text():a(this).html(),a.extend({},c.p.colModel[b].editoptions||{}),d=a.jgrid.jqID("v_"+d),a("#"+d+" span","#"+p).html(g),e&&a("#"+d,"#"+p).parents("tr:first").hide(),f++)}),0<f&&a("#id_g","#"+p).val(b)}function u(b,c){0===b?a("#pData","#"+p+"_2").addClass("ui-state-disabled"):
-a("#pData","#"+p+"_2").removeClass("ui-state-disabled");b==c?a("#nData","#"+p+"_2").addClass("ui-state-disabled"):a("#nData","#"+p+"_2").removeClass("ui-state-disabled")}function t(){var b=a(l).jqGrid("getDataIDs"),c=a("#id_g","#"+p).val();return[a.inArray(c,b),b]}var l=this;if(l.grid&&o){var g=l.p.id,f="ViewGrid_"+a.jgrid.jqID(g),p="ViewTbl_"+a.jgrid.jqID(g),w="ViewGrid_"+g,b="ViewTbl_"+g,s={themodal:"viewmod"+g,modalhead:"viewhd"+g,modalcontent:"viewcnt"+g,scrollelm:f},h=a.isFunction(c[l.p.id].beforeInitData)?
-c[l.p.id].beforeInitData:!1,j=!0,i=1,q=0;if(void 0!==a("#"+a.jgrid.jqID(s.themodal))[0]){h&&(j=h.call(l,a("#"+f)),"undefined"==typeof j&&(j=!0));if(!1===j)return;a(".ui-jqdialog-title","#"+a.jgrid.jqID(s.modalhead)).html(d.caption);a("#FormError","#"+p).hide();r(o,l);a.isFunction(c[l.p.id].beforeShowForm)&&c[l.p.id].beforeShowForm.call(l,a("#"+f));a.jgrid.viewModal("#"+a.jgrid.jqID(s.themodal),{gbox:"#gbox_"+a.jgrid.jqID(g),jqm:d.jqModal,jqM:!1,overlay:d.overlay,modal:d.modal});e()}else{var y=isNaN(d.dataheight)?
-d.dataheight:d.dataheight+"px",w=a("<form name='FormPost' id='"+w+"' class='FormGrid' style='width:100%;overflow:auto;position:relative;height:"+y+";'></form>"),A=a("<table id='"+b+"' class='EditTable' cellspacing='1' cellpadding='2' border='0' style='table-layout:fixed'><tbody></tbody></table>");h&&(j=h.call(l,a("#"+f)),"undefined"==typeof j&&(j=!0));if(!1===j)return;a(l.p.colModel).each(function(){var a=this.formoptions;i=Math.max(i,a?a.colpos||0:0);q=Math.max(q,a?a.rowpos||0:0)});a(w).append(A);
-n(o,l,A,i);b="rtl"==l.p.direction?!0:!1;h="<a href='javascript:void(0)' id='"+(b?"nData":"pData")+"' class='fm-button ui-state-default ui-corner-left'><span class='ui-icon ui-icon-triangle-1-w'></span></a>";j="<a href='javascript:void(0)' id='"+(b?"pData":"nData")+"' class='fm-button ui-state-default ui-corner-right'><span class='ui-icon ui-icon-triangle-1-e'></span></a>";y="<a href='javascript:void(0)' id='cData' class='fm-button ui-state-default ui-corner-all'>"+d.bClose+"</a>";if(0<q){var x=[];
-a.each(a(A)[0].rows,function(a,b){x[a]=b});x.sort(function(a,b){return a.rp>b.rp?1:a.rp<b.rp?-1:0});a.each(x,function(b,c){a("tbody",A).append(c)})}d.gbox="#gbox_"+a.jgrid.jqID(g);w=a("<span></span>").append(w).append("<table border='0' class='EditTable' id='"+p+"_2'><tbody><tr id='Act_Buttons'><td class='navButton' width='"+d.labelswidth+"'>"+(b?j+h:h+j)+"</td><td class='EditButton'>"+y+"</td></tr></tbody></table>");a.jgrid.createModal(s,w,d,"#gview_"+a.jgrid.jqID(l.p.id),a("#gview_"+a.jgrid.jqID(l.p.id))[0]);
-b&&(a("#pData, #nData","#"+p+"_2").css("float","right"),a(".EditButton","#"+p+"_2").css("text-align","left"));d.viewPagerButtons||a("#pData, #nData","#"+p+"_2").hide();w=null;a("#"+s.themodal).keydown(function(b){if(b.which===27){c[l.p.id].closeOnEscape&&a.jgrid.hideModal(this,{gb:d.gbox,jqm:d.jqModal,onClose:d.onClose});return false}if(d.navkeys[0]===true){if(b.which===d.navkeys[1]){a("#pData","#"+p+"_2").trigger("click");return false}if(b.which===d.navkeys[2]){a("#nData","#"+p+"_2").trigger("click");
-return false}}});d.closeicon=a.extend([!0,"left","ui-icon-close"],d.closeicon);!0===d.closeicon[0]&&a("#cData","#"+p+"_2").addClass("right"==d.closeicon[1]?"fm-button-icon-right":"fm-button-icon-left").append("<span class='ui-icon "+d.closeicon[2]+"'></span>");a.isFunction(d.beforeShowForm)&&d.beforeShowForm.call(l,a("#"+f));a.jgrid.viewModal("#"+a.jgrid.jqID(s.themodal),{gbox:"#gbox_"+a.jgrid.jqID(g),jqm:d.jqModal,modal:d.modal});a(".fm-button:not(.ui-state-disabled)","#"+p+"_2").hover(function(){a(this).addClass("ui-state-hover")},
-function(){a(this).removeClass("ui-state-hover")});e();a("#cData","#"+p+"_2").click(function(){a.jgrid.hideModal("#"+a.jgrid.jqID(s.themodal),{gb:"#gbox_"+a.jgrid.jqID(g),jqm:d.jqModal,onClose:d.onClose});return false});a("#nData","#"+p+"_2").click(function(){a("#FormError","#"+p).hide();var b=t();b[0]=parseInt(b[0],10);if(b[0]!=-1&&b[1][b[0]+1]){a.isFunction(d.onclickPgButtons)&&d.onclickPgButtons.call(l,"next",a("#"+f),b[1][b[0]]);r(b[1][b[0]+1],l);a(l).jqGrid("setSelection",b[1][b[0]+1]);a.isFunction(d.afterclickPgButtons)&&
-d.afterclickPgButtons.call(l,"next",a("#"+f),b[1][b[0]+1]);u(b[0]+1,b[1].length-1)}e();return false});a("#pData","#"+p+"_2").click(function(){a("#FormError","#"+p).hide();var b=t();if(b[0]!=-1&&b[1][b[0]-1]){a.isFunction(d.onclickPgButtons)&&d.onclickPgButtons.call(l,"prev",a("#"+f),b[1][b[0]]);r(b[1][b[0]-1],l);a(l).jqGrid("setSelection",b[1][b[0]-1]);a.isFunction(d.afterclickPgButtons)&&d.afterclickPgButtons.call(l,"prev",a("#"+f),b[1][b[0]-1]);u(b[0]-1,b[1].length-1)}e();return false})}w=t();u(w[0],
-w[1].length-1)}})},delGridRow:function(o,d){d=a.extend({top:0,left:0,width:240,height:"auto",dataheight:"auto",modal:!1,overlay:30,drag:!0,resize:!0,url:"",mtype:"POST",reloadAfterSubmit:!0,beforeShowForm:null,beforeInitData:null,afterShowForm:null,beforeSubmit:null,onclickSubmit:null,afterSubmit:null,jqModal:!0,closeOnEscape:!1,delData:{},delicon:[],cancelicon:[],onClose:null,ajaxDelOptions:{},processing:!1,serializeDelData:null,useDataProxy:!1},a.jgrid.del,d||{});c[a(this)[0].p.id]=d;return this.each(function(){var e=
-this;if(e.grid&&o){var n=a.isFunction(c[e.p.id].beforeShowForm),r=a.isFunction(c[e.p.id].afterShowForm),u=a.isFunction(c[e.p.id].beforeInitData)?c[e.p.id].beforeInitData:!1,t=e.p.id,l={},g=!0,f="DelTbl_"+a.jgrid.jqID(t),p,w,b,s,h="DelTbl_"+t,j={themodal:"delmod"+t,modalhead:"delhd"+t,modalcontent:"delcnt"+t,scrollelm:f};jQuery.isArray(o)&&(o=o.join());if(void 0!==a("#"+a.jgrid.jqID(j.themodal))[0]){u&&(g=u.call(e,a("#"+f)),"undefined"==typeof g&&(g=!0));if(!1===g)return;a("#DelData>td","#"+f).text(o);
-a("#DelError","#"+f).hide();!0===c[e.p.id].processing&&(c[e.p.id].processing=!1,a("#dData","#"+f).removeClass("ui-state-active"));n&&c[e.p.id].beforeShowForm.call(e,a("#"+f));a.jgrid.viewModal("#"+a.jgrid.jqID(j.themodal),{gbox:"#gbox_"+a.jgrid.jqID(t),jqm:c[e.p.id].jqModal,jqM:!1,overlay:c[e.p.id].overlay,modal:c[e.p.id].modal})}else{var i=isNaN(c[e.p.id].dataheight)?c[e.p.id].dataheight:c[e.p.id].dataheight+"px",h="<div id='"+h+"' class='formdata' style='width:100%;overflow:auto;position:relative;height:"+
-i+";'><table class='DelTable'><tbody><tr id='DelError' style='display:none'><td class='ui-state-error'></td></tr>"+("<tr id='DelData' style='display:none'><td >"+o+"</td></tr>"),h=h+('<tr><td class="delmsg" style="white-space:pre;">'+c[e.p.id].msg+"</td></tr><tr><td >&#160;</td></tr>"),h=h+"</tbody></table></div>"+("<table cellspacing='0' cellpadding='0' border='0' class='EditTable' id='"+f+"_2'><tbody><tr><td><hr class='ui-widget-content' style='margin:1px'/></td></tr><tr><td class='DelButton EditButton'>"+
-("<a href='javascript:void(0)' id='dData' class='fm-button ui-state-default ui-corner-all'>"+d.bSubmit+"</a>")+"&#160;"+("<a href='javascript:void(0)' id='eData' class='fm-button ui-state-default ui-corner-all'>"+d.bCancel+"</a>")+"</td></tr></tbody></table>");d.gbox="#gbox_"+a.jgrid.jqID(t);a.jgrid.createModal(j,h,d,"#gview_"+a.jgrid.jqID(e.p.id),a("#gview_"+a.jgrid.jqID(e.p.id))[0]);u&&(g=u.call(e,a("#"+f)),"undefined"==typeof g&&(g=!0));if(!1===g)return;a(".fm-button","#"+f+"_2").hover(function(){a(this).addClass("ui-state-hover")},
-function(){a(this).removeClass("ui-state-hover")});d.delicon=a.extend([!0,"left","ui-icon-scissors"],c[e.p.id].delicon);d.cancelicon=a.extend([!0,"left","ui-icon-cancel"],c[e.p.id].cancelicon);!0===d.delicon[0]&&a("#dData","#"+f+"_2").addClass("right"==d.delicon[1]?"fm-button-icon-right":"fm-button-icon-left").append("<span class='ui-icon "+d.delicon[2]+"'></span>");!0===d.cancelicon[0]&&a("#eData","#"+f+"_2").addClass("right"==d.cancelicon[1]?"fm-button-icon-right":"fm-button-icon-left").append("<span class='ui-icon "+
-d.cancelicon[2]+"'></span>");a("#dData","#"+f+"_2").click(function(){var g=[true,""];l={};var h=a("#DelData>td","#"+f).text();a.isFunction(c[e.p.id].onclickSubmit)&&(l=c[e.p.id].onclickSubmit.call(e,c[e.p.id],h)||{});a.isFunction(c[e.p.id].beforeSubmit)&&(g=c[e.p.id].beforeSubmit.call(e,h));if(g[0]&&!c[e.p.id].processing){c[e.p.id].processing=true;b=e.p.prmNames;p=a.extend({},c[e.p.id].delData,l);s=b.oper;p[s]=b.deloper;w=b.id;h=(""+h).split(",");if(!h.length)return false;for(var i in h)h.hasOwnProperty(i)&&
-(h[i]=a.jgrid.stripPref(e.p.idPrefix,h[i]));p[w]=h.join();a(this).addClass("ui-state-active");i=a.extend({url:c[e.p.id].url?c[e.p.id].url:a(e).jqGrid("getGridParam","editurl"),type:c[e.p.id].mtype,data:a.isFunction(c[e.p.id].serializeDelData)?c[e.p.id].serializeDelData.call(e,p):p,complete:function(b,i){if(i!="success"){g[0]=false;g[1]=a.isFunction(c[e.p.id].errorTextFormat)?c[e.p.id].errorTextFormat.call(e,b):i+" Status: '"+b.statusText+"'. Error code: "+b.status}else a.isFunction(c[e.p.id].afterSubmit)&&
-(g=c[e.p.id].afterSubmit.call(e,b,p));if(g[0]===false){a("#DelError>td","#"+f).html(g[1]);a("#DelError","#"+f).show()}else{if(c[e.p.id].reloadAfterSubmit&&e.p.datatype!="local")a(e).trigger("reloadGrid");else{if(e.p.treeGrid===true)try{a(e).jqGrid("delTreeNode",e.p.idPrefix+h[0])}catch(o){}else for(var l=0;l<h.length;l++)a(e).jqGrid("delRowData",e.p.idPrefix+h[l]);e.p.selrow=null;e.p.selarrrow=[]}a.isFunction(c[e.p.id].afterComplete)&&setTimeout(function(){c[e.p.id].afterComplete.call(e,b,h)},500)}c[e.p.id].processing=
-false;a("#dData","#"+f+"_2").removeClass("ui-state-active");g[0]&&a.jgrid.hideModal("#"+a.jgrid.jqID(j.themodal),{gb:"#gbox_"+a.jgrid.jqID(t),jqm:d.jqModal,onClose:c[e.p.id].onClose})}},a.jgrid.ajaxOptions,c[e.p.id].ajaxDelOptions);if(!i.url&&!c[e.p.id].useDataProxy)if(a.isFunction(e.p.dataProxy))c[e.p.id].useDataProxy=true;else{g[0]=false;g[1]=g[1]+(" "+a.jgrid.errors.nourl)}if(g[0])if(c[e.p.id].useDataProxy){i=e.p.dataProxy.call(e,i,"del_"+e.p.id);typeof i=="undefined"&&(i=[true,""]);if(i[0]===
-false){g[0]=false;g[1]=i[1]||"Error deleting the selected row!"}else a.jgrid.hideModal("#"+a.jgrid.jqID(j.themodal),{gb:"#gbox_"+a.jgrid.jqID(t),jqm:d.jqModal,onClose:c[e.p.id].onClose})}else a.ajax(i)}if(g[0]===false){a("#DelError>td","#"+f).html(g[1]);a("#DelError","#"+f).show()}return false});a("#eData","#"+f+"_2").click(function(){a.jgrid.hideModal("#"+a.jgrid.jqID(j.themodal),{gb:"#gbox_"+a.jgrid.jqID(t),jqm:c[e.p.id].jqModal,onClose:c[e.p.id].onClose});return false});n&&c[e.p.id].beforeShowForm.call(e,
-a("#"+f));a.jgrid.viewModal("#"+a.jgrid.jqID(j.themodal),{gbox:"#gbox_"+a.jgrid.jqID(t),jqm:c[e.p.id].jqModal,overlay:c[e.p.id].overlay,modal:c[e.p.id].modal})}r&&c[e.p.id].afterShowForm.call(e,a("#"+f));!0===c[e.p.id].closeOnEscape&&setTimeout(function(){a(".ui-jqdialog-titlebar-close","#"+a.jgrid.jqID(j.modalhead)).focus()},0)}})},navGrid:function(c,d,e,n,r,u,t){d=a.extend({edit:!0,editicon:"ui-icon-pencil",add:!0,addicon:"ui-icon-plus",del:!0,delicon:"ui-icon-trash",search:!0,searchicon:"ui-icon-search",
-refresh:!0,refreshicon:"ui-icon-refresh",refreshstate:"firstpage",view:!1,viewicon:"ui-icon-document",position:"left",closeOnEscape:!0,beforeRefresh:null,afterRefresh:null,cloneToTop:!1,alertwidth:200,alertheight:"auto",alerttop:null,alertleft:null,alertzIndex:null},a.jgrid.nav,d||{});return this.each(function(){if(!this.nav){var l={themodal:"alertmod",modalhead:"alerthd",modalcontent:"alertcnt"},g=this,f;if(g.grid&&"string"==typeof c){void 0===a("#"+l.themodal)[0]&&(!d.alerttop&&!d.alertleft&&("undefined"!=
-typeof window.innerWidth?(d.alertleft=window.innerWidth,d.alerttop=window.innerHeight):"undefined"!=typeof document.documentElement&&"undefined"!=typeof document.documentElement.clientWidth&&0!==document.documentElement.clientWidth?(d.alertleft=document.documentElement.clientWidth,d.alerttop=document.documentElement.clientHeight):(d.alertleft=1024,d.alerttop=768),d.alertleft=d.alertleft/2-parseInt(d.alertwidth,10)/2,d.alerttop=d.alerttop/2-25),a.jgrid.createModal(l,"<div>"+d.alerttext+"</div><span tabindex='0'><span tabindex='-1' id='jqg_alrt'></span></span>",
-{gbox:"#gbox_"+a.jgrid.jqID(g.p.id),jqModal:!0,drag:!0,resize:!0,caption:d.alertcap,top:d.alerttop,left:d.alertleft,width:d.alertwidth,height:d.alertheight,closeOnEscape:d.closeOnEscape,zIndex:d.alertzIndex},"","",!0));var p=1;d.cloneToTop&&g.p.toppager&&(p=2);for(var w=0;w<p;w++){var b=a("<table cellspacing='0' cellpadding='0' border='0' class='ui-pg-table navtable' style='float:left;table-layout:auto;'><tbody><tr></tr></tbody></table>"),s,h;0===w?(s=c,h=g.p.id,s==g.p.toppager&&(h+="_top",p=1)):
-(s=g.p.toppager,h=g.p.id+"_top");"rtl"==g.p.direction&&a(b).attr("dir","rtl").css("float","right");d.add&&(n=n||{},f=a("<td class='ui-pg-button ui-corner-all'></td>"),a(f).append("<div class='ui-pg-div'><span class='ui-icon "+d.addicon+"'></span>"+d.addtext+"</div>"),a("tr",b).append(f),a(f,b).attr({title:d.addtitle||"",id:n.id||"add_"+h}).click(function(){a(this).hasClass("ui-state-disabled")||(a.isFunction(d.addfunc)?d.addfunc.call(g):a(g).jqGrid("editGridRow","new",n));return false}).hover(function(){a(this).hasClass("ui-state-disabled")||
-a(this).addClass("ui-state-hover")},function(){a(this).removeClass("ui-state-hover")}),f=null);d.edit&&(f=a("<td class='ui-pg-button ui-corner-all'></td>"),e=e||{},a(f).append("<div class='ui-pg-div'><span class='ui-icon "+d.editicon+"'></span>"+d.edittext+"</div>"),a("tr",b).append(f),a(f,b).attr({title:d.edittitle||"",id:e.id||"edit_"+h}).click(function(){if(!a(this).hasClass("ui-state-disabled")){var b=g.p.selrow;if(b)a.isFunction(d.editfunc)?d.editfunc.call(g,b):a(g).jqGrid("editGridRow",b,e);
-else{a.jgrid.viewModal("#"+l.themodal,{gbox:"#gbox_"+a.jgrid.jqID(g.p.id),jqm:true});a("#jqg_alrt").focus()}}return false}).hover(function(){a(this).hasClass("ui-state-disabled")||a(this).addClass("ui-state-hover")},function(){a(this).removeClass("ui-state-hover")}),f=null);d.view&&(f=a("<td class='ui-pg-button ui-corner-all'></td>"),t=t||{},a(f).append("<div class='ui-pg-div'><span class='ui-icon "+d.viewicon+"'></span>"+d.viewtext+"</div>"),a("tr",b).append(f),a(f,b).attr({title:d.viewtitle||"",
-id:t.id||"view_"+h}).click(function(){if(!a(this).hasClass("ui-state-disabled")){var b=g.p.selrow;if(b)a.isFunction(d.viewfunc)?d.viewfunc.call(g,b):a(g).jqGrid("viewGridRow",b,t);else{a.jgrid.viewModal("#"+l.themodal,{gbox:"#gbox_"+a.jgrid.jqID(g.p.id),jqm:true});a("#jqg_alrt").focus()}}return false}).hover(function(){a(this).hasClass("ui-state-disabled")||a(this).addClass("ui-state-hover")},function(){a(this).removeClass("ui-state-hover")}),f=null);d.del&&(f=a("<td class='ui-pg-button ui-corner-all'></td>"),
-r=r||{},a(f).append("<div class='ui-pg-div'><span class='ui-icon "+d.delicon+"'></span>"+d.deltext+"</div>"),a("tr",b).append(f),a(f,b).attr({title:d.deltitle||"",id:r.id||"del_"+h}).click(function(){if(!a(this).hasClass("ui-state-disabled")){var b;if(g.p.multiselect){b=g.p.selarrrow;b.length===0&&(b=null)}else b=g.p.selrow;if(b)a.isFunction(d.delfunc)?d.delfunc.call(g,b):a(g).jqGrid("delGridRow",b,r);else{a.jgrid.viewModal("#"+l.themodal,{gbox:"#gbox_"+a.jgrid.jqID(g.p.id),jqm:true});a("#jqg_alrt").focus()}}return false}).hover(function(){a(this).hasClass("ui-state-disabled")||
-a(this).addClass("ui-state-hover")},function(){a(this).removeClass("ui-state-hover")}),f=null);(d.add||d.edit||d.del||d.view)&&a("tr",b).append("<td class='ui-pg-button ui-state-disabled' style='width:4px;'><span class='ui-separator'></span></td>");d.search&&(f=a("<td class='ui-pg-button ui-corner-all'></td>"),u=u||{},a(f).append("<div class='ui-pg-div'><span class='ui-icon "+d.searchicon+"'></span>"+d.searchtext+"</div>"),a("tr",b).append(f),a(f,b).attr({title:d.searchtitle||"",id:u.id||"search_"+
-h}).click(function(){a(this).hasClass("ui-state-disabled")||(a.isFunction(d.searchfunc)?d.searchfunc.call(g,u):a(g).jqGrid("searchGrid",u));return false}).hover(function(){a(this).hasClass("ui-state-disabled")||a(this).addClass("ui-state-hover")},function(){a(this).removeClass("ui-state-hover")}),u.showOnLoad&&!0===u.showOnLoad&&a(f,b).click(),f=null);d.refresh&&(f=a("<td class='ui-pg-button ui-corner-all'></td>"),a(f).append("<div class='ui-pg-div'><span class='ui-icon "+d.refreshicon+"'></span>"+
-d.refreshtext+"</div>"),a("tr",b).append(f),a(f,b).attr({title:d.refreshtitle||"",id:"refresh_"+h}).click(function(){if(!a(this).hasClass("ui-state-disabled")){a.isFunction(d.beforeRefresh)&&d.beforeRefresh.call(g);g.p.search=false;try{var b=g.p.id;g.p.postData.filters="";a("#fbox_"+a.jgrid.jqID(b)).jqFilter("resetFilter");a.isFunction(g.clearToolbar)&&g.clearToolbar.call(g,false)}catch(c){}switch(d.refreshstate){case "firstpage":a(g).trigger("reloadGrid",[{page:1}]);break;case "current":a(g).trigger("reloadGrid",
-[{current:true}])}a.isFunction(d.afterRefresh)&&d.afterRefresh.call(g)}return false}).hover(function(){a(this).hasClass("ui-state-disabled")||a(this).addClass("ui-state-hover")},function(){a(this).removeClass("ui-state-hover")}),f=null);f=a(".ui-jqgrid").css("font-size")||"11px";a("body").append("<div id='testpg2' class='ui-jqgrid ui-widget ui-widget-content' style='font-size:"+f+";visibility:hidden;' ></div>");f=a(b).clone().appendTo("#testpg2").width();a("#testpg2").remove();a(s+"_"+d.position,
-s).append(b);g.p._nvtd&&(f>g.p._nvtd[0]&&(a(s+"_"+d.position,s).width(f),g.p._nvtd[0]=f),g.p._nvtd[1]=f);b=f=f=null;this.nav=!0}}}})},navButtonAdd:function(c,d){d=a.extend({caption:"newButton",title:"",buttonicon:"ui-icon-newwin",onClickButton:null,position:"last",cursor:"pointer"},d||{});return this.each(function(){if(this.grid){"string"===typeof c&&0!==c.indexOf("#")&&(c="#"+a.jgrid.jqID(c));var e=a(".navtable",c)[0],n=this;if(e&&!(d.id&&void 0!==a("#"+a.jgrid.jqID(d.id),e)[0])){var r=a("<td></td>");
-"NONE"==d.buttonicon.toString().toUpperCase()?a(r).addClass("ui-pg-button ui-corner-all").append("<div class='ui-pg-div'>"+d.caption+"</div>"):a(r).addClass("ui-pg-button ui-corner-all").append("<div class='ui-pg-div'><span class='ui-icon "+d.buttonicon+"'></span>"+d.caption+"</div>");d.id&&a(r).attr("id",d.id);"first"==d.position?0===e.rows[0].cells.length?a("tr",e).append(r):a("tr td:eq(0)",e).before(r):a("tr",e).append(r);a(r,e).attr("title",d.title||"").click(function(c){a(this).hasClass("ui-state-disabled")||
-a.isFunction(d.onClickButton)&&d.onClickButton.call(n,c);return!1}).hover(function(){a(this).hasClass("ui-state-disabled")||a(this).addClass("ui-state-hover")},function(){a(this).removeClass("ui-state-hover")})}}})},navSeparatorAdd:function(c,d){d=a.extend({sepclass:"ui-separator",sepcontent:""},d||{});return this.each(function(){if(this.grid){"string"===typeof c&&0!==c.indexOf("#")&&(c="#"+a.jgrid.jqID(c));var e=a(".navtable",c)[0];if(e){var n="<td class='ui-pg-button ui-state-disabled' style='width:4px;'><span class='"+
-d.sepclass+"'></span>"+d.sepcontent+"</td>";a("tr",e).append(n)}}})},GridToForm:function(c,d){return this.each(function(){var e=this;if(e.grid){var n=a(e).jqGrid("getRowData",c);if(n)for(var r in n)a("[name="+a.jgrid.jqID(r)+"]",d).is("input:radio")||a("[name="+a.jgrid.jqID(r)+"]",d).is("input:checkbox")?a("[name="+a.jgrid.jqID(r)+"]",d).each(function(){if(a(this).val()==n[r])a(this)[e.p.useProp?"prop":"attr"]("checked",!0);else a(this)[e.p.useProp?"prop":"attr"]("checked",!1)}):a("[name="+a.jgrid.jqID(r)+
-"]",d).val(n[r])}})},FormToGrid:function(c,d,e,n){return this.each(function(){if(this.grid){e||(e="set");n||(n="first");var r=a(d).serializeArray(),u={};a.each(r,function(a,c){u[c.name]=c.value});"add"==e?a(this).jqGrid("addRowData",c,u,n):"set"==e&&a(this).jqGrid("setRowData",c,u)}})}})})(jQuery);
-(function(a){a.fn.jqFilter=function(d){if("string"===typeof d){var n=a.fn.jqFilter[d];if(!n)throw"jqFilter - No such method: "+d;var u=a.makeArray(arguments).slice(1);return n.apply(this,u)}var o=a.extend(!0,{filter:null,columns:[],onChange:null,afterRedraw:null,checkValues:null,error:!1,errmsg:"",errorcheck:!0,showQuery:!0,sopt:null,ops:[{name:"eq",description:"equal",operator:"="},{name:"ne",description:"not equal",operator:"<>"},{name:"lt",description:"less",operator:"<"},{name:"le",description:"less or equal",
-operator:"<="},{name:"gt",description:"greater",operator:">"},{name:"ge",description:"greater or equal",operator:">="},{name:"bw",description:"begins with",operator:"LIKE"},{name:"bn",description:"does not begin with",operator:"NOT LIKE"},{name:"in",description:"in",operator:"IN"},{name:"ni",description:"not in",operator:"NOT IN"},{name:"ew",description:"ends with",operator:"LIKE"},{name:"en",description:"does not end with",operator:"NOT LIKE"},{name:"cn",description:"contains",operator:"LIKE"},{name:"nc",
-description:"does not contain",operator:"NOT LIKE"},{name:"nu",description:"is null",operator:"IS NULL"},{name:"nn",description:"is not null",operator:"IS NOT NULL"}],numopts:"eq ne lt le gt ge nu nn in ni".split(" "),stropts:"eq ne bw bn ew en cn nc nu nn in ni".split(" "),_gridsopt:[],groupOps:[{op:"AND",text:"AND"},{op:"OR",text:"OR"}],groupButton:!0,ruleButtons:!0,direction:"ltr"},a.jgrid.filter,d||{});return this.each(function(){if(!this.filter){this.p=o;if(null===this.p.filter||void 0===this.p.filter)this.p.filter=
-{groupOp:this.p.groupOps[0].op,rules:[],groups:[]};var d,n=this.p.columns.length,f,t=/msie/i.test(navigator.userAgent)&&!window.opera;if(this.p._gridsopt.length)for(d=0;d<this.p._gridsopt.length;d++)this.p.ops[d].description=this.p._gridsopt[d];this.p.initFilter=a.extend(!0,{},this.p.filter);if(n){for(d=0;d<n;d++)if(f=this.p.columns[d],f.stype?f.inputtype=f.stype:f.inputtype||(f.inputtype="text"),f.sorttype?f.searchtype=f.sorttype:f.searchtype||(f.searchtype="string"),void 0===f.hidden&&(f.hidden=
-!1),f.label||(f.label=f.name),f.index&&(f.name=f.index),f.hasOwnProperty("searchoptions")||(f.searchoptions={}),!f.hasOwnProperty("searchrules"))f.searchrules={};this.p.showQuery&&a(this).append("<table class='queryresult ui-widget ui-widget-content' style='display:block;max-width:440px;border:0px none;' dir='"+this.p.direction+"'><tbody><tr><td class='query'></td></tr></tbody></table>");var r=function(g,k){var b=[!0,""];if(a.isFunction(k.searchrules))b=k.searchrules(g,k);else if(a.jgrid&&a.jgrid.checkValues)try{b=
-a.jgrid.checkValues(g,-1,null,k.searchrules,k.label)}catch(c){}b&&(b.length&&!1===b[0])&&(o.error=!b[0],o.errmsg=b[1])};this.onchange=function(){this.p.error=!1;this.p.errmsg="";return a.isFunction(this.p.onChange)?this.p.onChange.call(this,this.p):!1};this.reDraw=function(){a("table.group:first",this).remove();var g=this.createTableForGroup(o.filter,null);a(this).append(g);a.isFunction(this.p.afterRedraw)&&this.p.afterRedraw.call(this,this.p)};this.createTableForGroup=function(g,k){var b=this,c,
-e=a("<table class='group ui-widget ui-widget-content' style='border:0px none;'><tbody></tbody></table>"),d="left";"rtl"==this.p.direction&&(d="right",e.attr("dir","rtl"));null===k&&e.append("<tr class='error' style='display:none;'><th colspan='5' class='ui-state-error' align='"+d+"'></th></tr>");var h=a("<tr></tr>");e.append(h);d=a("<th colspan='5' align='"+d+"'></th>");h.append(d);if(!0===this.p.ruleButtons){var i=a("<select class='opsel'></select>");d.append(i);var h="",f;for(c=0;c<o.groupOps.length;c++)f=
-g.groupOp===b.p.groupOps[c].op?" selected='selected'":"",h+="<option value='"+b.p.groupOps[c].op+"'"+f+">"+b.p.groupOps[c].text+"</option>";i.append(h).bind("change",function(){g.groupOp=a(i).val();b.onchange()})}h="<span></span>";this.p.groupButton&&(h=a("<input type='button' value='+ {}' title='Add subgroup' class='add-group'/>"),h.bind("click",function(){if(g.groups===void 0)g.groups=[];g.groups.push({groupOp:o.groupOps[0].op,rules:[],groups:[]});b.reDraw();b.onchange();return false}));d.append(h);
-if(!0===this.p.ruleButtons){var h=a("<input type='button' value='+' title='Add rule' class='add-rule ui-add'/>"),l;h.bind("click",function(){if(g.rules===void 0)g.rules=[];for(c=0;c<b.p.columns.length;c++){var a=typeof b.p.columns[c].search==="undefined"?true:b.p.columns[c].search,e=b.p.columns[c].hidden===true;if(b.p.columns[c].searchoptions.searchhidden===true&&a||a&&!e){l=b.p.columns[c];break}}g.rules.push({field:l.name,op:(l.searchoptions.sopt?l.searchoptions.sopt:b.p.sopt?b.p.sopt:l.searchtype===
-"string"?b.p.stropts:b.p.numopts)[0],data:""});b.reDraw();return false});d.append(h)}null!==k&&(h=a("<input type='button' value='-' title='Delete group' class='delete-group'/>"),d.append(h),h.bind("click",function(){for(c=0;c<k.groups.length;c++)if(k.groups[c]===g){k.groups.splice(c,1);break}b.reDraw();b.onchange();return false}));if(void 0!==g.groups)for(c=0;c<g.groups.length;c++)d=a("<tr></tr>"),e.append(d),h=a("<td class='first'></td>"),d.append(h),h=a("<td colspan='4'></td>"),h.append(this.createTableForGroup(g.groups[c],
-g)),d.append(h);void 0===g.groupOp&&(g.groupOp=b.p.groupOps[0].op);if(void 0!==g.rules)for(c=0;c<g.rules.length;c++)e.append(this.createTableRowForRule(g.rules[c],g));return e};this.createTableRowForRule=function(g,d){var b=this,c=a("<tr></tr>"),e,f,h,i,j="",l;c.append("<td class='first'></td>");var m=a("<td class='columns'></td>");c.append(m);var n=a("<select></select>"),p,q=[];m.append(n);n.bind("change",function(){g.field=a(n).val();h=a(this).parents("tr:first");for(e=0;e<b.p.columns.length;e++)if(b.p.columns[e].name===
-g.field){i=b.p.columns[e];break}if(i){i.searchoptions.id=a.jgrid.randId();t&&"text"===i.inputtype&&!i.searchoptions.size&&(i.searchoptions.size=10);var c=a.jgrid.createEl(i.inputtype,i.searchoptions,"",!0,b.p.ajaxSelectOptions,!0);a(c).addClass("input-elm");f=i.searchoptions.sopt?i.searchoptions.sopt:b.p.sopt?b.p.sopt:"string"===i.searchtype?b.p.stropts:b.p.numopts;var d="",k=0;q=[];a.each(b.p.ops,function(){q.push(this.name)});for(e=0;e<f.length;e++)p=a.inArray(f[e],q),-1!==p&&(0===k&&(g.op=b.p.ops[p].name),
-d+="<option value='"+b.p.ops[p].name+"'>"+b.p.ops[p].description+"</option>",k++);a(".selectopts",h).empty().append(d);a(".selectopts",h)[0].selectedIndex=0;a.browser.msie&&9>a.browser.version&&(d=parseInt(a("select.selectopts",h)[0].offsetWidth)+1,a(".selectopts",h).width(d),a(".selectopts",h).css("width","auto"));a(".data",h).empty().append(c);a(".input-elm",h).bind("change",function(c){var d=a(this).hasClass("ui-autocomplete-input")?200:0;setTimeout(function(){var d=c.target;g.data=d.nodeName.toUpperCase()===
-"SPAN"&&i.searchoptions&&a.isFunction(i.searchoptions.custom_value)?i.searchoptions.custom_value(a(d).children(".customelement:first"),"get"):d.value;b.onchange()},d)});setTimeout(function(){g.data=a(c).val();b.onchange()},0)}});for(e=m=0;e<b.p.columns.length;e++){l="undefined"===typeof b.p.columns[e].search?!0:b.p.columns[e].search;var r=!0===b.p.columns[e].hidden;if(!0===b.p.columns[e].searchoptions.searchhidden&&l||l&&!r)l="",g.field===b.p.columns[e].name&&(l=" selected='selected'",m=e),j+="<option value='"+
-b.p.columns[e].name+"'"+l+">"+b.p.columns[e].label+"</option>"}n.append(j);j=a("<td class='operators'></td>");c.append(j);i=o.columns[m];i.searchoptions.id=a.jgrid.randId();t&&"text"===i.inputtype&&!i.searchoptions.size&&(i.searchoptions.size=10);var m=a.jgrid.createEl(i.inputtype,i.searchoptions,g.data,!0,b.p.ajaxSelectOptions,!0),s=a("<select class='selectopts'></select>");j.append(s);s.bind("change",function(){g.op=a(s).val();h=a(this).parents("tr:first");var c=a(".input-elm",h)[0];if(g.op==="nu"||
-g.op==="nn"){g.data="";c.value="";c.setAttribute("readonly","true");c.setAttribute("disabled","true")}else{c.removeAttribute("readonly");c.removeAttribute("disabled")}b.onchange()});f=i.searchoptions.sopt?i.searchoptions.sopt:b.p.sopt?b.p.sopt:"string"===i.searchtype?o.stropts:b.p.numopts;j="";a.each(b.p.ops,function(){q.push(this.name)});for(e=0;e<f.length;e++)p=a.inArray(f[e],q),-1!==p&&(l=g.op===b.p.ops[p].name?" selected='selected'":"",j+="<option value='"+b.p.ops[p].name+"'"+l+">"+b.p.ops[p].description+
-"</option>");s.append(j);j=a("<td class='data'></td>");c.append(j);j.append(m);a(m).addClass("input-elm").bind("change",function(){g.data=i.inputtype==="custom"?i.searchoptions.custom_value(a(this).children(".customelement:first"),"get"):a(this).val();b.onchange()});j=a("<td></td>");c.append(j);!0===this.p.ruleButtons&&(m=a("<input type='button' value='-' title='Delete rule' class='delete-rule ui-del'/>"),j.append(m),m.bind("click",function(){for(e=0;e<d.rules.length;e++)if(d.rules[e]===g){d.rules.splice(e,
-1);break}b.reDraw();b.onchange();return false}));return c};this.getStringForGroup=function(a){var d="(",b;if(void 0!==a.groups)for(b=0;b<a.groups.length;b++){1<d.length&&(d+=" "+a.groupOp+" ");try{d+=this.getStringForGroup(a.groups[b])}catch(c){alert(c)}}if(void 0!==a.rules)try{for(b=0;b<a.rules.length;b++)1<d.length&&(d+=" "+a.groupOp+" "),d+=this.getStringForRule(a.rules[b])}catch(e){alert(e)}d+=")";return"()"===d?"":d};this.getStringForRule=function(d){var f="",b="",c,e;for(c=0;c<this.p.ops.length;c++)if(this.p.ops[c].name===
-d.op){f=this.p.ops[c].operator;b=this.p.ops[c].name;break}for(c=0;c<this.p.columns.length;c++)if(this.p.columns[c].name===d.field){e=this.p.columns[c];break}c=d.data;if("bw"===b||"bn"===b)c+="%";if("ew"===b||"en"===b)c="%"+c;if("cn"===b||"nc"===b)c="%"+c+"%";if("in"===b||"ni"===b)c=" ("+c+")";o.errorcheck&&r(d.data,e);return-1!==a.inArray(e.searchtype,["int","integer","float","number","currency"])||"nn"===b||"nu"===b?d.field+" "+f+" "+c:d.field+" "+f+' "'+c+'"'};this.resetFilter=function(){this.p.filter=
-a.extend(!0,{},this.p.initFilter);this.reDraw();this.onchange()};this.hideError=function(){a("th.ui-state-error",this).html("");a("tr.error",this).hide()};this.showError=function(){a("th.ui-state-error",this).html(this.p.errmsg);a("tr.error",this).show()};this.toUserFriendlyString=function(){return this.getStringForGroup(o.filter)};this.toString=function(){function a(b){var c="(",e;if(void 0!==b.groups)for(e=0;e<b.groups.length;e++)1<c.length&&(c="OR"===b.groupOp?c+" || ":c+" && "),c+=a(b.groups[e]);
-if(void 0!==b.rules)for(e=0;e<b.rules.length;e++){1<c.length&&(c="OR"===b.groupOp?c+" || ":c+" && ");var f=b.rules[e];if(d.p.errorcheck){for(var h=void 0,i=void 0,h=0;h<d.p.columns.length;h++)if(d.p.columns[h].name===f.field){i=d.p.columns[h];break}i&&r(f.data,i)}c+=f.op+"(item."+f.field+",'"+f.data+"')"}c+=")";return"()"===c?"":c}var d=this;return a(this.p.filter)};this.reDraw();if(this.p.showQuery)this.onchange();this.filter=!0}}})};a.extend(a.fn.jqFilter,{toSQLString:function(){var a="";this.each(function(){a=
-this.toUserFriendlyString()});return a},filterData:function(){var a;this.each(function(){a=this.p.filter});return a},getParameter:function(a){return void 0!==a&&this.p.hasOwnProperty(a)?this.p[a]:this.p},resetFilter:function(){return this.each(function(){this.resetFilter()})},addFilter:function(a){"string"===typeof a&&(a=jQuery.jgrid.parse(a));this.each(function(){this.p.filter=a;this.reDraw();this.onchange()})}})})(jQuery);
-(function(a){a.jgrid.inlineEdit=a.jgrid.inlineEdit||{};a.jgrid.extend({editRow:function(c,d,b,k,g,l,p,h,e){var j={},f=a.makeArray(arguments).slice(1);if("object"===a.type(f[0]))j=f[0];else if("undefined"!==typeof d&&(j.keys=d),a.isFunction(b)&&(j.oneditfunc=b),a.isFunction(k)&&(j.successfunc=k),"undefined"!==typeof g&&(j.url=g),"undefined"!==typeof l&&(j.extraparam=l),a.isFunction(p)&&(j.aftersavefunc=p),a.isFunction(h)&&(j.errorfunc=h),a.isFunction(e))j.afterrestorefunc=e;j=a.extend(!0,{keys:!1,
-oneditfunc:null,successfunc:null,url:null,extraparam:{},aftersavefunc:null,errorfunc:null,afterrestorefunc:null,restoreAfterError:!0,mtype:"POST"},a.jgrid.inlineEdit,j);return this.each(function(){var e=this,d,b,f,g=0,h=null,l={},m,n;e.grid&&(m=a(e).jqGrid("getInd",c,!0),!1!==m&&(f=a(m).attr("editable")||"0","0"==f&&!a(m).hasClass("not-editable-row")&&(n=e.p.colModel,a('td[role="gridcell"]',m).each(function(f){d=n[f].name;var j=!0===e.p.treeGrid&&d==e.p.ExpandColumn;if(j)b=a("span:first",this).html();
-else try{b=a.unformat.call(e,this,{rowId:c,colModel:n[f]},f)}catch(m){b=n[f].edittype&&"textarea"==n[f].edittype?a(this).text():a(this).html()}if("cb"!=d&&("subgrid"!=d&&"rn"!=d)&&(e.p.autoencode&&(b=a.jgrid.htmlDecode(b)),l[d]=b,!0===n[f].editable)){null===h&&(h=f);j?a("span:first",this).html(""):a(this).html("");var k=a.extend({},n[f].editoptions||{},{id:c+"_"+d,name:d});n[f].edittype||(n[f].edittype="text");if("&nbsp;"==b||"&#160;"==b||1==b.length&&160==b.charCodeAt(0))b="";k=a.jgrid.createEl.call(e,
-n[f].edittype,k,b,!0,a.extend({},a.jgrid.ajaxOptions,e.p.ajaxSelectOptions||{}));a(k).addClass("editable");j?a("span:first",this).append(k):a(this).append(k);"select"==n[f].edittype&&("undefined"!==typeof n[f].editoptions&&!0===n[f].editoptions.multiple&&"undefined"===typeof n[f].editoptions.dataUrl&&a.browser.msie)&&a(k).width(a(k).width());g++}}),0<g&&(l.id=c,e.p.savedRow.push(l),a(m).attr("editable","1"),a("td:eq("+h+") input",m).focus(),!0===j.keys&&a(m).bind("keydown",function(f){if(27===f.keyCode){a(e).jqGrid("restoreRow",
-c,j.afterrestorefunc);if(e.p._inlinenav)try{a(e).jqGrid("showAddEditButtons")}catch(b){}return!1}if(13===f.keyCode){if("TEXTAREA"==f.target.tagName)return!0;if(a(e).jqGrid("saveRow",c,j)&&e.p._inlinenav)try{a(e).jqGrid("showAddEditButtons")}catch(d){}return!1}}),a(e).triggerHandler("jqGridInlineEditRow",[c,j]),a.isFunction(j.oneditfunc)&&j.oneditfunc.call(e,c)))))})},saveRow:function(c,d,b,k,g,l,p){var h=a.makeArray(arguments).slice(1),e={};if("object"===a.type(h[0]))e=h[0];else if(a.isFunction(d)&&
-(e.successfunc=d),"undefined"!==typeof b&&(e.url=b),"undefined"!==typeof k&&(e.extraparam=k),a.isFunction(g)&&(e.aftersavefunc=g),a.isFunction(l)&&(e.errorfunc=l),a.isFunction(p))e.afterrestorefunc=p;var e=a.extend(!0,{successfunc:null,url:null,extraparam:{},aftersavefunc:null,errorfunc:null,afterrestorefunc:null,restoreAfterError:!0,mtype:"POST"},a.jgrid.inlineEdit,e),j=!1,f=this[0],o,i={},u={},r={},t,s,q;if(!f.grid)return j;q=a(f).jqGrid("getInd",c,!0);if(!1===q)return j;h=a(q).attr("editable");
-e.url=e.url?e.url:f.p.editurl;if("1"===h){var m;a('td[role="gridcell"]',q).each(function(c){m=f.p.colModel[c];o=m.name;if("cb"!=o&&"subgrid"!=o&&!0===m.editable&&"rn"!=o&&!a(this).hasClass("not-editable-cell")){switch(m.edittype){case "checkbox":var b=["Yes","No"];m.editoptions&&(b=m.editoptions.value.split(":"));i[o]=a("input",this).is(":checked")?b[0]:b[1];break;case "text":case "password":case "textarea":case "button":i[o]=a("input, textarea",this).val();break;case "select":if(m.editoptions.multiple){var b=
-a("select",this),d=[];i[o]=a(b).val();i[o]=i[o]?i[o].join(","):"";a("select option:selected",this).each(function(e,f){d[e]=a(f).text()});u[o]=d.join(",")}else i[o]=a("select option:selected",this).val(),u[o]=a("select option:selected",this).text();m.formatter&&"select"==m.formatter&&(u={});break;case "custom":try{if(m.editoptions&&a.isFunction(m.editoptions.custom_value)){if(i[o]=m.editoptions.custom_value.call(f,a(".customelement",this),"get"),void 0===i[o])throw"e2";}else throw"e1";}catch(g){"e1"==
-g&&a.jgrid.info_dialog(a.jgrid.errors.errcap,"function 'custom_value' "+a.jgrid.edit.msg.nodefined,a.jgrid.edit.bClose),"e2"==g?a.jgrid.info_dialog(a.jgrid.errors.errcap,"function 'custom_value' "+a.jgrid.edit.msg.novalue,a.jgrid.edit.bClose):a.jgrid.info_dialog(a.jgrid.errors.errcap,g.message,a.jgrid.edit.bClose)}}s=a.jgrid.checkValues(i[o],c,f);if(!1===s[0])return s[1]=i[o]+" "+s[1],!1;f.p.autoencode&&(i[o]=a.jgrid.htmlEncode(i[o]));"clientArray"!==e.url&&m.editoptions&&!0===m.editoptions.NullIfEmpty&&
-""===i[o]&&(r[o]="null")}});if(!1===s[0]){try{var n=a.jgrid.findPos(a("#"+a.jgrid.jqID(c),f.grid.bDiv)[0]);a.jgrid.info_dialog(a.jgrid.errors.errcap,s[1],a.jgrid.edit.bClose,{left:n[0],top:n[1]})}catch(w){alert(s[1])}return j}var v,h=f.p.prmNames;v=h.oper;n=h.id;i&&(i[v]=h.editoper,i[n]=c,"undefined"==typeof f.p.inlineData&&(f.p.inlineData={}),i=a.extend({},i,f.p.inlineData,e.extraparam));if("clientArray"==e.url){i=a.extend({},i,u);f.p.autoencode&&a.each(i,function(e,f){i[e]=a.jgrid.htmlDecode(f)});
-n=a(f).jqGrid("setRowData",c,i);a(q).attr("editable","0");for(h=0;h<f.p.savedRow.length;h++)if(f.p.savedRow[h].id==c){t=h;break}0<=t&&f.p.savedRow.splice(t,1);a(f).triggerHandler("jqGridInlineAfterSaveRow",[c,n,i,e]);a.isFunction(e.aftersavefunc)&&e.aftersavefunc.call(f,c,n,e);j=!0;a(q).unbind("keydown")}else a("#lui_"+a.jgrid.jqID(f.p.id)).show(),r=a.extend({},i,r),r[n]=a.jgrid.stripPref(f.p.idPrefix,r[n]),a.ajax(a.extend({url:e.url,data:a.isFunction(f.p.serializeRowData)?f.p.serializeRowData.call(f,
-r):r,type:e.mtype,async:!1,complete:function(b,d){a("#lui_"+a.jgrid.jqID(f.p.id)).hide();if(d==="success"){var g=true,h;h=a(f).triggerHandler("jqGridInlineSuccessSaveRow",[b,c,e]);a.isArray(h)||(h=[true,i]);h[0]&&a.isFunction(e.successfunc)&&(h=e.successfunc.call(f,b));if(a.isArray(h)){g=h[0];i=h[1]?h[1]:i}else g=h;if(g===true){f.p.autoencode&&a.each(i,function(b,e){i[b]=a.jgrid.htmlDecode(e)});i=a.extend({},i,u);a(f).jqGrid("setRowData",c,i);a(q).attr("editable","0");for(g=0;g<f.p.savedRow.length;g++)if(f.p.savedRow[g].id==
-c){t=g;break}t>=0&&f.p.savedRow.splice(t,1);a(f).triggerHandler("jqGridInlineAfterSaveRow",[c,b,i,e]);a.isFunction(e.aftersavefunc)&&e.aftersavefunc.call(f,c,b);j=true;a(q).unbind("keydown")}else{a(f).triggerHandler("jqGridInlineErrorSaveRow",[c,b,d,null,e]);a.isFunction(e.errorfunc)&&e.errorfunc.call(f,c,b,d,null);e.restoreAfterError===true&&a(f).jqGrid("restoreRow",c,e.afterrestorefunc)}}},error:function(b,d,g){a("#lui_"+a.jgrid.jqID(f.p.id)).hide();a(f).triggerHandler("jqGridInlineErrorSaveRow",
-[c,b,d,g,e]);if(a.isFunction(e.errorfunc))e.errorfunc.call(f,c,b,d,g);else{b=b.responseText||b.statusText;try{a.jgrid.info_dialog(a.jgrid.errors.errcap,'<div class="ui-state-error">'+b+"</div>",a.jgrid.edit.bClose,{buttonalign:"right"})}catch(h){alert(b)}}e.restoreAfterError===true&&a(f).jqGrid("restoreRow",c,e.afterrestorefunc)}},a.jgrid.ajaxOptions,f.p.ajaxRowOptions||{}))}return j},restoreRow:function(c,d){var b=a.makeArray(arguments).slice(1),k={};"object"===a.type(b[0])?k=b[0]:a.isFunction(d)&&
-(k.afterrestorefunc=d);k=a.extend(!0,a.jgrid.inlineEdit,k);return this.each(function(){var b=this,d,p,h={};if(b.grid){p=a(b).jqGrid("getInd",c,true);if(p!==false){for(var e=0;e<b.p.savedRow.length;e++)if(b.p.savedRow[e].id==c){d=e;break}if(d>=0){if(a.isFunction(a.fn.datepicker))try{a("input.hasDatepicker","#"+a.jgrid.jqID(p.id)).datepicker("hide")}catch(j){}a.each(b.p.colModel,function(){this.editable===true&&this.name in b.p.savedRow[d]&&(h[this.name]=b.p.savedRow[d][this.name])});a(b).jqGrid("setRowData",
-c,h);a(p).attr("editable","0").unbind("keydown");b.p.savedRow.splice(d,1);a("#"+a.jgrid.jqID(c),"#"+a.jgrid.jqID(b.p.id)).hasClass("jqgrid-new-row")&&setTimeout(function(){a(b).jqGrid("delRowData",c)},0)}a(b).triggerHandler("jqGridInlineAfterRestoreRow",[c]);a.isFunction(k.afterrestorefunc)&&k.afterrestorefunc.call(b,c)}}})},addRow:function(c){c=a.extend(!0,{rowID:"new_row",initdata:{},position:"first",useDefValues:!0,useFormatter:!1,addRowParams:{extraparam:{}}},c||{});return this.each(function(){if(this.grid){var d=
-this;!0===c.useDefValues&&a(d.p.colModel).each(function(){if(this.editoptions&&this.editoptions.defaultValue){var b=this.editoptions.defaultValue,b=a.isFunction(b)?b.call(d):b;c.initdata[this.name]=b}});a(d).jqGrid("addRowData",c.rowID,c.initdata,c.position);c.rowID=d.p.idPrefix+c.rowID;a("#"+a.jgrid.jqID(c.rowID),"#"+a.jgrid.jqID(d.p.id)).addClass("jqgrid-new-row");if(c.useFormatter)a("#"+a.jgrid.jqID(c.rowID)+" .ui-inline-edit","#"+a.jgrid.jqID(d.p.id)).click();else{var b=d.p.prmNames;c.addRowParams.extraparam[b.oper]=
-b.addoper;a(d).jqGrid("editRow",c.rowID,c.addRowParams);a(d).jqGrid("setSelection",c.rowID)}}})},inlineNav:function(c,d){d=a.extend({edit:!0,editicon:"ui-icon-pencil",add:!0,addicon:"ui-icon-plus",save:!0,saveicon:"ui-icon-disk",cancel:!0,cancelicon:"ui-icon-cancel",addParams:{useFormatter:!1,rowID:"new_row"},editParams:{},restoreAfterSelect:!0},a.jgrid.nav,d||{});return this.each(function(){if(this.grid){var b=this,k,g=a.jgrid.jqID(b.p.id);b.p._inlinenav=!0;if(!0===d.addParams.useFormatter){var l=
-b.p.colModel,p;for(p=0;p<l.length;p++)if(l[p].formatter&&"actions"===l[p].formatter){l[p].formatoptions&&(l=a.extend({keys:!1,onEdit:null,onSuccess:null,afterSave:null,onError:null,afterRestore:null,extraparam:{},url:null},l[p].formatoptions),d.addParams.addRowParams={keys:l.keys,oneditfunc:l.onEdit,successfunc:l.onSuccess,url:l.url,extraparam:l.extraparam,aftersavefunc:l.afterSavef,errorfunc:l.onError,afterrestorefunc:l.afterRestore});break}}d.add&&a(b).jqGrid("navButtonAdd",c,{caption:d.addtext,
-title:d.addtitle,buttonicon:d.addicon,id:b.p.id+"_iladd",onClickButton:function(){a(b).jqGrid("addRow",d.addParams);d.addParams.useFormatter||(a("#"+g+"_ilsave").removeClass("ui-state-disabled"),a("#"+g+"_ilcancel").removeClass("ui-state-disabled"),a("#"+g+"_iladd").addClass("ui-state-disabled"),a("#"+g+"_iledit").addClass("ui-state-disabled"))}});d.edit&&a(b).jqGrid("navButtonAdd",c,{caption:d.edittext,title:d.edittitle,buttonicon:d.editicon,id:b.p.id+"_iledit",onClickButton:function(){var c=a(b).jqGrid("getGridParam",
-"selrow");c?(a(b).jqGrid("editRow",c,d.editParams),a("#"+g+"_ilsave").removeClass("ui-state-disabled"),a("#"+g+"_ilcancel").removeClass("ui-state-disabled"),a("#"+g+"_iladd").addClass("ui-state-disabled"),a("#"+g+"_iledit").addClass("ui-state-disabled")):(a.jgrid.viewModal("#alertmod",{gbox:"#gbox_"+g,jqm:!0}),a("#jqg_alrt").focus())}});d.save&&(a(b).jqGrid("navButtonAdd",c,{caption:d.savetext||"",title:d.savetitle||"Save row",buttonicon:d.saveicon,id:b.p.id+"_ilsave",onClickButton:function(){var c=
-b.p.savedRow[0].id;if(c){var e=b.p.prmNames,j=e.oper;d.editParams.extraparam||(d.editParams.extraparam={});d.editParams.extraparam[j]=a("#"+a.jgrid.jqID(c),"#"+g).hasClass("jqgrid-new-row")?e.addoper:e.editoper;a(b).jqGrid("saveRow",c,d.editParams)&&a(b).jqGrid("showAddEditButtons")}else a.jgrid.viewModal("#alertmod",{gbox:"#gbox_"+g,jqm:!0}),a("#jqg_alrt").focus()}}),a("#"+g+"_ilsave").addClass("ui-state-disabled"));d.cancel&&(a(b).jqGrid("navButtonAdd",c,{caption:d.canceltext||"",title:d.canceltitle||
-"Cancel row editing",buttonicon:d.cancelicon,id:b.p.id+"_ilcancel",onClickButton:function(){var c=b.p.savedRow[0].id;if(c){a(b).jqGrid("restoreRow",c,d.editParams);a(b).jqGrid("showAddEditButtons")}else{a.jgrid.viewModal("#alertmod",{gbox:"#gbox_"+g,jqm:true});a("#jqg_alrt").focus()}}}),a("#"+g+"_ilcancel").addClass("ui-state-disabled"));!0===d.restoreAfterSelect&&(k=a.isFunction(b.p.beforeSelectRow)?b.p.beforeSelectRow:!1,b.p.beforeSelectRow=function(c,e){var g=true;if(b.p.savedRow.length>0&&b.p._inlinenav===
-true&&c!==b.p.selrow&&b.p.selrow!==null){b.p.selrow==d.addParams.rowID?a(b).jqGrid("delRowData",b.p.selrow):a(b).jqGrid("restoreRow",b.p.selrow,d.editParams);a(b).jqGrid("showAddEditButtons")}k&&(g=k.call(b,c,e));return g})}})},showAddEditButtons:function(){return this.each(function(){if(this.grid){var c=a.jgrid.jqID(this.p.id);a("#"+c+"_ilsave").addClass("ui-state-disabled");a("#"+c+"_ilcancel").addClass("ui-state-disabled");a("#"+c+"_iladd").removeClass("ui-state-disabled");a("#"+c+"_iledit").removeClass("ui-state-disabled")}})}})})(jQuery);
-(function(b){b.jgrid.extend({editCell:function(d,f,a){return this.each(function(){var c=this,g,e,h,i;if(c.grid&&!0===c.p.cellEdit){f=parseInt(f,10);c.p.selrow=c.rows[d].id;c.p.knv||b(c).jqGrid("GridNav");if(0<c.p.savedRow.length){if(!0===a&&d==c.p.iRow&&f==c.p.iCol)return;b(c).jqGrid("saveCell",c.p.savedRow[0].id,c.p.savedRow[0].ic)}else window.setTimeout(function(){b("#"+b.jgrid.jqID(c.p.knv)).attr("tabindex","-1").focus()},0);i=c.p.colModel[f];g=i.name;if(!("subgrid"==g||"cb"==g||"rn"==g)){h=b("td:eq("+
-f+")",c.rows[d]);if(!0===i.editable&&!0===a&&!h.hasClass("not-editable-cell")){0<=parseInt(c.p.iCol,10)&&0<=parseInt(c.p.iRow,10)&&(b("td:eq("+c.p.iCol+")",c.rows[c.p.iRow]).removeClass("edit-cell ui-state-highlight"),b(c.rows[c.p.iRow]).removeClass("selected-row ui-state-hover"));b(h).addClass("edit-cell ui-state-highlight");b(c.rows[d]).addClass("selected-row ui-state-hover");try{e=b.unformat.call(c,h,{rowId:c.rows[d].id,colModel:i},f)}catch(k){e=i.edittype&&"textarea"==i.edittype?b(h).text():b(h).html()}c.p.autoencode&&
-(e=b.jgrid.htmlDecode(e));i.edittype||(i.edittype="text");c.p.savedRow.push({id:d,ic:f,name:g,v:e});if("&nbsp;"===e||"&#160;"===e||1===e.length&&160===e.charCodeAt(0))e="";if(b.isFunction(c.p.formatCell)){var j=c.p.formatCell.call(c,c.rows[d].id,g,e,d,f);void 0!==j&&(e=j)}var j=b.extend({},i.editoptions||{},{id:d+"_"+g,name:g}),n=b.jgrid.createEl.call(c,i.edittype,j,e,!0,b.extend({},b.jgrid.ajaxOptions,c.p.ajaxSelectOptions||{}));b(c).triggerHandler("jqGridBeforeEditCell",[c.rows[d].id,g,e,d,f]);
-b.isFunction(c.p.beforeEditCell)&&c.p.beforeEditCell.call(c,c.rows[d].id,g,e,d,f);b(h).html("").append(n).attr("tabindex","0");window.setTimeout(function(){b(n).focus()},0);b("input, select, textarea",h).bind("keydown",function(a){a.keyCode===27&&(b("input.hasDatepicker",h).length>0?b(".ui-datepicker").is(":hidden")?b(c).jqGrid("restoreCell",d,f):b("input.hasDatepicker",h).datepicker("hide"):b(c).jqGrid("restoreCell",d,f));if(a.keyCode===13){b(c).jqGrid("saveCell",d,f);return false}if(a.keyCode===
-9){if(c.grid.hDiv.loading)return false;a.shiftKey?b(c).jqGrid("prevCell",d,f):b(c).jqGrid("nextCell",d,f)}a.stopPropagation()});b(c).triggerHandler("jqGridAfterEditCell",[c.rows[d].id,g,e,d,f]);b.isFunction(c.p.afterEditCell)&&c.p.afterEditCell.call(c,c.rows[d].id,g,e,d,f)}else 0<=parseInt(c.p.iCol,10)&&0<=parseInt(c.p.iRow,10)&&(b("td:eq("+c.p.iCol+")",c.rows[c.p.iRow]).removeClass("edit-cell ui-state-highlight"),b(c.rows[c.p.iRow]).removeClass("selected-row ui-state-hover")),h.addClass("edit-cell ui-state-highlight"),
-b(c.rows[d]).addClass("selected-row ui-state-hover"),e=h.html().replace(/\&#160\;/ig,""),b(c).triggerHandler("jqGridSelectCell",[c.rows[d].id,g,e,d,f]),b.isFunction(c.p.onSelectCell)&&c.p.onSelectCell.call(c,c.rows[d].id,g,e,d,f);c.p.iCol=f;c.p.iRow=d}}})},saveCell:function(d,f){return this.each(function(){var a=this,c;if(a.grid&&!0===a.p.cellEdit){c=1<=a.p.savedRow.length?0:null;if(null!==c){var g=b("td:eq("+f+")",a.rows[d]),e,h,i=a.p.colModel[f],k=i.name,j=b.jgrid.jqID(k);switch(i.edittype){case "select":if(i.editoptions.multiple){var j=
-b("#"+d+"_"+j,a.rows[d]),n=[];(e=b(j).val())?e.join(","):e="";b("option:selected",j).each(function(a,c){n[a]=b(c).text()});h=n.join(",")}else e=b("#"+d+"_"+j+" option:selected",a.rows[d]).val(),h=b("#"+d+"_"+j+" option:selected",a.rows[d]).text();i.formatter&&(h=e);break;case "checkbox":var l=["Yes","No"];i.editoptions&&(l=i.editoptions.value.split(":"));h=e=b("#"+d+"_"+j,a.rows[d]).is(":checked")?l[0]:l[1];break;case "password":case "text":case "textarea":case "button":h=e=b("#"+d+"_"+j,a.rows[d]).val();
-break;case "custom":try{if(i.editoptions&&b.isFunction(i.editoptions.custom_value)){e=i.editoptions.custom_value.call(a,b(".customelement",g),"get");if(void 0===e)throw"e2";h=e}else throw"e1";}catch(o){"e1"==o&&b.jgrid.info_dialog(jQuery.jgrid.errors.errcap,"function 'custom_value' "+b.jgrid.edit.msg.nodefined,jQuery.jgrid.edit.bClose),"e2"==o?b.jgrid.info_dialog(jQuery.jgrid.errors.errcap,"function 'custom_value' "+b.jgrid.edit.msg.novalue,jQuery.jgrid.edit.bClose):b.jgrid.info_dialog(jQuery.jgrid.errors.errcap,
-o.message,jQuery.jgrid.edit.bClose)}}if(h!==a.p.savedRow[c].v){if(c=b(a).triggerHandler("jqGridBeforeSaveCell",[a.rows[d].id,k,e,d,f]))h=e=c;if(b.isFunction(a.p.beforeSaveCell)&&(c=a.p.beforeSaveCell.call(a,a.rows[d].id,k,e,d,f)))h=e=c;var p=b.jgrid.checkValues(e,f,a);if(!0===p[0]){c=b(a).triggerHandler("jqGridBeforeSubmitCell",[a.rows[d].id,k,e,d,f])||{};b.isFunction(a.p.beforeSubmitCell)&&((c=a.p.beforeSubmitCell.call(a,a.rows[d].id,k,e,d,f))||(c={}));0<b("input.hasDatepicker",g).length&&b("input.hasDatepicker",
-g).datepicker("hide");if("remote"==a.p.cellsubmit)if(a.p.cellurl){var m={};a.p.autoencode&&(e=b.jgrid.htmlEncode(e));m[k]=e;l=a.p.prmNames;i=l.id;j=l.oper;m[i]=b.jgrid.stripPref(a.p.idPrefix,a.rows[d].id);m[j]=l.editoper;m=b.extend(c,m);b("#lui_"+b.jgrid.jqID(a.p.id)).show();a.grid.hDiv.loading=!0;b.ajax(b.extend({url:a.p.cellurl,data:b.isFunction(a.p.serializeCellData)?a.p.serializeCellData.call(a,m):m,type:"POST",complete:function(c,i){b("#lui_"+a.p.id).hide();a.grid.hDiv.loading=false;if(i=="success"){var j=
-b(a).triggerHandler("jqGridAfterSubmitCell",[a,c,m.id,k,e,d,f])||[true,""];j[0]===true&&b.isFunction(a.p.afterSubmitCell)&&(j=a.p.afterSubmitCell.call(a,c,m.id,k,e,d,f));if(j[0]===true){b(g).empty();b(a).jqGrid("setCell",a.rows[d].id,f,h,false,false,true);b(g).addClass("dirty-cell");b(a.rows[d]).addClass("edited");b(a).triggerHandler("jqGridAfterSaveCell",[a.rows[d].id,k,e,d,f]);b.isFunction(a.p.afterSaveCell)&&a.p.afterSaveCell.call(a,a.rows[d].id,k,e,d,f);a.p.savedRow.splice(0,1)}else{b.jgrid.info_dialog(b.jgrid.errors.errcap,
-j[1],b.jgrid.edit.bClose);b(a).jqGrid("restoreCell",d,f)}}},error:function(c,e,h){b("#lui_"+b.jgrid.jqID(a.p.id)).hide();a.grid.hDiv.loading=false;b(a).triggerHandler("jqGridErrorCell",[c,e,h]);b.isFunction(a.p.errorCell)?a.p.errorCell.call(a,c,e,h):b.jgrid.info_dialog(b.jgrid.errors.errcap,c.status+" : "+c.statusText+"<br/>"+e,b.jgrid.edit.bClose);b(a).jqGrid("restoreCell",d,f)}},b.jgrid.ajaxOptions,a.p.ajaxCellOptions||{}))}else try{b.jgrid.info_dialog(b.jgrid.errors.errcap,b.jgrid.errors.nourl,
-b.jgrid.edit.bClose),b(a).jqGrid("restoreCell",d,f)}catch(q){}"clientArray"==a.p.cellsubmit&&(b(g).empty(),b(a).jqGrid("setCell",a.rows[d].id,f,h,!1,!1,!0),b(g).addClass("dirty-cell"),b(a.rows[d]).addClass("edited"),b(a).triggerHandler("jqGridAfterSaveCell",[a.rows[d].id,k,e,d,f]),b.isFunction(a.p.afterSaveCell)&&a.p.afterSaveCell.call(a,a.rows[d].id,k,e,d,f),a.p.savedRow.splice(0,1))}else try{window.setTimeout(function(){b.jgrid.info_dialog(b.jgrid.errors.errcap,e+" "+p[1],b.jgrid.edit.bClose)},
-100),b(a).jqGrid("restoreCell",d,f)}catch(r){}}else b(a).jqGrid("restoreCell",d,f)}b.browser.opera?b("#"+b.jgrid.jqID(a.p.knv)).attr("tabindex","-1").focus():window.setTimeout(function(){b("#"+b.jgrid.jqID(a.p.knv)).attr("tabindex","-1").focus()},0)}})},restoreCell:function(d,f){return this.each(function(){var a=this,c;if(a.grid&&!0===a.p.cellEdit){c=1<=a.p.savedRow.length?0:null;if(null!==c){var g=b("td:eq("+f+")",a.rows[d]);if(b.isFunction(b.fn.datepicker))try{b("input.hasDatepicker",g).datepicker("hide")}catch(e){}b(g).empty().attr("tabindex",
-"-1");b(a).jqGrid("setCell",a.rows[d].id,f,a.p.savedRow[c].v,!1,!1,!0);b(a).triggerHandler("jqGridAfterRestoreCell",[a.rows[d].id,a.p.savedRow[c].v,d,f]);b.isFunction(a.p.afterRestoreCell)&&a.p.afterRestoreCell.call(a,a.rows[d].id,a.p.savedRow[c].v,d,f);a.p.savedRow.splice(0,1)}window.setTimeout(function(){b("#"+a.p.knv).attr("tabindex","-1").focus()},0)}})},nextCell:function(d,f){return this.each(function(){var a=!1;if(this.grid&&!0===this.p.cellEdit){for(var c=f+1;c<this.p.colModel.length;c++)if(!0===
-this.p.colModel[c].editable){a=c;break}!1!==a?b(this).jqGrid("editCell",d,a,!0):0<this.p.savedRow.length&&b(this).jqGrid("saveCell",d,f)}})},prevCell:function(d,f){return this.each(function(){var a=!1;if(this.grid&&!0===this.p.cellEdit){for(var c=f-1;0<=c;c--)if(!0===this.p.colModel[c].editable){a=c;break}!1!==a?b(this).jqGrid("editCell",d,a,!0):0<this.p.savedRow.length&&b(this).jqGrid("saveCell",d,f)}})},GridNav:function(){return this.each(function(){function d(c,d,e){if("v"==e.substr(0,1)){var f=
-b(a.grid.bDiv)[0].clientHeight,g=b(a.grid.bDiv)[0].scrollTop,l=a.rows[c].offsetTop+a.rows[c].clientHeight,o=a.rows[c].offsetTop;"vd"==e&&l>=f&&(b(a.grid.bDiv)[0].scrollTop=b(a.grid.bDiv)[0].scrollTop+a.rows[c].clientHeight);"vu"==e&&o<g&&(b(a.grid.bDiv)[0].scrollTop=b(a.grid.bDiv)[0].scrollTop-a.rows[c].clientHeight)}"h"==e&&(e=b(a.grid.bDiv)[0].clientWidth,f=b(a.grid.bDiv)[0].scrollLeft,g=a.rows[c].cells[d].offsetLeft,a.rows[c].cells[d].offsetLeft+a.rows[c].cells[d].clientWidth>=e+parseInt(f,10)?
-b(a.grid.bDiv)[0].scrollLeft=b(a.grid.bDiv)[0].scrollLeft+a.rows[c].cells[d].clientWidth:g<f&&(b(a.grid.bDiv)[0].scrollLeft=b(a.grid.bDiv)[0].scrollLeft-a.rows[c].cells[d].clientWidth))}function f(b,c){var d,e;if("lft"==c){d=b+1;for(e=b;0<=e;e--)if(!0!==a.p.colModel[e].hidden){d=e;break}}if("rgt"==c){d=b-1;for(e=b;e<a.p.colModel.length;e++)if(!0!==a.p.colModel[e].hidden){d=e;break}}return d}var a=this;if(a.grid&&!0===a.p.cellEdit){a.p.knv=a.p.id+"_kn";var c=b("<div style='position:absolute;top:-1000000px;width:1px;height:1px;' tabindex='0'><div tabindex='-1' style='width:1px;height:1px;' id='"+
-a.p.knv+"'></div></div>"),g,e;b(c).insertBefore(a.grid.cDiv);b("#"+a.p.knv).focus().keydown(function(c){e=c.keyCode;"rtl"==a.p.direction&&(37===e?e=39:39===e&&(e=37));switch(e){case 38:0<a.p.iRow-1&&(d(a.p.iRow-1,a.p.iCol,"vu"),b(a).jqGrid("editCell",a.p.iRow-1,a.p.iCol,!1));break;case 40:a.p.iRow+1<=a.rows.length-1&&(d(a.p.iRow+1,a.p.iCol,"vd"),b(a).jqGrid("editCell",a.p.iRow+1,a.p.iCol,!1));break;case 37:0<=a.p.iCol-1&&(g=f(a.p.iCol-1,"lft"),d(a.p.iRow,g,"h"),b(a).jqGrid("editCell",a.p.iRow,g,!1));
-break;case 39:a.p.iCol+1<=a.p.colModel.length-1&&(g=f(a.p.iCol+1,"rgt"),d(a.p.iRow,g,"h"),b(a).jqGrid("editCell",a.p.iRow,g,!1));break;case 13:0<=parseInt(a.p.iCol,10)&&0<=parseInt(a.p.iRow,10)&&b(a).jqGrid("editCell",a.p.iRow,a.p.iCol,!0);break;default:return!0}return!1})}})},getChangedCells:function(d){var f=[];d||(d="all");this.each(function(){var a=this,c;a.grid&&!0===a.p.cellEdit&&b(a.rows).each(function(g){var e={};b(this).hasClass("edited")&&(b("td",this).each(function(f){c=a.p.colModel[f].name;
-if("cb"!==c&&"subgrid"!==c)if("dirty"==d){if(b(this).hasClass("dirty-cell"))try{e[c]=b.unformat.call(a,this,{rowId:a.rows[g].id,colModel:a.p.colModel[f]},f)}catch(i){e[c]=b.jgrid.htmlDecode(b(this).html())}}else try{e[c]=b.unformat.call(a,this,{rowId:a.rows[g].id,colModel:a.p.colModel[f]},f)}catch(k){e[c]=b.jgrid.htmlDecode(b(this).html())}}),e.id=this.id,f.push(e))})});return f}})})(jQuery);
-(function(b){b.fn.jqm=function(a){var k={overlay:50,closeoverlay:!0,overlayClass:"jqmOverlay",closeClass:"jqmClose",trigger:".jqModal",ajax:d,ajaxText:"",target:d,modal:d,toTop:d,onShow:d,onHide:d,onLoad:d};return this.each(function(){if(this._jqm)return i[this._jqm].c=b.extend({},i[this._jqm].c,a);g++;this._jqm=g;i[g]={c:b.extend(k,b.jqm.params,a),a:d,w:b(this).addClass("jqmID"+g),s:g};k.trigger&&b(this).jqmAddTrigger(k.trigger)})};b.fn.jqmAddClose=function(a){return n(this,a,"jqmHide")};b.fn.jqmAddTrigger=
-function(a){return n(this,a,"jqmShow")};b.fn.jqmShow=function(a){return this.each(function(){b.jqm.open(this._jqm,a)})};b.fn.jqmHide=function(a){return this.each(function(){b.jqm.close(this._jqm,a)})};b.jqm={hash:{},open:function(a,k){var c=i[a],e=c.c,l="."+e.closeClass,h=parseInt(c.w.css("z-index")),h=0<h?h:3E3,f=b("<div></div>").css({height:"100%",width:"100%",position:"fixed",left:0,top:0,"z-index":h-1,opacity:e.overlay/100});if(c.a)return d;c.t=k;c.a=!0;c.w.css("z-index",h);e.modal?(j[0]||setTimeout(function(){o("bind")},
-1),j.push(a)):0<e.overlay?e.closeoverlay&&c.w.jqmAddClose(f):f=d;c.o=f?f.addClass(e.overlayClass).prependTo("body"):d;if(p&&(b("html,body").css({height:"100%",width:"100%"}),f)){var f=f.css({position:"absolute"})[0],g;for(g in{Top:1,Left:1})f.style.setExpression(g.toLowerCase(),"(_=(document.documentElement.scroll"+g+" || document.body.scroll"+g+"))+'px'")}e.ajax?(h=e.target||c.w,f=e.ajax,h="string"==typeof h?b(h,c.w):b(h),f="@"==f.substr(0,1)?b(k).attr(f.substring(1)):f,h.html(e.ajaxText).load(f,
-function(){e.onLoad&&e.onLoad.call(this,c);l&&c.w.jqmAddClose(b(l,c.w));q(c)})):l&&c.w.jqmAddClose(b(l,c.w));e.toTop&&c.o&&c.w.before('<span id="jqmP'+c.w[0]._jqm+'"></span>').insertAfter(c.o);e.onShow?e.onShow(c):c.w.show();q(c);return d},close:function(a){a=i[a];if(!a.a)return d;a.a=d;j[0]&&(j.pop(),j[0]||o("unbind"));a.c.toTop&&a.o&&b("#jqmP"+a.w[0]._jqm).after(a.w).remove();if(a.c.onHide)a.c.onHide(a);else a.w.hide(),a.o&&a.o.remove();return d},params:{}};var g=0,i=b.jqm.hash,j=[],p=b.browser.msie&&
-"6.0"==b.browser.version,d=!1,q=function(a){var d=b('<iframe src="javascript:false;document.write(\'\');" class="jqm"></iframe>').css({opacity:0});p&&(a.o?a.o.html('<p style="width:100%;height:100%"/>').prepend(d):b("iframe.jqm",a.w)[0]||a.w.prepend(d));r(a)},r=function(a){try{b(":input:visible",a.w)[0].focus()}catch(d){}},o=function(a){b(document)[a]("keypress",m)[a]("keydown",m)[a]("mousedown",m)},m=function(a){var d=i[j[j.length-1]];(a=!b(a.target).parents(".jqmID"+d.s)[0])&&r(d);return!a},n=function(a,
-g,c){return a.each(function(){var a=this._jqm;b(g).each(function(){this[c]||(this[c]=[],b(this).click(function(){for(var a in{jqmShow:1,jqmHide:1})for(var b in this[a])if(i[this[a][b]])i[this[a][b]].w[a](this);return d}));this[c].push(a)})})}})(jQuery);
-(function(b){b.fn.jqDrag=function(a){return h(this,a,"d")};b.fn.jqResize=function(a,b){return h(this,a,"r",b)};b.jqDnR={dnr:{},e:0,drag:function(a){"d"==d.k?e.css({left:d.X+a.pageX-d.pX,top:d.Y+a.pageY-d.pY}):(e.css({width:Math.max(a.pageX-d.pX+d.W,0),height:Math.max(a.pageY-d.pY+d.H,0)}),f&&g.css({width:Math.max(a.pageX-f.pX+f.W,0),height:Math.max(a.pageY-f.pY+f.H,0)}));return!1},stop:function(){b(document).unbind("mousemove",c.drag).unbind("mouseup",c.stop)}};var c=b.jqDnR,d=c.dnr,e=c.e,g,f,h=function(a,
-c,h,l){return a.each(function(){c=c?b(c,a):a;c.bind("mousedown",{e:a,k:h},function(a){var c=a.data,i={};e=c.e;g=l?b(l):!1;if("relative"!=e.css("position"))try{e.position(i)}catch(h){}d={X:i.left||j("left")||0,Y:i.top||j("top")||0,W:j("width")||e[0].scrollWidth||0,H:j("height")||e[0].scrollHeight||0,pX:a.pageX,pY:a.pageY,k:c.k};f=g&&"d"!=c.k?{X:i.left||k("left")||0,Y:i.top||k("top")||0,W:g[0].offsetWidth||k("width")||0,H:g[0].offsetHeight||k("height")||0,pX:a.pageX,pY:a.pageY,k:c.k}:!1;if(b("input.hasDatepicker",
-e[0])[0])try{b("input.hasDatepicker",e[0]).datepicker("hide")}catch(m){}b(document).mousemove(b.jqDnR.drag).mouseup(b.jqDnR.stop);return!1})})},j=function(a){return parseInt(e.css(a),10)||!1},k=function(a){return parseInt(g.css(a),10)||!1}})(jQuery);
-(function(b){b.jgrid.extend({setSubGrid:function(){return this.each(function(){var e;this.p.subGridOptions=b.extend({plusicon:"ui-icon-plus",minusicon:"ui-icon-minus",openicon:"ui-icon-carat-1-sw",expandOnLoad:!1,delayOnLoad:50,selectOnExpand:!1,reloadOnExpand:!0},this.p.subGridOptions||{});this.p.colNames.unshift("");this.p.colModel.unshift({name:"subgrid",width:b.browser.safari?this.p.subGridWidth+this.p.cellLayout:this.p.subGridWidth,sortable:!1,resizable:!1,hidedlg:!0,search:!1,fixed:!0});e=this.p.subGridModel;
-if(e[0]){e[0].align=b.extend([],e[0].align||[]);for(var c=0;c<e[0].name.length;c++)e[0].align[c]=e[0].align[c]||"left"}})},addSubGridCell:function(b,c){var a="",m,l;this.each(function(){a=this.formatCol(b,c);l=this.p.id;m=this.p.subGridOptions.plusicon});return'<td role="gridcell" aria-describedby="'+l+'_subgrid" class="ui-sgcollapsed sgcollapsed" '+a+"><a href='javascript:void(0);'><span class='ui-icon "+m+"'></span></a></td>"},addSubGrid:function(e,c){return this.each(function(){var a=this;if(a.grid){var m=
-function(c,e,h){e=b("<td align='"+a.p.subGridModel[0].align[h]+"'></td>").html(e);b(c).append(e)},l=function(c,e){var h,f,n,d=b("<table cellspacing='0' cellpadding='0' border='0'><tbody></tbody></table>"),i=b("<tr></tr>");for(f=0;f<a.p.subGridModel[0].name.length;f++)h=b("<th class='ui-state-default ui-th-subgrid ui-th-column ui-th-"+a.p.direction+"'></th>"),b(h).html(a.p.subGridModel[0].name[f]),b(h).width(a.p.subGridModel[0].width[f]),b(i).append(h);b(d).append(i);c&&(n=a.p.xmlReader.subgrid,b(n.root+
-" "+n.row,c).each(function(){i=b("<tr class='ui-widget-content ui-subtblcell'></tr>");if(!0===n.repeatitems)b(n.cell,this).each(function(a){m(i,b(this).text()||"&#160;",a)});else{var c=a.p.subGridModel[0].mapping||a.p.subGridModel[0].name;if(c)for(f=0;f<c.length;f++)m(i,b(c[f],this).text()||"&#160;",f)}b(d).append(i)}));h=b("table:first",a.grid.bDiv).attr("id")+"_";b("#"+b.jgrid.jqID(h+e)).append(d);a.grid.hDiv.loading=!1;b("#load_"+b.jgrid.jqID(a.p.id)).hide();return!1},p=function(c,e){var h,f,d,
-g,i,k=b("<table cellspacing='0' cellpadding='0' border='0'><tbody></tbody></table>"),j=b("<tr></tr>");for(f=0;f<a.p.subGridModel[0].name.length;f++)h=b("<th class='ui-state-default ui-th-subgrid ui-th-column ui-th-"+a.p.direction+"'></th>"),b(h).html(a.p.subGridModel[0].name[f]),b(h).width(a.p.subGridModel[0].width[f]),b(j).append(h);b(k).append(j);if(c&&(g=a.p.jsonReader.subgrid,h=b.jgrid.getAccessor(c,g.root),"undefined"!==typeof h))for(f=0;f<h.length;f++){d=h[f];j=b("<tr class='ui-widget-content ui-subtblcell'></tr>");
-if(!0===g.repeatitems){g.cell&&(d=d[g.cell]);for(i=0;i<d.length;i++)m(j,d[i]||"&#160;",i)}else{var l=a.p.subGridModel[0].mapping||a.p.subGridModel[0].name;if(l.length)for(i=0;i<l.length;i++)m(j,d[l[i]]||"&#160;",i)}b(k).append(j)}f=b("table:first",a.grid.bDiv).attr("id")+"_";b("#"+b.jgrid.jqID(f+e)).append(k);a.grid.hDiv.loading=!1;b("#load_"+b.jgrid.jqID(a.p.id)).hide();return!1},t=function(c){var e,d,f,g;e=b(c).attr("id");d={nd_:(new Date).getTime()};d[a.p.prmNames.subgridid]=e;if(!a.p.subGridModel[0])return!1;
-if(a.p.subGridModel[0].params)for(g=0;g<a.p.subGridModel[0].params.length;g++)for(f=0;f<a.p.colModel.length;f++)a.p.colModel[f].name===a.p.subGridModel[0].params[g]&&(d[a.p.colModel[f].name]=b("td:eq("+f+")",c).text().replace(/\&#160\;/ig,""));if(!a.grid.hDiv.loading)switch(a.grid.hDiv.loading=!0,b("#load_"+b.jgrid.jqID(a.p.id)).show(),a.p.subgridtype||(a.p.subgridtype=a.p.datatype),b.isFunction(a.p.subgridtype)?a.p.subgridtype.call(a,d):a.p.subgridtype=a.p.subgridtype.toLowerCase(),a.p.subgridtype){case "xml":case "json":b.ajax(b.extend({type:a.p.mtype,
-url:a.p.subGridUrl,dataType:a.p.subgridtype,data:b.isFunction(a.p.serializeSubGridData)?a.p.serializeSubGridData.call(a,d):d,complete:function(c){a.p.subgridtype==="xml"?l(c.responseXML,e):p(b.jgrid.parse(c.responseText),e)}},b.jgrid.ajaxOptions,a.p.ajaxSubgridOptions||{}))}return!1},d,k,q,r=0,g,j;b.each(a.p.colModel,function(){(!0===this.hidden||"rn"===this.name||"cb"===this.name)&&r++});var s=a.rows.length,o=1;void 0!==c&&0<c&&(o=c,s=c+1);for(;o<s;)b(a.rows[o]).hasClass("jqgrow")&&b(a.rows[o].cells[e]).bind("click",
-function(){var c=b(this).parent("tr")[0];j=c.nextSibling;if(b(this).hasClass("sgcollapsed")){k=a.p.id;d=c.id;if(a.p.subGridOptions.reloadOnExpand===true||a.p.subGridOptions.reloadOnExpand===false&&!b(j).hasClass("ui-subgrid")){q=e>=1?"<td colspan='"+e+"'>&#160;</td>":"";g=b(a).triggerHandler("jqGridSubGridBeforeExpand",[k+"_"+d,d]);(g=g===false||g==="stop"?false:true)&&b.isFunction(a.p.subGridBeforeExpand)&&(g=a.p.subGridBeforeExpand.call(a,k+"_"+d,d));if(g===false)return false;b(c).after("<tr role='row' class='ui-subgrid'>"+
-q+"<td class='ui-widget-content subgrid-cell'><span class='ui-icon "+a.p.subGridOptions.openicon+"'></span></td><td colspan='"+parseInt(a.p.colNames.length-1-r,10)+"' class='ui-widget-content subgrid-data'><div id="+k+"_"+d+" class='tablediv'></div></td></tr>");b(a).triggerHandler("jqGridSubGridRowExpanded",[k+"_"+d,d]);b.isFunction(a.p.subGridRowExpanded)?a.p.subGridRowExpanded.call(a,k+"_"+d,d):t(c)}else b(j).show();b(this).html("<a href='javascript:void(0);'><span class='ui-icon "+a.p.subGridOptions.minusicon+
-"'></span></a>").removeClass("sgcollapsed").addClass("sgexpanded");a.p.subGridOptions.selectOnExpand&&b(a).jqGrid("setSelection",d)}else if(b(this).hasClass("sgexpanded")){g=b(a).triggerHandler("jqGridSubGridRowColapsed",[k+"_"+d,d]);if((g=g===false||g==="stop"?false:true)&&b.isFunction(a.p.subGridRowColapsed)){d=c.id;g=a.p.subGridRowColapsed.call(a,k+"_"+d,d)}if(g===false)return false;a.p.subGridOptions.reloadOnExpand===true?b(j).remove(".ui-subgrid"):b(j).hasClass("ui-subgrid")&&b(j).hide();b(this).html("<a href='javascript:void(0);'><span class='ui-icon "+
-a.p.subGridOptions.plusicon+"'></span></a>").removeClass("sgexpanded").addClass("sgcollapsed")}return false}),o++;!0===a.p.subGridOptions.expandOnLoad&&b(a.rows).filter(".jqgrow").each(function(a,c){b(c.cells[0]).click()});a.subGridXml=function(a,b){l(a,b)};a.subGridJson=function(a,b){p(a,b)}}})},expandSubGridRow:function(e){return this.each(function(){if((this.grid||e)&&!0===this.p.subGrid){var c=b(this).jqGrid("getInd",e,!0);c&&(c=b("td.sgcollapsed",c)[0])&&b(c).trigger("click")}})},collapseSubGridRow:function(e){return this.each(function(){if((this.grid||
-e)&&!0===this.p.subGrid){var c=b(this).jqGrid("getInd",e,!0);c&&(c=b("td.sgexpanded",c)[0])&&b(c).trigger("click")}})},toggleSubGridRow:function(e){return this.each(function(){if((this.grid||e)&&!0===this.p.subGrid){var c=b(this).jqGrid("getInd",e,!0);if(c){var a=b("td.sgcollapsed",c)[0];a?b(a).trigger("click"):(a=b("td.sgexpanded",c)[0])&&b(a).trigger("click")}}})}})})(jQuery);
-(function(b){b.extend(b.jgrid,{template:function(a){var c=b.makeArray(arguments).slice(1),f=1;void 0===a&&(a="");return a.replace(/\{([\w\-]+)(?:\:([\w\.]*)(?:\((.*?)?\))?)?\}/g,function(a,d){if(isNaN(parseInt(d,10))){for(var b=c[f],g=b.length;g--;)if(d===b[g].nm)return b[g].v;f++}else return f++,c[parseInt(d,10)]})}});b.jgrid.extend({groupingSetup:function(){return this.each(function(){var a=this.p.groupingView;if(null!==a&&("object"===typeof a||b.isFunction(a)))if(a.groupField.length){"undefined"===
-typeof a.visibiltyOnNextGrouping&&(a.visibiltyOnNextGrouping=[]);a.lastvalues=[];a.groups=[];a.counters=[];for(var c=0;c<a.groupField.length;c++)a.groupOrder[c]||(a.groupOrder[c]="asc"),a.groupText[c]||(a.groupText[c]="{0}"),"boolean"!==typeof a.groupColumnShow[c]&&(a.groupColumnShow[c]=!0),"boolean"!==typeof a.groupSummary[c]&&(a.groupSummary[c]=!1),!0===a.groupColumnShow[c]?(a.visibiltyOnNextGrouping[c]=!0,b(this).jqGrid("showCol",a.groupField[c])):(a.visibiltyOnNextGrouping[c]=b("#"+b.jgrid.jqID(this.p.id+
-"_"+a.groupField[c])).is(":visible"),b(this).jqGrid("hideCol",a.groupField[c]));a.summary=[];for(var c=this.p.colModel,f=0,e=c.length;f<e;f++)c[f].summaryType&&a.summary.push({nm:c[f].name,st:c[f].summaryType,v:"",sr:c[f].summaryRound,srt:c[f].summaryRoundType||"round"})}else this.p.grouping=!1;else this.p.grouping=!1})},groupingPrepare:function(a,c,f,e){this.each(function(){for(var d=this.p.groupingView,h=this,g=d.groupField.length,k,j,p=0,i=0;i<g;i++)k=d.groupField[i],j=f[k],void 0!==j&&(0===e?
-(d.groups.push({idx:i,dataIndex:k,value:j,startRow:e,cnt:1,summary:[]}),d.lastvalues[i]=j,d.counters[i]={cnt:1,pos:d.groups.length-1,summary:b.extend(!0,[],d.summary)}):"object"!==typeof j&&d.lastvalues[i]!==j?(d.groups.push({idx:i,dataIndex:k,value:j,startRow:e,cnt:1,summary:[]}),d.lastvalues[i]=j,p=1,d.counters[i]={cnt:1,pos:d.groups.length-1,summary:b.extend(!0,[],d.summary)}):1===p?(d.groups.push({idx:i,dataIndex:k,value:j,startRow:e,cnt:1,summary:[]}),d.lastvalues[i]=j,d.counters[i]={cnt:1,pos:d.groups.length-
-1,summary:b.extend(!0,[],d.summary)}):(d.counters[i].cnt+=1,d.groups[d.counters[i].pos].cnt=d.counters[i].cnt),b.each(d.counters[i].summary,function(){this.v=b.isFunction(this.st)?this.st.call(h,this.v,this.nm,f):b(h).jqGrid("groupingCalculations.handler",this.st,this.v,this.nm,this.sr,this.srt,f)}),d.groups[d.counters[i].pos].summary=d.counters[i].summary);c.push(a)});return c},groupingToggle:function(a){this.each(function(){var c=this.p.groupingView,f=a.split("_"),e=parseInt(f[f.length-2],10);f.splice(f.length-
-2,2);var f=f.join("_"),d=c.minusicon,h=c.plusicon,g=b("#"+b.jgrid.jqID(a)),g=g.length?g[0].nextSibling:null,k=b("#"+b.jgrid.jqID(a)+" span.tree-wrap-"+this.p.direction),j=!1;if(k.hasClass(d)){if(c.showSummaryOnHide){if(g)for(;g&&!(b(g).hasClass("jqfoot")&&parseInt(b(g).attr("jqfootlevel"),10)<=e);)b(g).hide(),g=g.nextSibling}else if(g)for(;g&&!b(g).hasClass(f+"_"+(""+e))&&!b(g).hasClass(f+"_"+(""+(e-1)));)b(g).hide(),g=g.nextSibling;k.removeClass(d).addClass(h);j=!0}else{if(g)for(;g&&!b(g).hasClass(f+
-"_"+(""+e))&&!b(g).hasClass(f+"_"+(""+(e-1)));)b(g).show(),(c=b(g).find("span.tree-wrap-"+this.p.direction))&&b(c).hasClass(h)&&b(c).removeClass(h).addClass(d),g=g.nextSibling;k.removeClass(h).addClass(d)}b(this).triggerHandler("jqGridGroupingClickGroup",[a,j]);b.isFunction(this.p.onClickGroup)&&this.p.onClickGroup.call(this,a,j)});return!1},groupingRender:function(a,c){return this.each(function(){function f(a,b,c){if(0===b)return c[a];var d=c[a].idx;if(0===d)return c[a];for(;0<=a;a--)if(c[a].idx===
-d-b)return c[a]}var e=this,d=e.p.groupingView,h="",g="",k,j,p=d.groupCollapse?d.plusicon:d.minusicon,i,w=[],x=d.groupField.length,p=p+(" tree-wrap-"+e.p.direction);b.each(e.p.colModel,function(a,b){for(var c=0;c<x;c++)if(d.groupField[c]===b.name){w[c]=a;break}});var s=0,y=b.makeArray(d.groupSummary);y.reverse();b.each(d.groups,function(r,l){s++;j=e.p.id+"ghead_"+l.idx;k=j+"_"+r;g="<span style='cursor:pointer;' class='ui-icon "+p+"' onclick=\"jQuery('#"+b.jgrid.jqID(e.p.id)+"').jqGrid('groupingToggle','"+
-k+"');return false;\"></span>";try{i=e.formatter(k,l.value,w[l.idx],l.value)}catch(C){i=l.value}h+='<tr id="'+k+'" role="row" class= "ui-widget-content jqgroup ui-row-'+e.p.direction+" "+j+'"><td style="padding-left:'+12*l.idx+'px;" colspan="'+c+'">'+g+b.jgrid.template(d.groupText[l.idx],i,l.cnt,l.summary)+"</td></tr>";if(x-1===l.idx){for(var m=d.groups[r+1],o=void 0!==m?d.groups[r+1].startRow:a.length,t=l.startRow;t<o;t++)h+=a[t].join("");var q;if(void 0!==m){for(q=0;q<d.groupField.length&&m.dataIndex!==
-d.groupField[q];q++);s=d.groupField.length-q}for(m=0;m<s;m++)if(y[m]){o="";d.groupCollapse&&!d.showSummaryOnHide&&(o=' style="display:none;"');h+="<tr"+o+' jqfootlevel="'+(l.idx-m)+'" role="row" class="ui-widget-content jqfoot ui-row-'+e.p.direction+'">';for(var o=f(r,m,d.groups),u=e.p.colModel,v,z=o.cnt,n=0;n<c;n++){var A="<td "+e.formatCol(n,1,"")+">&#160;</td>",B="{0}";b.each(o.summary,function(){if(this.nm===u[n].name){u[n].summaryTpl&&(B=u[n].summaryTpl);"string"===typeof this.st&&"avg"===this.st.toLowerCase()&&
-(this.v&&0<z)&&(this.v/=z);try{v=e.formatter("",this.v,n,this)}catch(a){v=this.v}A="<td "+e.formatCol(n,1,"")+">"+b.jgrid.format(B,v)+"</td>";return!1}});h+=A}h+="</tr>"}s=q}});b("#"+b.jgrid.jqID(e.p.id)+" tbody:first").append(h);h=null})},groupingGroupBy:function(a,c){return this.each(function(){"string"===typeof a&&(a=[a]);var f=this.p.groupingView;this.p.grouping=!0;"undefined"===typeof f.visibiltyOnNextGrouping&&(f.visibiltyOnNextGrouping=[]);var e;for(e=0;e<f.groupField.length;e++)!f.groupColumnShow[e]&&
-f.visibiltyOnNextGrouping[e]&&b(this).jqGrid("showCol",f.groupField[e]);for(e=0;e<a.length;e++)f.visibiltyOnNextGrouping[e]=b("#"+b.jgrid.jqID(this.p.id)+"_"+b.jgrid.jqID(a[e])).is(":visible");this.p.groupingView=b.extend(this.p.groupingView,c||{});f.groupField=a;b(this).trigger("reloadGrid")})},groupingRemove:function(a){return this.each(function(){"undefined"===typeof a&&(a=!0);this.p.grouping=!1;if(!0===a){for(var c=this.p.groupingView,f=0;f<c.groupField.length;f++)!c.groupColumnShow[f]&&c.visibiltyOnNextGrouping[f]&&
-b(this).jqGrid("showCol",c.groupField);b("tr.jqgroup, tr.jqfoot","#"+b.jgrid.jqID(this.p.id)+" tbody:first").remove();b("tr.jqgrow:hidden","#"+b.jgrid.jqID(this.p.id)+" tbody:first").show()}else b(this).trigger("reloadGrid")})},groupingCalculations:{handler:function(a,c,b,e,d,h){var g={sum:function(){return parseFloat(c||0)+parseFloat(h[b]||0)},min:function(){return""===c?parseFloat(h[b]||0):Math.min(parseFloat(c),parseFloat(h[b]||0))},max:function(){return""===c?parseFloat(h[b]||0):Math.max(parseFloat(c),
-parseFloat(h[b]||0))},count:function(){""===c&&(c=0);return h.hasOwnProperty(b)?c+1:0},avg:function(){return g.sum()}};if(!g[a])throw"jqGrid Grouping No such method: "+a;a=g[a]();null!=e&&("fixed"==d?a=a.toFixed(e):(e=Math.pow(10,e),a=Math.round(a*e)/e));return a}}})})(jQuery);
-(function(d){d.jgrid.extend({setTreeNode:function(a,c){return this.each(function(){var b=this;if(b.grid&&b.p.treeGrid)for(var e=b.p.expColInd,g=b.p.treeReader.expanded_field,h=b.p.treeReader.leaf_field,f=b.p.treeReader.level_field,l=b.p.treeReader.icon_field,j=b.p.treeReader.loaded,i,p,m,k;a<c;)k=b.p.data[b.p._index[b.rows[a].id]],"nested"==b.p.treeGridModel&&!k[h]&&(i=parseInt(k[b.p.treeReader.left_field],10),p=parseInt(k[b.p.treeReader.right_field],10),k[h]=p===i+1?"true":"false",b.rows[a].cells[b.p._treeleafpos].innerHTML=
-k[h]),i=parseInt(k[f],10),0===b.p.tree_root_level?(m=i+1,p=i):(m=i,p=i-1),m="<div class='tree-wrap tree-wrap-"+b.p.direction+"' style='width:"+18*m+"px;'>",m+="<div style='"+("rtl"==b.p.direction?"right:":"left:")+18*p+"px;' class='ui-icon ",void 0!==k[j]&&(k[j]="true"==k[j]||!0===k[j]?!0:!1),"true"==k[h]||!0===k[h]?(m+=(void 0!==k[l]&&""!==k[l]?k[l]:b.p.treeIcons.leaf)+" tree-leaf treeclick",k[h]=!0,p="leaf"):(k[h]=!1,p=""),k[g]=("true"==k[g]||!0===k[g]?!0:!1)&&k[j],m=!1===k[g]?m+(!0===k[h]?"'":
-b.p.treeIcons.plus+" tree-plus treeclick'"):m+(!0===k[h]?"'":b.p.treeIcons.minus+" tree-minus treeclick'"),m+="></div></div>",d(b.rows[a].cells[e]).wrapInner("<span class='cell-wrapper"+p+"'></span>").prepend(m),i!==parseInt(b.p.tree_root_level,10)&&((k=(k=d(b).jqGrid("getNodeParent",k))&&k.hasOwnProperty(g)?k[g]:!0)||d(b.rows[a]).css("display","none")),d(b.rows[a].cells[e]).find("div.treeclick").bind("click",function(a){a=d(a.target||a.srcElement,b.rows).closest("tr.jqgrow")[0].id;a=b.p._index[a];
-if(!b.p.data[a][h])if(b.p.data[a][g]){d(b).jqGrid("collapseRow",b.p.data[a]);d(b).jqGrid("collapseNode",b.p.data[a])}else{d(b).jqGrid("expandRow",b.p.data[a]);d(b).jqGrid("expandNode",b.p.data[a])}return false}),!0===b.p.ExpandColClick&&d(b.rows[a].cells[e]).find("span.cell-wrapper").css("cursor","pointer").bind("click",function(a){var a=d(a.target||a.srcElement,b.rows).closest("tr.jqgrow")[0].id,c=b.p._index[a];if(!b.p.data[c][h])if(b.p.data[c][g]){d(b).jqGrid("collapseRow",b.p.data[c]);d(b).jqGrid("collapseNode",
-b.p.data[c])}else{d(b).jqGrid("expandRow",b.p.data[c]);d(b).jqGrid("expandNode",b.p.data[c])}d(b).jqGrid("setSelection",a);return false}),a++})},setTreeGrid:function(){return this.each(function(){var a=this,c=0,b,e=!1,g,h=[];if(a.p.treeGrid){a.p.treedatatype||d.extend(a.p,{treedatatype:a.p.datatype});a.p.subGrid=!1;a.p.altRows=!1;a.p.pgbuttons=!1;a.p.pginput=!1;a.p.gridview=!0;null===a.p.rowTotal&&(a.p.rowNum=1E4);a.p.multiselect=!1;a.p.rowList=[];a.p.expColInd=0;b="ui-icon-triangle-1-"+("rtl"==a.p.direction?
-"w":"e");a.p.treeIcons=d.extend({plus:b,minus:"ui-icon-triangle-1-s",leaf:"ui-icon-radio-off"},a.p.treeIcons||{});"nested"==a.p.treeGridModel?a.p.treeReader=d.extend({level_field:"level",left_field:"lft",right_field:"rgt",leaf_field:"isLeaf",expanded_field:"expanded",loaded:"loaded",icon_field:"icon"},a.p.treeReader):"adjacency"==a.p.treeGridModel&&(a.p.treeReader=d.extend({level_field:"level",parent_id_field:"parent",leaf_field:"isLeaf",expanded_field:"expanded",loaded:"loaded",icon_field:"icon"},
-a.p.treeReader));for(g in a.p.colModel)if(a.p.colModel.hasOwnProperty(g)){b=a.p.colModel[g].name;b==a.p.ExpandColumn&&!e&&(e=!0,a.p.expColInd=c);c++;for(var f in a.p.treeReader)a.p.treeReader[f]==b&&h.push(b)}d.each(a.p.treeReader,function(b,e){if(e&&d.inArray(e,h)===-1){if(b==="leaf_field")a.p._treeleafpos=c;c++;a.p.colNames.push(e);a.p.colModel.push({name:e,width:1,hidden:true,sortable:false,resizable:false,hidedlg:true,editable:true,search:false})}})}})},expandRow:function(a){this.each(function(){var c=
-this;if(c.grid&&c.p.treeGrid){var b=d(c).jqGrid("getNodeChildren",a),e=c.p.treeReader.expanded_field,g=c.rows;d(b).each(function(){var a=d.jgrid.getAccessor(this,c.p.localReader.id);d(g.namedItem(a)).css("display","");this[e]&&d(c).jqGrid("expandRow",this)})}})},collapseRow:function(a){this.each(function(){var c=this;if(c.grid&&c.p.treeGrid){var b=d(c).jqGrid("getNodeChildren",a),e=c.p.treeReader.expanded_field,g=c.rows;d(b).each(function(){var a=d.jgrid.getAccessor(this,c.p.localReader.id);d(g.namedItem(a)).css("display",
-"none");this[e]&&d(c).jqGrid("collapseRow",this)})}})},getRootNodes:function(){var a=[];this.each(function(){var c=this;if(c.grid&&c.p.treeGrid)switch(c.p.treeGridModel){case "nested":var b=c.p.treeReader.level_field;d(c.p.data).each(function(){parseInt(this[b],10)===parseInt(c.p.tree_root_level,10)&&a.push(this)});break;case "adjacency":var e=c.p.treeReader.parent_id_field;d(c.p.data).each(function(){(null===this[e]||"null"==(""+this[e]).toLowerCase())&&a.push(this)})}});return a},getNodeDepth:function(a){var c=
-null;this.each(function(){if(this.grid&&this.p.treeGrid)switch(this.p.treeGridModel){case "nested":c=parseInt(a[this.p.treeReader.level_field],10)-parseInt(this.p.tree_root_level,10);break;case "adjacency":c=d(this).jqGrid("getNodeAncestors",a).length}});return c},getNodeParent:function(a){var c=null;this.each(function(){if(this.grid&&this.p.treeGrid)switch(this.p.treeGridModel){case "nested":var b=this.p.treeReader.left_field,e=this.p.treeReader.right_field,g=this.p.treeReader.level_field,h=parseInt(a[b],
-10),f=parseInt(a[e],10),l=parseInt(a[g],10);d(this.p.data).each(function(){if(parseInt(this[g],10)===l-1&&parseInt(this[b],10)<h&&parseInt(this[e],10)>f)return c=this,!1});break;case "adjacency":var j=this.p.treeReader.parent_id_field,i=this.p.localReader.id;d(this.p.data).each(function(){if(this[i]==a[j])return c=this,!1})}});return c},getNodeChildren:function(a){var c=[];this.each(function(){if(this.grid&&this.p.treeGrid)switch(this.p.treeGridModel){case "nested":var b=this.p.treeReader.left_field,
-e=this.p.treeReader.right_field,g=this.p.treeReader.level_field,h=parseInt(a[b],10),f=parseInt(a[e],10),l=parseInt(a[g],10);d(this.p.data).each(function(){parseInt(this[g],10)===l+1&&(parseInt(this[b],10)>h&&parseInt(this[e],10)<f)&&c.push(this)});break;case "adjacency":var j=this.p.treeReader.parent_id_field,i=this.p.localReader.id;d(this.p.data).each(function(){this[j]==a[i]&&c.push(this)})}});return c},getFullTreeNode:function(a){var c=[];this.each(function(){var b;if(this.grid&&this.p.treeGrid)switch(this.p.treeGridModel){case "nested":var e=
-this.p.treeReader.left_field,g=this.p.treeReader.right_field,h=this.p.treeReader.level_field,f=parseInt(a[e],10),l=parseInt(a[g],10),j=parseInt(a[h],10);d(this.p.data).each(function(){parseInt(this[h],10)>=j&&(parseInt(this[e],10)>=f&&parseInt(this[e],10)<=l)&&c.push(this)});break;case "adjacency":if(a){c.push(a);var i=this.p.treeReader.parent_id_field,p=this.p.localReader.id;d(this.p.data).each(function(a){b=c.length;for(a=0;a<b;a++)if(c[a][p]==this[i]){c.push(this);break}})}}});return c},getNodeAncestors:function(a){var c=
-[];this.each(function(){if(this.grid&&this.p.treeGrid)for(var b=d(this).jqGrid("getNodeParent",a);b;)c.push(b),b=d(this).jqGrid("getNodeParent",b)});return c},isVisibleNode:function(a){var c=!0;this.each(function(){if(this.grid&&this.p.treeGrid){var b=d(this).jqGrid("getNodeAncestors",a),e=this.p.treeReader.expanded_field;d(b).each(function(){c=c&&this[e];if(!c)return!1})}});return c},isNodeLoaded:function(a){var c;this.each(function(){if(this.grid&&this.p.treeGrid){var b=this.p.treeReader.leaf_field;
-c=void 0!==a?void 0!==a.loaded?a.loaded:a[b]||0<d(this).jqGrid("getNodeChildren",a).length?!0:!1:!1}});return c},expandNode:function(a){return this.each(function(){if(this.grid&&this.p.treeGrid){var c=this.p.treeReader.expanded_field,b=this.p.treeReader.parent_id_field,e=this.p.treeReader.loaded,g=this.p.treeReader.level_field,h=this.p.treeReader.left_field,f=this.p.treeReader.right_field;if(!a[c]){var l=d.jgrid.getAccessor(a,this.p.localReader.id),j=d("#"+d.jgrid.jqID(l),this.grid.bDiv)[0],i=this.p._index[l];
-d(this).jqGrid("isNodeLoaded",this.p.data[i])?(a[c]=!0,d("div.treeclick",j).removeClass(this.p.treeIcons.plus+" tree-plus").addClass(this.p.treeIcons.minus+" tree-minus")):this.grid.hDiv.loading||(a[c]=!0,d("div.treeclick",j).removeClass(this.p.treeIcons.plus+" tree-plus").addClass(this.p.treeIcons.minus+" tree-minus"),this.p.treeANode=j.rowIndex,this.p.datatype=this.p.treedatatype,"nested"==this.p.treeGridModel?d(this).jqGrid("setGridParam",{postData:{nodeid:l,n_left:a[h],n_right:a[f],n_level:a[g]}}):
-d(this).jqGrid("setGridParam",{postData:{nodeid:l,parentid:a[b],n_level:a[g]}}),d(this).trigger("reloadGrid"),a[e]=!0,"nested"==this.p.treeGridModel?d(this).jqGrid("setGridParam",{postData:{nodeid:"",n_left:"",n_right:"",n_level:""}}):d(this).jqGrid("setGridParam",{postData:{nodeid:"",parentid:"",n_level:""}}))}}})},collapseNode:function(a){return this.each(function(){if(this.grid&&this.p.treeGrid){var c=this.p.treeReader.expanded_field;a[c]&&(a[c]=!1,c=d.jgrid.getAccessor(a,this.p.localReader.id),
-c=d("#"+d.jgrid.jqID(c),this.grid.bDiv)[0],d("div.treeclick",c).removeClass(this.p.treeIcons.minus+" tree-minus").addClass(this.p.treeIcons.plus+" tree-plus"))}})},SortTree:function(a,c,b,e){return this.each(function(){if(this.grid&&this.p.treeGrid){var g,h,f,l=[],j=this,i;g=d(this).jqGrid("getRootNodes");g=d.jgrid.from(g);g.orderBy(a,c,b,e);i=g.select();g=0;for(h=i.length;g<h;g++)f=i[g],l.push(f),d(this).jqGrid("collectChildrenSortTree",l,f,a,c,b,e);d.each(l,function(a){var b=d.jgrid.getAccessor(this,
-j.p.localReader.id);d("#"+d.jgrid.jqID(j.p.id)+" tbody tr:eq("+a+")").after(d("tr#"+d.jgrid.jqID(b),j.grid.bDiv))});l=i=g=null}})},collectChildrenSortTree:function(a,c,b,e,g,h){return this.each(function(){if(this.grid&&this.p.treeGrid){var f,l,j,i;f=d(this).jqGrid("getNodeChildren",c);f=d.jgrid.from(f);f.orderBy(b,e,g,h);i=f.select();f=0;for(l=i.length;f<l;f++)j=i[f],a.push(j),d(this).jqGrid("collectChildrenSortTree",a,j,b,e,g,h)}})},setTreeRow:function(a,c){var b=!1;this.each(function(){this.grid&&
-this.p.treeGrid&&(b=d(this).jqGrid("setRowData",a,c))});return b},delTreeNode:function(a){return this.each(function(){var c=this.p.localReader.id,b=this.p.treeReader.left_field,e=this.p.treeReader.right_field,g,h,f;if(this.grid&&this.p.treeGrid){var l=this.p._index[a];if(void 0!==l){g=parseInt(this.p.data[l][e],10);h=g-parseInt(this.p.data[l][b],10)+1;l=d(this).jqGrid("getFullTreeNode",this.p.data[l]);if(0<l.length)for(var j=0;j<l.length;j++)d(this).jqGrid("delRowData",l[j][c]);if("nested"===this.p.treeGridModel){c=
-d.jgrid.from(this.p.data).greater(b,g,{stype:"integer"}).select();if(c.length)for(f in c)c.hasOwnProperty(f)&&(c[f][b]=parseInt(c[f][b],10)-h);c=d.jgrid.from(this.p.data).greater(e,g,{stype:"integer"}).select();if(c.length)for(f in c)c.hasOwnProperty(f)&&(c[f][e]=parseInt(c[f][e],10)-h)}}}})},addChildNode:function(a,c,b){var e=this[0];if(b){var g=e.p.treeReader.expanded_field,h=e.p.treeReader.leaf_field,f=e.p.treeReader.level_field,l=e.p.treeReader.parent_id_field,j=e.p.treeReader.left_field,i=e.p.treeReader.right_field,
-p=e.p.treeReader.loaded,m,k,q,s,o;m=0;var r=c,t;if("undefined"===typeof a||null===a){o=e.p.data.length-1;if(0<=o)for(;0<=o;)m=Math.max(m,parseInt(e.p.data[o][e.p.localReader.id],10)),o--;a=m+1}var u=d(e).jqGrid("getInd",c);t=!1;if(void 0===c||null===c||""===c)r=c=null,m="last",s=e.p.tree_root_level,o=e.p.data.length+1;else if(m="after",k=e.p._index[c],q=e.p.data[k],c=q[e.p.localReader.id],s=parseInt(q[f],10)+1,o=d(e).jqGrid("getFullTreeNode",q),o.length?(r=o=o[o.length-1][e.p.localReader.id],o=d(e).jqGrid("getInd",
-r)+1):o=d(e).jqGrid("getInd",c)+1,q[h])t=!0,q[g]=!0,d(e.rows[u]).find("span.cell-wrapperleaf").removeClass("cell-wrapperleaf").addClass("cell-wrapper").end().find("div.tree-leaf").removeClass(e.p.treeIcons.leaf+" tree-leaf").addClass(e.p.treeIcons.minus+" tree-minus"),e.p.data[k][h]=!1,q[p]=!0;k=o+1;b[g]=!1;b[p]=!0;b[f]=s;b[h]=!0;"adjacency"===e.p.treeGridModel&&(b[l]=c);if("nested"===e.p.treeGridModel){var n;if(null!==c){h=parseInt(q[i],10);f=d.jgrid.from(e.p.data);f=f.greaterOrEquals(i,h,{stype:"integer"});
-f=f.select();if(f.length)for(n in f)f.hasOwnProperty(n)&&(f[n][j]=f[n][j]>h?parseInt(f[n][j],10)+2:f[n][j],f[n][i]=f[n][i]>=h?parseInt(f[n][i],10)+2:f[n][i]);b[j]=h;b[i]=h+1}else{h=parseInt(d(e).jqGrid("getCol",i,!1,"max"),10);f=d.jgrid.from(e.p.data).greater(j,h,{stype:"integer"}).select();if(f.length)for(n in f)f.hasOwnProperty(n)&&(f[n][j]=parseInt(f[n][j],10)+2);f=d.jgrid.from(e.p.data).greater(i,h,{stype:"integer"}).select();if(f.length)for(n in f)f.hasOwnProperty(n)&&(f[n][i]=parseInt(f[n][i],
-10)+2);b[j]=h+1;b[i]=h+2}}if(null===c||d(e).jqGrid("isNodeLoaded",q)||t)d(e).jqGrid("addRowData",a,b,m,r),d(e).jqGrid("setTreeNode",o,k);q&&!q[g]&&d(e.rows[u]).find("div.treeclick").click()}}})})(jQuery);
-(function(c){c.jgrid.extend({jqGridImport:function(a){a=c.extend({imptype:"xml",impstring:"",impurl:"",mtype:"GET",impData:{},xmlGrid:{config:"roots>grid",data:"roots>rows"},jsonGrid:{config:"grid",data:"data"},ajaxOptions:{}},a||{});return this.each(function(){var d=this,b=function(a,b){var e=c(b.xmlGrid.config,a)[0],h=c(b.xmlGrid.data,a)[0],f;if(xmlJsonClass.xml2json&&c.jgrid.parse){var e=xmlJsonClass.xml2json(e," "),e=c.jgrid.parse(e),g;for(g in e)e.hasOwnProperty(g)&&(f=e[g]);h?(h=e.grid.datatype,
-e.grid.datatype="xmlstring",e.grid.datastr=a,c(d).jqGrid(f).jqGrid("setGridParam",{datatype:h})):c(d).jqGrid(f)}else alert("xml2json or parse are not present")},g=function(a,b){if(a&&"string"==typeof a){var e=!1;c.jgrid.useJSON&&(c.jgrid.useJSON=!1,e=!0);var f=c.jgrid.parse(a);e&&(c.jgrid.useJSON=!0);e=f[b.jsonGrid.config];if(f=f[b.jsonGrid.data]){var g=e.datatype;e.datatype="jsonstring";e.datastr=f;c(d).jqGrid(e).jqGrid("setGridParam",{datatype:g})}else c(d).jqGrid(e)}};switch(a.imptype){case "xml":c.ajax(c.extend({url:a.impurl,
-type:a.mtype,data:a.impData,dataType:"xml",complete:function(f,g){"success"==g&&(b(f.responseXML,a),c(d).triggerHandler("jqGridImportComplete",[f,a]),c.isFunction(a.importComplete)&&a.importComplete(f))}},a.ajaxOptions));break;case "xmlstring":if(a.impstring&&"string"==typeof a.impstring){var f=c.jgrid.stringToDoc(a.impstring);f&&(b(f,a),c(d).triggerHandler("jqGridImportComplete",[f,a]),c.isFunction(a.importComplete)&&a.importComplete(f),a.impstring=null);f=null}break;case "json":c.ajax(c.extend({url:a.impurl,
-type:a.mtype,data:a.impData,dataType:"json",complete:function(b){try{g(b.responseText,a),c(d).triggerHandler("jqGridImportComplete",[b,a]),c.isFunction(a.importComplete)&&a.importComplete(b)}catch(f){}}},a.ajaxOptions));break;case "jsonstring":a.impstring&&"string"==typeof a.impstring&&(g(a.impstring,a),c(d).triggerHandler("jqGridImportComplete",[a.impstring,a]),c.isFunction(a.importComplete)&&a.importComplete(a.impstring),a.impstring=null)}})},jqGridExport:function(a){var a=c.extend({exptype:"xmlstring",
-root:"grid",ident:"\t"},a||{}),d=null;this.each(function(){if(this.grid){var b=c.extend(!0,{},c(this).jqGrid("getGridParam"));b.rownumbers&&(b.colNames.splice(0,1),b.colModel.splice(0,1));b.multiselect&&(b.colNames.splice(0,1),b.colModel.splice(0,1));b.subGrid&&(b.colNames.splice(0,1),b.colModel.splice(0,1));b.knv=null;if(b.treeGrid)for(var g in b.treeReader)b.treeReader.hasOwnProperty(g)&&(b.colNames.splice(b.colNames.length-1),b.colModel.splice(b.colModel.length-1));switch(a.exptype){case "xmlstring":d=
-"<"+a.root+">"+xmlJsonClass.json2xml(b,a.ident)+"</"+a.root+">";break;case "jsonstring":d="{"+xmlJsonClass.toJson(b,a.root,a.ident,!1)+"}",void 0!==b.postData.filters&&(d=d.replace(/filters":"/,'filters":'),d=d.replace(/}]}"/,"}]}"))}}});return d},excelExport:function(a){a=c.extend({exptype:"remote",url:null,oper:"oper",tag:"excel",exportOptions:{}},a||{});return this.each(function(){if(this.grid){var d;"remote"==a.exptype&&(d=c.extend({},this.p.postData),d[a.oper]=a.tag,d=jQuery.param(d),d=-1!=a.url.indexOf("?")?
-a.url+"&"+d:a.url+"?"+d,window.location=d)}})}})})(jQuery);
-var xmlJsonClass={xml2json:function(a,b){9===a.nodeType&&(a=a.documentElement);var g=this.toJson(this.toObj(this.removeWhite(a)),a.nodeName,"\t");return"{\n"+b+(b?g.replace(/\t/g,b):g.replace(/\t|\n/g,""))+"\n}"},json2xml:function(a,b){var g=function(a,b,e){var d="",f,i;if(a instanceof Array)if(0===a.length)d+=e+"<"+b+">__EMPTY_ARRAY_</"+b+">\n";else{f=0;for(i=a.length;f<i;f+=1)var l=e+g(a[f],b,e+"\t")+"\n",d=d+l}else if("object"===typeof a){f=!1;d+=e+"<"+b;for(i in a)a.hasOwnProperty(i)&&("@"===
-i.charAt(0)?d+=" "+i.substr(1)+'="'+a[i].toString()+'"':f=!0);d+=f?">":"/>";if(f){for(i in a)a.hasOwnProperty(i)&&("#text"===i?d+=a[i]:"#cdata"===i?d+="<![CDATA["+a[i]+"]]\>":"@"!==i.charAt(0)&&(d+=g(a[i],i,e+"\t")));d+=("\n"===d.charAt(d.length-1)?e:"")+"</"+b+">"}}else"function"===typeof a?d+=e+"<"+b+"><![CDATA["+a+"]]\></"+b+">":(void 0===a&&(a=""),d='""'===a.toString()||0===a.toString().length?d+(e+"<"+b+">__EMPTY_STRING_</"+b+">"):d+(e+"<"+b+">"+a.toString()+"</"+b+">"));return d},f="",e;for(e in a)a.hasOwnProperty(e)&&
-(f+=g(a[e],e,""));return b?f.replace(/\t/g,b):f.replace(/\t|\n/g,"")},toObj:function(a){var b={},g=/function/i;if(1===a.nodeType){if(a.attributes.length){var f;for(f=0;f<a.attributes.length;f+=1)b["@"+a.attributes[f].nodeName]=(a.attributes[f].nodeValue||"").toString()}if(a.firstChild){var e=f=0,h=!1,c;for(c=a.firstChild;c;c=c.nextSibling)1===c.nodeType?h=!0:3===c.nodeType&&c.nodeValue.match(/[^ \f\n\r\t\v]/)?f+=1:4===c.nodeType&&(e+=1);if(h)if(2>f&&2>e){this.removeWhite(a);for(c=a.firstChild;c;c=
-c.nextSibling)3===c.nodeType?b["#text"]=this.escape(c.nodeValue):4===c.nodeType?g.test(c.nodeValue)?b[c.nodeName]=[b[c.nodeName],c.nodeValue]:b["#cdata"]=this.escape(c.nodeValue):b[c.nodeName]?b[c.nodeName]instanceof Array?b[c.nodeName][b[c.nodeName].length]=this.toObj(c):b[c.nodeName]=[b[c.nodeName],this.toObj(c)]:b[c.nodeName]=this.toObj(c)}else a.attributes.length?b["#text"]=this.escape(this.innerXml(a)):b=this.escape(this.innerXml(a));else if(f)a.attributes.length?b["#text"]=this.escape(this.innerXml(a)):
-(b=this.escape(this.innerXml(a)),"__EMPTY_ARRAY_"===b?b="[]":"__EMPTY_STRING_"===b&&(b=""));else if(e)if(1<e)b=this.escape(this.innerXml(a));else for(c=a.firstChild;c;c=c.nextSibling)if(g.test(a.firstChild.nodeValue)){b=a.firstChild.nodeValue;break}else b["#cdata"]=this.escape(c.nodeValue)}!a.attributes.length&&!a.firstChild&&(b=null)}else 9===a.nodeType?b=this.toObj(a.documentElement):alert("unhandled node type: "+a.nodeType);return b},toJson:function(a,b,g,f){void 0===f&&(f=!0);var e=b?'"'+b+'"':
-"",h="\t",c="\n";f||(c=h="");if("[]"===a)e+=b?":[]":"[]";else if(a instanceof Array){var j,d,k=[];d=0;for(j=a.length;d<j;d+=1)k[d]=this.toJson(a[d],"",g+h,f);e+=(b?":[":"[")+(1<k.length?c+g+h+k.join(","+c+g+h)+c+g:k.join(""))+"]"}else if(null===a)e+=(b&&":")+"null";else if("object"===typeof a){j=[];for(d in a)a.hasOwnProperty(d)&&(j[j.length]=this.toJson(a[d],d,g+h,f));e+=(b?":{":"{")+(1<j.length?c+g+h+j.join(","+c+g+h)+c+g:j.join(""))+"}"}else e="string"===typeof a?e+((b&&":")+'"'+a.replace(/\\/g,
-"\\\\").replace(/\"/g,'\\"')+'"'):e+((b&&":")+a.toString());return e},innerXml:function(a){var b="";if("innerHTML"in a)b=a.innerHTML;else for(var g=function(a){var b="",h;if(1===a.nodeType){b+="<"+a.nodeName;for(h=0;h<a.attributes.length;h+=1)b+=" "+a.attributes[h].nodeName+'="'+(a.attributes[h].nodeValue||"").toString()+'"';if(a.firstChild){b+=">";for(h=a.firstChild;h;h=h.nextSibling)b+=g(h);b+="</"+a.nodeName+">"}else b+="/>"}else 3===a.nodeType?b+=a.nodeValue:4===a.nodeType&&(b+="<![CDATA["+a.nodeValue+
-"]]\>");return b},a=a.firstChild;a;a=a.nextSibling)b+=g(a);return b},escape:function(a){return a.replace(/[\\]/g,"\\\\").replace(/[\"]/g,'\\"').replace(/[\n]/g,"\\n").replace(/[\r]/g,"\\r")},removeWhite:function(a){a.normalize();var b;for(b=a.firstChild;b;)if(3===b.nodeType)if(b.nodeValue.match(/[^ \f\n\r\t\v]/))b=b.nextSibling;else{var g=b.nextSibling;a.removeChild(b);b=g}else 1===b.nodeType&&this.removeWhite(b),b=b.nextSibling;return a}};
-function tableToGrid(j,k){jQuery(j).each(function(){if(!this.grid){jQuery(this).width("99%");var b=jQuery(this).width(),c=jQuery("tr td:first-child input[type=checkbox]:first",jQuery(this)),a=jQuery("tr td:first-child input[type=radio]:first",jQuery(this)),c=0<c.length,a=!c&&0<a.length,i=c||a,d=[],e=[];jQuery("th",jQuery(this)).each(function(){0===d.length&&i?(d.push({name:"__selection__",index:"__selection__",width:0,hidden:!0}),e.push("__selection__")):(d.push({name:jQuery(this).attr("id")||jQuery.trim(jQuery.jgrid.stripHtml(jQuery(this).html())).split(" ").join("_"),
-index:jQuery(this).attr("id")||jQuery.trim(jQuery.jgrid.stripHtml(jQuery(this).html())).split(" ").join("_"),width:jQuery(this).width()||150}),e.push(jQuery(this).html()))});var f=[],g=[],h=[];jQuery("tbody > tr",jQuery(this)).each(function(){var b={},a=0;jQuery("td",jQuery(this)).each(function(){if(0===a&&i){var c=jQuery("input",jQuery(this)),e=c.attr("value");g.push(e||f.length);c.is(":checked")&&h.push(e);b[d[a].name]=c.attr("value")}else b[d[a].name]=jQuery(this).html();a++});0<a&&f.push(b)});
-jQuery(this).empty();jQuery(this).addClass("scroll");jQuery(this).jqGrid(jQuery.extend({datatype:"local",width:b,colNames:e,colModel:d,multiselect:c},k||{}));for(b=0;b<f.length;b++)a=null,0<g.length&&(a=g[b])&&a.replace&&(a=encodeURIComponent(a).replace(/[.\-%]/g,"_")),null===a&&(a=b+1),jQuery(this).jqGrid("addRowData",a,f[b]);for(b=0;b<h.length;b++)jQuery(this).jqGrid("setSelection",h[b])}})};
-(function(b){b.browser.msie&&8==b.browser.version&&(b.expr[":"].hidden=function(b){return 0===b.offsetWidth||0===b.offsetHeight||"none"==b.style.display});b.jgrid._multiselect=!1;if(b.ui&&b.ui.multiselect){if(b.ui.multiselect.prototype._setSelected){var m=b.ui.multiselect.prototype._setSelected;b.ui.multiselect.prototype._setSelected=function(a,e){var c=m.call(this,a,e);if(e&&this.selectedList){var d=this.element;this.selectedList.find("li").each(function(){b(this).data("optionLink")&&b(this).data("optionLink").remove().appendTo(d)})}return c}}b.ui.multiselect.prototype.destroy&&
-(b.ui.multiselect.prototype.destroy=function(){this.element.show();this.container.remove();b.Widget===void 0?b.widget.prototype.destroy.apply(this,arguments):b.Widget.prototype.destroy.apply(this,arguments)});b.jgrid._multiselect=!0}b.jgrid.extend({sortableColumns:function(a){return this.each(function(){function e(){c.p.disableClick=true}var c=this,d=b.jgrid.jqID(c.p.id),d={tolerance:"pointer",axis:"x",scrollSensitivity:"1",items:">th:not(:has(#jqgh_"+d+"_cb,#jqgh_"+d+"_rn,#jqgh_"+d+"_subgrid),:hidden)",
-placeholder:{element:function(a){return b(document.createElement(a[0].nodeName)).addClass(a[0].className+" ui-sortable-placeholder ui-state-highlight").removeClass("ui-sortable-helper")[0]},update:function(b,a){a.height(b.currentItem.innerHeight()-parseInt(b.currentItem.css("paddingTop")||0,10)-parseInt(b.currentItem.css("paddingBottom")||0,10));a.width(b.currentItem.innerWidth()-parseInt(b.currentItem.css("paddingLeft")||0,10)-parseInt(b.currentItem.css("paddingRight")||0,10))}},update:function(a,
-g){var d=b(g.item).parent(),d=b(">th",d),e={},i=c.p.id+"_";b.each(c.p.colModel,function(b){e[this.name]=b});var h=[];d.each(function(){var a=b(">div",this).get(0).id.replace(/^jqgh_/,"").replace(i,"");a in e&&h.push(e[a])});b(c).jqGrid("remapColumns",h,true,true);b.isFunction(c.p.sortable.update)&&c.p.sortable.update(h);setTimeout(function(){c.p.disableClick=false},50)}};if(c.p.sortable.options)b.extend(d,c.p.sortable.options);else if(b.isFunction(c.p.sortable))c.p.sortable={update:c.p.sortable};
-if(d.start){var g=d.start;d.start=function(b,a){e();g.call(this,b,a)}}else d.start=e;if(c.p.sortable.exclude)d.items=d.items+(":not("+c.p.sortable.exclude+")");a.sortable(d).data("sortable").floating=true})},columnChooser:function(a){function e(a,c){a&&(typeof a=="string"?b.fn[a]&&b.fn[a].apply(c,b.makeArray(arguments).slice(2)):b.isFunction(a)&&a.apply(c,b.makeArray(arguments).slice(2)))}var c=this;if(!b("#colchooser_"+b.jgrid.jqID(c[0].p.id)).length){var d=b('<div id="colchooser_'+c[0].p.id+'" style="position:relative;overflow:hidden"><div><select multiple="multiple"></select></div></div>'),
-g=b("select",d),a=b.extend({width:420,height:240,classname:null,done:function(b){b&&c.jqGrid("remapColumns",b,true)},msel:"multiselect",dlog:"dialog",dialog_opts:{minWidth:470},dlog_opts:function(a){var c={};c[a.bSubmit]=function(){a.apply_perm();a.cleanup(false)};c[a.bCancel]=function(){a.cleanup(true)};return b.extend(true,{buttons:c,close:function(){a.cleanup(true)},modal:a.modal?a.modal:false,resizable:a.resizable?a.resizable:true,width:a.width+20},a.dialog_opts||{})},apply_perm:function(){b("option",
-g).each(function(){this.selected?c.jqGrid("showCol",k[this.value].name):c.jqGrid("hideCol",k[this.value].name)});var d=[];b("option:selected",g).each(function(){d.push(parseInt(this.value,10))});b.each(d,function(){delete f[k[parseInt(this,10)].name]});b.each(f,function(){var b=parseInt(this,10);var a=d,c=b;if(c>=0){var g=a.slice(),e=g.splice(c,Math.max(a.length-c,c));if(c>a.length)c=a.length;g[c]=b;d=g.concat(e)}else d=void 0});a.done&&a.done.call(c,d)},cleanup:function(b){e(a.dlog,d,"destroy");
-e(a.msel,g,"destroy");d.remove();b&&a.done&&a.done.call(c)},msel_opts:{}},b.jgrid.col,a||{});if(b.ui&&b.ui.multiselect&&a.msel=="multiselect"){if(!b.jgrid._multiselect){alert("Multiselect plugin loaded after jqGrid. Please load the plugin before the jqGrid!");return}a.msel_opts=b.extend(b.ui.multiselect.defaults,a.msel_opts)}a.caption&&d.attr("title",a.caption);if(a.classname){d.addClass(a.classname);g.addClass(a.classname)}if(a.width){b(">div",d).css({width:a.width,margin:"0 auto"});g.css("width",
-a.width)}if(a.height){b(">div",d).css("height",a.height);g.css("height",a.height-10)}var k=c.jqGrid("getGridParam","colModel"),p=c.jqGrid("getGridParam","colNames"),f={},j=[];g.empty();b.each(k,function(b){f[this.name]=b;this.hidedlg?this.hidden||j.push(b):g.append("<option value='"+b+"' "+(this.hidden?"":"selected='selected'")+">"+jQuery.jgrid.stripHtml(p[b])+"</option>")});var i=b.isFunction(a.dlog_opts)?a.dlog_opts.call(c,a):a.dlog_opts;e(a.dlog,d,i);i=b.isFunction(a.msel_opts)?a.msel_opts.call(c,
-a):a.msel_opts;e(a.msel,g,i)}},sortableRows:function(a){return this.each(function(){var e=this;if(e.grid&&!e.p.treeGrid&&b.fn.sortable){a=b.extend({cursor:"move",axis:"y",items:".jqgrow"},a||{});if(a.start&&b.isFunction(a.start)){a._start_=a.start;delete a.start}else a._start_=false;if(a.update&&b.isFunction(a.update)){a._update_=a.update;delete a.update}else a._update_=false;a.start=function(c,d){b(d.item).css("border-width","0px");b("td",d.item).each(function(b){this.style.width=e.grid.cols[b].style.width});
-if(e.p.subGrid){var g=b(d.item).attr("id");try{b(e).jqGrid("collapseSubGridRow",g)}catch(k){}}a._start_&&a._start_.apply(this,[c,d])};a.update=function(c,d){b(d.item).css("border-width","");e.p.rownumbers===true&&b("td.jqgrid-rownum",e.rows).each(function(a){b(this).html(a+1+(parseInt(e.p.page,10)-1)*parseInt(e.p.rowNum,10))});a._update_&&a._update_.apply(this,[c,d])};b("tbody:first",e).sortable(a);b("tbody:first",e).disableSelection()}})},gridDnD:function(a){return this.each(function(){function e(){var a=
-b.data(c,"dnd");b("tr.jqgrow:not(.ui-draggable)",c).draggable(b.isFunction(a.drag)?a.drag.call(b(c),a):a.drag)}var c=this;if(c.grid&&!c.p.treeGrid&&b.fn.draggable&&b.fn.droppable){b("#jqgrid_dnd")[0]===void 0&&b("body").append("<table id='jqgrid_dnd' class='ui-jqgrid-dnd'></table>");if(typeof a=="string"&&a=="updateDnD"&&c.p.jqgdnd===true)e();else{a=b.extend({drag:function(a){return b.extend({start:function(d,e){if(c.p.subGrid){var f=b(e.helper).attr("id");try{b(c).jqGrid("collapseSubGridRow",f)}catch(j){}}for(f=
-0;f<b.data(c,"dnd").connectWith.length;f++)b(b.data(c,"dnd").connectWith[f]).jqGrid("getGridParam","reccount")=="0"&&b(b.data(c,"dnd").connectWith[f]).jqGrid("addRowData","jqg_empty_row",{});e.helper.addClass("ui-state-highlight");b("td",e.helper).each(function(b){this.style.width=c.grid.headers[b].width+"px"});a.onstart&&b.isFunction(a.onstart)&&a.onstart.call(b(c),d,e)},stop:function(d,e){if(e.helper.dropped&&!a.dragcopy){var f=b(e.helper).attr("id");f===void 0&&(f=b(this).attr("id"));b(c).jqGrid("delRowData",
-f)}for(f=0;f<b.data(c,"dnd").connectWith.length;f++)b(b.data(c,"dnd").connectWith[f]).jqGrid("delRowData","jqg_empty_row");a.onstop&&b.isFunction(a.onstop)&&a.onstop.call(b(c),d,e)}},a.drag_opts||{})},drop:function(a){return b.extend({accept:function(a){if(!b(a).hasClass("jqgrow"))return a;a=b(a).closest("table.ui-jqgrid-btable");if(a.length>0&&b.data(a[0],"dnd")!==void 0){a=b.data(a[0],"dnd").connectWith;return b.inArray("#"+b.jgrid.jqID(this.id),a)!=-1?true:false}return false},drop:function(d,e){if(b(e.draggable).hasClass("jqgrow")){var f=
-b(e.draggable).attr("id"),f=e.draggable.parent().parent().jqGrid("getRowData",f);if(!a.dropbyname){var j=0,i={},h,n=b("#"+b.jgrid.jqID(this.id)).jqGrid("getGridParam","colModel");try{for(var o in f){h=n[j].name;h=="cb"||(h=="rn"||h=="subgrid")||f.hasOwnProperty(o)&&n[j]&&(i[h]=f[o]);j++}f=i}catch(m){}}e.helper.dropped=true;if(a.beforedrop&&b.isFunction(a.beforedrop)){h=a.beforedrop.call(this,d,e,f,b("#"+b.jgrid.jqID(c.p.id)),b(this));typeof h!="undefined"&&(h!==null&&typeof h=="object")&&(f=h)}if(e.helper.dropped){var l;
-if(a.autoid)if(b.isFunction(a.autoid))l=a.autoid.call(this,f);else{l=Math.ceil(Math.random()*1E3);l=a.autoidprefix+l}b("#"+b.jgrid.jqID(this.id)).jqGrid("addRowData",l,f,a.droppos)}a.ondrop&&b.isFunction(a.ondrop)&&a.ondrop.call(this,d,e,f)}}},a.drop_opts||{})},onstart:null,onstop:null,beforedrop:null,ondrop:null,drop_opts:{activeClass:"ui-state-active",hoverClass:"ui-state-hover"},drag_opts:{revert:"invalid",helper:"clone",cursor:"move",appendTo:"#jqgrid_dnd",zIndex:5E3},dragcopy:false,dropbyname:false,
-droppos:"first",autoid:true,autoidprefix:"dnd_"},a||{});if(a.connectWith){a.connectWith=a.connectWith.split(",");a.connectWith=b.map(a.connectWith,function(a){return b.trim(a)});b.data(c,"dnd",a);c.p.reccount!="0"&&!c.p.jqgdnd&&e();c.p.jqgdnd=true;for(var d=0;d<a.connectWith.length;d++)b(a.connectWith[d]).droppable(b.isFunction(a.drop)?a.drop.call(b(c),a):a.drop)}}}})},gridResize:function(a){return this.each(function(){var e=this,c=b.jgrid.jqID(e.p.id);if(e.grid&&b.fn.resizable){a=b.extend({},a||
-{});if(a.alsoResize){a._alsoResize_=a.alsoResize;delete a.alsoResize}else a._alsoResize_=false;if(a.stop&&b.isFunction(a.stop)){a._stop_=a.stop;delete a.stop}else a._stop_=false;a.stop=function(d,g){b(e).jqGrid("setGridParam",{height:b("#gview_"+c+" .ui-jqgrid-bdiv").height()});b(e).jqGrid("setGridWidth",g.size.width,a.shrinkToFit);a._stop_&&a._stop_.call(e,d,g)};a.alsoResize=a._alsoResize_?eval("("+("{'#gview_"+c+" .ui-jqgrid-bdiv':true,'"+a._alsoResize_+"':true}")+")"):b(".ui-jqgrid-bdiv","#gview_"+
-c);delete a._alsoResize_;b("#gbox_"+c).resizable(a)}})}})})(jQuery);
-// Utilities for jqGrid usage
-
-  // On success of AJAX call, load results into dialog.
-  function dialogLoadSuccessHandler(data, textStatus, jqXHR) {
-    jQuery('#dialog-modal').html(data);
-  }
-  // On failure of AJAX call, show an alert.
-  function errorHandler(jqXHR, textStatus, errorThrown) {
-    alert("Something went wrong: " + textStatus + ": " + errorThrown);
-  }
-
-// Simple change of grouping column in a grid.
-var jq_grid_select_grouping = function(grid_id, group_fields) {
-  var opts;
-  var already_grouped = jQuery("#"+grid_id).jqGrid('getGridParam', 'groupingView').groupField;
-	if( jQuery("#"+grid_id).jqGrid('getGridParam', 'grouping') === false) {
-		already_grouped = [];
-	}
-  jQuery.each(already_grouped, function(index, value) {
-    opts += '<option selected="selected">'+value+'</option>';
-  });
-  jQuery.each(group_fields, function(index, value) {
-		if( already_grouped.indexOf(value) == -1) {
-			opts += '<option>'+value+'</option>';
-		}
-  });
-
-  var dlg = jQuery('<div id="changeGroupColDlg">' +
-			'Group by one or more columns:<br /> <select id="changeGroupCol" multiple="multiple" class="multiselect" style="width:420px;">'+
-      opts+
-      '</select></div>');
-
-  dlg.dialog({title: 'Select grouping column',
-    modal: true,
-		width: 450,
-    buttons: { "Ok": function() { 
-      var choice = jQuery('#changeGroupCol').val();
-      var do_remove = jQuery('#remove_grp').attr('checked') !== undefined;
-      if(choice === null) {
-        jQuery("#"+grid_id).jqGrid('groupingRemove',true);
-      }
-      else {
-        jQuery("#"+grid_id).jqGrid('groupingGroupBy', choice);
-      }
-  jQuery(this).dialog("close");
-  jQuery('#changeGroupColDlg').remove();
-    },
-    "Cancel": function() {jQuery(this).dialog("close");
-      jQuery('#changeGroupColDlg').remove();
-    }}
-  });
-	jQuery('#changeGroupCol').multiselect();
-};
-
-
-// For a Multiselect grid, Toggle all checkboxes in the grid.
-var checkJqGridBoxes = function(e, str) 
-{
-  var checkstate = jQuery(e.target).prop('checked');
-  var mygrid     = jQuery('#' + str);
-  jQuery('#' + str + '_frozen [aria-describedby="' + str + '_cm"] > input').prop('checked', checkstate);
-  var currIds    = mygrid.jqGrid('getDataIDs');
-  var setstate   = checkstate ? 1 : 0;
-  for (i = 0, selCount = currIds.length; i < selCount; i++) {
-    mygrid.jqGrid('setCell', currIds[i], 'cm', setstate, '', '', false);
-  }
-  jQuery('#' + str +' tbody tr').toggleClass('grid_checked_row', checkstate);
-  jQuery('#' + str +'_frozen tbody tr').toggleClass('grid_checked_row', checkstate);
-  //e = e||event;
-  //e.stopPropagation? e.stopPropagation() : e.cancelBubble = true;
-  e.stopPropagation();
-};
-
-// Show the animated gif in grid cell when loading a popup link
-// from the anchor in the cell.
-function show_action_image_in_grid(clicked_cell)
-{
-  jQuery(clicked_cell).next().show(); 
-}
-
-// Setup grid print capability.  Add print button to navigation bar and bind to click.
-function setPrintGrid(gid,pid,pgTitle){
-  // print button title.
-  var btnTitle = 'Print Grid';
-
-  // setup print button in the grid bottom navigation bar.
-  jQuery('#'+gid).jqGrid('navSeparatorAdd', '#'+pid, { sepclass : "ui-separator" });
-  jQuery('#'+gid).jqGrid('navButtonAdd', '#'+pid, {
-    caption:       '',
-    title:         btnTitle,
-    position:      'last',
-    buttonicon:    'ui-icon-print',
-    onClickButton: function() { PrintGrid(); }
-  });
-
-  // Handles printing the grid as a table when the navigation bar button is clicked.
-  function PrintGrid(){
-    var disp_setting =  "toolbar=yes,location=no,directories=yes,menubar=yes,"; 
-        disp_setting += "scrollbars=yes,width=650, height=600, left=100, top=25"; 
-
-    var columnNms   = [];
-    var columnHeads = [];
-    var nonCols     = [];
-    var i,j;
-    var gridHeads   = jQuery('#'+gid).jqGrid('getGridParam','colNames');
-    var colModel    = jQuery('#'+gid).jqGrid('getGridParam','colModel');
-    var data        = jQuery('#'+gid).jqGrid('getRowData');
-    var row1        = data[0];
-
-    // Only choose columns with an index - this will ignore rownumbers if present.
-    // Build up a list of columns and of column headings.
-    jQuery.each(colModel, function(i,e){ if(e.index !== undefined && e.index !== 'cm') {columnNms.push(e.index); columnHeads.push(gridHeads[i]); } });
-
-    // Look for columns in the first data row that contain links and remove them from the column list.
-    jQuery.each(row1, function(i,e) { if(e.indexOf('href') != -1) {nonCols.unshift(columnNms.indexOf(i));} } );
-    for(i=0;i<nonCols.length;i++) {
-      columnNms.splice(nonCols[i],1);
-      columnHeads.splice(nonCols[i],1);
-    }
-
-    // Build up the print table.
-    var printTable = '<table><thead><tr>';
-    for(i=0;i<columnNms.length;i++) { printTable += '<th>'+columnHeads[i]+'</th>'; }
-    printTable += '</tr></thead><tbody>';
-
-    for(i=0;i<data.length;i++) {
-      printTable += '<tr>';
-      for(j=0;j<columnNms.length;j++) { printTable += '<td>'+data[i][columnNms[j]]+'</td>'; }
-      printTable += '</tr>';
-    }
-    printTable += '</tbody></table>';
-
-    // Open a new window to display the table and call print on it.
-    var docprint = window.open("", "", disp_setting);
-    docprint.document.open();
-    docprint.document.write('<html><head><title>Print '+pgTitle+'</title>');
-    docprint.document.write('<style type="text/css">#prt-container table { border-collapse:collapse; } #prt-container th, #prt-container td { border:1px solid gray; padding: 3px; } </style>');
-    docprint.document.write('</head><body onLoad="self.print()"><h1>'+pgTitle+'</h1><div id="prt-container" class="prt-hide">');
-    docprint.document.write(printTable);
-    docprint.document.write('</div></body></html>');
-    docprint.document.close();
-    docprint.focus();
-  }
-}
-
-// Document READY -------------------------------------------------------------
-jQuery(document).ready(function () {
-
-  // Set the error handler for all AJAX calls.
-  jQuery.ajaxSetup({error: errorHandler });
-
-  // Convert a div into a modal dialog.
-  jQuery( "#dialog-modal" ).dialog({
-    autoOpen: false,
-    width: 500,
-    //height: 140,
-    modal: true
-  });
-
-  // Load a form into a modal dialog.
-  //jQuery('a.popupjs').live('click', function() {
-  jQuery(document).on('click', 'a.popupjs', function() {
-    var $a    = jQuery(this);
-    // Check if the anchor has been set to no longer popup the dialog.
-    if ($a.data().checks && $a.data().checks.doPopup === false) {return false;}
-
-    var new_width  = $a.attr('data-dlg-width');
-    var new_height = $a.attr('data-dlg-height');
-		if (new_width) {jQuery('#dialog-modal').dialog('option', 'width', new_width);}
-		if (new_height) {jQuery('#dialog-modal').dialog('option', 'height', new_height);}
-
-    var title = $a.attr('data-dlg-title');
-    jQuery('#dialog-modal').html('');
-    jQuery('#dialog-modal').dialog('option', 'title', title || $a.text());
-    jQuery('#dialog-modal').dialog('open');
-    jQuery.ajax({
-      type: 'get',
-      url: $a.attr('href'),
-      //          dataType: "script",
-      success: dialogLoadSuccessHandler//,
-      //error: errorHandler
-    });
-    return false;
-  });
-
-  // Load a form into a modal dialog with parameter from a select box.
-  jQuery('a.popupjs-sel').live('click', function() {
-    var $a      = jQuery(this);
-    // Check if the anchor has been set to no longer popup the dialog.
-    if ($a.data().checks && $a.data().checks.doPopup === false) {return false;}
-
-    var new_width  = $a.attr('data-dlg-width');
-    var new_height = $a.attr('data-dlg-height');
-		if (new_width) {jQuery('#dialog-modal').dialog('option', 'width', new_width);}
-		if (new_height) {jQuery('#dialog-modal').dialog('option', 'height', new_height);}
-
-    var title   = $a.attr('data-dlg-title');
-    var sel_id  = $a.attr('data-sel');
-    var sel_val = jQuery('#' + sel_id).val();
-    jQuery('#dialog-modal').html('');
-    jQuery('#dialog-modal').dialog('option', 'title', title || $a.text());
-    jQuery('#dialog-modal').dialog('open');
-    jQuery.ajax({
-      type: 'get',
-      url: $a.attr('href') + '/' + sel_val, // + '.js',
-      //          dataType: "script",
-      success: dialogLoadSuccessHandler//,
-      //error: errorHandler
-    });
-    return false;
-  });
-
-});
-
 /*!
  * Collapse plugin for jQuery
  * http://github.com/danielstocks/jQuery-Collapse/
@@ -13893,7 +10887,24 @@ jQuery(document).ready(function () {
 	*/
 	$.timepicker.version = "1.0.4";
 
-})(jQuery);
+})(jQuery);  // Show/Hide child form
+  function showHideChildForm(elem) {
+    var img   = jQuery(elem);
+    var panel = img.parents('div').siblings('.ChildPanel');
+
+    // Minimize the containing table cell height so it only shows this image when the panel is hidden.
+    jQuery(img.parents('td')[0]).height(16);
+
+    // Toggle visibility of the panel and change the image appropriately.
+    panel.toggle();
+    if (panel.is(':hidden')) {
+      img.attr('src', '/images/collapsed.png');
+    }
+    else {
+      img.attr('src', '/images/collapse_groups.png');
+    }
+  }
+
   // Reload the contents of a frame.
   // subFrameId is the id of the subframe of "contentFrame" to target.
   // If it is left blank, contentFrame itself is reloaded.
@@ -13963,6 +10974,12 @@ jQuery(document).ready(function () {
     });
   };
 
+  // Replace the value of a text element.
+  replace_text_value = function(new_value, selectId) {
+    var sel = jQuery('#'+selectId);
+    sel.val(new_value);
+  };
+
   // Product Setup: Display ItemPackProduct and FgProduct codes.
   show_item_pack_and_fg = function(item_pack_product_code, fg_product_code) {
     jQuery('#item_pack_product_code').text(item_pack_product_code);
@@ -13998,6 +11015,40 @@ jQuery(document).ready(function () {
     // Make a re-order list sortable:
     jQuery('#list_to_re_order').sortable({ revert: true, cursor: 'move', stop: function(event, ui) { reCalculateListSequence(); } });
     jQuery('#list_to_re_order').disableSelection();
+    // Remove a line item from a re-order list.
+    jQuery('.removeReOrderItem').live('click', function() {
+      var target   = jQuery(this).parent();
+      //var val      = target.attr('data_field_id');
+      target.remove();
+      reCalculateListSequence();
+    });
+
+    // Custom Autocompletion widget
+    // ----------------------------
+    // Will insert a heading if the item objects include a "category" attribute.
+    jQuery.widget( "custom.catcomplete", jQuery.ui.autocomplete, {
+      _renderMenu: function( ul, items ) {
+        var self = this, currentCategory = "";
+        jQuery.each( items, function( index, item ) {
+          if ( item.category && item.category != currentCategory ) {
+            ul.append( "<li class='ui-autocomplete-category'>" + item.category + "</li>" );
+            currentCategory = item.category;
+          }
+          self._renderItem( ul, item );
+        });
+      }
+    });
+
+    // Highlight disabled option in a select.
+    jQuery(document).ready(function () {
+      jQuery('select > option:selected:disabled').each(function(){
+        jQuery(this).parent().css("color","red");
+      });
+
+      jQuery('select').change(function(){
+        jQuery(this).css("color", "inherit");
+      }); 
+    });
 
 
     // Datepickers
@@ -14063,6 +11114,7 @@ jQuery(document).ready(function () {
     //
     jQuery('form').on('change', '.select_observable', function(e) {
       var target = jQuery(e.target);
+      if(target.attr('data-url') === undefined) { return false; } // This can happen with chosen-select when the user searches.
       var url = target.attr('data-url') + '?id=' + target.val();
       var params, mod_url = '';
       if(target.attr('data-params')) {
@@ -14235,7 +11287,8 @@ var dmCalcFunc = (function() {
         add_all_group_by_columns(true);
       }
       if(jQuery('#apply_functions_hidden_field').val() !== '') {
-        functions_applied = jQuery('#apply_functions_hidden_field').val().split(',');
+        var re = /,|\|/;
+        functions_applied = jQuery('#apply_functions_hidden_field').val().split(re);
         add_applied_functions();
       }
     }
@@ -14283,6 +11336,7 @@ var dmCalcFunc = (function() {
 
     jQuery('#calculations2').dialog( {
       autoOpen: true,
+//      create: function(event) { jQuery(event.target).parent().css('position', 'fixed'); },
       width: 900,
       title: 'Calculations / Functions',
       modal: true,
@@ -15232,11 +12286,423 @@ function ds_remove_value() {
 // {
 //     tr.parentNode.removeChild(tr);
 // }
-// Script for Content layout.
+/*! 
+ * jquery.event.drag - v 2.2
+ * Copyright (c) 2010 Three Dub Media - http://threedubmedia.com
+ * Open Source MIT License - http://threedubmedia.com/code/license
+ */
+// Created: 2008-06-04 
+// Updated: 2012-05-21
+// REQUIRES: jquery 1.7.x
+
+;(function( $ ){
+
+// add the jquery instance method
+$.fn.drag = function( str, arg, opts ){
+	// figure out the event type
+	var type = typeof str == "string" ? str : "",
+	// figure out the event handler...
+	fn = $.isFunction( str ) ? str : $.isFunction( arg ) ? arg : null;
+	// fix the event type
+	if ( type.indexOf("drag") !== 0 ) 
+		type = "drag"+ type;
+	// were options passed
+	opts = ( str == fn ? arg : opts ) || {};
+	// trigger or bind event handler
+	return fn ? this.bind( type, opts, fn ) : this.trigger( type );
+};
+
+// local refs (increase compression)
+var $event = $.event, 
+$special = $event.special,
+// configure the drag special event 
+drag = $special.drag = {
+	
+	// these are the default settings
+	defaults: {
+		which: 1, // mouse button pressed to start drag sequence
+		distance: 0, // distance dragged before dragstart
+		not: ':input', // selector to suppress dragging on target elements
+		handle: null, // selector to match handle target elements
+		relative: false, // true to use "position", false to use "offset"
+		drop: true, // false to suppress drop events, true or selector to allow
+		click: false // false to suppress click events after dragend (no proxy)
+	},
+	
+	// the key name for stored drag data
+	datakey: "dragdata",
+	
+	// prevent bubbling for better performance
+	noBubble: true,
+	
+	// count bound related events
+	add: function( obj ){ 
+		// read the interaction data
+		var data = $.data( this, drag.datakey ),
+		// read any passed options 
+		opts = obj.data || {};
+		// count another realted event
+		data.related += 1;
+		// extend data options bound with this event
+		// don't iterate "opts" in case it is a node 
+		$.each( drag.defaults, function( key, def ){
+			if ( opts[ key ] !== undefined )
+				data[ key ] = opts[ key ];
+		});
+	},
+	
+	// forget unbound related events
+	remove: function(){
+		$.data( this, drag.datakey ).related -= 1;
+	},
+	
+	// configure interaction, capture settings
+	setup: function(){
+		// check for related events
+		if ( $.data( this, drag.datakey ) ) 
+			return;
+		// initialize the drag data with copied defaults
+		var data = $.extend({ related:0 }, drag.defaults );
+		// store the interaction data
+		$.data( this, drag.datakey, data );
+		// bind the mousedown event, which starts drag interactions
+		$event.add( this, "touchstart mousedown", drag.init, data );
+		// prevent image dragging in IE...
+		if ( this.attachEvent ) 
+			this.attachEvent("ondragstart", drag.dontstart ); 
+	},
+	
+	// destroy configured interaction
+	teardown: function(){
+		var data = $.data( this, drag.datakey ) || {};
+		// check for related events
+		if ( data.related ) 
+			return;
+		// remove the stored data
+		$.removeData( this, drag.datakey );
+		// remove the mousedown event
+		$event.remove( this, "touchstart mousedown", drag.init );
+		// enable text selection
+		drag.textselect( true ); 
+		// un-prevent image dragging in IE...
+		if ( this.detachEvent ) 
+			this.detachEvent("ondragstart", drag.dontstart ); 
+	},
+		
+	// initialize the interaction
+	init: function( event ){ 
+		// sorry, only one touch at a time
+		if ( drag.touched ) 
+			return;
+		// the drag/drop interaction data
+		var dd = event.data, results;
+		// check the which directive
+		if ( event.which != 0 && dd.which > 0 && event.which != dd.which ) 
+			return; 
+		// check for suppressed selector
+		if ( $( event.target ).is( dd.not ) ) 
+			return;
+		// check for handle selector
+		if ( dd.handle && !$( event.target ).closest( dd.handle, event.currentTarget ).length ) 
+			return;
+
+		drag.touched = event.type == 'touchstart' ? this : null;
+		dd.propagates = 1;
+		dd.mousedown = this;
+		dd.interactions = [ drag.interaction( this, dd ) ];
+		dd.target = event.target;
+		dd.pageX = event.pageX;
+		dd.pageY = event.pageY;
+		dd.dragging = null;
+		// handle draginit event... 
+		results = drag.hijack( event, "draginit", dd );
+		// early cancel
+		if ( !dd.propagates )
+			return;
+		// flatten the result set
+		results = drag.flatten( results );
+		// insert new interaction elements
+		if ( results && results.length ){
+			dd.interactions = [];
+			$.each( results, function(){
+				dd.interactions.push( drag.interaction( this, dd ) );
+			});
+		}
+		// remember how many interactions are propagating
+		dd.propagates = dd.interactions.length;
+		// locate and init the drop targets
+		if ( dd.drop !== false && $special.drop ) 
+			$special.drop.handler( event, dd );
+		// disable text selection
+		drag.textselect( false ); 
+		// bind additional events...
+		if ( drag.touched )
+			$event.add( drag.touched, "touchmove touchend", drag.handler, dd );
+		else 
+			$event.add( document, "mousemove mouseup", drag.handler, dd );
+		// helps prevent text selection or scrolling
+		if ( !drag.touched || dd.live )
+			return false;
+	},	
+	
+	// returns an interaction object
+	interaction: function( elem, dd ){
+		var offset = $( elem )[ dd.relative ? "position" : "offset" ]() || { top:0, left:0 };
+		return {
+			drag: elem, 
+			callback: new drag.callback(), 
+			droppable: [],
+			offset: offset
+		};
+	},
+	
+	// handle drag-releatd DOM events
+	handler: function( event ){ 
+		// read the data before hijacking anything
+		var dd = event.data;	
+		// handle various events
+		switch ( event.type ){
+			// mousemove, check distance, start dragging
+			case !dd.dragging && 'touchmove': 
+				event.preventDefault();
+			case !dd.dragging && 'mousemove':
+				//  drag tolerance, x² + y² = distance²
+				if ( Math.pow(  event.pageX-dd.pageX, 2 ) + Math.pow(  event.pageY-dd.pageY, 2 ) < Math.pow( dd.distance, 2 ) ) 
+					break; // distance tolerance not reached
+				event.target = dd.target; // force target from "mousedown" event (fix distance issue)
+				drag.hijack( event, "dragstart", dd ); // trigger "dragstart"
+				if ( dd.propagates ) // "dragstart" not rejected
+					dd.dragging = true; // activate interaction
+			// mousemove, dragging
+			case 'touchmove':
+				event.preventDefault();
+			case 'mousemove':
+				if ( dd.dragging ){
+					// trigger "drag"		
+					drag.hijack( event, "drag", dd );
+					if ( dd.propagates ){
+						// manage drop events
+						if ( dd.drop !== false && $special.drop )
+							$special.drop.handler( event, dd ); // "dropstart", "dropend"							
+						break; // "drag" not rejected, stop		
+					}
+					event.type = "mouseup"; // helps "drop" handler behave
+				}
+			// mouseup, stop dragging
+			case 'touchend': 
+			case 'mouseup': 
+			default:
+				if ( drag.touched )
+					$event.remove( drag.touched, "touchmove touchend", drag.handler ); // remove touch events
+				else 
+					$event.remove( document, "mousemove mouseup", drag.handler ); // remove page events	
+				if ( dd.dragging ){
+					if ( dd.drop !== false && $special.drop )
+						$special.drop.handler( event, dd ); // "drop"
+					drag.hijack( event, "dragend", dd ); // trigger "dragend"	
+				}
+				drag.textselect( true ); // enable text selection
+				// if suppressing click events...
+				if ( dd.click === false && dd.dragging )
+					$.data( dd.mousedown, "suppress.click", new Date().getTime() + 5 );
+				dd.dragging = drag.touched = false; // deactivate element	
+				break;
+		}
+	},
+		
+	// re-use event object for custom events
+	hijack: function( event, type, dd, x, elem ){
+		// not configured
+		if ( !dd ) 
+			return;
+		// remember the original event and type
+		var orig = { event:event.originalEvent, type:event.type },
+		// is the event drag related or drog related?
+		mode = type.indexOf("drop") ? "drag" : "drop",
+		// iteration vars
+		result, i = x || 0, ia, $elems, callback,
+		len = !isNaN( x ) ? x : dd.interactions.length;
+		// modify the event type
+		event.type = type;
+		// remove the original event
+		event.originalEvent = null;
+		// initialize the results
+		dd.results = [];
+		// handle each interacted element
+		do if ( ia = dd.interactions[ i ] ){
+			// validate the interaction
+			if ( type !== "dragend" && ia.cancelled )
+				continue;
+			// set the dragdrop properties on the event object
+			callback = drag.properties( event, dd, ia );
+			// prepare for more results
+			ia.results = [];
+			// handle each element
+			$( elem || ia[ mode ] || dd.droppable ).each(function( p, subject ){
+				// identify drag or drop targets individually
+				callback.target = subject;
+				// force propagtion of the custom event
+				event.isPropagationStopped = function(){ return false; };
+				// handle the event	
+				result = subject ? $event.dispatch.call( subject, event, callback ) : null;
+				// stop the drag interaction for this element
+				if ( result === false ){
+					if ( mode == "drag" ){
+						ia.cancelled = true;
+						dd.propagates -= 1;
+					}
+					if ( type == "drop" ){
+						ia[ mode ][p] = null;
+					}
+				}
+				// assign any dropinit elements
+				else if ( type == "dropinit" )
+					ia.droppable.push( drag.element( result ) || subject );
+				// accept a returned proxy element 
+				if ( type == "dragstart" )
+					ia.proxy = $( drag.element( result ) || ia.drag )[0];
+				// remember this result	
+				ia.results.push( result );
+				// forget the event result, for recycling
+				delete event.result;
+				// break on cancelled handler
+				if ( type !== "dropinit" )
+					return result;
+			});	
+			// flatten the results	
+			dd.results[ i ] = drag.flatten( ia.results );	
+			// accept a set of valid drop targets
+			if ( type == "dropinit" )
+				ia.droppable = drag.flatten( ia.droppable );
+			// locate drop targets
+			if ( type == "dragstart" && !ia.cancelled )
+				callback.update(); 
+		}
+		while ( ++i < len )
+		// restore the original event & type
+		event.type = orig.type;
+		event.originalEvent = orig.event;
+		// return all handler results
+		return drag.flatten( dd.results );
+	},
+		
+	// extend the callback object with drag/drop properties...
+	properties: function( event, dd, ia ){		
+		var obj = ia.callback;
+		// elements
+		obj.drag = ia.drag;
+		obj.proxy = ia.proxy || ia.drag;
+		// starting mouse position
+		obj.startX = dd.pageX;
+		obj.startY = dd.pageY;
+		// current distance dragged
+		obj.deltaX = event.pageX - dd.pageX;
+		obj.deltaY = event.pageY - dd.pageY;
+		// original element position
+		obj.originalX = ia.offset.left;
+		obj.originalY = ia.offset.top;
+		// adjusted element position
+		obj.offsetX = obj.originalX + obj.deltaX; 
+		obj.offsetY = obj.originalY + obj.deltaY;
+		// assign the drop targets information
+		obj.drop = drag.flatten( ( ia.drop || [] ).slice() );
+		obj.available = drag.flatten( ( ia.droppable || [] ).slice() );
+		return obj;	
+	},
+	
+	// determine is the argument is an element or jquery instance
+	element: function( arg ){
+		if ( arg && ( arg.jquery || arg.nodeType == 1 ) )
+			return arg;
+	},
+	
+	// flatten nested jquery objects and arrays into a single dimension array
+	flatten: function( arr ){
+		return $.map( arr, function( member ){
+			return member && member.jquery ? $.makeArray( member ) : 
+				member && member.length ? drag.flatten( member ) : member;
+		});
+	},
+	
+	// toggles text selection attributes ON (true) or OFF (false)
+	textselect: function( bool ){ 
+		$( document )[ bool ? "unbind" : "bind" ]("selectstart", drag.dontstart )
+			.css("MozUserSelect", bool ? "" : "none" );
+		// .attr("unselectable", bool ? "off" : "on" )
+		document.unselectable = bool ? "off" : "on"; 
+	},
+	
+	// suppress "selectstart" and "ondragstart" events
+	dontstart: function(){ 
+		return false; 
+	},
+	
+	// a callback instance contructor
+	callback: function(){}
+	
+};
+
+// callback methods
+drag.callback.prototype = {
+	update: function(){
+		if ( $special.drop && this.available.length )
+			$.each( this.available, function( i ){
+				$special.drop.locate( this, i );
+			});
+	}
+};
+
+// patch $.event.$dispatch to allow suppressing clicks
+var $dispatch = $event.dispatch;
+$event.dispatch = function( event ){
+	if ( $.data( this, "suppress."+ event.type ) - new Date().getTime() > 0 ){
+		$.removeData( this, "suppress."+ event.type );
+		return;
+	}
+	return $dispatch.apply( this, arguments );
+};
+
+// event fix hooks for touch events...
+var touchHooks = 
+$event.fixHooks.touchstart = 
+$event.fixHooks.touchmove = 
+$event.fixHooks.touchend =
+$event.fixHooks.touchcancel = {
+	props: "clientX clientY pageX pageY screenX screenY".split( " " ),
+	filter: function( event, orig ) {
+		if ( orig ){
+			var touched = ( orig.touches && orig.touches[0] )
+				|| ( orig.changedTouches && orig.changedTouches[0] )
+				|| null; 
+			// iOS webkit: touchstart, touchmove, touchend
+			if ( touched ) 
+				$.each( touchHooks.props, function( i, prop ){
+					event[ prop ] = touched[ prop ];
+				});
+		}
+		return event;
+	}
+};
+
+// share the same special event configuration with related events...
+$special.draginit = $special.dragstart = $special.dragend = drag;
+
+})( jQuery );// Script for Content layout.
 // --------------------------
 
 // Block use of $ for jQuery to avoid conflict with Prototype.
 jQuery.noConflict();
+
+// Are we in a sub-frame of contentframe?
+function inSubFrame() {
+  var isSub = ('contentFrame' !== self.name && '' !== self.name);
+  if (top.frames.length === 1) {
+    return false;
+  }
+  else {
+    return isSub;
+  }
+}
 
 // Called on click of jqgridminimize div. Zooms the page back to normal.
 function jqGridMinimize() {
@@ -15251,6 +12717,7 @@ function jqGridMinimize() {
 
 // If this subframe has been zoomed out make sure the minimise button is available.
 function jqGridMinButtonRequired() {
+  if(self.name == '') { return false; }
   if(top.frames.length > 1) {
     var sf;
     if('contentFrame' == self.name) {
@@ -15259,9 +12726,9 @@ function jqGridMinButtonRequired() {
     else {
       sf = jQuery('#'+self.name, top.frames[1].document);
     }
-		if(!jQuery('#contentFrame').fullScreen()) {
-			if('0px' == sf.css('top')) {document.getElementById("jqgridminimize").style.visibility = "visible";}
-		}
+    if(!jQuery('#contentFrame').fullScreen()) {
+      if('0px' == sf.css('top')) {document.getElementById("jqgridminimize").style.visibility = "visible";}
+    }
   }
 }
 
@@ -15278,17 +12745,16 @@ jQuery(document).ready(function() {
   jQuery('#jqgridminimize').button({ icons: { primary: "ui-icon-zoomin" } });
   jqGridMinButtonRequired();
   jQuery(".multiselect").multiselect();
+  jQuery(".chosen-select").chosen({disable_search_threshold: 10, allow_single_deselect: true, search_contains: true});
 });
 
 function send_fields_to_popup_window(link,send_fields) {
-  //        alert("Le' send fields : " + send_fields);
   var split_send_fields = send_fields.split(",");
   var send_fields_params = "";
-  //        alert("Length : " + split_send_fields.length);
+
   for(j=0; j < split_send_fields.length; j++) {
-    //            alert(split_send_fields[j]);
     var form_send_field = null;
-    if(window.parent.frames[1] !== null) {
+    if(window.parent.frames[1] !== undefined) {
       form_send_field = window.parent.frames[1].document.getElementById(split_send_fields[j]);
     }
 
@@ -15336,10 +12802,10 @@ function is_outer_form()
 
 function clear_info()
 {
-  //	       info_img = document.getElementById("info_img");
-  //	       info_text = document.getElementById("info_body");
-  //	       info_img.style.visibility = "hidden";
-  //	       info_text.innerHTML = "";
+  //         info_img = document.getElementById("info_img");
+  //         info_text = document.getElementById("info_body");
+  //         info_img.style.visibility = "hidden";
+  //         info_text.innerHTML = "";
 
 }
 
@@ -15370,3 +12836,11549 @@ function show_action_image(clicked_cell)
 
 }
 
+//     Underscore.js 1.4.4
+//     http://underscorejs.org
+//     (c) 2009-2013 Jeremy Ashkenas, DocumentCloud Inc.
+//     Underscore may be freely distributed under the MIT license.
+
+(function() {
+
+  // Baseline setup
+  // --------------
+
+  // Establish the root object, `window` in the browser, or `global` on the server.
+  var root = this;
+
+  // Save the previous value of the `_` variable.
+  var previousUnderscore = root._;
+
+  // Establish the object that gets returned to break out of a loop iteration.
+  var breaker = {};
+
+  // Save bytes in the minified (but not gzipped) version:
+  var ArrayProto = Array.prototype, ObjProto = Object.prototype, FuncProto = Function.prototype;
+
+  // Create quick reference variables for speed access to core prototypes.
+  var push             = ArrayProto.push,
+      slice            = ArrayProto.slice,
+      concat           = ArrayProto.concat,
+      toString         = ObjProto.toString,
+      hasOwnProperty   = ObjProto.hasOwnProperty;
+
+  // All **ECMAScript 5** native function implementations that we hope to use
+  // are declared here.
+  var
+    nativeForEach      = ArrayProto.forEach,
+    nativeMap          = ArrayProto.map,
+    nativeReduce       = ArrayProto.reduce,
+    nativeReduceRight  = ArrayProto.reduceRight,
+    nativeFilter       = ArrayProto.filter,
+    nativeEvery        = ArrayProto.every,
+    nativeSome         = ArrayProto.some,
+    nativeIndexOf      = ArrayProto.indexOf,
+    nativeLastIndexOf  = ArrayProto.lastIndexOf,
+    nativeIsArray      = Array.isArray,
+    nativeKeys         = Object.keys,
+    nativeBind         = FuncProto.bind;
+
+  // Create a safe reference to the Underscore object for use below.
+  var _ = function(obj) {
+    if (obj instanceof _) return obj;
+    if (!(this instanceof _)) return new _(obj);
+    this._wrapped = obj;
+  };
+
+  // Export the Underscore object for **Node.js**, with
+  // backwards-compatibility for the old `require()` API. If we're in
+  // the browser, add `_` as a global object via a string identifier,
+  // for Closure Compiler "advanced" mode.
+  if (typeof exports !== 'undefined') {
+    if (typeof module !== 'undefined' && module.exports) {
+      exports = module.exports = _;
+    }
+    exports._ = _;
+  } else {
+    root._ = _;
+  }
+
+  // Current version.
+  _.VERSION = '1.4.4';
+
+  // Collection Functions
+  // --------------------
+
+  // The cornerstone, an `each` implementation, aka `forEach`.
+  // Handles objects with the built-in `forEach`, arrays, and raw objects.
+  // Delegates to **ECMAScript 5**'s native `forEach` if available.
+  var each = _.each = _.forEach = function(obj, iterator, context) {
+    if (obj == null) return;
+    if (nativeForEach && obj.forEach === nativeForEach) {
+      obj.forEach(iterator, context);
+    } else if (obj.length === +obj.length) {
+      for (var i = 0, l = obj.length; i < l; i++) {
+        if (iterator.call(context, obj[i], i, obj) === breaker) return;
+      }
+    } else {
+      for (var key in obj) {
+        if (_.has(obj, key)) {
+          if (iterator.call(context, obj[key], key, obj) === breaker) return;
+        }
+      }
+    }
+  };
+
+  // Return the results of applying the iterator to each element.
+  // Delegates to **ECMAScript 5**'s native `map` if available.
+  _.map = _.collect = function(obj, iterator, context) {
+    var results = [];
+    if (obj == null) return results;
+    if (nativeMap && obj.map === nativeMap) return obj.map(iterator, context);
+    each(obj, function(value, index, list) {
+      results[results.length] = iterator.call(context, value, index, list);
+    });
+    return results;
+  };
+
+  var reduceError = 'Reduce of empty array with no initial value';
+
+  // **Reduce** builds up a single result from a list of values, aka `inject`,
+  // or `foldl`. Delegates to **ECMAScript 5**'s native `reduce` if available.
+  _.reduce = _.foldl = _.inject = function(obj, iterator, memo, context) {
+    var initial = arguments.length > 2;
+    if (obj == null) obj = [];
+    if (nativeReduce && obj.reduce === nativeReduce) {
+      if (context) iterator = _.bind(iterator, context);
+      return initial ? obj.reduce(iterator, memo) : obj.reduce(iterator);
+    }
+    each(obj, function(value, index, list) {
+      if (!initial) {
+        memo = value;
+        initial = true;
+      } else {
+        memo = iterator.call(context, memo, value, index, list);
+      }
+    });
+    if (!initial) throw new TypeError(reduceError);
+    return memo;
+  };
+
+  // The right-associative version of reduce, also known as `foldr`.
+  // Delegates to **ECMAScript 5**'s native `reduceRight` if available.
+  _.reduceRight = _.foldr = function(obj, iterator, memo, context) {
+    var initial = arguments.length > 2;
+    if (obj == null) obj = [];
+    if (nativeReduceRight && obj.reduceRight === nativeReduceRight) {
+      if (context) iterator = _.bind(iterator, context);
+      return initial ? obj.reduceRight(iterator, memo) : obj.reduceRight(iterator);
+    }
+    var length = obj.length;
+    if (length !== +length) {
+      var keys = _.keys(obj);
+      length = keys.length;
+    }
+    each(obj, function(value, index, list) {
+      index = keys ? keys[--length] : --length;
+      if (!initial) {
+        memo = obj[index];
+        initial = true;
+      } else {
+        memo = iterator.call(context, memo, obj[index], index, list);
+      }
+    });
+    if (!initial) throw new TypeError(reduceError);
+    return memo;
+  };
+
+  // Return the first value which passes a truth test. Aliased as `detect`.
+  _.find = _.detect = function(obj, iterator, context) {
+    var result;
+    any(obj, function(value, index, list) {
+      if (iterator.call(context, value, index, list)) {
+        result = value;
+        return true;
+      }
+    });
+    return result;
+  };
+
+  // Return all the elements that pass a truth test.
+  // Delegates to **ECMAScript 5**'s native `filter` if available.
+  // Aliased as `select`.
+  _.filter = _.select = function(obj, iterator, context) {
+    var results = [];
+    if (obj == null) return results;
+    if (nativeFilter && obj.filter === nativeFilter) return obj.filter(iterator, context);
+    each(obj, function(value, index, list) {
+      if (iterator.call(context, value, index, list)) results[results.length] = value;
+    });
+    return results;
+  };
+
+  // Return all the elements for which a truth test fails.
+  _.reject = function(obj, iterator, context) {
+    return _.filter(obj, function(value, index, list) {
+      return !iterator.call(context, value, index, list);
+    }, context);
+  };
+
+  // Determine whether all of the elements match a truth test.
+  // Delegates to **ECMAScript 5**'s native `every` if available.
+  // Aliased as `all`.
+  _.every = _.all = function(obj, iterator, context) {
+    iterator || (iterator = _.identity);
+    var result = true;
+    if (obj == null) return result;
+    if (nativeEvery && obj.every === nativeEvery) return obj.every(iterator, context);
+    each(obj, function(value, index, list) {
+      if (!(result = result && iterator.call(context, value, index, list))) return breaker;
+    });
+    return !!result;
+  };
+
+  // Determine if at least one element in the object matches a truth test.
+  // Delegates to **ECMAScript 5**'s native `some` if available.
+  // Aliased as `any`.
+  var any = _.some = _.any = function(obj, iterator, context) {
+    iterator || (iterator = _.identity);
+    var result = false;
+    if (obj == null) return result;
+    if (nativeSome && obj.some === nativeSome) return obj.some(iterator, context);
+    each(obj, function(value, index, list) {
+      if (result || (result = iterator.call(context, value, index, list))) return breaker;
+    });
+    return !!result;
+  };
+
+  // Determine if the array or object contains a given value (using `===`).
+  // Aliased as `include`.
+  _.contains = _.include = function(obj, target) {
+    if (obj == null) return false;
+    if (nativeIndexOf && obj.indexOf === nativeIndexOf) return obj.indexOf(target) != -1;
+    return any(obj, function(value) {
+      return value === target;
+    });
+  };
+
+  // Invoke a method (with arguments) on every item in a collection.
+  _.invoke = function(obj, method) {
+    var args = slice.call(arguments, 2);
+    var isFunc = _.isFunction(method);
+    return _.map(obj, function(value) {
+      return (isFunc ? method : value[method]).apply(value, args);
+    });
+  };
+
+  // Convenience version of a common use case of `map`: fetching a property.
+  _.pluck = function(obj, key) {
+    return _.map(obj, function(value){ return value[key]; });
+  };
+
+  // Convenience version of a common use case of `filter`: selecting only objects
+  // containing specific `key:value` pairs.
+  _.where = function(obj, attrs, first) {
+    if (_.isEmpty(attrs)) return first ? void 0 : [];
+    return _[first ? 'find' : 'filter'](obj, function(value) {
+      for (var key in attrs) {
+        if (attrs[key] !== value[key]) return false;
+      }
+      return true;
+    });
+  };
+
+  // Convenience version of a common use case of `find`: getting the first object
+  // containing specific `key:value` pairs.
+  _.findWhere = function(obj, attrs) {
+    return _.where(obj, attrs, true);
+  };
+
+  // Return the maximum element or (element-based computation).
+  // Can't optimize arrays of integers longer than 65,535 elements.
+  // See: https://bugs.webkit.org/show_bug.cgi?id=80797
+  _.max = function(obj, iterator, context) {
+    if (!iterator && _.isArray(obj) && obj[0] === +obj[0] && obj.length < 65535) {
+      return Math.max.apply(Math, obj);
+    }
+    if (!iterator && _.isEmpty(obj)) return -Infinity;
+    var result = {computed : -Infinity, value: -Infinity};
+    each(obj, function(value, index, list) {
+      var computed = iterator ? iterator.call(context, value, index, list) : value;
+      computed >= result.computed && (result = {value : value, computed : computed});
+    });
+    return result.value;
+  };
+
+  // Return the minimum element (or element-based computation).
+  _.min = function(obj, iterator, context) {
+    if (!iterator && _.isArray(obj) && obj[0] === +obj[0] && obj.length < 65535) {
+      return Math.min.apply(Math, obj);
+    }
+    if (!iterator && _.isEmpty(obj)) return Infinity;
+    var result = {computed : Infinity, value: Infinity};
+    each(obj, function(value, index, list) {
+      var computed = iterator ? iterator.call(context, value, index, list) : value;
+      computed < result.computed && (result = {value : value, computed : computed});
+    });
+    return result.value;
+  };
+
+  // Shuffle an array.
+  _.shuffle = function(obj) {
+    var rand;
+    var index = 0;
+    var shuffled = [];
+    each(obj, function(value) {
+      rand = _.random(index++);
+      shuffled[index - 1] = shuffled[rand];
+      shuffled[rand] = value;
+    });
+    return shuffled;
+  };
+
+  // An internal function to generate lookup iterators.
+  var lookupIterator = function(value) {
+    return _.isFunction(value) ? value : function(obj){ return obj[value]; };
+  };
+
+  // Sort the object's values by a criterion produced by an iterator.
+  _.sortBy = function(obj, value, context) {
+    var iterator = lookupIterator(value);
+    return _.pluck(_.map(obj, function(value, index, list) {
+      return {
+        value : value,
+        index : index,
+        criteria : iterator.call(context, value, index, list)
+      };
+    }).sort(function(left, right) {
+      var a = left.criteria;
+      var b = right.criteria;
+      if (a !== b) {
+        if (a > b || a === void 0) return 1;
+        if (a < b || b === void 0) return -1;
+      }
+      return left.index < right.index ? -1 : 1;
+    }), 'value');
+  };
+
+  // An internal function used for aggregate "group by" operations.
+  var group = function(obj, value, context, behavior) {
+    var result = {};
+    var iterator = lookupIterator(value || _.identity);
+    each(obj, function(value, index) {
+      var key = iterator.call(context, value, index, obj);
+      behavior(result, key, value);
+    });
+    return result;
+  };
+
+  // Groups the object's values by a criterion. Pass either a string attribute
+  // to group by, or a function that returns the criterion.
+  _.groupBy = function(obj, value, context) {
+    return group(obj, value, context, function(result, key, value) {
+      (_.has(result, key) ? result[key] : (result[key] = [])).push(value);
+    });
+  };
+
+  // Counts instances of an object that group by a certain criterion. Pass
+  // either a string attribute to count by, or a function that returns the
+  // criterion.
+  _.countBy = function(obj, value, context) {
+    return group(obj, value, context, function(result, key) {
+      if (!_.has(result, key)) result[key] = 0;
+      result[key]++;
+    });
+  };
+
+  // Use a comparator function to figure out the smallest index at which
+  // an object should be inserted so as to maintain order. Uses binary search.
+  _.sortedIndex = function(array, obj, iterator, context) {
+    iterator = iterator == null ? _.identity : lookupIterator(iterator);
+    var value = iterator.call(context, obj);
+    var low = 0, high = array.length;
+    while (low < high) {
+      var mid = (low + high) >>> 1;
+      iterator.call(context, array[mid]) < value ? low = mid + 1 : high = mid;
+    }
+    return low;
+  };
+
+  // Safely convert anything iterable into a real, live array.
+  _.toArray = function(obj) {
+    if (!obj) return [];
+    if (_.isArray(obj)) return slice.call(obj);
+    if (obj.length === +obj.length) return _.map(obj, _.identity);
+    return _.values(obj);
+  };
+
+  // Return the number of elements in an object.
+  _.size = function(obj) {
+    if (obj == null) return 0;
+    return (obj.length === +obj.length) ? obj.length : _.keys(obj).length;
+  };
+
+  // Array Functions
+  // ---------------
+
+  // Get the first element of an array. Passing **n** will return the first N
+  // values in the array. Aliased as `head` and `take`. The **guard** check
+  // allows it to work with `_.map`.
+  _.first = _.head = _.take = function(array, n, guard) {
+    if (array == null) return void 0;
+    return (n != null) && !guard ? slice.call(array, 0, n) : array[0];
+  };
+
+  // Returns everything but the last entry of the array. Especially useful on
+  // the arguments object. Passing **n** will return all the values in
+  // the array, excluding the last N. The **guard** check allows it to work with
+  // `_.map`.
+  _.initial = function(array, n, guard) {
+    return slice.call(array, 0, array.length - ((n == null) || guard ? 1 : n));
+  };
+
+  // Get the last element of an array. Passing **n** will return the last N
+  // values in the array. The **guard** check allows it to work with `_.map`.
+  _.last = function(array, n, guard) {
+    if (array == null) return void 0;
+    if ((n != null) && !guard) {
+      return slice.call(array, Math.max(array.length - n, 0));
+    } else {
+      return array[array.length - 1];
+    }
+  };
+
+  // Returns everything but the first entry of the array. Aliased as `tail` and `drop`.
+  // Especially useful on the arguments object. Passing an **n** will return
+  // the rest N values in the array. The **guard**
+  // check allows it to work with `_.map`.
+  _.rest = _.tail = _.drop = function(array, n, guard) {
+    return slice.call(array, (n == null) || guard ? 1 : n);
+  };
+
+  // Trim out all falsy values from an array.
+  _.compact = function(array) {
+    return _.filter(array, _.identity);
+  };
+
+  // Internal implementation of a recursive `flatten` function.
+  var flatten = function(input, shallow, output) {
+    each(input, function(value) {
+      if (_.isArray(value)) {
+        shallow ? push.apply(output, value) : flatten(value, shallow, output);
+      } else {
+        output.push(value);
+      }
+    });
+    return output;
+  };
+
+  // Return a completely flattened version of an array.
+  _.flatten = function(array, shallow) {
+    return flatten(array, shallow, []);
+  };
+
+  // Return a version of the array that does not contain the specified value(s).
+  _.without = function(array) {
+    return _.difference(array, slice.call(arguments, 1));
+  };
+
+  // Produce a duplicate-free version of the array. If the array has already
+  // been sorted, you have the option of using a faster algorithm.
+  // Aliased as `unique`.
+  _.uniq = _.unique = function(array, isSorted, iterator, context) {
+    if (_.isFunction(isSorted)) {
+      context = iterator;
+      iterator = isSorted;
+      isSorted = false;
+    }
+    var initial = iterator ? _.map(array, iterator, context) : array;
+    var results = [];
+    var seen = [];
+    each(initial, function(value, index) {
+      if (isSorted ? (!index || seen[seen.length - 1] !== value) : !_.contains(seen, value)) {
+        seen.push(value);
+        results.push(array[index]);
+      }
+    });
+    return results;
+  };
+
+  // Produce an array that contains the union: each distinct element from all of
+  // the passed-in arrays.
+  _.union = function() {
+    return _.uniq(concat.apply(ArrayProto, arguments));
+  };
+
+  // Produce an array that contains every item shared between all the
+  // passed-in arrays.
+  _.intersection = function(array) {
+    var rest = slice.call(arguments, 1);
+    return _.filter(_.uniq(array), function(item) {
+      return _.every(rest, function(other) {
+        return _.indexOf(other, item) >= 0;
+      });
+    });
+  };
+
+  // Take the difference between one array and a number of other arrays.
+  // Only the elements present in just the first array will remain.
+  _.difference = function(array) {
+    var rest = concat.apply(ArrayProto, slice.call(arguments, 1));
+    return _.filter(array, function(value){ return !_.contains(rest, value); });
+  };
+
+  // Zip together multiple lists into a single array -- elements that share
+  // an index go together.
+  _.zip = function() {
+    var args = slice.call(arguments);
+    var length = _.max(_.pluck(args, 'length'));
+    var results = new Array(length);
+    for (var i = 0; i < length; i++) {
+      results[i] = _.pluck(args, "" + i);
+    }
+    return results;
+  };
+
+  // Converts lists into objects. Pass either a single array of `[key, value]`
+  // pairs, or two parallel arrays of the same length -- one of keys, and one of
+  // the corresponding values.
+  _.object = function(list, values) {
+    if (list == null) return {};
+    var result = {};
+    for (var i = 0, l = list.length; i < l; i++) {
+      if (values) {
+        result[list[i]] = values[i];
+      } else {
+        result[list[i][0]] = list[i][1];
+      }
+    }
+    return result;
+  };
+
+  // If the browser doesn't supply us with indexOf (I'm looking at you, **MSIE**),
+  // we need this function. Return the position of the first occurrence of an
+  // item in an array, or -1 if the item is not included in the array.
+  // Delegates to **ECMAScript 5**'s native `indexOf` if available.
+  // If the array is large and already in sort order, pass `true`
+  // for **isSorted** to use binary search.
+  _.indexOf = function(array, item, isSorted) {
+    if (array == null) return -1;
+    var i = 0, l = array.length;
+    if (isSorted) {
+      if (typeof isSorted == 'number') {
+        i = (isSorted < 0 ? Math.max(0, l + isSorted) : isSorted);
+      } else {
+        i = _.sortedIndex(array, item);
+        return array[i] === item ? i : -1;
+      }
+    }
+    if (nativeIndexOf && array.indexOf === nativeIndexOf) return array.indexOf(item, isSorted);
+    for (; i < l; i++) if (array[i] === item) return i;
+    return -1;
+  };
+
+  // Delegates to **ECMAScript 5**'s native `lastIndexOf` if available.
+  _.lastIndexOf = function(array, item, from) {
+    if (array == null) return -1;
+    var hasIndex = from != null;
+    if (nativeLastIndexOf && array.lastIndexOf === nativeLastIndexOf) {
+      return hasIndex ? array.lastIndexOf(item, from) : array.lastIndexOf(item);
+    }
+    var i = (hasIndex ? from : array.length);
+    while (i--) if (array[i] === item) return i;
+    return -1;
+  };
+
+  // Generate an integer Array containing an arithmetic progression. A port of
+  // the native Python `range()` function. See
+  // [the Python documentation](http://docs.python.org/library/functions.html#range).
+  _.range = function(start, stop, step) {
+    if (arguments.length <= 1) {
+      stop = start || 0;
+      start = 0;
+    }
+    step = arguments[2] || 1;
+
+    var len = Math.max(Math.ceil((stop - start) / step), 0);
+    var idx = 0;
+    var range = new Array(len);
+
+    while(idx < len) {
+      range[idx++] = start;
+      start += step;
+    }
+
+    return range;
+  };
+
+  // Function (ahem) Functions
+  // ------------------
+
+  // Create a function bound to a given object (assigning `this`, and arguments,
+  // optionally). Delegates to **ECMAScript 5**'s native `Function.bind` if
+  // available.
+  _.bind = function(func, context) {
+    if (func.bind === nativeBind && nativeBind) return nativeBind.apply(func, slice.call(arguments, 1));
+    var args = slice.call(arguments, 2);
+    return function() {
+      return func.apply(context, args.concat(slice.call(arguments)));
+    };
+  };
+
+  // Partially apply a function by creating a version that has had some of its
+  // arguments pre-filled, without changing its dynamic `this` context.
+  _.partial = function(func) {
+    var args = slice.call(arguments, 1);
+    return function() {
+      return func.apply(this, args.concat(slice.call(arguments)));
+    };
+  };
+
+  // Bind all of an object's methods to that object. Useful for ensuring that
+  // all callbacks defined on an object belong to it.
+  _.bindAll = function(obj) {
+    var funcs = slice.call(arguments, 1);
+    if (funcs.length === 0) throw new Error("bindAll must be passed function names");
+    each(funcs, function(f) { obj[f] = _.bind(obj[f], obj); });
+    return obj;
+  };
+
+  // Memoize an expensive function by storing its results.
+  _.memoize = function(func, hasher) {
+    var memo = {};
+    hasher || (hasher = _.identity);
+    return function() {
+      var key = hasher.apply(this, arguments);
+      return _.has(memo, key) ? memo[key] : (memo[key] = func.apply(this, arguments));
+    };
+  };
+
+  // Delays a function for the given number of milliseconds, and then calls
+  // it with the arguments supplied.
+  _.delay = function(func, wait) {
+    var args = slice.call(arguments, 2);
+    return setTimeout(function(){ return func.apply(null, args); }, wait);
+  };
+
+  // Defers a function, scheduling it to run after the current call stack has
+  // cleared.
+  _.defer = function(func) {
+    return _.delay.apply(_, [func, 1].concat(slice.call(arguments, 1)));
+  };
+
+  // Returns a function, that, when invoked, will only be triggered at most once
+  // during a given window of time.
+  _.throttle = function(func, wait) {
+    var context, args, timeout, result;
+    var previous = 0;
+    var later = function() {
+      previous = new Date;
+      timeout = null;
+      result = func.apply(context, args);
+    };
+    return function() {
+      var now = new Date;
+      var remaining = wait - (now - previous);
+      context = this;
+      args = arguments;
+      if (remaining <= 0) {
+        clearTimeout(timeout);
+        timeout = null;
+        previous = now;
+        result = func.apply(context, args);
+      } else if (!timeout) {
+        timeout = setTimeout(later, remaining);
+      }
+      return result;
+    };
+  };
+
+  // Returns a function, that, as long as it continues to be invoked, will not
+  // be triggered. The function will be called after it stops being called for
+  // N milliseconds. If `immediate` is passed, trigger the function on the
+  // leading edge, instead of the trailing.
+  _.debounce = function(func, wait, immediate) {
+    var timeout, result;
+    return function() {
+      var context = this, args = arguments;
+      var later = function() {
+        timeout = null;
+        if (!immediate) result = func.apply(context, args);
+      };
+      var callNow = immediate && !timeout;
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+      if (callNow) result = func.apply(context, args);
+      return result;
+    };
+  };
+
+  // Returns a function that will be executed at most one time, no matter how
+  // often you call it. Useful for lazy initialization.
+  _.once = function(func) {
+    var ran = false, memo;
+    return function() {
+      if (ran) return memo;
+      ran = true;
+      memo = func.apply(this, arguments);
+      func = null;
+      return memo;
+    };
+  };
+
+  // Returns the first function passed as an argument to the second,
+  // allowing you to adjust arguments, run code before and after, and
+  // conditionally execute the original function.
+  _.wrap = function(func, wrapper) {
+    return function() {
+      var args = [func];
+      push.apply(args, arguments);
+      return wrapper.apply(this, args);
+    };
+  };
+
+  // Returns a function that is the composition of a list of functions, each
+  // consuming the return value of the function that follows.
+  _.compose = function() {
+    var funcs = arguments;
+    return function() {
+      var args = arguments;
+      for (var i = funcs.length - 1; i >= 0; i--) {
+        args = [funcs[i].apply(this, args)];
+      }
+      return args[0];
+    };
+  };
+
+  // Returns a function that will only be executed after being called N times.
+  _.after = function(times, func) {
+    if (times <= 0) return func();
+    return function() {
+      if (--times < 1) {
+        return func.apply(this, arguments);
+      }
+    };
+  };
+
+  // Object Functions
+  // ----------------
+
+  // Retrieve the names of an object's properties.
+  // Delegates to **ECMAScript 5**'s native `Object.keys`
+  _.keys = nativeKeys || function(obj) {
+    if (obj !== Object(obj)) throw new TypeError('Invalid object');
+    var keys = [];
+    for (var key in obj) if (_.has(obj, key)) keys[keys.length] = key;
+    return keys;
+  };
+
+  // Retrieve the values of an object's properties.
+  _.values = function(obj) {
+    var values = [];
+    for (var key in obj) if (_.has(obj, key)) values.push(obj[key]);
+    return values;
+  };
+
+  // Convert an object into a list of `[key, value]` pairs.
+  _.pairs = function(obj) {
+    var pairs = [];
+    for (var key in obj) if (_.has(obj, key)) pairs.push([key, obj[key]]);
+    return pairs;
+  };
+
+  // Invert the keys and values of an object. The values must be serializable.
+  _.invert = function(obj) {
+    var result = {};
+    for (var key in obj) if (_.has(obj, key)) result[obj[key]] = key;
+    return result;
+  };
+
+  // Return a sorted list of the function names available on the object.
+  // Aliased as `methods`
+  _.functions = _.methods = function(obj) {
+    var names = [];
+    for (var key in obj) {
+      if (_.isFunction(obj[key])) names.push(key);
+    }
+    return names.sort();
+  };
+
+  // Extend a given object with all the properties in passed-in object(s).
+  _.extend = function(obj) {
+    each(slice.call(arguments, 1), function(source) {
+      if (source) {
+        for (var prop in source) {
+          obj[prop] = source[prop];
+        }
+      }
+    });
+    return obj;
+  };
+
+  // Return a copy of the object only containing the whitelisted properties.
+  _.pick = function(obj) {
+    var copy = {};
+    var keys = concat.apply(ArrayProto, slice.call(arguments, 1));
+    each(keys, function(key) {
+      if (key in obj) copy[key] = obj[key];
+    });
+    return copy;
+  };
+
+   // Return a copy of the object without the blacklisted properties.
+  _.omit = function(obj) {
+    var copy = {};
+    var keys = concat.apply(ArrayProto, slice.call(arguments, 1));
+    for (var key in obj) {
+      if (!_.contains(keys, key)) copy[key] = obj[key];
+    }
+    return copy;
+  };
+
+  // Fill in a given object with default properties.
+  _.defaults = function(obj) {
+    each(slice.call(arguments, 1), function(source) {
+      if (source) {
+        for (var prop in source) {
+          if (obj[prop] == null) obj[prop] = source[prop];
+        }
+      }
+    });
+    return obj;
+  };
+
+  // Create a (shallow-cloned) duplicate of an object.
+  _.clone = function(obj) {
+    if (!_.isObject(obj)) return obj;
+    return _.isArray(obj) ? obj.slice() : _.extend({}, obj);
+  };
+
+  // Invokes interceptor with the obj, and then returns obj.
+  // The primary purpose of this method is to "tap into" a method chain, in
+  // order to perform operations on intermediate results within the chain.
+  _.tap = function(obj, interceptor) {
+    interceptor(obj);
+    return obj;
+  };
+
+  // Internal recursive comparison function for `isEqual`.
+  var eq = function(a, b, aStack, bStack) {
+    // Identical objects are equal. `0 === -0`, but they aren't identical.
+    // See the Harmony `egal` proposal: http://wiki.ecmascript.org/doku.php?id=harmony:egal.
+    if (a === b) return a !== 0 || 1 / a == 1 / b;
+    // A strict comparison is necessary because `null == undefined`.
+    if (a == null || b == null) return a === b;
+    // Unwrap any wrapped objects.
+    if (a instanceof _) a = a._wrapped;
+    if (b instanceof _) b = b._wrapped;
+    // Compare `[[Class]]` names.
+    var className = toString.call(a);
+    if (className != toString.call(b)) return false;
+    switch (className) {
+      // Strings, numbers, dates, and booleans are compared by value.
+      case '[object String]':
+        // Primitives and their corresponding object wrappers are equivalent; thus, `"5"` is
+        // equivalent to `new String("5")`.
+        return a == String(b);
+      case '[object Number]':
+        // `NaN`s are equivalent, but non-reflexive. An `egal` comparison is performed for
+        // other numeric values.
+        return a != +a ? b != +b : (a == 0 ? 1 / a == 1 / b : a == +b);
+      case '[object Date]':
+      case '[object Boolean]':
+        // Coerce dates and booleans to numeric primitive values. Dates are compared by their
+        // millisecond representations. Note that invalid dates with millisecond representations
+        // of `NaN` are not equivalent.
+        return +a == +b;
+      // RegExps are compared by their source patterns and flags.
+      case '[object RegExp]':
+        return a.source == b.source &&
+               a.global == b.global &&
+               a.multiline == b.multiline &&
+               a.ignoreCase == b.ignoreCase;
+    }
+    if (typeof a != 'object' || typeof b != 'object') return false;
+    // Assume equality for cyclic structures. The algorithm for detecting cyclic
+    // structures is adapted from ES 5.1 section 15.12.3, abstract operation `JO`.
+    var length = aStack.length;
+    while (length--) {
+      // Linear search. Performance is inversely proportional to the number of
+      // unique nested structures.
+      if (aStack[length] == a) return bStack[length] == b;
+    }
+    // Add the first object to the stack of traversed objects.
+    aStack.push(a);
+    bStack.push(b);
+    var size = 0, result = true;
+    // Recursively compare objects and arrays.
+    if (className == '[object Array]') {
+      // Compare array lengths to determine if a deep comparison is necessary.
+      size = a.length;
+      result = size == b.length;
+      if (result) {
+        // Deep compare the contents, ignoring non-numeric properties.
+        while (size--) {
+          if (!(result = eq(a[size], b[size], aStack, bStack))) break;
+        }
+      }
+    } else {
+      // Objects with different constructors are not equivalent, but `Object`s
+      // from different frames are.
+      var aCtor = a.constructor, bCtor = b.constructor;
+      if (aCtor !== bCtor && !(_.isFunction(aCtor) && (aCtor instanceof aCtor) &&
+                               _.isFunction(bCtor) && (bCtor instanceof bCtor))) {
+        return false;
+      }
+      // Deep compare objects.
+      for (var key in a) {
+        if (_.has(a, key)) {
+          // Count the expected number of properties.
+          size++;
+          // Deep compare each member.
+          if (!(result = _.has(b, key) && eq(a[key], b[key], aStack, bStack))) break;
+        }
+      }
+      // Ensure that both objects contain the same number of properties.
+      if (result) {
+        for (key in b) {
+          if (_.has(b, key) && !(size--)) break;
+        }
+        result = !size;
+      }
+    }
+    // Remove the first object from the stack of traversed objects.
+    aStack.pop();
+    bStack.pop();
+    return result;
+  };
+
+  // Perform a deep comparison to check if two objects are equal.
+  _.isEqual = function(a, b) {
+    return eq(a, b, [], []);
+  };
+
+  // Is a given array, string, or object empty?
+  // An "empty" object has no enumerable own-properties.
+  _.isEmpty = function(obj) {
+    if (obj == null) return true;
+    if (_.isArray(obj) || _.isString(obj)) return obj.length === 0;
+    for (var key in obj) if (_.has(obj, key)) return false;
+    return true;
+  };
+
+  // Is a given value a DOM element?
+  _.isElement = function(obj) {
+    return !!(obj && obj.nodeType === 1);
+  };
+
+  // Is a given value an array?
+  // Delegates to ECMA5's native Array.isArray
+  _.isArray = nativeIsArray || function(obj) {
+    return toString.call(obj) == '[object Array]';
+  };
+
+  // Is a given variable an object?
+  _.isObject = function(obj) {
+    return obj === Object(obj);
+  };
+
+  // Add some isType methods: isArguments, isFunction, isString, isNumber, isDate, isRegExp.
+  each(['Arguments', 'Function', 'String', 'Number', 'Date', 'RegExp'], function(name) {
+    _['is' + name] = function(obj) {
+      return toString.call(obj) == '[object ' + name + ']';
+    };
+  });
+
+  // Define a fallback version of the method in browsers (ahem, IE), where
+  // there isn't any inspectable "Arguments" type.
+  if (!_.isArguments(arguments)) {
+    _.isArguments = function(obj) {
+      return !!(obj && _.has(obj, 'callee'));
+    };
+  }
+
+  // Optimize `isFunction` if appropriate.
+  if (typeof (/./) !== 'function') {
+    _.isFunction = function(obj) {
+      return typeof obj === 'function';
+    };
+  }
+
+  // Is a given object a finite number?
+  _.isFinite = function(obj) {
+    return isFinite(obj) && !isNaN(parseFloat(obj));
+  };
+
+  // Is the given value `NaN`? (NaN is the only number which does not equal itself).
+  _.isNaN = function(obj) {
+    return _.isNumber(obj) && obj != +obj;
+  };
+
+  // Is a given value a boolean?
+  _.isBoolean = function(obj) {
+    return obj === true || obj === false || toString.call(obj) == '[object Boolean]';
+  };
+
+  // Is a given value equal to null?
+  _.isNull = function(obj) {
+    return obj === null;
+  };
+
+  // Is a given variable undefined?
+  _.isUndefined = function(obj) {
+    return obj === void 0;
+  };
+
+  // Shortcut function for checking if an object has a given property directly
+  // on itself (in other words, not on a prototype).
+  _.has = function(obj, key) {
+    return hasOwnProperty.call(obj, key);
+  };
+
+  // Utility Functions
+  // -----------------
+
+  // Run Underscore.js in *noConflict* mode, returning the `_` variable to its
+  // previous owner. Returns a reference to the Underscore object.
+  _.noConflict = function() {
+    root._ = previousUnderscore;
+    return this;
+  };
+
+  // Keep the identity function around for default iterators.
+  _.identity = function(value) {
+    return value;
+  };
+
+  // Run a function **n** times.
+  _.times = function(n, iterator, context) {
+    var accum = Array(n);
+    for (var i = 0; i < n; i++) accum[i] = iterator.call(context, i);
+    return accum;
+  };
+
+  // Return a random integer between min and max (inclusive).
+  _.random = function(min, max) {
+    if (max == null) {
+      max = min;
+      min = 0;
+    }
+    return min + Math.floor(Math.random() * (max - min + 1));
+  };
+
+  // List of HTML entities for escaping.
+  var entityMap = {
+    escape: {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#x27;',
+      '/': '&#x2F;'
+    }
+  };
+  entityMap.unescape = _.invert(entityMap.escape);
+
+  // Regexes containing the keys and values listed immediately above.
+  var entityRegexes = {
+    escape:   new RegExp('[' + _.keys(entityMap.escape).join('') + ']', 'g'),
+    unescape: new RegExp('(' + _.keys(entityMap.unescape).join('|') + ')', 'g')
+  };
+
+  // Functions for escaping and unescaping strings to/from HTML interpolation.
+  _.each(['escape', 'unescape'], function(method) {
+    _[method] = function(string) {
+      if (string == null) return '';
+      return ('' + string).replace(entityRegexes[method], function(match) {
+        return entityMap[method][match];
+      });
+    };
+  });
+
+  // If the value of the named property is a function then invoke it;
+  // otherwise, return it.
+  _.result = function(object, property) {
+    if (object == null) return void 0;
+    var value = object[property];
+    return _.isFunction(value) ? value.call(object) : value;
+  };
+
+  // Add your own custom functions to the Underscore object.
+  _.mixin = function(obj) {
+    each(_.functions(obj), function(name){
+      var func = _[name] = obj[name];
+      _.prototype[name] = function() {
+        var args = [this._wrapped];
+        push.apply(args, arguments);
+        return result.call(this, func.apply(_, args));
+      };
+    });
+  };
+
+  // Generate a unique integer id (unique within the entire client session).
+  // Useful for temporary DOM ids.
+  var idCounter = 0;
+  _.uniqueId = function(prefix) {
+    var id = ++idCounter + '';
+    return prefix ? prefix + id : id;
+  };
+
+  // By default, Underscore uses ERB-style template delimiters, change the
+  // following template settings to use alternative delimiters.
+  _.templateSettings = {
+    evaluate    : /<%([\s\S]+?)%>/g,
+    interpolate : /<%=([\s\S]+?)%>/g,
+    escape      : /<%-([\s\S]+?)%>/g
+  };
+
+  // When customizing `templateSettings`, if you don't want to define an
+  // interpolation, evaluation or escaping regex, we need one that is
+  // guaranteed not to match.
+  var noMatch = /(.)^/;
+
+  // Certain characters need to be escaped so that they can be put into a
+  // string literal.
+  var escapes = {
+    "'":      "'",
+    '\\':     '\\',
+    '\r':     'r',
+    '\n':     'n',
+    '\t':     't',
+    '\u2028': 'u2028',
+    '\u2029': 'u2029'
+  };
+
+  var escaper = /\\|'|\r|\n|\t|\u2028|\u2029/g;
+
+  // JavaScript micro-templating, similar to John Resig's implementation.
+  // Underscore templating handles arbitrary delimiters, preserves whitespace,
+  // and correctly escapes quotes within interpolated code.
+  _.template = function(text, data, settings) {
+    var render;
+    settings = _.defaults({}, settings, _.templateSettings);
+
+    // Combine delimiters into one regular expression via alternation.
+    var matcher = new RegExp([
+      (settings.escape || noMatch).source,
+      (settings.interpolate || noMatch).source,
+      (settings.evaluate || noMatch).source
+    ].join('|') + '|$', 'g');
+
+    // Compile the template source, escaping string literals appropriately.
+    var index = 0;
+    var source = "__p+='";
+    text.replace(matcher, function(match, escape, interpolate, evaluate, offset) {
+      source += text.slice(index, offset)
+        .replace(escaper, function(match) { return '\\' + escapes[match]; });
+
+      if (escape) {
+        source += "'+\n((__t=(" + escape + "))==null?'':_.escape(__t))+\n'";
+      }
+      if (interpolate) {
+        source += "'+\n((__t=(" + interpolate + "))==null?'':__t)+\n'";
+      }
+      if (evaluate) {
+        source += "';\n" + evaluate + "\n__p+='";
+      }
+      index = offset + match.length;
+      return match;
+    });
+    source += "';\n";
+
+    // If a variable is not specified, place data values in local scope.
+    if (!settings.variable) source = 'with(obj||{}){\n' + source + '}\n';
+
+    source = "var __t,__p='',__j=Array.prototype.join," +
+      "print=function(){__p+=__j.call(arguments,'');};\n" +
+      source + "return __p;\n";
+
+    try {
+      render = new Function(settings.variable || 'obj', '_', source);
+    } catch (e) {
+      e.source = source;
+      throw e;
+    }
+
+    if (data) return render(data, _);
+    var template = function(data) {
+      return render.call(this, data, _);
+    };
+
+    // Provide the compiled function source as a convenience for precompilation.
+    template.source = 'function(' + (settings.variable || 'obj') + '){\n' + source + '}';
+
+    return template;
+  };
+
+  // Add a "chain" function, which will delegate to the wrapper.
+  _.chain = function(obj) {
+    return _(obj).chain();
+  };
+
+  // OOP
+  // ---------------
+  // If Underscore is called as a function, it returns a wrapped object that
+  // can be used OO-style. This wrapper holds altered versions of all the
+  // underscore functions. Wrapped objects may be chained.
+
+  // Helper function to continue chaining intermediate results.
+  var result = function(obj) {
+    return this._chain ? _(obj).chain() : obj;
+  };
+
+  // Add all of the Underscore functions to the wrapper object.
+  _.mixin(_);
+
+  // Add all mutator Array functions to the wrapper.
+  each(['pop', 'push', 'reverse', 'shift', 'sort', 'splice', 'unshift'], function(name) {
+    var method = ArrayProto[name];
+    _.prototype[name] = function() {
+      var obj = this._wrapped;
+      method.apply(obj, arguments);
+      if ((name == 'shift' || name == 'splice') && obj.length === 0) delete obj[0];
+      return result.call(this, obj);
+    };
+  });
+
+  // Add all accessor Array functions to the wrapper.
+  each(['concat', 'join', 'slice'], function(name) {
+    var method = ArrayProto[name];
+    _.prototype[name] = function() {
+      return result.call(this, method.apply(this._wrapped, arguments));
+    };
+  });
+
+  _.extend(_.prototype, {
+
+    // Start chaining a wrapped Underscore object.
+    chain: function() {
+      this._chain = true;
+      return this;
+    },
+
+    // Extracts the result from a wrapped and chained object.
+    value: function() {
+      return this._wrapped;
+    }
+
+  });
+
+}).call(this);
+/***
+ * Contains core SlickGrid classes.
+ * @module Core
+ * @namespace Slick
+ */
+
+(function ($) {
+  // register namespace
+  $.extend(true, window, {
+    "Slick": {
+      "Event": Event,
+      "EventData": EventData,
+      "EventHandler": EventHandler,
+      "Range": Range,
+      "NonDataRow": NonDataItem,
+      "Group": Group,
+      "GroupTotals": GroupTotals,
+      "EditorLock": EditorLock,
+
+      /***
+       * A global singleton editor lock.
+       * @class GlobalEditorLock
+       * @static
+       * @constructor
+       */
+      "GlobalEditorLock": new EditorLock()
+    }
+  });
+
+  /***
+   * An event object for passing data to event handlers and letting them control propagation.
+   * <p>This is pretty much identical to how W3C and jQuery implement events.</p>
+   * @class EventData
+   * @constructor
+   */
+  function EventData() {
+    var isPropagationStopped = false;
+    var isImmediatePropagationStopped = false;
+
+    /***
+     * Stops event from propagating up the DOM tree.
+     * @method stopPropagation
+     */
+    this.stopPropagation = function () {
+      isPropagationStopped = true;
+    };
+
+    /***
+     * Returns whether stopPropagation was called on this event object.
+     * @method isPropagationStopped
+     * @return {Boolean}
+     */
+    this.isPropagationStopped = function () {
+      return isPropagationStopped;
+    };
+
+    /***
+     * Prevents the rest of the handlers from being executed.
+     * @method stopImmediatePropagation
+     */
+    this.stopImmediatePropagation = function () {
+      isImmediatePropagationStopped = true;
+    };
+
+    /***
+     * Returns whether stopImmediatePropagation was called on this event object.\
+     * @method isImmediatePropagationStopped
+     * @return {Boolean}
+     */
+    this.isImmediatePropagationStopped = function () {
+      return isImmediatePropagationStopped;
+    }
+  }
+
+  /***
+   * A simple publisher-subscriber implementation.
+   * @class Event
+   * @constructor
+   */
+  function Event() {
+    var handlers = [];
+
+    /***
+     * Adds an event handler to be called when the event is fired.
+     * <p>Event handler will receive two arguments - an <code>EventData</code> and the <code>data</code>
+     * object the event was fired with.<p>
+     * @method subscribe
+     * @param fn {Function} Event handler.
+     */
+    this.subscribe = function (fn) {
+      handlers.push(fn);
+    };
+
+    /***
+     * Removes an event handler added with <code>subscribe(fn)</code>.
+     * @method unsubscribe
+     * @param fn {Function} Event handler to be removed.
+     */
+    this.unsubscribe = function (fn) {
+      for (var i = handlers.length - 1; i >= 0; i--) {
+        if (handlers[i] === fn) {
+          handlers.splice(i, 1);
+        }
+      }
+    };
+
+    /***
+     * Fires an event notifying all subscribers.
+     * @method notify
+     * @param args {Object} Additional data object to be passed to all handlers.
+     * @param e {EventData}
+     *      Optional.
+     *      An <code>EventData</code> object to be passed to all handlers.
+     *      For DOM events, an existing W3C/jQuery event object can be passed in.
+     * @param scope {Object}
+     *      Optional.
+     *      The scope ("this") within which the handler will be executed.
+     *      If not specified, the scope will be set to the <code>Event</code> instance.
+     */
+    this.notify = function (args, e, scope) {
+      e = e || new EventData();
+      scope = scope || this;
+
+      var returnValue;
+      for (var i = 0; i < handlers.length && !(e.isPropagationStopped() || e.isImmediatePropagationStopped()); i++) {
+        returnValue = handlers[i].call(scope, e, args);
+      }
+
+      return returnValue;
+    };
+  }
+
+  function EventHandler() {
+    var handlers = [];
+
+    this.subscribe = function (event, handler) {
+      handlers.push({
+        event: event,
+        handler: handler
+      });
+      event.subscribe(handler);
+
+      return this;  // allow chaining
+    };
+
+    this.unsubscribe = function (event, handler) {
+      var i = handlers.length;
+      while (i--) {
+        if (handlers[i].event === event &&
+            handlers[i].handler === handler) {
+          handlers.splice(i, 1);
+          event.unsubscribe(handler);
+          return;
+        }
+      }
+
+      return this;  // allow chaining
+    };
+
+    this.unsubscribeAll = function () {
+      var i = handlers.length;
+      while (i--) {
+        handlers[i].event.unsubscribe(handlers[i].handler);
+      }
+      handlers = [];
+
+      return this;  // allow chaining
+    }
+  }
+
+  /***
+   * A structure containing a range of cells.
+   * @class Range
+   * @constructor
+   * @param fromRow {Integer} Starting row.
+   * @param fromCell {Integer} Starting cell.
+   * @param toRow {Integer} Optional. Ending row. Defaults to <code>fromRow</code>.
+   * @param toCell {Integer} Optional. Ending cell. Defaults to <code>fromCell</code>.
+   */
+  function Range(fromRow, fromCell, toRow, toCell) {
+    if (toRow === undefined && toCell === undefined) {
+      toRow = fromRow;
+      toCell = fromCell;
+    }
+
+    /***
+     * @property fromRow
+     * @type {Integer}
+     */
+    this.fromRow = Math.min(fromRow, toRow);
+
+    /***
+     * @property fromCell
+     * @type {Integer}
+     */
+    this.fromCell = Math.min(fromCell, toCell);
+
+    /***
+     * @property toRow
+     * @type {Integer}
+     */
+    this.toRow = Math.max(fromRow, toRow);
+
+    /***
+     * @property toCell
+     * @type {Integer}
+     */
+    this.toCell = Math.max(fromCell, toCell);
+
+    /***
+     * Returns whether a range represents a single row.
+     * @method isSingleRow
+     * @return {Boolean}
+     */
+    this.isSingleRow = function () {
+      return this.fromRow == this.toRow;
+    };
+
+    /***
+     * Returns whether a range represents a single cell.
+     * @method isSingleCell
+     * @return {Boolean}
+     */
+    this.isSingleCell = function () {
+      return this.fromRow == this.toRow && this.fromCell == this.toCell;
+    };
+
+    /***
+     * Returns whether a range contains a given cell.
+     * @method contains
+     * @param row {Integer}
+     * @param cell {Integer}
+     * @return {Boolean}
+     */
+    this.contains = function (row, cell) {
+      return row >= this.fromRow && row <= this.toRow &&
+          cell >= this.fromCell && cell <= this.toCell;
+    };
+
+    /***
+     * Returns a readable representation of a range.
+     * @method toString
+     * @return {String}
+     */
+    this.toString = function () {
+      if (this.isSingleCell()) {
+        return "(" + this.fromRow + ":" + this.fromCell + ")";
+      }
+      else {
+        return "(" + this.fromRow + ":" + this.fromCell + " - " + this.toRow + ":" + this.toCell + ")";
+      }
+    }
+  }
+
+
+  /***
+   * A base class that all special / non-data rows (like Group and GroupTotals) derive from.
+   * @class NonDataItem
+   * @constructor
+   */
+  function NonDataItem() {
+    this.__nonDataRow = true;
+  }
+
+
+  /***
+   * Information about a group of rows.
+   * @class Group
+   * @extends Slick.NonDataItem
+   * @constructor
+   */
+  function Group() {
+    this.__group = true;
+
+    /**
+     * Grouping level, starting with 0.
+     * @property level
+     * @type {Number}
+     */
+    this.level = 0;
+
+    /***
+     * Number of rows in the group.
+     * @property count
+     * @type {Integer}
+     */
+    this.count = 0;
+
+    /***
+     * Grouping value.
+     * @property value
+     * @type {Object}
+     */
+    this.value = null;
+
+    /***
+     * Formatted display value of the group.
+     * @property title
+     * @type {String}
+     */
+    this.title = null;
+
+    /***
+     * Whether a group is collapsed.
+     * @property collapsed
+     * @type {Boolean}
+     */
+    this.collapsed = false;
+
+    /***
+     * GroupTotals, if any.
+     * @property totals
+     * @type {GroupTotals}
+     */
+    this.totals = null;
+
+    /**
+     * Rows that are part of the group.
+     * @property rows
+     * @type {Array}
+     */
+    this.rows = [];
+
+    /**
+     * Sub-groups that are part of the group.
+     * @property groups
+     * @type {Array}
+     */
+    this.groups = null;
+
+    /**
+     * A unique key used to identify the group.  This key can be used in calls to DataView
+     * collapseGroup() or expandGroup().
+     * @property groupingKey
+     * @type {Object}
+     */
+    this.groupingKey = null;
+  }
+
+  Group.prototype = new NonDataItem();
+
+  /***
+   * Compares two Group instances.
+   * @method equals
+   * @return {Boolean}
+   * @param group {Group} Group instance to compare to.
+   */
+  Group.prototype.equals = function (group) {
+    return this.value === group.value &&
+        this.count === group.count &&
+        this.collapsed === group.collapsed &&
+        this.title === group.title;
+  };
+
+  /***
+   * Information about group totals.
+   * An instance of GroupTotals will be created for each totals row and passed to the aggregators
+   * so that they can store arbitrary data in it.  That data can later be accessed by group totals
+   * formatters during the display.
+   * @class GroupTotals
+   * @extends Slick.NonDataItem
+   * @constructor
+   */
+  function GroupTotals() {
+    this.__groupTotals = true;
+
+    /***
+     * Parent Group.
+     * @param group
+     * @type {Group}
+     */
+    this.group = null;
+  }
+
+  GroupTotals.prototype = new NonDataItem();
+
+  /***
+   * A locking helper to track the active edit controller and ensure that only a single controller
+   * can be active at a time.  This prevents a whole class of state and validation synchronization
+   * issues.  An edit controller (such as SlickGrid) can query if an active edit is in progress
+   * and attempt a commit or cancel before proceeding.
+   * @class EditorLock
+   * @constructor
+   */
+  function EditorLock() {
+    var activeEditController = null;
+
+    /***
+     * Returns true if a specified edit controller is active (has the edit lock).
+     * If the parameter is not specified, returns true if any edit controller is active.
+     * @method isActive
+     * @param editController {EditController}
+     * @return {Boolean}
+     */
+    this.isActive = function (editController) {
+      return (editController ? activeEditController === editController : activeEditController !== null);
+    };
+
+    /***
+     * Sets the specified edit controller as the active edit controller (acquire edit lock).
+     * If another edit controller is already active, and exception will be thrown.
+     * @method activate
+     * @param editController {EditController} edit controller acquiring the lock
+     */
+    this.activate = function (editController) {
+      if (editController === activeEditController) { // already activated?
+        return;
+      }
+      if (activeEditController !== null) {
+        throw "SlickGrid.EditorLock.activate: an editController is still active, can't activate another editController";
+      }
+      if (!editController.commitCurrentEdit) {
+        throw "SlickGrid.EditorLock.activate: editController must implement .commitCurrentEdit()";
+      }
+      if (!editController.cancelCurrentEdit) {
+        throw "SlickGrid.EditorLock.activate: editController must implement .cancelCurrentEdit()";
+      }
+      activeEditController = editController;
+    };
+
+    /***
+     * Unsets the specified edit controller as the active edit controller (release edit lock).
+     * If the specified edit controller is not the active one, an exception will be thrown.
+     * @method deactivate
+     * @param editController {EditController} edit controller releasing the lock
+     */
+    this.deactivate = function (editController) {
+      if (activeEditController !== editController) {
+        throw "SlickGrid.EditorLock.deactivate: specified editController is not the currently active one";
+      }
+      activeEditController = null;
+    };
+
+    /***
+     * Attempts to commit the current edit by calling "commitCurrentEdit" method on the active edit
+     * controller and returns whether the commit attempt was successful (commit may fail due to validation
+     * errors, etc.).  Edit controller's "commitCurrentEdit" must return true if the commit has succeeded
+     * and false otherwise.  If no edit controller is active, returns true.
+     * @method commitCurrentEdit
+     * @return {Boolean}
+     */
+    this.commitCurrentEdit = function () {
+      return (activeEditController ? activeEditController.commitCurrentEdit() : true);
+    };
+
+    /***
+     * Attempts to cancel the current edit by calling "cancelCurrentEdit" method on the active edit
+     * controller and returns whether the edit was successfully cancelled.  If no edit controller is
+     * active, returns true.
+     * @method cancelCurrentEdit
+     * @return {Boolean}
+     */
+    this.cancelCurrentEdit = function cancelCurrentEdit() {
+      return (activeEditController ? activeEditController.cancelCurrentEdit() : true);
+    };
+  }
+})(jQuery);
+
+
+(function ($) {
+  // register namespace
+  $.extend(true, window, {
+    "Slick": {
+      "CheckboxSelectColumn": CheckboxSelectColumn
+    }
+  });
+
+
+  function CheckboxSelectColumn(options) {
+    var _grid;
+    var _self = this;
+    var _handler = new Slick.EventHandler();
+    var _selectedRowsLookup = {};
+    var _defaults = {
+      columnId: "_checkbox_selector",
+      cssClass: null,
+      toolTip: "Select/Deselect All",
+      width: 30
+    };
+
+    var _options = $.extend(true, {}, _defaults, options);
+
+    function init(grid) {
+      _grid = grid;
+      _handler
+        .subscribe(_grid.onSelectedRowsChanged, handleSelectedRowsChanged)
+        .subscribe(_grid.onClick, handleClick)
+        .subscribe(_grid.onHeaderClick, handleHeaderClick)
+        .subscribe(_grid.onKeyDown, handleKeyDown);
+    }
+
+    function destroy() {
+      _handler.unsubscribeAll();
+    }
+
+    function handleSelectedRowsChanged(e, args) {
+      var selectedRows = _grid.getSelectedRows();
+      var lookup = {}, row, i;
+      for (i = 0; i < selectedRows.length; i++) {
+        row = selectedRows[i];
+        lookup[row] = true;
+        if (lookup[row] !== _selectedRowsLookup[row]) {
+          _grid.invalidateRow(row);
+          delete _selectedRowsLookup[row];
+        }
+      }
+      for (i in _selectedRowsLookup) {
+        _grid.invalidateRow(i);
+      }
+      _selectedRowsLookup = lookup;
+      _grid.render();
+
+      // Count the number of rows that are not selectable.
+      // Use in the check to see if all rows are selected.
+      var dataArr = _grid.getData();
+      if (dataArr.getItems) {
+        dataArr = dataArr.getItems();
+      }
+      var non_selects = $.grep(dataArr, function (r) {
+         return (r.not_multiselectable && r.not_multiselectable === 'Y');
+       }).length;
+
+      if (selectedRows.length && selectedRows.length == _grid.getDataLength() - non_selects) {
+        _grid.updateColumnHeader(_options.columnId, "<input type='checkbox' checked='checked'>", _options.toolTip);
+      } else {
+        _grid.updateColumnHeader(_options.columnId, "<input type='checkbox'>", _options.toolTip);
+      }
+    }
+
+    function handleKeyDown(e, args) {
+      if (e.which == 32) {
+        if (_grid.getColumns()[args.cell].id === _options.columnId) {
+          // if editing, try to commit
+          if (!_grid.getEditorLock().isActive() || _grid.getEditorLock().commitCurrentEdit()) {
+            toggleRowSelection(args.row);
+          }
+          e.preventDefault();
+          e.stopImmediatePropagation();
+        }
+      }
+    }
+
+    function handleClick(e, args) {
+      // clicking on a row select checkbox
+      if (_grid.getColumns()[args.cell].id === _options.columnId && $(e.target).is(":checkbox")) {
+        // if editing, try to commit
+        if (_grid.getEditorLock().isActive() && !_grid.getEditorLock().commitCurrentEdit()) {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          return;
+        }
+
+        toggleRowSelection(args.row);
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+      }
+    }
+
+    function toggleRowSelection(row) {
+      if (_selectedRowsLookup[row]) {
+        _grid.setSelectedRows($.grep(_grid.getSelectedRows(), function (n) {
+          return n != row
+        }));
+      } else {
+        _grid.setSelectedRows(_grid.getSelectedRows().concat(row));
+      }
+    }
+
+    function handleHeaderClick(e, args) {
+      if (args.column.id == _options.columnId && $(e.target).is(":checkbox")) {
+        // if editing, try to commit
+        if (_grid.getEditorLock().isActive() && !_grid.getEditorLock().commitCurrentEdit()) {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          return;
+        }
+
+        if ($(e.target).is(":checked")) {
+          var rows = [];
+          var rowData;
+          for (var i = 0; i < _grid.getDataLength(); i++) {
+            rowData = _grid.getDataItem(i);
+            if (!rowData.not_multiselectable || rowData.not_multiselectable === 'N') {
+              rows.push(i);
+            }
+          }
+          _grid.setSelectedRows(rows);
+        } else {
+          _grid.setSelectedRows([]);
+        }
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+      }
+    }
+
+    function getColumnDefinition() {
+      return {
+        id: _options.columnId,
+        name: "<input type='checkbox'>",
+        toolTip: _options.toolTip,
+        field: "sel",
+        width: _options.width,
+        resizable: false,
+        sortable: false,
+        cssClass: _options.cssClass,
+        formatter: checkboxSelectionFormatter
+      };
+    }
+
+    function checkboxSelectionFormatter(row, cell, value, columnDef, dataContext) {
+      if (dataContext) {
+        // Rows can be marked as not selectable.
+        if (dataContext.not_multiselectable && dataContext.not_multiselectable === 'Y') {
+          return null;
+        }
+        else {
+        return _selectedRowsLookup[row]
+            ? "<input type='checkbox' checked='checked'>"
+            : "<input type='checkbox'>";
+        }
+      }
+      return null;
+    }
+
+    $.extend(this, {
+      "init": init,
+      "destroy": destroy,
+
+      "getColumnDefinition": getColumnDefinition
+    });
+  }
+})(jQuery);
+(function ($) {
+  function SlickColumnPicker(columns, grid, options) {
+    var $menu;
+    var columnCheckboxes;
+
+    var defaults = {
+      fadeSpeed:250,
+      selSortButtons:false,
+      uiButtons:false
+    };
+
+    function init() {
+      grid.onHeaderContextMenu.subscribe(handleHeaderContextMenu);
+      grid.onColumnsReordered.subscribe(updateColumnOrder);
+      options = $.extend({}, defaults, options);
+
+      $menu = $("<span class='slick-columnpicker' style='display:none;position:absolute;z-index:20;' />").appendTo(document.body);
+
+      $menu.bind("mouseleave", function (e) {
+        $(this).fadeOut(options.fadeSpeed)
+      });
+      $menu.bind("click", updateColumn);
+
+    }
+
+    function handleHeaderContextMenu(e, args) {
+      e.preventDefault();
+      $menu.empty();
+      updateColumnOrder();
+      columnCheckboxes = [];
+
+      // Buttons to select/unselect all checkboxes and to sort the column list.
+      if (options.selSortButtons) {
+        $("<button>Select all</button>")
+          .bind('click', function() {
+            $('input', 'ul').prop('checked', true);
+           })
+          .appendTo($menu);
+        $("<button>Unselect all</button>")
+          .bind('click', function() {
+            $('input', 'ul').prop('checked', false);
+           })
+          .appendTo($menu);
+        $("<button>Sort</button>")
+          .bind('click', function() {
+            $('.slick-columnpicker ul')
+              .children('li')
+              .sort(function(a,b){
+                //return a.innerText.toLowerCase() > b.innerText.toLowerCase() ? 1 : -1;
+                return a.textContent.toLowerCase() > b.textContent.toLowerCase() ? 1 : -1;
+              })
+              .appendTo($('.slick-columnpicker ul'));
+           })
+          .appendTo($menu);
+        $("<hr />").appendTo($menu);
+      }
+
+      var $li, $input;
+      var $ul = $("<ul style='margin:0;padding-left:0;' />").appendTo($menu);
+      for (var i = 0; i < columns.length; i++) {
+        $li = $("<li />").appendTo($ul);
+        $input = $("<input type='checkbox' />").data("column-id", columns[i].id);
+        columnCheckboxes.push($input);
+
+        if (grid.getColumnIndex(columns[i].id) != null) {
+          $input.attr("checked", "checked");
+        }
+
+        $("<label />")
+            .text(columns[i].name)
+            .prepend($input)
+            .appendTo($li);
+      }
+
+      $("<hr/>").appendTo($menu);
+      $li = $("<span />").appendTo($menu);
+      $input = $("<input type='checkbox' />").data("option", "autoresize");
+      $("<label />")
+          .text("Force fit columns")
+          .prepend($input)
+          .appendTo($li);
+      if (grid.getOptions().forceFitColumns) {
+        $input.attr("checked", "checked");
+      }
+
+      $("<br/>").appendTo($menu);
+      $li = $("<span />").appendTo($menu);
+      $input = $("<input type='checkbox' />").data("option", "syncresize");
+      $("<label />")
+          .text("Synchronous resize")
+          .prepend($input)
+          .appendTo($li);
+      if (grid.getOptions().syncColumnCellResize) {
+        $input.attr("checked", "checked");
+      }
+
+      $menu
+          .css("top", e.pageY - 10)
+          .css("left", e.pageX - 10)
+          .fadeIn(options.fadeSpeed);
+
+      // Apply jQuery UI button styling.
+      if (options.selSortButtons & options.uiButtons) {
+        $( ".slick-columnpicker button:first" ).button({
+          icons: {
+            primary: "ui-icon-check"
+          }
+        }).next().button({
+          icons: {
+            primary: "ui-icon-minusthick"
+          }
+        }).next().button({
+          icons: {
+            primary: "ui-icon-arrowthick-2-n-s"
+          }
+        });
+      }
+    }
+
+    function updateColumnOrder() {
+      // Because columns can be reordered, we have to update the `columns`
+      // to reflect the new order, however we can't just take `grid.getColumns()`,
+      // as it does not include columns currently hidden by the picker.
+      // We create a new `columns` structure by leaving currently-hidden
+      // columns in their original ordinal position and interleaving the results
+      // of the current column sort.
+      var current = grid.getColumns().slice(0);
+      var ordered = new Array(columns.length);
+      for (var i = 0; i < ordered.length; i++) {
+        if ( grid.getColumnIndex(columns[i].id) === undefined ) {
+          // If the column doesn't return a value from getColumnIndex,
+          // it is hidden. Leave it in this position.
+          ordered[i] = columns[i];
+        } else {
+          // Otherwise, grab the next visible column.
+          ordered[i] = current.shift();
+        }
+      }
+      columns = ordered;
+    }
+
+    function updateColumn(e) {
+      if ($(e.target).data("option") == "autoresize") {
+        if (e.target.checked) {
+          grid.setOptions({forceFitColumns:true});
+          grid.autosizeColumns();
+        } else {
+          grid.setOptions({forceFitColumns:false});
+        }
+        return;
+      }
+
+      if ($(e.target).data("option") == "syncresize") {
+        if (e.target.checked) {
+          grid.setOptions({syncColumnCellResize:true});
+        } else {
+          grid.setOptions({syncColumnCellResize:false});
+        }
+        return;
+      }
+
+      if ($(e.target).is(":checkbox")) {
+        var visibleColumns = [];
+        $.each(columnCheckboxes, function (i, e) {
+          if ($(this).is(":checked")) {
+            visibleColumns.push(columns[i]);
+          }
+        });
+
+        if (!visibleColumns.length) {
+          $(e.target).attr("checked", "checked");
+          return;
+        }
+
+        grid.setColumns(visibleColumns);
+      }
+    }
+
+    function getAllColumns() {
+      return columns;
+    }
+
+    init();
+
+    return {
+      "getAllColumns": getAllColumns
+    };
+  }
+
+  // Slick.Controls.ColumnPicker
+  $.extend(true, window, { Slick:{ Controls:{ ColumnPicker:SlickColumnPicker }}});
+})(jQuery);
+(function ($) {
+  function SlickGridPager(dataView, grid, $container) {
+    var $status;
+
+    function init() {
+      dataView.onPagingInfoChanged.subscribe(function (e, pagingInfo) {
+        updatePager(pagingInfo);
+      });
+
+      constructPagerUI();
+      updatePager(dataView.getPagingInfo());
+    }
+
+    function getNavState() {
+      var cannotLeaveEditMode = !Slick.GlobalEditorLock.commitCurrentEdit();
+      var pagingInfo = dataView.getPagingInfo();
+      var lastPage = pagingInfo.totalPages - 1;
+
+      return {
+        canGotoFirst: !cannotLeaveEditMode && pagingInfo.pageSize != 0 && pagingInfo.pageNum > 0,
+        canGotoLast: !cannotLeaveEditMode && pagingInfo.pageSize != 0 && pagingInfo.pageNum != lastPage,
+        canGotoPrev: !cannotLeaveEditMode && pagingInfo.pageSize != 0 && pagingInfo.pageNum > 0,
+        canGotoNext: !cannotLeaveEditMode && pagingInfo.pageSize != 0 && pagingInfo.pageNum < lastPage,
+        pagingInfo: pagingInfo
+      }
+    }
+
+    function setPageSize(n) {
+      dataView.setRefreshHints({
+        isFilterUnchanged: true
+      });
+      dataView.setPagingOptions({pageSize: n});
+    }
+
+    function gotoFirst() {
+      if (getNavState().canGotoFirst) {
+        dataView.setPagingOptions({pageNum: 0});
+      }
+    }
+
+    function gotoLast() {
+      var state = getNavState();
+      if (state.canGotoLast) {
+        dataView.setPagingOptions({pageNum: state.pagingInfo.totalPages - 1});
+      }
+    }
+
+    function gotoPrev() {
+      var state = getNavState();
+      if (state.canGotoPrev) {
+        dataView.setPagingOptions({pageNum: state.pagingInfo.pageNum - 1});
+      }
+    }
+
+    function gotoNext() {
+      var state = getNavState();
+      if (state.canGotoNext) {
+        dataView.setPagingOptions({pageNum: state.pagingInfo.pageNum + 1});
+      }
+    }
+
+    function constructPagerUI() {
+      $container.empty();
+
+      var $nav = $("<span class='slick-pager-nav' />").appendTo($container);
+      var $settings = $("<span class='slick-pager-settings' />").appendTo($container);
+      $status = $("<span class='slick-pager-status' />").appendTo($container);
+
+      $settings
+          .append("<span class='slick-pager-settings-expanded' style='display:none'>Show: <a data=0>All</a><a data='-1'>Auto</a><a data=25>25</a><a data=50>50</a><a data=100>100</a></span>");
+
+      $settings.find("a[data]").click(function (e) {
+        var pagesize = $(e.target).attr("data");
+        if (pagesize != undefined) {
+          if (pagesize == -1) {
+            var vp = grid.getViewport();
+            setPageSize(vp.bottom - vp.top);
+          } else {
+            setPageSize(parseInt(pagesize));
+          }
+        }
+      });
+
+      var icon_prefix = "<span class='ui-state-default ui-corner-all ui-icon-container'><span class='ui-icon ";
+      var icon_suffix = "' /></span>";
+
+      $(icon_prefix + "ui-icon-lightbulb" + icon_suffix)
+          .click(function () {
+            $(".slick-pager-settings-expanded").toggle()
+          })
+          .appendTo($settings);
+
+      $(icon_prefix + "ui-icon-seek-first" + icon_suffix)
+          .click(gotoFirst)
+          .appendTo($nav);
+
+      $(icon_prefix + "ui-icon-seek-prev" + icon_suffix)
+          .click(gotoPrev)
+          .appendTo($nav);
+
+      $(icon_prefix + "ui-icon-seek-next" + icon_suffix)
+          .click(gotoNext)
+          .appendTo($nav);
+
+      $(icon_prefix + "ui-icon-seek-end" + icon_suffix)
+          .click(gotoLast)
+          .appendTo($nav);
+
+      $container.find(".ui-icon-container")
+          .hover(function () {
+            $(this).toggleClass("ui-state-hover");
+          });
+
+      $container.children().wrapAll("<div class='slick-pager' />");
+    }
+
+
+    function updatePager(pagingInfo) {
+      var state = getNavState();
+
+      $container.find(".slick-pager-nav span").removeClass("ui-state-disabled");
+      if (!state.canGotoFirst) {
+        $container.find(".ui-icon-seek-first").addClass("ui-state-disabled");
+      }
+      if (!state.canGotoLast) {
+        $container.find(".ui-icon-seek-end").addClass("ui-state-disabled");
+      }
+      if (!state.canGotoNext) {
+        $container.find(".ui-icon-seek-next").addClass("ui-state-disabled");
+      }
+      if (!state.canGotoPrev) {
+        $container.find(".ui-icon-seek-prev").addClass("ui-state-disabled");
+      }
+
+      if (pagingInfo.pageSize == 0) {
+        $status.text("Showing all " + pagingInfo.totalRows + " rows");
+      } else {
+        $status.text("Showing page " + (pagingInfo.pageNum + 1) + " of " + pagingInfo.totalPages);
+      }
+    }
+
+    init();
+  }
+
+  // Slick.Controls.Pager
+  $.extend(true, window, { Slick:{ Controls:{ Pager:SlickGridPager }}});
+})(jQuery);
+(function ($) {
+  $.extend(true, window, {
+    Slick: {
+      Data: {
+        DataView: DataView,
+        Aggregators: {
+          Avg: AvgAggregator,
+          Min: MinAggregator,
+          Max: MaxAggregator,
+          Sum: SumAggregator
+        }
+      }
+    }
+  });
+
+
+  /***
+   * A sample Model implementation.
+   * Provides a filtered view of the underlying data.
+   *
+   * Relies on the data item having an "id" property uniquely identifying it.
+   */
+  function DataView(options) {
+    var self = this;
+
+    var defaults = {
+      groupItemMetadataProvider: null,
+      inlineFilters: false
+    };
+
+
+    // private
+    var idProperty = "id";  // property holding a unique row id
+    var items = [];         // data by index
+    var rows = [];          // data by row
+    var idxById = {};       // indexes by id
+    var rowsById = null;    // rows by id; lazy-calculated
+    var filter = null;      // filter function
+    var updated = null;     // updated item ids
+    var suspend = false;    // suspends the recalculation
+    var sortAsc = true;
+    var fastSortField;
+    var sortComparer;
+    var refreshHints = {};
+    var prevRefreshHints = {};
+    var filterArgs;
+    var filteredItems = [];
+    var compiledFilter;
+    var compiledFilterWithCaching;
+    var filterCache = [];
+
+    // grouping
+    var groupingInfoDefaults = {
+      getter: null,
+      formatter: null,
+      comparer: function(a, b) { return a.value - b.value; },
+      predefinedValues: [],
+      aggregators: [],
+      aggregateEmpty: false,
+      aggregateCollapsed: false,
+      aggregateChildGroups: false,
+      collapsed: false,
+      displayTotalsRow: true
+    };
+    var groupingInfos = [];
+    var groups = [];
+    var toggledGroupsByLevel = [];
+    var groupingDelimiter = ':|:';
+
+    var pagesize = 0;
+    var pagenum = 0;
+    var totalRows = 0;
+
+    // events
+    var onRowCountChanged = new Slick.Event();
+    var onRowsChanged = new Slick.Event();
+    var onPagingInfoChanged = new Slick.Event();
+
+    options = $.extend(true, {}, defaults, options);
+
+
+    function beginUpdate() {
+      suspend = true;
+    }
+
+    function endUpdate() {
+      suspend = false;
+      refresh();
+    }
+
+    function setRefreshHints(hints) {
+      refreshHints = hints;
+    }
+
+    function setFilterArgs(args) {
+      filterArgs = args;
+    }
+
+    function updateIdxById(startingIndex) {
+      startingIndex = startingIndex || 0;
+      var id;
+      for (var i = startingIndex, l = items.length; i < l; i++) {
+        id = items[i][idProperty];
+        if (id === undefined) {
+          throw "Each data element must implement a unique 'id' property";
+        }
+        idxById[id] = i;
+      }
+    }
+
+    function ensureIdUniqueness() {
+      var id;
+      for (var i = 0, l = items.length; i < l; i++) {
+        id = items[i][idProperty];
+        if (id === undefined || idxById[id] !== i) {
+          throw "Each data element must implement a unique 'id' property. Found non-unique id: "+id;
+        }
+      }
+    }
+
+    function getItems() {
+      return items;
+    }
+
+    function setItems(data, objectIdProperty) {
+      if (objectIdProperty !== undefined) {
+        idProperty = objectIdProperty;
+      }
+      items = filteredItems = data;
+      idxById = {};
+      updateIdxById();
+      ensureIdUniqueness();
+      refresh();
+    }
+
+    function setPagingOptions(args) {
+      if (args.pageSize != undefined) {
+        pagesize = args.pageSize;
+        pagenum = pagesize ? Math.min(pagenum, Math.max(0, Math.ceil(totalRows / pagesize) - 1)) : 0;
+      }
+
+      if (args.pageNum != undefined) {
+        pagenum = Math.min(args.pageNum, Math.max(0, Math.ceil(totalRows / pagesize) - 1));
+      }
+
+      onPagingInfoChanged.notify(getPagingInfo(), null, self);
+
+      refresh();
+    }
+
+    function getPagingInfo() {
+      var totalPages = pagesize ? Math.max(1, Math.ceil(totalRows / pagesize)) : 1;
+      return {pageSize: pagesize, pageNum: pagenum, totalRows: totalRows, totalPages: totalPages};
+    }
+
+    function sort(comparer, ascending) {
+      sortAsc = ascending;
+      sortComparer = comparer;
+      fastSortField = null;
+      if (ascending === false) {
+        items.reverse();
+      }
+      items.sort(comparer);
+      if (ascending === false) {
+        items.reverse();
+      }
+      idxById = {};
+      updateIdxById();
+      refresh();
+    }
+
+    /***
+     * Provides a workaround for the extremely slow sorting in IE.
+     * Does a [lexicographic] sort on a give column by temporarily overriding Object.prototype.toString
+     * to return the value of that field and then doing a native Array.sort().
+     */
+    function fastSort(field, ascending) {
+      sortAsc = ascending;
+      fastSortField = field;
+      sortComparer = null;
+      var oldToString = Object.prototype.toString;
+      Object.prototype.toString = (typeof field == "function") ? field : function () {
+        return this[field]
+      };
+      // an extra reversal for descending sort keeps the sort stable
+      // (assuming a stable native sort implementation, which isn't true in some cases)
+      if (ascending === false) {
+        items.reverse();
+      }
+      items.sort();
+      Object.prototype.toString = oldToString;
+      if (ascending === false) {
+        items.reverse();
+      }
+      idxById = {};
+      updateIdxById();
+      refresh();
+    }
+
+    function reSort() {
+      if (sortComparer) {
+        sort(sortComparer, sortAsc);
+      } else if (fastSortField) {
+        fastSort(fastSortField, sortAsc);
+      }
+    }
+
+    function setFilter(filterFn) {
+      filter = filterFn;
+      if (options.inlineFilters) {
+        compiledFilter = compileFilter();
+        compiledFilterWithCaching = compileFilterWithCaching();
+      }
+      refresh();
+    }
+
+    function getGrouping() {
+      return groupingInfos;
+    }
+
+    function setGrouping(groupingInfo) {
+      if (!options.groupItemMetadataProvider) {
+        options.groupItemMetadataProvider = new Slick.Data.GroupItemMetadataProvider();
+      }
+
+      groups = [];
+      toggledGroupsByLevel = [];
+      groupingInfo = groupingInfo || [];
+      groupingInfos = (groupingInfo instanceof Array) ? groupingInfo : [groupingInfo];
+
+      for (var i = 0; i < groupingInfos.length; i++) {
+        var gi = groupingInfos[i] = $.extend(true, {}, groupingInfoDefaults, groupingInfos[i]);
+        gi.getterIsAFn = typeof gi.getter === "function";
+
+        // pre-compile accumulator loops
+        gi.compiledAccumulators = [];
+        var idx = gi.aggregators.length;
+        while (idx--) {
+          gi.compiledAccumulators[idx] = compileAccumulatorLoop(gi.aggregators[idx]);
+        }
+
+        toggledGroupsByLevel[i] = {};
+      }
+
+      refresh();
+    }
+
+    /**
+     * @deprecated Please use {@link setGrouping}.
+     */
+    function groupBy(valueGetter, valueFormatter, sortComparer) {
+      if (valueGetter == null) {
+        setGrouping([]);
+        return;
+      }
+
+      setGrouping({
+        getter: valueGetter,
+        formatter: valueFormatter,
+        comparer: sortComparer
+      });
+    }
+
+    /**
+     * @deprecated Please use {@link setGrouping}.
+     */
+    function setAggregators(groupAggregators, includeCollapsed) {
+      if (!groupingInfos.length) {
+        throw new Error("At least one grouping must be specified before calling setAggregators().");
+      }
+
+      groupingInfos[0].aggregators = groupAggregators;
+      groupingInfos[0].aggregateCollapsed = includeCollapsed;
+
+      setGrouping(groupingInfos);
+    }
+
+    function getItemByIdx(i) {
+      return items[i];
+    }
+
+    function getIdxById(id) {
+      return idxById[id];
+    }
+
+    function ensureRowsByIdCache() {
+      if (!rowsById) {
+        rowsById = {};
+        for (var i = 0, l = rows.length; i < l; i++) {
+          rowsById[rows[i][idProperty]] = i;
+        }
+      }
+    }
+
+    function getRowById(id) {
+      ensureRowsByIdCache();
+      return rowsById[id];
+    }
+
+    function getItemById(id) {
+      return items[idxById[id]];
+    }
+
+    function mapIdsToRows(idArray) {
+      var rows = [];
+      ensureRowsByIdCache();
+      for (var i = 0, l = idArray.length; i < l; i++) {
+        var row = rowsById[idArray[i]];
+        if (row != null) {
+          rows[rows.length] = row;
+        }
+      }
+      return rows;
+    }
+
+    function mapRowsToIds(rowArray) {
+      var ids = [];
+      for (var i = 0, l = rowArray.length; i < l; i++) {
+        if (rowArray[i] < rows.length) {
+          ids[ids.length] = rows[rowArray[i]][idProperty];
+        }
+      }
+      return ids;
+    }
+
+    function updateItem(id, item) {
+      if (idxById[id] === undefined || id !== item[idProperty]) {
+        throw "Invalid or non-matching id";
+      }
+      items[idxById[id]] = item;
+      if (!updated) {
+        updated = {};
+      }
+      updated[id] = true;
+      refresh();
+    }
+
+    function insertItem(insertBefore, item) {
+      items.splice(insertBefore, 0, item);
+      updateIdxById(insertBefore);
+      refresh();
+    }
+
+    function addItem(item) {
+      items.push(item);
+      updateIdxById(items.length - 1);
+      refresh();
+    }
+
+    function deleteItem(id) {
+      var idx = idxById[id];
+      if (idx === undefined) {
+        throw "Invalid id";
+      }
+      delete idxById[id];
+      items.splice(idx, 1);
+      updateIdxById(idx);
+      refresh();
+    }
+
+    function getLength() {
+      return rows.length;
+    }
+
+    function getItem(i) {
+      return rows[i];
+    }
+
+    function getItemMetadata(i) {
+      var item = rows[i];
+      if (item === undefined) {
+        return null;
+      }
+
+      // overrides for grouping rows
+      if (item.__group) {
+        return options.groupItemMetadataProvider.getGroupRowMetadata(item);
+      }
+
+      // overrides for totals rows
+      if (item.__groupTotals) {
+        return options.groupItemMetadataProvider.getTotalsRowMetadata(item);
+      }
+
+      return null;
+    }
+
+    function expandCollapseAllGroups(level, collapse) {
+      if (level == null) {
+        for (var i = 0; i < groupingInfos.length; i++) {
+          toggledGroupsByLevel[i] = {};
+          groupingInfos[i].collapsed = collapse;
+        }
+      } else {
+        toggledGroupsByLevel[level] = {};
+        groupingInfos[level].collapsed = collapse;
+      }
+      refresh();
+    }
+
+    /**
+     * @param level {Number} Optional level to collapse.  If not specified, applies to all levels.
+     */
+    function collapseAllGroups(level) {
+      expandCollapseAllGroups(level, true);
+    }
+
+    /**
+     * @param level {Number} Optional level to expand.  If not specified, applies to all levels.
+     */
+    function expandAllGroups(level) {
+      expandCollapseAllGroups(level, false);
+    }
+
+    function expandCollapseGroup(level, groupingKey, collapse) {
+      toggledGroupsByLevel[level][groupingKey] = groupingInfos[level].collapsed ^ collapse;
+      refresh();
+    }
+
+    /**
+     * @param varArgs Either a Slick.Group's "groupingKey" property, or a
+     *     variable argument list of grouping values denoting a unique path to the row.  For
+     *     example, calling collapseGroup('high', '10%') will collapse the '10%' subgroup of
+     *     the 'high' setGrouping.
+     */
+    function collapseGroup(varArgs) {
+      var args = Array.prototype.slice.call(arguments);
+      var arg0 = args[0];
+      if (args.length == 1 && arg0.indexOf(groupingDelimiter) != -1) {
+        expandCollapseGroup(arg0.split(groupingDelimiter).length - 1, arg0, true);
+      } else {
+        expandCollapseGroup(args.length - 1, args.join(groupingDelimiter), true);
+      }
+    }
+
+    /**
+     * @param varArgs Either a Slick.Group's "groupingKey" property, or a
+     *     variable argument list of grouping values denoting a unique path to the row.  For
+     *     example, calling expandGroup('high', '10%') will expand the '10%' subgroup of
+     *     the 'high' setGrouping.
+     */
+    function expandGroup(varArgs) {
+      var args = Array.prototype.slice.call(arguments);
+      var arg0 = args[0];
+      if (args.length == 1 && arg0.indexOf(groupingDelimiter) != -1) {
+        expandCollapseGroup(arg0.split(groupingDelimiter).length - 1, arg0, false);
+      } else {
+        expandCollapseGroup(args.length - 1, args.join(groupingDelimiter), false);
+      }
+    }
+
+    function getGroups() {
+      return groups;
+    }
+
+    function extractGroups(rows, parentGroup) {
+      var group;
+      var val;
+      var groups = [];
+      var groupsByVal = {};
+      var r;
+      var level = parentGroup ? parentGroup.level + 1 : 0;
+      var gi = groupingInfos[level];
+
+      for (var i = 0, l = gi.predefinedValues.length; i < l; i++) {
+        val = gi.predefinedValues[i];
+        group = groupsByVal[val];
+        if (!group) {
+          group = new Slick.Group();
+          group.value = val;
+          group.level = level;
+          group.groupingKey = (parentGroup ? parentGroup.groupingKey + groupingDelimiter : '') + val;
+          groups[groups.length] = group;
+          groupsByVal[val] = group;
+        }
+      }
+
+      for (var i = 0, l = rows.length; i < l; i++) {
+        r = rows[i];
+        val = gi.getterIsAFn ? gi.getter(r) : r[gi.getter];
+        group = groupsByVal[val];
+        if (!group) {
+          group = new Slick.Group();
+          group.value = val;
+          group.level = level;
+          group.groupingKey = (parentGroup ? parentGroup.groupingKey + groupingDelimiter : '') + val;
+          groups[groups.length] = group;
+          groupsByVal[val] = group;
+        }
+
+        group.rows[group.count++] = r;
+      }
+
+      if (level < groupingInfos.length - 1) {
+        for (var i = 0; i < groups.length; i++) {
+          group = groups[i];
+          group.groups = extractGroups(group.rows, group);
+        }
+      }      
+
+      groups.sort(groupingInfos[level].comparer);
+
+      return groups;
+    }
+
+    // TODO:  lazy totals calculation
+    function calculateGroupTotals(group) {
+      // TODO:  try moving iterating over groups into compiled accumulator
+      var gi = groupingInfos[group.level];
+      var isLeafLevel = (group.level == groupingInfos.length);
+      var totals = new Slick.GroupTotals();
+      var agg, idx = gi.aggregators.length;
+      while (idx--) {
+        agg = gi.aggregators[idx];
+        agg.init();
+        gi.compiledAccumulators[idx].call(agg,
+            (!isLeafLevel && gi.aggregateChildGroups) ? group.groups : group.rows);
+        agg.storeResult(totals);
+      }
+      totals.group = group;
+      group.totals = totals;
+    }
+
+    function calculateTotals(groups, level) {
+      level = level || 0;
+      var gi = groupingInfos[level];
+      var idx = groups.length, g;
+      while (idx--) {
+        g = groups[idx];
+
+        if (g.collapsed && !gi.aggregateCollapsed) {
+          continue;
+        }
+
+        // Do a depth-first aggregation so that parent setGrouping aggregators can access subgroup totals.
+        if (g.groups) {
+          calculateTotals(g.groups, level + 1);
+        }
+
+        if (gi.aggregators.length && (
+            gi.aggregateEmpty || g.rows.length || (g.groups && g.groups.length))) {
+          calculateGroupTotals(g);
+        }
+      }
+    }
+
+    function finalizeGroups(groups, level) {
+      level = level || 0;
+      var gi = groupingInfos[level];
+      var groupCollapsed = gi.collapsed;
+      var toggledGroups = toggledGroupsByLevel[level];
+      var idx = groups.length, g;
+      while (idx--) {
+        g = groups[idx];
+        g.collapsed = groupCollapsed ^ toggledGroups[g.groupingKey];
+        g.title = gi.formatter ? gi.formatter(g) : g.value;
+
+        if (g.groups) {
+          finalizeGroups(g.groups, level + 1);
+          // Let the non-leaf setGrouping rows get garbage-collected.
+          // They may have been used by aggregates that go over all of the descendants,
+          // but at this point they are no longer needed.
+          g.rows = [];
+        }
+      }
+    }
+
+    function flattenGroupedRows(groups, level) {
+      level = level || 0;
+      var gi = groupingInfos[level];
+      var groupedRows = [], rows, gl = 0, g;
+      for (var i = 0, l = groups.length; i < l; i++) {
+        g = groups[i];
+        groupedRows[gl++] = g;
+
+        if (!g.collapsed) {
+          rows = g.groups ? flattenGroupedRows(g.groups, level + 1) : g.rows;
+          for (var j = 0, jj = rows.length; j < jj; j++) {
+            groupedRows[gl++] = rows[j];
+          }
+        }
+
+        if (g.totals && gi.displayTotalsRow && (!g.collapsed || gi.aggregateCollapsed)) {
+          groupedRows[gl++] = g.totals;
+        }
+      }
+      return groupedRows;
+    }
+
+    function getFunctionInfo(fn) {
+      var fnRegex = /^function[^(]*\(([^)]*)\)\s*{([\s\S]*)}$/;
+      var matches = fn.toString().match(fnRegex);
+      return {
+        params: matches[1].split(","),
+        body: matches[2]
+      };
+    }
+
+    function compileAccumulatorLoop(aggregator) {
+      var accumulatorInfo = getFunctionInfo(aggregator.accumulate);
+      var fn = new Function(
+          "_items",
+          "for (var " + accumulatorInfo.params[0] + ", _i=0, _il=_items.length; _i<_il; _i++) {" +
+              accumulatorInfo.params[0] + " = _items[_i]; " +
+              accumulatorInfo.body +
+          "}"
+      );
+      fn.displayName = fn.name = "compiledAccumulatorLoop";
+      return fn;
+    }
+
+    function compileFilter() {
+      var filterInfo = getFunctionInfo(filter);
+
+      var filterBody = filterInfo.body
+          .replace(/return false\s*([;}]|$)/gi, "{ continue _coreloop; }$1")
+          .replace(/return true\s*([;}]|$)/gi, "{ _retval[_idx++] = $item$; continue _coreloop; }$1")
+          .replace(/return ([^;}]+?)\s*([;}]|$)/gi,
+          "{ if ($1) { _retval[_idx++] = $item$; }; continue _coreloop; }$2");
+
+      // This preserves the function template code after JS compression,
+      // so that replace() commands still work as expected.
+      var tpl = [
+        //"function(_items, _args) { ",
+        "var _retval = [], _idx = 0; ",
+        "var $item$, $args$ = _args; ",
+        "_coreloop: ",
+        "for (var _i = 0, _il = _items.length; _i < _il; _i++) { ",
+        "$item$ = _items[_i]; ",
+        "$filter$; ",
+        "} ",
+        "return _retval; "
+        //"}"
+      ].join("");
+      tpl = tpl.replace(/\$filter\$/gi, filterBody);
+      tpl = tpl.replace(/\$item\$/gi, filterInfo.params[0]);
+      tpl = tpl.replace(/\$args\$/gi, filterInfo.params[1]);
+
+      var fn = new Function("_items,_args", tpl);
+      fn.displayName = fn.name = "compiledFilter";
+      return fn;
+    }
+
+    function compileFilterWithCaching() {
+      var filterInfo = getFunctionInfo(filter);
+
+      var filterBody = filterInfo.body
+          .replace(/return false\s*([;}]|$)/gi, "{ continue _coreloop; }$1")
+          .replace(/return true\s*([;}]|$)/gi, "{ _cache[_i] = true;_retval[_idx++] = $item$; continue _coreloop; }$1")
+          .replace(/return ([^;}]+?)\s*([;}]|$)/gi,
+          "{ if ((_cache[_i] = $1)) { _retval[_idx++] = $item$; }; continue _coreloop; }$2");
+
+      // This preserves the function template code after JS compression,
+      // so that replace() commands still work as expected.
+      var tpl = [
+        //"function(_items, _args, _cache) { ",
+        "var _retval = [], _idx = 0; ",
+        "var $item$, $args$ = _args; ",
+        "_coreloop: ",
+        "for (var _i = 0, _il = _items.length; _i < _il; _i++) { ",
+        "$item$ = _items[_i]; ",
+        "if (_cache[_i]) { ",
+        "_retval[_idx++] = $item$; ",
+        "continue _coreloop; ",
+        "} ",
+        "$filter$; ",
+        "} ",
+        "return _retval; "
+        //"}"
+      ].join("");
+      tpl = tpl.replace(/\$filter\$/gi, filterBody);
+      tpl = tpl.replace(/\$item\$/gi, filterInfo.params[0]);
+      tpl = tpl.replace(/\$args\$/gi, filterInfo.params[1]);
+
+      var fn = new Function("_items,_args,_cache", tpl);
+      fn.displayName = fn.name = "compiledFilterWithCaching";
+      return fn;
+    }
+
+    function uncompiledFilter(items, args) {
+      var retval = [], idx = 0;
+
+      for (var i = 0, ii = items.length; i < ii; i++) {
+        if (filter(items[i], args)) {
+          retval[idx++] = items[i];
+        }
+      }
+
+      return retval;
+    }
+
+    function uncompiledFilterWithCaching(items, args, cache) {
+      var retval = [], idx = 0, item;
+
+      for (var i = 0, ii = items.length; i < ii; i++) {
+        item = items[i];
+        if (cache[i]) {
+          retval[idx++] = item;
+        } else if (filter(item, args)) {
+          retval[idx++] = item;
+          cache[i] = true;
+        }
+      }
+
+      return retval;
+    }
+
+    function getFilteredAndPagedItems(items) {
+      if (filter) {
+        var batchFilter = options.inlineFilters ? compiledFilter : uncompiledFilter;
+        var batchFilterWithCaching = options.inlineFilters ? compiledFilterWithCaching : uncompiledFilterWithCaching;
+
+        if (refreshHints.isFilterNarrowing) {
+          filteredItems = batchFilter(filteredItems, filterArgs);
+        } else if (refreshHints.isFilterExpanding) {
+          filteredItems = batchFilterWithCaching(items, filterArgs, filterCache);
+        } else if (!refreshHints.isFilterUnchanged) {
+          filteredItems = batchFilter(items, filterArgs);
+        }
+      } else {
+        // special case:  if not filtering and not paging, the resulting
+        // rows collection needs to be a copy so that changes due to sort
+        // can be caught
+        filteredItems = pagesize ? items : items.concat();
+      }
+
+      // get the current page
+      var paged;
+      if (pagesize) {
+        if (filteredItems.length < pagenum * pagesize) {
+          pagenum = Math.floor(filteredItems.length / pagesize);
+        }
+        paged = filteredItems.slice(pagesize * pagenum, pagesize * pagenum + pagesize);
+      } else {
+        paged = filteredItems;
+      }
+
+      return {totalRows: filteredItems.length, rows: paged};
+    }
+
+    function getRowDiffs(rows, newRows) {
+      var item, r, eitherIsNonData, diff = [];
+      var from = 0, to = newRows.length;
+
+      if (refreshHints && refreshHints.ignoreDiffsBefore) {
+        from = Math.max(0,
+            Math.min(newRows.length, refreshHints.ignoreDiffsBefore));
+      }
+
+      if (refreshHints && refreshHints.ignoreDiffsAfter) {
+        to = Math.min(newRows.length,
+            Math.max(0, refreshHints.ignoreDiffsAfter));
+      }
+
+      for (var i = from, rl = rows.length; i < to; i++) {
+        if (i >= rl) {
+          diff[diff.length] = i;
+        } else {
+          item = newRows[i];
+          r = rows[i];
+
+          if ((groupingInfos.length && (eitherIsNonData = (item.__nonDataRow) || (r.__nonDataRow)) &&
+              item.__group !== r.__group ||
+              item.__group && !item.equals(r))
+              || (eitherIsNonData &&
+              // no good way to compare totals since they are arbitrary DTOs
+              // deep object comparison is pretty expensive
+              // always considering them 'dirty' seems easier for the time being
+              (item.__groupTotals || r.__groupTotals))
+              || item[idProperty] != r[idProperty]
+              || (updated && updated[item[idProperty]])
+              ) {
+            diff[diff.length] = i;
+          }
+        }
+      }
+      return diff;
+    }
+
+    function recalc(_items) {
+      rowsById = null;
+
+      if (refreshHints.isFilterNarrowing != prevRefreshHints.isFilterNarrowing ||
+          refreshHints.isFilterExpanding != prevRefreshHints.isFilterExpanding) {
+        filterCache = [];
+      }
+
+      var filteredItems = getFilteredAndPagedItems(_items);
+      totalRows = filteredItems.totalRows;
+      var newRows = filteredItems.rows;
+
+      groups = [];
+      if (groupingInfos.length) {
+        groups = extractGroups(newRows);
+        if (groups.length) {
+          calculateTotals(groups);
+          finalizeGroups(groups);
+          newRows = flattenGroupedRows(groups);
+        }
+      }
+
+      var diff = getRowDiffs(rows, newRows);
+
+      rows = newRows;
+
+      return diff;
+    }
+
+    function refresh() {
+      if (suspend) {
+        return;
+      }
+
+      var countBefore = rows.length;
+      var totalRowsBefore = totalRows;
+
+      var diff = recalc(items, filter); // pass as direct refs to avoid closure perf hit
+
+      // if the current page is no longer valid, go to last page and recalc
+      // we suffer a performance penalty here, but the main loop (recalc) remains highly optimized
+      if (pagesize && totalRows < pagenum * pagesize) {
+        pagenum = Math.max(0, Math.ceil(totalRows / pagesize) - 1);
+        diff = recalc(items, filter);
+      }
+
+      updated = null;
+      prevRefreshHints = refreshHints;
+      refreshHints = {};
+
+      if (totalRowsBefore != totalRows) {
+        onPagingInfoChanged.notify(getPagingInfo(), null, self);
+      }
+      if (countBefore != rows.length) {
+        onRowCountChanged.notify({previous: countBefore, current: rows.length}, null, self);
+      }
+      if (diff.length > 0) {
+        onRowsChanged.notify({rows: diff}, null, self);
+      }
+    }
+
+    /***
+     * Wires the grid and the DataView together to keep row selection tied to item ids.
+     * This is useful since, without it, the grid only knows about rows, so if the items
+     * move around, the same rows stay selected instead of the selection moving along
+     * with the items.
+     *
+     * NOTE:  This doesn't work with cell selection model.
+     *
+     * @param grid {Slick.Grid} The grid to sync selection with.
+     * @param preserveHidden {Boolean} Whether to keep selected items that go out of the
+     *     view due to them getting filtered out.
+     * @param preserveHiddenOnSelectionChange {Boolean} Whether to keep selected items
+     *     that are currently out of the view (see preserveHidden) as selected when selection
+     *     changes.
+     * @return {Slick.Event} An event that notifies when an internal list of selected row ids
+     *     changes.  This is useful since, in combination with the above two options, it allows
+     *     access to the full list selected row ids, and not just the ones visible to the grid.
+     * @method syncGridSelection
+     */
+    function syncGridSelection(grid, preserveHidden, preserveHiddenOnSelectionChange) {
+      var self = this;
+      var inHandler;
+      var selectedRowIds = self.mapRowsToIds(grid.getSelectedRows());
+      var onSelectedRowIdsChanged = new Slick.Event();
+
+      function setSelectedRowIds(rowIds) {
+        if (selectedRowIds.join(",") == rowIds.join(",")) {
+          return;
+        }
+
+        selectedRowIds = rowIds;
+
+        onSelectedRowIdsChanged.notify({
+          "grid": grid,
+          "ids": selectedRowIds
+        }, new Slick.EventData(), self);
+      }
+
+      function update() {
+        if (selectedRowIds.length > 0) {
+          inHandler = true;
+          var selectedRows = self.mapIdsToRows(selectedRowIds);
+          if (!preserveHidden) {
+            setSelectedRowIds(self.mapRowsToIds(selectedRows));       
+          }
+          grid.setSelectedRows(selectedRows);
+          inHandler = false;
+        }
+      }
+
+      grid.onSelectedRowsChanged.subscribe(function(e, args) {
+        if (inHandler) { return; }
+        var newSelectedRowIds = self.mapRowsToIds(grid.getSelectedRows());
+        if (!preserveHiddenOnSelectionChange || !grid.getOptions().multiSelect) {
+          setSelectedRowIds(newSelectedRowIds);
+        } else {
+          // keep the ones that are hidden
+          var existing = $.grep(selectedRowIds, function(id) { return self.getRowById(id) === undefined; });
+          // add the newly selected ones
+          setSelectedRowIds(existing.concat(newSelectedRowIds));
+        }
+      });
+
+      this.onRowsChanged.subscribe(update);
+
+      this.onRowCountChanged.subscribe(update);
+
+      return onSelectedRowIdsChanged;
+    }
+
+    function syncGridCellCssStyles(grid, key) {
+      var hashById;
+      var inHandler;
+
+      // since this method can be called after the cell styles have been set,
+      // get the existing ones right away
+      storeCellCssStyles(grid.getCellCssStyles(key));
+
+      function storeCellCssStyles(hash) {
+        hashById = {};
+        for (var row in hash) {
+          var id = rows[row][idProperty];
+          hashById[id] = hash[row];
+        }
+      }
+
+      function update() {
+        if (hashById) {
+          inHandler = true;
+          ensureRowsByIdCache();
+          var newHash = {};
+          for (var id in hashById) {
+            var row = rowsById[id];
+            if (row != undefined) {
+              newHash[row] = hashById[id];
+            }
+          }
+          grid.setCellCssStyles(key, newHash);
+          inHandler = false;
+        }
+      }
+
+      grid.onCellCssStylesChanged.subscribe(function(e, args) {
+        if (inHandler) { return; }
+        if (key != args.key) { return; }
+        if (args.hash) {
+          storeCellCssStyles(args.hash);
+        }
+      });
+
+      this.onRowsChanged.subscribe(update);
+
+      this.onRowCountChanged.subscribe(update);
+    }
+
+    $.extend(this, {
+      // methods
+      "beginUpdate": beginUpdate,
+      "endUpdate": endUpdate,
+      "setPagingOptions": setPagingOptions,
+      "getPagingInfo": getPagingInfo,
+      "getItems": getItems,
+      "setItems": setItems,
+      "setFilter": setFilter,
+      "sort": sort,
+      "fastSort": fastSort,
+      "reSort": reSort,
+      "setGrouping": setGrouping,
+      "getGrouping": getGrouping,
+      "groupBy": groupBy,
+      "setAggregators": setAggregators,
+      "collapseAllGroups": collapseAllGroups,
+      "expandAllGroups": expandAllGroups,
+      "collapseGroup": collapseGroup,
+      "expandGroup": expandGroup,
+      "getGroups": getGroups,
+      "getIdxById": getIdxById,
+      "getRowById": getRowById,
+      "getItemById": getItemById,
+      "getItemByIdx": getItemByIdx,
+      "mapRowsToIds": mapRowsToIds,
+      "mapIdsToRows": mapIdsToRows,
+      "setRefreshHints": setRefreshHints,
+      "setFilterArgs": setFilterArgs,
+      "refresh": refresh,
+      "updateItem": updateItem,
+      "insertItem": insertItem,
+      "addItem": addItem,
+      "deleteItem": deleteItem,
+      "syncGridSelection": syncGridSelection,
+      "syncGridCellCssStyles": syncGridCellCssStyles,
+
+      // data provider methods
+      "getLength": getLength,
+      "getItem": getItem,
+      "getItemMetadata": getItemMetadata,
+
+      // events
+      "onRowCountChanged": onRowCountChanged,
+      "onRowsChanged": onRowsChanged,
+      "onPagingInfoChanged": onPagingInfoChanged
+    });
+  }
+
+  function AvgAggregator(field) {
+    this.field_ = field;
+
+    this.init = function () {
+      this.count_ = 0;
+      this.nonNullCount_ = 0;
+      this.sum_ = 0;
+    };
+
+    this.accumulate = function (item) {
+      var val = item[this.field_];
+      this.count_++;
+      if (val != null && val !== "" && val !== NaN) {
+        this.nonNullCount_++;
+        this.sum_ += parseFloat(val);
+      }
+    };
+
+    this.storeResult = function (groupTotals) {
+      if (!groupTotals.avg) {
+        groupTotals.avg = {};
+      }
+      if (this.nonNullCount_ != 0) {
+        groupTotals.avg[this.field_] = this.sum_ / this.nonNullCount_;
+      }
+    };
+  }
+
+  function MinAggregator(field) {
+    this.field_ = field;
+
+    this.init = function () {
+      this.min_ = null;
+    };
+
+    this.accumulate = function (item) {
+      var val = item[this.field_];
+      if (val != null && val !== "" && val !== NaN) {
+        if (this.min_ == null || val < this.min_) {
+          this.min_ = val;
+        }
+      }
+    };
+
+    this.storeResult = function (groupTotals) {
+      if (!groupTotals.min) {
+        groupTotals.min = {};
+      }
+      groupTotals.min[this.field_] = this.min_;
+    }
+  }
+
+  function MaxAggregator(field) {
+    this.field_ = field;
+
+    this.init = function () {
+      this.max_ = null;
+    };
+
+    this.accumulate = function (item) {
+      var val = item[this.field_];
+      if (val != null && val !== "" && val !== NaN) {
+        if (this.max_ == null || val > this.max_) {
+          this.max_ = val;
+        }
+      }
+    };
+
+    this.storeResult = function (groupTotals) {
+      if (!groupTotals.max) {
+        groupTotals.max = {};
+      }
+      groupTotals.max[this.field_] = this.max_;
+    }
+  }
+
+  function SumAggregator(field) {
+    this.field_ = field;
+
+    this.init = function () {
+      this.sum_ = null;
+    };
+
+    this.accumulate = function (item) {
+      var val = item[this.field_];
+      if (val != null && val !== "" && val !== NaN) {
+        this.sum_ += parseFloat(val);
+      }
+    };
+
+    this.storeResult = function (groupTotals) {
+      if (!groupTotals.sum) {
+        groupTotals.sum = {};
+      }
+      groupTotals.sum[this.field_] = this.sum_;
+    }
+  }
+
+  // TODO:  add more built-in aggregators
+  // TODO:  merge common aggregators in one to prevent needles iterating
+
+})(jQuery);
+(function ($) {
+  $.extend(true, window, {
+    Slick: {
+      Data: {
+        GroupItemMetadataProvider: GroupItemMetadataProvider
+      }
+    }
+  });
+
+
+  /***
+   * Provides item metadata for group (Slick.Group) and totals (Slick.Totals) rows produced by the DataView.
+   * This metadata overrides the default behavior and formatting of those rows so that they appear and function
+   * correctly when processed by the grid.
+   *
+   * This class also acts as a grid plugin providing event handlers to expand & collapse groups.
+   * If "grid.registerPlugin(...)" is not called, expand & collapse will not work.
+   *
+   * @class GroupItemMetadataProvider
+   * @module Data
+   * @namespace Slick.Data
+   * @constructor
+   * @param options
+   */
+  function GroupItemMetadataProvider(options) {
+    var _grid;
+    var _defaults = {
+      groupCssClass: "slick-group",
+      groupTitleCssClass: "slick-group-title",
+      totalsCssClass: "slick-group-totals",
+      groupFocusable: true,
+      totalsFocusable: false,
+      toggleCssClass: "slick-group-toggle",
+      toggleExpandedCssClass: "expanded",
+      toggleCollapsedCssClass: "collapsed",
+      enableExpandCollapse: true,
+      groupFormatter: defaultGroupCellFormatter,
+      totalsFormatter: defaultTotalsCellFormatter
+    };
+
+    options = $.extend(true, {}, _defaults, options);
+
+
+    function defaultGroupCellFormatter(row, cell, value, columnDef, item) {
+      if (!options.enableExpandCollapse) {
+        return item.title;
+      }
+
+      var indentation = item.level * 15 + "px";
+
+      return "<span class='" + options.toggleCssClass + " " +
+          (item.collapsed ? options.toggleCollapsedCssClass : options.toggleExpandedCssClass) +
+          "' style='margin-left:" + indentation +"'>" +
+          "</span>" +
+          "<span class='" + options.groupTitleCssClass + "' level='" + item.level + "'>" +
+            item.title +
+          "</span>";
+    }
+
+    function defaultTotalsCellFormatter(row, cell, value, columnDef, item) {
+      return (columnDef.groupTotalsFormatter && columnDef.groupTotalsFormatter(item, columnDef)) || "";
+    }
+
+
+    function init(grid) {
+      _grid = grid;
+      _grid.onClick.subscribe(handleGridClick);
+      _grid.onKeyDown.subscribe(handleGridKeyDown);
+
+    }
+
+    function destroy() {
+      if (_grid) {
+        _grid.onClick.unsubscribe(handleGridClick);
+        _grid.onKeyDown.unsubscribe(handleGridKeyDown);
+      }
+    }
+
+    function handleGridClick(e, args) {
+      var item = this.getDataItem(args.row);
+      if (item && item instanceof Slick.Group && $(e.target).hasClass(options.toggleCssClass)) {
+        if (item.collapsed) {
+          this.getData().expandGroup(item.groupingKey);
+        } else {
+          this.getData().collapseGroup(item.groupingKey);
+        }
+
+        e.stopImmediatePropagation();
+        e.preventDefault();
+      }
+    }
+
+    // TODO:  add -/+ handling
+    function handleGridKeyDown(e, args) {
+      if (options.enableExpandCollapse && (e.which == $.ui.keyCode.SPACE)) {
+        var activeCell = this.getActiveCell();
+        if (activeCell) {
+          var item = this.getDataItem(activeCell.row);
+          if (item && item instanceof Slick.Group) {
+            if (item.collapsed) {
+              this.getData().expandGroup(item.groupingKey);
+            } else {
+              this.getData().collapseGroup(item.groupingKey);
+            }
+
+            e.stopImmediatePropagation();
+            e.preventDefault();
+          }
+        }
+      }
+    }
+
+    function getGroupRowMetadata(item) {
+      return {
+        selectable: false,
+        focusable: options.groupFocusable,
+        cssClasses: options.groupCssClass,
+        columns: {
+          0: {
+            colspan: "*",
+            formatter: options.groupFormatter,
+            editor: null
+          }
+        }
+      };
+    }
+
+    function getTotalsRowMetadata(item) {
+      return {
+        selectable: false,
+        focusable: options.totalsFocusable,
+        cssClasses: options.totalsCssClass,
+        formatter: options.totalsFormatter,
+        editor: null
+      };
+    }
+
+
+    return {
+      "init": init,
+      "destroy": destroy,
+      "getGroupRowMetadata": getGroupRowMetadata,
+      "getTotalsRowMetadata": getTotalsRowMetadata
+    };
+  }
+})(jQuery);
+(function ($) {
+  /***
+   * A sample AJAX data store implementation.
+   * Right now, it's hooked up to load Hackernews stories, but can
+   * easily be extended to support any JSONP-compatible backend that accepts paging parameters.
+   */
+  function RemoteModel() {
+    // private
+    var PAGESIZE = 50;
+    var data = {length: 0};
+    var searchstr = "";
+    var sortcol = null;
+    var sortdir = 1;
+    var h_request = null;
+    var req = null; // ajax request
+
+    // events
+    var onDataLoading = new Slick.Event();
+    var onDataLoaded = new Slick.Event();
+
+
+    function init() {
+    }
+
+
+    function isDataLoaded(from, to) {
+      for (var i = from; i <= to; i++) {
+        if (data[i] == undefined || data[i] == null) {
+          return false;
+        }
+      }
+
+      return true;
+    }
+
+
+    function clear() {
+      for (var key in data) {
+        delete data[key];
+      }
+      data.length = 0;
+    }
+
+
+    function ensureData(from, to) {
+      if (req) {
+        req.abort();
+        for (var i = req.fromPage; i <= req.toPage; i++)
+          data[i * PAGESIZE] = undefined;
+      }
+
+      if (from < 0) {
+        from = 0;
+      }
+
+      if (data.length > 0) {
+        to = Math.min(to, data.length - 1);
+      }
+
+      var fromPage = Math.floor(from / PAGESIZE);
+      var toPage = Math.floor(to / PAGESIZE);
+
+      while (data[fromPage * PAGESIZE] !== undefined && fromPage < toPage)
+        fromPage++;
+
+      while (data[toPage * PAGESIZE] !== undefined && fromPage < toPage)
+        toPage--;
+
+      if (fromPage > toPage || ((fromPage == toPage) && data[fromPage * PAGESIZE] !== undefined)) {
+        // TODO:  look-ahead
+        onDataLoaded.notify({from: from, to: to});
+        return;
+      }
+
+      var url = "http://api.thriftdb.com/api.hnsearch.com/items/_search?filter[fields][type][]=submission&q=" + searchstr + "&start=" + (fromPage * PAGESIZE) + "&limit=" + (((toPage - fromPage) * PAGESIZE) + PAGESIZE);
+
+      if (sortcol != null) {
+          url += ("&sortby=" + sortcol + ((sortdir > 0) ? "+asc" : "+desc"));
+      }
+
+      if (h_request != null) {
+        clearTimeout(h_request);
+      }
+
+      h_request = setTimeout(function () {
+        for (var i = fromPage; i <= toPage; i++)
+          data[i * PAGESIZE] = null; // null indicates a 'requested but not available yet'
+
+        onDataLoading.notify({from: from, to: to});
+
+        req = $.jsonp({
+          url: url,
+          callbackParameter: "callback",
+          cache: true,
+          success: onSuccess,
+          error: function () {
+            onError(fromPage, toPage)
+          }
+        });
+        req.fromPage = fromPage;
+        req.toPage = toPage;
+      }, 50);
+    }
+
+
+    function onError(fromPage, toPage) {
+      alert("error loading pages " + fromPage + " to " + toPage);
+    }
+
+    function onSuccess(resp) {
+      var from = resp.request.start, to = from + resp.results.length;
+      data.length = Math.min(parseInt(resp.hits),1000); // limitation of the API
+
+      for (var i = 0; i < resp.results.length; i++) {
+        var item = resp.results[i].item;
+
+        // Old IE versions can't parse ISO dates, so change to universally-supported format.
+        item.create_ts = item.create_ts.replace(/^(\d+)-(\d+)-(\d+)T(\d+:\d+:\d+)Z$/, "$2/$3/$1 $4 UTC"); 
+        item.create_ts = new Date(item.create_ts);
+
+        data[from + i] = item;
+        data[from + i].index = from + i;
+      }
+
+      req = null;
+
+      onDataLoaded.notify({from: from, to: to});
+    }
+
+
+    function reloadData(from, to) {
+      for (var i = from; i <= to; i++)
+        delete data[i];
+
+      ensureData(from, to);
+    }
+
+
+    function setSort(column, dir) {
+      sortcol = column;
+      sortdir = dir;
+      clear();
+    }
+
+    function setSearch(str) {
+      searchstr = str;
+      clear();
+    }
+
+
+    init();
+
+    return {
+      // properties
+      "data": data,
+
+      // methods
+      "clear": clear,
+      "isDataLoaded": isDataLoaded,
+      "ensureData": ensureData,
+      "reloadData": reloadData,
+      "setSort": setSort,
+      "setSearch": setSearch,
+
+      // events
+      "onDataLoading": onDataLoading,
+      "onDataLoaded": onDataLoaded
+    };
+  }
+
+  // Slick.Data.RemoteModel
+  $.extend(true, window, { Slick: { Data: { RemoteModel: RemoteModel }}});
+})(jQuery);
+(function ($) {
+  // Register namespace
+  $.extend(true, window, {
+    "Slick": {
+      "AutoTooltips": AutoTooltips
+    }
+  });
+
+  /**
+   * AutoTooltips plugin to show/hide tooltips when columns are too narrow to fit content.
+   * @constructor
+   * @param {boolean} [options.enableForCells=true]        - Enable tooltip for grid cells
+   * @param {boolean} [options.enableForHeaderCells=false] - Enable tooltip for header cells
+   * @param {number}  [options.maxToolTipLength=null]      - The maximum length for a tooltip
+   */
+  function AutoTooltips(options) {
+    var _grid;
+    var _self = this;
+    var _defaults = {
+      enableForCells: true,
+      enableForHeaderCells: false,
+      maxToolTipLength: null
+    };
+    
+    /**
+     * Initialize plugin.
+     */
+    function init(grid) {
+      options = $.extend(true, {}, _defaults, options);
+      _grid = grid;
+      if (options.enableForCells) _grid.onMouseEnter.subscribe(handleMouseEnter);
+      if (options.enableForHeaderCells) _grid.onHeaderMouseEnter.subscribe(handleHeaderMouseEnter);
+    }
+    
+    /**
+     * Destroy plugin.
+     */
+    function destroy() {
+      if (options.enableForCells) _grid.onMouseEnter.unsubscribe(handleMouseEnter);
+      if (options.enableForHeaderCells) _grid.onHeaderMouseEnter.unsubscribe(handleHeaderMouseEnter);
+    }
+    
+    /**
+     * Handle mouse entering grid cell to add/remove tooltip.
+     * @param {jQuery.Event} e - The event
+     */
+    function handleMouseEnter(e) {
+      var cell = _grid.getCellFromEvent(e);
+      if (cell) {
+        var $node = $(_grid.getCellNode(cell.row, cell.cell));
+        var text;
+        if ($node.innerWidth() < $node[0].scrollWidth) {
+          text = $.trim($node.text());
+          if (options.maxToolTipLength && text.length > options.maxToolTipLength) {
+            text = text.substr(0, options.maxToolTipLength - 3) + "...";
+          }
+        } else {
+          text = "";
+        }
+        $node.attr("title", text);
+      }
+    }
+    
+    /**
+     * Handle mouse entering header cell to add/remove tooltip.
+     * @param {jQuery.Event} e     - The event
+     * @param {object} args.column - The column definition
+     */
+    function handleHeaderMouseEnter(e, args) {
+      var column = args.column,
+          $node = $(e.target).closest(".slick-header-column");
+      if (!column.toolTip) {
+        $node.attr("title", ($node.innerWidth() < $node[0].scrollWidth) ? column.name : "");
+      }
+    }
+    
+    // Public API
+    $.extend(this, {
+      "init": init,
+      "destroy": destroy
+    });
+  }
+})(jQuery);(function ($) {
+  // register namespace
+  $.extend(true, window, {
+    "Slick": {
+      "CellCopyManager": CellCopyManager
+    }
+  });
+
+
+  function CellCopyManager() {
+    var _grid;
+    var _self = this;
+    var _copiedRanges;
+
+    function init(grid) {
+      _grid = grid;
+      _grid.onKeyDown.subscribe(handleKeyDown);
+    }
+
+    function destroy() {
+      _grid.onKeyDown.unsubscribe(handleKeyDown);
+    }
+
+    function handleKeyDown(e, args) {
+      var ranges;
+      if (!_grid.getEditorLock().isActive()) {
+        if (e.which == $.ui.keyCode.ESCAPE) {
+          if (_copiedRanges) {
+            e.preventDefault();
+            clearCopySelection();
+            _self.onCopyCancelled.notify({ranges: _copiedRanges});
+            _copiedRanges = null;
+          }
+        }
+
+        if (e.which == 67 && (e.ctrlKey || e.metaKey)) {
+          ranges = _grid.getSelectionModel().getSelectedRanges();
+          if (ranges.length != 0) {
+            e.preventDefault();
+            _copiedRanges = ranges;
+            markCopySelection(ranges);
+            _self.onCopyCells.notify({ranges: ranges});
+          }
+        }
+
+        if (e.which == 86 && (e.ctrlKey || e.metaKey)) {
+          if (_copiedRanges) {
+            e.preventDefault();
+            clearCopySelection();
+            ranges = _grid.getSelectionModel().getSelectedRanges();
+            _self.onPasteCells.notify({from: _copiedRanges, to: ranges});
+            _copiedRanges = null;
+          }
+        }
+      }
+    }
+
+    function markCopySelection(ranges) {
+      var columns = _grid.getColumns();
+      var hash = {};
+      for (var i = 0; i < ranges.length; i++) {
+        for (var j = ranges[i].fromRow; j <= ranges[i].toRow; j++) {
+          hash[j] = {};
+          for (var k = ranges[i].fromCell; k <= ranges[i].toCell; k++) {
+            hash[j][columns[k].id] = "copied";
+          }
+        }
+      }
+      _grid.setCellCssStyles("copy-manager", hash);
+    }
+
+    function clearCopySelection() {
+      _grid.removeCellCssStyles("copy-manager");
+    }
+
+    $.extend(this, {
+      "init": init,
+      "destroy": destroy,
+      "clearCopySelection": clearCopySelection,
+
+      "onCopyCells": new Slick.Event(),
+      "onCopyCancelled": new Slick.Event(),
+      "onPasteCells": new Slick.Event()
+    });
+  }
+})(jQuery);(function ($) {
+  // register namespace
+  $.extend(true, window, {
+    "Slick": {
+      "CellRangeDecorator": CellRangeDecorator
+    }
+  });
+
+  /***
+   * Displays an overlay on top of a given cell range.
+   *
+   * TODO:
+   * Currently, it blocks mouse events to DOM nodes behind it.
+   * Use FF and WebKit-specific "pointer-events" CSS style, or some kind of event forwarding.
+   * Could also construct the borders separately using 4 individual DIVs.
+   *
+   * @param {Grid} grid
+   * @param {Object} options
+   */
+  function CellRangeDecorator(grid, options) {
+    var _elem;
+    var _defaults = {
+      selectionCssClass: 'slick-range-decorator',
+      selectionCss: {
+        "zIndex": "9999",
+        "border": "2px dashed red"
+      }
+    };
+
+    options = $.extend(true, {}, _defaults, options);
+
+
+    function show(range) {
+      if (!_elem) {
+        _elem = $("<div></div>", {css: options.selectionCss})
+            .addClass(options.selectionCssClass)
+            .css("position", "absolute")
+            .appendTo(grid.getCanvasNode());
+      }
+
+      var from = grid.getCellNodeBox(range.fromRow, range.fromCell);
+      var to = grid.getCellNodeBox(range.toRow, range.toCell);
+
+      _elem.css({
+        top: from.top - 1,
+        left: from.left - 1,
+        height: to.bottom - from.top - 2,
+        width: to.right - from.left - 2
+      });
+
+      return _elem;
+    }
+
+    function hide() {
+      if (_elem) {
+        _elem.remove();
+        _elem = null;
+      }
+    }
+
+    $.extend(this, {
+      "show": show,
+      "hide": hide
+    });
+  }
+})(jQuery);
+(function ($) {
+  // register namespace
+  $.extend(true, window, {
+    "Slick": {
+      "CellRangeSelector": CellRangeSelector
+    }
+  });
+
+
+  function CellRangeSelector(options) {
+    var _grid;
+    var _canvas;
+    var _dragging;
+    var _decorator;
+    var _self = this;
+    var _handler = new Slick.EventHandler();
+    var _defaults = {
+      selectionCss: {
+        "border": "2px dashed blue"
+      }
+    };
+
+
+    function init(grid) {
+      options = $.extend(true, {}, _defaults, options);
+      _decorator = new Slick.CellRangeDecorator(grid, options);
+      _grid = grid;
+      _canvas = _grid.getCanvasNode();
+      _handler
+        .subscribe(_grid.onDragInit, handleDragInit)
+        .subscribe(_grid.onDragStart, handleDragStart)
+        .subscribe(_grid.onDrag, handleDrag)
+        .subscribe(_grid.onDragEnd, handleDragEnd);
+    }
+
+    function destroy() {
+      _handler.unsubscribeAll();
+    }
+
+    function handleDragInit(e, dd) {
+      // prevent the grid from cancelling drag'n'drop by default
+      e.stopImmediatePropagation();
+    }
+
+    function handleDragStart(e, dd) {
+      var cell = _grid.getCellFromEvent(e);
+      if (_self.onBeforeCellRangeSelected.notify(cell) !== false) {
+        if (_grid.canCellBeSelected(cell.row, cell.cell)) {
+          _dragging = true;
+          e.stopImmediatePropagation();
+        }
+      }
+      if (!_dragging) {
+        return;
+      }
+
+      _grid.focus();
+
+      var start = _grid.getCellFromPoint(
+          dd.startX - $(_canvas).offset().left,
+          dd.startY - $(_canvas).offset().top);
+
+      dd.range = {start: start, end: {}};
+
+      return _decorator.show(new Slick.Range(start.row, start.cell));
+    }
+
+    function handleDrag(e, dd) {
+      if (!_dragging) {
+        return;
+      }
+      e.stopImmediatePropagation();
+
+      var end = _grid.getCellFromPoint(
+          e.pageX - $(_canvas).offset().left,
+          e.pageY - $(_canvas).offset().top);
+
+      if (!_grid.canCellBeSelected(end.row, end.cell)) {
+        return;
+      }
+
+      dd.range.end = end;
+      _decorator.show(new Slick.Range(dd.range.start.row, dd.range.start.cell, end.row, end.cell));
+    }
+
+    function handleDragEnd(e, dd) {
+      if (!_dragging) {
+        return;
+      }
+
+      _dragging = false;
+      e.stopImmediatePropagation();
+
+      _decorator.hide();
+      _self.onCellRangeSelected.notify({
+        range: new Slick.Range(
+            dd.range.start.row,
+            dd.range.start.cell,
+            dd.range.end.row,
+            dd.range.end.cell
+        )
+      });
+    }
+
+    $.extend(this, {
+      "init": init,
+      "destroy": destroy,
+
+      "onBeforeCellRangeSelected": new Slick.Event(),
+      "onCellRangeSelected": new Slick.Event()
+    });
+  }
+})(jQuery);(function ($) {
+  // register namespace
+  $.extend(true, window, {
+    "Slick": {
+      "CellSelectionModel": CellSelectionModel
+    }
+  });
+
+
+  function CellSelectionModel(options) {
+    var _grid;
+    var _canvas;
+    var _ranges = [];
+    var _self = this;
+    var _selector = new Slick.CellRangeSelector({
+      "selectionCss": {
+        "border": "2px solid black"
+      }
+    });
+    var _options;
+    var _defaults = {
+      selectActiveCell: true
+    };
+
+
+    function init(grid) {
+      _options = $.extend(true, {}, _defaults, options);
+      _grid = grid;
+      _canvas = _grid.getCanvasNode();
+      _grid.onActiveCellChanged.subscribe(handleActiveCellChange);
+      _grid.onKeyDown.subscribe(handleKeyDown);
+      grid.registerPlugin(_selector);
+      _selector.onCellRangeSelected.subscribe(handleCellRangeSelected);
+      _selector.onBeforeCellRangeSelected.subscribe(handleBeforeCellRangeSelected);
+    }
+
+    function destroy() {
+      _grid.onActiveCellChanged.unsubscribe(handleActiveCellChange);
+      _grid.onKeyDown.unsubscribe(handleKeyDown);
+      _selector.onCellRangeSelected.unsubscribe(handleCellRangeSelected);
+      _selector.onBeforeCellRangeSelected.unsubscribe(handleBeforeCellRangeSelected);
+      _grid.unregisterPlugin(_selector);
+    }
+
+    function removeInvalidRanges(ranges) {
+      var result = [];
+
+      for (var i = 0; i < ranges.length; i++) {
+        var r = ranges[i];
+        if (_grid.canCellBeSelected(r.fromRow, r.fromCell) && _grid.canCellBeSelected(r.toRow, r.toCell)) {
+          result.push(r);
+        }
+      }
+
+      return result;
+    }
+
+    function setSelectedRanges(ranges) {
+      _ranges = removeInvalidRanges(ranges);
+      _self.onSelectedRangesChanged.notify(_ranges);
+    }
+
+    function getSelectedRanges() {
+      return _ranges;
+    }
+
+    function handleBeforeCellRangeSelected(e, args) {
+      if (_grid.getEditorLock().isActive()) {
+        e.stopPropagation();
+        return false;
+      }
+    }
+
+    function handleCellRangeSelected(e, args) {
+      setSelectedRanges([args.range]);
+    }
+
+    function handleActiveCellChange(e, args) {
+      if (_options.selectActiveCell && args.row != null && args.cell != null) {
+        setSelectedRanges([new Slick.Range(args.row, args.cell)]);
+      }
+    }
+    
+    function handleKeyDown(e) {
+      /***
+       * Ðšey codes
+       * 37 left
+       * 38 up
+       * 39 right
+       * 40 down                     
+       */                                         
+      var ranges, last;
+      var active = _grid.getActiveCell(); 
+
+      if ( active && e.shiftKey && !e.ctrlKey && !e.altKey && 
+          (e.which == 37 || e.which == 39 || e.which == 38 || e.which == 40) ) {
+      
+        ranges = getSelectedRanges();
+        if (!ranges.length)
+         ranges.push(new Slick.Range(active.row, active.cell));
+         
+        // keyboard can work with last range only          
+        last = ranges.pop();
+        
+        // can't handle selection out of active cell
+        if (!last.contains(active.row, active.cell))
+          last = new Slick.Range(active.row, active.cell);
+        
+        var dRow = last.toRow - last.fromRow,
+            dCell = last.toCell - last.fromCell,
+            // walking direction
+            dirRow = active.row == last.fromRow ? 1 : -1,
+            dirCell = active.cell == last.fromCell ? 1 : -1;
+                 
+        if (e.which == 37) {
+          dCell -= dirCell; 
+        } else if (e.which == 39) {
+          dCell += dirCell ; 
+        } else if (e.which == 38) {
+          dRow -= dirRow; 
+        } else if (e.which == 40) {
+          dRow += dirRow; 
+        }
+        
+        // define new selection range 
+        var new_last = new Slick.Range(active.row, active.cell, active.row + dirRow*dRow, active.cell + dirCell*dCell);
+        if (removeInvalidRanges([new_last]).length) {
+          ranges.push(new_last);
+          var viewRow = dirRow > 0 ? new_last.toRow : new_last.fromRow;
+          var viewCell = dirCell > 0 ? new_last.toCell : new_last.fromCell;
+         _grid.scrollRowIntoView(viewRow);
+         _grid.scrollCellIntoView(viewRow, viewCell);
+        }
+        else 
+          ranges.push(last);
+
+        setSelectedRanges(ranges);  
+       
+        e.preventDefault();
+        e.stopPropagation();        
+      }           
+    }
+
+    $.extend(this, {
+      "getSelectedRanges": getSelectedRanges,
+      "setSelectedRanges": setSelectedRanges,
+
+      "init": init,
+      "destroy": destroy,
+
+      "onSelectedRangesChanged": new Slick.Event()
+    });
+  }
+})(jQuery);
+(function ($) {
+  // register namespace
+  $.extend(true, window, {
+    "Slick": {
+      "RowSelectionModel": RowSelectionModel
+    }
+  });
+
+  function RowSelectionModel(options) {
+    var _grid;
+    var _ranges = [];
+    var _self = this;
+    var _handler = new Slick.EventHandler();
+    var _inHandler;
+    var _options;
+    var _defaults = {
+      selectActiveRow: true
+    };
+
+    function init(grid) {
+      _options = $.extend(true, {}, _defaults, options);
+      _grid = grid;
+      _handler.subscribe(_grid.onActiveCellChanged,
+          wrapHandler(handleActiveCellChange));
+      _handler.subscribe(_grid.onKeyDown,
+          wrapHandler(handleKeyDown));
+      _handler.subscribe(_grid.onClick,
+          wrapHandler(handleClick));
+    }
+
+    function destroy() {
+      _handler.unsubscribeAll();
+    }
+
+    function wrapHandler(handler) {
+      return function () {
+        if (!_inHandler) {
+          _inHandler = true;
+          handler.apply(this, arguments);
+          _inHandler = false;
+        }
+      };
+    }
+
+    function rangesToRows(ranges) {
+      var rows = [];
+      for (var i = 0; i < ranges.length; i++) {
+        for (var j = ranges[i].fromRow; j <= ranges[i].toRow; j++) {
+          rows.push(j);
+        }
+      }
+      return rows;
+    }
+
+    function rowsToRanges(rows) {
+      var ranges = [];
+      var lastCell = _grid.getColumns().length - 1;
+      for (var i = 0; i < rows.length; i++) {
+        ranges.push(new Slick.Range(rows[i], 0, rows[i], lastCell));
+      }
+      return ranges;
+    }
+
+    function getRowsRange(from, to) {
+      var i, rows = [];
+      for (i = from; i <= to; i++) {
+        rows.push(i);
+      }
+      for (i = to; i < from; i++) {
+        rows.push(i);
+      }
+      return rows;
+    }
+
+    function getSelectedRows() {
+      return rangesToRows(_ranges);
+    }
+
+    function setSelectedRows(rows) {
+      setSelectedRanges(rowsToRanges(rows));
+    }
+
+    function setSelectedRanges(ranges) {
+      _ranges = ranges;
+      _self.onSelectedRangesChanged.notify(_ranges);
+    }
+
+    function getSelectedRanges() {
+      return _ranges;
+    }
+
+    function handleActiveCellChange(e, data) {
+      if (_options.selectActiveRow && data.row != null) {
+        setSelectedRanges([new Slick.Range(data.row, 0, data.row, _grid.getColumns().length - 1)]);
+      }
+    }
+
+    function handleKeyDown(e) {
+      var activeRow = _grid.getActiveCell();
+      if (activeRow && e.shiftKey && !e.ctrlKey && !e.altKey && !e.metaKey && (e.which == 38 || e.which == 40)) {
+        var selectedRows = getSelectedRows();
+        selectedRows.sort(function (x, y) {
+          return x - y
+        });
+
+        if (!selectedRows.length) {
+          selectedRows = [activeRow.row];
+        }
+
+        var top = selectedRows[0];
+        var bottom = selectedRows[selectedRows.length - 1];
+        var active;
+
+        if (e.which == 40) {
+          active = activeRow.row < bottom || top == bottom ? ++bottom : ++top;
+        } else {
+          active = activeRow.row < bottom ? --bottom : --top;
+        }
+
+        if (active >= 0 && active < _grid.getDataLength()) {
+          _grid.scrollRowIntoView(active);
+          _ranges = rowsToRanges(getRowsRange(top, bottom));
+          setSelectedRanges(_ranges);
+        }
+
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    }
+
+    function handleClick(e) {
+      var cell = _grid.getCellFromEvent(e);
+      if (!cell || !_grid.canCellBeActive(cell.row, cell.cell)) {
+        return false;
+      }
+
+      if (!_grid.getOptions().multiSelect || (
+          !e.ctrlKey && !e.shiftKey && !e.metaKey)) {
+        return false;
+      }
+
+      var selection = rangesToRows(_ranges);
+      var idx = $.inArray(cell.row, selection);
+
+      if (idx === -1 && (e.ctrlKey || e.metaKey)) {
+        selection.push(cell.row);
+        _grid.setActiveCell(cell.row, cell.cell);
+      } else if (idx !== -1 && (e.ctrlKey || e.metaKey)) {
+        selection = $.grep(selection, function (o, i) {
+          return (o !== cell.row);
+        });
+        _grid.setActiveCell(cell.row, cell.cell);
+      } else if (selection.length && e.shiftKey) {
+        var last = selection.pop();
+        var from = Math.min(cell.row, last);
+        var to = Math.max(cell.row, last);
+        selection = [];
+        for (var i = from; i <= to; i++) {
+          if (i !== last) {
+            selection.push(i);
+          }
+        }
+        selection.push(last);
+        _grid.setActiveCell(cell.row, cell.cell);
+      }
+
+      _ranges = rowsToRanges(selection);
+      setSelectedRanges(_ranges);
+      e.stopImmediatePropagation();
+
+      return true;
+    }
+
+    $.extend(this, {
+      "getSelectedRows": getSelectedRows,
+      "setSelectedRows": setSelectedRows,
+
+      "getSelectedRanges": getSelectedRanges,
+      "setSelectedRanges": setSelectedRanges,
+
+      "init": init,
+      "destroy": destroy,
+
+      "onSelectedRangesChanged": new Slick.Event()
+    });
+  }
+})(jQuery);/***
+ * Contains basic SlickGrid formatters.
+ * 
+ * NOTE:  These are merely examples.  You will most likely need to implement something more
+ *        robust/extensible/localizable/etc. for your use!
+ * 
+ * @module Formatters
+ * @namespace Slick
+ */
+
+(function ($) {
+  // register namespace
+  $.extend(true, window, {
+    "Slick": {
+      "Formatters": {
+        "PercentComplete": PercentCompleteFormatter,
+        "PercentCompleteBar": PercentCompleteBarFormatter,
+        "YesNo": YesNoFormatter,
+        "Checkmark": CheckmarkFormatter
+      }
+    }
+  });
+
+  function PercentCompleteFormatter(row, cell, value, columnDef, dataContext) {
+    if (value == null || value === "") {
+      return "-";
+    } else if (value < 50) {
+      return "<span style='color:red;font-weight:bold;'>" + value + "%</span>";
+    } else {
+      return "<span style='color:green'>" + value + "%</span>";
+    }
+  }
+
+  function PercentCompleteBarFormatter(row, cell, value, columnDef, dataContext) {
+    if (value == null || value === "") {
+      return "";
+    }
+
+    var color;
+
+    if (value < 30) {
+      color = "red";
+    } else if (value < 70) {
+      color = "silver";
+    } else {
+      color = "green";
+    }
+
+    return "<span class='percent-complete-bar' style='background:" + color + ";width:" + value + "%'></span>";
+  }
+
+  function YesNoFormatter(row, cell, value, columnDef, dataContext) {
+    return value ? "Yes" : "No";
+  }
+
+  function CheckmarkFormatter(row, cell, value, columnDef, dataContext) {
+    return value ? "<img src='../images/tick.png'>" : "";
+  }
+})(jQuery);
+/***
+ * Contains basic SlickGrid editors.
+ * @module Editors
+ * @namespace Slick
+ */
+
+(function ($) {
+  // register namespace
+  $.extend(true, window, {
+    "Slick": {
+      "Editors": {
+        "Text": TextEditor,
+        "Integer": IntegerEditor,
+        "Date": DateEditor,
+        "YesNoSelect": YesNoSelectEditor,
+        "Checkbox": CheckboxEditor,
+        "PercentComplete": PercentCompleteEditor,
+        "LongText": LongTextEditor
+      }
+    }
+  });
+
+  function TextEditor(args) {
+    var $input;
+    var defaultValue;
+    var scope = this;
+
+    this.init = function () {
+      $input = $("<INPUT type=text class='editor-text' />")
+          .appendTo(args.container)
+          .bind("keydown.nav", function (e) {
+            if (e.keyCode === $.ui.keyCode.LEFT || e.keyCode === $.ui.keyCode.RIGHT) {
+              e.stopImmediatePropagation();
+            }
+          })
+          .focus()
+          .select();
+    };
+
+    this.destroy = function () {
+      $input.remove();
+    };
+
+    this.focus = function () {
+      $input.focus();
+    };
+
+    this.getValue = function () {
+      return $input.val();
+    };
+
+    this.setValue = function (val) {
+      $input.val(val);
+    };
+
+    this.loadValue = function (item) {
+      defaultValue = item[args.column.field] || "";
+      $input.val(defaultValue);
+      $input[0].defaultValue = defaultValue;
+      $input.select();
+    };
+
+    this.serializeValue = function () {
+      return $input.val();
+    };
+
+    this.applyValue = function (item, state) {
+      item[args.column.field] = state;
+    };
+
+    this.isValueChanged = function () {
+      return (!($input.val() == "" && defaultValue == null)) && ($input.val() != defaultValue);
+    };
+
+    this.validate = function () {
+      if (args.column.validator) {
+        var validationResults = args.column.validator($input.val());
+        if (!validationResults.valid) {
+          return validationResults;
+        }
+      }
+
+      return {
+        valid: true,
+        msg: null
+      };
+    };
+
+    this.init();
+  }
+
+  function IntegerEditor(args) {
+    var $input;
+    var defaultValue;
+    var scope = this;
+
+    this.init = function () {
+      $input = $("<INPUT type=text class='editor-text' />");
+
+      $input.bind("keydown.nav", function (e) {
+        if (e.keyCode === $.ui.keyCode.LEFT || e.keyCode === $.ui.keyCode.RIGHT) {
+          e.stopImmediatePropagation();
+        }
+      });
+
+      $input.appendTo(args.container);
+      $input.focus().select();
+    };
+
+    this.destroy = function () {
+      $input.remove();
+    };
+
+    this.focus = function () {
+      $input.focus();
+    };
+
+    this.loadValue = function (item) {
+      defaultValue = item[args.column.field];
+      $input.val(defaultValue);
+      $input[0].defaultValue = defaultValue;
+      $input.select();
+    };
+
+    this.serializeValue = function () {
+      return parseInt($input.val(), 10) || 0;
+    };
+
+    this.applyValue = function (item, state) {
+      item[args.column.field] = state;
+    };
+
+    this.isValueChanged = function () {
+      return (!($input.val() == "" && defaultValue == null)) && ($input.val() != defaultValue);
+    };
+
+    this.validate = function () {
+      if (isNaN($input.val())) {
+        return {
+          valid: false,
+          msg: "Please enter a valid integer"
+        };
+      }
+
+      return {
+        valid: true,
+        msg: null
+      };
+    };
+
+    this.init();
+  }
+
+  function DateEditor(args) {
+    var $input;
+    var defaultValue;
+    var scope = this;
+    var calendarOpen = false;
+
+    this.init = function () {
+      $input = $("<INPUT type=text class='editor-text' />");
+      $input.appendTo(args.container);
+      $input.focus().select();
+      $input.datepicker({
+        showOn: "button",
+        buttonImageOnly: true,
+        buttonImage: "/images/calendar.gif",
+        beforeShow: function () {
+          calendarOpen = true
+        },
+        onClose: function () {
+          calendarOpen = false
+        }
+      });
+      $input.width($input.width() - 18);
+    };
+
+    this.destroy = function () {
+      $.datepicker.dpDiv.stop(true, true);
+      $input.datepicker("hide");
+      $input.datepicker("destroy");
+      $input.remove();
+    };
+
+    this.show = function () {
+      if (calendarOpen) {
+        $.datepicker.dpDiv.stop(true, true).show();
+      }
+    };
+
+    this.hide = function () {
+      if (calendarOpen) {
+        $.datepicker.dpDiv.stop(true, true).hide();
+      }
+    };
+
+    this.position = function (position) {
+      if (!calendarOpen) {
+        return;
+      }
+      $.datepicker.dpDiv
+          .css("top", position.top + 30)
+          .css("left", position.left);
+    };
+
+    this.focus = function () {
+      $input.focus();
+    };
+
+    this.loadValue = function (item) {
+      defaultValue = item[args.column.field];
+      $input.val(defaultValue);
+      $input[0].defaultValue = defaultValue;
+      $input.select();
+    };
+
+    this.serializeValue = function () {
+      return $input.val();
+    };
+
+    this.applyValue = function (item, state) {
+      item[args.column.field] = state;
+    };
+
+    this.isValueChanged = function () {
+      return (!($input.val() == "" && defaultValue == null)) && ($input.val() != defaultValue);
+    };
+
+    this.validate = function () {
+      return {
+        valid: true,
+        msg: null
+      };
+    };
+
+    this.init();
+  }
+
+  function YesNoSelectEditor(args) {
+    var $select;
+    var defaultValue;
+    var scope = this;
+
+    this.init = function () {
+      $select = $("<SELECT tabIndex='0' class='editor-yesno'><OPTION value='yes'>Yes</OPTION><OPTION value='no'>No</OPTION></SELECT>");
+      $select.appendTo(args.container);
+      $select.focus();
+    };
+
+    this.destroy = function () {
+      $select.remove();
+    };
+
+    this.focus = function () {
+      $select.focus();
+    };
+
+    this.loadValue = function (item) {
+      $select.val((defaultValue = item[args.column.field]) ? "yes" : "no");
+      $select.select();
+    };
+
+    this.serializeValue = function () {
+      return ($select.val() == "yes");
+    };
+
+    this.applyValue = function (item, state) {
+      item[args.column.field] = state;
+    };
+
+    this.isValueChanged = function () {
+      return ($select.val() != defaultValue);
+    };
+
+    this.validate = function () {
+      return {
+        valid: true,
+        msg: null
+      };
+    };
+
+    this.init();
+  }
+
+  function CheckboxEditor(args) {
+    var $select;
+    var defaultValue;
+    var scope = this;
+
+    this.init = function () {
+      $select = $("<INPUT type=checkbox value='true' class='editor-checkbox' hideFocus>");
+      $select.appendTo(args.container);
+      $select.focus();
+    };
+
+    this.destroy = function () {
+      $select.remove();
+    };
+
+    this.focus = function () {
+      $select.focus();
+    };
+
+    this.loadValue = function (item) {
+      defaultValue = !!item[args.column.field];
+      if (defaultValue) {
+        $select.prop('checked', true);
+      } else {
+        $select.prop('checked', false);
+      }
+    };
+
+    this.serializeValue = function () {
+      return $select.prop('checked');
+    };
+
+    this.applyValue = function (item, state) {
+      item[args.column.field] = state;
+    };
+
+    this.isValueChanged = function () {
+      return (this.serializeValue() !== defaultValue);
+    };
+
+    this.validate = function () {
+      return {
+        valid: true,
+        msg: null
+      };
+    };
+
+    this.init();
+  }
+
+  function PercentCompleteEditor(args) {
+    var $input, $picker;
+    var defaultValue;
+    var scope = this;
+
+    this.init = function () {
+      $input = $("<INPUT type=text class='editor-percentcomplete' />");
+      $input.width($(args.container).innerWidth() - 25);
+      $input.appendTo(args.container);
+
+      $picker = $("<div class='editor-percentcomplete-picker' />").appendTo(args.container);
+      $picker.append("<div class='editor-percentcomplete-helper'><div class='editor-percentcomplete-wrapper'><div class='editor-percentcomplete-slider' /><div class='editor-percentcomplete-buttons' /></div></div>");
+
+      $picker.find(".editor-percentcomplete-buttons").append("<button val=0>Not started</button><br/><button val=50>In Progress</button><br/><button val=100>Complete</button>");
+
+      $input.focus().select();
+
+      $picker.find(".editor-percentcomplete-slider").slider({
+        orientation: "vertical",
+        range: "min",
+        value: defaultValue,
+        slide: function (event, ui) {
+          $input.val(ui.value)
+        }
+      });
+
+      $picker.find(".editor-percentcomplete-buttons button").bind("click", function (e) {
+        $input.val($(this).attr("val"));
+        $picker.find(".editor-percentcomplete-slider").slider("value", $(this).attr("val"));
+      })
+    };
+
+    this.destroy = function () {
+      $input.remove();
+      $picker.remove();
+    };
+
+    this.focus = function () {
+      $input.focus();
+    };
+
+    this.loadValue = function (item) {
+      $input.val(defaultValue = item[args.column.field]);
+      $input.select();
+    };
+
+    this.serializeValue = function () {
+      return parseInt($input.val(), 10) || 0;
+    };
+
+    this.applyValue = function (item, state) {
+      item[args.column.field] = state;
+    };
+
+    this.isValueChanged = function () {
+      return (!($input.val() == "" && defaultValue == null)) && ((parseInt($input.val(), 10) || 0) != defaultValue);
+    };
+
+    this.validate = function () {
+      if (isNaN(parseInt($input.val(), 10))) {
+        return {
+          valid: false,
+          msg: "Please enter a valid positive number"
+        };
+      }
+
+      return {
+        valid: true,
+        msg: null
+      };
+    };
+
+    this.init();
+  }
+
+  /*
+   * An example of a "detached" editor.
+   * The UI is added onto document BODY and .position(), .show() and .hide() are implemented.
+   * KeyDown events are also handled to provide handling for Tab, Shift-Tab, Esc and Ctrl-Enter.
+   */
+  function LongTextEditor(args) {
+    var $input, $wrapper;
+    var defaultValue;
+    var scope = this;
+
+    this.init = function () {
+      var $container = $("body");
+
+      $wrapper = $("<DIV style='z-index:10000;position:absolute;background:white;padding:5px;border:3px solid gray; -moz-border-radius:10px; border-radius:10px;'/>")
+          .appendTo($container);
+
+      $input = $("<TEXTAREA hidefocus rows=5 style='backround:white;width:250px;height:80px;border:0;outline:0'>")
+          .appendTo($wrapper);
+
+      $("<DIV style='text-align:right'><BUTTON>Save</BUTTON><BUTTON>Cancel</BUTTON></DIV>")
+          .appendTo($wrapper);
+
+      $wrapper.find("button:first").bind("click", this.save);
+      $wrapper.find("button:last").bind("click", this.cancel);
+      $input.bind("keydown", this.handleKeyDown);
+
+      scope.position(args.position);
+      $input.focus().select();
+    };
+
+    this.handleKeyDown = function (e) {
+      if (e.which == $.ui.keyCode.ENTER && e.ctrlKey) {
+        scope.save();
+      } else if (e.which == $.ui.keyCode.ESCAPE) {
+        e.preventDefault();
+        scope.cancel();
+      } else if (e.which == $.ui.keyCode.TAB && e.shiftKey) {
+        e.preventDefault();
+        args.grid.navigatePrev();
+      } else if (e.which == $.ui.keyCode.TAB) {
+        e.preventDefault();
+        args.grid.navigateNext();
+      }
+    };
+
+    this.save = function () {
+      args.commitChanges();
+    };
+
+    this.cancel = function () {
+      $input.val(defaultValue);
+      args.cancelChanges();
+    };
+
+    this.hide = function () {
+      $wrapper.hide();
+    };
+
+    this.show = function () {
+      $wrapper.show();
+    };
+
+    this.position = function (position) {
+      $wrapper
+          .css("top", position.top - 5)
+          .css("left", position.left - 5)
+    };
+
+    this.destroy = function () {
+      $wrapper.remove();
+    };
+
+    this.focus = function () {
+      $input.focus();
+    };
+
+    this.loadValue = function (item) {
+      $input.val(defaultValue = item[args.column.field]);
+      $input.select();
+    };
+
+    this.serializeValue = function () {
+      return $input.val();
+    };
+
+    this.applyValue = function (item, state) {
+      item[args.column.field] = state;
+    };
+
+    this.isValueChanged = function () {
+      return (!($input.val() == "" && defaultValue == null)) && ($input.val() != defaultValue);
+    };
+
+    this.validate = function () {
+      return {
+        valid: true,
+        msg: null
+      };
+    };
+
+    this.init();
+  }
+})(jQuery);
+/**
+ * @license
+ * (c) 2009-2013 Michael Leibman
+ * michael{dot}leibman{at}gmail{dot}com
+ * http://github.com/mleibman/slickgrid
+ *
+ * Distributed under MIT license.
+ * All rights reserved.
+ *
+ * SlickGrid v2.2
+ *
+ * NOTES:
+ *     Cell/row DOM manipulations are done directly bypassing jQuery's DOM manipulation methods.
+ *     This increases the speed dramatically, but can only be done safely because there are no event handlers
+ *     or data associated with any cell/row DOM nodes.  Cell editors must make sure they implement .destroy()
+ *     and do proper cleanup.
+ */
+
+// make sure required JavaScript modules are loaded
+if (typeof jQuery === "undefined") {
+  throw "SlickGrid requires jquery module to be loaded";
+}
+if (!jQuery.fn.drag) {
+  throw "SlickGrid requires jquery.event.drag module to be loaded";
+}
+if (typeof Slick === "undefined") {
+  throw "slick.core.js not loaded";
+}
+
+
+(function ($) {
+  // Slick.Grid
+  $.extend(true, window, {
+    Slick: {
+      Grid: SlickGrid
+    }
+  });
+
+  // shared across all grids on the page
+  var scrollbarDimensions;
+  var maxSupportedCssHeight;  // browser's breaking point
+
+  //////////////////////////////////////////////////////////////////////////////////////////////
+  // SlickGrid class implementation (available as Slick.Grid)
+
+  /**
+   * Creates a new instance of the grid.
+   * @class SlickGrid
+   * @constructor
+   * @param {Node}              container   Container node to create the grid in.
+   * @param {Array,Object}      data        An array of objects for databinding.
+   * @param {Array}             columns     An array of column definitions.
+   * @param {Object}            options     Grid options.
+   **/
+  function SlickGrid(container, data, columns, options) {
+    // settings
+    var defaults = {
+      explicitInitialization: false,
+      rowHeight: 25,
+      defaultColumnWidth: 80,
+      enableAddRow: false,
+      leaveSpaceForNewRows: false,
+      editable: false,
+      autoEdit: true,
+      enableCellNavigation: true,
+      enableColumnReorder: true,
+      asyncEditorLoading: false,
+      asyncEditorLoadDelay: 100,
+      forceFitColumns: false,
+      enableAsyncPostRender: false,
+      asyncPostRenderDelay: 50,
+      autoHeight: false,
+      editorLock: Slick.GlobalEditorLock,
+      showHeaderRow: false,
+      headerRowHeight: 25,
+      showTopPanel: false,
+      topPanelHeight: 25,
+      formatterFactory: null,
+      editorFactory: null,
+      cellFlashingCssClass: "flashing",
+      selectedCellCssClass: "selected",
+      multiSelect: true,
+      enableTextSelectionOnCells: false,
+      dataItemColumnValueExtractor: null,
+      fullWidthRows: false,
+      multiColumnSort: false,
+      defaultFormatter: defaultFormatter,
+      forceSyncScrolling: false
+    };
+
+    var columnDefaults = {
+      name: "",
+      resizable: true,
+      sortable: false,
+      minWidth: 30,
+      rerenderOnResize: false,
+      headerCssClass: null,
+      defaultSortAsc: true,
+      focusable: true,
+      selectable: true
+    };
+
+    // scroller
+    var th;   // virtual height
+    var h;    // real scrollable height
+    var ph;   // page height
+    var n;    // number of pages
+    var cj;   // "jumpiness" coefficient
+
+    var page = 0;       // current page
+    var offset = 0;     // current page offset
+    var vScrollDir = 1;
+
+    // private
+    var initialized = false;
+    var $container;
+    var uid = "slickgrid_" + Math.round(1000000 * Math.random());
+    var self = this;
+    var $focusSink, $focusSink2;
+    var $headerScroller;
+    var $headers;
+    var $headerRow, $headerRowScroller, $headerRowSpacer;
+    var $topPanelScroller;
+    var $topPanel;
+    var $viewport;
+    var $canvas;
+    var $style;
+    var $boundAncestors;
+    var stylesheet, columnCssRulesL, columnCssRulesR;
+    var viewportH, viewportW;
+    var canvasWidth;
+    var viewportHasHScroll, viewportHasVScroll;
+    var headerColumnWidthDiff = 0, headerColumnHeightDiff = 0, // border+padding
+        cellWidthDiff = 0, cellHeightDiff = 0;
+    var absoluteColumnMinWidth;
+
+    var tabbingDirection = 1;
+    var activePosX;
+    var activeRow, activeCell;
+    var activeCellNode = null;
+    var currentEditor = null;
+    var serializedEditorValue;
+    var editController;
+
+    var rowsCache = {};
+    var renderedRows = 0;
+    var numVisibleRows;
+    var prevScrollTop = 0;
+    var scrollTop = 0;
+    var lastRenderedScrollTop = 0;
+    var lastRenderedScrollLeft = 0;
+    var prevScrollLeft = 0;
+    var scrollLeft = 0;
+
+    var selectionModel;
+    var selectedRows = [];
+
+    var plugins = [];
+    var cellCssClasses = {};
+
+    var columnsById = {};
+    var sortColumns = [];
+    var columnPosLeft = [];
+    var columnPosRight = [];
+
+
+    // async call handles
+    var h_editorLoader = null;
+    var h_render = null;
+    var h_postrender = null;
+    var postProcessedRows = {};
+    var postProcessToRow = null;
+    var postProcessFromRow = null;
+
+    // perf counters
+    var counter_rows_rendered = 0;
+    var counter_rows_removed = 0;
+
+
+    //////////////////////////////////////////////////////////////////////////////////////////////
+    // Initialization
+
+    function init() {
+      $container = $(container);
+      if ($container.length < 1) {
+        throw new Error("SlickGrid requires a valid container, " + container + " does not exist in the DOM.");
+      }
+
+      // calculate these only once and share between grid instances
+      maxSupportedCssHeight = maxSupportedCssHeight || getMaxSupportedCssHeight();
+      scrollbarDimensions = scrollbarDimensions || measureScrollbar();
+
+      options = $.extend({}, defaults, options);
+      validateAndEnforceOptions();
+      columnDefaults.width = options.defaultColumnWidth;
+
+      columnsById = {};
+      for (var i = 0; i < columns.length; i++) {
+        var m = columns[i] = $.extend({}, columnDefaults, columns[i]);
+        columnsById[m.id] = i;
+        if (m.minWidth && m.width < m.minWidth) {
+          m.width = m.minWidth;
+        }
+        if (m.maxWidth && m.width > m.maxWidth) {
+          m.width = m.maxWidth;
+        }
+      }
+
+      // validate loaded JavaScript modules against requested options
+      if (options.enableColumnReorder && !$.fn.sortable) {
+        throw new Error("SlickGrid's 'enableColumnReorder = true' option requires jquery-ui.sortable module to be loaded");
+      }
+
+      editController = {
+        "commitCurrentEdit": commitCurrentEdit,
+        "cancelCurrentEdit": cancelCurrentEdit
+      };
+
+      $container
+          .empty()
+          .css("overflow", "hidden")
+          .css("outline", 0)
+          .addClass(uid)
+          .addClass("ui-widget");
+
+      // set up a positioning container if needed
+      if (!/relative|absolute|fixed/.test($container.css("position"))) {
+        $container.css("position", "relative");
+      }
+
+      $focusSink = $("<div tabIndex='0' hideFocus style='position:fixed;width:0;height:0;top:0;left:0;outline:0;'></div>").appendTo($container);
+
+      $headerScroller = $("<div class='slick-header ui-state-default' style='overflow:hidden;position:relative;' />").appendTo($container);
+      $headers = $("<div class='slick-header-columns' style='left:-1000px' />").appendTo($headerScroller);
+      $headers.width(getHeadersWidth());
+
+      $headerRowScroller = $("<div class='slick-headerrow ui-state-default' style='overflow:hidden;position:relative;' />").appendTo($container);
+      $headerRow = $("<div class='slick-headerrow-columns' />").appendTo($headerRowScroller);
+      $headerRowSpacer = $("<div style='display:block;height:1px;position:absolute;top:0;left:0;'></div>")
+          .css("width", getCanvasWidth() + scrollbarDimensions.width + "px")
+          .appendTo($headerRowScroller);
+
+      $topPanelScroller = $("<div class='slick-top-panel-scroller ui-state-default' style='overflow:hidden;position:relative;' />").appendTo($container);
+      $topPanel = $("<div class='slick-top-panel' style='width:10000px' />").appendTo($topPanelScroller);
+
+      if (!options.showTopPanel) {
+        $topPanelScroller.hide();
+      }
+
+      if (!options.showHeaderRow) {
+        $headerRowScroller.hide();
+      }
+
+      $viewport = $("<div class='slick-viewport' style='width:100%;overflow:auto;outline:0;position:relative;;'>").appendTo($container);
+      $viewport.css("overflow-y", options.autoHeight ? "hidden" : "auto");
+
+      $canvas = $("<div class='grid-canvas' />").appendTo($viewport);
+
+      $focusSink2 = $focusSink.clone().appendTo($container);
+
+      if (!options.explicitInitialization) {
+        finishInitialization();
+      }
+    }
+
+    function finishInitialization() {
+      if (!initialized) {
+        initialized = true;
+
+        viewportW = parseFloat($.css($container[0], "width", true));
+
+        // header columns and cells may have different padding/border skewing width calculations (box-sizing, hello?)
+        // calculate the diff so we can set consistent sizes
+        measureCellPaddingAndBorder();
+
+        // for usability reasons, all text selection in SlickGrid is disabled
+        // with the exception of input and textarea elements (selection must
+        // be enabled there so that editors work as expected); note that
+        // selection in grid cells (grid body) is already unavailable in
+        // all browsers except IE
+        disableSelection($headers); // disable all text selection in header (including input and textarea)
+
+        if (!options.enableTextSelectionOnCells) {
+          // disable text selection in grid cells except in input and textarea elements
+          // (this is IE-specific, because selectstart event will only fire in IE)
+          $viewport.bind("selectstart.ui", function (event) {
+            return $(event.target).is("input,textarea");
+          });
+        }
+
+        updateColumnCaches();
+        createColumnHeaders();
+        setupColumnSort();
+        createCssRules();
+        resizeCanvas();
+        bindAncestorScrollEvents();
+
+        $container
+            .bind("resize.slickgrid", resizeCanvas);
+        $viewport
+            //.bind("click", handleClick)
+            .bind("scroll", handleScroll);
+        $headerScroller
+            .bind("contextmenu", handleHeaderContextMenu)
+            .bind("click", handleHeaderClick)
+            .delegate(".slick-header-column", "mouseenter", handleHeaderMouseEnter)
+            .delegate(".slick-header-column", "mouseleave", handleHeaderMouseLeave);
+        $headerRowScroller
+            .bind("scroll", handleHeaderRowScroll);
+        $focusSink.add($focusSink2)
+            .bind("keydown", handleKeyDown);
+        $canvas
+            .bind("keydown", handleKeyDown)
+            .bind("click", handleClick)
+            .bind("dblclick", handleDblClick)
+            .bind("contextmenu", handleContextMenu)
+            .bind("draginit", handleDragInit)
+            .bind("dragstart", {distance: 3}, handleDragStart)
+            .bind("drag", handleDrag)
+            .bind("dragend", handleDragEnd)
+            .delegate(".slick-cell", "mouseenter", handleMouseEnter)
+            .delegate(".slick-cell", "mouseleave", handleMouseLeave);
+      }
+    }
+
+    function registerPlugin(plugin) {
+      plugins.unshift(plugin);
+      plugin.init(self);
+    }
+
+    function unregisterPlugin(plugin) {
+      for (var i = plugins.length; i >= 0; i--) {
+        if (plugins[i] === plugin) {
+          if (plugins[i].destroy) {
+            plugins[i].destroy();
+          }
+          plugins.splice(i, 1);
+          break;
+        }
+      }
+    }
+
+    function setSelectionModel(model) {
+      if (selectionModel) {
+        selectionModel.onSelectedRangesChanged.unsubscribe(handleSelectedRangesChanged);
+        if (selectionModel.destroy) {
+          selectionModel.destroy();
+        }
+      }
+
+      selectionModel = model;
+      if (selectionModel) {
+        selectionModel.init(self);
+        selectionModel.onSelectedRangesChanged.subscribe(handleSelectedRangesChanged);
+      }
+    }
+
+    function getSelectionModel() {
+      return selectionModel;
+    }
+
+    function getCanvasNode() {
+      return $canvas[0];
+    }
+
+    function measureScrollbar() {
+      var $c = $("<div style='position:absolute; top:-10000px; left:-10000px; width:100px; height:100px; overflow:scroll;'></div>").appendTo("body");
+      var dim = {
+        width: $c.width() - $c[0].clientWidth,
+        height: $c.height() - $c[0].clientHeight
+      };
+      $c.remove();
+      return dim;
+    }
+
+    function getHeadersWidth() {
+      var headersWidth = 0;
+      for (var i = 0, ii = columns.length; i < ii; i++) {
+        var width = columns[i].width;
+        headersWidth += width;
+      }
+      headersWidth += scrollbarDimensions.width;
+      return Math.max(headersWidth, viewportW) + 1000;
+    }
+
+    function getCanvasWidth() {
+      var availableWidth = viewportHasVScroll ? viewportW - scrollbarDimensions.width : viewportW;
+      var rowWidth = 0;
+      var i = columns.length;
+      while (i--) {
+        rowWidth += columns[i].width;
+      }
+      return options.fullWidthRows ? Math.max(rowWidth, availableWidth) : rowWidth;
+    }
+
+    function updateCanvasWidth(forceColumnWidthsUpdate) {
+      var oldCanvasWidth = canvasWidth;
+      canvasWidth = getCanvasWidth();
+
+      if (canvasWidth != oldCanvasWidth) {
+        $canvas.width(canvasWidth);
+        $headerRow.width(canvasWidth);
+        $headers.width(getHeadersWidth());
+        viewportHasHScroll = (canvasWidth > viewportW - scrollbarDimensions.width);
+      }
+
+      $headerRowSpacer.width(canvasWidth + (viewportHasVScroll ? scrollbarDimensions.width : 0));
+
+      if (canvasWidth != oldCanvasWidth || forceColumnWidthsUpdate) {
+        applyColumnWidths();
+      }
+    }
+
+    function disableSelection($target) {
+      if ($target && $target.jquery) {
+        $target
+            .attr("unselectable", "on")
+            .css("MozUserSelect", "none")
+            .bind("selectstart.ui", function () {
+              return false;
+            }); // from jquery:ui.core.js 1.7.2
+      }
+    }
+
+    function getMaxSupportedCssHeight() {
+      var supportedHeight = 1000000;
+      // FF reports the height back but still renders blank after ~6M px
+      var testUpTo = navigator.userAgent.toLowerCase().match(/firefox/) ? 6000000 : 1000000000;
+      var div = $("<div style='display:none' />").appendTo(document.body);
+
+      while (true) {
+        var test = supportedHeight * 2;
+        div.css("height", test);
+        if (test > testUpTo || div.height() !== test) {
+          break;
+        } else {
+          supportedHeight = test;
+        }
+      }
+
+      div.remove();
+      return supportedHeight;
+    }
+
+    // TODO:  this is static.  need to handle page mutation.
+    function bindAncestorScrollEvents() {
+      var elem = $canvas[0];
+      while ((elem = elem.parentNode) != document.body && elem != null) {
+        // bind to scroll containers only
+        if (elem == $viewport[0] || elem.scrollWidth != elem.clientWidth || elem.scrollHeight != elem.clientHeight) {
+          var $elem = $(elem);
+          if (!$boundAncestors) {
+            $boundAncestors = $elem;
+          } else {
+            $boundAncestors = $boundAncestors.add($elem);
+          }
+          $elem.bind("scroll." + uid, handleActiveCellPositionChange);
+        }
+      }
+    }
+
+    function unbindAncestorScrollEvents() {
+      if (!$boundAncestors) {
+        return;
+      }
+      $boundAncestors.unbind("scroll." + uid);
+      $boundAncestors = null;
+    }
+
+    function updateColumnHeader(columnId, title, toolTip) {
+      if (!initialized) { return; }
+      var idx = getColumnIndex(columnId);
+      if (idx == null) {
+        return;
+      }
+
+      var columnDef = columns[idx];
+      var $header = $headers.children().eq(idx);
+      if ($header) {
+        if (title !== undefined) {
+          columns[idx].name = title;
+        }
+        if (toolTip !== undefined) {
+          columns[idx].toolTip = toolTip;
+        }
+
+        trigger(self.onBeforeHeaderCellDestroy, {
+          "node": $header[0],
+          "column": columnDef
+        });
+
+        $header
+            .attr("title", toolTip || "")
+            .children().eq(0).html(title);
+
+        trigger(self.onHeaderCellRendered, {
+          "node": $header[0],
+          "column": columnDef
+        });
+      }
+    }
+
+    function getHeaderRow() {
+      return $headerRow[0];
+    }
+
+    function getHeaderRowColumn(columnId) {
+      var idx = getColumnIndex(columnId);
+      var $header = $headerRow.children().eq(idx);
+      return $header && $header[0];
+    }
+
+    function createColumnHeaders() {
+      function onMouseEnter() {
+        $(this).addClass("ui-state-hover");
+      }
+
+      function onMouseLeave() {
+        $(this).removeClass("ui-state-hover");
+      }
+
+      $headers.find(".slick-header-column")
+        .each(function() {
+          var columnDef = $(this).data("column");
+          if (columnDef) {
+            trigger(self.onBeforeHeaderCellDestroy, {
+              "node": this,
+              "column": columnDef
+            });
+          }
+        });
+      $headers.empty();
+      $headers.width(getHeadersWidth());
+
+      $headerRow.find(".slick-headerrow-column")
+        .each(function() {
+          var columnDef = $(this).data("column");
+          if (columnDef) {
+            trigger(self.onBeforeHeaderRowCellDestroy, {
+              "node": this,
+              "column": columnDef
+            });
+          }
+        });
+      $headerRow.empty();
+
+      for (var i = 0; i < columns.length; i++) {
+        var m = columns[i];
+
+        var header = $("<div class='ui-state-default slick-header-column' />")
+            .html("<span class='slick-column-name'>" + m.name + "</span>")
+            .width(m.width - headerColumnWidthDiff)
+            .attr("id", "" + uid + m.id)
+            .attr("title", m.toolTip || "")
+            .data("column", m)
+            .addClass(m.headerCssClass || "")
+            .appendTo($headers);
+
+        if (options.enableColumnReorder || m.sortable) {
+          header
+            .on('mouseenter', onMouseEnter)
+            .on('mouseleave', onMouseLeave);
+        }
+
+        if (m.sortable) {
+          header.addClass("slick-header-sortable");
+          header.append("<span class='slick-sort-indicator' />");
+        }
+
+        trigger(self.onHeaderCellRendered, {
+          "node": header[0],
+          "column": m
+        });
+
+        if (options.showHeaderRow) {
+          var headerRowCell = $("<div class='ui-state-default slick-headerrow-column l" + i + " r" + i + "'></div>")
+              .data("column", m)
+              .appendTo($headerRow);
+
+          trigger(self.onHeaderRowCellRendered, {
+            "node": headerRowCell[0],
+            "column": m
+          });
+        }
+      }
+
+      setSortColumns(sortColumns);
+      setupColumnResize();
+      if (options.enableColumnReorder) {
+        setupColumnReorder();
+      }
+    }
+
+    function setupColumnSort() {
+      $headers.click(function (e) {
+        // temporary workaround for a bug in jQuery 1.7.1 (http://bugs.jquery.com/ticket/11328)
+        e.metaKey = e.metaKey || e.ctrlKey;
+
+        if ($(e.target).hasClass("slick-resizable-handle")) {
+          return;
+        }
+
+        var $col = $(e.target).closest(".slick-header-column");
+        if (!$col.length) {
+          return;
+        }
+
+        var column = $col.data("column");
+        if (column.sortable) {
+          if (!getEditorLock().commitCurrentEdit()) {
+            return;
+          }
+
+          var sortOpts = null;
+          var i = 0;
+          for (; i < sortColumns.length; i++) {
+            if (sortColumns[i].columnId == column.id) {
+              sortOpts = sortColumns[i];
+              sortOpts.sortAsc = !sortOpts.sortAsc;
+              break;
+            }
+          }
+
+          if (e.metaKey && options.multiColumnSort) {
+            if (sortOpts) {
+              sortColumns.splice(i, 1);
+            }
+          }
+          else {
+            if ((!e.shiftKey && !e.metaKey) || !options.multiColumnSort) {
+              sortColumns = [];
+            }
+
+            if (!sortOpts) {
+              sortOpts = { columnId: column.id, sortAsc: column.defaultSortAsc };
+              sortColumns.push(sortOpts);
+            } else if (sortColumns.length == 0) {
+              sortColumns.push(sortOpts);
+            }
+          }
+
+          setSortColumns(sortColumns);
+
+          if (!options.multiColumnSort) {
+            trigger(self.onSort, {
+              multiColumnSort: false,
+              sortCol: column,
+              sortAsc: sortOpts.sortAsc}, e);
+          } else {
+            trigger(self.onSort, {
+              multiColumnSort: true,
+              sortCols: $.map(sortColumns, function(col) {
+                return {sortCol: columns[getColumnIndex(col.columnId)], sortAsc: col.sortAsc };
+              })}, e);
+          }
+        }
+      });
+    }
+
+    function setupColumnReorder() {
+      $headers.filter(":ui-sortable").sortable("destroy");
+      $headers.sortable({
+        containment: "parent",
+        distance: 3,
+        axis: "x",
+        cursor: "default",
+        tolerance: "intersection",
+        helper: "clone",
+        placeholder: "slick-sortable-placeholder ui-state-default slick-header-column",
+        start: function (e, ui) {
+          ui.placeholder.width(ui.helper.outerWidth() - headerColumnWidthDiff);
+          $(ui.helper).addClass("slick-header-column-active");
+        },
+        beforeStop: function (e, ui) {
+          $(ui.helper).removeClass("slick-header-column-active");
+        },
+        stop: function (e) {
+          if (!getEditorLock().commitCurrentEdit()) {
+            $(this).sortable("cancel");
+            return;
+          }
+
+          var reorderedIds = $headers.sortable("toArray");
+          var reorderedColumns = [];
+          for (var i = 0; i < reorderedIds.length; i++) {
+            reorderedColumns.push(columns[getColumnIndex(reorderedIds[i].replace(uid, ""))]);
+          }
+          setColumns(reorderedColumns);
+
+          trigger(self.onColumnsReordered, {});
+          e.stopPropagation();
+          setupColumnResize();
+        }
+      });
+    }
+
+    function setupColumnResize() {
+      var $col, j, c, pageX, columnElements, minPageX, maxPageX, firstResizable, lastResizable;
+      columnElements = $headers.children();
+      columnElements.find(".slick-resizable-handle").remove();
+      columnElements.each(function (i, e) {
+        if (columns[i].resizable) {
+          if (firstResizable === undefined) {
+            firstResizable = i;
+          }
+          lastResizable = i;
+        }
+      });
+      if (firstResizable === undefined) {
+        return;
+      }
+      columnElements.each(function (i, e) {
+        if (i < firstResizable || (options.forceFitColumns && i >= lastResizable)) {
+          return;
+        }
+        $col = $(e);
+        $("<div class='slick-resizable-handle' />")
+            .appendTo(e)
+            .bind("dragstart", function (e, dd) {
+              if (!getEditorLock().commitCurrentEdit()) {
+                return false;
+              }
+              pageX = e.pageX;
+              $(this).parent().addClass("slick-header-column-active");
+              var shrinkLeewayOnRight = null, stretchLeewayOnRight = null;
+              // lock each column's width option to current width
+              columnElements.each(function (i, e) {
+                columns[i].previousWidth = $(e).outerWidth();
+              });
+              if (options.forceFitColumns) {
+                shrinkLeewayOnRight = 0;
+                stretchLeewayOnRight = 0;
+                // colums on right affect maxPageX/minPageX
+                for (j = i + 1; j < columnElements.length; j++) {
+                  c = columns[j];
+                  if (c.resizable) {
+                    if (stretchLeewayOnRight !== null) {
+                      if (c.maxWidth) {
+                        stretchLeewayOnRight += c.maxWidth - c.previousWidth;
+                      } else {
+                        stretchLeewayOnRight = null;
+                      }
+                    }
+                    shrinkLeewayOnRight += c.previousWidth - Math.max(c.minWidth || 0, absoluteColumnMinWidth);
+                  }
+                }
+              }
+              var shrinkLeewayOnLeft = 0, stretchLeewayOnLeft = 0;
+              for (j = 0; j <= i; j++) {
+                // columns on left only affect minPageX
+                c = columns[j];
+                if (c.resizable) {
+                  if (stretchLeewayOnLeft !== null) {
+                    if (c.maxWidth) {
+                      stretchLeewayOnLeft += c.maxWidth - c.previousWidth;
+                    } else {
+                      stretchLeewayOnLeft = null;
+                    }
+                  }
+                  shrinkLeewayOnLeft += c.previousWidth - Math.max(c.minWidth || 0, absoluteColumnMinWidth);
+                }
+              }
+              if (shrinkLeewayOnRight === null) {
+                shrinkLeewayOnRight = 100000;
+              }
+              if (shrinkLeewayOnLeft === null) {
+                shrinkLeewayOnLeft = 100000;
+              }
+              if (stretchLeewayOnRight === null) {
+                stretchLeewayOnRight = 100000;
+              }
+              if (stretchLeewayOnLeft === null) {
+                stretchLeewayOnLeft = 100000;
+              }
+              maxPageX = pageX + Math.min(shrinkLeewayOnRight, stretchLeewayOnLeft);
+              minPageX = pageX - Math.min(shrinkLeewayOnLeft, stretchLeewayOnRight);
+            })
+            .bind("drag", function (e, dd) {
+              var actualMinWidth, d = Math.min(maxPageX, Math.max(minPageX, e.pageX)) - pageX, x;
+              if (d < 0) { // shrink column
+                x = d;
+                for (j = i; j >= 0; j--) {
+                  c = columns[j];
+                  if (c.resizable) {
+                    actualMinWidth = Math.max(c.minWidth || 0, absoluteColumnMinWidth);
+                    if (x && c.previousWidth + x < actualMinWidth) {
+                      x += c.previousWidth - actualMinWidth;
+                      c.width = actualMinWidth;
+                    } else {
+                      c.width = c.previousWidth + x;
+                      x = 0;
+                    }
+                  }
+                }
+
+                if (options.forceFitColumns) {
+                  x = -d;
+                  for (j = i + 1; j < columnElements.length; j++) {
+                    c = columns[j];
+                    if (c.resizable) {
+                      if (x && c.maxWidth && (c.maxWidth - c.previousWidth < x)) {
+                        x -= c.maxWidth - c.previousWidth;
+                        c.width = c.maxWidth;
+                      } else {
+                        c.width = c.previousWidth + x;
+                        x = 0;
+                      }
+                    }
+                  }
+                }
+              } else { // stretch column
+                x = d;
+                for (j = i; j >= 0; j--) {
+                  c = columns[j];
+                  if (c.resizable) {
+                    if (x && c.maxWidth && (c.maxWidth - c.previousWidth < x)) {
+                      x -= c.maxWidth - c.previousWidth;
+                      c.width = c.maxWidth;
+                    } else {
+                      c.width = c.previousWidth + x;
+                      x = 0;
+                    }
+                  }
+                }
+
+                if (options.forceFitColumns) {
+                  x = -d;
+                  for (j = i + 1; j < columnElements.length; j++) {
+                    c = columns[j];
+                    if (c.resizable) {
+                      actualMinWidth = Math.max(c.minWidth || 0, absoluteColumnMinWidth);
+                      if (x && c.previousWidth + x < actualMinWidth) {
+                        x += c.previousWidth - actualMinWidth;
+                        c.width = actualMinWidth;
+                      } else {
+                        c.width = c.previousWidth + x;
+                        x = 0;
+                      }
+                    }
+                  }
+                }
+              }
+              applyColumnHeaderWidths();
+              if (options.syncColumnCellResize) {
+                applyColumnWidths();
+              }
+            })
+            .bind("dragend", function (e, dd) {
+              var newWidth;
+              $(this).parent().removeClass("slick-header-column-active");
+              for (j = 0; j < columnElements.length; j++) {
+                c = columns[j];
+                newWidth = $(columnElements[j]).outerWidth();
+
+                if (c.previousWidth !== newWidth && c.rerenderOnResize) {
+                  invalidateAllRows();
+                }
+              }
+              updateCanvasWidth(true);
+              render();
+              trigger(self.onColumnsResized, {});
+            });
+      });
+    }
+
+    function getVBoxDelta($el) {
+      var p = ["borderTopWidth", "borderBottomWidth", "paddingTop", "paddingBottom"];
+      var delta = 0;
+      $.each(p, function (n, val) {
+        delta += parseFloat($el.css(val)) || 0;
+      });
+      return delta;
+    }
+
+    function measureCellPaddingAndBorder() {
+      var el;
+      var h = ["borderLeftWidth", "borderRightWidth", "paddingLeft", "paddingRight"];
+      var v = ["borderTopWidth", "borderBottomWidth", "paddingTop", "paddingBottom"];
+
+      el = $("<div class='ui-state-default slick-header-column' style='visibility:hidden'>-</div>").appendTo($headers);
+      headerColumnWidthDiff = headerColumnHeightDiff = 0;
+      if (el.css("box-sizing") != "border-box" && el.css("-moz-box-sizing") != "border-box" && el.css("-webkit-box-sizing") != "border-box") {
+        $.each(h, function (n, val) {
+          headerColumnWidthDiff += parseFloat(el.css(val)) || 0;
+        });
+        $.each(v, function (n, val) {
+          headerColumnHeightDiff += parseFloat(el.css(val)) || 0;
+        });
+      }
+      el.remove();
+
+      var r = $("<div class='slick-row' />").appendTo($canvas);
+      el = $("<div class='slick-cell' id='' style='visibility:hidden'>-</div>").appendTo(r);
+      cellWidthDiff = cellHeightDiff = 0;
+      if (el.css("box-sizing") != "border-box" && el.css("-moz-box-sizing") != "border-box" && el.css("-webkit-box-sizing") != "border-box") {
+        $.each(h, function (n, val) {
+          cellWidthDiff += parseFloat(el.css(val)) || 0;
+        });
+        $.each(v, function (n, val) {
+          cellHeightDiff += parseFloat(el.css(val)) || 0;
+        });
+      }
+      r.remove();
+
+      absoluteColumnMinWidth = Math.max(headerColumnWidthDiff, cellWidthDiff);
+    }
+
+    function createCssRules() {
+      $style = $("<style type='text/css' rel='stylesheet' />").appendTo($("head"));
+      var rowHeight = (options.rowHeight - cellHeightDiff);
+      var rules = [
+        "." + uid + " .slick-header-column { left: 1000px; }",
+        "." + uid + " .slick-top-panel { height:" + options.topPanelHeight + "px; }",
+        "." + uid + " .slick-headerrow-columns { height:" + options.headerRowHeight + "px; }",
+        "." + uid + " .slick-cell { height:" + rowHeight + "px; }",
+        "." + uid + " .slick-row { height:" + options.rowHeight + "px; }"
+      ];
+
+      for (var i = 0; i < columns.length; i++) {
+        rules.push("." + uid + " .l" + i + " { }");
+        rules.push("." + uid + " .r" + i + " { }");
+      }
+
+      if ($style[0].styleSheet) { // IE
+        $style[0].styleSheet.cssText = rules.join(" ");
+      } else {
+        $style[0].appendChild(document.createTextNode(rules.join(" ")));
+      }
+    }
+
+    function getColumnCssRules(idx) {
+      if (!stylesheet) {
+        var sheets = document.styleSheets;
+        for (var i = 0; i < sheets.length; i++) {
+          if ((sheets[i].ownerNode || sheets[i].owningElement) == $style[0]) {
+            stylesheet = sheets[i];
+            break;
+          }
+        }
+
+        if (!stylesheet) {
+          throw new Error("Cannot find stylesheet.");
+        }
+
+        // find and cache column CSS rules
+        columnCssRulesL = [];
+        columnCssRulesR = [];
+        var cssRules = (stylesheet.cssRules || stylesheet.rules);
+        var matches, columnIdx;
+        for (var i = 0; i < cssRules.length; i++) {
+          var selector = cssRules[i].selectorText;
+          if (matches = /\.l\d+/.exec(selector)) {
+            columnIdx = parseInt(matches[0].substr(2, matches[0].length - 2), 10);
+            columnCssRulesL[columnIdx] = cssRules[i];
+          } else if (matches = /\.r\d+/.exec(selector)) {
+            columnIdx = parseInt(matches[0].substr(2, matches[0].length - 2), 10);
+            columnCssRulesR[columnIdx] = cssRules[i];
+          }
+        }
+      }
+
+      return {
+        "left": columnCssRulesL[idx],
+        "right": columnCssRulesR[idx]
+      };
+    }
+
+    function removeCssRules() {
+      $style.remove();
+      stylesheet = null;
+    }
+
+    function destroy() {
+      getEditorLock().cancelCurrentEdit();
+
+      trigger(self.onBeforeDestroy, {});
+
+      var i = plugins.length;
+      while(i--) {
+        unregisterPlugin(plugins[i]);
+      }
+
+      if (options.enableColumnReorder) {
+          $headers.filter(":ui-sortable").sortable("destroy");
+      }
+
+      unbindAncestorScrollEvents();
+      $container.unbind(".slickgrid");
+      removeCssRules();
+
+      $canvas.unbind("draginit dragstart dragend drag");
+      $container.empty().removeClass(uid);
+    }
+
+
+    //////////////////////////////////////////////////////////////////////////////////////////////
+    // General
+
+    function trigger(evt, args, e) {
+      e = e || new Slick.EventData();
+      args = args || {};
+      args.grid = self;
+      return evt.notify(args, e, self);
+    }
+
+    function getEditorLock() {
+      return options.editorLock;
+    }
+
+    function getEditController() {
+      return editController;
+    }
+
+    function getColumnIndex(id) {
+      return columnsById[id];
+    }
+
+    function autosizeColumns() {
+      var i, c,
+          widths = [],
+          shrinkLeeway = 0,
+          total = 0,
+          prevTotal,
+          availWidth = viewportHasVScroll ? viewportW - scrollbarDimensions.width : viewportW;
+
+      for (i = 0; i < columns.length; i++) {
+        c = columns[i];
+        widths.push(c.width);
+        total += c.width;
+        if (c.resizable) {
+          shrinkLeeway += c.width - Math.max(c.minWidth, absoluteColumnMinWidth);
+        }
+      }
+
+      // shrink
+      prevTotal = total;
+      while (total > availWidth && shrinkLeeway) {
+        var shrinkProportion = (total - availWidth) / shrinkLeeway;
+        for (i = 0; i < columns.length && total > availWidth; i++) {
+          c = columns[i];
+          var width = widths[i];
+          if (!c.resizable || width <= c.minWidth || width <= absoluteColumnMinWidth) {
+            continue;
+          }
+          var absMinWidth = Math.max(c.minWidth, absoluteColumnMinWidth);
+          var shrinkSize = Math.floor(shrinkProportion * (width - absMinWidth)) || 1;
+          shrinkSize = Math.min(shrinkSize, width - absMinWidth);
+          total -= shrinkSize;
+          shrinkLeeway -= shrinkSize;
+          widths[i] -= shrinkSize;
+        }
+        if (prevTotal == total) {  // avoid infinite loop
+          break;
+        }
+        prevTotal = total;
+      }
+
+      // grow
+      prevTotal = total;
+      while (total < availWidth) {
+        var growProportion = availWidth / total;
+        for (i = 0; i < columns.length && total < availWidth; i++) {
+          c = columns[i];
+          if (!c.resizable || c.maxWidth <= c.width) {
+            continue;
+          }
+          var growSize = Math.min(Math.floor(growProportion * c.width) - c.width, (c.maxWidth - c.width) || 1000000) || 1;
+          total += growSize;
+          widths[i] += growSize;
+        }
+        if (prevTotal == total) {  // avoid infinite loop
+          break;
+        }
+        prevTotal = total;
+      }
+
+      var reRender = false;
+      for (i = 0; i < columns.length; i++) {
+        if (columns[i].rerenderOnResize && columns[i].width != widths[i]) {
+          reRender = true;
+        }
+        columns[i].width = widths[i];
+      }
+
+      applyColumnHeaderWidths();
+      updateCanvasWidth(true);
+      if (reRender) {
+        invalidateAllRows();
+        render();
+      }
+    }
+
+    function applyColumnHeaderWidths() {
+      if (!initialized) { return; }
+      var h;
+      for (var i = 0, headers = $headers.children(), ii = headers.length; i < ii; i++) {
+        h = $(headers[i]);
+        if (h.width() !== columns[i].width - headerColumnWidthDiff) {
+          h.width(columns[i].width - headerColumnWidthDiff);
+        }
+      }
+
+      updateColumnCaches();
+    }
+
+    function applyColumnWidths() {
+      var x = 0, w, rule;
+      for (var i = 0; i < columns.length; i++) {
+        w = columns[i].width;
+
+        rule = getColumnCssRules(i);
+        rule.left.style.left = x + "px";
+        rule.right.style.right = (canvasWidth - x - w) + "px";
+
+        x += columns[i].width;
+      }
+    }
+
+    function setSortColumn(columnId, ascending) {
+      setSortColumns([{ columnId: columnId, sortAsc: ascending}]);
+    }
+
+    function setSortColumns(cols) {
+      sortColumns = cols;
+
+      var headerColumnEls = $headers.children();
+      headerColumnEls
+          .removeClass("slick-header-column-sorted")
+          .find(".slick-sort-indicator")
+              .removeClass("slick-sort-indicator-asc slick-sort-indicator-desc");
+
+      $.each(sortColumns, function(i, col) {
+        if (col.sortAsc == null) {
+          col.sortAsc = true;
+        }
+        var columnIndex = getColumnIndex(col.columnId);
+        if (columnIndex != null) {
+          headerColumnEls.eq(columnIndex)
+              .addClass("slick-header-column-sorted")
+              .find(".slick-sort-indicator")
+                  .addClass(col.sortAsc ? "slick-sort-indicator-asc" : "slick-sort-indicator-desc");
+        }
+      });
+    }
+
+    function getSortColumns() {
+      return sortColumns;
+    }
+
+    function handleSelectedRangesChanged(e, ranges) {
+      selectedRows = [];
+      var hash = {};
+      for (var i = 0; i < ranges.length; i++) {
+        for (var j = ranges[i].fromRow; j <= ranges[i].toRow; j++) {
+          if (!hash[j]) {  // prevent duplicates
+            selectedRows.push(j);
+            hash[j] = {};
+          }
+          for (var k = ranges[i].fromCell; k <= ranges[i].toCell; k++) {
+            if (canCellBeSelected(j, k)) {
+              hash[j][columns[k].id] = options.selectedCellCssClass;
+            }
+          }
+        }
+      }
+
+      setCellCssStyles(options.selectedCellCssClass, hash);
+
+      trigger(self.onSelectedRowsChanged, {rows: getSelectedRows()}, e);
+    }
+
+    function getColumns() {
+      return columns;
+    }
+
+    function updateColumnCaches() {
+      // Pre-calculate cell boundaries.
+      columnPosLeft = [];
+      columnPosRight = [];
+      var x = 0;
+      for (var i = 0, ii = columns.length; i < ii; i++) {
+        columnPosLeft[i] = x;
+        columnPosRight[i] = x + columns[i].width;
+        x += columns[i].width;
+      }
+    }
+
+    function setColumns(columnDefinitions) {
+      columns = columnDefinitions;
+
+      columnsById = {};
+      for (var i = 0; i < columns.length; i++) {
+        var m = columns[i] = $.extend({}, columnDefaults, columns[i]);
+        columnsById[m.id] = i;
+        if (m.minWidth && m.width < m.minWidth) {
+          m.width = m.minWidth;
+        }
+        if (m.maxWidth && m.width > m.maxWidth) {
+          m.width = m.maxWidth;
+        }
+      }
+
+      updateColumnCaches();
+
+      if (initialized) {
+        invalidateAllRows();
+        createColumnHeaders();
+        removeCssRules();
+        createCssRules();
+        resizeCanvas();
+        applyColumnWidths();
+        handleScroll();
+      }
+    }
+
+    function getOptions() {
+      return options;
+    }
+
+    function setOptions(args) {
+      if (!getEditorLock().commitCurrentEdit()) {
+        return;
+      }
+
+      makeActiveCellNormal();
+
+      if (options.enableAddRow !== args.enableAddRow) {
+        invalidateRow(getDataLength());
+      }
+
+      options = $.extend(options, args);
+      validateAndEnforceOptions();
+
+      $viewport.css("overflow-y", options.autoHeight ? "hidden" : "auto");
+      render();
+    }
+
+    function validateAndEnforceOptions() {
+      if (options.autoHeight) {
+        options.leaveSpaceForNewRows = false;
+      }
+    }
+
+    function setData(newData, scrollToTop) {
+      data = newData;
+      invalidateAllRows();
+      updateRowCount();
+      if (scrollToTop) {
+        scrollTo(0);
+      }
+    }
+
+    function getData() {
+      return data;
+    }
+
+    function getDataLength() {
+      if (data.getLength) {
+        return data.getLength();
+      } else {
+        return data.length;
+      }
+    }
+
+    function getDataLengthIncludingAddNew() {
+      return getDataLength() + (options.enableAddRow ? 1 : 0);
+    }
+
+    function getDataItem(i) {
+      if (data.getItem) {
+        return data.getItem(i);
+      } else {
+        return data[i];
+      }
+    }
+
+    function getTopPanel() {
+      return $topPanel[0];
+    }
+
+    function setTopPanelVisibility(visible) {
+      if (options.showTopPanel != visible) {
+        options.showTopPanel = visible;
+        if (visible) {
+          $topPanelScroller.slideDown("fast", resizeCanvas);
+        } else {
+          $topPanelScroller.slideUp("fast", resizeCanvas);
+        }
+      }
+    }
+
+    function setHeaderRowVisibility(visible) {
+      if (options.showHeaderRow != visible) {
+        options.showHeaderRow = visible;
+        if (visible) {
+          $headerRowScroller.slideDown("fast", resizeCanvas);
+        } else {
+          $headerRowScroller.slideUp("fast", resizeCanvas);
+        }
+      }
+    }
+
+    function getContainerNode() {
+      return $container.get(0);
+    }
+
+    //////////////////////////////////////////////////////////////////////////////////////////////
+    // Rendering / Scrolling
+
+    function getRowTop(row) {
+      return options.rowHeight * row - offset;
+    }
+
+    function getRowFromPosition(y) {
+      return Math.floor((y + offset) / options.rowHeight);
+    }
+
+    function scrollTo(y) {
+      y = Math.max(y, 0);
+      y = Math.min(y, th - viewportH + (viewportHasHScroll ? scrollbarDimensions.height : 0));
+
+      var oldOffset = offset;
+
+      page = Math.min(n - 1, Math.floor(y / ph));
+      offset = Math.round(page * cj);
+      var newScrollTop = y - offset;
+
+      if (offset != oldOffset) {
+        var range = getVisibleRange(newScrollTop);
+        cleanupRows(range);
+        updateRowPositions();
+      }
+
+      if (prevScrollTop != newScrollTop) {
+        vScrollDir = (prevScrollTop + oldOffset < newScrollTop + offset) ? 1 : -1;
+        $viewport[0].scrollTop = (lastRenderedScrollTop = scrollTop = prevScrollTop = newScrollTop);
+
+        trigger(self.onViewportChanged, {});
+      }
+    }
+
+    function defaultFormatter(row, cell, value, columnDef, dataContext) {
+      if (value == null) {
+        return "";
+      } else {
+        return (value + "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+      }
+    }
+
+    function getFormatter(row, column) {
+      var rowMetadata = data.getItemMetadata && data.getItemMetadata(row);
+
+      // look up by id, then index
+      var columnOverrides = rowMetadata &&
+          rowMetadata.columns &&
+          (rowMetadata.columns[column.id] || rowMetadata.columns[getColumnIndex(column.id)]);
+
+      return (columnOverrides && columnOverrides.formatter) ||
+          (rowMetadata && rowMetadata.formatter) ||
+          column.formatter ||
+          (options.formatterFactory && options.formatterFactory.getFormatter(column)) ||
+          options.defaultFormatter;
+    }
+
+    function getEditor(row, cell) {
+      var column = columns[cell];
+      var rowMetadata = data.getItemMetadata && data.getItemMetadata(row);
+      var columnMetadata = rowMetadata && rowMetadata.columns;
+
+      if (columnMetadata && columnMetadata[column.id] && columnMetadata[column.id].editor !== undefined) {
+        return columnMetadata[column.id].editor;
+      }
+      if (columnMetadata && columnMetadata[cell] && columnMetadata[cell].editor !== undefined) {
+        return columnMetadata[cell].editor;
+      }
+
+      return column.editor || (options.editorFactory && options.editorFactory.getEditor(column));
+    }
+
+    function getDataItemValueForColumn(item, columnDef) {
+      if (options.dataItemColumnValueExtractor) {
+        return options.dataItemColumnValueExtractor(item, columnDef);
+      }
+      return item[columnDef.field];
+    }
+
+    function appendRowHtml(stringArray, row, range, dataLength) {
+      var d = getDataItem(row);
+      var dataLoading = row < dataLength && !d;
+      var rowCss = "slick-row" +
+          (dataLoading ? " loading" : "") +
+          (row === activeRow ? " active" : "") +
+          (row % 2 == 1 ? " odd" : " even");
+
+      var metadata = data.getItemMetadata && data.getItemMetadata(row);
+
+      if (metadata && metadata.cssClasses) {
+        rowCss += " " + metadata.cssClasses;
+      }
+
+      stringArray.push("<div class='ui-widget-content " + rowCss + "' style='top:" + getRowTop(row) + "px'>");
+
+      var colspan, m;
+      for (var i = 0, ii = columns.length; i < ii; i++) {
+        m = columns[i];
+        colspan = 1;
+        if (metadata && metadata.columns) {
+          var columnData = metadata.columns[m.id] || metadata.columns[i];
+          colspan = (columnData && columnData.colspan) || 1;
+          if (colspan === "*") {
+            colspan = ii - i;
+          }
+        }
+
+        // Do not render cells outside of the viewport.
+        if (columnPosRight[Math.min(ii - 1, i + colspan - 1)] > range.leftPx) {
+          if (columnPosLeft[i] > range.rightPx) {
+            // All columns to the right are outside the range.
+            break;
+          }
+
+          appendCellHtml(stringArray, row, i, colspan, d);
+        }
+
+        if (colspan > 1) {
+          i += (colspan - 1);
+        }
+      }
+
+      stringArray.push("</div>");
+    }
+
+    function appendCellHtml(stringArray, row, cell, colspan, item) {
+      var m = columns[cell];
+      var cellCss = "slick-cell l" + cell + " r" + Math.min(columns.length - 1, cell + colspan - 1) +
+          (m.cssClass ? " " + m.cssClass : "");
+      if (row === activeRow && cell === activeCell) {
+        cellCss += (" active");
+      }
+
+      // TODO:  merge them together in the setter
+      for (var key in cellCssClasses) {
+        if (cellCssClasses[key][row] && cellCssClasses[key][row][m.id]) {
+          cellCss += (" " + cellCssClasses[key][row][m.id]);
+        }
+      }
+
+      stringArray.push("<div class='" + cellCss + "'>");
+
+      // if there is a corresponding row (if not, this is the Add New row or this data hasn't been loaded yet)
+      if (item) {
+        var value = getDataItemValueForColumn(item, m);
+        stringArray.push(getFormatter(row, m)(row, cell, value, m, item));
+      }
+
+      stringArray.push("</div>");
+
+      rowsCache[row].cellRenderQueue.push(cell);
+      rowsCache[row].cellColSpans[cell] = colspan;
+    }
+
+
+    function cleanupRows(rangeToKeep) {
+      for (var i in rowsCache) {
+        if (((i = parseInt(i, 10)) !== activeRow) && (i < rangeToKeep.top || i > rangeToKeep.bottom)) {
+          removeRowFromCache(i);
+        }
+      }
+    }
+
+    function invalidate() {
+      updateRowCount();
+      invalidateAllRows();
+      render();
+    }
+
+    function invalidateAllRows() {
+      if (currentEditor) {
+        makeActiveCellNormal();
+      }
+      for (var row in rowsCache) {
+        removeRowFromCache(row);
+      }
+    }
+
+    function removeRowFromCache(row) {
+      var cacheEntry = rowsCache[row];
+      if (!cacheEntry) {
+        return;
+      }
+      $canvas[0].removeChild(cacheEntry.rowNode);
+      delete rowsCache[row];
+      delete postProcessedRows[row];
+      renderedRows--;
+      counter_rows_removed++;
+    }
+
+    function invalidateRows(rows) {
+      var i, rl;
+      if (!rows || !rows.length) {
+        return;
+      }
+      vScrollDir = 0;
+      for (i = 0, rl = rows.length; i < rl; i++) {
+        if (currentEditor && activeRow === rows[i]) {
+          makeActiveCellNormal();
+        }
+        if (rowsCache[rows[i]]) {
+          removeRowFromCache(rows[i]);
+        }
+      }
+    }
+
+    function invalidateRow(row) {
+      invalidateRows([row]);
+    }
+
+    function updateCell(row, cell) {
+      var cellNode = getCellNode(row, cell);
+      if (!cellNode) {
+        return;
+      }
+
+      var m = columns[cell], d = getDataItem(row);
+      if (currentEditor && activeRow === row && activeCell === cell) {
+        currentEditor.loadValue(d);
+      } else {
+        cellNode.innerHTML = d ? getFormatter(row, m)(row, cell, getDataItemValueForColumn(d, m), m, d) : "";
+        invalidatePostProcessingResults(row);
+      }
+    }
+
+    function updateRow(row) {
+      var cacheEntry = rowsCache[row];
+      if (!cacheEntry) {
+        return;
+      }
+
+      ensureCellNodesInRowsCache(row);
+
+      var d = getDataItem(row);
+
+      for (var columnIdx in cacheEntry.cellNodesByColumnIdx) {
+        if (!cacheEntry.cellNodesByColumnIdx.hasOwnProperty(columnIdx)) {
+          continue;
+        }
+
+        columnIdx = columnIdx | 0;
+        var m = columns[columnIdx],
+            node = cacheEntry.cellNodesByColumnIdx[columnIdx];
+
+        if (row === activeRow && columnIdx === activeCell && currentEditor) {
+          currentEditor.loadValue(d);
+        } else if (d) {
+          node.innerHTML = getFormatter(row, m)(row, columnIdx, getDataItemValueForColumn(d, m), m, d);
+        } else {
+          node.innerHTML = "";
+        }
+      }
+
+      invalidatePostProcessingResults(row);
+    }
+
+    function getViewportHeight() {
+      return parseFloat($.css($container[0], "height", true)) -
+          parseFloat($.css($container[0], "paddingTop", true)) -
+          parseFloat($.css($container[0], "paddingBottom", true)) -
+          parseFloat($.css($headerScroller[0], "height")) - getVBoxDelta($headerScroller) -
+          (options.showTopPanel ? options.topPanelHeight + getVBoxDelta($topPanelScroller) : 0) -
+          (options.showHeaderRow ? options.headerRowHeight + getVBoxDelta($headerRowScroller) : 0);
+    }
+
+    function resizeCanvas() {
+      if (!initialized) { return; }
+      if (options.autoHeight) {
+        viewportH = options.rowHeight * getDataLengthIncludingAddNew();
+      } else {
+        viewportH = getViewportHeight();
+      }
+
+      numVisibleRows = Math.ceil(viewportH / options.rowHeight);
+      viewportW = parseFloat($.css($container[0], "width", true));
+      if (!options.autoHeight) {
+        $viewport.height(viewportH);
+      }
+
+      if (options.forceFitColumns) {
+        autosizeColumns();
+      }
+
+      updateRowCount();
+      handleScroll();
+      // Since the width has changed, force the render() to reevaluate virtually rendered cells.
+      lastRenderedScrollLeft = -1;
+      render();
+    }
+
+    function updateRowCount() {
+      if (!initialized) { return; }
+
+      var dataLengthIncludingAddNew = getDataLengthIncludingAddNew();
+      var numberOfRows = dataLengthIncludingAddNew +
+          (options.leaveSpaceForNewRows ? numVisibleRows - 1 : 0);
+
+      var oldViewportHasVScroll = viewportHasVScroll;
+      // with autoHeight, we do not need to accommodate the vertical scroll bar
+      viewportHasVScroll = !options.autoHeight && (numberOfRows * options.rowHeight > viewportH);
+
+      makeActiveCellNormal();
+
+      // remove the rows that are now outside of the data range
+      // this helps avoid redundant calls to .removeRow() when the size of the data decreased by thousands of rows
+      var l = dataLengthIncludingAddNew - 1;
+      for (var i in rowsCache) {
+        if (i >= l) {
+          removeRowFromCache(i);
+        }
+      }
+
+      if (activeCellNode && activeRow > l) {
+        resetActiveCell();
+      }
+
+      var oldH = h;
+      th = Math.max(options.rowHeight * numberOfRows, viewportH - scrollbarDimensions.height);
+      if (th < maxSupportedCssHeight) {
+        // just one page
+        h = ph = th;
+        n = 1;
+        cj = 0;
+      } else {
+        // break into pages
+        h = maxSupportedCssHeight;
+        ph = h / 100;
+        n = Math.floor(th / ph);
+        cj = (th - h) / (n - 1);
+      }
+
+      if (h !== oldH) {
+        $canvas.css("height", h);
+        scrollTop = $viewport[0].scrollTop;
+      }
+
+      var oldScrollTopInRange = (scrollTop + offset <= th - viewportH);
+
+      if (th == 0 || scrollTop == 0) {
+        page = offset = 0;
+      } else if (oldScrollTopInRange) {
+        // maintain virtual position
+        scrollTo(scrollTop + offset);
+      } else {
+        // scroll to bottom
+        scrollTo(th - viewportH);
+      }
+
+      if (h != oldH && options.autoHeight) {
+        resizeCanvas();
+      }
+
+      if (options.forceFitColumns && oldViewportHasVScroll != viewportHasVScroll) {
+        autosizeColumns();
+      }
+      updateCanvasWidth(false);
+    }
+
+    function getVisibleRange(viewportTop, viewportLeft) {
+      if (viewportTop == null) {
+        viewportTop = scrollTop;
+      }
+      if (viewportLeft == null) {
+        viewportLeft = scrollLeft;
+      }
+
+      return {
+        top: getRowFromPosition(viewportTop),
+        bottom: getRowFromPosition(viewportTop + viewportH) + 1,
+        leftPx: viewportLeft,
+        rightPx: viewportLeft + viewportW
+      };
+    }
+
+    function getRenderedRange(viewportTop, viewportLeft) {
+      var range = getVisibleRange(viewportTop, viewportLeft);
+      var buffer = Math.round(viewportH / options.rowHeight);
+      var minBuffer = 3;
+
+      if (vScrollDir == -1) {
+        range.top -= buffer;
+        range.bottom += minBuffer;
+      } else if (vScrollDir == 1) {
+        range.top -= minBuffer;
+        range.bottom += buffer;
+      } else {
+        range.top -= minBuffer;
+        range.bottom += minBuffer;
+      }
+
+      range.top = Math.max(0, range.top);
+      range.bottom = Math.min(getDataLengthIncludingAddNew() - 1, range.bottom);
+
+      range.leftPx -= viewportW;
+      range.rightPx += viewportW;
+
+      range.leftPx = Math.max(0, range.leftPx);
+      range.rightPx = Math.min(canvasWidth, range.rightPx);
+
+      return range;
+    }
+
+    function ensureCellNodesInRowsCache(row) {
+      var cacheEntry = rowsCache[row];
+      if (cacheEntry) {
+        if (cacheEntry.cellRenderQueue.length) {
+          var lastChild = cacheEntry.rowNode.lastChild;
+          while (cacheEntry.cellRenderQueue.length) {
+            var columnIdx = cacheEntry.cellRenderQueue.pop();
+            cacheEntry.cellNodesByColumnIdx[columnIdx] = lastChild;
+            lastChild = lastChild.previousSibling;
+          }
+        }
+      }
+    }
+
+    function cleanUpCells(range, row) {
+      var totalCellsRemoved = 0;
+      var cacheEntry = rowsCache[row];
+
+      // Remove cells outside the range.
+      var cellsToRemove = [];
+      for (var i in cacheEntry.cellNodesByColumnIdx) {
+        // I really hate it when people mess with Array.prototype.
+        if (!cacheEntry.cellNodesByColumnIdx.hasOwnProperty(i)) {
+          continue;
+        }
+
+        // This is a string, so it needs to be cast back to a number.
+        i = i | 0;
+
+        var colspan = cacheEntry.cellColSpans[i];
+        if (columnPosLeft[i] > range.rightPx ||
+          columnPosRight[Math.min(columns.length - 1, i + colspan - 1)] < range.leftPx) {
+          if (!(row == activeRow && i == activeCell)) {
+            cellsToRemove.push(i);
+          }
+        }
+      }
+
+      var cellToRemove;
+      while ((cellToRemove = cellsToRemove.pop()) != null) {
+        cacheEntry.rowNode.removeChild(cacheEntry.cellNodesByColumnIdx[cellToRemove]);
+        delete cacheEntry.cellColSpans[cellToRemove];
+        delete cacheEntry.cellNodesByColumnIdx[cellToRemove];
+        if (postProcessedRows[row]) {
+          delete postProcessedRows[row][cellToRemove];
+        }
+        totalCellsRemoved++;
+      }
+    }
+
+    function cleanUpAndRenderCells(range) {
+      var cacheEntry;
+      var stringArray = [];
+      var processedRows = [];
+      var cellsAdded;
+      var totalCellsAdded = 0;
+      var colspan;
+
+      for (var row = range.top, btm = range.bottom; row <= btm; row++) {
+        cacheEntry = rowsCache[row];
+        if (!cacheEntry) {
+          continue;
+        }
+
+        // cellRenderQueue populated in renderRows() needs to be cleared first
+        ensureCellNodesInRowsCache(row);
+
+        cleanUpCells(range, row);
+
+        // Render missing cells.
+        cellsAdded = 0;
+
+        var metadata = data.getItemMetadata && data.getItemMetadata(row);
+        metadata = metadata && metadata.columns;
+
+        var d = getDataItem(row);
+
+        // TODO:  shorten this loop (index? heuristics? binary search?)
+        for (var i = 0, ii = columns.length; i < ii; i++) {
+          // Cells to the right are outside the range.
+          if (columnPosLeft[i] > range.rightPx) {
+            break;
+          }
+
+          // Already rendered.
+          if ((colspan = cacheEntry.cellColSpans[i]) != null) {
+            i += (colspan > 1 ? colspan - 1 : 0);
+            continue;
+          }
+
+          colspan = 1;
+          if (metadata) {
+            var columnData = metadata[columns[i].id] || metadata[i];
+            colspan = (columnData && columnData.colspan) || 1;
+            if (colspan === "*") {
+              colspan = ii - i;
+            }
+          }
+
+          if (columnPosRight[Math.min(ii - 1, i + colspan - 1)] > range.leftPx) {
+            appendCellHtml(stringArray, row, i, colspan, d);
+            cellsAdded++;
+          }
+
+          i += (colspan > 1 ? colspan - 1 : 0);
+        }
+
+        if (cellsAdded) {
+          totalCellsAdded += cellsAdded;
+          processedRows.push(row);
+        }
+      }
+
+      if (!stringArray.length) {
+        return;
+      }
+
+      var x = document.createElement("div");
+      x.innerHTML = stringArray.join("");
+
+      var processedRow;
+      var node;
+      while ((processedRow = processedRows.pop()) != null) {
+        cacheEntry = rowsCache[processedRow];
+        var columnIdx;
+        while ((columnIdx = cacheEntry.cellRenderQueue.pop()) != null) {
+          node = x.lastChild;
+          cacheEntry.rowNode.appendChild(node);
+          cacheEntry.cellNodesByColumnIdx[columnIdx] = node;
+        }
+      }
+    }
+
+    function renderRows(range) {
+      var parentNode = $canvas[0],
+          stringArray = [],
+          rows = [],
+          needToReselectCell = false,
+          dataLength = getDataLength();
+
+      for (var i = range.top, ii = range.bottom; i <= ii; i++) {
+        if (rowsCache[i]) {
+          continue;
+        }
+        renderedRows++;
+        rows.push(i);
+
+        // Create an entry right away so that appendRowHtml() can
+        // start populatating it.
+        rowsCache[i] = {
+          "rowNode": null,
+
+          // ColSpans of rendered cells (by column idx).
+          // Can also be used for checking whether a cell has been rendered.
+          "cellColSpans": [],
+
+          // Cell nodes (by column idx).  Lazy-populated by ensureCellNodesInRowsCache().
+          "cellNodesByColumnIdx": [],
+
+          // Column indices of cell nodes that have been rendered, but not yet indexed in
+          // cellNodesByColumnIdx.  These are in the same order as cell nodes added at the
+          // end of the row.
+          "cellRenderQueue": []
+        };
+
+        appendRowHtml(stringArray, i, range, dataLength);
+        if (activeCellNode && activeRow === i) {
+          needToReselectCell = true;
+        }
+        counter_rows_rendered++;
+      }
+
+      if (!rows.length) { return; }
+
+      var x = document.createElement("div");
+      x.innerHTML = stringArray.join("");
+
+      for (var i = 0, ii = rows.length; i < ii; i++) {
+        rowsCache[rows[i]].rowNode = parentNode.appendChild(x.firstChild);
+      }
+
+      if (needToReselectCell) {
+        activeCellNode = getCellNode(activeRow, activeCell);
+      }
+    }
+
+    function startPostProcessing() {
+      if (!options.enableAsyncPostRender) {
+        return;
+      }
+      clearTimeout(h_postrender);
+      h_postrender = setTimeout(asyncPostProcessRows, options.asyncPostRenderDelay);
+    }
+
+    function invalidatePostProcessingResults(row) {
+      delete postProcessedRows[row];
+      postProcessFromRow = Math.min(postProcessFromRow, row);
+      postProcessToRow = Math.max(postProcessToRow, row);
+      startPostProcessing();
+    }
+
+    function updateRowPositions() {
+      for (var row in rowsCache) {
+        rowsCache[row].rowNode.style.top = getRowTop(row) + "px";
+      }
+    }
+
+    function render() {
+      if (!initialized) { return; }
+      var visible = getVisibleRange();
+      var rendered = getRenderedRange();
+
+      // remove rows no longer in the viewport
+      cleanupRows(rendered);
+
+      // add new rows & missing cells in existing rows
+      if (lastRenderedScrollLeft != scrollLeft) {
+        cleanUpAndRenderCells(rendered);
+      }
+
+      // render missing rows
+      renderRows(rendered);
+
+      postProcessFromRow = visible.top;
+      postProcessToRow = Math.min(getDataLengthIncludingAddNew() - 1, visible.bottom);
+      startPostProcessing();
+
+      lastRenderedScrollTop = scrollTop;
+      lastRenderedScrollLeft = scrollLeft;
+      h_render = null;
+    }
+
+    function handleHeaderRowScroll() {
+      var scrollLeft = $headerRowScroller[0].scrollLeft;
+      if (scrollLeft != $viewport[0].scrollLeft) {
+        $viewport[0].scrollLeft = scrollLeft;
+      }
+    }
+
+    function handleScroll() {
+      scrollTop = $viewport[0].scrollTop;
+      scrollLeft = $viewport[0].scrollLeft;
+      var vScrollDist = Math.abs(scrollTop - prevScrollTop);
+      var hScrollDist = Math.abs(scrollLeft - prevScrollLeft);
+
+      if (hScrollDist) {
+        prevScrollLeft = scrollLeft;
+        $headerScroller[0].scrollLeft = scrollLeft;
+        $topPanelScroller[0].scrollLeft = scrollLeft;
+        $headerRowScroller[0].scrollLeft = scrollLeft;
+      }
+
+      if (vScrollDist) {
+        vScrollDir = prevScrollTop < scrollTop ? 1 : -1;
+        prevScrollTop = scrollTop;
+
+        // switch virtual pages if needed
+        if (vScrollDist < viewportH) {
+          scrollTo(scrollTop + offset);
+        } else {
+          var oldOffset = offset;
+          if (h == viewportH) {
+            page = 0;
+          } else {
+            page = Math.min(n - 1, Math.floor(scrollTop * ((th - viewportH) / (h - viewportH)) * (1 / ph)));
+          }
+          offset = Math.round(page * cj);
+          if (oldOffset != offset) {
+            invalidateAllRows();
+          }
+        }
+      }
+
+      if (hScrollDist || vScrollDist) {
+        if (h_render) {
+          clearTimeout(h_render);
+        }
+
+        if (Math.abs(lastRenderedScrollTop - scrollTop) > 20 ||
+            Math.abs(lastRenderedScrollLeft - scrollLeft) > 20) {
+          if (options.forceSyncScrolling || (
+              Math.abs(lastRenderedScrollTop - scrollTop) < viewportH &&
+              Math.abs(lastRenderedScrollLeft - scrollLeft) < viewportW)) {
+            render();
+          } else {
+            h_render = setTimeout(render, 50);
+          }
+
+          trigger(self.onViewportChanged, {});
+        }
+      }
+
+      trigger(self.onScroll, {scrollLeft: scrollLeft, scrollTop: scrollTop});
+    }
+
+    function asyncPostProcessRows() {
+      var dataLength = getDataLength();
+      while (postProcessFromRow <= postProcessToRow) {
+        var row = (vScrollDir >= 0) ? postProcessFromRow++ : postProcessToRow--;
+        var cacheEntry = rowsCache[row];
+        if (!cacheEntry || row >= dataLength) {
+          continue;
+        }
+
+        if (!postProcessedRows[row]) {
+          postProcessedRows[row] = {};
+        }
+
+        ensureCellNodesInRowsCache(row);
+        for (var columnIdx in cacheEntry.cellNodesByColumnIdx) {
+          if (!cacheEntry.cellNodesByColumnIdx.hasOwnProperty(columnIdx)) {
+            continue;
+          }
+
+          columnIdx = columnIdx | 0;
+
+          var m = columns[columnIdx];
+          if (m.asyncPostRender && !postProcessedRows[row][columnIdx]) {
+            var node = cacheEntry.cellNodesByColumnIdx[columnIdx];
+            if (node) {
+              m.asyncPostRender(node, row, getDataItem(row), m);
+            }
+            postProcessedRows[row][columnIdx] = true;
+          }
+        }
+
+        h_postrender = setTimeout(asyncPostProcessRows, options.asyncPostRenderDelay);
+        return;
+      }
+    }
+
+    function updateCellCssStylesOnRenderedRows(addedHash, removedHash) {
+      var node, columnId, addedRowHash, removedRowHash;
+      for (var row in rowsCache) {
+        removedRowHash = removedHash && removedHash[row];
+        addedRowHash = addedHash && addedHash[row];
+
+        if (removedRowHash) {
+          for (columnId in removedRowHash) {
+            if (!addedRowHash || removedRowHash[columnId] != addedRowHash[columnId]) {
+              node = getCellNode(row, getColumnIndex(columnId));
+              if (node) {
+                $(node).removeClass(removedRowHash[columnId]);
+              }
+            }
+          }
+        }
+
+        if (addedRowHash) {
+          for (columnId in addedRowHash) {
+            if (!removedRowHash || removedRowHash[columnId] != addedRowHash[columnId]) {
+              node = getCellNode(row, getColumnIndex(columnId));
+              if (node) {
+                $(node).addClass(addedRowHash[columnId]);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    function addCellCssStyles(key, hash) {
+      if (cellCssClasses[key]) {
+        throw "addCellCssStyles: cell CSS hash with key '" + key + "' already exists.";
+      }
+
+      cellCssClasses[key] = hash;
+      updateCellCssStylesOnRenderedRows(hash, null);
+
+      trigger(self.onCellCssStylesChanged, { "key": key, "hash": hash });
+    }
+
+    function removeCellCssStyles(key) {
+      if (!cellCssClasses[key]) {
+        return;
+      }
+
+      updateCellCssStylesOnRenderedRows(null, cellCssClasses[key]);
+      delete cellCssClasses[key];
+
+      trigger(self.onCellCssStylesChanged, { "key": key, "hash": null });
+    }
+
+    function setCellCssStyles(key, hash) {
+      var prevHash = cellCssClasses[key];
+
+      cellCssClasses[key] = hash;
+      updateCellCssStylesOnRenderedRows(hash, prevHash);
+
+      trigger(self.onCellCssStylesChanged, { "key": key, "hash": hash });
+    }
+
+    function getCellCssStyles(key) {
+      return cellCssClasses[key];
+    }
+
+    function flashCell(row, cell, speed) {
+      speed = speed || 100;
+      if (rowsCache[row]) {
+        var $cell = $(getCellNode(row, cell));
+
+        function toggleCellClass(times) {
+          if (!times) {
+            return;
+          }
+          setTimeout(function () {
+                $cell.queue(function () {
+                  $cell.toggleClass(options.cellFlashingCssClass).dequeue();
+                  toggleCellClass(times - 1);
+                });
+              },
+              speed);
+        }
+
+        toggleCellClass(4);
+      }
+    }
+
+    //////////////////////////////////////////////////////////////////////////////////////////////
+    // Interactivity
+
+    function handleDragInit(e, dd) {
+      var cell = getCellFromEvent(e);
+      if (!cell || !cellExists(cell.row, cell.cell)) {
+        return false;
+      }
+
+      var retval = trigger(self.onDragInit, dd, e);
+      if (e.isImmediatePropagationStopped()) {
+        return retval;
+      }
+
+      // if nobody claims to be handling drag'n'drop by stopping immediate propagation,
+      // cancel out of it
+      return false;
+    }
+
+    function handleDragStart(e, dd) {
+      var cell = getCellFromEvent(e);
+      if (!cell || !cellExists(cell.row, cell.cell)) {
+        return false;
+      }
+
+      var retval = trigger(self.onDragStart, dd, e);
+      if (e.isImmediatePropagationStopped()) {
+        return retval;
+      }
+
+      return false;
+    }
+
+    function handleDrag(e, dd) {
+      return trigger(self.onDrag, dd, e);
+    }
+
+    function handleDragEnd(e, dd) {
+      trigger(self.onDragEnd, dd, e);
+    }
+
+    function handleKeyDown(e) {
+      trigger(self.onKeyDown, {row: activeRow, cell: activeCell}, e);
+      var handled = e.isImmediatePropagationStopped();
+
+      if (!handled) {
+        if (!e.shiftKey && !e.altKey && !e.ctrlKey) {
+          if (e.which == 27) {
+            if (!getEditorLock().isActive()) {
+              return; // no editing mode to cancel, allow bubbling and default processing (exit without cancelling the event)
+            }
+            cancelEditAndSetFocus();
+          } else if (e.which == 34) {
+            navigatePageDown();
+            handled = true;           
+          } else if (e.which == 33) {
+            navigatePageUp();
+            handled = true;
+          } else if (e.which == 37) {
+            handled = navigateLeft();
+          } else if (e.which == 39) {
+            handled = navigateRight();
+          } else if (e.which == 38) {
+            handled = navigateUp();
+          } else if (e.which == 40) {
+            handled = navigateDown();
+          } else if (e.which == 9) {
+            handled = navigateNext();
+          } else if (e.which == 13) {
+            if (options.editable) {
+              if (currentEditor) {
+                // adding new row
+                if (activeRow === getDataLength()) {
+                  navigateDown();
+                } else {
+                  commitEditAndSetFocus();
+                }
+              } else {
+                if (getEditorLock().commitCurrentEdit()) {
+                  makeActiveCellEditable();
+                }
+              }
+            }
+            handled = true;
+          }
+        } else if (e.which == 9 && e.shiftKey && !e.ctrlKey && !e.altKey) {
+          handled = navigatePrev();
+        }
+      }
+
+      if (handled) {
+        // the event has been handled so don't let parent element (bubbling/propagation) or browser (default) handle it
+        e.stopPropagation();
+        e.preventDefault();
+        try {
+          e.originalEvent.keyCode = 0; // prevent default behaviour for special keys in IE browsers (F3, F5, etc.)
+        }
+        // ignore exceptions - setting the original event's keycode throws access denied exception for "Ctrl"
+        // (hitting control key only, nothing else), "Shift" (maybe others)
+        catch (error) {
+        }
+      }
+    }
+
+    function handleClick(e) {
+      if (!currentEditor) {
+        // if this click resulted in some cell child node getting focus,
+        // don't steal it back - keyboard events will still bubble up
+        // IE9+ seems to default DIVs to tabIndex=0 instead of -1, so check for cell clicks directly.
+        if (e.target != document.activeElement || $(e.target).hasClass("slick-cell")) {
+          setFocus();
+        }
+      }
+
+      var cell = getCellFromEvent(e);
+      if (!cell || (currentEditor !== null && activeRow == cell.row && activeCell == cell.cell)) {
+        return;
+      }
+
+      trigger(self.onClick, {row: cell.row, cell: cell.cell}, e);
+      if (e.isImmediatePropagationStopped()) {
+        return;
+      }
+
+      if ((activeCell != cell.cell || activeRow != cell.row) && canCellBeActive(cell.row, cell.cell)) {
+        if (!getEditorLock().isActive() || getEditorLock().commitCurrentEdit()) {
+          scrollRowIntoView(cell.row, false);
+          setActiveCellInternal(getCellNode(cell.row, cell.cell));
+        }
+      }
+    }
+
+    function handleContextMenu(e) {
+      var $cell = $(e.target).closest(".slick-cell", $canvas);
+      if ($cell.length === 0) {
+        return;
+      }
+
+      // are we editing this cell?
+      if (activeCellNode === $cell[0] && currentEditor !== null) {
+        return;
+      }
+
+      trigger(self.onContextMenu, {}, e);
+    }
+
+    function handleDblClick(e) {
+      var cell = getCellFromEvent(e);
+      if (!cell || (currentEditor !== null && activeRow == cell.row && activeCell == cell.cell)) {
+        return;
+      }
+
+      trigger(self.onDblClick, {row: cell.row, cell: cell.cell}, e);
+      if (e.isImmediatePropagationStopped()) {
+        return;
+      }
+
+      if (options.editable) {
+        gotoCell(cell.row, cell.cell, true);
+      }
+    }
+
+    function handleHeaderMouseEnter(e) {
+      trigger(self.onHeaderMouseEnter, {
+        "column": $(this).data("column")
+      }, e);
+    }
+
+    function handleHeaderMouseLeave(e) {
+      trigger(self.onHeaderMouseLeave, {
+        "column": $(this).data("column")
+      }, e);
+    }
+
+    function handleHeaderContextMenu(e) {
+      var $header = $(e.target).closest(".slick-header-column", ".slick-header-columns");
+      var column = $header && $header.data("column");
+      trigger(self.onHeaderContextMenu, {column: column}, e);
+    }
+
+    function handleHeaderClick(e) {
+      var $header = $(e.target).closest(".slick-header-column", ".slick-header-columns");
+      var column = $header && $header.data("column");
+      if (column) {
+        trigger(self.onHeaderClick, {column: column}, e);
+      }
+    }
+
+    function handleMouseEnter(e) {
+      trigger(self.onMouseEnter, {}, e);
+    }
+
+    function handleMouseLeave(e) {
+      trigger(self.onMouseLeave, {}, e);
+    }
+
+    function cellExists(row, cell) {
+      return !(row < 0 || row >= getDataLength() || cell < 0 || cell >= columns.length);
+    }
+
+    function getCellFromPoint(x, y) {
+      var row = getRowFromPosition(y);
+      var cell = 0;
+
+      var w = 0;
+      for (var i = 0; i < columns.length && w < x; i++) {
+        w += columns[i].width;
+        cell++;
+      }
+
+      if (cell < 0) {
+        cell = 0;
+      }
+
+      return {row: row, cell: cell - 1};
+    }
+
+    function getCellFromNode(cellNode) {
+      // read column number from .l<columnNumber> CSS class
+      var cls = /l\d+/.exec(cellNode.className);
+      if (!cls) {
+        throw "getCellFromNode: cannot get cell - " + cellNode.className;
+      }
+      return parseInt(cls[0].substr(1, cls[0].length - 1), 10);
+    }
+
+    function getRowFromNode(rowNode) {
+      for (var row in rowsCache) {
+        if (rowsCache[row].rowNode === rowNode) {
+          return row | 0;
+        }
+      }
+
+      return null;
+    }
+
+    function getCellFromEvent(e) {
+      var $cell = $(e.target).closest(".slick-cell", $canvas);
+      if (!$cell.length) {
+        return null;
+      }
+
+      var row = getRowFromNode($cell[0].parentNode);
+      var cell = getCellFromNode($cell[0]);
+
+      if (row == null || cell == null) {
+        return null;
+      } else {
+        return {
+          "row": row,
+          "cell": cell
+        };
+      }
+    }
+
+    function getCellNodeBox(row, cell) {
+      if (!cellExists(row, cell)) {
+        return null;
+      }
+
+      var y1 = getRowTop(row);
+      var y2 = y1 + options.rowHeight - 1;
+      var x1 = 0;
+      for (var i = 0; i < cell; i++) {
+        x1 += columns[i].width;
+      }
+      var x2 = x1 + columns[cell].width;
+
+      return {
+        top: y1,
+        left: x1,
+        bottom: y2,
+        right: x2
+      };
+    }
+
+    //////////////////////////////////////////////////////////////////////////////////////////////
+    // Cell switching
+
+    function resetActiveCell() {
+      setActiveCellInternal(null, false);
+    }
+
+    function setFocus() {
+      if (tabbingDirection == -1) {
+        $focusSink[0].focus();
+      } else {
+        $focusSink2[0].focus();
+      }
+    }
+
+    function scrollCellIntoView(row, cell, doPaging) {
+      scrollRowIntoView(row, doPaging);
+
+      var colspan = getColspan(row, cell);
+      var left = columnPosLeft[cell],
+        right = columnPosRight[cell + (colspan > 1 ? colspan - 1 : 0)],
+        scrollRight = scrollLeft + viewportW;
+
+      if (left < scrollLeft) {
+        $viewport.scrollLeft(left);
+        handleScroll();
+        render();
+      } else if (right > scrollRight) {
+        $viewport.scrollLeft(Math.min(left, right - $viewport[0].clientWidth));
+        handleScroll();
+        render();
+      }
+    }
+
+    function setActiveCellInternal(newCell, opt_editMode) {
+      if (activeCellNode !== null) {
+        makeActiveCellNormal();
+        $(activeCellNode).removeClass("active");
+        if (rowsCache[activeRow]) {
+          $(rowsCache[activeRow].rowNode).removeClass("active");
+        }
+      }
+
+      var activeCellChanged = (activeCellNode !== newCell);
+      activeCellNode = newCell;
+
+      if (activeCellNode != null) {
+        activeRow = getRowFromNode(activeCellNode.parentNode);
+        activeCell = activePosX = getCellFromNode(activeCellNode);
+
+        if (opt_editMode == null) {
+          opt_editMode = (activeRow == getDataLength()) || options.autoEdit;
+        }
+
+        $(activeCellNode).addClass("active");
+        $(rowsCache[activeRow].rowNode).addClass("active");
+
+        if (options.editable && opt_editMode && isCellPotentiallyEditable(activeRow, activeCell)) {
+          clearTimeout(h_editorLoader);
+
+          if (options.asyncEditorLoading) {
+            h_editorLoader = setTimeout(function () {
+              makeActiveCellEditable();
+            }, options.asyncEditorLoadDelay);
+          } else {
+            makeActiveCellEditable();
+          }
+        }
+      } else {
+        activeRow = activeCell = null;
+      }
+
+      if (activeCellChanged) {
+        trigger(self.onActiveCellChanged, getActiveCell());
+      }
+    }
+
+    function clearTextSelection() {
+      if (document.selection && document.selection.empty) {
+        try {
+          //IE fails here if selected element is not in dom
+          document.selection.empty();
+        } catch (e) { }
+      } else if (window.getSelection) {
+        var sel = window.getSelection();
+        if (sel && sel.removeAllRanges) {
+          sel.removeAllRanges();
+        }
+      }
+    }
+
+    function isCellPotentiallyEditable(row, cell) {
+      var dataLength = getDataLength();
+      // is the data for this row loaded?
+      if (row < dataLength && !getDataItem(row)) {
+        return false;
+      }
+
+      // are we in the Add New row?  can we create new from this cell?
+      if (columns[cell].cannotTriggerInsert && row >= dataLength) {
+        return false;
+      }
+
+      // does this cell have an editor?
+      if (!getEditor(row, cell)) {
+        return false;
+      }
+
+      return true;
+    }
+
+    function makeActiveCellNormal() {
+      if (!currentEditor) {
+        return;
+      }
+      trigger(self.onBeforeCellEditorDestroy, {editor: currentEditor});
+      currentEditor.destroy();
+      currentEditor = null;
+
+      if (activeCellNode) {
+        var d = getDataItem(activeRow);
+        $(activeCellNode).removeClass("editable invalid");
+        if (d) {
+          var column = columns[activeCell];
+          var formatter = getFormatter(activeRow, column);
+          activeCellNode.innerHTML = formatter(activeRow, activeCell, getDataItemValueForColumn(d, column), column, d);
+          invalidatePostProcessingResults(activeRow);
+        }
+      }
+
+      // if there previously was text selected on a page (such as selected text in the edit cell just removed),
+      // IE can't set focus to anything else correctly
+      if (navigator.userAgent.toLowerCase().match(/msie/)) {
+        clearTextSelection();
+      }
+
+      getEditorLock().deactivate(editController);
+    }
+
+    function makeActiveCellEditable(editor) {
+      if (!activeCellNode) {
+        return;
+      }
+      if (!options.editable) {
+        throw "Grid : makeActiveCellEditable : should never get called when options.editable is false";
+      }
+
+      // cancel pending async call if there is one
+      clearTimeout(h_editorLoader);
+
+      if (!isCellPotentiallyEditable(activeRow, activeCell)) {
+        return;
+      }
+
+      var columnDef = columns[activeCell];
+      var item = getDataItem(activeRow);
+
+      if (trigger(self.onBeforeEditCell, {row: activeRow, cell: activeCell, item: item, column: columnDef}) === false) {
+        setFocus();
+        return;
+      }
+
+      getEditorLock().activate(editController);
+      $(activeCellNode).addClass("editable");
+
+      // don't clear the cell if a custom editor is passed through
+      if (!editor) {
+        activeCellNode.innerHTML = "";
+      }
+
+      currentEditor = new (editor || getEditor(activeRow, activeCell))({
+        grid: self,
+        gridPosition: absBox($container[0]),
+        position: absBox(activeCellNode),
+        container: activeCellNode,
+        column: columnDef,
+        item: item || {},
+        commitChanges: commitEditAndSetFocus,
+        cancelChanges: cancelEditAndSetFocus
+      });
+
+      if (item) {
+        currentEditor.loadValue(item);
+      }
+
+      serializedEditorValue = currentEditor.serializeValue();
+
+      if (currentEditor.position) {
+        handleActiveCellPositionChange();
+      }
+    }
+
+    function commitEditAndSetFocus() {
+      // if the commit fails, it would do so due to a validation error
+      // if so, do not steal the focus from the editor
+      if (getEditorLock().commitCurrentEdit()) {
+        setFocus();
+        if (options.autoEdit) {
+          navigateDown();
+        }
+      }
+    }
+
+    function cancelEditAndSetFocus() {
+      if (getEditorLock().cancelCurrentEdit()) {
+        setFocus();
+      }
+    }
+
+    function absBox(elem) {
+      var box = {
+        top: elem.offsetTop,
+        left: elem.offsetLeft,
+        bottom: 0,
+        right: 0,
+        width: $(elem).outerWidth(),
+        height: $(elem).outerHeight(),
+        visible: true};
+      box.bottom = box.top + box.height;
+      box.right = box.left + box.width;
+
+      // walk up the tree
+      var offsetParent = elem.offsetParent;
+      while ((elem = elem.parentNode) != document.body) {
+        if (box.visible && elem.scrollHeight != elem.offsetHeight && $(elem).css("overflowY") != "visible") {
+          box.visible = box.bottom > elem.scrollTop && box.top < elem.scrollTop + elem.clientHeight;
+        }
+
+        if (box.visible && elem.scrollWidth != elem.offsetWidth && $(elem).css("overflowX") != "visible") {
+          box.visible = box.right > elem.scrollLeft && box.left < elem.scrollLeft + elem.clientWidth;
+        }
+
+        box.left -= elem.scrollLeft;
+        box.top -= elem.scrollTop;
+
+        if (elem === offsetParent) {
+          box.left += elem.offsetLeft;
+          box.top += elem.offsetTop;
+          offsetParent = elem.offsetParent;
+        }
+
+        box.bottom = box.top + box.height;
+        box.right = box.left + box.width;
+      }
+
+      return box;
+    }
+
+    function getActiveCellPosition() {
+      return absBox(activeCellNode);
+    }
+
+    function getGridPosition() {
+      return absBox($container[0])
+    }
+
+    function handleActiveCellPositionChange() {
+      if (!activeCellNode) {
+        return;
+      }
+
+      trigger(self.onActiveCellPositionChanged, {});
+
+      if (currentEditor) {
+        var cellBox = getActiveCellPosition();
+        if (currentEditor.show && currentEditor.hide) {
+          if (!cellBox.visible) {
+            currentEditor.hide();
+          } else {
+            currentEditor.show();
+          }
+        }
+
+        if (currentEditor.position) {
+          currentEditor.position(cellBox);
+        }
+      }
+    }
+
+    function getCellEditor() {
+      return currentEditor;
+    }
+
+    function getActiveCell() {
+      if (!activeCellNode) {
+        return null;
+      } else {
+        return {row: activeRow, cell: activeCell};
+      }
+    }
+
+    function getActiveCellNode() {
+      return activeCellNode;
+    }
+
+    function scrollRowIntoView(row, doPaging) {
+      var rowAtTop = row * options.rowHeight;
+      var rowAtBottom = (row + 1) * options.rowHeight - viewportH + (viewportHasHScroll ? scrollbarDimensions.height : 0);
+
+      // need to page down?
+      if ((row + 1) * options.rowHeight > scrollTop + viewportH + offset) {
+        scrollTo(doPaging ? rowAtTop : rowAtBottom);
+        render();
+      }
+      // or page up?
+      else if (row * options.rowHeight < scrollTop + offset) {
+        scrollTo(doPaging ? rowAtBottom : rowAtTop);
+        render();
+      }
+    }
+
+    function scrollRowToTop(row) {
+      scrollTo(row * options.rowHeight);
+      render();
+    }
+
+    function scrollPage(dir) {
+      var deltaRows = dir * numVisibleRows;
+      scrollTo((getRowFromPosition(scrollTop) + deltaRows) * options.rowHeight);
+      render();
+
+      if (options.enableCellNavigation && activeRow != null) {
+        var row = activeRow + deltaRows;
+        var dataLengthIncludingAddNew = getDataLengthIncludingAddNew();
+        if (row >= dataLengthIncludingAddNew) {
+          row = dataLengthIncludingAddNew - 1;
+        }
+        if (row < 0) {
+          row = 0;
+        }
+
+        var cell = 0, prevCell = null;
+        var prevActivePosX = activePosX;
+        while (cell <= activePosX) {
+          if (canCellBeActive(row, cell)) {
+            prevCell = cell;  
+          }
+          cell += getColspan(row, cell);
+        }
+
+        if (prevCell !== null) {
+          setActiveCellInternal(getCellNode(row, prevCell));
+          activePosX = prevActivePosX;
+        } else {
+          resetActiveCell();
+        }
+      }
+    }
+
+    function navigatePageDown() {
+      scrollPage(1);
+    }
+
+    function navigatePageUp() {
+      scrollPage(-1);
+    }
+
+    function getColspan(row, cell) {
+      var metadata = data.getItemMetadata && data.getItemMetadata(row);
+      if (!metadata || !metadata.columns) {
+        return 1;
+      }
+
+      var columnData = metadata.columns[columns[cell].id] || metadata.columns[cell];
+      var colspan = (columnData && columnData.colspan);
+      if (colspan === "*") {
+        colspan = columns.length - cell;
+      } else {
+        colspan = colspan || 1;
+      }
+
+      return colspan;
+    }
+
+    function findFirstFocusableCell(row) {
+      var cell = 0;
+      while (cell < columns.length) {
+        if (canCellBeActive(row, cell)) {
+          return cell;
+        }
+        cell += getColspan(row, cell);
+      }
+      return null;
+    }
+
+    function findLastFocusableCell(row) {
+      var cell = 0;
+      var lastFocusableCell = null;
+      while (cell < columns.length) {
+        if (canCellBeActive(row, cell)) {
+          lastFocusableCell = cell;
+        }
+        cell += getColspan(row, cell);
+      }
+      return lastFocusableCell;
+    }
+
+    function gotoRight(row, cell, posX) {
+      if (cell >= columns.length) {
+        return null;
+      }
+
+      do {
+        cell += getColspan(row, cell);
+      }
+      while (cell < columns.length && !canCellBeActive(row, cell));
+
+      if (cell < columns.length) {
+        return {
+          "row": row,
+          "cell": cell,
+          "posX": cell
+        };
+      }
+      return null;
+    }
+
+    function gotoLeft(row, cell, posX) {
+      if (cell <= 0) {
+        return null;
+      }
+
+      var firstFocusableCell = findFirstFocusableCell(row);
+      if (firstFocusableCell === null || firstFocusableCell >= cell) {
+        return null;
+      }
+
+      var prev = {
+        "row": row,
+        "cell": firstFocusableCell,
+        "posX": firstFocusableCell
+      };
+      var pos;
+      while (true) {
+        pos = gotoRight(prev.row, prev.cell, prev.posX);
+        if (!pos) {
+          return null;
+        }
+        if (pos.cell >= cell) {
+          return prev;
+        }
+        prev = pos;
+      }
+    }
+
+    function gotoDown(row, cell, posX) {
+      var prevCell;
+      var dataLengthIncludingAddNew = getDataLengthIncludingAddNew();
+      while (true) {
+        if (++row >= dataLengthIncludingAddNew) {
+          return null;
+        }
+
+        prevCell = cell = 0;
+        while (cell <= posX) {
+          prevCell = cell;
+          cell += getColspan(row, cell);
+        }
+
+        if (canCellBeActive(row, prevCell)) {
+          return {
+            "row": row,
+            "cell": prevCell,
+            "posX": posX
+          };
+        }
+      }
+    }
+
+    function gotoUp(row, cell, posX) {
+      var prevCell;
+      while (true) {
+        if (--row < 0) {
+          return null;
+        }
+
+        prevCell = cell = 0;
+        while (cell <= posX) {
+          prevCell = cell;
+          cell += getColspan(row, cell);
+        }
+
+        if (canCellBeActive(row, prevCell)) {
+          return {
+            "row": row,
+            "cell": prevCell,
+            "posX": posX
+          };
+        }
+      }
+    }
+
+    function gotoNext(row, cell, posX) {
+      if (row == null && cell == null) {
+        row = cell = posX = 0;
+        if (canCellBeActive(row, cell)) {
+          return {
+            "row": row,
+            "cell": cell,
+            "posX": cell
+          };
+        }
+      }
+
+      var pos = gotoRight(row, cell, posX);
+      if (pos) {
+        return pos;
+      }
+
+      var firstFocusableCell = null;
+      var dataLengthIncludingAddNew = getDataLengthIncludingAddNew();
+      while (++row < dataLengthIncludingAddNew) {
+        firstFocusableCell = findFirstFocusableCell(row);
+        if (firstFocusableCell !== null) {
+          return {
+            "row": row,
+            "cell": firstFocusableCell,
+            "posX": firstFocusableCell
+          };
+        }
+      }
+      return null;
+    }
+
+    function gotoPrev(row, cell, posX) {
+      if (row == null && cell == null) {
+        row = getDataLengthIncludingAddNew() - 1;
+        cell = posX = columns.length - 1;
+        if (canCellBeActive(row, cell)) {
+          return {
+            "row": row,
+            "cell": cell,
+            "posX": cell
+          };
+        }
+      }
+
+      var pos;
+      var lastSelectableCell;
+      while (!pos) {
+        pos = gotoLeft(row, cell, posX);
+        if (pos) {
+          break;
+        }
+        if (--row < 0) {
+          return null;
+        }
+
+        cell = 0;
+        lastSelectableCell = findLastFocusableCell(row);
+        if (lastSelectableCell !== null) {
+          pos = {
+            "row": row,
+            "cell": lastSelectableCell,
+            "posX": lastSelectableCell
+          };
+        }
+      }
+      return pos;
+    }
+
+    function navigateRight() {
+      return navigate("right");
+    }
+
+    function navigateLeft() {
+      return navigate("left");
+    }
+
+    function navigateDown() {
+      return navigate("down");
+    }
+
+    function navigateUp() {
+      return navigate("up");
+    }
+
+    function navigateNext() {
+      return navigate("next");
+    }
+
+    function navigatePrev() {
+      return navigate("prev");
+    }
+
+    /**
+     * @param {string} dir Navigation direction.
+     * @return {boolean} Whether navigation resulted in a change of active cell.
+     */
+    function navigate(dir) {
+      if (!options.enableCellNavigation) {
+        return false;
+      }
+
+      if (!activeCellNode && dir != "prev" && dir != "next") {
+        return false;
+      }
+
+      if (!getEditorLock().commitCurrentEdit()) {
+        return true;
+      }
+      setFocus();
+
+      var tabbingDirections = {
+        "up": -1,
+        "down": 1,
+        "left": -1,
+        "right": 1,
+        "prev": -1,
+        "next": 1
+      };
+      tabbingDirection = tabbingDirections[dir];
+
+      var stepFunctions = {
+        "up": gotoUp,
+        "down": gotoDown,
+        "left": gotoLeft,
+        "right": gotoRight,
+        "prev": gotoPrev,
+        "next": gotoNext
+      };
+      var stepFn = stepFunctions[dir];
+      var pos = stepFn(activeRow, activeCell, activePosX);
+      if (pos) {
+        var isAddNewRow = (pos.row == getDataLength());
+        scrollCellIntoView(pos.row, pos.cell, !isAddNewRow);
+        setActiveCellInternal(getCellNode(pos.row, pos.cell));
+        activePosX = pos.posX;
+        return true;
+      } else {
+        setActiveCellInternal(getCellNode(activeRow, activeCell));
+        return false;
+      }
+    }
+
+    function getCellNode(row, cell) {
+      if (rowsCache[row]) {
+        ensureCellNodesInRowsCache(row);
+        return rowsCache[row].cellNodesByColumnIdx[cell];
+      }
+      return null;
+    }
+
+    function setActiveCell(row, cell) {
+      if (!initialized) { return; }
+      if (row > getDataLength() || row < 0 || cell >= columns.length || cell < 0) {
+        return;
+      }
+
+      if (!options.enableCellNavigation) {
+        return;
+      }
+
+      scrollCellIntoView(row, cell, false);
+      setActiveCellInternal(getCellNode(row, cell), false);
+    }
+
+    function canCellBeActive(row, cell) {
+      if (!options.enableCellNavigation || row >= getDataLengthIncludingAddNew() ||
+          row < 0 || cell >= columns.length || cell < 0) {
+        return false;
+      }
+
+      var rowMetadata = data.getItemMetadata && data.getItemMetadata(row);
+      if (rowMetadata && typeof rowMetadata.focusable === "boolean") {
+        return rowMetadata.focusable;
+      }
+
+      var columnMetadata = rowMetadata && rowMetadata.columns;
+      if (columnMetadata && columnMetadata[columns[cell].id] && typeof columnMetadata[columns[cell].id].focusable === "boolean") {
+        return columnMetadata[columns[cell].id].focusable;
+      }
+      if (columnMetadata && columnMetadata[cell] && typeof columnMetadata[cell].focusable === "boolean") {
+        return columnMetadata[cell].focusable;
+      }
+
+      return columns[cell].focusable;
+    }
+
+    function canCellBeSelected(row, cell) {
+      if (row >= getDataLength() || row < 0 || cell >= columns.length || cell < 0) {
+        return false;
+      }
+
+      var rowMetadata = data.getItemMetadata && data.getItemMetadata(row);
+      if (rowMetadata && typeof rowMetadata.selectable === "boolean") {
+        return rowMetadata.selectable;
+      }
+
+      var columnMetadata = rowMetadata && rowMetadata.columns && (rowMetadata.columns[columns[cell].id] || rowMetadata.columns[cell]);
+      if (columnMetadata && typeof columnMetadata.selectable === "boolean") {
+        return columnMetadata.selectable;
+      }
+
+      return columns[cell].selectable;
+    }
+
+    function gotoCell(row, cell, forceEdit) {
+      if (!initialized) { return; }
+      if (!canCellBeActive(row, cell)) {
+        return;
+      }
+
+      if (!getEditorLock().commitCurrentEdit()) {
+        return;
+      }
+
+      scrollCellIntoView(row, cell, false);
+
+      var newCell = getCellNode(row, cell);
+
+      // if selecting the 'add new' row, start editing right away
+      setActiveCellInternal(newCell, forceEdit || (row === getDataLength()) || options.autoEdit);
+
+      // if no editor was created, set the focus back on the grid
+      if (!currentEditor) {
+        setFocus();
+      }
+    }
+
+
+    //////////////////////////////////////////////////////////////////////////////////////////////
+    // IEditor implementation for the editor lock
+
+    function commitCurrentEdit() {
+      var item = getDataItem(activeRow);
+      var column = columns[activeCell];
+
+      if (currentEditor) {
+        if (currentEditor.isValueChanged()) {
+          var validationResults = currentEditor.validate();
+
+          if (validationResults.valid) {
+            if (activeRow < getDataLength()) {
+              var editCommand = {
+                row: activeRow,
+                cell: activeCell,
+                editor: currentEditor,
+                serializedValue: currentEditor.serializeValue(),
+                prevSerializedValue: serializedEditorValue,
+                execute: function () {
+                  this.editor.applyValue(item, this.serializedValue);
+                  updateRow(this.row);
+                },
+                undo: function () {
+                  this.editor.applyValue(item, this.prevSerializedValue);
+                  updateRow(this.row);
+                }
+              };
+
+              if (options.editCommandHandler) {
+                makeActiveCellNormal();
+                options.editCommandHandler(item, column, editCommand);
+              } else {
+                editCommand.execute();
+                makeActiveCellNormal();
+              }
+
+              trigger(self.onCellChange, {
+                row: activeRow,
+                cell: activeCell,
+                item: item
+              });
+            } else {
+              var newItem = {};
+              currentEditor.applyValue(newItem, currentEditor.serializeValue());
+              makeActiveCellNormal();
+              trigger(self.onAddNewRow, {item: newItem, column: column});
+            }
+
+            // check whether the lock has been re-acquired by event handlers
+            return !getEditorLock().isActive();
+          } else {
+            // Re-add the CSS class to trigger transitions, if any.
+            $(activeCellNode).removeClass("invalid");
+            $(activeCellNode).width();  // force layout
+            $(activeCellNode).addClass("invalid");
+
+            trigger(self.onValidationError, {
+              editor: currentEditor,
+              cellNode: activeCellNode,
+              validationResults: validationResults,
+              row: activeRow,
+              cell: activeCell,
+              column: column
+            });
+
+            currentEditor.focus();
+            return false;
+          }
+        }
+
+        makeActiveCellNormal();
+      }
+      return true;
+    }
+
+    function cancelCurrentEdit() {
+      makeActiveCellNormal();
+      return true;
+    }
+
+    function rowsToRanges(rows) {
+      var ranges = [];
+      var lastCell = columns.length - 1;
+      for (var i = 0; i < rows.length; i++) {
+        ranges.push(new Slick.Range(rows[i], 0, rows[i], lastCell));
+      }
+      return ranges;
+    }
+
+    function getSelectedRows() {
+      if (!selectionModel) {
+        throw "Selection model is not set";
+      }
+      return selectedRows;
+    }
+
+    function setSelectedRows(rows) {
+      if (!selectionModel) {
+        throw "Selection model is not set";
+      }
+      selectionModel.setSelectedRanges(rowsToRanges(rows));
+    }
+
+
+    //////////////////////////////////////////////////////////////////////////////////////////////
+    // Debug
+
+    this.debug = function () {
+      var s = "";
+
+      s += ("\n" + "counter_rows_rendered:  " + counter_rows_rendered);
+      s += ("\n" + "counter_rows_removed:  " + counter_rows_removed);
+      s += ("\n" + "renderedRows:  " + renderedRows);
+      s += ("\n" + "numVisibleRows:  " + numVisibleRows);
+      s += ("\n" + "maxSupportedCssHeight:  " + maxSupportedCssHeight);
+      s += ("\n" + "n(umber of pages):  " + n);
+      s += ("\n" + "(current) page:  " + page);
+      s += ("\n" + "page height (ph):  " + ph);
+      s += ("\n" + "vScrollDir:  " + vScrollDir);
+
+      alert(s);
+    };
+
+    // a debug helper to be able to access private members
+    this.eval = function (expr) {
+      return eval(expr);
+    };
+
+    //////////////////////////////////////////////////////////////////////////////////////////////
+    // Public API
+
+    $.extend(this, {
+      "slickGridVersion": "2.1",
+
+      // Events
+      "onScroll": new Slick.Event(),
+      "onSort": new Slick.Event(),
+      "onHeaderMouseEnter": new Slick.Event(),
+      "onHeaderMouseLeave": new Slick.Event(),
+      "onHeaderContextMenu": new Slick.Event(),
+      "onHeaderClick": new Slick.Event(),
+      "onHeaderCellRendered": new Slick.Event(),
+      "onBeforeHeaderCellDestroy": new Slick.Event(),
+      "onHeaderRowCellRendered": new Slick.Event(),
+      "onBeforeHeaderRowCellDestroy": new Slick.Event(),
+      "onMouseEnter": new Slick.Event(),
+      "onMouseLeave": new Slick.Event(),
+      "onClick": new Slick.Event(),
+      "onDblClick": new Slick.Event(),
+      "onContextMenu": new Slick.Event(),
+      "onKeyDown": new Slick.Event(),
+      "onAddNewRow": new Slick.Event(),
+      "onValidationError": new Slick.Event(),
+      "onViewportChanged": new Slick.Event(),
+      "onColumnsReordered": new Slick.Event(),
+      "onColumnsResized": new Slick.Event(),
+      "onCellChange": new Slick.Event(),
+      "onBeforeEditCell": new Slick.Event(),
+      "onBeforeCellEditorDestroy": new Slick.Event(),
+      "onBeforeDestroy": new Slick.Event(),
+      "onActiveCellChanged": new Slick.Event(),
+      "onActiveCellPositionChanged": new Slick.Event(),
+      "onDragInit": new Slick.Event(),
+      "onDragStart": new Slick.Event(),
+      "onDrag": new Slick.Event(),
+      "onDragEnd": new Slick.Event(),
+      "onSelectedRowsChanged": new Slick.Event(),
+      "onCellCssStylesChanged": new Slick.Event(),
+
+      // Methods
+      "registerPlugin": registerPlugin,
+      "unregisterPlugin": unregisterPlugin,
+      "getColumns": getColumns,
+      "setColumns": setColumns,
+      "getColumnIndex": getColumnIndex,
+      "updateColumnHeader": updateColumnHeader,
+      "setSortColumn": setSortColumn,
+      "setSortColumns": setSortColumns,
+      "getSortColumns": getSortColumns,
+      "autosizeColumns": autosizeColumns,
+      "getOptions": getOptions,
+      "setOptions": setOptions,
+      "getData": getData,
+      "getDataLength": getDataLength,
+      "getDataItem": getDataItem,
+      "setData": setData,
+      "getSelectionModel": getSelectionModel,
+      "setSelectionModel": setSelectionModel,
+      "getSelectedRows": getSelectedRows,
+      "setSelectedRows": setSelectedRows,
+      "getContainerNode": getContainerNode,
+
+      "render": render,
+      "invalidate": invalidate,
+      "invalidateRow": invalidateRow,
+      "invalidateRows": invalidateRows,
+      "invalidateAllRows": invalidateAllRows,
+      "updateCell": updateCell,
+      "updateRow": updateRow,
+      "getViewport": getVisibleRange,
+      "getRenderedRange": getRenderedRange,
+      "resizeCanvas": resizeCanvas,
+      "updateRowCount": updateRowCount,
+      "scrollRowIntoView": scrollRowIntoView,
+      "scrollRowToTop": scrollRowToTop,
+      "scrollCellIntoView": scrollCellIntoView,
+      "getCanvasNode": getCanvasNode,
+      "focus": setFocus,
+
+      "getCellFromPoint": getCellFromPoint,
+      "getCellFromEvent": getCellFromEvent,
+      "getActiveCell": getActiveCell,
+      "setActiveCell": setActiveCell,
+      "getActiveCellNode": getActiveCellNode,
+      "getActiveCellPosition": getActiveCellPosition,
+      "resetActiveCell": resetActiveCell,
+      "editActiveCell": makeActiveCellEditable,
+      "getCellEditor": getCellEditor,
+      "getCellNode": getCellNode,
+      "getCellNodeBox": getCellNodeBox,
+      "canCellBeSelected": canCellBeSelected,
+      "canCellBeActive": canCellBeActive,
+      "navigatePrev": navigatePrev,
+      "navigateNext": navigateNext,
+      "navigateUp": navigateUp,
+      "navigateDown": navigateDown,
+      "navigateLeft": navigateLeft,
+      "navigateRight": navigateRight,
+      "navigatePageUp": navigatePageUp,
+      "navigatePageDown": navigatePageDown,
+      "gotoCell": gotoCell,
+      "getTopPanel": getTopPanel,
+      "setTopPanelVisibility": setTopPanelVisibility,
+      "setHeaderRowVisibility": setHeaderRowVisibility,
+      "getHeaderRow": getHeaderRow,
+      "getHeaderRowColumn": getHeaderRowColumn,
+      "getGridPosition": getGridPosition,
+      "flashCell": flashCell,
+      "addCellCssStyles": addCellCssStyles,
+      "setCellCssStyles": setCellCssStyles,
+      "removeCellCssStyles": removeCellCssStyles,
+      "getCellCssStyles": getCellCssStyles,
+
+      "init": finishInitialization,
+      "destroy": destroy,
+
+      // IEditor implementation
+      "getEditorLock": getEditorLock,
+      "getEditController": getEditController
+    });
+
+    init();
+  }
+}(jQuery));
+(function ($) {
+  // register namespace
+  $.extend(true, window, {
+    "Slick": {
+      "Plugins": {
+        "HeaderMenu": HeaderMenu
+      }
+    }
+  });
+
+
+  /***
+   * A plugin to add drop-down menus to column headers.
+   *
+   * USAGE:
+   *
+   * Add the plugin .js & .css files and register it with the grid.
+   *
+   * To specify a menu in a column header, extend the column definition like so:
+   *
+   *   var columns = [
+   *     {
+   *       id: 'myColumn',
+   *       name: 'My column',
+   *
+   *       // This is the relevant part
+   *       header: {
+   *          menu: {
+   *              items: [
+   *                {
+   *                  // menu item options
+   *                },
+   *                {
+   *                  // menu item options
+   *                }
+   *              ]
+   *          }
+   *       }
+   *     }
+   *   ];
+   *
+   *
+   * Available menu options:
+   *    tooltip:      Menu button tooltip.
+   *
+   *
+   * Available menu item options:
+   *    title:        Menu item text.
+   *    disabled:     Whether the item is disabled.
+   *    tooltip:      Item tooltip.
+   *    command:      A command identifier to be passed to the onCommand event handlers.
+   *    iconCssClass: A CSS class to be added to the menu item icon.
+   *    iconImage:    A url to the icon image.
+   *
+   *
+   * The plugin exposes the following events:
+   *    onBeforeMenuShow:   Fired before the menu is shown.  You can customize the menu or dismiss it by returning false.
+   *        Event args:
+   *            grid:     Reference to the grid.
+   *            column:   Column definition.
+   *            menu:     Menu options.  Note that you can change the menu items here.
+   *
+   *    onCommand:    Fired on menu item click for buttons with 'command' specified.
+   *        Event args:
+   *            grid:     Reference to the grid.
+   *            column:   Column definition.
+   *            command:  Button command identified.
+   *            button:   Button options.  Note that you can change the button options in your
+   *                      event handler, and the column header will be automatically updated to
+   *                      reflect them.  This is useful if you want to implement something like a
+   *                      toggle button.
+   *
+   *
+   * @param options {Object} Options:
+   *    buttonCssClass:   an extra CSS class to add to the menu button
+   *    buttonImage:      a url to the menu button image (default '../images/down.gif')
+   * @class Slick.Plugins.HeaderButtons
+   * @constructor
+   */
+  function HeaderMenu(options) {
+    var _grid;
+    var _self = this;
+    var _handler = new Slick.EventHandler();
+    var _defaults = {
+      buttonCssClass: null,
+      buttonImage: null
+    };
+    var $menu;
+    var $activeHeaderColumn;
+
+
+    function init(grid) {
+      options = $.extend(true, {}, _defaults, options);
+      _grid = grid;
+      _handler
+        .subscribe(_grid.onHeaderCellRendered, handleHeaderCellRendered)
+        .subscribe(_grid.onBeforeHeaderCellDestroy, handleBeforeHeaderCellDestroy);
+
+      // Force the grid to re-render the header now that the events are hooked up.
+      _grid.setColumns(_grid.getColumns());
+
+      // Hide the menu on outside click.
+      $(document.body).bind("mousedown", handleBodyMouseDown);
+    }
+
+
+    function destroy() {
+      _handler.unsubscribeAll();
+      $(document.body).unbind("mousedown", handleBodyMouseDown);
+    }
+
+
+    function handleBodyMouseDown(e) {
+      if ($menu && $menu[0] != e.target && !$.contains($menu[0], e.target)) {
+        hideMenu();
+      }
+    }
+
+
+    function hideMenu() {
+      if ($menu) {
+        $menu.remove();
+        $menu = null;
+        $activeHeaderColumn
+          .removeClass("slick-header-column-active");
+      }
+    }
+
+    function handleHeaderCellRendered(e, args) {
+      var column = args.column;
+      var menu = column.header && column.header.menu;
+
+      if (menu) {
+        var $el = $("<div></div>")
+          .addClass("slick-header-menubutton")
+          .data("column", column)
+          .data("menu", menu);
+
+        if (options.buttonCssClass) {
+          $el.addClass(options.buttonCssClass);
+        }
+
+        if (options.buttonImage) {
+          $el.css("background-image", "url(" + options.buttonImage + ")");
+        }
+
+        if (menu.tooltip) {
+          $el.attr("title", menu.tooltip);
+        }
+
+        $el
+          .bind("click", showMenu)
+          .appendTo(args.node);
+      }
+    }
+
+
+    function handleBeforeHeaderCellDestroy(e, args) {
+      var column = args.column;
+
+      if (column.header && column.header.menu) {
+        $(args.node).find(".slick-header-menubutton").remove();
+      }
+    }
+
+
+    function showMenu(e) {
+      var $menuButton = $(this);
+      var menu = $menuButton.data("menu");
+      var columnDef = $menuButton.data("column");
+
+      // Let the user modify the menu or cancel altogether,
+      // or provide alternative menu implementation.
+      if (_self.onBeforeMenuShow.notify({
+          "grid": _grid,
+          "column": columnDef,
+          "menu": menu
+        }, e, _self) == false) {
+        return;
+      }
+
+
+      if (!$menu) {
+        $menu = $("<div class='slick-header-menu'></div>")
+          .appendTo(_grid.getContainerNode());
+      }
+      $menu.empty();
+
+
+      // Construct the menu items.
+      for (var i = 0; i < menu.items.length; i++) {
+        var item = menu.items[i];
+
+        var $li = $("<div class='slick-header-menuitem'></div>")
+          .data("command", item.command || '')
+          .data("column", columnDef)
+          .data("item", item)
+          .bind("click", handleMenuItemClick)
+          .appendTo($menu);
+
+        if (item.disabled) {
+          $li.addClass("slick-header-menuitem-disabled");
+        }
+
+        if (item.tooltip) {
+          $li.attr("title", item.tooltip);
+        }
+
+        var $icon = $("<div class='slick-header-menuicon'></div>")
+          .appendTo($li);
+
+        if (item.iconCssClass) {
+          $icon.addClass(item.iconCssClass);
+        }
+
+        if (item.iconImage) {
+          $icon.css("background-image", "url(" + item.iconImage + ")");
+        }
+
+        $("<span class='slick-header-menucontent'></span>")
+          .text(item.title)
+          .appendTo($li);
+      }
+
+
+      // Position the menu.
+      $menu
+        .offset({ top: $(this).offset().top + $(this).height(), left: $(this).offset().left });
+
+
+      // Mark the header as active to keep the highlighting.
+      $activeHeaderColumn = $menuButton.closest(".slick-header-column");
+      $activeHeaderColumn
+        .addClass("slick-header-column-active");
+
+      // Stop propagation so that it doesn't register as a header click event.
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+
+    function handleMenuItemClick(e) {
+      var command = $(this).data("command");
+      var columnDef = $(this).data("column");
+      var item = $(this).data("item");
+
+      if (item.disabled) {
+        return;
+      }
+
+      hideMenu();
+
+      if (command != null && command != '') {
+        _self.onCommand.notify({
+            "grid": _grid,
+            "column": columnDef,
+            "command": command,
+            "item": item
+          }, e, _self);
+      }
+
+      // Stop propagation so that it doesn't register as a header click event.
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    $.extend(this, {
+      "init": init,
+      "destroy": destroy,
+
+      "onBeforeMenuShow": new Slick.Event(),
+      "onCommand": new Slick.Event()
+    });
+  }
+})(jQuery);
+(function ($) {
+    $.extend(true, window, {
+        "Ext": {
+            "Plugins": {
+                "HeaderFilter": HeaderFilter
+            }
+        }
+    });
+
+    /*
+    Based on SlickGrid Header Menu Plugin (https://github.com/mleibman/SlickGrid/blob/master/plugins/slick.headermenu.js)
+
+    (Can't be used at the same time as the header menu plugin as it implements the dropdown in the same way)
+
+
+    */
+
+    function HeaderFilter(options) {
+        var grid;
+        var self = this;
+        var handler = new Slick.EventHandler();
+        var defaults = {
+            buttonImage: "/images/down.png",
+            filterImage: "/images/filter.png",
+            sortAscImage: "/images/sort-asc.png",
+            sortDescImage: "/images/sort-desc.png",
+            sortAvailable: true
+        };
+        var $menu;
+
+        function init(g) {
+            options = $.extend(true, {}, defaults, options);
+            grid = g;
+            handler.subscribe(grid.onHeaderCellRendered, handleHeaderCellRendered)
+                   .subscribe(grid.onBeforeHeaderCellDestroy, handleBeforeHeaderCellDestroy)
+                   .subscribe(grid.onClick, handleBodyMouseDown)
+                   .subscribe(grid.onColumnsResized, columnsResized);
+
+            grid.setColumns(grid.getColumns());
+
+            $(document.body).bind("mousedown", handleBodyMouseDown);
+        }
+
+        function destroy() {
+            handler.unsubscribeAll();
+            $(document.body).unbind("mousedown", handleBodyMouseDown);
+        }
+
+        function handleBodyMouseDown(e) {
+            if ($menu && $menu[0] != e.target && !$.contains($menu[0], e.target)) {
+                hideMenu();
+            }
+        }
+
+        function hideMenu() {
+            if ($menu) {
+                $menu.remove();
+                $menu = null;
+            }
+        }
+
+        function handleHeaderCellRendered(e, args) {
+            //console.log('handleHeaderCellRendered');
+            var column = args.column;
+            if(column.unfiltered) { return false; }
+
+            var $el = $("<div></div>")
+                .addClass("slick-header-menubutton")
+                .data("column", column);
+
+            if (options.buttonImage) {
+                $el.css("background-image", "url(" + options.buttonImage + ")");
+            }
+
+            $el.bind("click", showFilter).appendTo(args.node);
+        }
+
+        function handleBeforeHeaderCellDestroy(e, args) {
+            $(args.node)
+                .find(".slick-header-menubutton")
+                .remove();
+        }
+
+        function addMenuItem(menu, columnDef, title, command, image) {
+            var $item = $("<div class='slick-header-menuitem'>")
+                         .data("command", command)
+                         .data("column", columnDef)
+                         .bind("click", handleMenuItemClick)
+                         .appendTo(menu);
+
+            var $icon = $("<div class='slick-header-menuicon'>")
+                         .appendTo($item);
+
+            if (image) {
+                $icon.css("background-image", "url(" + image + ")");
+            }
+
+            $("<span class='slick-header-menucontent'>")
+             .text(title)
+             .appendTo($item);
+        }
+
+        function showFilter(e) {
+            var $menuButton = $(this);
+            var columnDef = $menuButton.data("column");
+
+            columnDef.filterValues = columnDef.filterValues || [];
+
+            // WorkingFilters is a copy of the filters to enable apply/cancel behaviour
+            var workingFilters = columnDef.filterValues.slice(0);
+
+            var filterItems;
+
+            if (workingFilters.length === 0) {
+                // Filter based all available values
+                filterItems = getFilterValues(grid.getData(), columnDef);
+            }
+            else {
+                // Filter based on current dataView subset
+                filterItems = getAllFilterValues(grid.getData().getItems(), columnDef);
+            }
+
+            if (!$menu) {
+                $menu = $("<div class='slick-header-menu'>").appendTo(document.body);
+            }
+
+            $menu.empty();
+
+            if(options.sortAvailable) {
+              addMenuItem($menu, columnDef, 'Sort Ascending', 'sort-asc', options.sortAscImage);
+              addMenuItem($menu, columnDef, 'Sort Descending', 'sort-desc', options.sortDescImage);
+            }
+
+            var filterOptions = "<label><input type='checkbox' value='-1' />(Select All)</label>";
+
+            for (var i = 0; i < filterItems.length; i++) {
+                var filtered = _.contains(workingFilters, filterItems[i]);
+
+                filterOptions += "<label><input type='checkbox' value='" + i + "'"
+                                 + (filtered ? " checked='checked'" : "")
+                                 + "/>" + filterItems[i] + "</label>";
+            }
+
+            var $filter = $("<div class='filter'>")
+                           .append($(filterOptions))
+                           .appendTo($menu);
+
+            $('<button>OK</button>')
+                .appendTo($menu)
+                .bind('click', function (ev) {
+                    columnDef.filterValues = workingFilters.splice(0);
+                    setButtonImage($menuButton, columnDef.filterValues.length > 0);
+                    handleApply(ev, columnDef);
+                });
+
+            $('<button>Clear</button>')
+                .appendTo($menu)
+                .bind('click', function (ec) {
+                    columnDef.filterValues.length = 0;
+                    setButtonImage($menuButton, false);
+                    handleApply(ec, columnDef);
+                });
+
+            $('<button>Cancel</button>')
+                .appendTo($menu)
+                .bind('click', hideMenu);
+
+            $(':checkbox', $filter).bind('click', function () {
+                workingFilters = changeWorkingFilter(filterItems, workingFilters, $(this));
+            });
+
+            var offset = $(this).offset();
+            var left = offset.left - $menu.width() + $(this).width() - 8;
+
+            $menu.css("top", offset.top + $(this).height())
+                 .css("left", (left > 0 ? left : 0));
+
+            // Stop propagation so that it doesn't register as a header click event.
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        function columnsResized() {
+            hideMenu();
+        }
+
+        function changeWorkingFilter(filterItems, workingFilters, $checkbox) {
+            var value = $checkbox.val();
+            var $filter = $checkbox.parent().parent();
+
+            if ($checkbox.val() < 0) {
+                // Select All
+                if ($checkbox.prop('checked')) {
+                    $(':checkbox', $filter).prop('checked', true);
+                    workingFilters = filterItems.slice(0);
+                } else {
+                    $(':checkbox', $filter).prop('checked', false);
+                    workingFilters.length = 0;
+                }
+            } else {
+                var index = _.indexOf(workingFilters, filterItems[value]);
+
+                if ($checkbox.prop('checked') && index < 0) {
+                    workingFilters.push(filterItems[value]);
+                }
+                else {
+                    if (index > -1) {
+                        workingFilters.splice(index, 1);
+                    }
+                }
+            }
+
+            return workingFilters;
+        }
+
+        function setButtonImage($el, filtered) {
+            var image = "url(" + (filtered ? options.filterImage : options.buttonImage) + ")";
+
+            $el.css("background-image", image);
+        }
+
+        function handleApply(e, columnDef) {
+            hideMenu();
+
+            self.onFilterApplied.notify({ "grid": grid, "column": columnDef }, e, self);
+
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        function getFilterValues(dataView, column) {
+            var seen = [];
+            for (var i = 0; i < dataView.getLength() ; i++) {
+                var value = dataView.getItem(i)[column.field];
+
+                if (value !== undefined && !_.contains(seen, value)) {
+                    seen.push(value);
+                }
+            }
+
+            return _.sortBy(seen, function (v) { return v; });
+        }
+
+        function getAllFilterValues(data, column) {
+            var seen = [];
+            for (var i = 0; i < data.length; i++) {
+                var value = data[i][column.field];
+
+                if (value !== undefined && !_.contains(seen, value)) {
+                    seen.push(value);
+                }
+            }
+
+            return _.sortBy(seen, function (v) { return v; });
+        }
+
+        function handleMenuItemClick(e) {
+            var command = $(this).data("command");
+            var columnDef = $(this).data("column");
+
+            hideMenu();
+
+            self.onCommand.notify({
+                "grid": grid,
+                "column": columnDef,
+                "command": command
+            }, e, self);
+
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        $.extend(this, {
+            "init": init,
+            "destroy": destroy,
+            "onFilterApplied": new Slick.Event(),
+            "onCommand": new Slick.Event()
+        });
+    }
+})(jQuery);
+// Utilities for SlickGrid usage
+
+
+// Wrapper around browser storage (auto JSON stringify & parse).
+var jmtStorage = {
+  //storageAdaptor: sessionStorage,
+  storageAdaptor: localStorage,
+
+  // Thanks Angus! - http://goo.gl/GtvsU
+  toType: function(obj) {
+    return ({}).toString.call(obj).match(/\s([a-z|A-Z]+)/)[1].toLowerCase();
+  },
+
+  getItem: function(key) {
+    var item = this.storageAdaptor.getItem(key);
+
+    try {
+      item = JSON.parse(item);
+    } catch (e) {}
+
+    return item;
+  },
+
+  setItem: function(key, value) {
+    var type = this.toType(value);
+
+    if (/object|array/.test(type)) {
+      value = JSON.stringify(value);
+    }
+
+    this.storageAdaptor.setItem(key, value);
+  },
+
+  removeItem: function(key) {
+    this.storageAdaptor.removeItem(key);
+  },
+
+  genStandardKey: function(suffix) {
+    var rx  = new RegExp('/\\d+$');
+    if (suffix === undefined) {
+      return window.location.pathname.replace(rx,'');
+    }
+    else {
+      return window.location.pathname.replace(rx,'') +'|'+ suffix;
+    }
+  }
+};
+
+// Save grid columns to local storage.
+function saveLocSlickGridCols(gridid) {
+    var key     = jmtStorage.genStandardKey(gridid) + '_cols';
+    var grid     = jQuery('#'+gridid).data('slickgrid');
+    var columns = [];
+    jQuery.each(grid.getColumns(), function(i,val) {
+      columns.push(val.id);
+    });
+    var fltr    = {columns: columns};
+    jmtStorage.setItem(key, fltr);
+    if(_.isEmpty(fltr)) {
+      alert('Nothing to save');
+    }
+    else {
+      alert('Saved columns');
+    }
+}
+
+// Read local storage and apply saved columns.
+function getLocSlickGridCols(gridid) {
+  var key  = jmtStorage.genStandardKey(gridid) + '_cols';
+  var fltr = jmtStorage.getItem(key) || 'Not Set';
+  if(fltr === 'Not Set' || _.isEmpty(fltr)) {
+    alert('There is no saved column setting to apply.');
+    return;
+  }
+
+  var grid     = jQuery('#'+gridid).data('slickgrid');
+  var ids      = JSON.parse(fltr.columns);
+  var new_cols = [];
+  for (var i = 0; i < ids.length; i++) {
+    new_cols.push(grid.getColumns()[grid.getColumnIndex(ids[i])]);
+  }
+  grid.setColumns(new_cols);
+}
+
+// Save grid filters to local storage.
+function saveLocSlickGrid(gridid, caption) {
+    var key     = jmtStorage.genStandardKey(gridid);
+    var grid    = jQuery('#'+gridid).data('slickgrid');
+    var columns = grid.getColumns();
+    var fltr    = {};
+    for (var i = 0; i < columns.length; i++) {
+        var col          = columns[i];
+        var filterValues = col.filterValues;
+
+        if (filterValues && filterValues.length > 0) {
+          fltr[col.id] = filterValues;
+        }
+    }
+    jmtStorage.setItem(key, fltr);
+    if(_.isEmpty(fltr)) {
+      alert('Nothing to save');
+    }
+    else {
+      alert('Saved filter snapshot');
+    }
+}
+
+// Read local storage and apply saved filter rules.
+function getLocSlickGrid(gridid, caption) {
+  var key  = jmtStorage.genStandardKey(gridid);
+  var fltr = jmtStorage.getItem(key) || 'Not Set';
+  if(fltr === 'Not Set' || _.isEmpty(fltr)) {
+    alert('There is no saved snapshot to apply as a filter.');
+    return; // TODO: clear filters?
+  }
+
+  var keys     = _.map(fltr, function(e,k) {return k});
+  var grid     = jQuery('#'+gridid).data('slickgrid');
+  var gridView = jQuery('#'+gridid).data('slickgridView');
+  var cls      = jQuery('#'+gridid).prop('class').split(' ');
+  var no       = _.find(cls, function(e) { return e.startsWith('slickgrid_') }).replace('slickgrid_', '');
+  var columns  = grid.getColumns();
+  for (var i = 0; i < columns.length; i++) {
+    var col = columns[i];
+    if (_.find(keys, function(k) { return k === col.id; })) {
+      col.filterValues = JSON.parse(fltr[col.id]);
+      if( _.isEmpty(col.filterValues)) {
+        jQuery('.slick-header-menubutton', '#slickgrid_'+no+col.id.replace(/\./g,'\\.')).css("background-image", "url(/images/down.png)");
+      }
+      else {
+        jQuery('.slick-header-menubutton', '#slickgrid_'+no+col.id.replace(/\./g,'\\.')).css("background-image", "url(/images/filter.png)");
+      }
+    }
+  }
+  gridView.refresh();
+  showStatusCounts(gridid);
+}
+
+// Convert commas to semicolons for including in CSV.
+function scrubCommas(dataArray) {
+  var newArray = [];
+  dataArray.forEach(function(data, index){
+    newArray[index] = data.replace(/,/g, ";");
+  });
+  return newArray;
+}
+// Convert html entities to plain text for including in CSV.
+function scrubHtmlEntities(dataArray) {
+  var newArray = [];
+  dataArray.forEach(function(data, index){
+    newArray[index] = data.replace(/&amp;/g, "&").replace(/&gt;/g, ">").replace(/&#x2F;/g, "/").replace(/&lt;/g, "<");
+  });
+  return newArray;
+}
+
+// Download an array as a csv file.
+// data must be an array of arrays, filename must not include the extension.
+function saveArrayToCsv(data, filename) {
+  var csvContent = ''; //"data:text/csv;charset=utf-8,";
+  data.forEach(function(infoArray, index){
+    dataString = scrubHtmlEntities(scrubCommas(infoArray)).join(",");
+    csvContent += index < data.length ? dataString+ "\n" : dataString;
+  });
+  // var encodedUri = encodeURI(csvContent);
+  // ...This change implemented because Chrome started saving all files named "download"...
+  // See: https://code.google.com/p/chromium/issues/detail?id=373182
+  var blob = new Blob([csvContent],{type: 'text/csv;charset=utf-8;'});
+  var encodedUri =  URL.createObjectURL(blob);
+  // ...end of change...
+  // window.open(encodedUri); //... This will work in Firefox, below only in Chrome...
+  var link = document.createElement("a");
+  link.setAttribute("href", encodedUri);
+  link.setAttribute("download", filename+".csv"); // From Chrome 35.0.1916.114, the filename is no longer honoured.
+  link.click();
+}
+
+  // Download the contents of a grid as a csv file.
+  function downloadSlickGrid(gridid,filename) {
+    var columnNms   = [];
+    var columnHeads = [];
+    var i,j;
+    var grid     = jQuery('#'+gridid).data('slickgrid');
+    var gridView = jQuery('#'+gridid).data('slickgridView');
+    var colModel = grid.getColumns();
+
+    // Only choose sortable columns - this will ignore rownumbers, multiselect checkboxes and links columns.
+    // Build up a list of columns and of column headings.
+    jQuery.each(colModel, function(i,e){ if(e.sortable || e.dynlink) {columnNms.push(e.id); columnHeads.push(e.name); } });
+
+    var data = [];
+    data.push(columnHeads);
+
+    var cols,row, indent, k, colval, test_str;
+    for(i=0;i<gridView.getLength();i++) {
+      row = gridView.getItem(i);
+      cols =[];
+      for(j=0;j<columnNms.length;j++) {
+        if (row.__group) {
+          if (j === 0) {
+            indent = '';
+            for(k=0;k<row.level;k++) {indent += ' '; }
+            cols.push(_.escape(indent + row.value + ' (' + row.count+ ')'));
+          }
+          else {
+            cols.push(_.escape(''));
+          }
+        }
+        else {
+          if (row.__groupTotals === true) {
+            colval = '';
+            if (row.sum && row.sum[columnNms[j]]) {
+              colval = row.sum[columnNms[j]];
+            }
+            if (row.avg && row.avg[columnNms[j]]) {
+              colval = 'avg: '+row.avg[columnNms[j]];
+            }
+            if (row.min && row.min[columnNms[j]]) {
+              colval = 'min: '+row.min[columnNms[j]];
+            }
+            if (row.max && row.max[columnNms[j]]) {
+              colval = 'max: '+row.max[columnNms[j]];
+            }
+            cols.push(_.escape(colval));
+          }
+          else {
+            no_escape = false;
+            // Get the text out of a link:
+            if (_.isString(row[columnNms[j]]) && row[columnNms[j]].indexOf('"href":') > 0) {
+              colval = jQuery.parseJSON( row[columnNms[j]] ).text;
+            } else {
+              // if the value is numeric and more than 12 digits long,
+              // and does not include a decimal point,
+              // place a single quote at the start - so a spreadsheet will treat it as text.
+              test_str = ''+row[columnNms[j]];
+              if (test_str.length > 12 && !isNaN(test_str) && !test_str.includes('.')) {
+                colval = "'"+test_str;
+                no_escape = true; // Cannot escape the quote!
+              }
+              else {
+                colval = row[columnNms[j]];
+              }
+            }
+            cols.push(no_escape ? colval : _.escape(colval));
+          }
+        }
+      }
+      data.push(cols);
+    }
+    saveArrayToCsv(data, filename);
+  }
+
+  // Display the number of rows after search/filter.
+  function showStatusCounts(gridid) {
+      var dataView = jQuery('#'+gridid).data('slickgridView');
+      var statusText;
+      var totLength = dataView.getItems().length;
+      var grpLength = dataView.getGroups().length;
+      if (grpLength > 0) {
+        jQuery.each(dataView.getGroups(), function(i,val) {
+          if (val.totals !== null && val.totals.__groupTotals) { grpLength += 1; }
+        });
+      }
+      var displayLength = dataView.getLength() - grpLength;
+      if (displayLength === totLength) {
+        if (totLength === 0) {
+          statusText = 'There are no rows to display';
+        }
+        else {
+          statusText = 'Showing all rows (' + displayLength + ')';
+        }
+      } else {
+          statusText = 'Showing ' + displayLength + ' of ' + totLength + ' rows';
+      }
+      jQuery('#'+gridid+'status-label').text(statusText);
+  }
+
+  // On success of AJAX call, load results into dialog.
+  function dialogLoadSuccessHandler(data, textStatus, jqXHR) {
+    jQuery('#dialog-modal').html(data);
+  }
+  // On failure of AJAX call, show an alert.
+  function errorHandler(jqXHR, textStatus, errorThrown) {
+    alert("Something went wrong: " + textStatus + ": " + errorThrown);
+  }
+
+  // Popup a JQ UI dialog.
+  function jmtPopupDialog(new_width, new_height, title, text, href) {
+    if (new_width) {jQuery('#dialog-modal').dialog('option', 'width', new_width);}
+    if (new_height) {jQuery('#dialog-modal').dialog('option', 'height', new_height);}
+    jQuery('#dialog-modal').html('');
+    jQuery('#dialog-modal').dialog('option', 'title', title || text);
+    jQuery('#dialog-modal').dialog('open');
+    jQuery.ajax({
+      type: 'get',
+      url: href,
+      //          dataType: "script",
+      success: dialogLoadSuccessHandler//,
+      //error: errorHandler
+    });
+  }
+
+  function makeColSafeOrNull(val) {
+    if (val === null || val === undefined || val === '') {
+      return 'nil';
+    }
+    else {
+      if (typeof val === 'string') {
+        return "'" +val.replace(/'/g, "%27").replace(/"/g,'%22')+ "'";
+      }
+      else {
+        return "'" +val+ "'";
+      }
+    }
+  }
+
+  // Submit ids and editable values from grid.
+  function returnChangesFromGrid(gridid, action) {
+    Slick.GlobalEditorLock.commitCurrentEdit(); // Ensure current edit is saved to the grid first.
+    var grid     = jQuery('#'+gridid).data('slickgrid');
+    var dataView = jQuery('#'+gridid).data('slickgridView'),
+        columns = [],
+        res = [];
+    // Map editable column ids
+    jQuery.each(grid.getColumns(), function(i,val) {
+      if(val.editor) { columns.push(val.id); }
+    });
+
+    var i,j,row, colval,rowval;
+    for(i=0;i<dataView.getLength();i++) {
+      row = dataView.getItem(i);
+      if (!row.__group) {
+        rowval = "{:id=>"+row['id'];
+        for(j=0;j<columns.length;j++) {
+          rowval += (',:'+columns[j]+"=>"+makeColSafeOrNull(row[columns[j]]));
+        }
+        res.push(rowval+'}');
+      }
+    }
+    if(confirm('Are you sure you want to save these changes?')) {
+      var fn = window[gridid+'ValidateEditedRows'] // Turn the function name string into a callable function ref (avoid using eval).
+      //var isOk = eval(gridid+'ValidateEditedRows').call(null,res);
+      var isOk = fn( res );
+      if (isOk) {
+        var newform = jQuery( document.createElement('form') );
+        newform.attr('method', 'post')
+        .attr('action', action)
+        .append('<input type=\"hidden\" name=\"grid_values\" value=\"['+res.join(',')+']\" />')
+        .appendTo('body') // Required for Firefox to work.
+        .submit();
+      }
+    }
+  }
+
+  // Submit multiselect choice
+  function returnMultiSelectIdsFromGrid(gridid, action, can_be_cleared) {
+    var gridSel  = jQuery('#'+gridid).data('slickgridSelectedIds');
+    var ids      = gridSel.ids;
+    var msg;
+    if(!can_be_cleared && ids.length === 0) {
+      alert("You have not selected any items to submit!");
+    }
+    else {
+      if(ids.length === 0) {
+        msg = 'Are you sure you want to submit an empty selection?'
+      }
+      else {
+        msg = 'Are you sure you want to submit this selection?(' + ids.length.toString() + ' items)'
+      }
+      if(confirm(msg)) {
+        var newform = jQuery( document.createElement('form') );
+        newform.attr('method', 'post')
+          .attr('action', action)
+          .append('<input type=\"hidden\" name=\"selection[list]\" value=\"['+ids.join(',')+']\" />')
+          .appendTo('body') // Required for Firefox to work.
+          .submit();
+      }
+    }
+  }
+
+  // Build up the content for the view row table (in grid column order or in alphabetical column name order)
+  function buildRowsForViewRowTable(gridid, sorted) {
+    var grid     = jQuery('#'+gridid).data('slickgrid');
+    var dataView = jQuery('#'+gridid).data('slickgridView');
+    var columns = [];
+    jQuery.each(grid.getColumns(), function(i,val) {
+      if(!val.unfiltered || val.dynlink) { columns.push(val); }
+    });
+    if(sorted === true) {
+      columns.sort(function(a,b){return a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1;});
+    }
+    var item     = dataView.getItem(grid.getActiveCell().row);
+    var i, cls, strBod = '', rowCls = item.row_colour, colCls = '';
+    for (i=0; i < columns.length; i++) {
+        var col = columns[i], val;
+        if(i % 2 === 0) {cls = rowCls+' roweven'; } else { cls = rowCls+' rowodd'; }
+        if(col.formatter === undefined) {
+          val = item[col.field];
+          val = _.escape(val);
+        }
+        else {
+          val = col.formatter(dataView.getIdxById(item.id),grid.getColumnIndex(col.id), item[col.field], col, item);
+          if (!col.dynlink && col.formatter !== slickBooleanFormatter ) {
+            val = _.escape(val);
+          }
+        }
+        if (col.cssClass === undefined) {colCls = ' class="slick-view-cell"'; } else { colCls = ' class="'+col.cssClass+' slick-view-cell"'; }
+        //strBod += '<tr class="hover-row '+cls+'"><td>'+col.name+'</td><td'+colCls+'>'+_.escape(val)+'</td></tr>';
+        strBod += '<tr class="hover-row '+cls+'"><td>'+col.name+'</td><td'+colCls+'>'+val+'</td></tr>';
+    }
+    return strBod;
+  }
+
+  // Expand/collapse all groups
+  function expandCollapseGrid(gridid,expand) {
+    var dataView = jQuery('#'+gridid).data('slickgridView');
+    if( expand ) {
+      dataView.expandAllGroups();
+    }
+    else {
+      dataView.collapseAllGroups();
+    }
+  }
+
+  // Toggle to show only selected rows of multiselect grid.
+  function filterSelectedIds(gridid,filter) {
+    var dataView = jQuery('#'+gridid).data('slickgridView');
+    if (filter) {
+      dataView.setFilterArgs({ selectedIds:true });
+      dataView.refresh();
+      showStatusCounts(gridid);
+    }
+    else {
+      dataView.setFilterArgs({ searchString:'' });
+      jQuery('#'+gridid+'search').keyup();
+    }
+  }
+
+  // Toggle to invert selection in a multiselect grid.
+  function invertSelectedIds(gridid) {
+    var grid             = jQuery('#'+gridid).data('slickgrid');
+    var dataView         = jQuery('#'+gridid).data('slickgridView');
+    var multiSelectStore = jQuery('#'+gridid).data('slickgridSelectedIds');
+    var rows = [];
+
+    // Alert and prevent if any filter is in place...
+    var totLength = dataView.getItems().length;
+    var grpLength = dataView.getGroups().length;
+    if (grpLength > 0) {
+      jQuery.each(dataView.getGroups(), function(i,val) {
+        if (val.totals !== null && val.totals.__groupTotals) { grpLength += 1; }
+      });
+    }
+    var displayLength = dataView.getLength() - grpLength;
+    if (displayLength !== totLength) {
+      alert('Please clear all filters before inverting your selection');
+      return;
+    }
+
+    // Invert...
+    for (var i = 0; i < totLength; i++) { rows[i] = i; }
+    var newSelection = _.reject(dataView.mapRowsToIds(rows), function(row_id) {
+      return _.contains(multiSelectStore.ids, row_id)
+    });
+    grid.setSelectedRows(dataView.mapIdsToRows(newSelection))
+  }
+
+  function navGrid(gridid, forward) {
+    var grid     = jQuery('#'+gridid).data('slickgrid');
+    if (forward) {
+      grid.navigateDown();
+    }
+    else {
+      grid.navigateUp();
+    }
+  }
+
+  // View fields of a grid row in a dialog.
+  function viewRowGridButtonClick(gridid,caption) {
+    var grid     = jQuery('#'+gridid).data('slickgrid');
+    if(grid.getActiveCell() === null) {
+      alert('Please select a row.');
+      return;
+    }
+    var sorted = jQuery('#dialog-modal').data('viewRowSorted');
+     var strSortBtn = "";
+     if (sorted) {
+      strSortBtn = "<button disabled=true>Sort</button>";
+     }
+     else {
+      strSortBtn = "<button onclick=\"jQuery('#dialog-modal').data('viewRowSorted',true);jQuery('#"+gridid+"vrBod').html(buildRowsForViewRowTable('"+gridid+"', true));this.disabled=true;\">Sort</button>";
+     }
+    var strPrevBtn = "<button onclick=\"navGrid('"+gridid+"', false);jQuery('#"+gridid+"vrBod').html(buildRowsForViewRowTable('"+gridid+"', jQuery('#dialog-modal').data('viewRowSorted')));\">Prev</button>";
+    var strNextBtn = "<button onclick=\"navGrid('"+gridid+"', true);jQuery('#"+gridid+"vrBod').html(buildRowsForViewRowTable('"+gridid+"', jQuery('#dialog-modal').data('viewRowSorted')));\">Next</button>";
+
+    jQuery('#dialog-modal').html(strSortBtn+strPrevBtn+strNextBtn+'<div style="position:absolute;overflow-y:auto;top:40px;bottom:10px;left:10px;right:10px;min-height:200px;">'+
+                                 '<table class="thinbordertable">'+
+                                 '<thead><tr><th>Column</th><th>Value</th></tr></thead>'+
+                                 '<tbody id="'+gridid+'vrBod">'+buildRowsForViewRowTable(gridid, sorted)+'</tbody></table></div>');
+    jQuery('#dialog-modal').dialog('option', 'title', 'Selected row from '+caption);
+    jQuery('#dialog-modal').dialog('option', 'height', 300);
+    jQuery("#dialog-modal button:first" ).button({
+        icons: {
+          primary: "ui-icon-arrowthick-2-n-s"
+        }
+      }).next().button({icons: {primary: "ui-icon-seek-prev" }}).next().button({icons: {secondary: "ui-icon-seek-next" }});
+    jQuery('#dialog-modal').dialog('open');
+    jQuery("#dialog-modal button:first" ).blur();
+  }
+
+  // Return a number with thousand separator and at least 2 digits after the decimal.
+  function numberWithCommas2(x) {
+    if (typeof x === 'string') { x = parseFloat(x); }
+    x = Math.round((x + 0.00001) * 100) / 100 // Round to 2 digits if longer.
+    var parts = x.toString().split(".");
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    if(parts[1] === undefined || parts[1].length === 0) {parts[1] = '00'; }
+    if(parts[1].length === 1) {parts[1] += '0'; }
+    return parts.join(".");
+  }
+
+  // Return a number with thousand separator and at least 4 digits after the decimal.
+  function numberWithCommas4(x) {
+    if (typeof x === 'string') { x = parseFloat(x); }
+    x = Math.round((x + 0.0000001) * 10000) / 10000 // Round to 4 digits if longer.
+    var parts = x.toString().split(".");
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    if(parts[1] === undefined || parts[1].length === 0) {parts[1] = '0000'; }
+    while(parts[1].length < 4) {parts[1] += '0'; }
+    return parts.join(".");
+  }
+  // Formatters
+
+  // Format a text cell with classes for colour/bold/italic...
+  function slickTextFormatter(row, cell, value, columnDef, dataContext) {
+    if(value === ''){ return ''; }
+    if(dataContext.cell_format_rules === ''){ return value; }
+    var colFmtRule = jQuery.parseJSON( dataContext.cell_format_rules );
+    var cls = colFmtRule[columnDef.id];
+    if( cls === undefined ) { return value; }
+    return "<span class='"+cls+"'>"+value+"</span>";
+  }
+
+  // Format a numeric text cell with percent sign.
+  function slickPercentFormatter(row, cell, value, columnDef, dataContext) {
+    if(value === ''){ return ''; }
+    return numberWithCommas2(value)+'%'; // 98.23%
+  }
+
+  // Format a numeric text cell with thousands separator.
+  function slickDelimitedFormatter(row, cell, value, columnDef, dataContext) {
+    if(value === ''){ return ''; }
+    return numberWithCommas2(value); // 10,000,000.00
+  }
+
+  // Format a numeric text cell with thousands separator. 4 decimals.
+  function slickDelimitedFormatter4(row, cell, value, columnDef, dataContext) {
+    if(value === ''){ return ''; }
+    return numberWithCommas4(value); // 10,000,000.0000
+  }
+
+  // Format a numeric text cell with thousands separator and "R" for currency.
+  function slickCurrencyFormatter(row, cell, value, columnDef, dataContext) {
+    if(value === ''){ return ''; }
+    return 'R'+numberWithCommas2(value); // R10,000,000.00
+  }
+
+  // Format a numeric text cell with thousands separator and "R" for currency. 4 decimals.
+  function slickCurrencyFormatter4(row, cell, value, columnDef, dataContext) {
+    if(value === ''){ return ''; }
+    return 'R'+numberWithCommas4(value); // R10,000,000.0000
+  }
+
+  // Format a boolean with a checkbox image.
+  function slickBooleanFormatter(row, cell, value, columnDef, dataContext) {
+    if(value === ''){ return ''; }
+    if(value == 't' || value == 'true' || value == 'y' || value == 1) {
+      return "<span class='ac_icon ac_icon_check'>&nbsp;</span>";
+    }
+    else {
+      return "<span class='ac_icon ac_icon_uncheck'>&nbsp;</span>";
+    }
+  }
+
+  // TODO: spinner...
+  function slickLinkFormatter(row, cell, value, columnDef, dataContext) {
+    if(value === '' || jQuery.isEmptyObject(value)){ return ''; }
+    var linkConfig, prompt_action;
+    if(typeof(value) == "string") {linkConfig= jQuery.parseJSON( value ); } else {linkConfig = value;}
+    if(linkConfig === null || linkConfig === undefined) { return ''; }
+    if(linkConfig.prompt_text !== '') { prompt_action = ' onclick="if(!confirm(\''+linkConfig.prompt_text+'\')) {return false;}" '; } else {prompt_action = ''; }
+    if(linkConfig.icon === undefined || linkConfig.icon === '') {
+      return "<a href='"+linkConfig.href+"' "+prompt_action+"class='"+linkConfig.cls+"'>"+linkConfig.text+"</a>";
+    } else {
+      var img = linkConfig.icon;
+      if(img.indexOf('.') === -1) { img += '.png'; }
+      return "<a href='"+linkConfig.href+"' "+prompt_action+"class='"+linkConfig.cls+"'><img src='/images/"+img+"' border='0' height='16' width='16' /></a>";
+    }
+  }
+
+  function slickLinkPopUpFormatter(row, cell, value, columnDef, dataContext) {
+    if(value === '' || jQuery.isEmptyObject(value)){ return ''; }
+    var linkConfig;
+    if(typeof(value) == "string") {linkConfig= jQuery.parseJSON( value ); } else {linkConfig = value;}
+    if(linkConfig === null || linkConfig === undefined) { return ''; }
+    if(linkConfig.icon === undefined || linkConfig.icon === '') {
+      return "<a style='text-decoration: underline;' id='"+linkConfig.href+"' href='#' onclick='javascript:parent.call_open_window(this);'>"+linkConfig.text+"</a>";
+    } else {
+      var img = linkConfig.icon;
+      if(img.indexOf('.') === -1) { img += '.png'; }
+      return "<a style='text-decoration: underline;' id='"+linkConfig.href+"' href='#' onclick='javascript:parent.call_open_window(this);'><img src='/images/"+img+"' border='0' height='16' width='16' /></a>";
+    }
+  }
+
+  // Formatter for Action Collection.
+  // Presents a button which when clicked launches a contextMenu.
+  function slickActionCollectionFormatter(row, cell, value, columnDef, dataContext) {
+    if(value === ''){ return ''; }
+    return '<button class="slickGridContextMenu" data-row="'+row+'">list</button>';
+  }
+
+// Process an Action type link.
+  function slickProcessAction(body) {
+    if(body.prompt_text !== '') {
+      if(!confirm(body.prompt_text)) {return false;}
+    }
+    if(body.cls.indexOf('popupjs') > -1) { // Load page in a UI dialog
+      var parsed_opts = JSON.parse(body.opts);
+      jmtPopupDialog(parsed_opts['data-dlg-width'], parsed_opts['data-dlg-height'], parsed_opts['data-dlg-title'], body.text, body.href);
+    }
+    else {
+      window.location.href = body.href;
+    }
+  }
+  function slickProcessLinkWindow(body) {
+    open_window_link(body.href);
+  }
+
+  // Handles printing the grid as a table when the navigation bar button is clicked.
+  function printSlickGrid(gridid,pgTitle) {
+     var disp_setting =  "toolbar=yes,location=no,directories=yes,menubar=yes,";
+         disp_setting += "scrollbars=yes,width=650, height=600, left=100, top=25";
+
+    var columnNms   = [];
+    var columnHeads = [];
+    var i,j;
+    var grid     = jQuery('#'+gridid).data('slickgrid');
+    var gridView = jQuery('#'+gridid).data('slickgridView');
+    var colModel = grid.getColumns();
+
+    // Only choose sortable columns - this will ignore rownumbers, multiselect checkboxes and links columns.
+    // Build up a list of columns and of column headings.
+    jQuery.each(colModel, function(i,e){ if(e.sortable || e.dynlink) {columnNms.push(e.id); columnHeads.push(e.name); } });
+
+    // Build up the print table.
+    var printTable = '<table><thead><tr>';
+    for(i=0;i<columnNms.length;i++) { printTable += '<th>'+columnHeads[i]+'</th>'; }
+    printTable += '</tr></thead><tbody>';
+
+    var cls,row, colval;
+    for(i=0;i<gridView.getLength();i++) {
+      row = gridView.getItem(i);
+      cls = row.row_colour;
+      if(cls !== '') {
+        cls = ' class="'+cls+'"';
+      }
+      printTable += '<tr'+cls+'>';
+      //for(j=0;j<columnNms.length;j++) { printTable += '<td>'+_.escape(row[columnNms[j]])+'</td>'; }
+      for(j=0;j<columnNms.length;j++) {
+        if (row.__group) {
+          if (j === 0) {
+            printTable += '<td><div class="slick-group-title" level="'+row.level+'">'+row.title+'</div></td>';
+          }
+          else {
+            printTable += '<td>'+_.escape('')+'</td>';
+          }
+        }
+        else {
+          if (row.__groupTotals === true) {
+            colval = '';
+            if (row.sum && row.sum[columnNms[j]]) {
+              colval = row.sum[columnNms[j]];
+            }
+            if (row.avg && row.avg[columnNms[j]]) {
+              colval = 'avg: '+row.avg[columnNms[j]];
+            }
+            if (row.min && row.min[columnNms[j]]) {
+              colval = 'min: '+row.min[columnNms[j]];
+            }
+            if (row.max && row.max[columnNms[j]]) {
+              colval = 'max: '+row.max[columnNms[j]];
+            }
+            printTable += '<td>'+_.escape(colval)+'</td>';
+          }
+          else {
+            // Get the text out of a link:
+            if (_.isString(row[columnNms[j]]) && row[columnNms[j]].indexOf('"href":') > 0) {
+              colval = jQuery.parseJSON( row[columnNms[j]] ).text;
+            } else {
+              colval = row[columnNms[j]];
+            }
+            printTable += '<td>'+_.escape(colval)+'</td>';
+          }
+        }
+      }
+      printTable += '</tr>\n';
+    }
+    printTable += '</tbody></table>';
+
+    // Open a new window to display the table and call print on it.
+    var docprint = window.open("", "", disp_setting);
+    docprint.document.open();
+    docprint.document.write('<html><head><title>Print '+pgTitle+'</title>');
+    docprint.document.write('<style type="text/css">#prt-container table { border-collapse:collapse; }'+ ' .slick_row_black td { color: black; } .slick_row_blue td { color: blue; } .slick_row_brown td { color: brown; } .slick_row_green td { color: green; } .slick_row_gray td { color: gray; } .slick_row_maroon td { color: maroon; } .slick_row_orange td { color: orange; } .slick_row_purple td { color: purple; } .slick_row_red td { color: red; } .slick_row_light_green td { color: lightgreen; } .slick_row_dark_green td  { color: darkgreen; } #prt-container th, #prt-container td { border:1px solid gray; padding: 3px; } .slick-group-title[level="0"] { font-weight: bold; } .slick-group-title[level="1"] { text-decoration: underline; text-indent: 10px; } .slick-group-title[level="2"] { font-style: italic; text-indent: 20px; } </style>');
+    docprint.document.write('</head><body onLoad="self.print()"><h1>'+pgTitle+'</h1><div id="prt-container" class="prt-hide">');
+    docprint.document.write(printTable);
+    docprint.document.write('</div></body></html>');
+    docprint.document.close();
+    docprint.focus();
+  }
+
+  // Zoom the grid to full page and back.
+  function zoomGridButtonClick() {
+     var cf = jQuery('#contentFrame', top.document);
+     // var td = null;
+     // if (cf.length === 0) {
+     //   cf = top.document;
+     //   td = top.document;
+     // }
+     // else {
+     //   td = top.frames[1].document;
+     // }
+     var isSub = ('contentFrame' !== self.name);
+     var sf = null;
+     if(isSub) {sf = jQuery('#'+self.name, top.frames[1].document);}
+     //if(isSub) {sf = jQuery('#'+self.name, td);}
+     if(jQuery(cf).hasClass('zoomout')) {
+       jQuery(cf).removeClass('zoomout');
+       if(isSub) {jQuery(sf).removeClass('zoomoutsub'); }
+       jQuery('#jqgridminimize').css('visibility', 'hidden');
+     }
+     else {
+       jQuery(cf).addClass('zoomout');
+       if(isSub) {jQuery(sf).addClass('zoomoutsub'); }
+       jQuery('#jqgridminimize').css('visibility', 'visible');
+     }
+   }
+
+  //TODO: if invalidate passed, repaint grid... (for when was hidden - EDI grids)....
+  function resizeSlickGrid(id, grid) {
+     jQuery('#'+id+'_caption').width(jQuery('#'+id).width());
+     grid.resizeCanvas();
+  }
+
+  // Build menu items for ActionCollection.
+  function build_ac_context_sub_menu(linkConfig,level) {
+    var items            = {};
+    var ky = ''+level;
+
+    linkConfig.forEach(function(element,i) {
+      var k = level.slice();
+      k.push(i);
+      if(element.type==='separator')   {items[k.join('|')] = "---------"; }
+      if(element.type==='action')      {items[k.join('|')] = {name: element.body.text, icon: element.body.icon}; }
+      if(element.type==='text')        {items[k.join('|')] = {name: element.body, disabled: true}; }
+      if(element.type==='link_window') {items[k.join('|')] = {name: element.body.text, icon: element.body.icon}; }
+      if(element.type==='sub_menu')    {items[k.join('|')] = {name: element.caption, items: build_ac_context_sub_menu(element.body,k)}; }
+    });
+    return items;
+  }
+
+  // Return data object (at correct level for submenu).
+  function linkConfigCurrentAt(linkConfig,levels) {
+    var nl = levels;
+    var i, currObj;
+    nl.shift(); // Remove level 0
+    currObj = linkConfig[nl.shift()]; // Get level 0 object
+    for (i=0; i < nl.length; i++) {
+      currObj = currObj.body[nl[i]];
+    }
+    return currObj;
+  }
+
+  // Change grouping
+  function changeGridGrouping(gridid, groupable_fields) {
+    var grid = jQuery('#'+gridid).data('slickgrid');
+    var dataView = jQuery('#'+gridid).data('slickgridView');
+    var columns = []; //
+    var opts;
+    var sp_col = {id:'colSpacer', name:'', field: 'cs', width:0, cannotTriggerInsert:true, resizable:false, selectable:false, sortable:false, unfiltered:true};
+    var nr_col = {id:'rowNumber', name:'&nbsp;', field: 'rn', formatter:function(row, cell, value, columnDef, dataContext) { return row + 1 + ' '; }, behavior:'select', cssClass:'cell-selection', width:40, cannotTriggerInsert:true, resizable:false, unselectable:true, sortable:false, unfiltered:true, cssClass: 'ui-state-default jqgrid-rownum slk_cell_right_align'};
+
+
+    var already_grouped = _.map(dataView.getGrouping(), function(e,k) {return e.getter});
+    jQuery.each(already_grouped, function(index, value) {
+      opts += '<option selected="selected">'+value+'</option>';
+    });
+    jQuery.each(groupable_fields, function(index, value) {
+      if( already_grouped.indexOf(value) == -1) {
+        opts += '<option>'+value+'</option>';
+      }
+    });
+
+    var dlg = jQuery('<div id="changeGroupColDlg">' +
+        'Group by one or more columns:<br /> <select id="changeGroupCol" multiple="multiple" class="multiselect" style="width:420px;">'+
+        opts+
+        '</select></div>');
+
+    dlg.dialog({title: 'Select grouping column',
+      modal: true,
+      width: 450,
+      buttons: { "Ok": function() {
+        var choice = jQuery('#changeGroupCol').val();
+        if(choice === null) {
+          columns.push(nr_col);
+          jQuery.each(grid.getColumns(), function (i, e) {
+            if (e.id !== 'rowNumber' && e.id !== 'colSpacer') {
+              columns.push(e);
+            }
+          });
+          grid.setColumns(columns);
+          dataView.setGrouping([]);
+        }
+        else {
+          columns.push(sp_col);
+          jQuery.each(grid.getColumns(), function (i, e) {
+            if (e.id !== 'rowNumber' && e.id !== 'colSpacer') {
+              columns.push(e);
+            }
+          });
+          grid.setColumns(columns);
+          changeGroupingTo(gridid, choice);
+        }
+        jQuery(this).dialog("close");
+        jQuery('#changeGroupColDlg').remove();
+      },
+      "Cancel": function() {jQuery(this).dialog("close");
+        jQuery('#changeGroupColDlg').remove();
+      }}
+    });
+    jQuery('#changeGroupCol').multiselect();
+
+  }
+
+  function changeGroupingTo(gridid, selected_fields) {
+    var dataView = jQuery('#'+gridid).data('slickgridView');
+    var aggregators = jQuery('#'+gridid).data('groupAggregators');
+    var grpArray = [];
+    var colours  = ['green', 'blue', 'orange', 'purple', 'red'];
+    var obj = {};
+    jQuery.each(selected_fields, function(i,val) {
+      obj = {};
+      obj.getter = val;
+      obj.formatter = function (g) { return g.value + '  <span style="color:'+colours[i]+'">(' + g.count + ')</span>'; };
+      obj.aggregators = aggregators;
+      grpArray.push(obj);
+    });
+    dataView.setGrouping(grpArray);
+  }
+
+// Document READY -------------------------------------------------------------
+jQuery(document).ready(function () {
+
+  // Context menu for ActionCollection in a grid.
+  jQuery.contextMenu({
+    selector: '.slickGridContextMenu',
+    trigger: 'left',
+    build: function($trigger, e) {
+      // this callback is executed every time the menu is to be shown
+      // its results are destroyed every time the menu is hidden
+      // e is the original contextmenu event, containing e.pageX and e.pageY (amongst other data)
+      var row              = jQuery(e.target).data('row');
+      var gridView         = jQuery(jQuery(e.target).parents('.jmt_slick_grid')[0]).data('slickgridView');
+      var rowdata          = gridView.getItem(row);
+      var actionCollection = rowdata.actions;
+      var linkConfig       = jQuery.parseJSON( actionCollection );
+      var items            = {};
+      items                = build_ac_context_sub_menu(linkConfig,[0]);
+
+      return {
+        callback: function(key, options) {
+          var levels = key.split('|');
+          var currObj = linkConfigCurrentAt(linkConfig,levels);
+          if(currObj.type === 'action')      {slickProcessAction(currObj.body);}
+          if(currObj.type === 'link_window') {slickProcessLinkWindow(currObj.body);}
+        },
+        items: items
+      };
+    }
+  });
+
+  // Set the error handler for all AJAX calls.
+  jQuery.ajaxSetup({error: errorHandler });
+
+  // Convert a div into a modal dialog.
+  jQuery( "#dialog-modal" ).dialog({
+    autoOpen: false,
+    width: 500,
+    //height: 140,
+    modal: true
+  });
+
+  // Show a popup with a webquery URL to be copied to clipboard.
+  jQuery(document).on('click', 'a.copy_webquery_link', function() {
+    var link = jQuery(this);
+    copyToClipboard('Paste this link in your spreadsheet. ', link.attr('href'));
+    return false;
+  });
+
+  // Load a form into a modal dialog.
+  //jQuery('a.popupjs').live('click', function() {
+  jQuery(document).on('click', 'a.popupjs', function() {
+    var $a    = jQuery(this);
+    // Check if the anchor has been set to no longer popup the dialog.
+    if ($a.data().checks && $a.data().checks.doPopup === false) {return false;}
+
+    var new_width  = $a.attr('data-dlg-width');
+    var new_height = $a.attr('data-dlg-height');
+    // if (new_width) {jQuery('#dialog-modal').dialog('option', 'width', new_width);}
+    // if (new_height) {jQuery('#dialog-modal').dialog('option', 'height', new_height);}
+
+    var title = $a.attr('data-dlg-title');
+    jmtPopupDialog(new_width, new_height, title, $a.text(), $a.attr('href'));
+    // jQuery('#dialog-modal').html('');
+    // jQuery('#dialog-modal').dialog('option', 'title', title || $a.text());
+    // jQuery('#dialog-modal').dialog('open');
+    // jQuery.ajax({
+    //   type: 'get',
+    //   url: $a.attr('href'),
+    //   //          dataType: "script",
+    //   success: dialogLoadSuccessHandler//,
+    //   //error: errorHandler
+    // });
+    return false;
+  });
+
+  // Load a form into a modal dialog with parameter from a select box.
+  //jQuery('a.popupjs-sel').live('click', function() {
+  jQuery(document).on('click', 'a.popupjs-sel', function() {
+    var $a      = jQuery(this);
+    // Check if the anchor has been set to no longer popup the dialog.
+    if ($a.data().checks && $a.data().checks.doPopup === false) {return false;}
+
+    var new_width  = $a.attr('data-dlg-width');
+    var new_height = $a.attr('data-dlg-height');
+    if (new_width) {jQuery('#dialog-modal').dialog('option', 'width', new_width);}
+    if (new_height) {jQuery('#dialog-modal').dialog('option', 'height', new_height);}
+
+    var title   = $a.attr('data-dlg-title');
+    var sel_id  = $a.attr('data-sel');
+    var sel_val = jQuery('#' + sel_id).val();
+    jQuery('#dialog-modal').html('');
+    jQuery('#dialog-modal').dialog('option', 'title', title || $a.text());
+    jQuery('#dialog-modal').dialog('open');
+    jQuery.ajax({
+      type: 'get',
+      url: $a.attr('href') + '/' + sel_val, // + '.js',
+      //          dataType: "script",
+      success: dialogLoadSuccessHandler//,
+      //error: errorHandler
+    });
+    return false;
+  });
+
+  // Toggle display of list of links for an ActionCollection in a grid column.
+  jQuery(document).on('click', '.action-collection-click', function() {
+    var a   = jQuery(this);
+    var pop = jQuery('div', a);
+    if (pop.is(':hidden')) {
+      jQuery('.action-collection-click div').hide(); // Make sure only one popup is showing at a time.
+      pop.show();
+    }
+    else {
+      pop.hide();
+    }
+  });
+
+});
+
+
+// Select Editor for SlickGrid.
+(function ($) {
+  // register namespace
+  $.extend(true, window, {
+    "Slick": {
+      "Editors": {
+        "Select": SelectEditor
+      }
+    }
+  });
+
+  function SelectEditor(args) {
+    var $select;
+    var defaultValue;
+    var scope = this;
+
+    this.init = function () {
+      var opts = '';
+      for (var i=0;i<args.column.select_vals.length; i++) {
+        if(args.column.select_texts) {
+          opts += "<OPTION value='"+args.column.select_vals[i]+"'>"+args.column.select_texts[i]+"</OPTION>"
+        }
+        else {
+          opts += "<OPTION value='"+args.column.select_vals[i]+"'>"+args.column.select_vals[i]+"</OPTION>"
+        }
+      }
+      $select = $("<SELECT tabIndex='0' class='editor-select'>"+opts+"</SELECT>");
+      $select.appendTo(args.container);
+      $select.focus();
+    };
+
+    this.destroy = function () {
+      $select.remove();
+    };
+
+    this.focus = function () {
+      $select.focus();
+    };
+
+    this.loadValue = function (item) {
+      $select.val((defaultValue = item[args.column.field]));
+      $select.select();
+    };
+
+    this.serializeValue = function () {
+      return ($select.val());
+    };
+
+    this.applyValue = function (item, state) {
+      item[args.column.field] = state;
+    };
+
+    this.isValueChanged = function () {
+      return ($select.val() != defaultValue);
+    };
+
+    this.validate = function () {
+      return {
+        valid: true,
+        msg: null
+      };
+    };
+
+    this.init();
+  }
+
+})(jQuery);
+/*!
+ * jQuery contextMenu - Plugin for simple contextMenu handling
+ *
+ * Version: git-master
+ *
+ * Authors: Rodney Rehm, Addy Osmani (patches for FF)
+ * Web: http://medialize.github.com/jQuery-contextMenu/
+ *
+ * Licensed under
+ *   MIT License http://www.opensource.org/licenses/mit-license
+ *   GPL v3 http://opensource.org/licenses/GPL-3.0
+ *
+ */
+
+(function($, undefined){
+    
+    // TODO: -
+        // ARIA stuff: menuitem, menuitemcheckbox und menuitemradio
+        // create <menu> structure if $.support[htmlCommand || htmlMenuitem] and !opt.disableNative
+
+// determine html5 compatibility
+$.support.htmlMenuitem = ('HTMLMenuItemElement' in window);
+$.support.htmlCommand = ('HTMLCommandElement' in window);
+$.support.eventSelectstart = ("onselectstart" in document.documentElement);
+/* // should the need arise, test for css user-select
+$.support.cssUserSelect = (function(){
+    var t = false,
+        e = document.createElement('div');
+    
+    $.each('Moz|Webkit|Khtml|O|ms|Icab|'.split('|'), function(i, prefix) {
+        var propCC = prefix + (prefix ? 'U' : 'u') + 'serSelect',
+            prop = (prefix ? ('-' + prefix.toLowerCase() + '-') : '') + 'user-select';
+            
+        e.style.cssText = prop + ': text;';
+        if (e.style[propCC] == 'text') {
+            t = true;
+            return false;
+        }
+        
+        return true;
+    });
+    
+    return t;
+})();
+*/
+
+if (!$.ui || !$.ui.widget) {
+    // duck punch $.cleanData like jQueryUI does to get that remove event
+    // https://github.com/jquery/jquery-ui/blob/master/ui/jquery.ui.widget.js#L16-24
+    var _cleanData = $.cleanData;
+    $.cleanData = function( elems ) {
+        for ( var i = 0, elem; (elem = elems[i]) != null; i++ ) {
+            try {
+                $( elem ).triggerHandler( "remove" );
+                // http://bugs.jquery.com/ticket/8235
+            } catch( e ) {}
+        }
+        _cleanData( elems );
+    };
+}
+
+var // currently active contextMenu trigger
+    $currentTrigger = null,
+    // is contextMenu initialized with at least one menu?
+    initialized = false,
+    // window handle
+    $win = $(window),
+    // number of registered menus
+    counter = 0,
+    // mapping selector to namespace
+    namespaces = {},
+    // mapping namespace to options
+    menus = {},
+    // custom command type handlers
+    types = {},
+    // default values
+    defaults = {
+        // selector of contextMenu trigger
+        selector: null,
+        // where to append the menu to
+        appendTo: null,
+        // method to trigger context menu ["right", "left", "hover"]
+        trigger: "right",
+        // hide menu when mouse leaves trigger / menu elements
+        autoHide: false,
+        // ms to wait before showing a hover-triggered context menu
+        delay: 200,
+        // flag denoting if a second trigger should simply move (true) or rebuild (false) an open menu
+        // as long as the trigger happened on one of the trigger-element's child nodes
+        reposition: true,
+        // determine position to show menu at
+        determinePosition: function($menu) {
+            // position to the lower middle of the trigger element
+            if ($.ui && $.ui.position) {
+                // .position() is provided as a jQuery UI utility
+                // (...and it won't work on hidden elements)
+                $menu.css('display', 'block').position({
+                    my: "center top",
+                    at: "center bottom",
+                    of: this,
+                    offset: "0 5",
+                    collision: "fit"
+                }).css('display', 'none');
+            } else {
+                // determine contextMenu position
+                var offset = this.offset();
+                offset.top += this.outerHeight();
+                offset.left += this.outerWidth() / 2 - $menu.outerWidth() / 2;
+                $menu.css(offset);
+            }
+        },
+        // position menu
+        position: function(opt, x, y) {
+            var $this = this,
+                offset;
+            // determine contextMenu position
+            if (!x && !y) {
+                opt.determinePosition.call(this, opt.$menu);
+                return;
+            } else if (x === "maintain" && y === "maintain") {
+                // x and y must not be changed (after re-show on command click)
+                offset = opt.$menu.position();
+            } else {
+                // x and y are given (by mouse event)
+                offset = {top: y, left: x};
+            }
+            
+            // correct offset if viewport demands it
+            var bottom = $win.scrollTop() + $win.height(),
+                right = $win.scrollLeft() + $win.width(),
+                height = opt.$menu.height(),
+                width = opt.$menu.width();
+            
+            if (offset.top + height > bottom) {
+                offset.top -= height;
+            }
+            
+            if (offset.left + width > right) {
+                offset.left -= width;
+            }
+            
+            opt.$menu.css(offset);
+        },
+        // position the sub-menu
+        positionSubmenu: function($menu) {
+            if ($.ui && $.ui.position) {
+                // .position() is provided as a jQuery UI utility
+                // (...and it won't work on hidden elements)
+                $menu.css('display', 'block').position({
+                    my: "left top",
+                    at: "right top",
+                    of: this,
+                    collision: "flipfit fit"
+                }).css('display', '');
+            } else {
+                // determine contextMenu position
+                var offset = {
+                    top: 0,
+                    left: this.outerWidth()
+                };
+                $menu.css(offset);
+            }
+        },
+        // offset to add to zIndex
+        zIndex: 1,
+        // show hide animation settings
+        animation: {
+            duration: 50,
+            show: 'slideDown',
+            hide: 'slideUp'
+        },
+        // events
+        events: {
+            show: $.noop,
+            hide: $.noop
+        },
+        // default callback
+        callback: null,
+        // list of contextMenu items
+        items: {}
+    },
+    // mouse position for hover activation
+    hoveract = {
+        timer: null,
+        pageX: null,
+        pageY: null
+    },
+    // determine zIndex
+    zindex = function($t) {
+        var zin = 0,
+            $tt = $t;
+
+        while (true) {
+            zin = Math.max(zin, parseInt($tt.css('z-index'), 10) || 0);
+            $tt = $tt.parent();
+            if (!$tt || !$tt.length || "html body".indexOf($tt.prop('nodeName').toLowerCase()) > -1 ) {
+                break;
+            }
+        }
+        
+        return zin;
+    },
+    // event handlers
+    handle = {
+        // abort anything
+        abortevent: function(e){
+            e.preventDefault();
+            e.stopImmediatePropagation();
+        },
+        
+        // contextmenu show dispatcher
+        contextmenu: function(e) {
+            var $this = $(this);
+            
+            // disable actual context-menu
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            
+            // abort native-triggered events unless we're triggering on right click
+            if (e.data.trigger != 'right' && e.originalEvent) {
+                return;
+            }
+            
+            // abort event if menu is visible for this trigger
+            if ($this.hasClass('context-menu-active')) {
+                return;
+            }
+            
+            if (!$this.hasClass('context-menu-disabled')) {
+                // theoretically need to fire a show event at <menu>
+                // http://www.whatwg.org/specs/web-apps/current-work/multipage/interactive-elements.html#context-menus
+                // var evt = jQuery.Event("show", { data: data, pageX: e.pageX, pageY: e.pageY, relatedTarget: this });
+                // e.data.$menu.trigger(evt);
+                
+                $currentTrigger = $this;
+                if (e.data.build) {
+                    var built = e.data.build($currentTrigger, e);
+                    // abort if build() returned false
+                    if (built === false) {
+                        return;
+                    }
+                    
+                    // dynamically build menu on invocation
+                    e.data = $.extend(true, {}, defaults, e.data, built || {});
+
+                    // abort if there are no items to display
+                    if (!e.data.items || $.isEmptyObject(e.data.items)) {
+                        // Note: jQuery captures and ignores errors from event handlers
+                        if (window.console) {
+                            (console.error || console.log)("No items specified to show in contextMenu");
+                        }
+                        
+                        throw new Error('No Items specified');
+                    }
+                    
+                    // backreference for custom command type creation
+                    e.data.$trigger = $currentTrigger;
+                    
+                    op.create(e.data);
+                }
+                // show menu
+                op.show.call($this, e.data, e.pageX, e.pageY);
+            }
+        },
+        // contextMenu left-click trigger
+        click: function(e) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            $(this).trigger($.Event("contextmenu", { data: e.data, pageX: e.pageX, pageY: e.pageY }));
+        },
+        // contextMenu right-click trigger
+        mousedown: function(e) {
+            // register mouse down
+            var $this = $(this);
+            
+            // hide any previous menus
+            if ($currentTrigger && $currentTrigger.length && !$currentTrigger.is($this)) {
+                $currentTrigger.data('contextMenu').$menu.trigger('contextmenu:hide');
+            }
+            
+            // activate on right click
+            if (e.button == 2) {
+                $currentTrigger = $this.data('contextMenuActive', true);
+            }
+        },
+        // contextMenu right-click trigger
+        mouseup: function(e) {
+            // show menu
+            var $this = $(this);
+            if ($this.data('contextMenuActive') && $currentTrigger && $currentTrigger.length && $currentTrigger.is($this) && !$this.hasClass('context-menu-disabled')) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                $currentTrigger = $this;
+                $this.trigger($.Event("contextmenu", { data: e.data, pageX: e.pageX, pageY: e.pageY }));
+            }
+            
+            $this.removeData('contextMenuActive');
+        },
+        // contextMenu hover trigger
+        mouseenter: function(e) {
+            var $this = $(this),
+                $related = $(e.relatedTarget),
+                $document = $(document);
+            
+            // abort if we're coming from a menu
+            if ($related.is('.context-menu-list') || $related.closest('.context-menu-list').length) {
+                return;
+            }
+            
+            // abort if a menu is shown
+            if ($currentTrigger && $currentTrigger.length) {
+                return;
+            }
+            
+            hoveract.pageX = e.pageX;
+            hoveract.pageY = e.pageY;
+            hoveract.data = e.data;
+            $document.on('mousemove.contextMenuShow', handle.mousemove);
+            hoveract.timer = setTimeout(function() {
+                hoveract.timer = null;
+                $document.off('mousemove.contextMenuShow');
+                $currentTrigger = $this;
+                $this.trigger($.Event("contextmenu", { data: hoveract.data, pageX: hoveract.pageX, pageY: hoveract.pageY }));
+            }, e.data.delay );
+        },
+        // contextMenu hover trigger
+        mousemove: function(e) {
+            hoveract.pageX = e.pageX;
+            hoveract.pageY = e.pageY;
+        },
+        // contextMenu hover trigger
+        mouseleave: function(e) {
+            // abort if we're leaving for a menu
+            var $related = $(e.relatedTarget);
+            if ($related.is('.context-menu-list') || $related.closest('.context-menu-list').length) {
+                return;
+            }
+            
+            try {
+                clearTimeout(hoveract.timer);
+            } catch(e) {}
+            
+            hoveract.timer = null;
+        },
+        
+        // click on layer to hide contextMenu
+        layerClick: function(e) {
+            var $this = $(this),
+                root = $this.data('contextMenuRoot'),
+                mouseup = false,
+                button = e.button,
+                x = e.pageX,
+                y = e.pageY,
+                target, 
+                offset,
+                selectors;
+                
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            
+            setTimeout(function() {
+                var $window, hideshow, possibleTarget;
+                var triggerAction = ((root.trigger == 'left' && button === 0) || (root.trigger == 'right' && button === 2));
+                
+                // find the element that would've been clicked, wasn't the layer in the way
+                if (document.elementFromPoint) {
+                    root.$layer.hide();
+                    target = document.elementFromPoint(x - $win.scrollLeft(), y - $win.scrollTop());
+                    root.$layer.show();
+                }
+                
+                if (root.reposition && triggerAction) {
+                    if (document.elementFromPoint) {
+                        if (root.$trigger.is(target) || root.$trigger.has(target).length) {
+                            root.position.call(root.$trigger, root, x, y);
+                            return;
+                        }
+                    } else {
+                        offset = root.$trigger.offset();
+                        $window = $(window);
+                        // while this looks kinda awful, it's the best way to avoid
+                        // unnecessarily calculating any positions
+                        offset.top += $window.scrollTop();
+                        if (offset.top <= e.pageY) {
+                            offset.left += $window.scrollLeft();
+                            if (offset.left <= e.pageX) {
+                                offset.bottom = offset.top + root.$trigger.outerHeight();
+                                if (offset.bottom >= e.pageY) {
+                                    offset.right = offset.left + root.$trigger.outerWidth();
+                                    if (offset.right >= e.pageX) {
+                                        // reposition
+                                        root.position.call(root.$trigger, root, x, y);
+                                        return;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                if (target && triggerAction) {
+                    root.$trigger.one('contextmenu:hidden', function() {
+                        $(target).contextMenu({x: x, y: y});
+                    });
+                }
+
+                root.$menu.trigger('contextmenu:hide');
+            }, 50);
+        },
+        // key handled :hover
+        keyStop: function(e, opt) {
+            if (!opt.isInput) {
+                e.preventDefault();
+            }
+            
+            e.stopPropagation();
+        },
+        key: function(e) {
+            var opt = $currentTrigger.data('contextMenu') || {};
+
+            switch (e.keyCode) {
+                case 9:
+                case 38: // up
+                    handle.keyStop(e, opt);
+                    // if keyCode is [38 (up)] or [9 (tab) with shift]
+                    if (opt.isInput) {
+                        if (e.keyCode == 9 && e.shiftKey) {
+                            e.preventDefault();
+                            opt.$selected && opt.$selected.find('input, textarea, select').blur();
+                            opt.$menu.trigger('prevcommand');
+                            return;
+                        } else if (e.keyCode == 38 && opt.$selected.find('input, textarea, select').prop('type') == 'checkbox') {
+                            // checkboxes don't capture this key
+                            e.preventDefault();
+                            return;
+                        }
+                    } else if (e.keyCode != 9 || e.shiftKey) {
+                        opt.$menu.trigger('prevcommand');
+                        return;
+                    }
+                    // omitting break;
+                    
+                // case 9: // tab - reached through omitted break;
+                case 40: // down
+                    handle.keyStop(e, opt);
+                    if (opt.isInput) {
+                        if (e.keyCode == 9) {
+                            e.preventDefault();
+                            opt.$selected && opt.$selected.find('input, textarea, select').blur();
+                            opt.$menu.trigger('nextcommand');
+                            return;
+                        } else if (e.keyCode == 40 && opt.$selected.find('input, textarea, select').prop('type') == 'checkbox') {
+                            // checkboxes don't capture this key
+                            e.preventDefault();
+                            return;
+                        }
+                    } else {
+                        opt.$menu.trigger('nextcommand');
+                        return;
+                    }
+                    break;
+                
+                case 37: // left
+                    handle.keyStop(e, opt);
+                    if (opt.isInput || !opt.$selected || !opt.$selected.length) {
+                        break;
+                    }
+                
+                    if (!opt.$selected.parent().hasClass('context-menu-root')) {
+                        var $parent = opt.$selected.parent().parent();
+                        opt.$selected.trigger('contextmenu:blur');
+                        opt.$selected = $parent;
+                        return;
+                    }
+                    break;
+                    
+                case 39: // right
+                    handle.keyStop(e, opt);
+                    if (opt.isInput || !opt.$selected || !opt.$selected.length) {
+                        break;
+                    }
+                    
+                    var itemdata = opt.$selected.data('contextMenu') || {};
+                    if (itemdata.$menu && opt.$selected.hasClass('context-menu-submenu')) {
+                        opt.$selected = null;
+                        itemdata.$selected = null;
+                        itemdata.$menu.trigger('nextcommand');
+                        return;
+                    }
+                    break;
+                
+                case 35: // end
+                case 36: // home
+                    if (opt.$selected && opt.$selected.find('input, textarea, select').length) {
+                        return;
+                    } else {
+                        (opt.$selected && opt.$selected.parent() || opt.$menu)
+                            .children(':not(.disabled, .not-selectable)')[e.keyCode == 36 ? 'first' : 'last']()
+                            .trigger('contextmenu:focus');
+                        e.preventDefault();
+                        return;
+                    }
+                    break;
+                    
+                case 13: // enter
+                    handle.keyStop(e, opt);
+                    if (opt.isInput) {
+                        if (opt.$selected && !opt.$selected.is('textarea, select')) {
+                            e.preventDefault();
+                            return;
+                        }
+                        break;
+                    }
+                    opt.$selected && opt.$selected.trigger('mouseup');
+                    return;
+                    
+                case 32: // space
+                case 33: // page up
+                case 34: // page down
+                    // prevent browser from scrolling down while menu is visible
+                    handle.keyStop(e, opt);
+                    return;
+                    
+                case 27: // esc
+                    handle.keyStop(e, opt);
+                    opt.$menu.trigger('contextmenu:hide');
+                    return;
+                    
+                default: // 0-9, a-z
+                    var k = (String.fromCharCode(e.keyCode)).toUpperCase();
+                    if (opt.accesskeys[k]) {
+                        // according to the specs accesskeys must be invoked immediately
+                        opt.accesskeys[k].$node.trigger(opt.accesskeys[k].$menu
+                            ? 'contextmenu:focus'
+                            : 'mouseup'
+                        );
+                        return;
+                    }
+                    break;
+            }
+            // pass event to selected item, 
+            // stop propagation to avoid endless recursion
+            e.stopPropagation();
+            opt.$selected && opt.$selected.trigger(e);
+        },
+
+        // select previous possible command in menu
+        prevItem: function(e) {
+            e.stopPropagation();
+            var opt = $(this).data('contextMenu') || {};
+
+            // obtain currently selected menu
+            if (opt.$selected) {
+                var $s = opt.$selected;
+                opt = opt.$selected.parent().data('contextMenu') || {};
+                opt.$selected = $s;
+            }
+            
+            var $children = opt.$menu.children(),
+                $prev = !opt.$selected || !opt.$selected.prev().length ? $children.last() : opt.$selected.prev(),
+                $round = $prev;
+            
+            // skip disabled
+            while ($prev.hasClass('disabled') || $prev.hasClass('not-selectable')) {
+                if ($prev.prev().length) {
+                    $prev = $prev.prev();
+                } else {
+                    $prev = $children.last();
+                }
+                if ($prev.is($round)) {
+                    // break endless loop
+                    return;
+                }
+            }
+            
+            // leave current
+            if (opt.$selected) {
+                handle.itemMouseleave.call(opt.$selected.get(0), e);
+            }
+            
+            // activate next
+            handle.itemMouseenter.call($prev.get(0), e);
+            
+            // focus input
+            var $input = $prev.find('input, textarea, select');
+            if ($input.length) {
+                $input.focus();
+            }
+        },
+        // select next possible command in menu
+        nextItem: function(e) {
+            e.stopPropagation();
+            var opt = $(this).data('contextMenu') || {};
+
+            // obtain currently selected menu
+            if (opt.$selected) {
+                var $s = opt.$selected;
+                opt = opt.$selected.parent().data('contextMenu') || {};
+                opt.$selected = $s;
+            }
+
+            var $children = opt.$menu.children(),
+                $next = !opt.$selected || !opt.$selected.next().length ? $children.first() : opt.$selected.next(),
+                $round = $next;
+
+            // skip disabled
+            while ($next.hasClass('disabled') || $next.hasClass('not-selectable')) {
+                if ($next.next().length) {
+                    $next = $next.next();
+                } else {
+                    $next = $children.first();
+                }
+                if ($next.is($round)) {
+                    // break endless loop
+                    return;
+                }
+            }
+            
+            // leave current
+            if (opt.$selected) {
+                handle.itemMouseleave.call(opt.$selected.get(0), e);
+            }
+            
+            // activate next
+            handle.itemMouseenter.call($next.get(0), e);
+            
+            // focus input
+            var $input = $next.find('input, textarea, select');
+            if ($input.length) {
+                $input.focus();
+            }
+        },
+        
+        // flag that we're inside an input so the key handler can act accordingly
+        focusInput: function(e) {
+            var $this = $(this).closest('.context-menu-item'),
+                data = $this.data(),
+                opt = data.contextMenu,
+                root = data.contextMenuRoot;
+
+            root.$selected = opt.$selected = $this;
+            root.isInput = opt.isInput = true;
+        },
+        // flag that we're inside an input so the key handler can act accordingly
+        blurInput: function(e) {
+            var $this = $(this).closest('.context-menu-item'),
+                data = $this.data(),
+                opt = data.contextMenu,
+                root = data.contextMenuRoot;
+
+            root.isInput = opt.isInput = false;
+        },
+        
+        // :hover on menu
+        menuMouseenter: function(e) {
+            var root = $(this).data().contextMenuRoot;
+            root.hovering = true;
+        },
+        // :hover on menu
+        menuMouseleave: function(e) {
+            var root = $(this).data().contextMenuRoot;
+            if (root.$layer && root.$layer.is(e.relatedTarget)) {
+                root.hovering = false;
+            }
+        },
+        
+        // :hover done manually so key handling is possible
+        itemMouseenter: function(e) {
+            var $this = $(this),
+                data = $this.data(),
+                opt = data.contextMenu,
+                root = data.contextMenuRoot;
+            
+            root.hovering = true;
+
+            // abort if we're re-entering
+            if (e && root.$layer && root.$layer.is(e.relatedTarget)) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+            }
+
+            // make sure only one item is selected
+            (opt.$menu ? opt : root).$menu
+                .children('.hover').trigger('contextmenu:blur');
+
+            if ($this.hasClass('disabled') || $this.hasClass('not-selectable')) {
+                opt.$selected = null;
+                return;
+            }
+            
+            $this.trigger('contextmenu:focus');
+        },
+        // :hover done manually so key handling is possible
+        itemMouseleave: function(e) {
+            var $this = $(this),
+                data = $this.data(),
+                opt = data.contextMenu,
+                root = data.contextMenuRoot;
+
+            if (root !== opt && root.$layer && root.$layer.is(e.relatedTarget)) {
+                root.$selected && root.$selected.trigger('contextmenu:blur');
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                root.$selected = opt.$selected = opt.$node;
+                return;
+            }
+            
+            $this.trigger('contextmenu:blur');
+        },
+        // contextMenu item click
+        itemClick: function(e) {
+            var $this = $(this),
+                data = $this.data(),
+                opt = data.contextMenu,
+                root = data.contextMenuRoot,
+                key = data.contextMenuKey,
+                callback;
+
+            // abort if the key is unknown or disabled or is a menu
+            if (!opt.items[key] || $this.is('.disabled, .context-menu-submenu, .context-menu-separator, .not-selectable')) {
+                return;
+            }
+
+            e.preventDefault();
+            e.stopImmediatePropagation();
+
+            if ($.isFunction(root.callbacks[key]) && Object.prototype.hasOwnProperty.call(root.callbacks, key)) {
+                // item-specific callback
+                callback = root.callbacks[key];
+            } else if ($.isFunction(root.callback)) {
+                // default callback
+                callback = root.callback;                
+            } else {
+                // no callback, no action
+                return;
+            }
+
+            // hide menu if callback doesn't stop that
+            if (callback.call(root.$trigger, key, root) !== false) {
+                root.$menu.trigger('contextmenu:hide');
+            } else if (root.$menu.parent().length) {
+                op.update.call(root.$trigger, root);
+            }
+        },
+        // ignore click events on input elements
+        inputClick: function(e) {
+            e.stopImmediatePropagation();
+        },
+        
+        // hide <menu>
+        hideMenu: function(e, data) {
+            var root = $(this).data('contextMenuRoot');
+            op.hide.call(root.$trigger, root, data && data.force);
+        },
+        // focus <command>
+        focusItem: function(e) {
+            e.stopPropagation();
+            var $this = $(this),
+                data = $this.data(),
+                opt = data.contextMenu,
+                root = data.contextMenuRoot;
+
+            $this.addClass('hover')
+                .siblings('.hover').trigger('contextmenu:blur');
+            
+            // remember selected
+            opt.$selected = root.$selected = $this;
+            
+            // position sub-menu - do after show so dumb $.ui.position can keep up
+            if (opt.$node) {
+                root.positionSubmenu.call(opt.$node, opt.$menu);
+            }
+        },
+        // blur <command>
+        blurItem: function(e) {
+            e.stopPropagation();
+            var $this = $(this),
+                data = $this.data(),
+                opt = data.contextMenu,
+                root = data.contextMenuRoot;
+            
+            $this.removeClass('hover');
+            opt.$selected = null;
+        }
+    },
+    // operations
+    op = {
+        show: function(opt, x, y) {
+            var $trigger = $(this),
+                offset,
+                css = {};
+
+            // hide any open menus
+            $('#context-menu-layer').trigger('mousedown');
+
+            // backreference for callbacks
+            opt.$trigger = $trigger;
+
+            // show event
+            if (opt.events.show.call($trigger, opt) === false) {
+                $currentTrigger = null;
+                return;
+            }
+
+            // create or update context menu
+            op.update.call($trigger, opt);
+            
+            // position menu
+            opt.position.call($trigger, opt, x, y);
+
+            // make sure we're in front
+            if (opt.zIndex) {
+                css.zIndex = zindex($trigger) + opt.zIndex;
+            }
+            
+            // add layer
+            op.layer.call(opt.$menu, opt, css.zIndex);
+            
+            // adjust sub-menu zIndexes
+            opt.$menu.find('ul').css('zIndex', css.zIndex + 1);
+            
+            // position and show context menu
+            opt.$menu.css( css )[opt.animation.show](opt.animation.duration, function() {
+                $trigger.trigger('contextmenu:visible');
+            });
+            // make options available and set state
+            $trigger
+                .data('contextMenu', opt)
+                .addClass("context-menu-active");
+            
+            // register key handler
+            $(document).off('keydown.contextMenu').on('keydown.contextMenu', handle.key);
+            // register autoHide handler
+            if (opt.autoHide) {
+                // mouse position handler
+                $(document).on('mousemove.contextMenuAutoHide', function(e) {
+                    // need to capture the offset on mousemove,
+                    // since the page might've been scrolled since activation
+                    var pos = $trigger.offset();
+                    pos.right = pos.left + $trigger.outerWidth();
+                    pos.bottom = pos.top + $trigger.outerHeight();
+                    
+                    if (opt.$layer && !opt.hovering && (!(e.pageX >= pos.left && e.pageX <= pos.right) || !(e.pageY >= pos.top && e.pageY <= pos.bottom))) {
+                        // if mouse in menu...
+                        opt.$menu.trigger('contextmenu:hide');
+                    }
+                });
+            }
+        },
+        hide: function(opt, force) {
+            var $trigger = $(this);
+            if (!opt) {
+                opt = $trigger.data('contextMenu') || {};
+            }
+            
+            // hide event
+            if (!force && opt.events && opt.events.hide.call($trigger, opt) === false) {
+                return;
+            }
+            
+            // remove options and revert state
+            $trigger
+                .removeData('contextMenu')
+                .removeClass("context-menu-active");
+            
+            if (opt.$layer) {
+                // keep layer for a bit so the contextmenu event can be aborted properly by opera
+                setTimeout((function($layer) {
+                    return function(){
+                        $layer.remove();
+                    };
+                })(opt.$layer), 10);
+                
+                try {
+                    delete opt.$layer;
+                } catch(e) {
+                    opt.$layer = null;
+                }
+            }
+            
+            // remove handle
+            $currentTrigger = null;
+            // remove selected
+            opt.$menu.find('.hover').trigger('contextmenu:blur');
+            opt.$selected = null;
+            // unregister key and mouse handlers
+            //$(document).off('.contextMenuAutoHide keydown.contextMenu'); // http://bugs.jquery.com/ticket/10705
+            $(document).off('.contextMenuAutoHide').off('keydown.contextMenu');
+            // hide menu
+            opt.$menu && opt.$menu[opt.animation.hide](opt.animation.duration, function (){
+                // tear down dynamically built menu after animation is completed.
+                if (opt.build) {
+                    opt.$menu.remove();
+                    $.each(opt, function(key, value) {
+                        switch (key) {
+                            case 'ns':
+                            case 'selector':
+                            case 'build':
+                            case 'trigger':
+                                return true;
+
+                            default:
+                                opt[key] = undefined;
+                                try {
+                                    delete opt[key];
+                                } catch (e) {}
+                                return true;
+                        }
+                    });
+                }
+                
+                setTimeout(function() {
+                    $trigger.trigger('contextmenu:hidden');
+                }, 10);
+            });
+        },
+        create: function(opt, root) {
+            if (root === undefined) {
+                root = opt;
+            }
+            // create contextMenu
+            opt.$menu = $('<ul class="context-menu-list"></ul>').addClass(opt.className || "").data({
+                'contextMenu': opt,
+                'contextMenuRoot': root
+            });
+            
+            $.each(['callbacks', 'commands', 'inputs'], function(i,k){
+                opt[k] = {};
+                if (!root[k]) {
+                    root[k] = {};
+                }
+            });
+            
+            root.accesskeys || (root.accesskeys = {});
+            
+            // create contextMenu items
+            $.each(opt.items, function(key, item){
+                var $t = $('<li class="context-menu-item"></li>').addClass(item.className || ""),
+                    $label = null,
+                    $input = null;
+                
+                // iOS needs to see a click-event bound to an element to actually
+                // have the TouchEvents infrastructure trigger the click event
+                $t.on('click', $.noop);
+                
+                item.$node = $t.data({
+                    'contextMenu': opt,
+                    'contextMenuRoot': root,
+                    'contextMenuKey': key
+                });
+                
+                // register accesskey
+                // NOTE: the accesskey attribute should be applicable to any element, but Safari5 and Chrome13 still can't do that
+                if (item.accesskey) {
+                    var aks = splitAccesskey(item.accesskey);
+                    for (var i=0, ak; ak = aks[i]; i++) {
+                        if (!root.accesskeys[ak]) {
+                            root.accesskeys[ak] = item;
+                            item._name = item.name.replace(new RegExp('(' + ak + ')', 'i'), '<span class="context-menu-accesskey">$1</span>');
+                            break;
+                        }
+                    }
+                }
+                
+                if (typeof item == "string") {
+                    $t.addClass('context-menu-separator not-selectable');
+                } else if (item.type && types[item.type]) {
+                    // run custom type handler
+                    types[item.type].call($t, item, opt, root);
+                    // register commands
+                    $.each([opt, root], function(i,k){
+                        k.commands[key] = item;
+                        if ($.isFunction(item.callback)) {
+                            k.callbacks[key] = item.callback;
+                        }
+                    });
+                } else {
+                    // add label for input
+                    if (item.type == 'html') {
+                        $t.addClass('context-menu-html not-selectable');
+                    } else if (item.type) {
+                        $label = $('<label></label>').appendTo($t);
+                        $('<span></span>').html(item._name || item.name).appendTo($label);
+                        $t.addClass('context-menu-input');
+                        opt.hasTypes = true;
+                        $.each([opt, root], function(i,k){
+                            k.commands[key] = item;
+                            k.inputs[key] = item;
+                        });
+                    } else if (item.items) {
+                        item.type = 'sub';
+                    }
+                
+                    switch (item.type) {
+                        case 'text':
+                            $input = $('<input type="text" value="1" name="" value="">')
+                                .attr('name', 'context-menu-input-' + key)
+                                .val(item.value || "")
+                                .appendTo($label);
+                            break;
+                    
+                        case 'textarea':
+                            $input = $('<textarea name=""></textarea>')
+                                .attr('name', 'context-menu-input-' + key)
+                                .val(item.value || "")
+                                .appendTo($label);
+
+                            if (item.height) {
+                                $input.height(item.height);
+                            }
+                            break;
+
+                        case 'checkbox':
+                            $input = $('<input type="checkbox" value="1" name="" value="">')
+                                .attr('name', 'context-menu-input-' + key)
+                                .val(item.value || "")
+                                .prop("checked", !!item.selected)
+                                .prependTo($label);
+                            break;
+
+                        case 'radio':
+                            $input = $('<input type="radio" value="1" name="" value="">')
+                                .attr('name', 'context-menu-input-' + item.radio)
+                                .val(item.value || "")
+                                .prop("checked", !!item.selected)
+                                .prependTo($label);
+                            break;
+                    
+                        case 'select':
+                            $input = $('<select name="">')
+                                .attr('name', 'context-menu-input-' + key)
+                                .appendTo($label);
+                            if (item.options) {
+                                $.each(item.options, function(value, text) {
+                                    $('<option></option>').val(value).text(text).appendTo($input);
+                                });
+                                $input.val(item.selected);
+                            }
+                            break;
+                        
+                        case 'sub':
+                            // FIXME: shouldn't this .html() be a .text()?
+                            $('<span></span>').html(item._name || item.name).appendTo($t);
+                            item.appendTo = item.$node;
+                            op.create(item, root);
+                            $t.data('contextMenu', item).addClass('context-menu-submenu');
+                            item.callback = null;
+                            break;
+                        
+                        case 'html':
+                            $(item.html).appendTo($t);
+                            break;
+                        
+                        default:
+                            $.each([opt, root], function(i,k){
+                                k.commands[key] = item;
+                                if ($.isFunction(item.callback)) {
+                                    k.callbacks[key] = item.callback;
+                                }
+                            });
+                            // FIXME: shouldn't this .html() be a .text()?
+                            $('<span></span>').html(item._name || item.name || "").appendTo($t);
+                            break;
+                    }
+                    
+                    // disable key listener in <input>
+                    if (item.type && item.type != 'sub' && item.type != 'html') {
+                        $input
+                            .on('focus', handle.focusInput)
+                            .on('blur', handle.blurInput);
+                        
+                        if (item.events) {
+                            $input.on(item.events, opt);
+                        }
+                    }
+                
+                    // add icons
+                    if (item.icon) {
+                        $t.addClass("icon icon-" + item.icon);
+                    }
+                }
+                
+                // cache contained elements
+                item.$input = $input;
+                item.$label = $label;
+
+                // attach item to menu
+                $t.appendTo(opt.$menu);
+                
+                // Disable text selection
+                if (!opt.hasTypes && $.support.eventSelectstart) {
+                    // browsers support user-select: none, 
+                    // IE has a special event for text-selection
+                    // browsers supporting neither will not be preventing text-selection
+                    $t.on('selectstart.disableTextSelect', handle.abortevent);
+                }
+            });
+            // attach contextMenu to <body> (to bypass any possible overflow:hidden issues on parents of the trigger element)
+            if (!opt.$node) {
+                opt.$menu.css('display', 'none').addClass('context-menu-root');
+            }
+            opt.$menu.appendTo(opt.appendTo || document.body);
+        },
+        resize: function($menu, nested) {
+            // determine widths of submenus, as CSS won't grow them automatically
+            // position:absolute within position:absolute; min-width:100; max-width:200; results in width: 100;
+            // kinda sucks hard...
+
+            // determine width of absolutely positioned element
+            $menu.css({position: 'absolute', display: 'block'});
+            // don't apply yet, because that would break nested elements' widths
+            // add a pixel to circumvent word-break issue in IE9 - #80
+            $menu.data('width', Math.ceil($menu.width()) + 1);
+            // reset styles so they allow nested elements to grow/shrink naturally
+            $menu.css({
+                position: 'static',
+                minWidth: '0px',
+                maxWidth: '100000px'
+            });
+            // identify width of nested menus
+            $menu.find('> li > ul').each(function() {
+                op.resize($(this), true);
+            });
+            // reset and apply changes in the end because nested
+            // elements' widths wouldn't be calculatable otherwise
+            if (!nested) {
+                $menu.find('ul').andSelf().css({
+                    position: '', 
+                    display: '',
+                    minWidth: '',
+                    maxWidth: ''
+                }).width(function() {
+                    return $(this).data('width');
+                });
+            }
+        },
+        update: function(opt, root) {
+            var $trigger = this;
+            if (root === undefined) {
+                root = opt;
+                op.resize(opt.$menu);
+            }
+            // re-check disabled for each item
+            opt.$menu.children().each(function(){
+                var $item = $(this),
+                    key = $item.data('contextMenuKey'),
+                    item = opt.items[key],
+                    disabled = ($.isFunction(item.disabled) && item.disabled.call($trigger, key, root)) || item.disabled === true;
+
+                // dis- / enable item
+                $item[disabled ? 'addClass' : 'removeClass']('disabled');
+                
+                if (item.type) {
+                    // dis- / enable input elements
+                    $item.find('input, select, textarea').prop('disabled', disabled);
+                    
+                    // update input states
+                    switch (item.type) {
+                        case 'text':
+                        case 'textarea':
+                            item.$input.val(item.value || "");
+                            break;
+                            
+                        case 'checkbox':
+                        case 'radio':
+                            item.$input.val(item.value || "").prop('checked', !!item.selected);
+                            break;
+                            
+                        case 'select':
+                            item.$input.val(item.selected || "");
+                            break;
+                    }
+                }
+                
+                if (item.$menu) {
+                    // update sub-menu
+                    op.update.call($trigger, item, root);
+                }
+            });
+        },
+        layer: function(opt, zIndex) {
+            // add transparent layer for click area
+            // filter and background for Internet Explorer, Issue #23
+            var $layer = opt.$layer = $('<div id="context-menu-layer" style="position:fixed; z-index:' + zIndex + '; top:0; left:0; opacity: 0; filter: alpha(opacity=0); background-color: #000;"></div>')
+                .css({height: $win.height(), width: $win.width(), display: 'block'})
+                .data('contextMenuRoot', opt)
+                .insertBefore(this)
+                .on('contextmenu', handle.abortevent)
+                .on('mousedown', handle.layerClick);
+            
+            // IE6 doesn't know position:fixed;
+            if (!$.support.fixedPosition) {
+                $layer.css({
+                    'position' : 'absolute',
+                    'height' : $(document).height()
+                });
+            }
+            
+            return $layer;
+        }
+    };
+
+// split accesskey according to http://www.whatwg.org/specs/web-apps/current-work/multipage/editing.html#assigned-access-key
+function splitAccesskey(val) {
+    var t = val.split(/\s+/),
+        keys = [];
+        
+    for (var i=0, k; k = t[i]; i++) {
+        k = k[0].toUpperCase(); // first character only
+        // theoretically non-accessible characters should be ignored, but different systems, different keyboard layouts, ... screw it.
+        // a map to look up already used access keys would be nice
+        keys.push(k);
+    }
+    
+    return keys;
+}
+
+// handle contextMenu triggers
+$.fn.contextMenu = function(operation) {
+    if (operation === undefined) {
+        this.first().trigger('contextmenu');
+    } else if (operation.x && operation.y) {
+        this.first().trigger($.Event("contextmenu", {pageX: operation.x, pageY: operation.y}));
+    } else if (operation === "hide") {
+        var $menu = this.data('contextMenu').$menu;
+        $menu && $menu.trigger('contextmenu:hide');
+    } else if (operation === "destroy") {
+        $.contextMenu("destroy", {context: this});
+    } else if ($.isPlainObject(operation)) {
+        operation.context = this;
+        $.contextMenu("create", operation);
+    } else if (operation) {
+        this.removeClass('context-menu-disabled');
+    } else if (!operation) {
+        this.addClass('context-menu-disabled');
+    }
+    
+    return this;
+};
+
+// manage contextMenu instances
+$.contextMenu = function(operation, options) {
+    if (typeof operation != 'string') {
+        options = operation;
+        operation = 'create';
+    }
+    
+    if (typeof options == 'string') {
+        options = {selector: options};
+    } else if (options === undefined) {
+        options = {};
+    }
+    
+    // merge with default options
+    var o = $.extend(true, {}, defaults, options || {});
+    var $document = $(document);
+    var $context = $document;
+    var _hasContext = false;
+    
+    if (!o.context || !o.context.length) {
+        o.context = document;
+    } else {
+        // you never know what they throw at you...
+        $context = $(o.context).first();
+        o.context = $context.get(0);
+        _hasContext = o.context !== document;
+    }
+    
+    switch (operation) {
+        case 'create':
+            // no selector no joy
+            if (!o.selector) {
+                throw new Error('No selector specified');
+            }
+            // make sure internal classes are not bound to
+            if (o.selector.match(/.context-menu-(list|item|input)($|\s)/)) {
+                throw new Error('Cannot bind to selector "' + o.selector + '" as it contains a reserved className');
+            }
+            if (!o.build && (!o.items || $.isEmptyObject(o.items))) {
+                throw new Error('No Items specified');
+            }
+            counter ++;
+            o.ns = '.contextMenu' + counter;
+            if (!_hasContext) {
+                namespaces[o.selector] = o.ns;
+            }
+            menus[o.ns] = o;
+            
+            // default to right click
+            if (!o.trigger) {
+                o.trigger = 'right';
+            }
+            
+            if (!initialized) {
+                // make sure item click is registered first
+                $document
+                    .on({
+                        'contextmenu:hide.contextMenu': handle.hideMenu,
+                        'prevcommand.contextMenu': handle.prevItem,
+                        'nextcommand.contextMenu': handle.nextItem,
+                        'contextmenu.contextMenu': handle.abortevent,
+                        'mouseenter.contextMenu': handle.menuMouseenter,
+                        'mouseleave.contextMenu': handle.menuMouseleave
+                    }, '.context-menu-list')
+                    .on('mouseup.contextMenu', '.context-menu-input', handle.inputClick)
+                    .on({
+                        'mouseup.contextMenu': handle.itemClick,
+                        'contextmenu:focus.contextMenu': handle.focusItem,
+                        'contextmenu:blur.contextMenu': handle.blurItem,
+                        'contextmenu.contextMenu': handle.abortevent,
+                        'mouseenter.contextMenu': handle.itemMouseenter,
+                        'mouseleave.contextMenu': handle.itemMouseleave
+                    }, '.context-menu-item');
+
+                initialized = true;
+            }
+            
+            // engage native contextmenu event
+            $context
+                .on('contextmenu' + o.ns, o.selector, o, handle.contextmenu);
+            
+            if (_hasContext) {
+                // add remove hook, just in case
+                $context.on('remove' + o.ns, function() {
+                    $(this).contextMenu("destroy");
+                });
+            }
+            
+            switch (o.trigger) {
+                case 'hover':
+                        $context
+                            .on('mouseenter' + o.ns, o.selector, o, handle.mouseenter)
+                            .on('mouseleave' + o.ns, o.selector, o, handle.mouseleave);                    
+                    break;
+                    
+                case 'left':
+                        $context.on('click' + o.ns, o.selector, o, handle.click);
+                    break;
+                /*
+                default:
+                    // http://www.quirksmode.org/dom/events/contextmenu.html
+                    $document
+                        .on('mousedown' + o.ns, o.selector, o, handle.mousedown)
+                        .on('mouseup' + o.ns, o.selector, o, handle.mouseup);
+                    break;
+                */
+            }
+            
+            // create menu
+            if (!o.build) {
+                op.create(o);
+            }
+            break;
+        
+        case 'destroy':
+            var $visibleMenu;
+            if (_hasContext) {
+                // get proper options 
+                var context = o.context;
+                $.each(menus, function(ns, o) {
+                    if (o.context !== context) {
+                        return true;
+                    }
+                    
+                    $visibleMenu = $('.context-menu-list').filter(':visible');
+                    if ($visibleMenu.length && $visibleMenu.data().contextMenuRoot.$trigger.is($(o.context).find(o.selector))) {
+                        $visibleMenu.trigger('contextmenu:hide', {force: true});
+                    }
+
+                    try {
+                        if (menus[o.ns].$menu) {
+                            menus[o.ns].$menu.remove();
+                        }
+
+                        delete menus[o.ns];
+                    } catch(e) {
+                        menus[o.ns] = null;
+                    }
+
+                    $(o.context).off(o.ns);
+                    
+                    return true;
+                });
+            } else if (!o.selector) {
+                $document.off('.contextMenu .contextMenuAutoHide');
+                $.each(menus, function(ns, o) {
+                    $(o.context).off(o.ns);
+                });
+                
+                namespaces = {};
+                menus = {};
+                counter = 0;
+                initialized = false;
+                
+                $('#context-menu-layer, .context-menu-list').remove();
+            } else if (namespaces[o.selector]) {
+                $visibleMenu = $('.context-menu-list').filter(':visible');
+                if ($visibleMenu.length && $visibleMenu.data().contextMenuRoot.$trigger.is(o.selector)) {
+                    $visibleMenu.trigger('contextmenu:hide', {force: true});
+                }
+                
+                try {
+                    if (menus[namespaces[o.selector]].$menu) {
+                        menus[namespaces[o.selector]].$menu.remove();
+                    }
+                    
+                    delete menus[namespaces[o.selector]];
+                } catch(e) {
+                    menus[namespaces[o.selector]] = null;
+                }
+                
+                $document.off(namespaces[o.selector]);
+            }
+            break;
+        
+        case 'html5':
+            // if <command> or <menuitem> are not handled by the browser,
+            // or options was a bool true,
+            // initialize $.contextMenu for them
+            if ((!$.support.htmlCommand && !$.support.htmlMenuitem) || (typeof options == "boolean" && options)) {
+                $('menu[type="context"]').each(function() {
+                    if (this.id) {
+                        $.contextMenu({
+                            selector: '[contextmenu=' + this.id +']',
+                            items: $.contextMenu.fromMenu(this)
+                        });
+                    }
+                }).css('display', 'none');
+            }
+            break;
+        
+        default:
+            throw new Error('Unknown operation "' + operation + '"');
+    }
+    
+    return this;
+};
+
+// import values into <input> commands
+$.contextMenu.setInputValues = function(opt, data) {
+    if (data === undefined) {
+        data = {};
+    }
+    
+    $.each(opt.inputs, function(key, item) {
+        switch (item.type) {
+            case 'text':
+            case 'textarea':
+                item.value = data[key] || "";
+                break;
+
+            case 'checkbox':
+                item.selected = data[key] ? true : false;
+                break;
+                
+            case 'radio':
+                item.selected = (data[item.radio] || "") == item.value ? true : false;
+                break;
+            
+            case 'select':
+                item.selected = data[key] || "";
+                break;
+        }
+    });
+};
+
+// export values from <input> commands
+$.contextMenu.getInputValues = function(opt, data) {
+    if (data === undefined) {
+        data = {};
+    }
+    
+    $.each(opt.inputs, function(key, item) {
+        switch (item.type) {
+            case 'text':
+            case 'textarea':
+            case 'select':
+                data[key] = item.$input.val();
+                break;
+
+            case 'checkbox':
+                data[key] = item.$input.prop('checked');
+                break;
+                
+            case 'radio':
+                if (item.$input.prop('checked')) {
+                    data[item.radio] = item.value;
+                }
+                break;
+        }
+    });
+    
+    return data;
+};
+
+// find <label for="xyz">
+function inputLabel(node) {
+    return (node.id && $('label[for="'+ node.id +'"]').val()) || node.name;
+}
+
+// convert <menu> to items object
+function menuChildren(items, $children, counter) {
+    if (!counter) {
+        counter = 0;
+    }
+    
+    $children.each(function() {
+        var $node = $(this),
+            node = this,
+            nodeName = this.nodeName.toLowerCase(),
+            label,
+            item;
+        
+        // extract <label><input>
+        if (nodeName == 'label' && $node.find('input, textarea, select').length) {
+            label = $node.text();
+            $node = $node.children().first();
+            node = $node.get(0);
+            nodeName = node.nodeName.toLowerCase();
+        }
+        
+        /*
+         * <menu> accepts flow-content as children. that means <embed>, <canvas> and such are valid menu items.
+         * Not being the sadistic kind, $.contextMenu only accepts:
+         * <command>, <menuitem>, <hr>, <span>, <p> <input [text, radio, checkbox]>, <textarea>, <select> and of course <menu>.
+         * Everything else will be imported as an html node, which is not interfaced with contextMenu.
+         */
+        
+        // http://www.whatwg.org/specs/web-apps/current-work/multipage/commands.html#concept-command
+        switch (nodeName) {
+            // http://www.whatwg.org/specs/web-apps/current-work/multipage/interactive-elements.html#the-menu-element
+            case 'menu':
+                item = {name: $node.attr('label'), items: {}};
+                counter = menuChildren(item.items, $node.children(), counter);
+                break;
+            
+            // http://www.whatwg.org/specs/web-apps/current-work/multipage/commands.html#using-the-a-element-to-define-a-command
+            case 'a':
+            // http://www.whatwg.org/specs/web-apps/current-work/multipage/commands.html#using-the-button-element-to-define-a-command
+            case 'button':
+                item = {
+                    name: $node.text(),
+                    disabled: !!$node.attr('disabled'),
+                    callback: (function(){ return function(){ $node.click(); }; })()
+                };
+                break;
+            
+            // http://www.whatwg.org/specs/web-apps/current-work/multipage/commands.html#using-the-command-element-to-define-a-command
+
+            case 'menuitem':
+            case 'command':
+                switch ($node.attr('type')) {
+                    case undefined:
+                    case 'command':
+                    case 'menuitem':
+                        item = {
+                            name: $node.attr('label'),
+                            disabled: !!$node.attr('disabled'),
+                            callback: (function(){ return function(){ $node.click(); }; })()
+                        };
+                        break;
+                        
+                    case 'checkbox':
+                        item = {
+                            type: 'checkbox',
+                            disabled: !!$node.attr('disabled'),
+                            name: $node.attr('label'),
+                            selected: !!$node.attr('checked')
+                        };
+                        break;
+                        
+                    case 'radio':
+                        item = {
+                            type: 'radio',
+                            disabled: !!$node.attr('disabled'),
+                            name: $node.attr('label'),
+                            radio: $node.attr('radiogroup'),
+                            value: $node.attr('id'),
+                            selected: !!$node.attr('checked')
+                        };
+                        break;
+                        
+                    default:
+                        item = undefined;
+                }
+                break;
+ 
+            case 'hr':
+                item = '-------';
+                break;
+                
+            case 'input':
+                switch ($node.attr('type')) {
+                    case 'text':
+                        item = {
+                            type: 'text',
+                            name: label || inputLabel(node),
+                            disabled: !!$node.attr('disabled'),
+                            value: $node.val()
+                        };
+                        break;
+                        
+                    case 'checkbox':
+                        item = {
+                            type: 'checkbox',
+                            name: label || inputLabel(node),
+                            disabled: !!$node.attr('disabled'),
+                            selected: !!$node.attr('checked')
+                        };
+                        break;
+                        
+                    case 'radio':
+                        item = {
+                            type: 'radio',
+                            name: label || inputLabel(node),
+                            disabled: !!$node.attr('disabled'),
+                            radio: !!$node.attr('name'),
+                            value: $node.val(),
+                            selected: !!$node.attr('checked')
+                        };
+                        break;
+                    
+                    default:
+                        item = undefined;
+                        break;
+                }
+                break;
+                
+            case 'select':
+                item = {
+                    type: 'select',
+                    name: label || inputLabel(node),
+                    disabled: !!$node.attr('disabled'),
+                    selected: $node.val(),
+                    options: {}
+                };
+                $node.children().each(function(){
+                    item.options[this.value] = $(this).text();
+                });
+                break;
+                
+            case 'textarea':
+                item = {
+                    type: 'textarea',
+                    name: label || inputLabel(node),
+                    disabled: !!$node.attr('disabled'),
+                    value: $node.val()
+                };
+                break;
+            
+            case 'label':
+                break;
+            
+            default:
+                item = {type: 'html', html: $node.clone(true)};
+                break;
+        }
+        
+        if (item) {
+            counter++;
+            items['key' + counter] = item;
+        }
+    });
+    
+    return counter;
+}
+
+// convert html5 menu
+$.contextMenu.fromMenu = function(element) {
+    var $this = $(element),
+        items = {};
+        
+    menuChildren(items, $this.children());
+    
+    return items;
+};
+
+// make defaults accessible
+$.contextMenu.defaults = defaults;
+$.contextMenu.types = types;
+// export internal functions - undocumented, for hacking only!
+$.contextMenu.handle = handle;
+$.contextMenu.op = op;
+$.contextMenu.menus = menus;
+
+})(jQuery);
+/* Chosen v1.1.0 | (c) 2011-2013 by Harvest | MIT License, https://github.com/harvesthq/chosen/blob/master/LICENSE.md */
+!function(){var a,AbstractChosen,Chosen,SelectParser,b,c={}.hasOwnProperty,d=function(a,b){function d(){this.constructor=a}for(var e in b)c.call(b,e)&&(a[e]=b[e]);return d.prototype=b.prototype,a.prototype=new d,a.__super__=b.prototype,a};SelectParser=function(){function SelectParser(){this.options_index=0,this.parsed=[]}return SelectParser.prototype.add_node=function(a){return"OPTGROUP"===a.nodeName.toUpperCase()?this.add_group(a):this.add_option(a)},SelectParser.prototype.add_group=function(a){var b,c,d,e,f,g;for(b=this.parsed.length,this.parsed.push({array_index:b,group:!0,label:this.escapeExpression(a.label),children:0,disabled:a.disabled}),f=a.childNodes,g=[],d=0,e=f.length;e>d;d++)c=f[d],g.push(this.add_option(c,b,a.disabled));return g},SelectParser.prototype.add_option=function(a,b,c){return"OPTION"===a.nodeName.toUpperCase()?(""!==a.text?(null!=b&&(this.parsed[b].children+=1),this.parsed.push({array_index:this.parsed.length,options_index:this.options_index,value:a.value,text:a.text,html:a.innerHTML,selected:a.selected,disabled:c===!0?c:a.disabled,group_array_index:b,classes:a.className,style:a.style.cssText})):this.parsed.push({array_index:this.parsed.length,options_index:this.options_index,empty:!0}),this.options_index+=1):void 0},SelectParser.prototype.escapeExpression=function(a){var b,c;return null==a||a===!1?"":/[\&\<\>\"\'\`]/.test(a)?(b={"<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#x27;","`":"&#x60;"},c=/&(?!\w+;)|[\<\>\"\'\`]/g,a.replace(c,function(a){return b[a]||"&amp;"})):a},SelectParser}(),SelectParser.select_to_array=function(a){var b,c,d,e,f;for(c=new SelectParser,f=a.childNodes,d=0,e=f.length;e>d;d++)b=f[d],c.add_node(b);return c.parsed},AbstractChosen=function(){function AbstractChosen(a,b){this.form_field=a,this.options=null!=b?b:{},AbstractChosen.browser_is_supported()&&(this.is_multiple=this.form_field.multiple,this.set_default_text(),this.set_default_values(),this.setup(),this.set_up_html(),this.register_observers())}return AbstractChosen.prototype.set_default_values=function(){var a=this;return this.click_test_action=function(b){return a.test_active_click(b)},this.activate_action=function(b){return a.activate_field(b)},this.active_field=!1,this.mouse_on_container=!1,this.results_showing=!1,this.result_highlighted=null,this.allow_single_deselect=null!=this.options.allow_single_deselect&&null!=this.form_field.options[0]&&""===this.form_field.options[0].text?this.options.allow_single_deselect:!1,this.disable_search_threshold=this.options.disable_search_threshold||0,this.disable_search=this.options.disable_search||!1,this.enable_split_word_search=null!=this.options.enable_split_word_search?this.options.enable_split_word_search:!0,this.group_search=null!=this.options.group_search?this.options.group_search:!0,this.search_contains=this.options.search_contains||!1,this.single_backstroke_delete=null!=this.options.single_backstroke_delete?this.options.single_backstroke_delete:!0,this.max_selected_options=this.options.max_selected_options||1/0,this.inherit_select_classes=this.options.inherit_select_classes||!1,this.display_selected_options=null!=this.options.display_selected_options?this.options.display_selected_options:!0,this.display_disabled_options=null!=this.options.display_disabled_options?this.options.display_disabled_options:!0},AbstractChosen.prototype.set_default_text=function(){return this.default_text=this.form_field.getAttribute("data-placeholder")?this.form_field.getAttribute("data-placeholder"):this.is_multiple?this.options.placeholder_text_multiple||this.options.placeholder_text||AbstractChosen.default_multiple_text:this.options.placeholder_text_single||this.options.placeholder_text||AbstractChosen.default_single_text,this.results_none_found=this.form_field.getAttribute("data-no_results_text")||this.options.no_results_text||AbstractChosen.default_no_result_text},AbstractChosen.prototype.mouse_enter=function(){return this.mouse_on_container=!0},AbstractChosen.prototype.mouse_leave=function(){return this.mouse_on_container=!1},AbstractChosen.prototype.input_focus=function(){var a=this;if(this.is_multiple){if(!this.active_field)return setTimeout(function(){return a.container_mousedown()},50)}else if(!this.active_field)return this.activate_field()},AbstractChosen.prototype.input_blur=function(){var a=this;return this.mouse_on_container?void 0:(this.active_field=!1,setTimeout(function(){return a.blur_test()},100))},AbstractChosen.prototype.results_option_build=function(a){var b,c,d,e,f;for(b="",f=this.results_data,d=0,e=f.length;e>d;d++)c=f[d],b+=c.group?this.result_add_group(c):this.result_add_option(c),(null!=a?a.first:void 0)&&(c.selected&&this.is_multiple?this.choice_build(c):c.selected&&!this.is_multiple&&this.single_set_selected_text(c.text));return b},AbstractChosen.prototype.result_add_option=function(a){var b,c;return a.search_match?this.include_option_in_results(a)?(b=[],a.disabled||a.selected&&this.is_multiple||b.push("active-result"),!a.disabled||a.selected&&this.is_multiple||b.push("disabled-result"),a.selected&&b.push("result-selected"),null!=a.group_array_index&&b.push("group-option"),""!==a.classes&&b.push(a.classes),c=document.createElement("li"),c.className=b.join(" "),c.style.cssText=a.style,c.setAttribute("data-option-array-index",a.array_index),c.innerHTML=a.search_text,this.outerHTML(c)):"":""},AbstractChosen.prototype.result_add_group=function(a){var b;return a.search_match||a.group_match?a.active_options>0?(b=document.createElement("li"),b.className="group-result",b.innerHTML=a.search_text,this.outerHTML(b)):"":""},AbstractChosen.prototype.results_update_field=function(){return this.set_default_text(),this.is_multiple||this.results_reset_cleanup(),this.result_clear_highlight(),this.results_build(),this.results_showing?this.winnow_results():void 0},AbstractChosen.prototype.reset_single_select_options=function(){var a,b,c,d,e;for(d=this.results_data,e=[],b=0,c=d.length;c>b;b++)a=d[b],a.selected?e.push(a.selected=!1):e.push(void 0);return e},AbstractChosen.prototype.results_toggle=function(){return this.results_showing?this.results_hide():this.results_show()},AbstractChosen.prototype.results_search=function(){return this.results_showing?this.winnow_results():this.results_show()},AbstractChosen.prototype.winnow_results=function(){var a,b,c,d,e,f,g,h,i,j,k,l,m;for(this.no_results_clear(),e=0,g=this.get_search_text(),a=g.replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&"),d=this.search_contains?"":"^",c=new RegExp(d+a,"i"),j=new RegExp(a,"i"),m=this.results_data,k=0,l=m.length;l>k;k++)b=m[k],b.search_match=!1,f=null,this.include_option_in_results(b)&&(b.group&&(b.group_match=!1,b.active_options=0),null!=b.group_array_index&&this.results_data[b.group_array_index]&&(f=this.results_data[b.group_array_index],0===f.active_options&&f.search_match&&(e+=1),f.active_options+=1),(!b.group||this.group_search)&&(b.search_text=b.group?b.label:b.html,b.search_match=this.search_string_match(b.search_text,c),b.search_match&&!b.group&&(e+=1),b.search_match?(g.length&&(h=b.search_text.search(j),i=b.search_text.substr(0,h+g.length)+"</em>"+b.search_text.substr(h+g.length),b.search_text=i.substr(0,h)+"<em>"+i.substr(h)),null!=f&&(f.group_match=!0)):null!=b.group_array_index&&this.results_data[b.group_array_index].search_match&&(b.search_match=!0)));return this.result_clear_highlight(),1>e&&g.length?(this.update_results_content(""),this.no_results(g)):(this.update_results_content(this.results_option_build()),this.winnow_results_set_highlight())},AbstractChosen.prototype.search_string_match=function(a,b){var c,d,e,f;if(b.test(a))return!0;if(this.enable_split_word_search&&(a.indexOf(" ")>=0||0===a.indexOf("["))&&(d=a.replace(/\[|\]/g,"").split(" "),d.length))for(e=0,f=d.length;f>e;e++)if(c=d[e],b.test(c))return!0},AbstractChosen.prototype.choices_count=function(){var a,b,c,d;if(null!=this.selected_option_count)return this.selected_option_count;for(this.selected_option_count=0,d=this.form_field.options,b=0,c=d.length;c>b;b++)a=d[b],a.selected&&(this.selected_option_count+=1);return this.selected_option_count},AbstractChosen.prototype.choices_click=function(a){return a.preventDefault(),this.results_showing||this.is_disabled?void 0:this.results_show()},AbstractChosen.prototype.keyup_checker=function(a){var b,c;switch(b=null!=(c=a.which)?c:a.keyCode,this.search_field_scale(),b){case 8:if(this.is_multiple&&this.backstroke_length<1&&this.choices_count()>0)return this.keydown_backstroke();if(!this.pending_backstroke)return this.result_clear_highlight(),this.results_search();break;case 13:if(a.preventDefault(),this.results_showing)return this.result_select(a);break;case 27:return this.results_showing&&this.results_hide(),!0;case 9:case 38:case 40:case 16:case 91:case 17:break;default:return this.results_search()}},AbstractChosen.prototype.clipboard_event_checker=function(){var a=this;return setTimeout(function(){return a.results_search()},50)},AbstractChosen.prototype.container_width=function(){return null!=this.options.width?this.options.width:""+this.form_field.offsetWidth+"px"},AbstractChosen.prototype.include_option_in_results=function(a){return this.is_multiple&&!this.display_selected_options&&a.selected?!1:!this.display_disabled_options&&a.disabled?!1:a.empty?!1:!0},AbstractChosen.prototype.search_results_touchstart=function(a){return this.touch_started=!0,this.search_results_mouseover(a)},AbstractChosen.prototype.search_results_touchmove=function(a){return this.touch_started=!1,this.search_results_mouseout(a)},AbstractChosen.prototype.search_results_touchend=function(a){return this.touch_started?this.search_results_mouseup(a):void 0},AbstractChosen.prototype.outerHTML=function(a){var b;return a.outerHTML?a.outerHTML:(b=document.createElement("div"),b.appendChild(a),b.innerHTML)},AbstractChosen.browser_is_supported=function(){return"Microsoft Internet Explorer"===window.navigator.appName?document.documentMode>=8:/iP(od|hone)/i.test(window.navigator.userAgent)?!1:/Android/i.test(window.navigator.userAgent)&&/Mobile/i.test(window.navigator.userAgent)?!1:!0},AbstractChosen.default_multiple_text="Select Some Options",AbstractChosen.default_single_text="Select an Option",AbstractChosen.default_no_result_text="No results match",AbstractChosen}(),a=jQuery,a.fn.extend({chosen:function(b){return AbstractChosen.browser_is_supported()?this.each(function(){var c,d;c=a(this),d=c.data("chosen"),"destroy"===b&&d?d.destroy():d||c.data("chosen",new Chosen(this,b))}):this}}),Chosen=function(c){function Chosen(){return b=Chosen.__super__.constructor.apply(this,arguments)}return d(Chosen,c),Chosen.prototype.setup=function(){return this.form_field_jq=a(this.form_field),this.current_selectedIndex=this.form_field.selectedIndex,this.is_rtl=this.form_field_jq.hasClass("chosen-rtl")},Chosen.prototype.set_up_html=function(){var b,c;return b=["chosen-container"],b.push("chosen-container-"+(this.is_multiple?"multi":"single")),this.inherit_select_classes&&this.form_field.className&&b.push(this.form_field.className),this.is_rtl&&b.push("chosen-rtl"),c={"class":b.join(" "),style:"width: "+this.container_width()+";",title:this.form_field.title},this.form_field.id.length&&(c.id=this.form_field.id.replace(/[^\w]/g,"_")+"_chosen"),this.container=a("<div />",c),this.is_multiple?this.container.html('<ul class="chosen-choices"><li class="search-field"><input type="text" value="'+this.default_text+'" class="default" autocomplete="off" style="width:25px;" /></li></ul><div class="chosen-drop"><ul class="chosen-results"></ul></div>'):this.container.html('<a class="chosen-single chosen-default" tabindex="-1"><span>'+this.default_text+'</span><div><b></b></div></a><div class="chosen-drop"><div class="chosen-search"><input type="text" autocomplete="off" /></div><ul class="chosen-results"></ul></div>'),this.form_field_jq.hide().after(this.container),this.dropdown=this.container.find("div.chosen-drop").first(),this.search_field=this.container.find("input").first(),this.search_results=this.container.find("ul.chosen-results").first(),this.search_field_scale(),this.search_no_results=this.container.find("li.no-results").first(),this.is_multiple?(this.search_choices=this.container.find("ul.chosen-choices").first(),this.search_container=this.container.find("li.search-field").first()):(this.search_container=this.container.find("div.chosen-search").first(),this.selected_item=this.container.find(".chosen-single").first()),this.results_build(),this.set_tab_index(),this.set_label_behavior(),this.form_field_jq.trigger("chosen:ready",{chosen:this})},Chosen.prototype.register_observers=function(){var a=this;return this.container.bind("mousedown.chosen",function(b){a.container_mousedown(b)}),this.container.bind("mouseup.chosen",function(b){a.container_mouseup(b)}),this.container.bind("mouseenter.chosen",function(b){a.mouse_enter(b)}),this.container.bind("mouseleave.chosen",function(b){a.mouse_leave(b)}),this.search_results.bind("mouseup.chosen",function(b){a.search_results_mouseup(b)}),this.search_results.bind("mouseover.chosen",function(b){a.search_results_mouseover(b)}),this.search_results.bind("mouseout.chosen",function(b){a.search_results_mouseout(b)}),this.search_results.bind("mousewheel.chosen DOMMouseScroll.chosen",function(b){a.search_results_mousewheel(b)}),this.search_results.bind("touchstart.chosen",function(b){a.search_results_touchstart(b)}),this.search_results.bind("touchmove.chosen",function(b){a.search_results_touchmove(b)}),this.search_results.bind("touchend.chosen",function(b){a.search_results_touchend(b)}),this.form_field_jq.bind("chosen:updated.chosen",function(b){a.results_update_field(b)}),this.form_field_jq.bind("chosen:activate.chosen",function(b){a.activate_field(b)}),this.form_field_jq.bind("chosen:open.chosen",function(b){a.container_mousedown(b)}),this.form_field_jq.bind("chosen:close.chosen",function(b){a.input_blur(b)}),this.search_field.bind("blur.chosen",function(b){a.input_blur(b)}),this.search_field.bind("keyup.chosen",function(b){a.keyup_checker(b)}),this.search_field.bind("keydown.chosen",function(b){a.keydown_checker(b)}),this.search_field.bind("focus.chosen",function(b){a.input_focus(b)}),this.search_field.bind("cut.chosen",function(b){a.clipboard_event_checker(b)}),this.search_field.bind("paste.chosen",function(b){a.clipboard_event_checker(b)}),this.is_multiple?this.search_choices.bind("click.chosen",function(b){a.choices_click(b)}):this.container.bind("click.chosen",function(a){a.preventDefault()})},Chosen.prototype.destroy=function(){return a(this.container[0].ownerDocument).unbind("click.chosen",this.click_test_action),this.search_field[0].tabIndex&&(this.form_field_jq[0].tabIndex=this.search_field[0].tabIndex),this.container.remove(),this.form_field_jq.removeData("chosen"),this.form_field_jq.show()},Chosen.prototype.search_field_disabled=function(){return this.is_disabled=this.form_field_jq[0].disabled,this.is_disabled?(this.container.addClass("chosen-disabled"),this.search_field[0].disabled=!0,this.is_multiple||this.selected_item.unbind("focus.chosen",this.activate_action),this.close_field()):(this.container.removeClass("chosen-disabled"),this.search_field[0].disabled=!1,this.is_multiple?void 0:this.selected_item.bind("focus.chosen",this.activate_action))},Chosen.prototype.container_mousedown=function(b){return this.is_disabled||(b&&"mousedown"===b.type&&!this.results_showing&&b.preventDefault(),null!=b&&a(b.target).hasClass("search-choice-close"))?void 0:(this.active_field?this.is_multiple||!b||a(b.target)[0]!==this.selected_item[0]&&!a(b.target).parents("a.chosen-single").length||(b.preventDefault(),this.results_toggle()):(this.is_multiple&&this.search_field.val(""),a(this.container[0].ownerDocument).bind("click.chosen",this.click_test_action),this.results_show()),this.activate_field())},Chosen.prototype.container_mouseup=function(a){return"ABBR"!==a.target.nodeName||this.is_disabled?void 0:this.results_reset(a)},Chosen.prototype.search_results_mousewheel=function(a){var b;return a.originalEvent&&(b=-a.originalEvent.wheelDelta||a.originalEvent.detail),null!=b?(a.preventDefault(),"DOMMouseScroll"===a.type&&(b=40*b),this.search_results.scrollTop(b+this.search_results.scrollTop())):void 0},Chosen.prototype.blur_test=function(){return!this.active_field&&this.container.hasClass("chosen-container-active")?this.close_field():void 0},Chosen.prototype.close_field=function(){return a(this.container[0].ownerDocument).unbind("click.chosen",this.click_test_action),this.active_field=!1,this.results_hide(),this.container.removeClass("chosen-container-active"),this.clear_backstroke(),this.show_search_field_default(),this.search_field_scale()},Chosen.prototype.activate_field=function(){return this.container.addClass("chosen-container-active"),this.active_field=!0,this.search_field.val(this.search_field.val()),this.search_field.focus()},Chosen.prototype.test_active_click=function(b){var c;return c=a(b.target).closest(".chosen-container"),c.length&&this.container[0]===c[0]?this.active_field=!0:this.close_field()},Chosen.prototype.results_build=function(){return this.parsing=!0,this.selected_option_count=null,this.results_data=SelectParser.select_to_array(this.form_field),this.is_multiple?this.search_choices.find("li.search-choice").remove():this.is_multiple||(this.single_set_selected_text(),this.disable_search||this.form_field.options.length<=this.disable_search_threshold?(this.search_field[0].readOnly=!0,this.container.addClass("chosen-container-single-nosearch")):(this.search_field[0].readOnly=!1,this.container.removeClass("chosen-container-single-nosearch"))),this.update_results_content(this.results_option_build({first:!0})),this.search_field_disabled(),this.show_search_field_default(),this.search_field_scale(),this.parsing=!1},Chosen.prototype.result_do_highlight=function(a){var b,c,d,e,f;if(a.length){if(this.result_clear_highlight(),this.result_highlight=a,this.result_highlight.addClass("highlighted"),d=parseInt(this.search_results.css("maxHeight"),10),f=this.search_results.scrollTop(),e=d+f,c=this.result_highlight.position().top+this.search_results.scrollTop(),b=c+this.result_highlight.outerHeight(),b>=e)return this.search_results.scrollTop(b-d>0?b-d:0);if(f>c)return this.search_results.scrollTop(c)}},Chosen.prototype.result_clear_highlight=function(){return this.result_highlight&&this.result_highlight.removeClass("highlighted"),this.result_highlight=null},Chosen.prototype.results_show=function(){return this.is_multiple&&this.max_selected_options<=this.choices_count()?(this.form_field_jq.trigger("chosen:maxselected",{chosen:this}),!1):(this.container.addClass("chosen-with-drop"),this.results_showing=!0,this.search_field.focus(),this.search_field.val(this.search_field.val()),this.winnow_results(),this.form_field_jq.trigger("chosen:showing_dropdown",{chosen:this}))},Chosen.prototype.update_results_content=function(a){return this.search_results.html(a)},Chosen.prototype.results_hide=function(){return this.results_showing&&(this.result_clear_highlight(),this.container.removeClass("chosen-with-drop"),this.form_field_jq.trigger("chosen:hiding_dropdown",{chosen:this})),this.results_showing=!1},Chosen.prototype.set_tab_index=function(){var a;return this.form_field.tabIndex?(a=this.form_field.tabIndex,this.form_field.tabIndex=-1,this.search_field[0].tabIndex=a):void 0},Chosen.prototype.set_label_behavior=function(){var b=this;return this.form_field_label=this.form_field_jq.parents("label"),!this.form_field_label.length&&this.form_field.id.length&&(this.form_field_label=a("label[for='"+this.form_field.id+"']")),this.form_field_label.length>0?this.form_field_label.bind("click.chosen",function(a){return b.is_multiple?b.container_mousedown(a):b.activate_field()}):void 0},Chosen.prototype.show_search_field_default=function(){return this.is_multiple&&this.choices_count()<1&&!this.active_field?(this.search_field.val(this.default_text),this.search_field.addClass("default")):(this.search_field.val(""),this.search_field.removeClass("default"))},Chosen.prototype.search_results_mouseup=function(b){var c;return c=a(b.target).hasClass("active-result")?a(b.target):a(b.target).parents(".active-result").first(),c.length?(this.result_highlight=c,this.result_select(b),this.search_field.focus()):void 0},Chosen.prototype.search_results_mouseover=function(b){var c;return c=a(b.target).hasClass("active-result")?a(b.target):a(b.target).parents(".active-result").first(),c?this.result_do_highlight(c):void 0},Chosen.prototype.search_results_mouseout=function(b){return a(b.target).hasClass("active-result")?this.result_clear_highlight():void 0},Chosen.prototype.choice_build=function(b){var c,d,e=this;return c=a("<li />",{"class":"search-choice"}).html("<span>"+b.html+"</span>"),b.disabled?c.addClass("search-choice-disabled"):(d=a("<a />",{"class":"search-choice-close","data-option-array-index":b.array_index}),d.bind("click.chosen",function(a){return e.choice_destroy_link_click(a)}),c.append(d)),this.search_container.before(c)},Chosen.prototype.choice_destroy_link_click=function(b){return b.preventDefault(),b.stopPropagation(),this.is_disabled?void 0:this.choice_destroy(a(b.target))},Chosen.prototype.choice_destroy=function(a){return this.result_deselect(a[0].getAttribute("data-option-array-index"))?(this.show_search_field_default(),this.is_multiple&&this.choices_count()>0&&this.search_field.val().length<1&&this.results_hide(),a.parents("li").first().remove(),this.search_field_scale()):void 0},Chosen.prototype.results_reset=function(){return this.reset_single_select_options(),this.form_field.options[0].selected=!0,this.single_set_selected_text(),this.show_search_field_default(),this.results_reset_cleanup(),this.form_field_jq.trigger("change"),this.active_field?this.results_hide():void 0},Chosen.prototype.results_reset_cleanup=function(){return this.current_selectedIndex=this.form_field.selectedIndex,this.selected_item.find("abbr").remove()},Chosen.prototype.result_select=function(a){var b,c;return this.result_highlight?(b=this.result_highlight,this.result_clear_highlight(),this.is_multiple&&this.max_selected_options<=this.choices_count()?(this.form_field_jq.trigger("chosen:maxselected",{chosen:this}),!1):(this.is_multiple?b.removeClass("active-result"):this.reset_single_select_options(),c=this.results_data[b[0].getAttribute("data-option-array-index")],c.selected=!0,this.form_field.options[c.options_index].selected=!0,this.selected_option_count=null,this.is_multiple?this.choice_build(c):this.single_set_selected_text(c.text),(a.metaKey||a.ctrlKey)&&this.is_multiple||this.results_hide(),this.search_field.val(""),(this.is_multiple||this.form_field.selectedIndex!==this.current_selectedIndex)&&this.form_field_jq.trigger("change",{selected:this.form_field.options[c.options_index].value}),this.current_selectedIndex=this.form_field.selectedIndex,this.search_field_scale())):void 0},Chosen.prototype.single_set_selected_text=function(a){return null==a&&(a=this.default_text),a===this.default_text?this.selected_item.addClass("chosen-default"):(this.single_deselect_control_build(),this.selected_item.removeClass("chosen-default")),this.selected_item.find("span").text(a)},Chosen.prototype.result_deselect=function(a){var b;return b=this.results_data[a],this.form_field.options[b.options_index].disabled?!1:(b.selected=!1,this.form_field.options[b.options_index].selected=!1,this.selected_option_count=null,this.result_clear_highlight(),this.results_showing&&this.winnow_results(),this.form_field_jq.trigger("change",{deselected:this.form_field.options[b.options_index].value}),this.search_field_scale(),!0)},Chosen.prototype.single_deselect_control_build=function(){return this.allow_single_deselect?(this.selected_item.find("abbr").length||this.selected_item.find("span").first().after('<abbr class="search-choice-close"></abbr>'),this.selected_item.addClass("chosen-single-with-deselect")):void 0},Chosen.prototype.get_search_text=function(){return this.search_field.val()===this.default_text?"":a("<div/>").text(a.trim(this.search_field.val())).html()},Chosen.prototype.winnow_results_set_highlight=function(){var a,b;return b=this.is_multiple?[]:this.search_results.find(".result-selected.active-result"),a=b.length?b.first():this.search_results.find(".active-result").first(),null!=a?this.result_do_highlight(a):void 0},Chosen.prototype.no_results=function(b){var c;return c=a('<li class="no-results">'+this.results_none_found+' "<span></span>"</li>'),c.find("span").first().html(b),this.search_results.append(c),this.form_field_jq.trigger("chosen:no_results",{chosen:this})},Chosen.prototype.no_results_clear=function(){return this.search_results.find(".no-results").remove()},Chosen.prototype.keydown_arrow=function(){var a;return this.results_showing&&this.result_highlight?(a=this.result_highlight.nextAll("li.active-result").first())?this.result_do_highlight(a):void 0:this.results_show()},Chosen.prototype.keyup_arrow=function(){var a;return this.results_showing||this.is_multiple?this.result_highlight?(a=this.result_highlight.prevAll("li.active-result"),a.length?this.result_do_highlight(a.first()):(this.choices_count()>0&&this.results_hide(),this.result_clear_highlight())):void 0:this.results_show()},Chosen.prototype.keydown_backstroke=function(){var a;return this.pending_backstroke?(this.choice_destroy(this.pending_backstroke.find("a").first()),this.clear_backstroke()):(a=this.search_container.siblings("li.search-choice").last(),a.length&&!a.hasClass("search-choice-disabled")?(this.pending_backstroke=a,this.single_backstroke_delete?this.keydown_backstroke():this.pending_backstroke.addClass("search-choice-focus")):void 0)},Chosen.prototype.clear_backstroke=function(){return this.pending_backstroke&&this.pending_backstroke.removeClass("search-choice-focus"),this.pending_backstroke=null},Chosen.prototype.keydown_checker=function(a){var b,c;switch(b=null!=(c=a.which)?c:a.keyCode,this.search_field_scale(),8!==b&&this.pending_backstroke&&this.clear_backstroke(),b){case 8:this.backstroke_length=this.search_field.val().length;break;case 9:this.results_showing&&!this.is_multiple&&this.result_select(a),this.mouse_on_container=!1;break;case 13:a.preventDefault();break;case 38:a.preventDefault(),this.keyup_arrow();break;case 40:a.preventDefault(),this.keydown_arrow()}},Chosen.prototype.search_field_scale=function(){var b,c,d,e,f,g,h,i,j;if(this.is_multiple){for(d=0,h=0,f="position:absolute; left: -1000px; top: -1000px; display:none;",g=["font-size","font-style","font-weight","font-family","line-height","text-transform","letter-spacing"],i=0,j=g.length;j>i;i++)e=g[i],f+=e+":"+this.search_field.css(e)+";";return b=a("<div />",{style:f}),b.text(this.search_field.val()),a("body").append(b),h=b.width()+25,b.remove(),c=this.container.outerWidth(),h>c-10&&(h=c-10),this.search_field.css({width:h+"px"})}},Chosen}(AbstractChosen)}.call(this);
