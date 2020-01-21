@@ -36,8 +36,15 @@ module Fg::PackingInstructionsBinLineItemHelper
     track_slms_indicator_codes = ["select commodity first"] if !packing_instructions_bin_line_item
     track_slms_indicator_codes = PackingInstructionsBinLineItem.get_track_slms_indicators if packing_instructions_bin_line_item
 
-    commodity_codes, product_class_codes, size_codes, treatment_codes, varieties = get_rmt_product_lists(rmt_products)
-
+    commodity_codes, product_class_codes, size_codes, tees, varieties = get_rmt_product_lists(rmt_products)
+    treatment_codes =Treatment.find_by_sql("select distinct treatments.id,treatments.treatment_code
+                                   from treatments
+                                   join rmt_products on rmt_products.treatment_id=treatments.id
+                                   join varieties on rmt_products.variety_id=varieties.id
+                                   join rmt_varieties on   varieties.rmt_variety_id=rmt_varieties.id
+                                   where rmt_varieties.id='#{packing_instructions_bin_line_item['variety_id']}'
+                                   order by treatment_code").map{|p|[p.treatment_code,p.id]} if packing_instructions_bin_line_item && packing_instructions_bin_line_item['variety_id']
+    treatment_codes = []  if !packing_instructions_bin_line_item || (packing_instructions_bin_line_item && !packing_instructions_bin_line_item['variety_id'])
     field_configs = []
 #  ----------------------------------------------------------------------------------------------
 #  Combo fields to represent foreign key (track_slms_indicator_id) on related table: track_slms_indicators
@@ -50,7 +57,7 @@ module Fg::PackingInstructionsBinLineItemHelper
                           :remote_method => 'refresh_track_slms_indicator',
                           :on_completed_js => combos_js_for_commodity["packing_instructions_bin_line_item_commodity_id"]}
 
-    combos_js_for_variety = gen_combos_clear_js_for_combos(["packing_instructions_bin_line_item_variety_id", "packing_instructions_bin_line_item_variety_id"])
+    combos_js_for_variety = gen_combos_clear_js_for_combos(["packing_instructions_bin_line_item_variety_id", "packing_instructions_bin_line_item_treatment_id"])
     variety_observer = {:updated_field_id => "treatment_id_cell",
                           :remote_method => 'variety_changed',
                           :on_completed_js => combos_js_for_variety["packing_instructions_bin_line_item_variety_id"]}
@@ -83,6 +90,14 @@ module Fg::PackingInstructionsBinLineItemHelper
     field_configs << {:field_type => 'DropDownField',
                       :field_name => 'track_slms_indicator_id',
                       :settings => {:list => track_slms_indicator_codes}}
+
+    field_configs[field_configs.length()] = {:field_type=>'TextArea',
+                                             :field_name=>'remarks',
+                                             :settings=>{
+                                                 :cols=> 40,
+                                                 :rows=>1
+                                             } }
+
 
 
     construct_form(packing_instructions_bin_line_item, field_configs, action, 'packing_instructions_bin_line_item', caption, is_edit)
@@ -158,6 +173,7 @@ module Fg::PackingInstructionsBinLineItemHelper
     column_configs << {:field_type => 'text', :field_name => 'product_class_code', :col_width => 130, :column_caption => 'product_class'}
     column_configs << {:field_type => 'text', :field_name => 'treatment_code', :col_width => 100, :column_caption => 'treatment'}
     column_configs << {:field_type => 'text', :field_name => 'track_slms_indicator_code', :col_width => 140, :column_caption => 'track_slms_indicator'}
+    column_configs << {:field_type => 'text', :field_name => 'remarks', :col_width => 140}
     column_configs << {:field_type => 'text', :field_name => 'id'}
 
     get_data_grid(data_set, column_configs, nil, true, grid_command)

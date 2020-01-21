@@ -27,7 +27,7 @@ class PackingInstructionsFgLineItem < ActiveRecord::Base
   def validate
 #  first check whether combo fields have been selected
     is_valid = true
-    validate_uniqueness
+    validate_uniqueness if self.new_record?
 #  if is_valid
 #    is_valid = ModelHelper::Validations.validate_combos([{:grade_code => self.grade_code}],self)
 # end

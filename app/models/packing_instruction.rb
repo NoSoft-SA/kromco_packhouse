@@ -87,7 +87,7 @@ def self.get_all_shift_type_codes
 end
 
   def self.get_trading_partners
-    trading_partners = ActiveRecord::Base.connection.select_all("select id,contact_name from trading_partners").map{|x|[x['contact_name'],x['id']]}
+    trading_partners = ActiveRecord::Base.connection.select_all("select id,contact_name from trading_partners").map{|x|[x['contact_name'],x['id'].to_i]}
   end
 
 

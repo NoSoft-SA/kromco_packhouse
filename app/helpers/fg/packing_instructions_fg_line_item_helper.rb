@@ -107,12 +107,18 @@ module Fg::PackingInstructionsFgLineItemHelper
                           :remote_method => 'store_old_pack_code',
                           :on_completed_js => combos_js_for_old_pack_code["#{frm}_old_pack_code"]}
 
-    combos_js_for_actual_count = gen_combos_clear_js_for_combos(["#{frm}_actual_count", "#{frm}_old_fg_id"])
-    actual_count_observer = {:updated_field_id => "old_fg_id_cell",
-                          :remote_method => 'refresh_old_fg_id',
-                          :on_completed_js => combos_js_for_actual_count["#{frm}_actual_count"]}
+    combos_js_for_actual_count = gen_combos_clear_js_for_combos(["#{frm}_actual_count", "#{frm}_extended_fg_id"])
+    actual_count_observer = {:updated_field_id => "extended_fg_id_cell",
+                             :remote_method => 'refresh_extended_fg_code',
+                             :on_completed_js => combos_js_for_actual_count["#{frm}_actual_count"]}
 
-    return commodity_observer,marketing_variety_code_observer,brand_code_observer,old_pack_code_observer,actual_count_observer
+    combos_js_for_extended_fg = gen_combos_clear_js_for_combos(["#{frm}_extended_fg_id", "#{frm}_old_fg_id"])
+    extended_fg_observer = {:updated_field_id => "old_fg_id_cell",
+                          :remote_method => 'refresh_old_fg_id',
+                          :on_completed_js => combos_js_for_extended_fg["#{frm}_extended_fg_id"]}
+
+
+    return commodity_observer,marketing_variety_code_observer,brand_code_observer,old_pack_code_observer,actual_count_observer,extended_fg_observer
 
   end
 
@@ -124,8 +130,8 @@ module Fg::PackingInstructionsFgLineItemHelper
 #  --------------------------------------------------------------------------------------------------
   session[:packing_instructions_fg_line_item_form]= Hash.new
 
-  commodity_observer,marketing_variety_code_observer,brand_code_observer,old_pack_code_observer,actual_count_observer=get_observers("packing_instructions_fg_line_item")
-  mv_extended_fgs = ActiveRecord::Base.connection.select_all("select DISTINCT old_fg_code,id,marketing_variety_code,brand_code,old_pack_code,actual_count
+  commodity_observer,marketing_variety_code_observer,brand_code_observer,old_pack_code_observer,actual_count_observer,extended_fg_observer=get_observers("packing_instructions_fg_line_item")
+  mv_extended_fgs = ActiveRecord::Base.connection.select_all("select DISTINCT extended_fg_code,old_fg_code,id,marketing_variety_code,brand_code,old_pack_code,actual_count
                      FROM mv_extended_fgs ")
 
   session[:mv_extended_fgs] = mv_extended_fgs
@@ -135,7 +141,8 @@ module Fg::PackingInstructionsFgLineItemHelper
   brand_codes             = mv_extended_fgs.map{|x|x['brand_code']}.delete_if { |e| e ==nil || e=='' }.uniq
   old_pack_codes          = mv_extended_fgs.map{|x|x['old_pack_code']}.delete_if { |e| e ==nil || e=='' }.uniq
   actual_counts           = mv_extended_fgs.map{|x|x['actual_count']}.delete_if { |e| e ==nil || e=='' }.uniq
-  fg_codes                = mv_extended_fgs.map{|g|[g['old_fg_code'],g['id'].to_i]}.uniq
+  fg_codes                = mv_extended_fgs.map{|g|[g['old_fg_code']     ,g['id'].to_i]}.uniq
+extended_fgs              = mv_extended_fgs.map{|g|[g['extended_fg_code'],g['id'].to_i]}.uniq
 
   grade_codes = Grade.find_by_sql('select distinct grades.id,grades.grade_code from grades
                                   join extended_fgs on extended_fgs.grade_code=grades.grade_code ').map{|g|[g.grade_code,g.id.to_i]}
@@ -178,7 +185,10 @@ module Fg::PackingInstructionsFgLineItemHelper
     field_configs << {:field_type => 'DropDownField', :field_name => 'actual_count',
                       :settings => {:label_caption=> 'actual_count',:list => actual_counts},:observer=>actual_count_observer}
 
-  field_configs << {:field_type => 'DropDownField', :field_name => 'old_fg_id',
+    field_configs << {:field_type => 'DropDownField', :field_name => 'extended_fg_id',
+                      :settings => {:label_caption=> 'extended fg code',:list => extended_fgs},:observer=> extended_fg_observer}
+
+    field_configs << {:field_type => 'DropDownField', :field_name => 'old_fg_id',
                     :settings => {:label_caption=> 'old fg',:list => fg_codes}}
 
   field_configs << {:field_type => 'DropDownField',
@@ -194,6 +204,13 @@ module Fg::PackingInstructionsFgLineItemHelper
 
   field_configs << {:field_type => 'DropDownField',
             :field_name => 'marketing_org_id',:settings => {:list => marketing_orgs}}
+
+    field_configs[field_configs.length()] = {:field_type=>'TextArea',
+                                             :field_name=>'remarks',
+                                             :settings=>{
+                                                 :cols=> 40,
+                                                 :rows=>1
+                                             } }
 
   construct_form(packing_instructions_fg_line_item,field_configs,action,'packing_instructions_fg_line_item',caption,is_edit)
   end
@@ -236,7 +253,9 @@ end
                               :controller =>request.path_parameters['controller'].to_s,
                               :target_action =>'new_packing_instructions_fg_line_item',
                               :link_text => 'new_packing_instructions_fg_line_item',
-                              :id_value=>'id'
+                              :id_value=>'id',
+                              :window_width => 1200,
+                              :window_height => 800,
                           }}
 
       action_configs << {:field_type => 'link_window',:field_name => 'edit packing_instructions_fg_line_item',
@@ -279,6 +298,7 @@ end
 
    column_configs << {:field_type => 'text', :field_name => 'pallet_qty',:col_width=>80, :data_type => 'integer', :column_caption => 'pallet_qty'}
    column_configs << {:field_type => 'text', :field_name => 'retailer_sell_by_code',:col_width=>150}
+   column_configs << {:field_type => 'text', :field_name => 'extended_fg_code',:col_width=>150}
    column_configs << {:field_type => 'text', :field_name => 'old_fg_code',:col_width=>150}
    column_configs << {:field_type => 'text', :field_name => 'grade_code', :column_caption => 'grade',:col_width=>70}
    column_configs << {:field_type => 'text', :field_name => 'inventory_code',:col_width=>150}
@@ -290,6 +310,7 @@ end
    column_configs << {:field_type => 'text', :field_name => 'old_pack_code',:col_width=>150}
    column_configs << {:field_type => 'text', :field_name => 'actual_count',:col_width=>150}
    column_configs << {:field_type => 'text', :field_name => 'packing_instruction_bin_line_item_id',:hide=>true,:col_width=>150}
+   column_configs << {:field_type => 'text', :field_name => 'remarks', :col_width => 140}
    column_configs << {:field_type => 'text', :field_name => 'id',:hide=> true}
 
    @multi_select = multi_select

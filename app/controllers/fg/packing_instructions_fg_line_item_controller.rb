@@ -8,6 +8,44 @@ class Fg::PackingInstructionsFgLineItemController < ApplicationController
     true
   end
 
+  def refresh_extended_fg_code
+    actual_count = get_selected_combo_value(params)
+
+    if actual_count == nil
+      @extended_fgs = ["select actual_count "]
+    else
+      session[:actual_count] = actual_count
+
+      # @extended_fgs = session[:mv_extended_fgs].find_all{|x|
+      # x['commodity_code']         =="'#{session[:commodity_code]}'" &&
+      # x['marketing_variety_code'] =="'#{session[:marketing_variety_code]}'" &&
+      # x['brand_code']             =="'#{session[:brand_code]}'"&&
+      # x['old_pack_code']          =="'#{session[:old_pack_code]}'" &&
+      # x['actual_count']           =="'#{actual_count}'"
+      # }.map { |g| [g['extended_fg_code'],g['id'].to_i]}.uniq
+
+      @extended_fgs = ActiveRecord::Base.connection.select_all(
+          "
+      select DISTINCT extended_fg_code,id
+      FROM mv_extended_fgs
+      where commodity_code='#{session[:commodity_code]}'
+      and marketing_variety_code='#{session[:marketing_variety_code]}'
+      and brand_code ='#{session[:brand_code]}'
+      and old_pack_code='#{session[:old_pack_code]}'
+      and actual_count='#{actual_count}'").map { |g| [g['extended_fg_code'],g['id'].to_i]}.uniq
+
+      @extended_fgs.unshift(["<empty>"])
+    end
+    render :inline => %{
+      <%x_content     = select('packing_instructions_fg_line_item','extended_fg_id',@extended_fgs) %>
+   <script>
+          <%= update_element_function("extended_fg_id_cell", :action => :update,:content => x_content) %>
+    </script>
+    <%= refresh_combo_observer_no_img('packing_instructions_fg_line_item_extended_fg_id', 'old_fg_id_cell', 'refresh_old_fg_id') %>
+
+   }
+  end
+
   def submit_fg_line_item_params
     recs = params[:fg_line_item]['fgs'].split(/\n/)
     extended_fgs,extended_fg_list,inventories,inventory_list,tms,tms_list,sell_bys,sell_by_list,insert_values = get_fg_line_item_lists
@@ -273,12 +311,22 @@ class Fg::PackingInstructionsFgLineItemController < ApplicationController
   end
 
   def refresh_old_fg_id
-    actual_count = get_selected_combo_value(params)
+    extended_fg_id = get_selected_combo_value(params)
 
-    if actual_count == nil
-      @old_fgs = ["select actual_count "]
+    if extended_fg_id == nil
+      @old_fgs = ["select extended_fg_code "]
     else
-      session[:actual_count] = actual_count
+      session[:extended_fg_id] = extended_fg_id
+
+        # @old_fgs = session[:mv_extended_fgs].find_all{|x|
+        # x['id'].to_i                == extended_fg_id.to_i &&
+        # x['commodity_code']         =="'#{session[:commodity_code]}'" &&
+        # x['marketing_variety_code'] =="'#{session[:marketing_variety_code]}'" &&
+        # x['brand_code']             =="'#{session[:brand_code]}'"&&
+        # x['old_pack_code']          =="'#{session[:old_pack_code]}'" &&
+        # x['actual_count']           =="'#{session[:actual_count]}'"
+        #  }.map { |g| [g['old_fg_code'], g['id'].to_i] }.uniq
+
       @old_fgs = ActiveRecord::Base.connection.select_all(
           "
       select DISTINCT old_fg_code,id
@@ -286,7 +334,8 @@ class Fg::PackingInstructionsFgLineItemController < ApplicationController
       where commodity_code='#{session[:commodity_code]}' and marketing_variety_code='#{session[:marketing_variety_code]}'
       and brand_code ='#{session[:brand_code]}'
       and old_pack_code='#{session[:old_pack_code]}'
-      and actual_count='#{actual_count}'").map { |g| [g['old_fg_code'], g['id'].to_i] }.uniq
+      and actual_count='#{session[:actual_count]}'
+      and id = #{extended_fg_id}").map { |g| [g['old_fg_code'], g['id'].to_i] }.uniq
 
       @old_fgs.unshift(["<empty>"])
     end
@@ -297,6 +346,7 @@ class Fg::PackingInstructionsFgLineItemController < ApplicationController
     </script>
    }
   end
+
 
   def store_old_pack_code
     old_pack_code = get_selected_combo_value(params)
@@ -313,7 +363,7 @@ class Fg::PackingInstructionsFgLineItemController < ApplicationController
    <script>
           <%= update_element_function("actual_count_cell", :action => :update,:content => x_content) %>
     </script>
-    <%= refresh_combo_observer_no_img('packing_instructions_fg_line_item_actual_count', 'old_fg_id_cell', 'refresh_old_fg_id') %>
+    <%= refresh_combo_observer_no_img('packing_instructions_fg_line_item_actual_count', 'extended_fg_id_cell', 'refresh_extended_fg_code') %>
    }
   end
 
@@ -628,7 +678,9 @@ class Fg::PackingInstructionsFgLineItemController < ApplicationController
         :marketing_variety_code => params[:packing_instructions_fg_line_item]['marketing_variety_code'],
         :brand_code => params[:packing_instructions_fg_line_item]['brand_code'],
         :old_pack_code => params[:packing_instructions_fg_line_item]['old_pack_code'],
-        :actual_count => params[:packing_instructions_fg_line_item]['actual_count']
+        :actual_count => params[:packing_instructions_fg_line_item]['actual_count'],
+        :extended_fg_id => params[:packing_instructions_fg_line_item]['extended_fg_id'],
+        :remarks => params[:packing_instructions_fg_line_item]['remarks']
     )
     if @packing_instructions_fg_line_item.save
       render :inline =>
@@ -691,7 +743,10 @@ class Fg::PackingInstructionsFgLineItemController < ApplicationController
           :marketing_variety_code => params[:packing_instructions_fg_line_item]['marketing_variety_code'],
           :brand_code => params[:packing_instructions_fg_line_item]['brand_code'],
           :old_pack_code => params[:packing_instructions_fg_line_item]['old_pack_code'],
-          :actual_count => params[:packing_instructions_fg_line_item]['actual_count']
+          :actual_count => params[:packing_instructions_fg_line_item]['actual_count'],
+          :remarks => params[:packing_instructions_fg_line_item]['remarks']
+
+
       )
         render :inline =>
                    %{
@@ -740,7 +795,8 @@ class Fg::PackingInstructionsFgLineItemController < ApplicationController
   def fg_line_item_list_query(condition = nil)
     list_query = " select pifgi.*,g.grade_code,pifgi.old_fg_code,o.short_description as marketing_org_code,
                  tm.target_market_name || ':' || tm.target_market_description as target_market_code,
-                 inv.inventory_code || ':' || inv.inventory_name as inventory_code
+                 inv.inventory_code || ':' || inv.inventory_name as inventory_code,
+                 exf.old_fg_code,exf.extended_fg_code
                  from packing_instructions_fg_line_items pifgi
                  left join grades g on pifgi.grade_id = g.id
                  left join extended_fgs exf on pifgi.old_fg_id = exf.id

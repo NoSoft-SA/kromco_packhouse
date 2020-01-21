@@ -8,6 +8,27 @@ class Fg::PackingInstructionsBinLineItemController < ApplicationController
     true
   end
 
+  def refresh_track_slms_indicator
+    commodity_id = get_selected_combo_value(params)
+
+    if commodity_id == nil
+      @track_slms_indicators = ["<empty>"]
+    else
+      @track_slms_indicators = TrackSlmsIndicator.find_by_sql("select distinct tslm.id,track_slms_indicator_code
+                                  from track_slms_indicators tslm
+                                  join commodities c on tslm.commodity_code = c.commodity_code
+                                   where tslm.track_indicator_type_code='RMI' and c.id= #{commodity_id}").map { |g| [g.track_slms_indicator_code, g.id] }
+
+      @track_slms_indicators.unshift(["<empty>"])
+    end
+    render :inline => %{
+      <%track_slms_indicator_content     = select('packing_instructions_bin_line_item','track_slms_indicator_id',@track_slms_indicators) %>
+   <script>
+          <%= update_element_function("track_slms_indicator_id_cell", :action => :update,:content => track_slms_indicator_content) %>
+    </script>
+   }
+  end
+
   def variety_changed
       variety_id = get_selected_combo_value(params)
 
@@ -24,7 +45,7 @@ class Fg::PackingInstructionsBinLineItemController < ApplicationController
         @treatments.unshift(["<empty>"])
       end
       render :inline => %{
-      <%treatment_id_content     = select('production_run','treatment_id',@treatments) %>
+      <%treatment_id_content     = select('packing_instructions_bin_line_item','treatment_id',@treatments) %>
       <script>
           <%= update_element_function("treatment_id_cell", :action => :update,:content => treatment_id_content) %>
        </script>
@@ -238,26 +259,7 @@ class Fg::PackingInstructionsBinLineItemController < ApplicationController
   end
 
 
-  def refresh_track_slms_indicator
-    commodity_id = get_selected_combo_value(params)
 
-    if commodity_id == nil
-      @track_slms_indicators = ["<empty>"]
-    else
-      @track_slms_indicators = TrackSlmsIndicator.find_by_sql("select distinct tslm.id,track_slms_indicator_code
-                                  from track_slms_indicators tslm
-                                  join commodities c on tslm.commodity_code = c.commodity_code
-                                   where tslm.track_indicator_type_code='RMI' and c.id= #{commodity_id}").map { |g| [g.track_slms_indicator_code, g.id] }
-
-      @track_slms_indicators.unshift(["<empty>"])
-    end
-    render :inline => %{
-      <%track_slms_indicator_content     = select('packing_instructions_bin_line_item','track_slms_indicator_id',@track_slms_indicators) %>
-   <script>
-          <%= update_element_function("track_slms_indicator_id_cell", :action => :update,:content => track_slms_indicator_content) %>
-    </script>
-   }
-  end
 
   def list_packing_instructions_bin_line_items
     return if authorise_for_web(program_name?, 'read') == false

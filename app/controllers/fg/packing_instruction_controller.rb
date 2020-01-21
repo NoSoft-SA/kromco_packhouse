@@ -36,7 +36,7 @@ def list_packing_instructions
                 from packing_instructions pi
                 left join trading_partners tp on pi.trading_partner_id=tp.id
                 left join shift_types st on pi.shift_type_id = st.id
-                order by pi.id desc limit 100"
+                order by pi.id desc "
   @packing_instructions = ActiveRecord::Base.connection.select_all(list_query)
   session[:query] = "ActiveRecord::Base.connection.select_all(\"#{list_query}\")"
   #  ids = @packing_instructions.map{|c|c['id']}
@@ -137,11 +137,10 @@ def create_packing_instruction
    @packing_instruction.packing_instruction_code = create_packing_instruction_code
    if @packing_instruction.save
      set_active_doc("pi",@packing_instruction.id)
-
      render :inline => %{<script>
                           alert('packing instruction created');
                           window.close();
-                         window.parent.opener.frames[1].location.href = '/fg/packing_instruction/edit_packing_instruction';
+                         window.parent.opener.frames[1].location.href = '/fg/packing_instruction/edit_packing_instruction/<%= #{@packing_instruction.id}.to_s%>';
                         </script>}, :layout=>"content"
   else
     @is_create_retry = true
