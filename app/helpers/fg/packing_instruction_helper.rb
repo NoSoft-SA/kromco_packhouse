@@ -40,7 +40,7 @@ module Fg::PackingInstructionHelper
             :field_name => 'remarks'}
 
     #field_configs[field_configs.length()] = {:field_type => 'LabelField', :field_name => 'du', :non_db_field => true, :settings => {:is_separator => false, :static_value => '', :css_class => "borderless_label_field"}}
-    if packing_instruction
+    if packing_instruction && !is_create_retry
     field_configs[field_configs.length()] = {:field_type => 'LinkWindowField',
                                              :field_name => '',
                                              :settings => {
@@ -63,7 +63,7 @@ module Fg::PackingInstructionHelper
                                                  :id_value => packing_instruction.id,
                                                  :no_scroll => true
                                              }
-    } if packing_instruction
+    } if packing_instruction && !is_create_retry
 
     field_configs[field_configs.length()] = {:field_type => 'Screen',
                                              :field_name => "child_form2",
@@ -75,7 +75,7 @@ module Fg::PackingInstructionHelper
                                                  :id_value => packing_instruction.id,
                                                  :no_scroll => true
                                              }
-    } if packing_instruction
+    } if packing_instruction && !is_create_retry
     @submit_button_align = "left"
     set_form_layout "2", nil, 1, 8
 
