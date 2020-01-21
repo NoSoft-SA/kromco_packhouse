@@ -497,7 +497,7 @@ class RwActiveCarton < ActiveRecord::Base
     data.store("F2", str_num)
 
     long_variety = self.variety_short_long
-    labeling_variety  = "(" + long_variety.slice(0,3) + ")" +  long_variety.slice(3,long_variety.length())
+    labeling_variety  = "(" + long_variety.slice(0,3) + ")  " +  long_variety.slice(3,long_variety.length())
 
     data.store("F3", labeling_variety)
     data.store("F4", self.commodity_code)
