@@ -59,7 +59,8 @@ class ScanLoadPallet < PDTTransactionState
         end
     end
 
-    if pallet.qc_result_status!="PASSED"
+    #only export pallets (first part of if clause) needs to be inspected and passed in order to be eligible for a load
+    if pallet.load_detail.load_order.load.load_voyages.size > 0 && pallet.qc_result_status!="PASSED"
      return PDTTransaction.build_msg_screen_definition("#{pallet_num }:QC RESULT STATUS  is not PASSED", nil, nil, nil)
     end
 
