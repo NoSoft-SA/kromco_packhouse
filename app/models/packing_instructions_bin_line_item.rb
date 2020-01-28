@@ -19,6 +19,16 @@ class PackingInstructionsBinLineItem < ActiveRecord::Base
   #     self.update
   #   end
   # end
+  #
+  def PackingInstructionsBinLineItem.get_rmt_product_record(rmt_product_id)
+      rmt_product = ActiveRecord::Base.connection.select_one("
+          select distinct rmt.variety_id,rmt.variety_code,rmt.treatment_id,rmt.treatment_code,
+          rmt.product_class_id,rmt.product_class_code,rmt.rmt_product_code,rmt.id,
+          rmt.size_id,rmt.size_code,rmt.commodity_code,c.id as commodity_id
+          from rmt_products rmt
+          left join commodities c on rmt.commodity_code =c.commodity_code
+          where rmt.id = #{rmt_product_id}")
+    end
 
   def calc_bin_line_item_code
     bin_line_item_query = PackingInstructionsBinLineItem.bin_line_item_list_query("where pibli.id = #{self.id}")
@@ -44,10 +54,11 @@ class PackingInstructionsBinLineItem < ActiveRecord::Base
   def PackingInstructionsBinLineItem.get_rmt_products
     rmt_products = ActiveRecord::Base.connection.select_all("
     select distinct rmt.variety_id,rmt.variety_code,rmt.treatment_id,rmt.treatment_code,
-     rmt.product_class_id,rmt.product_class_code,
+     rmt.product_class_id,rmt.product_class_code,rmt.rmt_product_code,rmt.id,
     rmt.size_id,rmt.size_code,rmt.commodity_code,c.id as commodity_id
     from rmt_products rmt
-    left join commodities c on rmt.commodity_code =c.commodity_code")
+    left join commodities c on rmt.commodity_code =c.commodity_code
+    where c.commodity_code in ('AP','PR')")
   end
 
   def PackingInstructionsBinLineItem.get_commodities

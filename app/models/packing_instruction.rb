@@ -1,7 +1,22 @@
 class PackingInstruction < ActiveRecord::Base
 
- belongs_to :trading_partner
+  belongs_to :trading_partner
   belongs_to :shift_type
+  validates_presence_of :pack_date
+
+
+  def PackingInstruction.get_packing_instruction_sequence_number(pack_date,shift_type_id)
+   year=pack_date.to_date.year
+   last_sequence_number = ActiveRecord::Base.connection.select_one("
+                         select MAX(sequence_number) as sequence_number
+                         from packing_instructions
+                         where year=#{year} and pack_date = '#{pack_date}' and shift_type_id = #{shift_type_id}
+                        ")['sequence_number']
+   last_sequence_number = 0 if !last_sequence_number
+   sequence_number=last_sequence_number.to_i + 1
+   sequence_number = "%03d" % sequence_number.to_s
+   return year,sequence_number
+ end
 
  def PackingInstruction.get_run_packing_instruction_codes(where_condition = nil)
    packing_instructions =  ActiveRecord::Base.connection.select_all("
@@ -25,7 +40,7 @@ def validate
    is_valid = ModelHelper::Validations.validate_combos([{:shift_type_id => self.shift_type_id}], self) if is_valid
 
    if self.new_record? && is_valid
-     validate_uniqueness
+     #validate_uniqueness
    end
 end
 

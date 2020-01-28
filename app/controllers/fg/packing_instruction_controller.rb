@@ -125,16 +125,18 @@ def new_packing_instruction
   render_new_packing_instruction
 end
 
-def create_packing_instruction_code
+def calc_packing_instruction_code
   shift_type_code = ShiftType.find(params[:packing_instruction]['shift_type_id']).shift_type_code
-  #trading_partner =  ActiveRecord::Base.connection.select_one("select contact_name from trading_partners")['contact_name']
-  code = shift_type_code + "_" + params[:packing_instruction]['pack_date'].to_s
-  return code
+  year, sequence_number =  PackingInstruction.get_packing_instruction_sequence_number( params[:packing_instruction]['pack_date'],params[:packing_instruction]['shift_type_id'])
+  code = shift_type_code + "_" + params[:packing_instruction]['pack_date'].to_s + "_" + sequence_number.to_s
+  @packing_instruction.year = year
+  @packing_instruction.packing_instruction_code = code
+  @packing_instruction.sequence_number = sequence_number
 end
 
 def create_packing_instruction
+  calc_packing_instruction_code
    @packing_instruction = PackingInstruction.new(params[:packing_instruction])
-   @packing_instruction.packing_instruction_code = create_packing_instruction_code
    if @packing_instruction.save
      set_active_doc("pi",@packing_instruction.id)
      render :inline => %{<script>
@@ -183,6 +185,7 @@ end
 def update_packing_instruction
    id = params[:packing_instruction][:id]
    if id && @packing_instruction = PackingInstruction.find(id)
+     calc_packing_instruction_code
      if @packing_instruction.update_attributes(params[:packing_instruction])
       params[:id] = @packing_instruction.id
       flash[:notice] = 'record saved'

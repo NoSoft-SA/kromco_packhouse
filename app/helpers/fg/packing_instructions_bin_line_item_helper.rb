@@ -1,5 +1,80 @@
 module Fg::PackingInstructionsBinLineItemHelper
 
+  def build_packing_instructions_bin_line_item_form(packing_instructions_bin_line_item, action, caption, is_edit = nil, is_create_retry = nil)
+    commodity_code, product_class_code, rmt_observer, rmt_products, size_code, track_slms_indicator_codes, treatment_code, variety_code = get_form_data(packing_instructions_bin_line_item)
+
+
+    field_configs = []
+    #  ----------------------------------------------------------------------------------------------
+    #  Combo fields to represent foreign key (track_slms_indicator_id) on related table: track_slms_indicators
+    #  ----------------------------------------------------------------------------------------------
+    field_configs << {:field_type => 'TextField',
+                      :field_name => 'bin_qty'}
+
+    field_configs[field_configs.length()] = {:field_type => 'DropDownField',
+                                             :field_name => 'rmt_product_id',
+                                             :settings => {
+                                                 :list => rmt_products,
+                                                 :label_caption => 'rmt_product_code',
+                                                 :show_label => true},
+                                             :observer => rmt_observer}
+
+
+    field_configs[field_configs.length()] = {:field_type => 'LabelField',
+                                             :field_name => 'commodity_id',
+                                             :settings => {
+                                                 :label_caption => 'commodity_code',
+                                                 :show_label => true,
+                                                 :static_value => commodity_code}}
+
+    field_configs << {:field_type => 'LabelField',
+                      :field_name => 'variety_id',
+                      :settings => {
+                          :label_caption => 'variety_code',
+                          :show_label => true,
+                          :static_value => variety_code}
+                     }
+
+    field_configs << {:field_type => 'LabelField',
+                      :field_name => 'size_id',
+                      :settings => {
+                          :label_caption => 'size_code',
+                          :show_label => true,
+                          :static_value => size_code}
+                      }
+
+    field_configs << {:field_type => 'LabelField',
+                      :field_name => 'product_class_id',
+                      :settings => {
+                          :label_caption => 'product_class_code',
+                          :show_label => true,
+                          :static_value => product_class_code}
+                      }
+
+    field_configs << {:field_type => 'LabelField',
+                      :field_name => 'treatment_id',
+                      :settings => {
+                          :label_caption => 'treatment_code',
+                          :show_label => true,
+                          :static_value => treatment_code}}
+
+    field_configs << {:field_type => 'DropDownField',
+                      :field_name => 'track_slms_indicator_id',
+                      :settings => {:list => track_slms_indicator_codes}}
+
+    field_configs[field_configs.length()] = {:field_type=>'TextArea',
+                                             :field_name=>'remarks',
+                                             :settings=>{
+                                                 :cols=> 40,
+                                                 :rows=>1
+                                             } }
+
+
+
+    construct_form(packing_instructions_bin_line_item, field_configs, action, 'packing_instructions_bin_line_item', caption, is_edit)
+
+  end
+
   def build_bins_grid(data_set,add=nil)
     column_configs                          = Array.new
     get_bin_columns(column_configs)
@@ -25,8 +100,9 @@ module Fg::PackingInstructionsBinLineItemHelper
     get_data_grid(data_set,column_configs,nil,true,grid_command)
   end
 
-  def build_packing_instructions_bin_line_item_form(packing_instructions_bin_line_item, action, caption, is_edit = nil, is_create_retry = nil)
+  def old_build_packing_instructions_bin_line_item_form(packing_instructions_bin_line_item, action, caption, is_edit = nil, is_create_retry = nil)
     rmt_products = PackingInstructionsBinLineItem.get_rmt_products
+    session[:rmt_products] = rmt_products
 
     # commodity_codes = ActiveRecord::Base.connection.select_all("
     #                    select distinct commodities.id,commodities.commodity_code
@@ -220,7 +296,34 @@ module Fg::PackingInstructionsBinLineItemHelper
     get_data_grid(data_set, column_configs, nil, true, grid_command)
   end
 
-  private
+
+  def get_form_data(packing_instructions_bin_line_item)
+    rmt_products = PackingInstructionsBinLineItem.get_rmt_products.map{|x|[x['rmt_product_code'],x['id'].to_i]}
+
+    track_slms_indicator_codes = ["select rmt product code first"] if !packing_instructions_bin_line_item
+    track_slms_indicator_codes = PackingInstructionsBinLineItem.get_track_slms_indicators if packing_instructions_bin_line_item
+
+    if packing_instructions_bin_line_item && packing_instructions_bin_line_item.rmt_product_id
+      rmt_product = PackingInstructionsBinLineItem.get_rmt_product_record(packing_instructions_bin_line_item.rmt_product_id)
+      commodity_code = rmt_product['commodity_code']
+      product_class_code = rmt_product['product_class_code']
+      size_code = rmt_product['size_code']
+      treatment_code = rmt_product['treatment_code']
+      variety_code = rmt_product['variety_code']
+    else
+      commodity_code = nil
+      product_class_code = nil
+      size_code = nil
+      treatment_code = nil
+      variety_code = nil
+    end
+
+    combos_js_for_rmt = gen_combos_clear_js_for_combos(["packing_instructions_bin_line_item_rmt_product_id", "packing_instructions_bin_line_item_commodity_id"])
+    rmt_observer = {:updated_field_id => "commodity_id_cell",
+                    :remote_method => 'rmt_selected',
+                    :on_completed_js => combos_js_for_rmt["packing_instructions_bin_line_item_rmt_product_id"]}
+    return commodity_code, product_class_code, rmt_observer, rmt_products, size_code, track_slms_indicator_codes, treatment_code, variety_code
+  end
 
   def get_rmt_product_lists(rmt_products)
     varieties = []
