@@ -26,23 +26,24 @@ module Fg::PackingInstructionsBinLineItemHelper
   end
 
   def build_packing_instructions_bin_line_item_form(packing_instructions_bin_line_item, action, caption, is_edit = nil, is_create_retry = nil)
-    rmt_products = PackingInstructionsBinLineItem.get_rmt_products
+    #rmt_products = PackingInstructionsBinLineItem.get_rmt_products
 
-    # commodity_codes = rmt_products.map { |x| [x['commodity_code'], x['commodity_id'].to_i] }.uniq
-    # treatment_codes = rmt_products.map { |x| [x['treatment_code'], x['treatment_id'].to_i] }.uniq
-    # product_class_codes = rmt_products.map { |x| [x['product_class_code'], x['product_class_id'].to_i] }.uniq
-    # size_codes = rmt_products.map { |x| [x['size_code'], x['size_id'].to_i] }.uniq
-   # varieties = rmt_products.map { |x| [x['variety_code'], x['variety_id'].to_i].uniq }
+    commodity_codes = ActiveRecord::Base.connection.select_all("
+                       select id,commodity_code from commodities where commodity_code in ('AP','PR')").map { |x| [x['commodity_code'], x['id'].to_i] }
+    treatment_codes = ActiveRecord::Base.connection.select_all("select id, treatment_code from treatments").map { |x| [x['treatment_code'], x['treatment_id'].to_i] }.uniq if !packing_instructions_bin_line_item
+    product_class_codes = ActiveRecord::Base.connection.select_all("select id, product_class_code from product_classes").map { |x| [x['product_class_code'], x['id'].to_i] }.uniq
+    size_codes = ActiveRecord::Base.connection.select_all("select id, size_code from sizes").map { |x| [x['size_code'], x['id'].to_i] }.uniq
     track_slms_indicator_codes = ["select commodity first"] if !packing_instructions_bin_line_item
     track_slms_indicator_codes = PackingInstructionsBinLineItem.get_track_slms_indicators if packing_instructions_bin_line_item
 
-    commodity_codes, product_class_codes, size_codes, tees, varieties = get_rmt_product_lists(rmt_products)
+   # commodity_codes, product_class_codes, size_codes, tees, vs = get_rmt_product_lists(rmt_products)
+    varieties = ActiveRecord::Base.connection.select_all("select id,rmt_variety_code from rmt_varieties").map { |x| [x['rmt_variety_code'], x['id'].to_i].uniq }
     treatment_codes =Treatment.find_by_sql("select distinct treatments.id,treatments.treatment_code
                                    from treatments
                                    join rmt_products on rmt_products.treatment_id=treatments.id
                                    join varieties on rmt_products.variety_id=varieties.id
                                    join rmt_varieties on   varieties.rmt_variety_id=rmt_varieties.id
-                                   where rmt_varieties.id='#{packing_instructions_bin_line_item['variety_id']}'
+                                   where rmt_varieties.id=#{packing_instructions_bin_line_item['variety_id']}
                                    order by treatment_code").map{|p|[p.treatment_code,p.id]} if packing_instructions_bin_line_item && packing_instructions_bin_line_item['variety_id']
     treatment_codes = []  if !packing_instructions_bin_line_item || (packing_instructions_bin_line_item && !packing_instructions_bin_line_item['variety_id'])
     field_configs = []

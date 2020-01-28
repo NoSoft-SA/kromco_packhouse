@@ -40,7 +40,7 @@ class Fg::PackingInstructionsBinLineItemController < ApplicationController
                                    join rmt_products on rmt_products.treatment_id=treatments.id
                                    join varieties on rmt_products.variety_id=varieties.id
                                    join rmt_varieties on   varieties.rmt_variety_id=rmt_varieties.id
-                                   where rmt_varieties.id='#{variety_id}'
+                                   where rmt_varieties.id=#{variety_id}
                                    order by treatment_code").map{|p|[p.treatment_code,p.id]}
         @treatments.unshift(["<empty>"])
       end
