@@ -13,19 +13,30 @@ class Fg::PackingInstructionsBinLineItemController < ApplicationController
 
     if commodity_id == nil
       @track_slms_indicators = ["<empty>"]
+      @varieties = []
     else
       @track_slms_indicators = TrackSlmsIndicator.find_by_sql("select distinct tslm.id,track_slms_indicator_code
                                   from track_slms_indicators tslm
                                   join commodities c on tslm.commodity_code = c.commodity_code
                                    where tslm.track_indicator_type_code='RMI' and c.id= #{commodity_id}").map { |g| [g.track_slms_indicator_code, g.id] }
 
+      @varieties = ActiveRecord::Base.connection.select_all("select distinct r.variety_id,r.variety_code
+       from rmt_products r
+       join commodities c on r.commodity_code = c.commodity_code
+       where c.id=#{commodity_id}
+       order by variety_code").map { |x| [x['variety_code'], x['variety_id'].to_i].uniq }
+
       @track_slms_indicators.unshift(["<empty>"])
+      @varieties.unshift(["<empty>"])
     end
     render :inline => %{
       <%track_slms_indicator_content     = select('packing_instructions_bin_line_item','track_slms_indicator_id',@track_slms_indicators) %>
-   <script>
+      <%variety_content                  = select('packing_instructions_bin_line_item','variety_id',@varieties) %>
+    <script>
           <%= update_element_function("track_slms_indicator_id_cell", :action => :update,:content => track_slms_indicator_content) %>
+          <%= update_element_function("variety_id_cell"             , :action => :update ,:content => variety_content) %>
     </script>
+    <%= refresh_combo_observer_no_img('packing_instructions_bin_line_item_variety_id', 'treatment_id_cell', 'variety_changed') %>
    }
   end
 
@@ -35,17 +46,15 @@ class Fg::PackingInstructionsBinLineItemController < ApplicationController
       if variety_id == nil
         @treatments = ["<empty>"]
       else
-        @treatments =Treatment.find_by_sql("select distinct treatments.id,treatments.treatment_code
-                                   from treatments
-                                   join rmt_products on rmt_products.treatment_id=treatments.id
-                                   join varieties on rmt_products.variety_id=varieties.id
-                                   join rmt_varieties on   varieties.rmt_variety_id=rmt_varieties.id
-                                   where rmt_varieties.id=#{variety_id}
-                                   order by treatment_code").map{|p|[p.treatment_code,p.id]}
-        @treatments.unshift(["<empty>"])
+        @treatment_codes =Treatment.find_by_sql("select distinct treatment_id,treatment_code
+                                   from rmt_products
+                                   where variety_id=#{variety_id}
+                                   order by treatment_code").map{|p|[p.treatment_code,p.treatment_id.to_i]}
+
+        @treatment_codes.unshift("<empty>")
       end
       render :inline => %{
-      <%treatment_id_content     = select('packing_instructions_bin_line_item','treatment_id',@treatments) %>
+      <%treatment_id_content     = select('packing_instructions_bin_line_item','treatment_id',@treatment_codes) %>
       <script>
           <%= update_element_function("treatment_id_cell", :action => :update,:content => treatment_id_content) %>
        </script>
@@ -135,7 +144,6 @@ class Fg::PackingInstructionsBinLineItemController < ApplicationController
               left join rmt_products on bins.rmt_product_id=rmt_products.id
               left join locations on stock_items.location_id=locations.id
              where
-              seasons.season=2019 and
               (stock_items.destroyed IS NULL OR stock_items.destroyed = false)
                and coalesce('',location_status) in ('OPEN', 'TEMPORARY', 'LOADING_CA', '')
                 and (#{bin_where_clause})
@@ -362,25 +370,48 @@ class Fg::PackingInstructionsBinLineItemController < ApplicationController
     render_new_packing_instructions_bin_line_item
   end
 
+  def is_rmt_product_record?(params)
+    commodity_code = Commodity.find(params['commodity_id']).commodity_code
+    rmt_products = ActiveRecord::Base.connection.select_all("
+     select *
+     from rmt_products
+     where
+     commodity_code = '#{commodity_code}' and
+     variety_id = #{params['variety_id']} and
+     size_id = #{params['size_id']} and
+     product_class_id = #{params['product_class_id']} and
+     treatment_id = #{params['treatment_id']}
+    ")
+     return rmt_products
+  end
+
   def create_packing_instructions_bin_line_item
     @packing_instructions_bin_line_item = PackingInstructionsBinLineItem.new(params[:packing_instructions_bin_line_item])
     @packing_instructions_bin_line_item.packing_instruction_id = session[:active_doc]['pi']
-    if @packing_instructions_bin_line_item.save
-      @packing_instructions_bin_line_item.bin_line_item_code = @packing_instructions_bin_line_item.calc_bin_line_item_code
-      @packing_instructions_bin_line_item.update
-      render :inline =>
-                 %{
+    rmt_products = is_rmt_product_record?(params[:packing_instructions_bin_line_item])
+    if !rmt_products.empty?
+      if @packing_instructions_bin_line_item.save
+        @packing_instructions_bin_line_item.bin_line_item_code = @packing_instructions_bin_line_item.calc_bin_line_item_code
+        @packing_instructions_bin_line_item.update
+        render :inline =>
+                   %{
             "<script>
                  alert("new record created");
                  window.close();
-                 window.opener.frames[0].location.reload(true);
+                 window.opener.frames[0].location.href = '/fg/packing_instructions_bin_line_item/list_packing_instructions_bin_line_items';
              </script>"
      }, :layout => "content"
 
+      else
+        @is_create_retry = true
+        render_new_packing_instructions_bin_line_item
+      end
     else
+      flash[:error] = "No rmt product with that combination(commodity.variety,size,class,treatment)"
       @is_create_retry = true
       render_new_packing_instructions_bin_line_item
     end
+
   rescue
     handle_error('record could not be created')
   end
@@ -458,17 +489,26 @@ class Fg::PackingInstructionsBinLineItemController < ApplicationController
                          window.parent.opener.frames[0].location.href = '/fg/packing_instructions_bin_line_item/list_packing_instructions_bin_line_items';
                         </script>} and return
        else
-         if @packing_instructions_bin_line_item.update_attributes(params[:packing_instructions_bin_line_item])
-           bin_line_item_code = @packing_instructions_bin_line_item.calc_bin_line_item_code
-           @packing_instructions_bin_line_item.update if bin_line_item_code != @packing_instructions_bin_line_item.bin_line_item_code
-           render :inline => %{
-                          <script>
-                          window.close();
-                         window.parent.opener.frames[0].location.href = '/fg/packing_instructions_bin_line_item/list_packing_instructions_bin_line_items';
-                        </script>} and return
+         rmt_products = is_rmt_product_record?(params[:packing_instructions_bin_line_item])
+         if !rmt_products.empty?
+           if @packing_instructions_bin_line_item.update_attributes(params[:packing_instructions_bin_line_item])
+             bin_line_item_code = @packing_instructions_bin_line_item.calc_bin_line_item_code
+             @packing_instructions_bin_line_item.update if bin_line_item_code != @packing_instructions_bin_line_item.bin_line_item_code
+             @packing_instructions_bin_line_item.bin_line_item_code = @packing_instructions_bin_line_item.calc_bin_line_item_code
+             @packing_instructions_bin_line_item.update
+             render :inline => %{
+                            <script>
+                            window.close();
+                           window.parent.opener.frames[0].location.href = '/fg/packing_instructions_bin_line_item/list_packing_instructions_bin_line_items';
+                          </script>} and return
+           else
+             render_edit_packing_instructions_bin_line_item
+           end
          else
+           flash[:error] = "No rmt product with that combination(commodity.variety,size,class,treatment)"
            render_edit_packing_instructions_bin_line_item
          end
+
        end
     end
   rescue

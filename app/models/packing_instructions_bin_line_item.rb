@@ -28,15 +28,15 @@ class PackingInstructionsBinLineItem < ActiveRecord::Base
   end
 
   def PackingInstructionsBinLineItem.bin_line_item_list_query(condition = nil)
-    list_query = "select pibli.*,t.track_slms_indicator_code,rmt_varieties.rmt_variety_code as variety_code,s.size_code,
+    list_query = "select pibli.*,t.track_slms_indicator_code,v.rmt_variety_code as variety_code,s.size_code,
   p.product_class_code,treats.treatment_code,c.commodity_code
   from packing_instructions_bin_line_items pibli
   left join track_slms_indicators t on t.id=pibli.track_slms_indicator_id
-  left join rmt_varieties on   pibli.variety_id=rmt_varieties.id
-  left join sizes s on s.id=pibli.size_id
-  left join product_classes p on p.id=pibli.product_class_id
+  left join sizes s on   s.id=pibli.size_id
+  left join product_classes p on   p.id=pibli.product_class_id
   left join treatments treats on treats.id=pibli.treatment_id
   left join commodities c on c.id=pibli.commodity_id
+  left join varieties v on   v.id=pibli.variety_id
   left join packing_instructions pi on pi.id=pibli.packing_instruction_id
    #{condition}"
   end

@@ -26,32 +26,37 @@ module Fg::PackingInstructionsBinLineItemHelper
   end
 
   def build_packing_instructions_bin_line_item_form(packing_instructions_bin_line_item, action, caption, is_edit = nil, is_create_retry = nil)
-    #rmt_products = PackingInstructionsBinLineItem.get_rmt_products
+    rmt_products = PackingInstructionsBinLineItem.get_rmt_products
 
-    commodity_codes = ActiveRecord::Base.connection.select_all("
-                       select id,commodity_code from commodities where commodity_code in ('AP','PR')").map { |x| [x['commodity_code'], x['id'].to_i] }
-    treatment_codes = ActiveRecord::Base.connection.select_all("select id, treatment_code from treatments").map { |x| [x['treatment_code'], x['treatment_id'].to_i] }.uniq if !packing_instructions_bin_line_item
-    product_class_codes = ActiveRecord::Base.connection.select_all("select id, product_class_code from product_classes").map { |x| [x['product_class_code'], x['id'].to_i] }.uniq
-    size_codes = ActiveRecord::Base.connection.select_all("select id, size_code from sizes").map { |x| [x['size_code'], x['id'].to_i] }.uniq
+    # commodity_codes = ActiveRecord::Base.connection.select_all("
+    #                    select distinct commodities.id,commodities.commodity_code
+    #                    from commodities
+    #                    join rmt_products on rmt_products.commodity_code = commodities.commodity_code
+    #                    where commodities.commodity_code in ('AP','PR')").map { |x| [x['commodity_code'], x['id'].to_i] }
+    # treatment_codes = ActiveRecord::Base.connection.select_all("select  distinct treatments.id, treatments.treatment_code
+    #                   from treatments
+    #                   join rmt_products on rmt_products.treatment_id = treatments.id").map { |x| [x['treatment_code'], x['treatment_id'].to_i] }.uniq if !packing_instructions_bin_line_item
+    # product_class_codes = ActiveRecord::Base.connection.select_all("select  distinct product_classes.id, product_classes.product_class_code
+    #                       from product_classes
+    #                       join rmt_products on rmt_products.product_class_id = product_classes.id").map { |x| [x['product_class_code'], x['id'].to_i] }.uniq
+    # size_codes = ActiveRecord::Base.connection.select_all("select  distinct sizes.id, sizes.size_code
+    #                  from sizes
+    #                   join rmt_products on rmt_products.size_id = sizes.id").map { |x| [x['size_code'], x['id'].to_i] }.uniq
     track_slms_indicator_codes = ["select commodity first"] if !packing_instructions_bin_line_item
     track_slms_indicator_codes = PackingInstructionsBinLineItem.get_track_slms_indicators if packing_instructions_bin_line_item
 
-   # commodity_codes, product_class_codes, size_codes, tees, vs = get_rmt_product_lists(rmt_products)
-    varieties = ActiveRecord::Base.connection.select_all("select id,rmt_variety_code from rmt_varieties").map { |x| [x['rmt_variety_code'], x['id'].to_i].uniq }
-    treatment_codes =Treatment.find_by_sql("select distinct treatments.id,treatments.treatment_code
-                                   from treatments
-                                   join rmt_products on rmt_products.treatment_id=treatments.id
-                                   join varieties on rmt_products.variety_id=varieties.id
-                                   join rmt_varieties on   varieties.rmt_variety_id=rmt_varieties.id
-                                   where rmt_varieties.id=#{packing_instructions_bin_line_item['variety_id']}
-                                   order by treatment_code").map{|p|[p.treatment_code,p.id]} if packing_instructions_bin_line_item && packing_instructions_bin_line_item['variety_id']
+   commodity_codes, product_class_codes, size_codes, treatment_codes, varieties = get_rmt_product_lists(rmt_products)
+    varieties = ActiveRecord::Base.connection.select_all("select distinct r.variety_id,r.variety_code
+                from rmt_products r
+                join commodities c on r.commodity_code = c.commodity_code
+                where c.id=#{packing_instructions_bin_line_item['commodity_id']}
+                  ").map { |x| [x['variety_code'], x['variety_id'].to_i].uniq } if packing_instructions_bin_line_item && packing_instructions_bin_line_item['commodity_id']
+
+    treatment_codes =Treatment.find_by_sql("select distinct treatment_id,treatment_code
+                                   from rmt_products
+                                   where variety_id=#{packing_instructions_bin_line_item['variety_id']}
+                                   order by treatment_code").map{|p|[p.treatment_code ,p.treatment_id.to_i]} if packing_instructions_bin_line_item && packing_instructions_bin_line_item['variety_id']
     treatment_codes = []  if !packing_instructions_bin_line_item || (packing_instructions_bin_line_item && !packing_instructions_bin_line_item['variety_id'])
-    field_configs = []
-#  ----------------------------------------------------------------------------------------------
-#  Combo fields to represent foreign key (track_slms_indicator_id) on related table: track_slms_indicators
-#  ----------------------------------------------------------------------------------------------
-    field_configs << {:field_type => 'TextField',
-                      :field_name => 'bin_qty'}
 
     combos_js_for_commodity = gen_combos_clear_js_for_combos(["packing_instructions_bin_line_item_commodity_id", "packing_instructions_bin_line_item_track_slms_indicator_id"])
     commodity_observer = {:updated_field_id => "track_slms_indicator_id_cell",
@@ -60,8 +65,18 @@ module Fg::PackingInstructionsBinLineItemHelper
 
     combos_js_for_variety = gen_combos_clear_js_for_combos(["packing_instructions_bin_line_item_variety_id", "packing_instructions_bin_line_item_treatment_id"])
     variety_observer = {:updated_field_id => "treatment_id_cell",
-                          :remote_method => 'variety_changed',
-                          :on_completed_js => combos_js_for_variety["packing_instructions_bin_line_item_variety_id"]}
+                        :remote_method => 'variety_changed',
+                        :on_completed_js => combos_js_for_variety["packing_instructions_bin_line_item_variety_id"]}
+
+
+    field_configs = []
+#  ----------------------------------------------------------------------------------------------
+#  Combo fields to represent foreign key (track_slms_indicator_id) on related table: track_slms_indicators
+#  ----------------------------------------------------------------------------------------------
+    field_configs << {:field_type => 'TextField',
+                      :field_name => 'bin_qty'}
+
+    #commodity_observer, variety_observer,size_observer,class_observer = get_rmt_observers
 
     field_configs[field_configs.length()] = {:field_type => 'DropDownField',
                                              :field_name => 'commodity_id',
@@ -103,6 +118,31 @@ module Fg::PackingInstructionsBinLineItemHelper
 
     construct_form(packing_instructions_bin_line_item, field_configs, action, 'packing_instructions_bin_line_item', caption, is_edit)
 
+  end
+
+  def get_rmt_observers
+    combos_js_for_commodity = gen_combos_clear_js_for_combos(["packing_instructions_bin_line_item_commodity_id", "packing_instructions_bin_line_item_track_slms_indicator_id"])
+    commodity_observer = {:updated_field_id => "track_slms_indicator_id_cell",
+                          :remote_method => 'refresh_track_slms_indicator',
+                          :on_completed_js => combos_js_for_commodity["packing_instructions_bin_line_item_commodity_id"]}
+
+    combos_js_for_variety = gen_combos_clear_js_for_combos(["packing_instructions_bin_line_item_variety_id", "packing_instructions_bin_line_item_size_id"])
+    variety_observer = {:updated_field_id => "size_id_cell",
+                        :remote_method => 'variety_changed',
+                        :on_completed_js => combos_js_for_variety["packing_instructions_bin_line_item_variety_id"]}
+
+    combos_js_for_size = gen_combos_clear_js_for_combos(["packing_instructions_bin_line_item_size_id", "packing_instructions_bin_line_item_product_class_id"])
+    size_observer = {:updated_field_id => "product_class_id_cell",
+                          :remote_method => 'size_changed',
+                          :on_completed_js => combos_js_for_size["packing_instructions_bin_line_item_size_id"]}
+
+    combos_js_for_product_class= gen_combos_clear_js_for_combos(["packing_instructions_bin_line_item_product_class_id", "packing_instructions_bin_line_item_treatment_id"])
+    product_class_observer = {:updated_field_id => "treatment_id_cell",
+                        :remote_method => 'product_class_changed',
+                        :on_completed_js => combos_js_for_product_class["packing_instructions_bin_line_item_product_class_id"]}
+
+
+    return commodity_observer, variety_observer,size_observer,product_class_observer
   end
 
 
