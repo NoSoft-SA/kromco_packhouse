@@ -135,6 +135,11 @@ def calc_packing_instruction_code
 end
 
 def create_packing_instruction
+  if params[:packing_instruction]['pack_date'] == "" || params[:packing_instruction]['shift_type_id'] == nil
+    flash[:error] = "Shift type and pack date are required"
+    @is_create_retry = true
+    render_new_packing_instruction
+  else
   calc_packing_instruction_code
    @packing_instruction = PackingInstruction.new(params[:packing_instruction])
    if @packing_instruction.save
@@ -148,6 +153,7 @@ def create_packing_instruction
     @is_create_retry = true
     render_new_packing_instruction
    end
+  end
 rescue
    handle_error('record could not be created')
 end
@@ -185,15 +191,21 @@ end
 def update_packing_instruction
    id = params[:packing_instruction][:id]
    if id && @packing_instruction = PackingInstruction.find(id)
+     if params[:packing_instruction]['pack_date'] == "" || params[:packing_instruction]['shift_type_id'] == nil
+       flash[:error] = "Shift type and pack date are required"
+       render_edit_packing_instruction
+     else
      calc_packing_instruction_code
      if @packing_instruction.update_attributes(params[:packing_instruction])
       params[:id] = @packing_instruction.id
       flash[:notice] = 'record saved'
       edit_packing_instruction
+     end
+      end
    else
        render_edit_packing_instruction
      end
-   end
+
 rescue
    handle_error('record could not be saved')
  end
