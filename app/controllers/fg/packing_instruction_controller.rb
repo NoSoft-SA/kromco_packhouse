@@ -129,9 +129,7 @@ def calc_packing_instruction_code
   shift_type_code = ShiftType.find(params[:packing_instruction]['shift_type_id']).shift_type_code
   year, sequence_number =  PackingInstruction.get_packing_instruction_sequence_number( params[:packing_instruction]['pack_date'],params[:packing_instruction]['shift_type_id'])
   code = shift_type_code + "_" + params[:packing_instruction]['pack_date'].to_s + "_" + sequence_number.to_s
-  @packing_instruction.year = year
-  @packing_instruction.packing_instruction_code = code
-  @packing_instruction.sequence_number = sequence_number
+ return year,code,sequence_number
 end
 
 def create_packing_instruction
@@ -140,8 +138,11 @@ def create_packing_instruction
     @is_create_retry = true
     render_new_packing_instruction
   else
-  calc_packing_instruction_code
+    year,code,sequence_number = calc_packing_instruction_code
    @packing_instruction = PackingInstruction.new(params[:packing_instruction])
+  @packing_instruction.year = year
+  @packing_instruction.packing_instruction_code = code
+  @packing_instruction.sequence_number = sequence_number
    if @packing_instruction.save
      set_active_doc("pi",@packing_instruction.id)
      render :inline => %{<script>
@@ -195,8 +196,12 @@ def update_packing_instruction
        flash[:error] = "Shift type and pack date are required"
        render_edit_packing_instruction
      else
-     calc_packing_instruction_code
+       year,code,sequence_number = calc_packing_instruction_code
      if @packing_instruction.update_attributes(params[:packing_instruction])
+       @packing_instruction.year = year
+       @packing_instruction.packing_instruction_code = code
+       @packing_instruction.sequence_number = sequence_number
+       @packing_instruction.update
       params[:id] = @packing_instruction.id
       flash[:notice] = 'record saved'
       edit_packing_instruction
