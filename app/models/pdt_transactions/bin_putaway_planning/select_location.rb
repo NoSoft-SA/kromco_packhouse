@@ -28,6 +28,16 @@ class SelectLocation < PDTTransactionState
       return result_screen
     end
 
+    if location.loading_out
+      result_screen = PDTTransaction.build_msg_screen_definition("Location is loading_out.Scan another one.", nil, nil, nil)
+      return result_screen
+    end
+
+    @parent.location_code = location.location_code
+    @parent.location_id = location.id
+
+    @parent.spaces_left = Location.get_spaces_in_location(@parent.location_code, @parent.scanned_bins.length) if @parent.location_code
+
     error = validate_location(location)
     if error
       result_screen = PDTTransaction.build_msg_screen_definition(error, nil, nil, nil)
