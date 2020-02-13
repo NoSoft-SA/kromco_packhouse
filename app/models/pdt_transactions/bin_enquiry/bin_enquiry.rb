@@ -1,4 +1,10 @@
 class BinEnquiry < PDTTransaction
+
+
+  def next_bin
+    build_default_screen
+  end
+
   def build_default_screen
 
 
@@ -71,7 +77,7 @@ class BinEnquiry < PDTTransaction
     field_configs[field_configs.length] = {:type=>"static_text",:name=>"is_sample_bin",:value=>bin.is_half_bin}
 
     screen_attributes = {:auto_submit=>"false",:content_header_caption=>"bin enquiry"}
-    buttons = {"B3Label"=>"Clear" ,"B2Label"=>"", "B2Submit"=>"", "B1Submit"=>"","B1Label"=>"","B1Enable"=>"false","B2Enable"=>"false","B3Enable"=>"false" }
+    buttons = {"B3Label"=>"Clear" ,"B2Label"=>"", "B2Submit"=>"", "B1Submit"=>"build_default_screen","B1Label"=>"next bin","B1Enable"=>"true","B2Enable"=>"false","B3Enable"=>"false" }
     plugins = Array.new
 
 
