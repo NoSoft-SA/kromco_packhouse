@@ -1,7 +1,9 @@
 class BinPutawayScanning < PDTTransactionState
+
   def initialize(parent)
     @parent = parent
     @current_scanned_bin_index = 0
+    @parent.bpp = nil
   end
 
   def restart_scanning
@@ -72,18 +74,22 @@ class BinPutawayScanning < PDTTransactionState
 
     get_locations if @parent.bin && @parent.scanned_bins.length == 1
 
-    create_bin_putaway if @parent.scanned_bins.length == 1
+    create_bin_putaway if @parent.scanned_bins.length == 1 && !@parent.bpp
 
-    @parent.spaces_left = Location.get_spaces_in_location(@parent.location_code, @parent.scanned_bins.length) if @parent.location_code
+    @parent.spaces_left = Location.get_spaces_in_location(@parent.location_code, @parent.scanned_bins.length,@parent.pdt_screen_def.user,@parent.created_on) if @parent.location_code
 
+    #TODO: REvise this part
     if @parent.spaces_left && @parent.scanned_bins.length == 1 && (@parent.spaces_left.to_i < @parent.qty_bins.to_i)
-      if @parent.spaces_left < 0
+      if @parent.spaces_left < 0 || @parent.spaces_left ==  0
         @parent.error_str  = "inadequate space."
         return render_select_location_state
       else
         @parent.qty_bins = @parent.spaces_left + 1
         @adjusted_qty =  "(adjusted to space)"
       end
+    elsif ( @parent.spaces_left &&  @parent.spaces_left.to_i == 0 && (@parent.scanned_bins.length < qty_bins_remaining))
+          @parent.error_str = "inadequate space."
+          return render_select_location_state
     end
 
     matching_error = match_existing_bins if @parent.scanned_bins.length > 1
@@ -93,15 +99,6 @@ class BinPutawayScanning < PDTTransactionState
     end
 
     if !@parent.location_code
-      return render_select_location_state
-    elsif (@parent.spaces_left && @parent.spaces_left.to_i == 0) && (@parent.scanned_bins.length < qty_bins_remaining)
-      @parent.error_str = "inadequate space"
-      return render_select_location_state
-    end
-
-
-    if ( @parent.spaces_left &&  @parent.spaces_left.to_i == 0 && (@parent.scanned_bins.length < qty_bins_remaining))
-      @parent.error_str = "inadequate space."
       return render_select_location_state
     end
 
@@ -132,21 +129,23 @@ class BinPutawayScanning < PDTTransactionState
   def match_existing_bins
     bin = get_bin_type_and_fruit_spec("bins.bin_number = '#{@bin_number}' ")
       error = []
-      error << " Scanned bin is of different stock type.Undo and scan another bin"  if @parent.bin_fruit_spec['stock_type'] != bin['stock_type_code']
-      error <<  "Scanned bin is of different commodity.Undo and scan another bin" if @parent.bin_fruit_spec['commodity'] != bin['commodity_code']
-      error <<  "Scanned bin is of different variety.Undo and scan another bin" if @parent.bin_fruit_spec['variety'] != bin['variety_code']
-      error <<  "Scanned bin is of different size.Undo and scan another bin" if @parent.bin_fruit_spec['size'] != bin['size_code']
-      error <<  "Scanned bin is of different class.Undo and scan another bin" if @parent.bin_fruit_spec['class'] != bin['product_class_code']
-      error <<  "Scanned bin is of different treatment.Undo and scan another bin" if @parent.bin_fruit_spec['treatment'] != bin['treatment_code']
-      error <<  "Scanned bin is of different farm.Undo and scan another bin" if (@parent.bin_fruit_spec['farm'] != bin['farm_code']) && (@parent.bin_fruit_spec['farm'] && bin['farm_code'])
-      error <<  "Scanned bin is of different track_indicator_code.Undo and scan another bin" if @parent.bin_fruit_spec['track_indicator1_id'] != bin['track_indicator1_id']
-
-    return error.join(",") if !error.empty?
+    error << " stock type"  if @parent.bin_fruit_spec['stock_type_code'] != bin['stock_type_code']
+    error <<  "commodity" if @parent.bin_fruit_spec['commodity'] != bin['commodity_code']
+    error <<  "variety" if @parent.bin_fruit_spec['variety'] != bin['variety_code']
+    error <<  "size" if @parent.bin_fruit_spec['size'] != bin['size_code']
+    error <<  "class" if @parent.bin_fruit_spec['class'] != bin['product_class_code']
+    error <<  "treatment" if @parent.bin_fruit_spec['treatment'] != bin['treatment_code']
+    error <<  "farm" if (@parent.bin_fruit_spec['farm'] != bin['farm_code']) && (@parent.bin_fruit_spec['farm'] && bin['farm_code'])
+    error <<  "track_indicator_code" if @parent.bin_fruit_spec['track_indicator1_id'] != bin['track_indicator1_id']
+    error << "undo and scan another"
+    return error.join("<BR>") if !error.empty?
     return nil if error.empty?
    end
 
   def create_bin_putaway
-    bin_nums = {}
+
+    if !@parent.bpp
+      bin_nums = {}
     @parent.scanned_bins.each do |num|
       bin_nums[num] = "'#{num}'"
     end
@@ -156,14 +155,17 @@ class BinPutawayScanning < PDTTransactionState
     bin_putaway_plan.qty_bins_to_putaway = @parent.qty_bins.to_i
     #bin_putaway_plan.bins_to_putaway = bin_nums
     #bin_putaway_plan.bins_putaway_completed = bin_nums
-    bin_putaway_plan.created_on = Time.now
+    bin_putaway_plan.created_on = Time.now.to_formatted_s(:db)
     #bin_putaway_plan.completed = true
     #bin_putaway_plan.updated_at = Time.now.strftime("%Y/%m/%d/%H:%M:%S")
     bin_putaway_plan.user_name = @parent.pdt_screen_def.user
     bin_putaway_plan.save
 
+    @parent.created_on = bin_putaway_plan.created_on.to_formatted_s(:db)
     @parent.bin_putaway_plan_id = bin_putaway_plan.id
-
+    @bpp = true
+    @parent.bpp = @bpp
+      end
   end
 
 
@@ -171,6 +173,7 @@ class BinPutawayScanning < PDTTransactionState
     location = get_matched_bin_location
     @parent.location_code = location['location_code'] if location
     @parent.location_id = location['location_id'] if location
+
   end
 
 
@@ -191,7 +194,7 @@ class BinPutawayScanning < PDTTransactionState
   def get_location_where
     where = []
     @parent.bin_fruit_spec.each do |k,v|
-      if k != "stock_type"
+      if k != "stock_type_code"
         where << "rmt.#{k} = '#{v}' " if k != "track_indicator1_id"
         where << "b.#{k}   =  #{v}" if k == "track_indicator1_id"
       end
@@ -228,6 +231,7 @@ class BinPutawayScanning < PDTTransactionState
 
 
     @parent.error_str = "no matched location" if !location
+    return location if location
 
   end
 
@@ -250,7 +254,7 @@ class BinPutawayScanning < PDTTransactionState
     end
   end
 
-  def get_bin_type_and_frit_spec(where_clause)
+  def get_bin_type_and_fruit_spec(where_clause)
     bin = ActiveRecord::Base.connection.select_all("
             select  distinct bins.bin_number,bins.id,
                     rmt.rmt_product_code,
@@ -271,7 +275,7 @@ class BinPutawayScanning < PDTTransactionState
 					  WHERE  ((si.destroyed IS NULL) OR (si.destroyed = false)) and #{where_clause}
                                                    ")[0]
 
-    assign_bin_variables(bin) if bin && @parent.scanned_bins.length == 1
+    #assign_bin_variables(bin) if bin && @parent.scanned_bins.length == 1
     return bin
   end
 
@@ -285,41 +289,47 @@ class BinPutawayScanning < PDTTransactionState
     @track_indicator1_id = bin['track_indicator1_id']
     @farm_code = bin['farm_code']
 
-    # farm_code = bin['farm_code']
-    #
-    #
-    # if @stock_type_code == 'BIN'
-    #   @farm_code = "and  farms.farm_code like '%'"
-    #   if !farm_code
-    #   else
-    #     @farm_code = "and  farms.farm_code = '#{farm_code}'"
-    #   end
-    # end
+    @parent.stock_type_code = bin['stock_type_code']
+    @parent.commodity_code = bin['commodity_code']
+    @parent.variety_code = bin['variety_code']
+    @parent.size_code = bin['size_code']
+    @parent.product_class_code = bin['product_class_code']
+    @parent.treatment_code = bin['treatment_code']
+    @parent.track_indicator1_id = bin['track_indicator1_id']
+    @parent.farm_code = bin['farm_code']
+
+    get_bin_fruit_spec
+   #  @parent.bin_fruit_spec = {
+   # 'stock_type_code' => bin['stock_type_code'],
+   #  'commodity_code' => bin['commodity_code'],
+   #  'variety_code' => bin['variety_code'],
+   #  'size_code' => bin['size_code'],
+   #  'product_class_code' => bin['product_class_code'],
+   #  'treatment_code' => bin['treatment_code'],
+   #  'track_indicator1_id' => bin['track_indicator1_id']
+   #  }
+
+  end
+
+  def get_bin_fruit_spec
+    # bin_fruit_spec = BinPutawayPlanningRule.new(
+    # @parent.stock_type_code,
+    # @parent.commodity_code,
+    # @parent.variety_code,
+    # @parent.size_code,
+    # @parent.product_class_code,
+    # @parent.treatment_code,
+    # @parent.track_indicator1_id,
+    # @parent.farm_code,
+    # @parent.bin,
+    # @parent.scanned_bins
+    # )
+    # @parent.bin_fruit_spec = bin_fruit_spec
 
     self.parent.clear_active_state
-    next_state = BinPutawayPlanningRules.new(
-                                            bin,
-                                            @stock_type_code,
-                                            @commodity_code,
-                                            @variety_code,
-                                            @size_code,
-                                            @product_class_code,
-                                            @treatment_code,
-                                            @track_indicator1_id,
-                                            @farm_code,"grade",
-                                            @parent.scanned_bins.length,
-                                            true,
-                                            @parent)
-    result_screen = next_state.call
+    next_state = BinPutawayPlanningRule.new(true, @parent)
     @parent.set_active_state(next_state)
-    #return result_screen
-
-    # @parent.bin_fruit_spec = {'stock_type' => @stock_type_code, 'commodity' => @commodity_code,
-    #                    'variety' => @variety_code, 'size' => @size_code, 'class' => @product_class_code,
-    #                    'treatment' => @treatment_code,'track_indicator1_id'=> @track_indicator1_id} if @stock_type_code == 'PRESORT'
-
-
-
+    next_state.call
   end
 
 
@@ -369,11 +379,14 @@ class BinPutawayScanning < PDTTransactionState
 
   def process_scanned_bins
     @quantity_bins_remaining = qty_bins_remaining
+    @parent.quantity_bins_remaining = @quantity_bins_remaining
     if (@quantity_bins_remaining && @quantity_bins_remaining <= 0) || @force_complete =="true"
-        #create_bin_putaway
+      #TODO: should it be commented out?
         return transition_to_bulk_putaway
     else
-      build_default_screen
+       self.parent.clear_active_state
+       @parent.clear_active_state
+      return self.build_default_screen
     end
   end
 
