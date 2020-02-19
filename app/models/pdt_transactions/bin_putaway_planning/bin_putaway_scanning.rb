@@ -60,17 +60,10 @@ class BinPutawayScanning < PDTTransactionState
     else
       process_bin_scanned_submit
     end
-
   end
 
-  def receive_call_back
-    self.parent.clear_active_state
-    @parent.clear_active_state
-    process_bin_scanned_submit(true)
-  end
-
-  def process_bin_scanned_submit(from_another_class=nil)
-    get_bin_type_and_location if !from_another_class
+  def process_bin_scanned_submit()
+    get_bin_type if  @parent.scanned_bins.length == 1
 
     get_locations if @parent.bin && @parent.scanned_bins.length == 1
 
@@ -105,12 +98,26 @@ class BinPutawayScanning < PDTTransactionState
     process_scanned_bins
   end
 
-  def get_bin_type_and_location
-    bin = get_bin_type_and_fruit_spec("bins.bin_number = '#{@bin_number}' ") if @parent.scanned_bins.length == 1
+  def get_bin_type
+    bin = get_bin_fruit_spec("bins.bin_number = '#{@bin_number}' ") if @parent.scanned_bins.length == 1
 
     @parent.bin  = bin
 
     assign_bin_variables(bin) if bin && @parent.scanned_bins.length == 1
+
+    bin_fruit_spec = BinPutawayPlanningRule.determine_bin_fruit_spec(
+        @parent.stock_type_code,
+        @parent.commodity_code,
+        @parent.variety_code,
+        @parent.size_code,
+        @parent.product_class_code,
+        @parent.treatment_code,
+        @parent.track_indicator1_id,
+        @parent.farm_code,
+        nil,
+        @parent.scanned_bins
+    )
+    @parent.bin_fruit_spec = bin_fruit_spec
 
   end
 
@@ -127,7 +134,7 @@ class BinPutawayScanning < PDTTransactionState
   end
 
   def match_existing_bins
-    bin = get_bin_type_and_fruit_spec("bins.bin_number = '#{@bin_number}' ")
+    bin = get_bin_fruit_spec("bins.bin_number = '#{@bin_number}' ")
       error = []
     error << " stock type"  if @parent.bin_fruit_spec['stock_type_code'] != bin['stock_type_code']
     error <<  "commodity" if @parent.bin_fruit_spec['commodity'] != bin['commodity_code']
@@ -254,7 +261,7 @@ class BinPutawayScanning < PDTTransactionState
     end
   end
 
-  def get_bin_type_and_fruit_spec(where_clause)
+  def get_bin_fruit_spec(where_clause)
     bin = ActiveRecord::Base.connection.select_all("
             select  distinct bins.bin_number,bins.id,
                     rmt.rmt_product_code,
@@ -275,7 +282,6 @@ class BinPutawayScanning < PDTTransactionState
 					  WHERE  ((si.destroyed IS NULL) OR (si.destroyed = false)) and #{where_clause}
                                                    ")[0]
 
-    #assign_bin_variables(bin) if bin && @parent.scanned_bins.length == 1
     return bin
   end
 
@@ -298,39 +304,9 @@ class BinPutawayScanning < PDTTransactionState
     @parent.track_indicator1_id = bin['track_indicator1_id']
     @parent.farm_code = bin['farm_code']
 
-    get_bin_fruit_spec
-   #  @parent.bin_fruit_spec = {
-   # 'stock_type_code' => bin['stock_type_code'],
-   #  'commodity_code' => bin['commodity_code'],
-   #  'variety_code' => bin['variety_code'],
-   #  'size_code' => bin['size_code'],
-   #  'product_class_code' => bin['product_class_code'],
-   #  'treatment_code' => bin['treatment_code'],
-   #  'track_indicator1_id' => bin['track_indicator1_id']
-   #  }
 
   end
 
-  def get_bin_fruit_spec
-    # bin_fruit_spec = BinPutawayPlanningRule.new(
-    # @parent.stock_type_code,
-    # @parent.commodity_code,
-    # @parent.variety_code,
-    # @parent.size_code,
-    # @parent.product_class_code,
-    # @parent.treatment_code,
-    # @parent.track_indicator1_id,
-    # @parent.farm_code,
-    # @parent.bin,
-    # @parent.scanned_bins
-    # )
-    # @parent.bin_fruit_spec = bin_fruit_spec
-
-    self.parent.clear_active_state
-    next_state = BinPutawayPlanningRule.new(true, @parent)
-    @parent.set_active_state(next_state)
-    next_state.call
-  end
 
 
   def validate
