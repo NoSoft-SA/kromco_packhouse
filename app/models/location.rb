@@ -18,7 +18,6 @@ class Location < ActiveRecord::Base
 #	============================
   validates_presence_of :location_code
 
-  private
 
   def self.get_spaces_left( location,active_plan_qty_bins)
     spaces_left = ActiveRecord::Base.connection.select_one("
