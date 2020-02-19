@@ -3,7 +3,6 @@ class BinPutawayScanning < PDTTransactionState
   def initialize(parent)
     @parent = parent
     @current_scanned_bin_index = 0
-    @parent.bpp = nil
   end
 
   def restart_scanning
@@ -22,7 +21,7 @@ class BinPutawayScanning < PDTTransactionState
 
   def build_default_screen
 
-   field_configs = Array.new
+    field_configs = Array.new
     field_configs[field_configs.length] = {:type => "static_text", :name => "room", :value => @parent.coldroom}
     field_configs[field_configs.length] = {:type => "static_text", :name => "putaway_loc", :value => @parent.location_code}
     if @adjusted_qty
@@ -33,9 +32,9 @@ class BinPutawayScanning < PDTTransactionState
     field_configs[field_configs.length] = {:type => "static_text", :name => "bins_scanned", :value => "#{@parent.scanned_bins.length().to_s}"}
     #field_configs[field_configs.length] = {:type => "static_text", :name => "space_left", :value => "#{@parent.spaces_left}"}
     field_configs[field_configs.length] = {:type => "text_box", :name => "bin_number",
-                                            :scan_only => "false", :scan_field => true,
+                                           :scan_only => "false", :scan_field => true,
                                            :submit_form => true}
-    field_configs[field_configs.length()] = {:type => "check_box", :name => "force_complete",:submit_form => true} #,:scan_field => true,:submit_form => true}#,:scan_only=>"true"
+    field_configs[field_configs.length()] = {:type => "check_box", :name => "force_complete", :submit_form => true} #,:scan_field => true,:submit_form => true}#,:scan_only=>"true"
 
     screen_attributes = {:auto_submit => "true", :auto_submit_to => "bin_scanned_submit", :cache_screen => true}
     buttons = {"B3Label" => "", "B2Label" => "", "B1Submit" => "bin_scanned_submit", "B1Label" => "submit", "B1Enable" => "false", "B2Enable" => "false", "B3Enable" => "false"}
@@ -55,70 +54,57 @@ class BinPutawayScanning < PDTTransactionState
     end
 
     @parent.scanned_bins.push(@bin_number) if @bin_number
-    if @force_complete == "true" && @parent.scanned_bins.length >=1 && !@bin_number
+    if @force_complete == "true" && @parent.scanned_bins.length >= 1 && !@bin_number
       process_scanned_bins
     else
-      process_bin_scanned_submit
-    end
-  end
 
-  def process_bin_scanned_submit()
-    get_bin_type if  @parent.scanned_bins.length == 1
+      bin = process_bin
 
-    get_locations if @parent.bin && @parent.scanned_bins.length == 1
+      get_locations if bin && @parent.scanned_bins.length == 1
 
-    create_bin_putaway if @parent.scanned_bins.length == 1 && !@parent.bpp
-
-    @parent.spaces_left = Location.get_spaces_in_location(@parent.location_code, @parent.scanned_bins.length,@parent.pdt_screen_def.user,@parent.created_on) if @parent.location_code
-
-    #TODO: REvise this part
-    if @parent.spaces_left && @parent.scanned_bins.length == 1 && (@parent.spaces_left.to_i < @parent.qty_bins.to_i)
-      if @parent.spaces_left < 0 || @parent.spaces_left ==  0
-        @parent.error_str  = "inadequate space."
+      if !@parent.location_code
         return render_select_location_state
       else
-        @parent.qty_bins = @parent.spaces_left + 1
-        @adjusted_qty =  "(adjusted to space)"
-      end
-    elsif ( @parent.spaces_left &&  @parent.spaces_left.to_i == 0 && (@parent.scanned_bins.length < qty_bins_remaining))
+
+        @parent.spaces_left = Location.get_spaces_in_location(@parent.location_code, @parent.scanned_bins.length, @parent.qty_bins.to_i) if @parent.location_code
+
+        if @parent.spaces_left && @parent.scanned_bins.length == 1 && (@parent.spaces_left.to_i < @parent.qty_bins.to_i)
+          if @parent.spaces_left < 0 || @parent.spaces_left == 0
+            @parent.error_str = "inadequate space."
+            return render_select_location_state
+          else
+            @parent.qty_bins = @parent.spaces_left
+            @adjusted_qty = "(adjusted to space)"
+          end
+        elsif (@parent.spaces_left && @parent.spaces_left.to_i == 0 && (@parent.scanned_bins.length < qty_bins_remaining))
           @parent.error_str = "inadequate space."
           return render_select_location_state
-    end
+        end
 
-    matching_error = match_existing_bins if @parent.scanned_bins.length > 1
-    if matching_error
-      result_screen = PDTTransaction.build_msg_screen_definition("#{matching_error}", nil, nil, nil)
-      return result_screen
-    end
-
-    if !@parent.location_code
-      return render_select_location_state
+        matching_error = match_existing_bins if @parent.scanned_bins.length > 1
+        if matching_error
+          result_screen = PDTTransaction.build_msg_screen_definition("#{matching_error}", nil, nil, nil)
+          return result_screen
+        end
+      end
     end
 
     process_scanned_bins
   end
 
-  def get_bin_type
+  def process_bin
     bin = get_bin_fruit_spec("bins.bin_number = '#{@bin_number}' ") if @parent.scanned_bins.length == 1
 
-    @parent.bin  = bin
+    @parent.bin = bin
 
     assign_bin_variables(bin) if bin && @parent.scanned_bins.length == 1
 
-    bin_fruit_spec = BinPutawayPlanningRule.determine_bin_fruit_spec(
-        @parent.stock_type_code,
-        @parent.commodity_code,
-        @parent.variety_code,
-        @parent.size_code,
-        @parent.product_class_code,
-        @parent.treatment_code,
-        @parent.track_indicator1_id,
-        @parent.farm_code,
-        nil,
-        @parent.scanned_bins
-    )
-    @parent.bin_fruit_spec = bin_fruit_spec
+    frut_spec = Location.determine_bin_fruit_spec(@stock_type_code, @commodity_code, @variety_code, @size_code,
+                                                  @product_class_code, @treatment_code, @track_indicator1_id,
+                                                  @farm_code, nil, @parent.scanned_bins) if @parent.scanned_bins.length == 1
 
+    @parent.bin_fruit_spec = frut_spec if @parent.scanned_bins.length == 1
+    bin
   end
 
   def render_select_location_state
@@ -135,24 +121,26 @@ class BinPutawayScanning < PDTTransactionState
 
   def match_existing_bins
     bin = get_bin_fruit_spec("bins.bin_number = '#{@bin_number}' ")
-      error = []
-    error << " stock type"  if @parent.bin_fruit_spec['stock_type_code'] != bin['stock_type_code']
-    error <<  "commodity" if @parent.bin_fruit_spec['commodity'] != bin['commodity_code']
-    error <<  "variety" if @parent.bin_fruit_spec['variety'] != bin['variety_code']
-    error <<  "size" if @parent.bin_fruit_spec['size'] != bin['size_code']
-    error <<  "class" if @parent.bin_fruit_spec['class'] != bin['product_class_code']
-    error <<  "treatment" if @parent.bin_fruit_spec['treatment'] != bin['treatment_code']
-    error <<  "farm" if (@parent.bin_fruit_spec['farm'] != bin['farm_code']) && (@parent.bin_fruit_spec['farm'] && bin['farm_code'])
-    error <<  "track_indicator_code" if @parent.bin_fruit_spec['track_indicator1_id'] != bin['track_indicator1_id']
-    error << "undo and scan another"
-    return error.join("<BR>") if !error.empty?
-    return nil if error.empty?
-   end
+    error = []
+    error << " stock type" if @parent.bin_fruit_spec['stock_type_code'] && (@parent.bin_fruit_spec['stock_type_code'] != bin['stock_type_code'])
+    error << "commodity" if @parent.bin_fruit_spec['commodity_code'] && (@parent.bin_fruit_spec['commodity_code'] != bin['commodity_code'])
+    error << "variety" if @parent.bin_fruit_spec['variety_code'] && (@parent.bin_fruit_spec['variety_code'] != bin['variety_code'])
+    error << "size" if @parent.bin_fruit_spec['size_code'] && (@parent.bin_fruit_spec['size_code'] != bin['size_code'])
+    error << "class" if @parent.bin_fruit_spec['product_class_code'] && (@parent.bin_fruit_spec['product_class_code'] != bin['product_class_code'])
+    error << "treatment" if @parent.bin_fruit_spec['treatment_code'] && (@parent.bin_fruit_spec['treatment_code'] != bin['treatment_code'])
+    error << "farm" if @parent.bin_fruit_spec['farm_code'] && (@parent.bin_fruit_spec['farm_code'] && bin['farm_code'])
+    error << "track_indicator_code" if @parent.bin_fruit_spec['track_indicator1_id'] && (@parent.bin_fruit_spec['track_indicator1_id'] != bin['track_indicator1_id'])
+    if !error.empty?
+      error << "UNDO and scan another."
+      error.unshift("Scanned bin is of different:")
+      return error.join("<BR>")
+    else
+      return nil
+    end
+  end
 
   def create_bin_putaway
-
-    if !@parent.bpp
-      bin_nums = {}
+    bin_nums = {}
     @parent.scanned_bins.each do |num|
       bin_nums[num] = "'#{num}'"
     end
@@ -160,19 +148,12 @@ class BinPutawayScanning < PDTTransactionState
     bin_putaway_plan.coldroom_location_id = @parent.coldroom_id
     bin_putaway_plan.putaway_location_id = @parent.location_id
     bin_putaway_plan.qty_bins_to_putaway = @parent.qty_bins.to_i
-    #bin_putaway_plan.bins_to_putaway = bin_nums
-    #bin_putaway_plan.bins_putaway_completed = bin_nums
     bin_putaway_plan.created_on = Time.now.to_formatted_s(:db)
-    #bin_putaway_plan.completed = true
-    #bin_putaway_plan.updated_at = Time.now.strftime("%Y/%m/%d/%H:%M:%S")
     bin_putaway_plan.user_name = @parent.pdt_screen_def.user
     bin_putaway_plan.save
 
     @parent.created_on = bin_putaway_plan.created_on.to_formatted_s(:db)
     @parent.bin_putaway_plan_id = bin_putaway_plan.id
-    @bpp = true
-    @parent.bpp = @bpp
-      end
   end
 
 
@@ -180,7 +161,6 @@ class BinPutawayScanning < PDTTransactionState
     location = get_matched_bin_location
     @parent.location_code = location['location_code'] if location
     @parent.location_id = location['location_id'] if location
-
   end
 
 
@@ -200,14 +180,14 @@ class BinPutawayScanning < PDTTransactionState
 
   def get_location_where
     where = []
-    @parent.bin_fruit_spec.each do |k,v|
+    @parent.bin_fruit_spec.each do |k, v|
       if k != "stock_type_code"
         where << "rmt.#{k} = '#{v}' " if k != "track_indicator1_id"
         where << "b.#{k}   =  #{v}" if k == "track_indicator1_id"
       end
 
     end
-   return where.join(" AND ")
+    return where.join(" AND ")
   end
 
   def get_matched_bin_location
@@ -236,22 +216,26 @@ class BinPutawayScanning < PDTTransactionState
                   order by fullness ,updated_at desc limit 1
                                                         ")
 
+    if !location
+      @parent.error_str = "no matched location"
+      return render_select_location_state
+    else
+      location_status(location)
+    end
 
-    @parent.error_str = "no matched location" if !location
-    return location if location
 
   end
 
   def location_status(location)
     location_status = Location.check_location_status(location.location_barcode)
-    if  location_status  != nil
+    if location_status != nil
       if location_status == "SEALED"
         error = "Location is SEALED "
       elsif location_status == "GAS"
         error = "Location status:GAS "
       end
       if error
-        @parent.error_str  = error
+        @parent.error_str = error
         return render_select_location_state
       else
         return location
@@ -308,10 +292,9 @@ class BinPutawayScanning < PDTTransactionState
   end
 
 
-
   def validate
     scan_bin_number = @parent.pdt_screen_def.get_control_value("bin_number").strip
-    @force_complete =  @parent.pdt_screen_def.get_control_value("force_complete").strip
+    @force_complete = @parent.pdt_screen_def.get_control_value("force_complete").strip
 
     if @force_complete == "true" && @parent.scanned_bins.length >= 1
       @bin_number = nil
@@ -319,50 +302,48 @@ class BinPutawayScanning < PDTTransactionState
       bin = Bin.find_by_bin_number(scan_bin_number)
 
       if bin == nil
-      error = ["Bin number :'#{scan_bin_number}' does not exist "]
-      return error
-    end
+        error = ["Bin number :'#{scan_bin_number}' does not exist "]
+        return error
+      end
 
-    @bin_number = bin.bin_number
+      @bin_number = bin.bin_number
 
 
-    if @parent.scanned_bins.include?(bin.bin_number)
-      error = ["Bin number : '#{bin.bin_number}' has already been scanned"]
-      return error
-    end
+      if @parent.scanned_bins.include?(bin.bin_number)
+        error = ["Bin number : '#{bin.bin_number}' has already been scanned"]
+        return error
+      end
 
-    on_a_tripsheet = Bin.is_on_tripsheet?(scan_bin_number)
-    if on_a_tripsheet
-      error = ["Bin number :'#{scan_bin_number}' is already on tripsheet: #{on_a_tripsheet} "]
-      return error
-    end
+      on_a_tripsheet = Bin.is_on_tripsheet?(scan_bin_number)
+      if on_a_tripsheet
+        error = ["Bin number :'#{scan_bin_number}' is already on tripsheet: #{on_a_tripsheet} "]
+        return error
+      end
 
-    inv_reference = bin.bin_number.to_s
-    stock_item = StockItem.find_by_inventory_reference(inv_reference)
-    if !stock_item
-      error = ["Bin can not be received,its not a stock item "]
-      return error
-    end
+      inv_reference = bin.bin_number.to_s
+      stock_item = StockItem.find_by_inventory_reference(inv_reference)
+      if !stock_item
+        error = ["Bin can not be received,its not a stock item "]
+        return error
+      end
 
-    on_a_bin_plan = BinPutawayPlan.is_on_a_putaway_plan?(scan_bin_number)
-    if on_a_bin_plan
-      error = ["Bin can not be received,its on another bin putaway plan "]
-      return error
-    end
+      on_a_bin_plan = BinPutawayPlan.is_on_a_putaway_plan?(scan_bin_number)
+      if on_a_bin_plan
+        error = ["Bin can not be received,its on another bin putaway plan "]
+        return error
+      end
     end
   end
 
 
   def process_scanned_bins
+    create_bin_putaway if @parent.scanned_bins.length == 1
     @quantity_bins_remaining = qty_bins_remaining
     @parent.quantity_bins_remaining = @quantity_bins_remaining
-    if (@quantity_bins_remaining && @quantity_bins_remaining <= 0) || @force_complete =="true"
-      #TODO: should it be commented out?
-        return transition_to_bulk_putaway
+    if (@quantity_bins_remaining && @quantity_bins_remaining <= 0) || @force_complete == "true"
+      return transition_to_bulk_putaway
     else
-       self.parent.clear_active_state
-       @parent.clear_active_state
-      return self.build_default_screen
+      build_default_screen
     end
   end
 

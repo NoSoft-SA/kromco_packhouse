@@ -18,6 +18,81 @@ class Location < ActiveRecord::Base
 #	============================
   validates_presence_of :location_code
 
+  private
+
+  def self.get_spaces_left( location,active_plan_qty_bins)
+    spaces_left = ActiveRecord::Base.connection.select_one("
+    select
+    (l.location_maximum_units - ((COALESCE(l.units_in_location,0) + COALESCE(bpp.qty_bins_to_putaway,0)) - #{active_plan_qty_bins})) as spaces_left
+    from  locations l
+    left join bin_putaway_plans bpp on bpp.putaway_location_id = l.id and bpp.completed is not true
+    where l.location_code = '#{location}'
+    ")['spaces_left'] if location
+    return spaces_left
+  end
+
+  def Location.determine_bin_fruit_spec(stock_type_code= nil , commodity_code= nil , variety_code= nil , size_code= nil , product_class_code= nil , treatment_code= nil , track_indicator1_id= nil , farm_code= nil , grade_code= nil , scanned_bins=nil )
+
+    bin_fruit_spec = {}
+
+    if stock_type_code == "BIN"
+      bin_fruit_spec = {
+          'stock_type_code' => stock_type_code, 'commodity_code' => commodity_code,
+          'variety_code' => variety_code, 'size_code' => size_code, 'product_class_code' => product_class_code,
+          'treatment_code' => treatment_code,'track_indicator1_id'=> track_indicator1_id
+      }
+    elsif stock_type_code == "REBIN"
+      bin_fruit_spec = {
+          'stock_type_code' => stock_type_code, 'commodity_code' => commodity_code,
+          'variety_code' => variety_code, 'product_class_code' => product_class_code
+      }
+    end
+
+    if stock_type_code == "PRESORT"
+      if !%w(1A 2L 1L SA).include?("'#{product_class_code}'") && (!size_code[0].chr.is_numeric? && !%w(ALL 2L).include?("'#{size_code}'"))
+        bin_fruit_spec = {
+            'stock_type_code' => stock_type_code, 'commodity_code' => commodity_code,
+            'variety_code' => variety_code, 'product_class_code' => product_class_code
+        }
+
+
+      elsif size_code=="UNDERS"
+        bin_fruit_spec = {
+            'stock_type_code' => stock_type_code, 'commodity_code' => commodity_code,
+            'variety_code' => variety_code, 'product_class_code' => product_class_code
+        }
+
+
+      elsif  (size_code[0].chr.is_numeric? && size_code.include?("-"))
+        bin_fruit_spec = {
+            'stock_type_code' => stock_type_code, 'commodity_code' => commodity_code,
+            'variety_code' => variety_code, 'size_code' => size_code, 'product_class_code' => product_class_code,
+            'treatment_code' => treatment_code, 'farm_code' => farm,'track_indicator1_id'=> track_indicator1_id
+        }
+
+
+      elsif  size_code == "ALL" && grade_code == "2L"
+        bin_fruit_spec = {
+            'stock_type_code' => stock_type_code, 'commodity_code' => commodity_code,
+            'variety_code' => variety_code, 'size_code' => size_code, 'product_class_code' => product_class_code,
+            'treatment_code' => treatment_code, 'farm_code' => farm,'track_indicator1_id'=> track_indicator1_id
+        }
+
+      else
+
+        bin_fruit_spec = {
+            'stock_type_code' => stock_type_code, 'commodity_code' => commodity_code,
+            'variety_code' => variety_code, 'size_code' => size_code, 'product_class_code' => product_class_code,
+            'treatment_code' => treatment_code,'track_indicator1_id'=> track_indicator1_id
+        }
+      end
+    end
+
+
+    return bin_fruit_spec
+
+  end
+
   def Location.check_location_status(location_barcode)
     location_status= Location.find_by_sql("select locations.location_status from locations
                                           where location_barcode='#{location_barcode}' and location_code like '%CA%' ")
@@ -35,15 +110,9 @@ class Location < ActiveRecord::Base
     end
   end
 
+  def Location.get_spaces_in_location(location,scanned_bins,active_plan_qty_bins)
+    spaces_left = get_spaces_left(location,active_plan_qty_bins)
 
-  def Location.get_spaces_in_location(location,scanned_bins)
-    spaces_left = ActiveRecord::Base.connection.select_one("
-                        select
-                        l.location_maximum_units - (COALESCE(l.units_in_location,0) + COALESCE(bpp.qty_bins_to_putaway,0)) as spaces_left
-                        from  locations l
-                        left join bin_putaway_plans bpp on bpp.putaway_location_id = l.id and bpp.completed is not true
-                        where l.location_code = '#{location}'
-                                      ")['spaces_left'] if location
     if scanned_bins==1
       #spaces_left = spaces_left.to_i - 1
     else
@@ -53,16 +122,6 @@ class Location < ActiveRecord::Base
     return spaces_left.to_i
     return nil if !spaces_left
   end
-
-
-  #def before_update
-  #  location_status=Location.find(self.id).location_status
-  #  if location_status != "OPEN" && self.location_status == "OPEN"
-  #    sql="update bins set sealed_ca_open_date_time='#{Time.now.to_formatted_s(:db)}' where bins.id in (
-  #    select  b.id from bins b join stock_items si on si.inventory_reference=b.bin_number  where si.location_id=#{self.id} and b.sealed_ca_location_id=#{self.id} and sealed_ca_open_date_time is null AND (destroyed = false or destroyed is null))"
-  #    ActiveRecord::Base.connection.execute(sql)
-  #  end
-  #end
 
   def Location.bin_age(location)
     age=Location.find_by_sql("
@@ -270,8 +329,6 @@ class Location < ActiveRecord::Base
       return true
     end
   end
-
-
 
 
 
