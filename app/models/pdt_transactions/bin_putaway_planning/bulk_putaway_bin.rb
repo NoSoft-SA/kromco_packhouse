@@ -89,7 +89,7 @@ class BulkPutawayBin < PDTTransactionState
     bin_putway_plan = BinPutawayPlan.find(@parent.bin_putaway_plan_id)
     bin_putway_plan.bins_putaway_completed = bin_putway_plan.bins_to_putaway
     bin_putway_plan.completed = true
-    bin_putway_plan.updated_at = Time.now.strftime("%Y/%m/%d/%H:%M:%S")
+    bin_putway_plan.updated_at = Time.now.to_formatted_s(:db)
     bin_putway_plan.user_name = @parent.pdt_screen_def.user
     bin_putway_plan.update
     bin_putway_plan
