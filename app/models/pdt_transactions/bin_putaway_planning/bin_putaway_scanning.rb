@@ -229,8 +229,8 @@ class BinPutawayScanning < PDTTransactionState
   def location_status(location)
     location_status = Location.check_location_status(location.location_barcode)
     if location_status != nil
-      if location_status == "SEALED"
-        error = "Location is SEALED "
+      if location_status.upcase.index("SEALED")
+        error = "Location is #{location_status} "
       elsif location_status == "GAS"
         error = "Location status:GAS "
       end
