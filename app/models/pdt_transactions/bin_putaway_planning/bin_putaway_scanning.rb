@@ -182,8 +182,17 @@ class BinPutawayScanning < PDTTransactionState
     where = []
     @parent.bin_fruit_spec.each do |k, v|
       if k != "stock_type_code"
-        where << "rmt.#{k} = '#{v}' " if k != "track_indicator1_id"
-        where << "b.#{k}   =  #{v}" if k == "track_indicator1_id"
+        if k == "track_indicator1_id"
+          where << "b.#{k}   =  #{v}"
+        elsif k == "farm_code"
+          where << "farms.#{k}   =  '#{v}'"
+        else
+          where << "rmt.#{k} = '#{v}'"
+        end
+        # where << "rmt.#{k} = '#{v}' " if k != "track_indicator1_id"
+        # where << "b.#{k}   =  #{v}" if k == "track_indicator1_id"
+        # where << "farms.#{k}   =  #{v}" if k == "farm_code"
+
       end
 
     end
