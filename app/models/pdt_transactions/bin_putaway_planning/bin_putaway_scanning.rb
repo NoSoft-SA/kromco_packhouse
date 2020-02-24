@@ -144,7 +144,7 @@ class BinPutawayScanning < PDTTransactionState
     error << "size" if @parent.bin_fruit_spec['size_code'] && (@parent.bin_fruit_spec['size_code'] != bin['size_code'])
     error << "class" if @parent.bin_fruit_spec['product_class_code'] && (@parent.bin_fruit_spec['product_class_code'] != bin['product_class_code'])
     error << "treatment" if @parent.bin_fruit_spec['treatment_code'] && (@parent.bin_fruit_spec['treatment_code'] != bin['treatment_code'])
-    error << "farm" if @parent.bin_fruit_spec['farm_code'] && (@parent.bin_fruit_spec['farm_code'] && bin['farm_code'])
+    error << "farm" if @parent.bin_fruit_spec['farm_code'] && (@parent.bin_fruit_spec['farm_code'] != bin['farm_code'])
     error << "track_indicator_code" if @parent.bin_fruit_spec['track_indicator1_id'] && (@parent.bin_fruit_spec['track_indicator1_id'] != bin['track_indicator1_id'])
     if !error.empty?
       error << "UNDO and scan another."
