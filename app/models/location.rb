@@ -33,7 +33,7 @@ class Location < ActiveRecord::Base
   def Location.determine_bin_fruit_spec(stock_type_code= nil , commodity_code= nil , variety_code= nil , size_code= nil , product_class_code= nil , treatment_code= nil , track_indicator1_id= nil , farm_code= nil , grade_code= nil , scanned_bins=nil )
 
     bin_fruit_spec = {}
-
+    rule = nil
     if stock_type_code == "BIN"
       bin_fruit_spec = {
           'stock_type_code' => stock_type_code, 'commodity_code' => commodity_code,
@@ -41,11 +41,13 @@ class Location < ActiveRecord::Base
           'treatment_code' => treatment_code,'track_indicator1_id'=> track_indicator1_id,
           'farm_code' => farm_code
       }
+      rule = 6
     elsif stock_type_code == "REBIN"
       bin_fruit_spec = {
           'stock_type_code' => stock_type_code, 'commodity_code' => commodity_code,
           'variety_code' => variety_code, 'product_class_code' => product_class_code
       }
+      rule = 7
     end
 
     if stock_type_code == "PRESORT"
@@ -55,13 +57,13 @@ class Location < ActiveRecord::Base
             'variety_code' => variety_code, 'product_class_code' => product_class_code
         }
 
-
+        rule =  1
       elsif size_code=="UNDERS"
         bin_fruit_spec = {
             'stock_type_code' => stock_type_code, 'commodity_code' => commodity_code,
             'variety_code' => variety_code, 'product_class_code' => product_class_code
         }
-
+       rule = 2
 
       elsif  (size_code[0].chr.is_numeric? && size_code.include?("-"))
         bin_fruit_spec = {
@@ -70,14 +72,14 @@ class Location < ActiveRecord::Base
             'treatment_code' => treatment_code, 'farm_code' => farm_code,'track_indicator1_id'=> track_indicator1_id
         }
 
-
-      elsif  size_code == "ALL" && grade_code == "2L"
+        rule = 3
+      elsif  size_code == "ALL" && product_class_code == "2L"
         bin_fruit_spec = {
             'stock_type_code' => stock_type_code, 'commodity_code' => commodity_code,
             'variety_code' => variety_code, 'size_code' => size_code, 'product_class_code' => product_class_code,
             'treatment_code' => treatment_code, 'farm_code' => farm_code,'track_indicator1_id'=> track_indicator1_id
         }
-
+       rule = 4
       else
 
         bin_fruit_spec = {
@@ -85,11 +87,12 @@ class Location < ActiveRecord::Base
             'variety_code' => variety_code, 'size_code' => size_code, 'product_class_code' => product_class_code,
             'treatment_code' => treatment_code,'track_indicator1_id'=> track_indicator1_id
         }
+        rule = 5
       end
     end
 
 
-    return bin_fruit_spec
+    return bin_fruit_spec , rule
 
   end
 
