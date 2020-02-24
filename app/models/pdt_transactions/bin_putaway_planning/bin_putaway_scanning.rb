@@ -162,6 +162,7 @@ class BinPutawayScanning < PDTTransactionState
     bin_putaway_plan.coldroom_location_id = @parent.coldroom_id
     bin_putaway_plan.putaway_location_id = @parent.location_id
     bin_putaway_plan.qty_bins_to_putaway = @parent.qty_bins.to_i
+    bin_putaway_plan.bins_to_putaway = bin_nums
     bin_putaway_plan.created_on = Time.now.to_formatted_s(:db)
     bin_putaway_plan.user_name = @parent.pdt_screen_def.user
     bin_putaway_plan.save
