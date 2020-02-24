@@ -99,11 +99,25 @@ class BinPutawayScanning < PDTTransactionState
 
     assign_bin_variables(bin) if bin && @parent.scanned_bins.length == 1
 
+    if @parent.scanned_bins.length == 1
     frut_spec = Location.determine_bin_fruit_spec(@stock_type_code, @commodity_code, @variety_code, @size_code,
                                                   @product_class_code, @treatment_code, @track_indicator1_id,
-                                                  @farm_code, nil, @parent.scanned_bins) if @parent.scanned_bins.length == 1
+                                                  @farm_code, nil, @parent.scanned_bins)
 
-    @parent.bin_fruit_spec = frut_spec if @parent.scanned_bins.length == 1
+    str = []
+    frut_spec.each do |k,v|
+      str << "#{k}" + " " + "#{v}"
+    end
+    log = str.unshift("Scanned Bin number:  #{bin['bin_number']}").join("/n") + "\n"
+
+    puts"**************#{log}"
+
+    RAILS_DEFAULT_LOGGER.info("#{log}")
+
+    @parent.bin_fruit_spec = frut_spec
+
+    end
+
     bin
   end
 

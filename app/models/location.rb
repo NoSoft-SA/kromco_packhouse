@@ -38,7 +38,8 @@ class Location < ActiveRecord::Base
       bin_fruit_spec = {
           'stock_type_code' => stock_type_code, 'commodity_code' => commodity_code,
           'variety_code' => variety_code, 'size_code' => size_code, 'product_class_code' => product_class_code,
-          'treatment_code' => treatment_code,'track_indicator1_id'=> track_indicator1_id
+          'treatment_code' => treatment_code,'track_indicator1_id'=> track_indicator1_id,
+          'farm_code' => farm_code
       }
     elsif stock_type_code == "REBIN"
       bin_fruit_spec = {
