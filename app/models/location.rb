@@ -51,37 +51,33 @@ class Location < ActiveRecord::Base
     end
 
     if stock_type_code == "PRESORT"
-      if !%w(1A 2L 1L SA).include?("'#{product_class_code}'") && (!size_code[0].chr.is_numeric? && !%w(ALL 2L).include?("'#{size_code}'"))
+      if size_code=="UNDERS"
         bin_fruit_spec = {
             'stock_type_code' => stock_type_code, 'commodity_code' => commodity_code,
             'variety_code' => variety_code, 'product_class_code' => product_class_code
         }
-
-        rule =  1
-      elsif size_code=="UNDERS"
-        bin_fruit_spec = {
-            'stock_type_code' => stock_type_code, 'commodity_code' => commodity_code,
-            'variety_code' => variety_code, 'product_class_code' => product_class_code
-        }
-       rule = 2
-
-      elsif  (size_code[0].chr.is_numeric? && size_code.include?("-"))
-        bin_fruit_spec = {
-            'stock_type_code' => stock_type_code, 'commodity_code' => commodity_code,
-            'variety_code' => variety_code, 'size_code' => size_code, 'product_class_code' => product_class_code,
-            'treatment_code' => treatment_code, 'farm_code' => farm_code,'track_indicator1_id'=> track_indicator1_id
-        }
-
-        rule = 3
+        rule = 2
       elsif  size_code == "ALL" && product_class_code == "2L"
         bin_fruit_spec = {
             'stock_type_code' => stock_type_code, 'commodity_code' => commodity_code,
             'variety_code' => variety_code, 'size_code' => size_code, 'product_class_code' => product_class_code,
             'treatment_code' => treatment_code, 'farm_code' => farm_code,'track_indicator1_id'=> track_indicator1_id
         }
-       rule = 4
+        rule = 4
+      elsif  (size_code[0].chr.is_numeric? && size_code.include?("-"))
+        bin_fruit_spec = {
+            'stock_type_code' => stock_type_code, 'commodity_code' => commodity_code,
+            'variety_code' => variety_code, 'size_code' => size_code, 'product_class_code' => product_class_code,
+            'treatment_code' => treatment_code, 'farm_code' => farm_code,'track_indicator1_id'=> track_indicator1_id
+        }
+        rule = 3
+      elsif !%w(1A 2L 1L SA).include?(product_class_code) && !size_code[0].chr.is_numeric? && !%w(ALL).include?(size_code)
+        bin_fruit_spec = {
+            'stock_type_code' => stock_type_code, 'commodity_code' => commodity_code,
+            'variety_code' => variety_code, 'product_class_code' => product_class_code
+        }
+        rule =  1
       else
-
         bin_fruit_spec = {
             'stock_type_code' => stock_type_code, 'commodity_code' => commodity_code,
             'variety_code' => variety_code, 'size_code' => size_code, 'product_class_code' => product_class_code,
