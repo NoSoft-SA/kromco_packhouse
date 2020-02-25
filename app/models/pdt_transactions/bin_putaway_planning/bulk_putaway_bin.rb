@@ -86,11 +86,16 @@ class BulkPutawayBin < PDTTransactionState
 
   def do_bulk_putaway
     #- copy contents of bins_to_putaway to bins_putaway_completed
+    bin_nums = {}
+    @parent.scanned_bins.each do |num|
+      bin_nums[num] = "'#{num}'"
+    end
     bin_putway_plan = BinPutawayPlan.find(@parent.bin_putaway_plan_id)
     bin_putway_plan.bins_putaway_completed = bin_putway_plan.qty_bins_to_putaway
     bin_putway_plan.completed = true
     bin_putway_plan.updated_at = Time.now.to_formatted_s(:db)
     bin_putway_plan.user_name = @parent.pdt_screen_def.user
+    bin_putway_plan.bins_to_putaway = bin_nums
     bin_putway_plan.update
     bin_putway_plan
   end
