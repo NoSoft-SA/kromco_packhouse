@@ -108,9 +108,11 @@ class BinPutawayScanning < PDTTransactionState
     str << "RULE: #{rule}"
     puts"Scanned Bin number:  #{bin['bin_number']}"
     puts "RULE: #{rule}"
-    frut_spec.each do |k,v|
-      str << "#{k}" + " " + "#{v}"
-      puts "#{k}" + " " + "#{v}"
+    bin.each do |k,v|
+      if %w(commodity_code stock_type_code variety_code size_code product_class_code treatment_code farm_code track_indicator1_id ).include?(k)
+        str << "#{k}" + " " + "#{v}"
+        puts "#{k}" + " " + "#{v}"
+      end
     end
     log = str.unshift("Scanned Bin number:  #{bin['bin_number']}").join("/n") + "\n"
 

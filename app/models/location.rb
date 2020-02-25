@@ -61,7 +61,7 @@ class Location < ActiveRecord::Base
         bin_fruit_spec = {
             'stock_type_code' => stock_type_code, 'commodity_code' => commodity_code,
             'variety_code' => variety_code, 'size_code' => size_code, 'product_class_code' => product_class_code,
-            'treatment_code' => treatment_code, 'farm_code' => farm_code,'track_indicator1_id'=> track_indicator1_id
+            'treatment_code' => treatment_code, 'track_indicator1_id'=> track_indicator1_id
         }
         rule = 4
       elsif  (size_code[0].chr.is_numeric? && size_code.include?("-"))
