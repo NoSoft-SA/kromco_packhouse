@@ -158,22 +158,23 @@ class BinPutawayScanning < PDTTransactionState
   end
 
   def create_bin_putaway
-    bin_nums = {}
-    @parent.scanned_bins.each do |num|
-      bin_nums[num] = "'#{num}'"
+    if @parent.scanned_bins.length == 1 && !@parent.bin_putaway_plan_id
+      bin_nums = {}
+      @parent.scanned_bins.each do |num|
+        bin_nums[num] = "'#{num}'"
+      end
+      bin_putaway_plan = BinPutawayPlan.new
+      bin_putaway_plan.coldroom_location_id = @parent.coldroom_id
+      bin_putaway_plan.putaway_location_id = @parent.location_id
+      bin_putaway_plan.qty_bins_to_putaway = @parent.qty_bins.to_i
+      bin_putaway_plan.bins_to_putaway = bin_nums
+      bin_putaway_plan.created_on = Time.now.to_formatted_s(:db)
+      bin_putaway_plan.user_name = @parent.pdt_screen_def.user
+      bin_putaway_plan.bin_putaway_code = @parent.pdt_screen_def.user + "_" + @parent.coldroom_id.to_s + "_" + @parent.location_id.to_s + "_" + @parent.qty_bins.to_s + "_" + bin_putaway_plan.created_on.to_s
+      bin_putaway_plan.save if @parent.scanned_bins.length == 1 && !@parent.bin_putaway_plan_id
+      @parent.created_on = bin_putaway_plan.created_on.to_formatted_s(:db)
+      @parent.bin_putaway_plan_id = bin_putaway_plan.id if  !@parent.bin_putaway_plan_id
     end
-    bin_putaway_plan = BinPutawayPlan.new
-    bin_putaway_plan.coldroom_location_id = @parent.coldroom_id
-    bin_putaway_plan.putaway_location_id = @parent.location_id
-    bin_putaway_plan.qty_bins_to_putaway = @parent.qty_bins.to_i
-    bin_putaway_plan.bins_to_putaway = bin_nums
-    bin_putaway_plan.created_on = Time.now.to_formatted_s(:db)
-    bin_putaway_plan.user_name = @parent.pdt_screen_def.user
-    bin_putaway_plan.bin_putaway_code = @parent.pdt_screen_def.user + "_" + @parent.coldroom_id.to_s + "_" + @parent.location_id.to_s + "_" + @parent.qty_bins.to_s + "_" + bin_putaway_plan.created_on.to_s
-    bin_putaway_plan.save
-
-    @parent.created_on = bin_putaway_plan.created_on.to_formatted_s(:db)
-    @parent.bin_putaway_plan_id = bin_putaway_plan.id
   end
 
 
@@ -366,7 +367,7 @@ class BinPutawayScanning < PDTTransactionState
 
 
   def process_scanned_bins
-    create_bin_putaway if @parent.scanned_bins.length == 1
+    create_bin_putaway if @parent.scanned_bins.length == 1 && !@parent.bin_putaway_plan_id
     @quantity_bins_remaining = qty_bins_remaining
     @parent.quantity_bins_remaining = @quantity_bins_remaining
     if (@quantity_bins_remaining && @quantity_bins_remaining <= 0) || @force_complete == "true"
