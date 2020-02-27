@@ -166,7 +166,7 @@ end
 
 def build_print_instruction(label_data, printer)
 
-  seed_num = MesControlFile.next_seq_web(MesControlFile::BIN_TICKET,@qty_to_print.to_i)
+  seed_num = MesControlFile.next_seq_web(MesControlFile::BIN_TICKET,@qty_to_print.to_i,"kr")
   #puts seed_num.to_s
 
   start_num = seed_num.to_i - @qty_to_print.to_i

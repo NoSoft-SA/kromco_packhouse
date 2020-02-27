@@ -116,6 +116,11 @@ class BinScanning < PDTTransactionState
       return error
     end
 
+    if @parent.active_bins_list.include?(scan_bin_number)
+      error = ["Bin number : '#{scan_bin_number}' has already been scanned"]
+      return error
+    end
+
     return nil
   end
 
