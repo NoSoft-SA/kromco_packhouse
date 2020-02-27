@@ -212,6 +212,13 @@ module Qc::QcInspectionHelper
         :target_action => 'edit_qc_inspection',
         :id_value      => inspection_type_code,
         :id_column     => 'id'}}
+      column_configs << {:field_type => 'action', :field_name => 're_open',
+                         :settings =>
+                             {:link_text      => 're_open',
+                              :target_action => 're_edit_qc_inspection',
+                              :id_value      => inspection_type_code,
+                              :id_column     => 'id',
+                              :null_test => "['status'] != 'QC INSPECTION COMPLETED'"}}
       if can_re_edit
         column_configs << {:field_type => 'action', :field_name => 're_edit',
           :settings =>
