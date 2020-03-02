@@ -237,6 +237,7 @@ class BinPutawayScanning < PDTTransactionState
                   join rmt_products rmt ON b.rmt_product_id = rmt.id
 				          left join farms ON b.farm_id = farms.id
                   where
+                   b.season_code in ('2020_AP','2020_PR') AND
                   ((si.destroyed IS NULL) OR (si.destroyed = false)) and
                   l.parent_location_code  = '#{@parent.coldroom}'  and
                   l.loading_out is not true and
