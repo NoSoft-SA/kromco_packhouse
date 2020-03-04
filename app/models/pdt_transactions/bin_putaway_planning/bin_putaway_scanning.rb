@@ -102,14 +102,14 @@ class BinPutawayScanning < PDTTransactionState
     if @parent.scanned_bins.length == 1
     frut_spec,rule = Location.determine_bin_fruit_spec(@stock_type_code, @commodity_code, @variety_code, @size_code,
                                                   @product_class_code, @treatment_code, @track_indicator1_id,
-                                                  @farm_code, nil, @parent.scanned_bins)
+                                                  @farm_code, nil, @parent.scanned_bins,@coldstore_type)
 
     str = []
     str << "RULE: #{rule}"
     puts"Scanned Bin number:  #{bin['bin_number']}"
     puts "RULE: #{rule}"
     bin.each do |k,v|
-      if %w(commodity_code stock_type_code variety_code size_code product_class_code treatment_code farm_code track_indicator1_id ).include?(k)
+      if %w(commodity_code stock_type_code variety_code size_code product_class_code treatment_code farm_code track_indicator1_id,coldstore_type ).include?(k)
         str << "#{k}" + " " + "#{v}"
         puts "#{k}" + " " + "#{v}"
       end
@@ -158,23 +158,27 @@ class BinPutawayScanning < PDTTransactionState
   end
 
   def create_bin_putaway
-    if @parent.scanned_bins.length == 1 && !@parent.bin_putaway_plan_id
-      bin_nums = {}
-      @parent.scanned_bins.each do |num|
-        bin_nums[num] = "'#{num}'"
+
+      if @parent.scanned_bins.length == 1 && !@parent.bin_putaway_plan_id
+        bin_nums = {}
+        @parent.scanned_bins.each do |num|
+          bin_nums[num] = "'#{num}'"
+        end
+        bin_putaway_plan = BinPutawayPlan.new
+        bin_putaway_plan.coldroom_location_id = @parent.coldroom_id
+        bin_putaway_plan.putaway_location_id = @parent.location_id
+        bin_putaway_plan.qty_bins_to_putaway = @parent.qty_bins.to_i
+        bin_putaway_plan.bins_to_putaway = bin_nums
+        bin_putaway_plan.created_on = Time.now.to_formatted_s(:db)
+        bin_putaway_plan.user_name = @parent.pdt_screen_def.user
+        bin_putaway_plan.bin_putaway_code = @parent.pdt_screen_def.user + "_" + @parent.coldroom_id.to_s + "_" + @parent.location_id.to_s + "_" + @parent.qty_bins.to_s + "_" + bin_putaway_plan.created_on.to_s
+        bin_putaway_plan.save if @parent.scanned_bins.length == 1 && !@parent.bin_putaway_plan_id
+        @parent.created_on = bin_putaway_plan.created_on.to_formatted_s(:db)
+        @parent.bin_putaway_plan_id = bin_putaway_plan.id if  !@parent.bin_putaway_plan_id
       end
-      bin_putaway_plan = BinPutawayPlan.new
-      bin_putaway_plan.coldroom_location_id = @parent.coldroom_id
-      bin_putaway_plan.putaway_location_id = @parent.location_id
-      bin_putaway_plan.qty_bins_to_putaway = @parent.qty_bins.to_i
-      bin_putaway_plan.bins_to_putaway = bin_nums
-      bin_putaway_plan.created_on = Time.now.to_formatted_s(:db)
-      bin_putaway_plan.user_name = @parent.pdt_screen_def.user
-      bin_putaway_plan.bin_putaway_code = @parent.pdt_screen_def.user + "_" + @parent.coldroom_id.to_s + "_" + @parent.location_id.to_s + "_" + @parent.qty_bins.to_s + "_" + bin_putaway_plan.created_on.to_s
-      bin_putaway_plan.save if @parent.scanned_bins.length == 1 && !@parent.bin_putaway_plan_id
-      @parent.created_on = bin_putaway_plan.created_on.to_formatted_s(:db)
-      @parent.bin_putaway_plan_id = bin_putaway_plan.id if  !@parent.bin_putaway_plan_id
-    end
+
+
+
   end
 
 
@@ -207,6 +211,8 @@ class BinPutawayScanning < PDTTransactionState
           where << "b.#{k}   =  #{v}"
         elsif k == "farm_code"
           where << "farms.#{k}   =  '#{v}'"
+        elsif k == "coldstore_type"
+          where << "b.#{k}   = COALESCE( '#{v}','RA')"
         else
           where << "rmt.#{k} = '#{v}'"
         end
@@ -288,7 +294,8 @@ class BinPutawayScanning < PDTTransactionState
                     rmt.product_class_code,
                     rmt.treatment_code,
                     farms.farm_code,
-                    bins.track_indicator1_id
+                    bins.track_indicator1_id,
+                    bins.coldstore_type
             from bins
                      JOIN stock_items si ON si.inventory_reference=bins.bin_number
                      JOIN rmt_products rmt ON bins.rmt_product_id = rmt.id
@@ -309,6 +316,7 @@ class BinPutawayScanning < PDTTransactionState
     @treatment_code = bin['treatment_code']
     @track_indicator1_id = bin['track_indicator1_id']
     @farm_code = bin['farm_code']
+    @coldstore_type = bin['coldstore_type']
 
     @parent.stock_type_code = bin['stock_type_code']
     @parent.commodity_code = bin['commodity_code']
@@ -318,7 +326,7 @@ class BinPutawayScanning < PDTTransactionState
     @parent.treatment_code = bin['treatment_code']
     @parent.track_indicator1_id = bin['track_indicator1_id']
     @parent.farm_code = bin['farm_code']
-
+    @parent.coldstore_type = bin['coldstore_type']
 
   end
 
@@ -326,6 +334,7 @@ class BinPutawayScanning < PDTTransactionState
   def validate
     scan_bin_number = @parent.pdt_screen_def.get_control_value("bin_number").strip
     @force_complete = @parent.pdt_screen_def.get_control_value("force_complete").strip
+
 
     if @force_complete == "true" && @parent.scanned_bins.length >= 1
       @bin_number = nil
@@ -368,14 +377,32 @@ class BinPutawayScanning < PDTTransactionState
 
 
   def process_scanned_bins
-    create_bin_putaway if @parent.scanned_bins.length == 1 && !@parent.bin_putaway_plan_id
-    @quantity_bins_remaining = qty_bins_remaining
-    @parent.quantity_bins_remaining = @quantity_bins_remaining
-    if (@quantity_bins_remaining && @quantity_bins_remaining <= 0) || @force_complete == "true"
-      return transition_to_bulk_putaway
+    if @parent.scanned_bins.length == 1 && !@parent.bin_putaway_plan_id
+      uncompleted_plans = get_uncompleted_plans_by_user
+      if uncompleted_plans.to_i >= 1
+        error = ["Plan cannot be created.User already have uncompleted plan/s for the same location."]
+        result_screen = PDTTransaction.build_msg_screen_definition(nil, nil, nil, error)
+        return result_screen
+      else
+        create_bin_putaway
+        @quantity_bins_remaining = qty_bins_remaining
+        @parent.quantity_bins_remaining = @quantity_bins_remaining
+        if (@quantity_bins_remaining && @quantity_bins_remaining <= 0) || @force_complete == "true"
+          return transition_to_bulk_putaway
+        else
+          build_default_screen
+        end
+      end
     else
-      build_default_screen
+      @quantity_bins_remaining = qty_bins_remaining
+      @parent.quantity_bins_remaining = @quantity_bins_remaining
+      if (@quantity_bins_remaining && @quantity_bins_remaining <= 0) || @force_complete == "true"
+        return transition_to_bulk_putaway
+      else
+        build_default_screen
+      end
     end
+
   end
 
   def transition_to_bulk_putaway
@@ -394,6 +421,20 @@ class BinPutawayScanning < PDTTransactionState
                         from  locations l
                         where l.location_code = '#{@parent.location_code}'
                                       ")['positions_available']
+  end
+
+
+
+  def get_uncompleted_plans_by_user
+    uncompleted_plans = ActiveRecord::Base.connection.select_one("
+                       select COUNT(distinct id)   as plans
+                       from bin_putaway_plans
+                       where
+                       coldroom_location_id = #{@parent.coldroom_id}
+                       and putaway_location_id = #{@parent.location_id}
+                       and user_name = '#{@parent.pdt_screen_def.user}'
+                       and completed is null
+                       ")['plans']
   end
 
 

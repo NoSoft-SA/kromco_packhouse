@@ -1,6 +1,6 @@
 class BinPutawayPlanning < PDTTransaction
 
-  attr_accessor :bpp,:quantity_bins_remaining,:user,:created_on,:bin,:farm_code,:track_indicator1_id,:treatment_code,:product_class_code,:size_code,:variety_code,:commodity_code,:stock_type_code,:error_str,:bin_fruit_spec,:bin_putaway_plan_id,:coldroom,:positions_available, :qty_bins, :scanned_bins, :current_index, :coldroom_id,:location_id, :current_bins_index, :new,:location_code,:spaces_left
+  attr_accessor :coldstore_type,:bpp,:quantity_bins_remaining,:user,:created_on,:bin,:farm_code,:track_indicator1_id,:treatment_code,:product_class_code,:size_code,:variety_code,:commodity_code,:stock_type_code,:error_str,:bin_fruit_spec,:bin_putaway_plan_id,:coldroom,:positions_available, :qty_bins, :scanned_bins, :current_index, :coldroom_id,:location_id, :current_bins_index, :new,:location_code,:spaces_left
 
   def render_next_state
     @scanned_bins = Array.new

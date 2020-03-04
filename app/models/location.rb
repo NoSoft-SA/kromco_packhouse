@@ -30,7 +30,7 @@ class Location < ActiveRecord::Base
     return spaces_left
   end
 
-  def Location.determine_bin_fruit_spec(stock_type_code= nil , commodity_code= nil , variety_code= nil , size_code= nil , product_class_code= nil , treatment_code= nil , track_indicator1_id= nil , farm_code= nil , grade_code= nil , scanned_bins=nil )
+  def Location.determine_bin_fruit_spec(stock_type_code= nil , commodity_code= nil , variety_code= nil , size_code= nil , product_class_code= nil , treatment_code= nil , track_indicator1_id= nil , farm_code= nil , grade_code= nil , scanned_bins=nil,coldstore_type=nil )
 
     bin_fruit_spec = {}
     rule = nil
@@ -39,13 +39,13 @@ class Location < ActiveRecord::Base
           'stock_type_code' => stock_type_code, 'commodity_code' => commodity_code,
           'variety_code' => variety_code, 'size_code' => size_code, 'product_class_code' => product_class_code,
           'treatment_code' => treatment_code,'track_indicator1_id'=> track_indicator1_id,
-          'farm_code' => farm_code
+          'farm_code' => farm_code,'coldstore_type'=> coldstore_type
       }
       rule = 6
     elsif stock_type_code == "REBIN"
       bin_fruit_spec = {
           'stock_type_code' => stock_type_code, 'commodity_code' => commodity_code,
-          'variety_code' => variety_code, 'product_class_code' => product_class_code
+          'variety_code' => variety_code, 'product_class_code' => product_class_code,'coldstore_type'=> coldstore_type
       }
       rule = 7
     end
@@ -54,34 +54,35 @@ class Location < ActiveRecord::Base
       if size_code=="UNDERS"
         bin_fruit_spec = {
             'stock_type_code' => stock_type_code, 'commodity_code' => commodity_code,
-            'variety_code' => variety_code, 'product_class_code' => product_class_code
+            'variety_code' => variety_code, 'product_class_code' => product_class_code,'coldstore_type'=> coldstore_type
         }
         rule = 2
       elsif  size_code == "ALL" && product_class_code == "2L"
         bin_fruit_spec = {
             'stock_type_code' => stock_type_code, 'commodity_code' => commodity_code,
             'variety_code' => variety_code, 'size_code' => size_code, 'product_class_code' => product_class_code,
-            'treatment_code' => treatment_code, 'track_indicator1_id'=> track_indicator1_id
+            'treatment_code' => treatment_code, 'track_indicator1_id'=> track_indicator1_id,'coldstore_type'=> coldstore_type
         }
         rule = 4
       elsif  (size_code[0].chr.is_numeric? && size_code.include?("-"))
         bin_fruit_spec = {
             'stock_type_code' => stock_type_code, 'commodity_code' => commodity_code,
             'variety_code' => variety_code, 'size_code' => size_code, 'product_class_code' => product_class_code,
-            'treatment_code' => treatment_code, 'farm_code' => farm_code,'track_indicator1_id'=> track_indicator1_id
+            'treatment_code' => treatment_code, 'farm_code' => farm_code,'track_indicator1_id'=> track_indicator1_id,
+            'coldstore_type'=> coldstore_type
         }
         rule = 3
       elsif !%w(1A 2L 1L SA).include?(product_class_code) && !size_code[0].chr.is_numeric? && !%w(ALL).include?(size_code)
         bin_fruit_spec = {
             'stock_type_code' => stock_type_code, 'commodity_code' => commodity_code,
-            'variety_code' => variety_code, 'product_class_code' => product_class_code
+            'variety_code' => variety_code, 'product_class_code' => product_class_code,'coldstore_type'=> coldstore_type
         }
         rule =  1
       else
         bin_fruit_spec = {
             'stock_type_code' => stock_type_code, 'commodity_code' => commodity_code,
             'variety_code' => variety_code, 'size_code' => size_code, 'product_class_code' => product_class_code,
-            'treatment_code' => treatment_code,'track_indicator1_id'=> track_indicator1_id
+            'treatment_code' => treatment_code,'track_indicator1_id'=> track_indicator1_id,'coldstore_type'=> coldstore_type
         }
         rule = 5
       end
