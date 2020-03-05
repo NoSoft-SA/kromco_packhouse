@@ -212,7 +212,8 @@ class BinPutawayScanning < PDTTransactionState
         elsif k == "farm_code"
           where << "farms.#{k}   =  '#{v}'"
         elsif k == "coldstore_type"
-          where << "b.#{k}   = COALESCE( '#{v}','RA')"
+          where << "COALESCE(b.#{k},'RA')  = COALESCE( '#{v}','RA')" if v
+          where << "COALESCE(b.#{k},'RA')   =COALESCE(NULL,'RA')" if !v
         else
           where << "rmt.#{k} = '#{v}'"
         end
