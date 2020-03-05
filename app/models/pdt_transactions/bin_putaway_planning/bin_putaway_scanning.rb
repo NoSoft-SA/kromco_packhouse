@@ -165,6 +165,7 @@ class BinPutawayScanning < PDTTransactionState
           bin_nums[num] = "'#{num}'"
         end
         bin_putaway_plan = BinPutawayPlan.new
+        bin_putaway_plan.ip_address =self.pdt_screen_def.ip
         bin_putaway_plan.coldroom_location_id = @parent.coldroom_id
         bin_putaway_plan.putaway_location_id = @parent.location_id
         bin_putaway_plan.qty_bins_to_putaway = @parent.qty_bins.to_i
@@ -380,30 +381,18 @@ class BinPutawayScanning < PDTTransactionState
   def process_scanned_bins
     if @parent.scanned_bins.length == 1 && !@parent.bin_putaway_plan_id
       uncompleted_plans = get_uncompleted_plans_by_user
-      if uncompleted_plans.to_i >= 1
-        error = ["Plan cannot be created.User already have uncompleted plan/s for the same location."]
-        result_screen = PDTTransaction.build_msg_screen_definition(nil, nil, nil, error)
-        return result_screen
-      else
-        create_bin_putaway
-        @quantity_bins_remaining = qty_bins_remaining
-        @parent.quantity_bins_remaining = @quantity_bins_remaining
-        if (@quantity_bins_remaining && @quantity_bins_remaining <= 0) || @force_complete == "true"
-          return transition_to_bulk_putaway
-        else
-          build_default_screen
-        end
+      if !uncompleted_plans.empty?
+       ActiveRecord::Base.connection.execute("delete from bin_putaway_plans where id in (#{uncompleted_plans.map{|x|x['id']}.join(',')})")
       end
-    else
-      @quantity_bins_remaining = qty_bins_remaining
-      @parent.quantity_bins_remaining = @quantity_bins_remaining
-      if (@quantity_bins_remaining && @quantity_bins_remaining <= 0) || @force_complete == "true"
-        return transition_to_bulk_putaway
-      else
-        build_default_screen
-      end
+      create_bin_putaway
     end
-
+    @quantity_bins_remaining = qty_bins_remaining
+    @parent.quantity_bins_remaining = @quantity_bins_remaining
+    if (@quantity_bins_remaining && @quantity_bins_remaining <= 0) || @force_complete == "true"
+      return transition_to_bulk_putaway
+    else
+      build_default_screen
+    end
   end
 
   def transition_to_bulk_putaway
@@ -427,15 +416,17 @@ class BinPutawayScanning < PDTTransactionState
 
 
   def get_uncompleted_plans_by_user
-    uncompleted_plans = ActiveRecord::Base.connection.select_one("
-                       select COUNT(distinct id)   as plans
+    uncompleted_plans = ActiveRecord::Base.connection.select_all("
+                       select bin_putaway_plans.id
                        from bin_putaway_plans
                        where
                        coldroom_location_id = #{@parent.coldroom_id}
                        and putaway_location_id = #{@parent.location_id}
                        and user_name = '#{@parent.pdt_screen_def.user}'
+                       and ip_address = '#{@parent.pdt_screen_def.ip}'
                        and completed is null
-                       ")['plans']
+                       ")
+    return uncompleted_plans
   end
 
 
