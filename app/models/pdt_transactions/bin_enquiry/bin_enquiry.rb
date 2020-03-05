@@ -28,10 +28,6 @@ class BinEnquiry < PDTTransaction
     bin_number = self.pdt_screen_def.get_control_value("bin_number")
     bin = Bin.find_by_bin_number(bin_number)
 
-    pm_rec = PackMaterialProduct.find(bin.pack_material_product_id)
-    pm_code = ""
-    pm_code = pm_rec.pack_material_product_code if  pm_rec
-
     if !bin
       return PDTTransaction.build_msg_screen_definition(nil,nil,nil,["Bin: #{bin_number} not found"])
     end
@@ -42,6 +38,10 @@ class BinEnquiry < PDTTransaction
     if stock_item.destroyed
       return  PDTTransaction.build_msg_screen_definition(nil, nil, nil, ["bin(#{bin.bin_number}) no longer on stock", " It was shipped or destroyed at location: ",destroyed_at_location ])
     end
+
+    pm_rec = PackMaterialProduct.find(bin.pack_material_product_id)
+    pm_code = ""
+    pm_code = pm_rec.pack_material_product_code if  pm_rec
 
     field_configs = Array.new
     rmt_product_code = RmtProduct.find(bin.rmt_product_id).rmt_product_code
