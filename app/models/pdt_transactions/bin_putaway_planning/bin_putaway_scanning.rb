@@ -65,7 +65,12 @@ class BinPutawayScanning < PDTTransactionState
       if !@parent.location_code
         return render_select_location_state
       else
-
+        if @parent.scanned_bins.length == 1 && !@parent.bin_putaway_plan_id
+          uncompleted_plans = get_uncompleted_plans_by_user
+          if !uncompleted_plans.empty?
+            ActiveRecord::Base.connection.execute("delete from bin_putaway_plans where id in (#{uncompleted_plans.map{|x|x['id']}.join(',')})")
+          end
+        end
         @parent.spaces_left = Location.get_spaces_in_location(@parent.location_code, @parent.scanned_bins.length, @parent.qty_bins.to_i) if @parent.location_code
 
         if @parent.spaces_left && @parent.scanned_bins.length == 1 && (@parent.spaces_left.to_i < @parent.qty_bins.to_i)
@@ -165,7 +170,7 @@ class BinPutawayScanning < PDTTransactionState
           bin_nums[num] = "'#{num}'"
         end
         bin_putaway_plan = BinPutawayPlan.new
-        bin_putaway_plan.ip_address =self.pdt_screen_def.ip
+        bin_putaway_plan.ip_address = @parent.pdt_screen_def.ip
         bin_putaway_plan.coldroom_location_id = @parent.coldroom_id
         bin_putaway_plan.putaway_location_id = @parent.location_id
         bin_putaway_plan.qty_bins_to_putaway = @parent.qty_bins.to_i
@@ -379,13 +384,9 @@ class BinPutawayScanning < PDTTransactionState
 
 
   def process_scanned_bins
-    if @parent.scanned_bins.length == 1 && !@parent.bin_putaway_plan_id
-      uncompleted_plans = get_uncompleted_plans_by_user
-      if !uncompleted_plans.empty?
-       ActiveRecord::Base.connection.execute("delete from bin_putaway_plans where id in (#{uncompleted_plans.map{|x|x['id']}.join(',')})")
-      end
-      create_bin_putaway
-    end
+
+      create_bin_putaway if @parent.scanned_bins.length == 1 && !@parent.bin_putaway_plan_id
+
     @quantity_bins_remaining = qty_bins_remaining
     @parent.quantity_bins_remaining = @quantity_bins_remaining
     if (@quantity_bins_remaining && @quantity_bins_remaining <= 0) || @force_complete == "true"
@@ -425,6 +426,7 @@ class BinPutawayScanning < PDTTransactionState
                        and user_name = '#{@parent.pdt_screen_def.user}'
                        and ip_address = '#{@parent.pdt_screen_def.ip}'
                        and completed is null
+                       order by created_on desc
                        ")
     return uncompleted_plans
   end

@@ -22,7 +22,9 @@ class Location < ActiveRecord::Base
   def self.get_spaces_left( location,active_plan_qty_bins)
     spaces_left = ActiveRecord::Base.connection.select_one("
     select
-    (l.location_maximum_units - ((COALESCE(l.units_in_location,0) + COALESCE(bpp.qty_bins_to_putaway,0)) - #{active_plan_qty_bins})) as spaces_left
+     (
+       MAX(l.location_maximum_units) - ( COALESCE(MAX(l.units_in_location),0) + SUM(COALESCE(bpp.qty_bins_to_putaway,0))  )
+     ) as spaces_left
     from  locations l
     left join bin_putaway_plans bpp on bpp.putaway_location_id = l.id and bpp.completed is not true
     where l.location_code = '#{location}'
