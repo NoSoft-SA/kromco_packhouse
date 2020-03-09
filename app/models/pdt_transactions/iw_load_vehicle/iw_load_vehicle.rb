@@ -273,7 +273,7 @@ class IwLoadVehicle < PDTTransaction
       vehicle.update
       vehicle_job = VehicleJob.new
       
-      self.vehicle_job_no = "TRP" + MesControlFile.next_seq_web(4).to_s
+      self.vehicle_job_no = "TRP" + MesControlFile.next_seq_web(34).to_s
       vehicle_job.vehicle_job_number = self.vehicle_job_no
       vehicle_job.date_time_loaded = Time.now.to_formatted_s(:db)
       vehicle_job.vehicle_id = vehicle.id if vehicle

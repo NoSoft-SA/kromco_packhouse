@@ -13,6 +13,7 @@ class MesControlFile < ActiveRecord::Base
   ORDER = 8
   LOAD = 9
   BIN_ORDER =30
+  LOAD_VEHICLE_NUMBER = 34
 
   # EDI Out flow types:
   EDI_PS = 10
