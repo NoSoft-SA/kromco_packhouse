@@ -40,6 +40,10 @@ class ScanLoadPallet < PDTTransactionState
       return PDTTransaction.build_msg_screen_definition(pallet_num, nil, nil, nil)
      end
 
+    if !@parent.pick_list_pallets.include?(pallet_num)
+      return PDTTransaction.build_msg_screen_definition("scanned pallet does not belong to this pick list ", nil, nil, nil)
+    end
+
     pallet = Pallet.find_by_pallet_number(pallet_num)
     stock_item =StockItem.find_by_inventory_reference(pallet_num.to_s)
 
@@ -76,18 +80,16 @@ class ScanLoadPallet < PDTTransactionState
       return PDTTransaction.build_msg_screen_definition("location_code has  PART_PALLETS", nil, nil, nil)
     end
 
-    if @parent.pick_list_pallets.include?(pallet_num)
-      @parent.scanned_pallets.push(pallet_num.to_s)
-      if (self.parent.scanned_pallets.length == self.parent.pick_list_pallets.length)
-        self.parent.set_active_state(nil)
-        self.parent.load_truck_trans()
-      else
-        @current_scanned_pallet_index+=1
-        return build_default_screen
-      end
+    @parent.scanned_pallets.push(pallet_num.to_s)
+    if (self.parent.scanned_pallets.length == self.parent.pick_list_pallets.length)
+      self.parent.set_active_state(nil)
+      self.parent.load_truck_trans()
     else
-      return PDTTransaction.build_msg_screen_definition("scanned pallet does not belong to order load ", nil, nil, nil)
+      @current_scanned_pallet_index+=1
+      return build_default_screen
     end
+
+
   end
 
   def show_loaded_pallets
