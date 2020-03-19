@@ -116,6 +116,7 @@ class Services::SampleBinWeighingController < ApplicationController
       send_response("<complete>delivery weighing completed OK</complete>")
       return
     rescue
+      handle_error_silently("service: sample bin weighing complete failed. Reported exception: " + $!)
       send_error($!.to_s)
       return
     ensure
@@ -148,6 +149,7 @@ class Services::SampleBinWeighingController < ApplicationController
  end
 
  def send_error(err_msg)
+
    @error = err_msg
    puts "Error/Result = " + err_msg
    render :inline => %{
