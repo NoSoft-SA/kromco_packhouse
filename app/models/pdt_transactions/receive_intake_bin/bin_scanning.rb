@@ -27,9 +27,9 @@ class BinScanning < PDTTransactionState
     field_configs[field_configs.length()] = {:type=>"static_text", :name=>"sample_bins_scanned", :value=>self.parent.sample_bins.length().to_s}
     key_in_bin_number = authorise_scan("2.1.1",'key_in_bin_number',ActiveRequest.get_active_request.user)
     if key_in_bin_number
-      field_configs[field_configs.length]   = {:type=>"text_box", :name=>"bin_number", :is_required=>"true", :scan_only=>"false",:scan_field => true}
+      field_configs[field_configs.length]   = {:type=>"text_box", :name=>"bin_number", :is_required=>"true", :scan_only=>"false",:scan_field => true,:submit_form => true}
     else
-      field_configs[field_configs.length]   = {:type=>"text_box", :name=>"bin_number", :is_required=>"true", :scan_only=>"true",:scan_field => true}
+      field_configs[field_configs.length]   = {:type=>"text_box", :name=>"bin_number", :is_required=>"true", :scan_only=>"true",:scan_field => true, :submit_form => true}
     end
     statement                             = "Please Apply Sticker"
 
