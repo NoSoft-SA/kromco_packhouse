@@ -9,6 +9,19 @@ class LoadOrder < ActiveRecord::Base
   belongs_to :vehicle_job
   belongs_to :load
   has_many :load_details, :dependent=> :destroy
+
+
+   def get_shipping_agent_party_name
+     sql = "select parties_roles.party_name  from load_orders lo join orders on orders.id=lo.order_id
+
+     join load_voyages on load_voyages.load_id =lo.load_id
+     join parties_roles on load_voyages.shipping_agent_party_role_id =parties_roles.id
+     where lo.id = #{self.id}"
+
+     shipper = ActiveRecord::Base.connection.select_one(sql)
+     return shipper['party_name'] if shipper
+
+   end
   
 
 #	============================

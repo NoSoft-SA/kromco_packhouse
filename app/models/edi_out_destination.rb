@@ -16,6 +16,8 @@ class EdiOutDestination < ActiveRecord::Base
   # Returns an array of destinations and the organization and hub address
   # in error if a destination could not be found for the combination of
   # Flow, Organization and Hub address.
+
+
   def self.find_for_flow_and_model(flow_type, model, options)
     destinations = []
     org_err = ''
@@ -100,6 +102,12 @@ class EdiOutDestination < ActiveRecord::Base
             hub_err = '031'
           end
 
+          # Send a copy to shipping agent if dest is setup
+
+          shipper_dest = self.get_edi_dest_for_shipper(model)
+          destinations << shipper_dest if shipper_dest
+
+
           # Send the PO flow:
           party_role = PartiesRole.find(model.order.customer_party_role_id)
           # First check if this organization should receive EDI
@@ -127,6 +135,8 @@ class EdiOutDestination < ActiveRecord::Base
               hub_err = model.order.depot_code
             end
           end
+
+
 
 
           RAILS_DEFAULT_LOGGER.info("NAE party_role.party_name " + party_role.party_name)
@@ -205,6 +215,17 @@ class EdiOutDestination < ActiveRecord::Base
       end
     end
     return destinations, org_err, hub_err
+  end
+
+
+  def self.get_edi_dest_for_shipper(load_order)
+    # Send  a copy to shipping agent, if edi out dest exists for this party (assumption is that it cannot be same as marketing org)
+    shipper = load_order.get_shipping_agent_party_name
+    if shipper
+      return self.find_by_flow_type_and_organization_code_and_hub_address('po',
+                                                                          shipper, '031')
+    end
+
   end
 
   # Check if the organization should receive EDI files or not.

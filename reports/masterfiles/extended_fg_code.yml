@@ -1,4 +1,4 @@
-query: select id, ri_mark_code, ru_mark_code, fg_mark_code, tu_mark_code, units_per_carton, tu_gross_mass, tu_nett_mass, ri_diameter_range, unit_pack_product_code, carton_pack_product_code, marketing_variety_code, ri_weight_range, extended_fg_code, extended_fg_ru_description, old_fg_code, marketing_org_code, fg_code, treatment_type_code, treatment_description, carton_pack_style_code, carton_pack_style_description, basic_pack_code, short_code, length, basic_pack_width, basic_pack_height, carton_pack_type_type_code, carton_pack_type_description, carton_pack_products_height, carton_pack_product_type_code, unit_pack_product_type_type_code, unit_pack_product_type_description, subtype_code, unit_pack_product_subtype_description, unit_pack_product_nett_mass, commodity_code, commodity_description_long, commodity_description_short, marketing_variety_description, grade_code, product_class_code, standard_size_count_value, size_ref, cosmetic_code_name, treatment_code, actual_count, created_on, updated_on, carton_fruit_standard_mass, old_pack_code, brand_code, mk4_count from vw_extended_fgs WHERE(old_fg_code={old_fg_code} and commodity_code={commodity_code} and marketing_variety_description={marketing_variety_description} and grade_code={grade_code} and updated_on={updated_on} and created_on={created_on})
+query: select id, extended_fg_code, brand_code, old_pack_code, diameter_range, external_party_product_code, marking, tu_gross_mass, ru_description, as_ch_marking, old_fg_code, marketing_variety_code, marketing_org_code, tu_nett_mass, product_class_code, product_class_description_short, external_custom_pack_code2, commodity_group_code, grade_code, external_fruit_per_ru, fruit_per_ru, external_fruit_per_ru_combined, commodity_code, basic_pack_code, units_per_carton, type_of_box, packaging, commodity_group_desc, ctn_gross_mass, external_custom_pack_code1, marketing_variety_description, pack_material_weight, product, size_count_code, unit_pack_product_type_description, subtype_code, carton_fruit_standard_mass, size_ref, fg_code, standard_size_count_value, cosmetic_code, actual_count FROM mv_extended_fgs WHERE(old_fg_code={old_fg_code} and commodity_code={commodity_code} and marketing_org_code={marketing_org_code} and marketing_variety_code={marketing_variety_code} and brand_code={brand_code} and grade_code={grade_code} and size_count_code={size_count_code} and packaging={packaging})
 main_table_name: extended_fgs
 fields:
  field1:
@@ -10,19 +10,15 @@ fields:
   caption: commodity_code
   field_type: text
  field3:
-  field_name: marketing_variety_description
-  caption: marketing_variety_description
+  field_name: marketing_variety_code
+  caption: marketing_variety_code
   field_type: text
  field4:
   field_name: grade_code
   caption: grade_code
   field_type: text
  field5:
-  field_name: created_on
-  caption: created_on
-  field_type: daterange
- field6:
-  field_name: updated_on
-  caption: updated_on
-  field_type: daterange
-  
+  field_name: packaging
+  caption: packaging
+  field_type: lookup
+  list: "select description from unit_pack_product_subtypes"
