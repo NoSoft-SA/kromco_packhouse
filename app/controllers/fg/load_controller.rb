@@ -221,13 +221,23 @@ class Fg::LoadController < ApplicationController
     load_pallets = Pallet.find_by_sql("select * from pallets where id in (#{session[:load_pallet_ids].join(",")})")
     selected_pallets = selected_records?(load_pallets, nil)
     load_id=session[:load_id]
-    order=Order.find_by_sql("select orders.* from orders inner join load_orders on load_orders.order_id=orders.id where load_orders.load_id=#{load_id}")[0]
+    load_order_id = LoadOrder.find_by_load_id(load_id).id
+    order=Order.find_by_sql("select orders.*
+         from orders
+         inner join load_orders on load_orders.order_id=orders.id
+         where load_orders.load_id=#{load_id}")[0]
+
     pallet_numbers=selected_pallets.map { |l| "'#{l.pallet_number}'" }.join(",")
     ActiveRecord::Base.transaction do
       load_details=LoadDetail.find_by_sql("select load_details.* from load_details inner join pallets on pallets.load_detail_id=load_details.id where pallets.pallet_number in (#{pallet_numbers})")
 
-      Pallet.find_by_sql(ActiveRecord::Base.extend_update_sql_with_request("UPDATE pallets SET target_market_code=orig_target_market_code, orig_target_market_code = null WHERE pallet_number in (#{pallet_numbers}) and orig_target_market_code is not null"))
-      Pallet.find_by_sql(ActiveRecord::Base.extend_update_sql_with_request("UPDATE pallets SET load_detail_id = null,remarks1 = null,  remarks2 = null,  remarks3 = null,  remarks4 = null,  remarks5 = null WHERE pallet_number in (#{pallet_numbers})"))
+      Pallet.find_by_sql(ActiveRecord::Base.extend_update_sql_with_request("UPDATE pallets SET target_market_code=orig_target_market_code,
+      orig_target_market_code = null WHERE pallet_number in (#{pallet_numbers}) and orig_target_market_code is not null"))
+
+      Pallet.find_by_sql(ActiveRecord::Base.extend_update_sql_with_request("UPDATE pallets SET load_detail_id = null,remarks1 = null,
+      remarks2 = null,  remarks3 = null,  remarks4 = null,  remarks5 = null WHERE pallet_number in (#{pallet_numbers})"))
+
+      Pallet.log_deallocation(selected_pallets,load_order_id)
 
       for load_detail in load_details
         li_pallets =Pallet.find_all_by_load_detail_id(load_detail.id)

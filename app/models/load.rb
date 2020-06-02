@@ -113,7 +113,6 @@ class Load < ActiveRecord::Base
 
   end
 
-
   def reverse_engineer_order(pseudo_pallets, remarks,container=nil)
     ActiveRecord::Base.transaction do
       load_order = LoadOrder.find_by_load_id(self.id)
@@ -242,6 +241,7 @@ class Load < ActiveRecord::Base
         pallet_numbers = Array.new
         load_detail_id = load_detail.id
         plt_remarks={}
+        allocated = []
         for pseud_pallet in item_pack_product_group
           plt_remarks={}
           order_plt_nums << pseud_pallet['pallet_number']
@@ -258,12 +258,17 @@ class Load < ActiveRecord::Base
             j = j+ 1
           end
           updates << "load_detail_id =" + load_detail_id.to_s
+
           updates=updates.join(",")
           plt_remarks[marks[0]]=updates
           pallet_numbers << marks[0]
-          for plt in plt_remarks
-            self.connection.execute("update pallets set #{plt[1]} where (pallet_number='#{plt[0].strip}') ")
-            puts "=========load_detail_id: #{load_detail_id}====#{plt[0]} ========"
+
+          for pallet in plt_remarks
+            if !allocated.include?(pallet[0])
+              self.connection.execute("update pallets set #{pallet[1]} where (pallet_number='#{pallet[0].strip}') ")
+              Pallet.log_rev_eng_allocation(load_order.id,pallet[0])
+              allocated << pallet[0]
+            end
           end
 
         end
@@ -297,19 +302,7 @@ class Load < ActiveRecord::Base
 
   end
 
-  def calc_order_product_sequence_number(order)
-    max_sequence =OrderProduct.find_by_sql("SELECT MAX(sequence_number) FROM order_products where order_id = #{order.id.to_s} ")
-    max_sequence = max_sequence[0].attributes['max']
-    max_sequence = max_sequence.to_i
-    if  max_sequence == nil
-      next_sequence = 1
-      return next_sequence
-    else
-      next_sequence = max_sequence + 1
-      return next_sequence
-    end
 
-  end
 
   def get_by_pallet_numbers(from_clause, where_or_clause, closing_clause)
     str_sql = from_clause + "where" +"(" + where_or_clause + ")" + closing_clause

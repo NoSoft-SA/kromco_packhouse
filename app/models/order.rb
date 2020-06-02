@@ -638,13 +638,11 @@ class Order < ActiveRecord::Base
   end
 
   def log_pallets
-    log = PalletDocumentLog.new
     dispatch_consignment_number = self.load_orders[0].dispatch_consignment_number
     query = "insert into pallet_document_logs (pallet_id,document_number,document_type,program_name,user_name,created_at)
                       select pallets.id, pallets.exit_ref,'dispatch','dispatch','#{self.user}','#{Time.new().to_formatted_s(:db)}'
                      from pallets where pallets.exit_ref = '#{dispatch_consignment_number}'"
     self.connection.execute(query)
-
   end
 
   def complete_order

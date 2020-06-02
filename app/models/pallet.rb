@@ -14,34 +14,25 @@ class Pallet < ActiveRecord::Base
   attr_accessor :line_code, :production_schedule_name, :pallet_time_search, :completed_date_from, :completed_date_to,
                 :item_pack_product_code, :unit_pack_product_code, :carton_pack_product_code, :production_run_code, :hold_over_date_time
 
+  def Pallet.log_rev_eng_allocation(load_order_id,pallet_number)
+    query = "insert into pallet_document_logs (pallet_id,document_number,document_type,program_name,user_name,created_at,load_order_id,action)
+            select pallets.id, '#{pallet_number}','load','#{ActiveRequest.get_active_request.program}','#{ActiveRequest.get_active_request.user}',
+            '#{Time.new().to_formatted_s(:db)}',#{load_order_id},'rev_eng_allocate_pallets'
+            from pallets where pallets.pallet_number = '#{pallet_number}'"
+    self.connection.execute(query)
+  end
 
 
+  def Pallet.log_deallocation(pallets,load_order_id)
+    pallets.each do|pallet|
+      query = "insert into pallet_document_logs (pallet_id,document_number,document_type,program_name,user_name,created_at,load_order_id,action)
+            select pallets.id, '#{pallet['pallet_number']}','load','#{ActiveRequest.get_active_request.program}','#{ActiveRequest.get_active_request.user}',
+             '#{Time.new().to_formatted_s(:db)}',#{load_order_id},'deallocate'
+            from pallets where pallets.id = #{pallet['id']}"
+      self.connection.execute(query)
+    end
 
-  #def after_update
-#Gerrit Fouche add to poplate prod datawarehouse 03/sep/2013
-
- #ActiveRecord::Base.connection.execute("delete from carton_summary where pallet_id is not null and pallet_id =#{self.id}")
- #ActiveRecord::Base.connection.execute("INSERT INTO carton_summary( shift_id,account_code,exit_date_time,farm_code,inventory_id,is_depot_carton,iso_week_code,pc_code,puc,season_code,target_market_id,extended_fg_id,pallet_id,production_run_id,sum_carton_fruit_nett_mass,sum_quantity,load_date,track_indicator_code,order_number,packer_number) select shift_id,c.account_code,exit_date_time,c.farm_code,i.id,is_depot_carton,c.iso_week_code,c.pc_code,puc,c.season_code,t.id,extended_fgs.id,pallet_id,c.production_run_id,sum(carton_fruit_nett_mass),sum(quantity),current_timestamp,c.track_indicator_code,c.order_number,case length(c.packer_number) when 5 then c.packer_number when 10 then substring(c.packer_number,3,5) else c.packer_number end from cartons c join extended_fgs on c.extended_fg_code = extended_fgs.extended_fg_code join pallets p on pallet_id=p.id left JOIN public.inventory_codes i ON (c.inventory_code = i.inventory_code||'_'||i.inventory_name) left JOIN public.target_markets t ON (c.target_market_code = t.target_market_code) where p.id =#{self.id}  group by shift_id,c.account_code,exit_date_time,c.farm_code,i.id,is_depot_carton,c.iso_week_code,c.pc_code,puc,c.season_code,t.id,extended_fgs.id,pallet_id,c.production_run_id,c.track_indicator_code,c.order_number,c.packer_number")
-
- # end
-
- # def after_create
-#Gerrit Fouche add to poplate prod datawarehouse 03/sep/2013
-
- #ActiveRecord::Base.connection.execute("delete from carton_summary where pallet_id =#{self.id}")
- # ActiveRecord::Base.connection.execute("INSERT INTO carton_summary( shift_id,account_code,exit_date_time,farm_code,inventory_id,is_depot_carton,iso_week_code,pc_code,puc,season_code,target_market_id,extended_fg_id,pallet_id,production_run_id,sum_carton_fruit_nett_mass,sum_quantity,load_date,track_indicator_code,order_number,packer_number) select shift_id,c.account_code,exit_date_time,c.farm_code,i.id,is_depot_carton,c.iso_week_code,c.pc_code,puc,c.season_code,t.id,extended_fgs.id,pallet_id,c.production_run_id,sum(carton_fruit_nett_mass),sum(quantity),current_timestamp,c.track_indicator_code,c.order_number,case length(c.packer_number) when 5 then c.packer_number when 10 then substring(c.packer_number,3,5) else c.packer_number end from cartons c join extended_fgs on c.extended_fg_code = extended_fgs.extended_fg_code join pallets p on pallet_id=p.id left JOIN public.inventory_codes i ON (c.inventory_code = i.inventory_code||'_'||i.inventory_name) left JOIN public.target_markets t ON (c.target_market_code = t.target_market_code) where p.id =#{self.id}  group by shift_id,c.account_code,exit_date_time,c.farm_code,i.id,is_depot_carton,c.iso_week_code,c.pc_code,puc,c.season_code,t.id,extended_fgs.id,pallet_id,c.production_run_id,c.track_indicator_code,c.order_number,c.packer_number")
-
- # end
-
-
-
-
-
-
-
-
-
-
+  end
 
   def Pallet.invalid_pallets_for_dispatch_import?(pallet_numbers, order)
     inspection_r_hash = Hash.new
