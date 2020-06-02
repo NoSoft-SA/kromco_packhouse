@@ -15,9 +15,9 @@ class Pallet < ActiveRecord::Base
                 :item_pack_product_code, :unit_pack_product_code, :carton_pack_product_code, :production_run_code, :hold_over_date_time
 
   def Pallet.log_rev_eng_allocation(load_order_id,pallet_number)
-    query = "insert into pallet_document_logs (pallet_id,document_number,document_type,program_name,user_name,created_at,load_order_id,action)
-            select pallets.id, '#{pallet_number}','load','#{ActiveRequest.get_active_request.program}','#{ActiveRequest.get_active_request.user}',
-            '#{Time.new().to_formatted_s(:db)}',#{load_order_id},'rev_eng_allocate_pallets'
+    query = "insert into pallet_document_logs (pallet_id,document_number,document_type,program_name,user_name,created_at,action)
+            select pallets.id, #{load_order_id},'load_order','#{ActiveRequest.get_active_request.program}','#{ActiveRequest.get_active_request.user}',
+            '#{Time.new().to_formatted_s(:db)}','rev_eng_allocate_pallets'
             from pallets where pallets.pallet_number = '#{pallet_number}'"
     self.connection.execute(query)
   end
@@ -25,9 +25,9 @@ class Pallet < ActiveRecord::Base
 
   def Pallet.log_deallocation(pallets,load_order_id)
     pallets.each do|pallet|
-      query = "insert into pallet_document_logs (pallet_id,document_number,document_type,program_name,user_name,created_at,load_order_id,action)
-            select pallets.id, '#{pallet['pallet_number']}','load','#{ActiveRequest.get_active_request.program}','#{ActiveRequest.get_active_request.user}',
-             '#{Time.new().to_formatted_s(:db)}',#{load_order_id},'deallocate'
+      query = "insert into pallet_document_logs (pallet_id,document_number,document_type,program_name,user_name,created_at,action)
+            select pallets.id, #{load_order_id},'load_order','#{ActiveRequest.get_active_request.program}','#{ActiveRequest.get_active_request.user}',
+             '#{Time.new().to_formatted_s(:db)}','deallocate'
             from pallets where pallets.id = #{pallet['id']}"
       self.connection.execute(query)
     end
