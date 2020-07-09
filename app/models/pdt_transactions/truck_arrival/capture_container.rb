@@ -56,8 +56,9 @@ class CaptureContainer < PDTTransactionState
     end
     field_configs[field_configs.length()] = {:type=>"text_box", :name=>"cto_consec_no", :value=>@parent.cto_consec_code}
 
-    screen_attributes = {:auto_submit=>"true", :auto_submit_to =>"load_container_submit", :content_header_caption=>"load_container"}
-    buttons = {"B3Label"=>"", "B2Label"=>"", "B1Submit"=>"load_container_submit", "B1Label"=>"submit", "B1Enable"=>"false", "B2Enable"=>"false", "B3Enable"=>"false"}
+    screen_attributes = {:auto_submit=>"false",  :content_header_caption=>"load_container"}
+    buttons = {"B3Label"=>"Clear" ,"B2Label"=>"", "B2Submit"=>"", "B1Submit"=>"load_container_submit","B1Label"=>"submit","B1Enable"=>"true","B2Enable"=>"false","B3Enable"=>"false" }
+
     plugins = nil
     result_screen_def = PdtScreenDefinition.gen_screen_xml(field_configs, buttons, screen_attributes, plugins)
 
