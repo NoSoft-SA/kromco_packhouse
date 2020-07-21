@@ -10,12 +10,12 @@ class ScanLoadPallet < PDTTransactionState
   def build_default_screen
 
     field_configs = Array.new
-    key_in_pallet_number = authorise_scan("1.6.2",'key_in_pallet_number',ActiveRequest.get_active_request.user)
-    if key_in_pallet_number
-	field_configs[field_configs.length()] = {:type=>"text_box", :name=>"pallet_number", :is_required=>"true", :scan_only=>"false"}
-    else
+    # key_in_pallet_number = authorise_scan("1.6.2",'key_in_pallet_number',ActiveRequest.get_active_request.user)
+  #   if key_in_pallet_number
+	# field_configs[field_configs.length()] = {:type=>"text_box", :name=>"pallet_number", :is_required=>"true", :scan_only=>"false"}
+  #   else
 	field_configs[field_configs.length()] = {:type=>"text_box", :name=>"pallet_number", :is_required=>"true", :scan_only=>"true"}
-    end
+    # end
     field_configs[field_configs.length] = {:type=>"static_text", :name=>"load_number", :value=>@parent.load_number}
     field_configs[field_configs.length] = {:type=>"static_text", :name=>"load_order_id", :value=>@parent.load_order_id.to_s}
     screen_attributes = {:auto_submit=>"true", :auto_submit_to=>"pallet_scanned", :content_header_caption=>"'#{self.parent.scanned_pallets.length().to_s}' pallets of '#{self.parent.pick_list_pallets.length().to_s}'",:cache_screen => true}
