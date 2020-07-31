@@ -18,7 +18,8 @@ class PrintPalletLabelBase < PDTTransaction
     field_configs[field_configs.length] = {:type=>"text_box", :name=>"carton_or_pallet", :label=>"scan ctn or plt", :is_required=>"true",:scan_field => true,:submit_form => true}
 
     screen_attributes                   = {:auto_submit=>"false", :content_header_caption=>"scan carton or pallet and printer"}
-    buttons                             = {"B3Label"=>"Clear", "B2Label"=>"Cancel", "B1Submit"=>"print_pallet_label_base_submit", "B1Label"=>"submit", "B1Enable"=>"true", "B2Enable"=>"false", "B3Enable"=>"false"}
+    buttons                             = {"B3Label"=>"Clear" ,"B2Label"=>"", "B2Submit"=>"", "B1Submit"=>"print_pallet_label_base_submit","B1Label"=>"submit","B1Enable"=>"true","B2Enable"=>"false","B3Enable"=>"false" }
+
     plugins                             = nil
     result_screen_def                   = PdtScreenDefinition.gen_screen_xml(field_configs, buttons, screen_attributes, plugins)
 
