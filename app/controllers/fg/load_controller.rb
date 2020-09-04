@@ -63,6 +63,18 @@ class Fg::LoadController < ApplicationController
 
   end
 
+  def view_load_pallets2
+    @load=Load.find(params[:id])
+    set_active_doc("loads",params[:id])
+
+    render :inline => %{
+            <% @content_header_caption = "'#{@caption}'" %>
+            <%= build_view_load_pallets_form(@load)%>
+
+            }, :layout => 'content'
+  end
+
+
 
   def view_load_pallets
     id = params[:id].to_i
@@ -215,7 +227,7 @@ class Fg::LoadController < ApplicationController
          inner join load_orders on load_orders.order_id=orders.id
          where load_orders.load_id=#{load_id}")[0]
 
-    pallet_numbers=selected_pallets.map { |l| "'#{l.pallet_number}'" }.join(',')
+    pallet_numbers=selected_pallets.map { |l| "'#{l.pallet_number}'" }.join(",")
     ActiveRecord::Base.transaction do
       load_details=LoadDetail.find_by_sql("select load_details.* from load_details inner join pallets on pallets.load_detail_id=load_details.id where pallets.pallet_number in (#{pallet_numbers})")
 
