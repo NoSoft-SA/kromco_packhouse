@@ -10,21 +10,16 @@ class ScanLoadPallet < PDTTransactionState
   def build_default_screen
 
     field_configs = Array.new
-    # key_in_pallet_number = authorise_scan("1.6.2",'key_in_pallet_number',ActiveRequest.get_active_request.user)
-  #   if key_in_pallet_number
-	# field_configs[field_configs.length()] = {:type=>"text_box", :name=>"pallet_number", :is_required=>"true", :scan_only=>"false"}
-  #   else
-	field_configs[field_configs.length()] = {:type=>"text_box", :name=>"pallet_number", :is_required=>"true", :scan_only=>"true"}
-    # end
+    scand= "'#{self.parent.scanned_pallets.length().to_s}' pallets of '#{self.parent.pick_list_pallets.length().to_s}'"
+
+    field_configs[field_configs.length] = {:type=>"static_text", :name=>"scanned", :value=>"'#{scand}'"}
+
+
+	  field_configs[field_configs.length()] = {:type=>"text_box", :name=>"pallet_number", :is_required=>"true", :scan_only=>"true"}
     field_configs[field_configs.length] = {:type=>"static_text", :name=>"load_number", :value=>@parent.load_number}
     field_configs[field_configs.length] = {:type=>"static_text", :name=>"load_order_id", :value=>@parent.load_order_id.to_s}
-    screen_attributes = {:auto_submit=>"true", :auto_submit_to=>"pallet_scanned", :content_header_caption=>"'#{self.parent.scanned_pallets.length().to_s}' pallets of '#{self.parent.pick_list_pallets.length().to_s}'",:cache_screen => true}
+    screen_attributes = {:auto_submit=>"true", :auto_submit_to=>"pallet_scanned",:cache_screen => true}
     buttons = {"B3Label"=>"next", "B3Submit"=>"next_pallet", "B2Label"=>"scan_pallet", "B2Submit"=>"pallet_scanned", "B1Submit"=>"previous_pallet", "B1Label"=>"previous", "B1Enable"=>"false", "B2Enable"=>"false", "B3Enable"=>"false"}
-
-#    if self.parent.pick_list_pallets.length > 1
-#    buttons['B3Enable'] = true if !on_last?
-#    buttons['B1Enable'] = true if !on_first?
-#    end
 
     plugins = nil
     result_screen_def = PdtScreenDefinition.gen_screen_xml(field_configs, buttons, screen_attributes, plugins)
