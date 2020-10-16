@@ -19,7 +19,6 @@ class ScanLoadPallet < PDTTransactionState
     field_configs[field_configs.length] = {:type=>"static_text", :name=>"load_number", :value=>@parent.load_number}
     field_configs[field_configs.length] = {:type=>"static_text", :name=>"load_order_id", :value=>@parent.load_order_id.to_s}
     screen_attributes = {:auto_submit=>"true", :auto_submit_to=>"pallet_scanned",:cache_screen => true}
-    #buttons = {"B3Label"=>"next", "B3Submit"=>"next_pallet", "B2Label"=>"scan_pallet", "B2Submit"=>"pallet_scanned", "B1Submit"=>"previous_pallet", "B1Label"=>"previous", "B1Enable"=>"false", "B2Enable"=>"false", "B3Enable"=>"false"}
     buttons = {"B3Label"=>"" ,"B2Label"=>"","B1Submit"=> "pallet_scanned","B1Label"=>"submit","B1Enable"=>"false","B2Enable"=>"false","B3Enable"=>"false" }
 
     plugins = nil
