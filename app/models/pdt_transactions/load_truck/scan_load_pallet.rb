@@ -13,9 +13,7 @@ class ScanLoadPallet < PDTTransactionState
     scand= "'#{self.parent.scanned_pallets.length().to_s}' pallets of '#{self.parent.pick_list_pallets.length().to_s}'"
 
     field_configs[field_configs.length] = {:type=>"static_text", :name=>"scanned", :value=>"'#{scand}'"}
-
-
-	  field_configs[field_configs.length()] = {:type=>"text_box", :name=>"pallet_number", :is_required=>"true", :scan_only=>"true"}
+    field_configs[field_configs.length] = {:type=>"text_box",:name=>"pallet_number",:is_required=>"true",:scan_field => true, :submit_form => true}
     field_configs[field_configs.length] = {:type=>"static_text", :name=>"load_number", :value=>@parent.load_number}
     field_configs[field_configs.length] = {:type=>"static_text", :name=>"load_order_id", :value=>@parent.load_order_id.to_s}
     screen_attributes = {:auto_submit=>"true", :auto_submit_to=>"pallet_scanned",:cache_screen => true}
