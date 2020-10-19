@@ -41,12 +41,12 @@ class CaptureContainer < PDTTransactionState
     field_configs[field_configs.length()] = {:type=>"static_text", :name=>"shipping_agent", :value=>@parent.shipping_agent.to_s}
     field_configs[field_configs.length()] = {:type=>"static_text", :name=>"shipping_line", :value=>@parent.shipping_line}
 
-    field_configs[field_configs.length()] = {:type=>"text_box", :name=>"scan_load_bay", :value=>@parent.load_bay.to_s.strip}
+    field_configs[field_configs.length()] = {:type=>"text_box", :name=>"scan_load_bay", :value=>@parent.load_bay.to_s.strip, :scan_field => true}
     field_configs[field_configs.length()] = {:type=>"text_box", :name=>"truck_number", :value=>@parent.vehicle_number.to_s.strip}
-    field_configs[field_configs.length()] = {:type=>"text_box", :name=>"seal_number", :value=>@parent.container_seal_code.to_s.strip}
+    field_configs[field_configs.length()] = {:type=>"text_box", :name=>"seal_number", :value=>@parent.container_seal_code.to_s.strip, :scan_field => true}
     field_configs[field_configs.length()] = {:type=>"text_box", :name=>"container_number", :value=>@parent.container_code.to_s.strip}
     field_configs[field_configs.length()] = {:type=>"text_box", :name=>"container_setting", :value=>@parent.container_setting.to_s.strip}
-    field_configs[field_configs.length()] = {:type=>"text_box", :name=>"temperature_rhine", :value=>@parent.container_temperature_rhine.to_s.strip}
+    field_configs[field_configs.length()] = {:type=>"text_box", :name=>"temperature_rhine", :value=>@parent.container_temperature_rhine.to_s.strip, :scan_field => true}
     field_configs[field_configs.length()] = {:type=>"text_box", :name=>"temperature_rhine2", :value=>@parent.container_temperature_rhine2.to_s.strip}
     field_configs[field_configs.length()] = {:type=>"drop_down", :name=>"stack_type_code", :value=>@parent.stack_type_code, :list => stack_types,:is_required=>'true'}
     field_configs[field_configs.length()] = {:type=>"drop_down", :name=>"haulier_code", :is_required=>"true", :list => hauliers, :value=>@parent.haulier_id}
