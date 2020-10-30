@@ -34,8 +34,24 @@ class BinPutawayPlanning < PDTTransaction
   def create_putaway_plan_submit
     @coldroom = self.pdt_screen_def.get_control_value("room").to_s.strip
     @qty_bins = self.pdt_screen_def.get_control_value("qty").to_s.strip
-    @coldroom_id = ActiveRecord::Base.connection.select_one("select id from locations where location_code = '#{@coldroom}'")['id']
-    return render_next_state
+    error = validate_coldroom
+    if !error.empty?
+      result_screen = PDTTransaction.build_msg_screen_definition(nil, nil, nil, error)
+      return result_screen
+    else
+      @coldroom_id = ActiveRecord::Base.connection.select_one("select id from locations where location_code = '#{@coldroom}'")['id']
+      return render_next_state
+    end
+  end
+
+  def validate_coldroom
+    location = Location.find_by_location_code(@coldroom)
+    if location == nil
+      error = ["Location:'#{@coldroom}' does not exist "]
+      return error
+    else
+      return []
+    end
   end
 
   def get_user_latest_planning_plan
