@@ -6,5 +6,5 @@ Vagrant.configure("2") do |config|
 
   # Ruby 1.8.7 & Rails 1.2.3 with applicable gems:
   config.vm.box = "nosoft_ruby18.box"
-  config.vm.network :forwarded_port, guest: 3000, host: 3030
+  config.vm.network :forwarded_port, guest: 3000, host: 3040
 end
