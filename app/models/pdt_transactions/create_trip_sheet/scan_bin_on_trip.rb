@@ -23,11 +23,10 @@ class ScanBinOnTrip < PDTTransactionState
 
              uncompleted_delivery = DeliveryRouteStep.find_by_sql(uncompleted_delivery_query)
 
-             if  uncompleted_delivery.length() > 0
-                return nil
+             if  uncompleted_delivery.length() > 0  # if uncompleted deliveries is 0 proceed to next block else return error
+                return delivery_id
              end
          end
-
 
         if jobs.length() > 0
           return jobs[0].vehicle_job_number
