@@ -220,7 +220,10 @@ class RmtProcessing::ForecastController < ApplicationController
       @forecast                      = Forecast.new(params[:forecast])
       @forecast.sequence_number      = generate_sequence_number(@forecast) + 1
       @forecast.forecast_status_code = "active"
-      @forecast.puc_id             = Puc.find_by_puc_code(params[:forecast]['puc_code']).id if params[:forecast]['puc_code']
+      if params[:forecast]['puc_code']
+        puc                          = Puc.find_by_puc_code(params[:forecast]['puc_code'])
+        @forecast.puc_id             = puc.id if puc
+      end
 #   ========================
 #   generating forecast_code
 #   ========================
