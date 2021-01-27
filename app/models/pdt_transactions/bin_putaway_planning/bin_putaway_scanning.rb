@@ -235,6 +235,7 @@ class BinPutawayScanning < PDTTransactionState
 
   def get_matched_bin_location
     where_clause = get_location_where
+    year = Time.now.year.to_s
     location = ActiveRecord::Base.connection.select_one("
                   select * from (
                   select distinct l.location_code , l.id  as location_id,l.updated_at,
@@ -250,7 +251,7 @@ class BinPutawayScanning < PDTTransactionState
                   join rmt_products rmt ON b.rmt_product_id = rmt.id
 				          left join farms ON b.farm_id = farms.id
                   where
-                   b.season_code in ('2020_AP','2020_PR') AND
+                   b.season_code in ('#{year}_AP','#{year}_PR') AND
                   ((si.destroyed IS NULL) OR (si.destroyed = false)) and
                   l.parent_location_code  = '#{@parent.coldroom}'  and
                   l.loading_out is not true and
