@@ -191,7 +191,8 @@ class Services::IntegrationController < ApplicationController
   def can_bin_be_tipped
     result = {:can_tip_bin => true, :msg => 'ok'}
 
-    if !(bin = Bin.find_by_bin_number(params[:bin_number]))
+    bin = Bin.find_by_bin_number(params[:bin_number])
+    if !bin
       result = {:can_tip_bin => false, :msg => "Bin #{params[:bin_number]} not found in external system"}
     elsif !bin.weight
       result = {:can_tip_bin => false, :msg => 'Bin has not been weighed'}
@@ -248,6 +249,8 @@ class Services::IntegrationController < ApplicationController
     	bins.bin_number = '#{bin_number}'")[0]
 
     if bin && (bin.grower_commitment_required == true|| bin.grower_commitment_required == 't')
+      return true if !bin.delivery_id
+
       Set.new(Delivery.find_by_sql("SELECT
                               mrl_results.mrl_result
                               FROM
@@ -272,7 +275,7 @@ class Services::IntegrationController < ApplicationController
   end
 
   def get_run_treatment_codes
-    treatment_codes = Treatment.find_by_sql("select treatment_code from treatments").map { |t| t.treatment_code }
+    treatment_codes = Treatment.find_by_sql("select distinct treatment_code from treatments").map { |t| t.treatment_code }
     render :json => treatment_codes.to_json
   end
 
@@ -285,5 +288,11 @@ class Services::IntegrationController < ApplicationController
     condition = " where ripe_point_code='#{params['ripe_point_code']}'" if params['ripe_point_code']
     ripe_points = RipePoint.find_by_sql("select ripe_point_code, pc_codes.pc_name from pc_codes join ripe_points on ripe_points.pc_code_id=pc_codes.id #{condition}").map { |r| [r.ripe_point_code, r.pc_name] }
     render :json => ripe_points.to_json
+  end
+
+  def get_extended_fg
+    extended_fg = ExtendedFg.find_by_extended_fg_code(params['extended_fg_code'])
+    @result = extended_fg ? extended_fg.id : nil
+    render :inline => %{<%= @result%>}
   end
 end
