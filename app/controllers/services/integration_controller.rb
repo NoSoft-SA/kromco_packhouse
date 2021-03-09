@@ -83,6 +83,7 @@ class Services::IntegrationController < ApplicationController
     type = params[:type]
     record_id = params[:record_id]
     model = params[:model]
+    nspack_run_id = params[:nspack_run_id]
 
     puts params.to_s
     err = false
@@ -129,6 +130,9 @@ class Services::IntegrationController < ApplicationController
 
         elsif type == "bin_tipped"
           #Inventory.remove_stock(nil, 'BIN', 'RMT', @bin_order_load.id, location_to, bin_numbers)
+          unless nspack_run_id.nil?
+            ActiveRecord::Base.connection.execute("update bins set tipped_date_time='#{Time.now}',updated_at='#{Time.now}',affected_by_env='nspack',affected_by_program='bin_tipping',affected_by_function='nspack_tip',updated_by='system',nspack_run_id=#{nspack_run_id} where bin_number = '#{record_id}'")
+          end
           Inventory.move_stock("PRODUCTION", "", "PACKHSE", [record_id])
           Inventory.remove_stock(nil, 'BIN', "PRODUCTION", "", "PACKHSE", [record_id], "KROMCO")
         end
