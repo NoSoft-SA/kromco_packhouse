@@ -23,11 +23,10 @@ class ScanBinOnTrip < PDTTransactionState
 
              uncompleted_delivery = DeliveryRouteStep.find_by_sql(uncompleted_delivery_query)
 
-             if  uncompleted_delivery.length() > 0
-                return nil
+             if  uncompleted_delivery.length() > 0  # if uncompleted deliveries is 0 proceed to next block else return error
+                return delivery_id
              end
          end
-
 
         if jobs.length() > 0
           return jobs[0].vehicle_job_number
@@ -71,6 +70,7 @@ class ScanBinOnTrip < PDTTransactionState
     field_configs                         = Array.new
     field_configs[field_configs.length()] = {:type=>"static_text", :name=>"tripsheet", :value=>@parent.tripsheet_number}
     field_configs[field_configs.length()] = {:type=>"static_text", :name=>"bins_scanned", :value=>@parent.scanned_bins.length().to_s}
+    field_configs[field_configs.length()] = {:type=>"drop_down", :name=>"destination_location", :is_required=>"true", :list => ",CDE Floor,1-5 Floor,Packhouse,Reworks,FGH,6&7,GlenFruin", :is_required=>"true"}
     field_configs[field_configs.length]   = {:type=>"text_box", :name=>"printer", :is_required=>"false"}
     field_configs[field_configs.length()] = {:type=>"text_line", :name=>"question", :value=>question}
 
@@ -179,7 +179,7 @@ class ScanBinOnTrip < PDTTransactionState
 
     exit_reference = bin_record.exit_ref
     if exit_reference != nil
-      error = ["bin :'#{exit_ref}'"]
+      error = ["bin :'#{bin_record.exit_ref}'"]
       return error
     end
 
@@ -237,7 +237,48 @@ class ScanBinOnTrip < PDTTransactionState
   end
 
 
+  def send_tripsheet_to_printer(vehicle_job, printer)
+
+      out_file_type = "PDF"
+      out_file_name = "vehicle_job_#{Time.now.strftime("%m_%d_%Y_%H_%M_%S")}"
+      out_file_path = Globals.jasper_reports_pdf_downloads + "/#{out_file_name}"
+
+      err = JasperReports.generate_report('vehicle_job',self.pdt_screen_def.user,{:vehicle_job_number=>vehicle_job.vehicle_job_number,:printer=>printer.system_name,:MODE=>"PRINT",
+                                                                                  :OUT_FILE_NAME=>out_file_path,:OUT_FILE_TYPE=>out_file_type, :keep_file=>true})
+      if(!err)
+
+          # create vehicle_job_statuses record
+          vehicle_job_status = VehicleJobStatus.new
+          vehicle_job_status.vehicle_job_number = vehicle_job.vehicle_job_number
+          vehicle_job_status.vehicle_job_id = vehicle_job.id
+          vehicle_job_status.tripsheet_status_code = "printed"
+          vehicle_job_status.create()
+
+          return result = PDTTransaction.build_msg_screen_definition(nil, nil, nil, ["Tripsheet was printed successfully!"])
+
+      else
+        errors_array = [err.gsub("<BR>","")]
+        field_configs = Array.new
+        errors_array.each do |err_line|
+          field_configs[field_configs.length] = {:type=>"text_line", :name=>"output",:value=>err_line}
+        end
+        screen_attributes = {:auto_submit=>"false",:content_header_caption=>"error messages"}
+        buttons = {"B3Label"=>"Clear" ,"B2Label"=>"Cancel","B1Submit"=>"print_tripsheet_submit","B1Label"=>"Submit","B1Enable"=>"false","B2Enable"=>"false","B3Enable"=>"false" }
+        return PdtScreenDefinition.gen_screen_xml(field_configs, buttons, screen_attributes, nil)
+      end
+
+  end
+
+
   def print_confirmed
+
+    printer_friendly_name = self.pdt_screen_def.get_input_control_value("printer")
+    if(!(printer = Printer.find_by_friendly_name(printer_friendly_name)))
+      printer_error_screen = PDTTransaction.build_msg_screen_definition(nil, nil, nil, ["Printer[#{printer_friendly_name}] not found"])
+      return printer_error_screen
+    end
+
+    vehicle_jobs = nil
     ActiveRecord::Base.transaction do
       veh_job_type                      = VehicleJobType.find_by_sql("select * from vehicle_job_types  where vehicle_job_types.vehicle_job_type_code = 'BINS' order by vehicle_job_types.id desc")[0]
       vehicle_job_type_id               = veh_job_type.id
@@ -248,6 +289,7 @@ class ScanBinOnTrip < PDTTransactionState
       first_scanned_stock_item = StockItem.find_by_inventory_reference(@parent.scanned_bins[0])
       vehicle_jobs.created_at_location = first_scanned_stock_item.location_code if(first_scanned_stock_item)
       vehicle_jobs.created_by = @parent.pdt_screen_def.user
+      vehicle_jobs.planned_location = self.pdt_screen_def.get_input_control_value("destination_location")
 
       vehicle_jobs.create
 
@@ -259,27 +301,18 @@ class ScanBinOnTrip < PDTTransactionState
         vehicle_job_unit.create
       end
 
-
       Inventory.move_stock("Create_Tripsheet", @parent.tripsheet_number, "IN_TRANSIT", @parent.scanned_bins)
-
-     # http_conn = Net::HTTP.new('192.168.10.199', nil)
-     # msg, body = http_conn.get("/jasperserver/flow.html?_flowId=viewReportFlow&reportUnit=/FG/first_intake&j_username=jasperadmin&j_password=jasperadmin&output=pdf&consignment_note_number=A031000009", nil)
-     # puts "body = " + body.to_s
-     # puts "msg = " + msg.to_s
-
-##      ===== test code =========
-#      msg = PDTTransaction.print_report("first_intake",{:consignment_note_number=>"L031063021"},@pdt_screen_def.user)
-#      return PDTTransaction.build_msg_screen_definition(nil,nil,nil,[msg]) if msg
-##      ===== test code =========
-      
-      #msg = PDTTransaction.print_report("rmt_tripsheet",{:tripsheet_number=>@parent.tripsheet_number},@pdt_screen_def.user)
-      #return PDTTransaction.build_msg_screen_definition(nil,nil,nil,[msg]) if msg
-
-      self.parent.set_transaction_complete_flag
-      result        = ["Transaction has been completed successfully "]
-      result_screen = PDTTransaction.build_msg_screen_definition(nil, nil, nil, result)
-      return result_screen
     end
+
+    if printer_friendly_name && printer_friendly_name.strip != ""
+      return  send_tripsheet_to_printer(vehicle_jobs, printer)
+    else
+      result        = ["Tripsheet created. You can print with Web App "]
+      return  PDTTransaction.build_msg_screen_definition(nil, nil, nil, result)
+    end
+
+    self.parent.set_transaction_complete_flag
+    return print_result_screen
   end
 
   def yes
