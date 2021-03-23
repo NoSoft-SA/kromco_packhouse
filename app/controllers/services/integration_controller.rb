@@ -284,7 +284,7 @@ class Services::IntegrationController < ApplicationController
   end
 
   def get_run_track_indicator_codes
-    track_indicator_codes = TrackIndicator.find_by_sql("select  id,track_indicator_code from track_indicators ").map { |t| t.track_indicator_code }
+    track_indicator_codes = TrackIndicator.find_by_sql("select  id,track_indicator_code from track_indicators where rmt_variety_code='#{params[:rmt_variety_code]}'").map { |t| t.track_indicator_code }
     render :json => track_indicator_codes.to_json
   end
 
