@@ -56,12 +56,20 @@
         margin-left: 10px;
       }
       div.field-group input {
+        /*
         width: 200px;
         height: 30px;
+          */
+        width: auto;
+        height: auto;
       }
       div.field-group select {
+        /*
         width: 200px;
         height: 30px;
+          */
+        width: auto;
+        height: auto;
       }
       input[readonly] {
         background-color: #ddd;
@@ -123,7 +131,7 @@
       <%= @content_for_layout %>
 
       <% if @websocket_scan %>
-        <script src="/javascripts/crossbeams-rmd-scan.js?seq=10" type="text/javascript"></script>
+        <script src="/javascripts/crossbeams-rmd-scan.js?seq=11" type="text/javascript"></script>
         <script>
           window.addEventListener('DOMContentLoaded', function() {
             crossbeamsRmdScan.init({}, true);

@@ -111,7 +111,8 @@ const crossbeamsRmdScan = (function crossbeamsRmdScan() {
    * @param {string} val - the scanned value.
    * @returns {object} success: boolean, value: the value, scanType: the type, error: string.
    */
-  const unpackScanValue = (val) => {
+  const unpackScanValue = (rawVal) => {
+    const val = rawVal.split(/\r\n|\r|\n/)[0]; // remove newlines
     const res = { success: false };
     // If we can scan any barcode, return whatever was scanned:
     if (publicAPIs.bypassRules) {
@@ -123,7 +124,7 @@ const crossbeamsRmdScan = (function crossbeamsRmdScan() {
     }
     const matches = [];
     let rxp;
-    this.rules.filter(r => this.expectedScanTypes.indexOf(r.type) !== -1).forEach((rule) => {
+    publicAPIs.rules.filter(r => publicAPIs.expectedScanTypes.indexOf(r.type) !== -1).forEach((rule) => {
       rxp = RegExp(rule.regex);
       if (rxp.test(val)) {
         matches.push(rule.type);
@@ -234,9 +235,9 @@ const crossbeamsRmdScan = (function crossbeamsRmdScan() {
    * show settings in use for this page.
    */
   publicAPIs.showSettings = () => ({
-    expectedScanTypes: this.expectedScanTypes,
-    rules: this.rules,
-    rulesForThisPage: this.rules.filter(r => this.expectedScanTypes.indexOf(r.type) !== -1),
+    expectedScanTypes: publicAPIs.expectedScanTypes,
+    rules: publicAPIs.rules,
+    rulesForThisPage: publicAPIs.rules.filter(r => publicAPIs.expectedScanTypes.indexOf(r.type) !== -1),
   });
 
   /**
@@ -249,10 +250,10 @@ const crossbeamsRmdScan = (function crossbeamsRmdScan() {
    * @param {boolean} bypassRules - should the rules be ignored (scan any barcode).
    */
   publicAPIs.init = (rules, bypassRules) => {
-    this.rules = rules;
+    publicAPIs.rules = rules;
     publicAPIs.bypassRules = bypassRules;
-    this.expectedScanTypes = Array.from(document.querySelectorAll('[data-scan-rule]')).map(a => a.dataset.scanRule);
-    this.expectedScanTypes = this.expectedScanTypes.filter((it, i, ar) => ar.indexOf(it) === i);
+    publicAPIs.expectedScanTypes = Array.from(document.querySelectorAll('[data-scan-rule]')).map(a => a.dataset.scanRule);
+    publicAPIs.expectedScanTypes = publicAPIs.expectedScanTypes.filter((it, i, ar) => ar.indexOf(it) === i);
 
     setupListeners();
 
