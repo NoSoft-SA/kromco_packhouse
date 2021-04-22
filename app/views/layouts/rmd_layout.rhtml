@@ -113,13 +113,42 @@
       .scanbutton:focus, .scanbutton:hover {
           opacity: .5;
       }
+
+      .wifiWait {
+        animation: pulse 10s infinite;
+        -webkit-animation: pulse 10s infinite;
+      }
+
+      @keyframes pulse {
+        0%   { fill: #ff0000 }
+        17%  { fill: #00ff00 }
+        33%  { fill: #ff0000 }
+        50%  { fill: #00ff00 }
+        67%  { fill: #ff0000 }
+        83%  { fill: #00ff00 }
+        100% { fill: #ff0000 }
+      }
+
+
+      @-webkit-keyframes pulse {
+        0%   { fill: #ff0000 }
+        17%  { fill: #00ff00 }
+        33%  { fill: #ff0000 }
+        50%  { fill: #00ff00 }
+        67%  { fill: #ff0000 }
+        83%  { fill: #00ff00 }
+        100% { fill: #ff0000 }
+      }
+      input {
+        font-size: 1.5rem;
+      }
     </style>
   </head>
   <body class="site" data-utf-8-ensurer="О">
     <% if @websocket_scan %>
     <div id="rmd-offline-status" style="display:none">
-      <p><svg class="wifi-icon" width="2048" height="1792" viewBox="0 0 2048 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1024 1523q-20 0-93-73.5t-73-93.5q0-32 62.5-54t103.5-22 103.5 22 62.5 54q0 20-73 93.5t-93 73.5zm270-271q-2 0-40-25t-101.5-50-128.5-25-128.5 25-101 50-40.5 25q-18 0-93.5-75t-75.5-93q0-13 10-23 78-77 196-121t233-44 233 44 196 121q10 10 10 23 0 18-75.5 93t-93.5 75zm273-272q-11 0-23-8-136-105-252-154.5t-268-49.5q-85 0-170.5 22t-149 53-113.5 62-79 53-31 22q-17 0-92-75t-75-93q0-12 10-22 132-132 320-205t380-73 380 73 320 205q10 10 10 22 0 18-75 93t-92 75zm271-271q-11 0-22-9-179-157-371.5-236.5t-420.5-79.5-420.5 79.5-371.5 236.5q-11 9-22 9-17 0-92.5-75t-75.5-93q0-13 10-23 187-186 445-288t527-102 527 102 445 288q10 10 10 23 0 18-75.5 93t-92.5 75z"/></svg>
-      <strong>Offline</strong><br>You are currently offline. Please check network settings and re-connect.</p>
+      <p><svg id="wifiIcon" class="wifi-icon" width="2048" height="1792" viewBox="0 0 2048 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1024 1523q-20 0-93-73.5t-73-93.5q0-32 62.5-54t103.5-22 103.5 22 62.5 54q0 20-73 93.5t-93 73.5zm270-271q-2 0-40-25t-101.5-50-128.5-25-128.5 25-101 50-40.5 25q-18 0-93.5-75t-75.5-93q0-13 10-23 78-77 196-121t233-44 233 44 196 121q10 10 10 23 0 18-75.5 93t-93.5 75zm273-272q-11 0-23-8-136-105-252-154.5t-268-49.5q-85 0-170.5 22t-149 53-113.5 62-79 53-31 22q-17 0-92-75t-75-93q0-12 10-22 132-132 320-205t380-73 380 73 320 205q10 10 10 22 0 18-75 93t-92 75zm271-271q-11 0-22-9-179-157-371.5-236.5t-420.5-79.5-420.5 79.5-371.5 236.5q-11 9-22 9-17 0-92.5-75t-75.5-93q0-13 10-23 187-186 445-288t527-102 527 102 445 288q10 10 10 23 0 18-75.5 93t-92.5 75z"/></svg>
+      <strong>Offline</strong><br><span id="offlineMsg">You are currently offline. Please check network settings and re-connect.</span></p>
     </div>
     <% end %>
     <div class="<%= @websocket_scan ? 'inner-container' : 'container' %>">
@@ -131,7 +160,7 @@
       <%= @content_for_layout %>
 
       <% if @websocket_scan %>
-        <script src="/javascripts/crossbeams-rmd-scan.js?seq=11" type="text/javascript"></script>
+        <script src="/javascripts/crossbeams-rmd-scan.js?seq=12" type="text/javascript"></script>
         <script>
           window.addEventListener('DOMContentLoaded', function() {
             crossbeamsRmdScan.init({}, true);
