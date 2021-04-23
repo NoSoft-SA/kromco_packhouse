@@ -115,29 +115,36 @@
       }
 
       .wifiWait {
-        animation: pulse 10s infinite;
-        -webkit-animation: pulse 10s infinite;
+        animation: pulse 2s infinite;
+        -webkit-animation: pulse 2s infinite;
       }
 
       @keyframes pulse {
-        0%   { fill: #ff0000 }
-        17%  { fill: #00ff00 }
-        33%  { fill: #ff0000 }
-        50%  { fill: #00ff00 }
-        67%  { fill: #ff0000 }
-        83%  { fill: #00ff00 }
-        100% { fill: #ff0000 }
+        0% {
+          fill: #001F3F;
+          transform: scale(0.3);
+        }
+        50% {
+          fill: #FF4136;
+        }
+        100% {
+          fill: #FF0000;
+          transform: scale(1.5);
+        }
       }
 
-
       @-webkit-keyframes pulse {
-        0%   { fill: #ff0000 }
-        17%  { fill: #00ff00 }
-        33%  { fill: #ff0000 }
-        50%  { fill: #00ff00 }
-        67%  { fill: #ff0000 }
-        83%  { fill: #00ff00 }
-        100% { fill: #ff0000 }
+        0% {
+          fill: #001F3F;
+          transform: scale(0.3);
+        }
+        50% {
+          fill: #FF4136;
+        }
+        100% {
+          fill: #FF0000;
+          transform: scale(1.5);
+        }
       }
       input {
         font-size: 1.5rem;
