@@ -77,6 +77,7 @@ class HcsOut < CsvOutTransformer
 
 :select => 'cartons.carton_number, pallets.pallet_number, cartons.target_market_code, cartons.farm_code, pallets.consignment_note_number,
 load_orders.dispatch_consignment_number, cartons.carton_fruit_nett_mass, cartons.track_indicator_code, load_containers.container_code,
+(SELECT COUNT(*) FROM load_orders l2 WHERE l2.order_id = load_orders.order_id) AS no_loads_on_order,
 voyages.vessel_code, voyages.voyage_code, vessels.vessel_registration_number, cartons.season_code, cartons.organization_code,
 cartons.sell_by_code, load_details.id load_detail_id, cartons.grade_code, cartons.commodity_code, farms.farm_group_code,
 production_runs.parent_run_code, pallets.is_depot_pallet ,extended_fgs.id, fg_marks.ri_mark_code, fg_marks.ru_mark_code,
@@ -140,7 +141,8 @@ LEFT JOIN loads ON loads.id = load_details.load_id',
     load_orders.each do |record|
       #NAE 20160404 replace first digit of season with first digit of calender year
       #ucr = "#{record.season_code[-1,1]}ZA01507472C#{trading_partner}"
-      ucr = "#{record.shipped_date_time[3,1]}ZA01507472CDEL#{order.order_number}S"
+      suffix = record.no_loads_on_order.to_i > 1 ? 'M' : 'S'
+      ucr = "#{record.shipped_date_time[3,1]}ZA01507472CDEL#{order.order_number}#{suffix}"
 
       count_array = LoadDetail.find_by_sql(['select count(cartons.id) FROM load_details join pallets on pallets.load_detail_id = load_details.id join cartons on cartons.pallet_id = pallets.id WHERE (load_details.id = ?)', record.load_detail_id])
       no_cartons = count_array[0].count
