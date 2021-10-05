@@ -1,4 +1,5 @@
 class Services::PreSortingController < ApplicationController
+  require 'json'
 
   def bypass_generic_security?
     true
@@ -990,6 +991,23 @@ class Services::PreSortingController < ApplicationController
           <%= @progress.join('') %>
 
           }, :layout => 'content'
+  end
+
+  def legacy_bin_mrl_failed
+    begin
+      bin = Bin.find_by_bin_number(params[:bin_number])
+      if !bin
+        result = {:bin_mrl_failed => false, :msg => "Mrl Results: Bin #{params[:bin_number]} not found in external system"}
+      elsif bin_mrl_failed?(bin)
+        result = {:bin_mrl_failed => true, :msg => 'Failed mrl results'}
+      else
+        result = {:bin_mrl_failed => false, :msg => 'Passed mrl results'}
+      end
+    rescue
+      result = {:bin_mrl_failed => true, :msg => $!.message}
+    end
+
+    render :json => result.to_json
   end
 
   def render_result(result)

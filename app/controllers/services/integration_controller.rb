@@ -278,6 +278,11 @@ class Services::IntegrationController < ApplicationController
     end
   end
 
+  def get_presort_staging_run_treatment_codes
+    treatment_codes = Treatment.find_by_sql("select distinct treatments.treatment_code from treatments ").map{ |p| p.treatment_code }
+    render :json => treatment_codes.to_json
+  end
+
   def get_run_treatment_codes
     treatment_codes = RmtProduct.find_by_sql("select distinct treatment_code from rmt_products").map { |t| t.treatment_code }
     render :json => treatment_codes.to_json
