@@ -299,6 +299,14 @@ class Services::IntegrationController < ApplicationController
     render :json => ripe_points.to_json
   end
 
+  def get_legacy_pc_code
+    pc_code = RipePoint.find(:first, :conditions=>"ripe_point_code='#{params['ripe_point_code']}'",
+                   :select=>"pc_codes.pc_code",
+                   :joins=>"join pc_codes on pc_codes.id=pc_code_id")
+    res = pc_code['pc_code'] unless pc_code.nil?
+    render :text => "#{res}"
+  end
+
   def get_extended_fg
     extended_fg = ExtendedFg.find_by_extended_fg_code(params['extended_fg_code'])
     @result = extended_fg ? extended_fg.id : nil
